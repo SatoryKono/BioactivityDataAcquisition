@@ -657,8 +657,8 @@ source:
     recovery_timeout: 300
 
   rate_limit:
-    requests_per_second: 3
-    burst: 10
+    requests_per_second: 0.1
+    burst: 1
 
 entities:
   - activity

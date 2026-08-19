@@ -37,7 +37,7 @@ DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
 _RENDER_MANIFEST_JSON = "render-manifest.json"
 _CAPTURE_ID_RE = re.compile(r"[^A-Za-z0-9._-]+")
-_DASHBOARD_VARIABLE_NAME_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{0,63}\Z")
+_DASHBOARD_VARIABLE_NAME_RE = re.compile(r"[A-Za-z]\w{0,63}\Z", re.ASCII)
 
 
 def _default_tool_playwright_paths() -> tuple[Path, Path]:
@@ -195,19 +195,57 @@ def _capture_id(config: RenderConfig) -> str:
     return cleaned or uuid.uuid4().hex
 
 
+def _load_json_object(path: Path, *, description: str) -> tuple[bytes, dict[str, object]]:
+    try:
+        raw = path.read_bytes()
+        payload = json.loads(raw.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{description} is unreadable: {path}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"{description} must contain a JSON object")
+    return raw, payload
+
+
+def _fixture_case_evidence(
+    case: str,
+    metadata: dict[str, object],
+    *,
+    contract: object,
+    root: Path,
+) -> dict[str, str]:
+    fixture_path_value = metadata.get("path")
+    if not isinstance(fixture_path_value, str) or not fixture_path_value:
+        raise ValueError(f"fixture case {case!r} lacks a repository-relative path")
+    fixture_path, fixture_relative_path = _repo_relative_path(
+        root / fixture_path_value, root=root
+    )
+    fixture_bytes, fixture_payload = _load_json_object(
+        fixture_path, description=f"fixture case {case!r}"
+    )
+    if (
+        fixture_payload.get("contract") != contract
+        or fixture_payload.get("case") != case
+    ):
+        raise ValueError(f"fixture case {case!r} contract or case value is invalid")
+    if fixture_payload.get("classification") != metadata.get("classification"):
+        raise ValueError(f"fixture case {case!r} classification does not match registry")
+    if fixture_payload.get("http_status") != metadata.get("http_status"):
+        raise ValueError(f"fixture case {case!r} HTTP status does not match registry")
+    return {
+        "path": fixture_relative_path,
+        "sha256": _sha256_bytes(fixture_bytes),
+    }
+
+
 def _fixture_state_evidence_from_path(fixture_manifest: Path) -> dict[str, object]:
     """Build immutable fixture provenance from one validated registry snapshot."""
     root = _repo_root()
     registry_path, registry_relative_path = _repo_relative_path(
         fixture_manifest, root=root
     )
-    try:
-        registry_bytes = registry_path.read_bytes()
-        payload = json.loads(registry_bytes.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ValueError(f"fixture manifest is unreadable: {fixture_manifest}") from exc
-    if not isinstance(payload, dict):
-        raise ValueError("fixture manifest must contain a JSON object")
+    registry_bytes, payload = _load_json_object(
+        registry_path, description="fixture manifest"
+    )
     contract = payload.get("contract")
     cases = payload.get("cases")
     if contract != "dashboard_state_fixture_v1" or not isinstance(cases, dict):
@@ -218,38 +256,9 @@ def _fixture_state_evidence_from_path(fixture_manifest: Path) -> dict[str, objec
     for case, metadata in sorted(cases.items()):
         if not isinstance(case, str) or not isinstance(metadata, dict):
             raise ValueError("fixture manifest cases must map strings to metadata")
-        fixture_path_value = metadata.get("path")
-        if not isinstance(fixture_path_value, str) or not fixture_path_value:
-            raise ValueError(f"fixture case {case!r} lacks a repository-relative path")
-        fixture_path, fixture_relative_path = _repo_relative_path(
-            root / fixture_path_value, root=root
+        fixtures[case] = _fixture_case_evidence(
+            case, metadata, contract=contract, root=root
         )
-        try:
-            fixture_bytes = fixture_path.read_bytes()
-            fixture_payload = json.loads(fixture_bytes.decode("utf-8"))
-        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise ValueError(
-                f"fixture case {case!r} is unreadable: {fixture_path}"
-            ) from exc
-        if not isinstance(fixture_payload, dict):
-            raise ValueError(f"fixture case {case!r} must contain a JSON object")
-        if (
-            fixture_payload.get("contract") != contract
-            or fixture_payload.get("case") != case
-        ):
-            raise ValueError(f"fixture case {case!r} contract or case value is invalid")
-        if fixture_payload.get("classification") != metadata.get("classification"):
-            raise ValueError(
-                f"fixture case {case!r} classification does not match registry"
-            )
-        if fixture_payload.get("http_status") != metadata.get("http_status"):
-            raise ValueError(
-                f"fixture case {case!r} HTTP status does not match registry"
-            )
-        fixtures[case] = {
-            "path": fixture_relative_path,
-            "sha256": _sha256_bytes(fixture_bytes),
-        }
     return {
         "contract": contract,
         "path": registry_relative_path,
@@ -657,6 +666,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
                 fixture_case_evidence,
                 load_v2_case,
             )
+
             fixture_state = fixture_case_evidence(
                 load_v2_case(fixture_manifest, fixture_case)
             )

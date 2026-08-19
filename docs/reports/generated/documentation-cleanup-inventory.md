@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3181 |
-| Tracked doc-like files | 3176 |
+| Doc-like files | 3348 |
+| Tracked doc-like files | 3343 |
 | Ignored local docs/reports files | 5 |
-| Duplicate groups | 9 |
-| Generated without route or exception | 0 |
-| Generated routes | 71 |
+| Duplicate groups | 7 |
+| Generated without route or exception | 1 |
+| Generated routes | 70 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 3176 |
+| tracked | 3343 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 272 |
-| active_quality_baseline | 57 |
+| active_quality_baseline | 58 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 10 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 652 |
+| working_report | 786 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,32 +59,32 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 740 |
+| Active | 741 |
 | Archived | 169 |
 | Canonical | 70 |
 | Deprecated | 8 |
-| Generated | 1055 |
-| Working | 1139 |
+| Generated | 1086 |
+| Working | 1274 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 740 |
+| active | 741 |
 | archive | 169 |
 | canonical | 70 |
 | duplicate | 8 |
-| generated | 1055 |
-| working | 1139 |
+| generated | 1086 |
+| working | 1274 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 326 |
-| archive-after-migration | 664 |
-| generate-automatically | 1055 |
-| keep | 1124 |
+| archive-after-migration | 798 |
+| generate-automatically | 1086 |
+| keep | 1126 |
 | reconcile-with-github-state | 4 |
 | replace-with-link | 8 |
 
@@ -376,7 +376,6 @@
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |
 | contract-schema-classifier-diagnostics-quality-report | `scripts/engineering/ci/validate_schema_classifier_gate.py` | working_output |
 | contract-tests-junit-report | `.github/workflows/contract-tests.yml` | ignored_ci_output |
-| dashboard-dux7-live-residual-protocol-generated-doc | `scripts/ops/observability/grafana/apply_dux7_live_residual.py` | tracked_curated_generated_doc |
 | dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
 | dashboard-scenes-parity-ledger | `scripts/engineering/qa/report_dashboard_scenes_parity.py` | tracked_quality_evidence |

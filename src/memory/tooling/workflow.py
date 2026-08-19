@@ -386,6 +386,7 @@ def _record_envelope_metadata(
     from memory.records import (
         ActorIdentity,
         RecordEnvelope,
+        RecordScope,
         RecordType,
         SecurityClass,
         TrustLevel,
@@ -407,11 +408,13 @@ def _record_envelope_metadata(
     envelope = RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.WORKING,
-        repo_id=scope.repo_id,
-        git_commit=scope.git_commit,
-        branch=scope.branch,
-        worktree_id=scope.worktree_id,
-        task_id=task_id,
+        scope=RecordScope(
+            repo_id=scope.repo_id,
+            git_commit=scope.git_commit,
+            branch=scope.branch,
+            worktree_id=scope.worktree_id,
+            task_id=task_id,
+        ),
         actor=ActorIdentity(
             runtime=runtime,
             agent=agent,

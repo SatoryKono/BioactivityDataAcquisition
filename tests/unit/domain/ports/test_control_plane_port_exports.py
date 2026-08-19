@@ -9,6 +9,7 @@ import pytest
 from bioetl.domain.ports import control_plane
 from bioetl.domain.ports.control_plane import (
     ArtifactByteComparisonPort,
+    ContractEvidenceRecorderPort,
     EffectiveConfigArtifactStorePort,
     LineageStorePort,
     RawManifestInspection,
@@ -23,6 +24,7 @@ from bioetl.domain.ports.control_plane import (
 EXPECTED_EXPORTS = frozenset(
     {
         "ArtifactByteComparisonPort",
+        "ContractEvidenceRecorderPort",
         "EffectiveConfigArtifactStorePort",
         "LineageStorePort",
         "RawManifestInspection",
@@ -68,6 +70,7 @@ def test_control_plane_named_imports_resolve_to_package_exports() -> None:
         is EffectiveConfigArtifactStorePort
     )
     assert control_plane.ArtifactByteComparisonPort is ArtifactByteComparisonPort
+    assert control_plane.ContractEvidenceRecorderPort is ContractEvidenceRecorderPort
 
 
 @pytest.mark.unit

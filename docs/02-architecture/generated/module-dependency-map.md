@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2429`
-- Internal import edges (raw): `7605`
+- Scanned modules: `2436`
+- Internal import edges (raw): `7622`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `323`
@@ -21,15 +21,15 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1522 OK| application
+    application -->|1527 OK| application
     application -->|975 OK| domain
     composition -->|161 OK| application
     composition -->|672 OK| composition
     composition -->|281 OK| domain
-    composition -->|233 OK| infrastructure
-    domain -->|1251 OK| domain
+    composition -->|236 OK| infrastructure
+    domain -->|1256 OK| domain
     infrastructure -->|755 OK| domain
-    infrastructure -->|1186 OK| infrastructure
+    infrastructure -->|1190 OK| infrastructure
     interfaces -->|51 OK| application
     interfaces -->|56 OK| composition
     interfaces -->|68 OK| domain
@@ -40,15 +40,15 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1522 | allowed |
+| `application`    | `application`    |    1527 | allowed |
 | `application`    | `domain`         |     975 | allowed |
 | `composition`    | `application`    |     161 | allowed |
 | `composition`    | `composition`    |     672 | allowed |
 | `composition`    | `domain`         |     281 | allowed |
-| `composition`    | `infrastructure` |     233 | allowed |
-| `domain`         | `domain`         |    1251 | allowed |
+| `composition`    | `infrastructure` |     236 | allowed |
+| `domain`         | `domain`         |    1256 | allowed |
 | `infrastructure` | `domain`         |     755 | allowed |
-| `infrastructure` | `infrastructure` |    1186 | allowed |
+| `infrastructure` | `infrastructure` |    1190 | allowed |
 | `interfaces`     | `application`    |      51 | allowed |
 | `interfaces`     | `composition`    |      56 | allowed |
 | `interfaces`     | `domain`         |      68 | allowed |
@@ -109,8 +109,8 @@ flowchart LR
 | `application.core`             | `domain.exceptions`                        |      13 |
 | `application.services`         | `domain.behavior`                          |      13 |
 | `application.services`         | `domain.workflow`                          |      13 |
+| `composition.bootstrap`        | `infrastructure.control_plane`             |      13 |
 | `infrastructure.observability` | `domain.ports`                             |      13 |
-| `composition.bootstrap`        | `infrastructure.control_plane`             |      12 |
 | `composition.factories`        | `domain.behavior`                          |      12 |
 | `composition.providers`        | `infrastructure.adapters`                  |      12 |
 

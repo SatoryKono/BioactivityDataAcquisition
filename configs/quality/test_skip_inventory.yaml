@@ -166,6 +166,16 @@ entries:
     vcr_related: false
     review_date: "2026-07-27"
     rationale: Reviewed skip/importorskip surface tracked for governance.
+  - path: tests/integration/test_grafana_datasource_provisioning.py
+    suite: integration
+    category: conditional_environment_guard
+    owner: "@bioetl-observability"
+    linked_issue: "#7249"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-08-19"
+    rationale: Grafana bootstrap integration requires a POSIX sh runtime and skips only when that platform capability is absent.
   - path: tests/integration/test_grafana_workflow_descriptions.py
     suite: integration
     category: live_endpoint_unavailability

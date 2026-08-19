@@ -209,6 +209,10 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
   Diagnostics stay collapsed progressive disclosure.
 - First Action panel provides operator guidance based on current state.
 
-### 99. Review All Domain Status
+## Additional shipped panels
+### 27. Review All Domain Status
 
-Docs for Review All Domain Status.
+Shipped in `bioetl-overview-v2.json`.
+### 28. Review Selected Run Summary
+
+Shipped in `bioetl-overview-v2.json`.

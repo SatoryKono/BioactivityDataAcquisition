@@ -12,7 +12,6 @@ from bioetl.domain.behavior.composite_validation_helpers import (
     _convert_to_aggregation_config,
     _convert_to_cross_validation_config,
     _create_issue,
-    _extract_priority,
     _is_valid_field_priorities,
     _is_valid_lineage_config,
     append_invalid_config_section,
@@ -28,9 +27,7 @@ from bioetl.domain.behavior.preflight_governance import (
     PreflightGovernanceConfig,
     PreflightGovernor,
 )
-from bioetl.domain.behavior.validation_result_envelopes import (
-    build_validation_result,
-)
+from bioetl.domain.behavior.validation_result_envelopes import build_validation_result
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
@@ -91,9 +88,7 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(
-            validation_report, execution_decision=governance_decision
-        )  # NOSONAR
+        return replace(validation_report, execution_decision=governance_decision)
 
     def _run_structural_validation(
         self,
@@ -293,14 +288,3 @@ class CompositeValidator:
         config: JsonDict,
     ) -> list[ValidationIssue]:
         return precheck_cross_validation_config(config)
-
-    def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        return _is_valid_field_priorities(priorities)
-
-    @staticmethod
-    def _extract_priority(priority_config: object) -> object | None:
-        return _extract_priority(priority_config)
-
-    @staticmethod
-    def _is_valid_lineage_config(config: JsonDict) -> bool:
-        return _is_valid_lineage_config(config)

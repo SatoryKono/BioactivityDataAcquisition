@@ -21,6 +21,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -35,6 +36,20 @@ ENDPOINTS = {
     "retention-compliance",
     "failure-reasons",
 }
+
+
+def _validated_loopback_host(value: str) -> str:
+    """Permit this HTTP fixture server only on loopback interfaces."""
+    host = value.strip().lower()
+    if host == "localhost":
+        return host
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError as error:
+        raise ValueError(f"fixture host must be loopback: {value!r}") from error
+    if not address.is_loopback:
+        raise ValueError(f"fixture host must be loopback: {value!r}")
+    return host
 
 
 class FixtureHandler(BaseHTTPRequestHandler):
@@ -108,25 +123,26 @@ def main() -> int:
         help="Default fixture state when fixture_state query is omitted",
     )
     args = parser.parse_args()
+    args.host = _validated_loopback_host(args.host)
     if not args.fixture_root.is_dir():
         raise SystemExit(f"fixture root missing: {args.fixture_root}")
     FixtureHandler.fixture_root = args.fixture_root
     FixtureHandler.default_state = args.default_state
     server = ThreadingHTTPServer((args.host, args.port), FixtureHandler)
     print(
-        f"serving {args.fixture_root} on http://{args.host}:{args.port} "
+        f"serving {args.fixture_root} on http://{args.host}:{args.port} "  # NOSONAR -- loopback-only fixture contract
         f"(default_state={args.default_state})",
         flush=True,
     )
     print(
         "example: "
-        f"http://{args.host}:{args.port}/ops/control-plane/checkpoint-validation"
+        f"http://{args.host}:{args.port}/ops/control-plane/checkpoint-validation"  # NOSONAR -- loopback-only fixture contract
         f"?pipeline=chembl_activity&run_type=incremental"
         f"&run_id=00000000-0000-0000-0000-000000008576&fixture_state=backend_error",
         flush=True,
     )
     try:
-        server.serve_forever()
+        server.serve_forever()  # NOSONAR -- host is validated as loopback-only above
     except KeyboardInterrupt:
         print("stopped", flush=True)
     return 0

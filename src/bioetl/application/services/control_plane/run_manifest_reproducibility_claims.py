@@ -1,6 +1,8 @@
-"""Project-wide reproducibility claim payload builders."""
-
 from __future__ import annotations
+
+from bioetl.application.services._historical_claim_reason import (
+    historical_universe_claim_reason,
+)
 
 JsonDict = dict[str, object]
 
@@ -21,6 +23,22 @@ def _claim_evidence_refs(
     return sorted(dict.fromkeys(refs))
 
 
+def _blocked_historical_governed_gate() -> JsonDict:
+    """Default blocked gate when the authoritative artifact is missing."""
+    return {
+        "gate_kind": "universal_historical_exact_replay",
+        "scope": "all_known_historical_runs",
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "required_claims": {
+            "universal_claim": False,
+            "durable_evidence_coverage_claim": False,
+        },
+        "satisfied": False,
+        "verdict": "gate_blocked",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+    }
+
+
 def build_historical_replay_universe_exact_replay_claim(
     *,
     summary: JsonDict,
@@ -30,18 +48,7 @@ def build_historical_replay_universe_exact_replay_claim(
     historical_universe_source = summary.get("historical_replay_universe_claim_source")
     governed_gate = summary.get("historical_replay_universe_governed_full_corpus_gate")
     if not isinstance(governed_gate, dict):
-        governed_gate = {
-            "gate_kind": "universal_historical_exact_replay",
-            "scope": "all_known_historical_runs",
-            "authoritative_truth_surface": "historical_replay_universe_closure_report",
-            "required_claims": {
-                "universal_claim": False,
-                "durable_evidence_coverage_claim": False,
-            },
-            "satisfied": False,
-            "verdict": "gate_blocked",
-            "reason": "authoritative_historical_replay_universe_artifact_unavailable",
-        }
+        governed_gate = _blocked_historical_governed_gate()
     if isinstance(historical_universe_claim, dict):
         claim_refs = _claim_evidence_refs(
             evidence_refs=evidence_refs,
@@ -60,16 +67,11 @@ def build_historical_replay_universe_exact_replay_claim(
         fully_claimed = (
             exact_replay_supported and durable_supported and governed_gate_satisfied
         )
-        if fully_claimed:
-            claim_reason = (
-                "latest_historical_replay_universe_artifact_supports_universal_claim"
-            )
-        elif not exact_replay_supported:
-            claim_reason = "historical_replay_universe_artifact_blocks_universal_claim"
-        elif not durable_supported:
-            claim_reason = "durable_evidence_coverage_blocks_universal_claim"
-        else:
-            claim_reason = "governed_full_corpus_gate_unsatisfied"
+        claim_reason = historical_universe_claim_reason(
+            fully_claimed=fully_claimed,
+            exact_replay_supported=exact_replay_supported,
+            durable_supported=durable_supported,
+        )
         return {
             "scope": str(
                 historical_universe_claim.get("scope") or "all_known_historical_runs"

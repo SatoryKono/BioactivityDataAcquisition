@@ -188,34 +188,22 @@ the relevant provider or evidence gap.
   renders as a dominant red gauge arc.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.
 
-### Inspect Full Fleet Evidence
+## Additional shipped panels
+### 32. Inspect Status Reason
 
-Docs for Inspect Full Fleet Evidence.
+Shipped in `bioetl-provider-health-v2.json`.
+### 33. Inspect Fleet Non-OK and Causes
 
-### Inspect Full Fleet Severity
+Shipped in `bioetl-provider-health-v2.json`.
+### 34. Inspect Full Fleet Evidence
 
-Docs for Inspect Full Fleet Severity.
+Shipped in `bioetl-provider-health-v2.json`.
+### 35. Inspect Full Fleet Severity
 
-### Inspect Full Non-OK Providers
+Shipped in `bioetl-provider-health-v2.json`.
+### 36. Inspect Full Non-OK Providers
 
-Docs for Inspect Full Non-OK Providers.
+Shipped in `bioetl-provider-health-v2.json`.
+### 37. Inspect Full Provider Causes
 
-### Inspect Full Provider Causes
-
-Docs for Inspect Full Provider Causes.
-
-### 99. Inspect Full Fleet Evidence
-
-Docs for Inspect Full Fleet Evidence.
-
-### 99. Inspect Full Fleet Severity
-
-Docs for Inspect Full Fleet Severity.
-
-### 99. Inspect Full Non-OK Providers
-
-Docs for Inspect Full Non-OK Providers.
-
-### 99. Inspect Full Provider Causes
-
-Docs for Inspect Full Provider Causes.
+Shipped in `bioetl-provider-health-v2.json`.

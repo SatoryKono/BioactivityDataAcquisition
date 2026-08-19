@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
-from typing import cast
 
+from bioetl.application.services.control_plane.workflow._execution_recording_finish import (
+    _UNSET_CURSOR,
+    _record_workflow_failure,
+    _record_workflow_success,
+)
 from bioetl.application.services.control_plane.workflow.execution_recording_context import (
     WorkflowExecutionRecorder,
 )
@@ -19,7 +23,9 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
+    _clear_ambiguous_step,
     _find_step_state,
+    _record_completed_transform_fingerprint,
     _record_step_state,
     _remove_step_ids,
 )
@@ -31,7 +37,12 @@ from bioetl.application.services.workflow.workflow_runner_service import (
 from bioetl.domain.control_plane import WorkflowStepState
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
-_UNSET_CURSOR = object()
+_RECORDING_HELPER_REEXPORTS = (
+    _clear_ambiguous_step,
+    _find_failed_step,
+    _record_completed_transform_fingerprint,
+    _workflow_failure_message,
+)
 
 __all__ = [
     "WorkflowExecutionRecorder",
@@ -163,7 +174,9 @@ def record_transform_commit(
             "confirmation. Resume requires explicit --repair-steps or "
             "--force-steps for the ambiguous step."
         ),
-        ambiguous_step_ids=tuple(dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))),
+        ambiguous_step_ids=tuple(
+            dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))
+        ),
     )
     context.state_port.save(context.state)
 
@@ -190,57 +203,3 @@ def record_workflow_finished(
     _record_workflow_failure(
         context, result=result, completed_at=completed_at, summary=summary
     )
-
-
-def _record_workflow_success(
-    context: WorkflowExecutionRecorder,
-    *,
-    completed_at: datetime,
-    summary: dict[str, object],
-    last_start_offset: int | object | None = _UNSET_CURSOR,
-    last_limit: int | object | None = _UNSET_CURSOR,
-) -> None:
-    entry = context.ledger.record_workflow_finished(details=summary)
-    resolved_start_offset = context.state.last_start_offset
-    if last_start_offset is not _UNSET_CURSOR:
-        resolved_start_offset = cast("int | None", last_start_offset)
-    resolved_limit = context.state.last_limit
-    if last_limit is not _UNSET_CURSOR:
-        resolved_limit = cast("int | None", last_limit)
-    context.state = replace(
-        context.state,
-        status="success",
-        updated_at=entry.occurred_at,
-        completed_at=completed_at,
-        last_event_id=entry.entry_id,
-        last_error_type=None,
-        last_error_message=None,
-        last_start_offset=resolved_start_offset,
-        last_limit=resolved_limit,
-    )
-    context.state_port.save(context.state)
-
-
-def _record_workflow_failure(
-    context: WorkflowExecutionRecorder,
-    *,
-    result: WorkflowRunExecutionResult,
-    completed_at: datetime,
-    summary: dict[str, object],
-) -> None:
-    failed_step = _find_failed_step(result)
-    entry = context.ledger.record_workflow_failed(
-        message=_workflow_failure_message(failed_step),
-        error_type=None if failed_step is None else failed_step.error_type,
-        details=summary,
-    )
-    context.state = replace(
-        context.state,
-        status="failed",
-        updated_at=entry.occurred_at,
-        completed_at=completed_at,
-        last_event_id=entry.entry_id,
-        last_error_type=None if failed_step is None else failed_step.error_type,
-        last_error_message=None if failed_step is None else failed_step.error_message,
-    )
-    context.state_port.save(context.state)

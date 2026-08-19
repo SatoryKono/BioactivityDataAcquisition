@@ -50,9 +50,7 @@ class _MedallionMaintenanceMixin:
             ValueError: If ``retention_days`` is negative.
         """
         if retention_days < 0:
-            raise ValueError(
-                f"retention_days must be >= 0, got {retention_days}"
-            )
+            raise ValueError(f"retention_days must be >= 0, got {retention_days}")
         retention_hours = retention_days * 24
         self.logger.info(
             "Starting vacuum operation",

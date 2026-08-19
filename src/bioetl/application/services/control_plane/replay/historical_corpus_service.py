@@ -1,5 +1,3 @@
-"""Corpus-wide historical replay inventory and bulk certification workflows."""
-
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -42,7 +40,6 @@ def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, obje
 
 _build_diagnostics_summary = build_diagnostics_summary
 
-
 __all__ = [
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
@@ -56,14 +53,11 @@ __all__ = [
 
 @dataclass(slots=True)
 class HistoricalReplayCorpusService:
-    """Operate on retained manifests as a bounded historical replay corpus."""
-
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
     certification_service: HistoricalReplayCertificationService
 
     def build_certifiability_inventory(self) -> HistoricalReplayCertifiabilityInventory:
-        """Inventory retained manifests against the certified replay tranche."""
         records = tuple(
             self._record(manifest) for manifest in self.manifest_port.list_all()
         )
@@ -74,7 +68,6 @@ class HistoricalReplayCorpusService:
         *,
         specs: tuple[HistoricalReplayBulkCertificationSpec, ...],
     ) -> HistoricalReplayBulkCertificationResult:
-        """Apply deterministic bulk certification across retained manifests."""
         inventory_before = self.build_certifiability_inventory()
         status_by_manifest_id = {
             record.manifest_id: record for record in inventory_before.records
@@ -82,19 +75,11 @@ class HistoricalReplayCorpusService:
         manifest_by_id = {
             manifest.manifest_id: manifest for manifest in self.manifest_port.list_all()
         }
-        # Validate all specs before sorting so missing keys raise explicit
-        # ValueError instead of KeyError during sort key evaluation.
-        for spec in specs:
-            if spec.manifest_id not in manifest_by_id:
-                raise ValueError(
-                    f"Historical replay bulk certification could not find manifest "
-                    f"{spec.manifest_id!r}"
-                )
-            if spec.manifest_id not in status_by_manifest_id:
-                raise ValueError(
-                    f"Historical replay inventory is missing manifest "
-                    f"{spec.manifest_id!r}"
-                )
+        self.validate_bulk_manifests(
+            specs,
+            manifest_by_id=manifest_by_id,
+            status_by_manifest_id=status_by_manifest_id,
+        )
         ordered_specs = tuple(
             sorted(
                 specs,
@@ -105,36 +90,9 @@ class HistoricalReplayCorpusService:
         for spec in ordered_specs:
             manifest = manifest_by_id[spec.manifest_id]
             inventory_record = status_by_manifest_id[spec.manifest_id]
-            if inventory_record.certification_status == "already_certified":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_already_certified",
-                    )
-                )
-                continue
-            if inventory_record.certification_status == "already_replayable":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_already_replayable",
-                    )
-                )
-                continue
-            if inventory_record.certification_status == (
-                "outside_certified_historical_scope"
-            ):
-                raise ValueError(
-                    "Historical replay bulk certification is outside the published "
-                    f"certified tranche for manifest {spec.manifest_id!r}"
-                )
-            if inventory_record.certification_status == "needs_operator_review":
-                records.append(
-                    self._build_skipped_record(
-                        inventory_record=inventory_record,
-                        status="skipped_needs_operator_review",
-                    )
-                )
+            skipped = self._skipped_bulk_record(inventory_record)
+            if skipped is not None:
+                records.append(skipped)
                 continue
             result = self._apply_one_certification(
                 certification_service=self.certification_service,
@@ -158,6 +116,44 @@ class HistoricalReplayCorpusService:
             inventory_after=self.build_certifiability_inventory(),
             records=tuple(records),
         )
+
+
+    def _skipped_bulk_record(
+        self,
+        inventory_record: HistoricalReplayCertifiabilityRecord,
+    ) -> HistoricalReplayBulkCertificationRecord | None:
+        skip_status = {
+            "already_certified": "skipped_already_certified",
+            "already_replayable": "skipped_already_replayable",
+            "outside_certified_historical_scope": (
+                "skipped_outside_certified_historical_scope"
+            ),
+            "needs_operator_review": "skipped_needs_operator_review",
+        }.get(inventory_record.certification_status)
+        if skip_status is None:
+            return None
+        return self._build_skipped_record(
+            inventory_record=inventory_record,
+            status=skip_status,
+        )
+
+    def validate_bulk_manifests(
+        self,
+        specs: tuple[HistoricalReplayBulkCertificationSpec, ...],
+        *,
+        manifest_by_id: Mapping[str, RunManifest],
+        status_by_manifest_id: Mapping[str, object],
+    ) -> None:
+        for spec in specs:
+            mid = spec.manifest_id
+            if mid not in manifest_by_id:
+                raise ValueError(
+                    f"Historical replay bulk certification could not find manifest {mid!r}"
+                )
+            if mid not in status_by_manifest_id:
+                raise ValueError(
+                    f"Historical replay inventory is missing manifest {mid!r}"
+                )
 
     def _apply_one_certification(
         self,

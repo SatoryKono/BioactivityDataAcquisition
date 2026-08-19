@@ -45,9 +45,7 @@ def test_enrich_quarantine_summary_does_not_mutate_nested_stats() -> None:
     silver_stats = {"total_count": 2}
     stats = {"silver_filter_rejects": silver_stats}
     run_manifest = SimpleNamespace(
-        ledger_entries=(
-            SimpleNamespace(metrics_snapshot={"records_bronze": 10}),
-        )
+        ledger_entries=(SimpleNamespace(metrics_snapshot={"records_bronze": 10}),)
     )
 
     summary = enrich_quarantine_summary(

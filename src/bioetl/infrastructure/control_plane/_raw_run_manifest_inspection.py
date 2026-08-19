@@ -44,7 +44,7 @@ _OPTIONAL_STRING_FIELDS = (
     "replay_of_manifest_id",
     "replay_capability",
 )
-_SCHEMA_VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+(?:\.[0-9]+)?")
+_SCHEMA_VERSION_PATTERN = re.compile(r"\d+\.\d+(?:\.\d+)?")
 
 
 class _RawManifestInspectionHost(Protocol):
@@ -64,9 +64,11 @@ class RawRunManifestInspectionMixin:
             return RawManifestInspection(False, ("manifest_not_found",))
         try:
             raw_payload = deserialize_from_json(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, ValueError):
+        except UnicodeError:
+            return RawManifestInspection(False, ("manifest_read_error",))
+        except ValueError:
             return RawManifestInspection(False, ("manifest_parse_error",))
-        except (OSError, UnicodeError):
+        except OSError:
             return RawManifestInspection(False, ("manifest_read_error",))
         if not isinstance(raw_payload, dict):
             return RawManifestInspection(True, ("manifest_payload_not_object",))
@@ -95,20 +97,36 @@ def contract_evidence_path(base_path: Path, manifest_id: str) -> Path:
     return base_path / f"{manifest_id}.contract-evidence.json"
 
 
+class ContractEvidenceConflictError(ValueError):
+    """Raised when a retry would overwrite a different sidecar payload."""
+
+
 def persist_contract_evidence(
     base_path: Path,
     manifest_id: str,
     evidence: dict[str, object],
 ) -> None:
-    """Write one deterministic contract-evidence sidecar."""
+    """Create one sidecar, or no-op when an identical payload already exists."""
     from bioetl.infrastructure.storage.atomic import atomic_write_text
 
     path = contract_evidence_path(base_path, manifest_id)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    atomic_write_text(
-        path,
-        json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+    payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + chr(
+        10
     )
+    if path.is_file():
+        try:
+            existing = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as error:
+            raise ContractEvidenceConflictError(
+                f"Contract evidence sidecar '{path}' cannot be compared"
+            ) from error
+        if existing == payload:
+            return
+        raise ContractEvidenceConflictError(
+            f"Contract evidence sidecar '{path}' already exists with different content"
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(path, payload)
 
 
 def _load_contract_evidence(
@@ -229,6 +247,7 @@ def _invalid_parsed_text(
 
 
 __all__ = [
+    "ContractEvidenceConflictError",
     "RawRunManifestInspectionMixin",
     "contract_evidence_path",
     "persist_contract_evidence",

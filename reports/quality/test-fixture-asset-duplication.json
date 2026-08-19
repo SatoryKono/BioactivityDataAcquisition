@@ -5,11 +5,11 @@
   "max_group_size": 0,
   "scan_root": "tests/fixtures",
   "scope_file_counts": {
-    "fixture": 54,
+    "fixture": 80,
     "golden": 30,
     "vcr": 356
   },
-  "total_files": 440,
+  "total_files": 466,
   "tracked_extensions": [
     ".json",
     ".yaml",

@@ -143,7 +143,7 @@ async def test_pubmed_coverage__with_fallback__c05cba22(pubmed_adapter: PubMedAd
 
         async with pubmed_adapter._http_client:
             records = []
-            fallback_mapping = {"missing_id": "Fallback Title"}
+            fallback_mapping = {"missing_id": "Fallback Article"}
             async for record in pubmed_adapter.fetch_filtered_with_fallback(
                 entity_type="publication",
                 filter_ids=["12345", "missing_id"],
@@ -156,7 +156,7 @@ async def test_pubmed_coverage__with_fallback__c05cba22(pubmed_adapter: PubMedAd
             # Check if we got the fallback record too
             pmids = [r["pmid"] for r in records]
             assert "12345" in pmids
-            # assert "67890" in pmids
+            assert "67890" in pmids
             assert esearch_route.called
             assert efetch_route.call_count == 2
 

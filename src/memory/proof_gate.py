@@ -13,6 +13,7 @@ from memory.proof import ProofError, VerificationResult, verify_bundle
 from memory.records import (
     ActorIdentity,
     RecordEnvelope,
+    RecordScope,
     RecordType,
     TrustLevel,
 )
@@ -157,11 +158,13 @@ def _envelope(
     return RecordEnvelope.create(
         record_id=record_id,
         record_type=RecordType.EVIDENCE,
-        repo_id=str(repository["repo_id"]),
-        git_commit=str(source["head_sha"]),
-        branch=str(repository["branch"]),
-        worktree_id=str(repository["worktree_id"]),
-        task_id=str(bundle["task_id"]),
+        scope=RecordScope(
+            repo_id=str(repository["repo_id"]),
+            git_commit=str(source["head_sha"]),
+            branch=str(repository["branch"]),
+            worktree_id=str(repository["worktree_id"]),
+            task_id=str(bundle["task_id"]),
+        ),
         actor=actor,
         source_refs=source_refs,
         source_hashes=source_hashes,

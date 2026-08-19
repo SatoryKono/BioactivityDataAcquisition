@@ -56,7 +56,7 @@ fi
 SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
 if timeout 5 test -f "${SHARED_WSL_PROXY_ENV}" 2>/dev/null \
     && timeout 5 bash -c "source '${SHARED_WSL_PROXY_ENV}'" 2>/dev/null; then
-    # shellcheck disable=SC1091
+    # shellcheck disable=SC1090
     source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
@@ -79,9 +79,8 @@ fi
 if ! timeout 10 bash -c "command -v vibe >/dev/null 2>&1"; then
     log_error "Mistral Vibe CLI not found in PATH"
     echo "[mistral] Install with one of:"
-    echo "[mistral]   curl -LsSf https://mistral.ai/vibe/install.sh | bash"
-    echo "[mistral]   python3 -m pip install --user mistral-vibe"
     echo "[mistral]   pipx install mistral-vibe"
+    echo "[mistral]   python3 -m pip install --user mistral-vibe"
     exit 1
 fi
 
@@ -100,5 +99,6 @@ if [[ $# -eq 0 ]]; then
     exec vibe --workdir "${REPO_ROOT}"
 fi
 
-log_info "Prompt: $*"
+prompt_text="$*"
+log_info "Prompt length: ${#prompt_text} chars"
 exec vibe --workdir "${REPO_ROOT}" "$@"

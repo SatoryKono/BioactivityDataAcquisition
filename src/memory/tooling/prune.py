@@ -15,6 +15,7 @@ from memory.resources import POLICY_DIR, discover_memory_root, load_yaml_resourc
 
 SUPPORTED_NOTE_EXTENSIONS = {".json", ".yaml", ".yml", ".md"}
 NON_PRUNABLE_EPISODIC_DIRECTORIES = {"templates"}
+README_NAME = "README.md"
 
 
 def _episodic_root() -> Path:
@@ -145,7 +146,7 @@ def find_prunable_episodic_notes(
     for path in sorted(resolved_root.rglob("*")):
         if not path.is_file() or path.suffix not in SUPPORTED_NOTE_EXTENSIONS:
             continue
-        if path.name == "README.md" or not _is_prunable_note_path(path, resolved_root):
+        if path.name == README_NAME or not _is_prunable_note_path(path, resolved_root):
             continue
         metadata = _extract_metadata(path)
         created_at = _coerce_created_at(metadata.get("created_at"))
@@ -178,23 +179,9 @@ def prune_episodic_notes(
     total_count = _count_episodic_notes(resolved_root)
     active_count = max(total_count - len(candidates), 0)
     invalid_metadata = _find_invalid_metadata(resolved_root)
-    removed_paths: list[str] = []
-    if apply:
-        from memory.storage import exclusive_lock
-
-        for candidate in candidates:
-            candidate_path = Path(candidate.path)
-            if candidate_path.exists():
-                with exclusive_lock(candidate_path):
-                    if candidate_path.exists():
-                        candidate_path.unlink()
-                        removed_paths.append(candidate.path)
+    removed_paths = _remove_prune_candidates(candidates) if apply else []
     effective_max_active = _default_max_active() if max_active is None else max_active
-    density_status = "not_checked"
-    density_excess = 0
-    if effective_max_active is not None:
-        density_excess = max(active_count - effective_max_active, 0)
-        density_status = "review" if density_excess else "ok"
+    density_status, density_excess = _density_result(active_count, effective_max_active)
     return {
         "apply": apply,
         "candidate_count": len(candidates),
@@ -211,6 +198,32 @@ def prune_episodic_notes(
     }
 
 
+def _remove_prune_candidates(candidates: list[PruneCandidate]) -> list[str]:
+    """Delete still-present candidates under their sidecar locks."""
+    from memory.storage import exclusive_lock
+
+    removed_paths: list[str] = []
+    for candidate in candidates:
+        candidate_path = Path(candidate.path)
+        if not candidate_path.exists():
+            continue
+        with exclusive_lock(candidate_path):
+            if candidate_path.exists():
+                candidate_path.unlink()
+                removed_paths.append(candidate.path)
+    return removed_paths
+
+
+def _density_result(
+    active_count: int,
+    maximum: int | None,
+) -> tuple[str, int]:
+    if maximum is None:
+        return "not_checked", 0
+    excess = max(active_count - maximum, 0)
+    return ("review" if excess else "ok"), excess
+
+
 def _count_episodic_notes(root: Path) -> int:
     if not root.exists():
         return 0
@@ -219,7 +232,7 @@ def _count_episodic_notes(root: Path) -> int:
         for path in root.rglob("*")
         if path.is_file()
         and path.suffix in SUPPORTED_NOTE_EXTENSIONS
-        and path.name != "README.md"
+        and path.name != README_NAME
         and _is_prunable_note_path(path, root)
     )
 

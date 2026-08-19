@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Literal
 
+from bioetl.application.services.protein._classification_resolution_support import (
+    json_array,
+    record_component_hierarchies,
+)
 from bioetl.domain.mapping.protein_class_target_type import (
     PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
     ProteinClassTargetTypeMappingData,
@@ -136,9 +139,9 @@ class TargetProteinClassificationRecord:
             target_id=target_id,
             component_id=component_id,
             leaf_id=hierarchy.leaf_id,
-            path_ids=_json_array(hierarchy.path_ids),
-            path_names=_json_array(hierarchy.path_names),
-            path_labels=_json_array(hierarchy.path_labels),
+            path_ids=json_array(hierarchy.path_ids),
+            path_names=json_array(hierarchy.path_names),
+            path_labels=json_array(hierarchy.path_labels),
             depth=hierarchy.depth,
             root_id=hierarchy.root_id,
             is_leaf=hierarchy.is_leaf,
@@ -320,7 +323,7 @@ def _collect_target_hierarchies(
         if issue is not None:
             dq_issues.append(issue)
             continue
-        _record_component_hierarchies(
+        record_component_hierarchies(
             by_leaf_id=by_leaf_id,
             component_id=component_id,
             hierarchies=hierarchies,
@@ -352,19 +355,6 @@ def _resolution_failure_issue(
         error_code="protein_classification_resolution_failed",
         message=str(error),
     )
-
-
-def _record_component_hierarchies(
-    *,
-    by_leaf_id: dict[int, tuple[int, ProteinClassHierarchy]],
-    component_id: int,
-    hierarchies: tuple[ProteinClassHierarchy, ...],
-) -> None:
-    """Keep the lowest component ID for each resolved classification leaf."""
-    for hierarchy in hierarchies:
-        current = by_leaf_id.get(hierarchy.leaf_id)
-        if current is None or component_id < current[0]:
-            by_leaf_id[hierarchy.leaf_id] = (component_id, hierarchy)
 
 
 def _resolved_resolution(
@@ -413,8 +403,3 @@ def _unresolved_resolution(
 
 ProteinClassificationResolution = ProteinClassificationResolutionResult
 ResolveProteinClassificationUseCase = ProteinClassificationResolutionService
-
-
-def _json_array(values: Iterable[object]) -> str:
-    """Return a stable JSON array for publication in scalar contract fields."""
-    return json.dumps(tuple(values), ensure_ascii=False, separators=(",", ":"))

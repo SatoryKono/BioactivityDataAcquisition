@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.base_transformer.types import (
     T,
@@ -124,7 +124,6 @@ class BaseTransformer(
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
 
-        from typing import cast
 
         from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
 

@@ -34,6 +34,7 @@ import pytest
 import json
 import hashlib
 import os
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -664,3 +665,236 @@ def test_plan_for_manifest_does_not_include_unrelated_catalog_files(
     assert "manifest-other.json" not in paths
     assert "manifest-other.jsonl" not in paths
     assert "manifest-selected" in artifact_ids
+
+
+def test_plan_for_manifest_does_not_call_rglob_or_unbounded_glob(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+    from bioetl.domain.types import RunID, RunType
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+    )
+    rglob_calls: list[object] = []
+    glob_calls: list[object] = []
+    original_rglob = Path.rglob
+    original_glob = Path.glob
+
+    def _rglob(self: Path, pattern: str, *args: object, **kwargs: object):
+        rglob_calls.append((str(self), pattern))
+        return original_rglob(self, pattern, *args, **kwargs)
+
+    def _glob(self: Path, pattern: str, *args: object, **kwargs: object):
+        glob_calls.append((str(self), pattern))
+        return original_glob(self, pattern, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "rglob", _rglob)
+    monkeypatch.setattr(Path, "glob", _glob)
+
+    store.plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        manifest=manifest,
+        dry_run=True,
+    )
+
+    assert rglob_calls == []
+    assert glob_calls == []
+
+
+def test_plan_for_manifest_reuses_warm_cache_for_same_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+    from bioetl.domain.types import RunID, RunType
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+    )
+    policy = ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now)
+    first = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+    glob_calls: list[object] = []
+    original_glob = Path.glob
+
+    def _glob(self: Path, pattern: str, *args: object, **kwargs: object):
+        glob_calls.append((str(self), pattern))
+        return original_glob(self, pattern, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "glob", _glob)
+    second = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+    assert second is first
+    assert glob_calls == []
+
+
+def test_plan_for_manifest_ignores_thousands_of_unrelated_files(tmp_path: Path) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
+    from bioetl.domain.types import RunID, RunType
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    _write_text(control_root / "run_ledger" / "manifest-selected.jsonl", "{}\n")
+    store = FileControlPlaneArtifactLifecycleStore(base_path=control_root)
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+    )
+    policy = ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now)
+    baseline = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+
+    bronze_root = tmp_path / "bronze"
+    checkpoint_root = tmp_path / "checkpoints" / "noise"
+    fragments_root = control_root / "lineage" / "fragments"
+    bronze_root.mkdir(parents=True, exist_ok=True)
+    checkpoint_root.mkdir(parents=True, exist_ok=True)
+    fragments_root.mkdir(parents=True, exist_ok=True)
+    for index in range(5000):
+        (bronze_root / f"noise-{index}.json").write_text("{}", encoding="utf-8")
+    for index in range(50):
+        (checkpoint_root / f"noise-{index}.json").write_text("{}", encoding="utf-8")
+        (fragments_root / f"noise-{index}.json").write_text("{}", encoding="utf-8")
+
+    started = time.perf_counter()
+    noisy = store.plan_for_manifest(policy, manifest=manifest, dry_run=True)
+    elapsed = time.perf_counter() - started
+    assert len(noisy.artifacts) == len(baseline.artifacts)
+    noisy_names = {Path(artifact.path).name for artifact in noisy.artifacts}
+    assert not any(name.startswith("noise-") for name in noisy_names)
+    assert elapsed < 1.0
+
+
+def test_plan_for_manifest_resolves_bronze_uri_and_typed_issues(
+    tmp_path: Path,
+) -> None:
+    from uuid import UUID
+
+    from bioetl.domain.control_plane import (
+        ControlPlaneArtifactResolutionIssueCode,
+        RunCodeProvenance,
+        RunInputSnapshotRef,
+        RunManifest,
+        RunSourceRef,
+    )
+    from bioetl.domain.types import RunID, RunType
+    from bioetl.infrastructure.control_plane._file_lineage_index import (
+        stable_key_filename,
+    )
+
+    control_root = tmp_path / "control"
+    now = datetime(2026, 4, 22, tzinfo=UTC)
+    selected = _write_bytes(tmp_path / "bronze" / "selected.zst", b"selected")
+    _write_bytes(tmp_path / "bronze" / "unrelated.zst", b"other")
+    manifest = RunManifest(
+        manifest_id="manifest-selected",
+        execution_fingerprint="fp",
+        schema_version="1.0",
+        created_at=now,
+        run_id=RunID(UUID("00000000-0000-0000-0000-000000000001")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        code_provenance=RunCodeProvenance(),
+        source_refs=(
+            RunSourceRef(
+                provider="chembl",
+                entity="activity",
+                pipeline_name="chembl_activity",
+                input_snapshots=(
+                    RunInputSnapshotRef(
+                        snapshot_id="sha256:selected",
+                        content_hash="selected",
+                        immutable_uri="bronze://selected.zst",
+                    ),
+                    RunInputSnapshotRef(
+                        snapshot_id="sha256:missing-uri",
+                        content_hash="missing-uri",
+                    ),
+                ),
+            ),
+        ),
+    )
+    _write_json(
+        control_root / "run_manifest" / "manifest-selected.json",
+        {"manifest_id": "manifest-selected", "created_at": now.isoformat()},
+    )
+    fragment_id = "fragment-selected"
+    _write_json(
+        control_root / "lineage" / "fragments" / f"{fragment_id}.json",
+        {
+            "stored_fragment_id": fragment_id,
+            "fragment_id": fragment_id,
+            "manifest_id": manifest.manifest_id,
+        },
+    )
+    _write_text(
+        control_root
+        / "lineage"
+        / "_by_manifest_id"
+        / f"{stable_key_filename(manifest.manifest_id)}.jsonl",
+        json.dumps({"key": manifest.manifest_id, "fragment_id": fragment_id}) + "\n",
+    )
+
+    plan = FileControlPlaneArtifactLifecycleStore(
+        base_path=control_root
+    ).plan_for_manifest(
+        ControlPlaneArtifactLifecyclePolicy(retention_days=30, now=now),
+        manifest=manifest,
+        dry_run=True,
+    )
+    names = {Path(artifact.path).name for artifact in plan.artifacts}
+    assert selected.name in names
+    assert "unrelated.zst" not in names
+    assert f"{fragment_id}.json" in names
+    codes = {issue.code for issue in plan.resolution_issues}
+    assert ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED in codes
+    assert ControlPlaneArtifactResolutionIssueCode.CHECKPOINT_INDEX_MISSING in codes

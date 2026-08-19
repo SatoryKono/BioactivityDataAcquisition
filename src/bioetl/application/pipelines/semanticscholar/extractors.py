@@ -153,11 +153,12 @@ def extract_journal_info(
         first_page, last_page = parse_page_range(raw_pages)
 
         # Clean pages string (strip whitespace/newlines)
-        pages = (
-            raw_pages.strip()
-            if isinstance(raw_pages, str) and raw_pages
-            else (str(raw_pages) if raw_pages not in (None, "") else None)
-        )
+        if isinstance(raw_pages, str) and raw_pages:
+            pages = raw_pages.strip()
+        elif raw_pages not in (None, ""):
+            pages = str(raw_pages)
+        else:
+            pages = None
 
         return {
             "journal": journal.get("name") or venue,

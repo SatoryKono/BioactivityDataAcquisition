@@ -406,6 +406,11 @@ tests:
         exp_samples:
           - labels: '{provider="chembl"}'
             value: 1
+      - expr: bioetl_provider_current_status{provider="chembl"}
+        eval_time: 16m
+        exp_samples:
+          - labels: '{__name__="bioetl_provider_current_status",provider="chembl"}'
+            value: 3
 
   - name: provider-current-status-projects-healthy-raw-status
     interval: 1m
@@ -958,6 +963,8 @@ tests:
     input_series:
       - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
         values: "0+1x10"
+      - series: 'bioetl_control_plane_manifest_present{pipeline="chembl",run_type="incremental"}'
+        values: "1+0x10"
       - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
         values: "0+1x10"
       - series: 'bioetl_replay_duplicate_overwrite_risk_total{pipeline="chembl",run_type="incremental",risk_type="duplicate"}'
@@ -1013,6 +1020,23 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_terminal_events_15m",pipeline="chembl"}'
             value: 10
+      - expr: bioetl_control_plane_current_evidence_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_evidence_status",pipeline="chembl",run_type="incremental"}'
+            value: 0
+
+  - name: control-plane-current-evidence-unknown-without-present-gauge
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+1x10"
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_evidence_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_evidence_status",pipeline="chembl",run_type="incremental"}'
+            value: 3
 
   - name: control-plane-replay-write-risk-blocks-trusted-status
     interval: 1m

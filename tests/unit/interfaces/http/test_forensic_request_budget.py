@@ -38,9 +38,12 @@ from typing import Any, cast
 import pytest
 
 from bioetl.interfaces.http._forensic_request_budget import (
+    FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     ForensicEndpointUnavailable,
     forensic_unavailable_payload,
+    forensic_unavailable_table_payload,
     run_bounded_forensic_operation,
+    table_error_as_http_ok,
 )
 
 pytestmark = pytest.mark.unit
@@ -166,3 +169,29 @@ def test_unavailable_payload_is_typed_and_retryable() -> None:
         "reason": "backend_unavailable",
         "retryable": True,
     }
+
+
+def test_unavailable_table_payload_includes_error_row() -> None:
+    payload = forensic_unavailable_table_payload(
+        endpoint="/ops/control-plane/retention-compliance",
+        reason="deadline_exceeded",
+        observed_at="2026-08-19T00:00:00+00:00",
+    )
+    assert payload["contract"] == "forensic_endpoint_error_v1"
+    assert payload["status"] == "unavailable"
+    assert payload["retryable"] is True
+    assert payload["rows"][0]["check"] == "endpoint_availability"
+    assert payload["rows"][0]["status"] == "ERROR"
+    assert payload["rows"][0]["reason"] == "deadline_exceeded"
+    assert payload["rows"][0]["retryable"] is True
+    assert "refresh" in str(payload["rows"][0]["detail"]).lower()
+
+
+def test_table_error_as_http_ok_accepts_grafana_flag() -> None:
+    assert table_error_as_http_ok({"error_as_row": "1"}) is True
+    assert table_error_as_http_ok({"error_as_row": "true"}) is True
+    assert table_error_as_http_ok({}) is False
+
+
+def test_forensic_deadline_remains_twelve_seconds() -> None:
+    assert FORENSIC_ENDPOINT_TIMEOUT_SECONDS == 12.0

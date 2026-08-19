@@ -40,6 +40,7 @@ from pathlib import Path
 from bioetl.interfaces.http._health_server_observability_routing import (
     _is_unresolved_run_scope,
     _not_found_pipeline_run_report_shell,
+    _summary_rows_pipeline_run_report,
     _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
@@ -482,3 +483,18 @@ def test_load_rejects_wrong_schema_version(tmp_path: Path) -> None:
         )
         is None
     )
+
+
+def test_summary_rows_unresolved_and_missing_are_not_ok() -> None:
+    unresolved = _summary_rows_pipeline_run_report(
+        _unresolved_pipeline_run_report_shell(run_id="-", pipeline="chembl_activity")
+    )
+    assert unresolved["summary"][0]["covers_selected_run"] == "select_run"
+    assert unresolved["status"] == "unresolved_scope"
+    missing = _summary_rows_pipeline_run_report(
+        _not_found_pipeline_run_report_shell(
+            run_id="missing-run", pipeline="chembl_assay"
+        )
+    )
+    assert missing["summary"][0]["covers_selected_run"] == "not_found"
+    assert missing["status"] == "not_found"

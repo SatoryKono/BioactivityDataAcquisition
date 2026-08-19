@@ -46,11 +46,7 @@ def _logical_fs_path(path: Path) -> Path:
     ``Path('/custom/x').resolve()`` on Windows becomes ``C:\\custom\\x``.
     Tests and operator-supplied POSIX roots must stay comparable as POSIX.
     """
-    candidate = Path(path)
-    posix = candidate.as_posix()
-    if posix.startswith("/") and not candidate.drive:
-        return candidate
-    return candidate
+    return Path(path)
 
 
 def bootstrap_quarantine_adapter(*, data_root: Path | None = None) -> QuarantinePort:

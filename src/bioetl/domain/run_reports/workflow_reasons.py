@@ -17,7 +17,10 @@ def normalize_top_reasons(
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
-    items = [item for item in (_normalize_reason(entry) for entry in raw) if item]
+    reason_entries = raw
+    items = [
+        item for item in (_normalize_reason(entry) for entry in reason_entries) if item
+    ]
     ranked = sorted(
         items,
         key=lambda item: (-_as_int(item.get("count")), str(item.get("reason_code"))),

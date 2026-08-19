@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, overload
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Literal, cast, overload
 
 if TYPE_CHECKING:
     from bioetl.composition._service_types import (
@@ -186,4 +187,5 @@ def invoke_bootstrap(name: str, *args: object, **kwargs: object) -> object:
     bootstrap_fn = _services.resolve_bootstrap_attr(name)
     if not callable(bootstrap_fn):
         raise TypeError(f"Bootstrap export {name!r} is not callable")
-    return bootstrap_fn(*args, **kwargs)
+    callable_bootstrap = cast("Callable[..., object]", bootstrap_fn)
+    return callable_bootstrap(*args, **kwargs)

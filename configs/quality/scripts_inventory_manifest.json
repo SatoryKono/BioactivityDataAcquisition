@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-19T14:09:34.597309+00:00",
+  "generated_at": "2026-08-19T18:22:52.629052+00:00",
   "summary": {
-    "total_scripts": 606,
+    "total_scripts": 600,
     "status_counts": {
       "active": 338,
-      "supporting": 268
+      "supporting": 262
     },
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
       "ci": 81,
-      "docs": 256,
-      "other": 78,
-      "scripts": 501,
+      "docs": 250,
+      "other": 76,
+      "scripts": 498,
       "skills": 12,
-      "tests": 397
+      "tests": 393
     }
   },
   "scripts": [
@@ -228,7 +228,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 359,
+          "line": 371,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.bat\").exists()"
         }
@@ -249,7 +249,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 358,
+          "line": 370,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.ps1\").exists()"
         }
@@ -288,19 +288,19 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 354,
+          "line": 366,
           "source_group": "tests",
           "text": "assert \"../ai/codex/diagnose_wsl.sh\" in ops_router"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 357,
+          "line": 369,
           "source_group": "tests",
           "text": "assert (root / \"scripts\" / \"ai\" / \"codex\" / \"diagnose_wsl.sh\").exists()"
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 372,
+          "line": 384,
           "source_group": "tests",
           "text": "assert 'bash \"${SCRIPT_DIR}/diagnose_wsl.sh\"' in launcher"
         }
@@ -380,7 +380,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 371,
+          "line": 383,
           "source_group": "tests",
           "text": "assert 'python3 \"${SCRIPT_DIR}/efficiency_baseline.py\"' in launcher"
         },
@@ -440,7 +440,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 380,
+          "line": 392,
           "source_group": "tests",
           "text": "headless = (root / \"scripts/ai/codex/headless.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -498,7 +498,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 392,
+          "line": 404,
           "source_group": "tests",
           "text": "helper = (root / \"scripts/ai/codex/helper/check-env.sh\").read_text(encoding=\"utf-8\")"
         }
@@ -882,7 +882,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 137,
+          "line": 142,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ai\" / \"codex\" / \"helper\" / \"setup-wsl-complete.sh\""
         },
@@ -1145,7 +1145,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 387,
+          "line": 399,
           "source_group": "tests",
           "text": "assert 'local_state_audit.py\" audit' in launcher"
         },
@@ -4971,7 +4971,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 65,
+      "reference_count": 66,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -5036,7 +5036,7 @@
       "references": [
         {
           "path": "scripts/ai/prompts/__main__.py",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts.check import ("
         },
@@ -5053,11 +5053,30 @@
       "next_step": "Retain as the validation helper behind the canonical python -m scripts.ai.prompts command surface; keep direct operator use routed through that package entrypoint."
     },
     {
+      "path": "scripts/ai/prompts/project_full.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/prompts/__main__.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "from scripts.ai.prompts.project_full import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the source-aware generated-link helper behind the canonical python -m scripts.ai.prompts command surface; do not expose it as a second standalone entrypoint."
+    },
+    {
       "path": "scripts/ai/prompts/registry.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5122,7 +5141,7 @@
       "references": [
         {
           "path": "scripts/ai/prompts/__main__.py",
-          "line": 27,
+          "line": 32,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts.render import ("
         },
@@ -5174,7 +5193,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 10,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -5213,15 +5232,15 @@
           "text": "exec \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/ai/sync/governance.py\" \\"
         },
         {
+          "path": "scripts/ai/codex/doctor.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.ai.sync.governance import normalize_codex_agents"
+        },
+        {
           "path": "scripts/ai/sync/runtime_skills.py",
           "line": 29,
           "source_group": "scripts",
-          "text": "from scripts.ai.sync import governance as sync_ai_governance"
-        },
-        {
-          "path": "tests/unit/repo_backed/scripts/test_check_skills_mirror.py",
-          "line": 36,
-          "source_group": "tests",
           "text": "from scripts.ai.sync import governance as sync_ai_governance"
         }
       ],
@@ -5410,7 +5429,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -5449,16 +5468,16 @@
           "text": "str(vibe_dir / \"launch.ps1\"),"
         },
         {
+          "path": "scripts/ai/codex/native_runtime_contract.py",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/vibe/launch.ps1\","
+        },
+        {
           "path": "scripts/ai/vibe/README.md",
           "line": 18,
           "source_group": "scripts",
           "text": "pwsh -File scripts/ai/vibe/launch.ps1 --help"
-        },
-        {
-          "path": "scripts/ai/vibe/README.md",
-          "line": 22,
-          "source_group": "scripts",
-          "text": "`launch.sh` / `launch.ps1` entrypoints and the local `helper/` setup/check"
         }
       ]
     },
@@ -5467,7 +5486,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/03-guides/development/mistral-vibe-wsl2-setup.md",
@@ -5500,6 +5519,12 @@
           "text": "return [\"bash\", str(vibe_dir / \"launch.sh\"), *rest]"
         },
         {
+          "path": "scripts/ai/codex/native_runtime_contract.py",
+          "line": 60,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/vibe/launch.sh\","
+        },
+        {
           "path": "scripts/ai/vibe/README.md",
           "line": 17,
           "source_group": "scripts",
@@ -5510,12 +5535,6 @@
           "line": 22,
           "source_group": "scripts",
           "text": "`launch.sh` / `launch.ps1` entrypoints and the local `helper/` setup/check"
-        },
-        {
-          "path": "tests/architecture/test_ai_vibe_surface_contract.py",
-          "line": 39,
-          "source_group": "tests",
-          "text": "assert \"launch.sh\" in top_level_router"
         }
       ]
     },
@@ -5848,7 +5867,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -5891,6 +5910,12 @@
           "line": 369,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/check/check_class_method_render_integrity.py\" \\"
+        },
+        {
+          "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "\"scripts/diagrams/check/check_class_method_render_integrity.py\","
         }
       ]
     },
@@ -6436,7 +6461,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -6467,6 +6492,12 @@
           "line": 150,
           "source_group": "tests",
           "text": "\"differentiate_linkstyle.py\","
+        },
+        {
+          "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "\"scripts/diagrams/fix/differentiate_linkstyle.py\","
         },
         {
           "path": "tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py",
@@ -6547,7 +6578,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -6566,6 +6597,12 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"harmonize-link-styles\": python_command(\"fix/harmonize_link_styles.py\"),"
+        },
+        {
+          "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
+          "line": 54,
+          "source_group": "tests",
+          "text": "\"scripts/diagrams/fix/harmonize_link_styles.py\","
         }
       ]
     },
@@ -6574,7 +6611,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -7571,7 +7608,7 @@
       "type": "mjs",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -7596,6 +7633,12 @@
           "line": 133,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/svg2png.mjs`                               | Node.js SVG-to-PNG converter                                                                  |"
+        },
+        {
+          "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
+          "line": 85,
+          "source_group": "tests",
+          "text": "text = (ROOT / \"scripts/diagrams/svg2png.mjs\").read_text(encoding=\"utf-8\")"
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
@@ -8204,7 +8247,7 @@
           "path": "scripts/docs/checks/check_links.py",
           "line": 74,
           "source_group": "scripts",
-          "text": "from scripts.docs.common.markdown import (  # noqa: E402"
+          "text": "from scripts.docs.common.markdown import ("
         },
         {
           "path": "scripts/docs/checks/report_docs_kpi.py",
@@ -8241,7 +8284,7 @@
           "path": "scripts/docs/checks/check_links.py",
           "line": 82,
           "source_group": "scripts",
-          "text": "from scripts.docs.common.paths import (  # noqa: E402"
+          "text": "from scripts.docs.common.paths import ("
         },
         {
           "path": "scripts/docs/checks/report_docs_kpi.py",
@@ -10221,7 +10264,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 230,
+      "reference_count": 241,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -15267,11 +15310,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/architecture/test_live_residual_snapshot.py",
           "line": 120,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
+        },
+        {
+          "path": "tests/architecture/test_live_residual_snapshot.py",
+          "line": 151,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_live_residual_snapshot import ("
         }
@@ -15967,7 +16016,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 325,
+          "line": 317,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         },
@@ -16081,13 +16130,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/integration/test_dashboard_content_contract.py",
           "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import validate_dashboard_content_contract as subject"
+        },
+        {
+          "path": "tests/integration/test_dashboard_scope_refactor.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import validate_dashboard_content_contract as content"
         }
       ],
       "owner": "@bioetl-observability",
@@ -16402,7 +16457,7 @@
         },
         {
           "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
-          "line": 14,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.vcr.check_vcr_secrets import _looks_redacted"
         }
@@ -16715,7 +16770,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 323,
+          "line": 336,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17572,7 +17627,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 67,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -18623,7 +18678,7 @@
         },
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 104,
+          "line": 109,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"start-codex.bat\""
         }
@@ -18638,7 +18693,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 107,
+          "line": 112,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
@@ -18653,7 +18708,7 @@
       "references": [
         {
           "path": "tests/architecture/test_codex_launcher_bootstrap.py",
-          "line": 110,
+          "line": 115,
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
@@ -18668,7 +18723,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 254,
+          "line": 267,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -18724,7 +18779,7 @@
         },
         {
           "path": "tests/unit/infrastructure/test_cr_8917_secret_redaction.py",
-          "line": 15,
+          "line": 13,
           "source_group": "tests",
           "text": "from scripts.ops.maintenance.security.salt_rotate import ("
         }
@@ -18946,13 +19001,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 176,
           "source_group": "docs",
           "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
+        },
+        {
+          "path": "scripts/engineering/qa/check_prometheus_rules.py",
+          "line": 655,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
@@ -18962,7 +19023,7 @@
         },
         {
           "path": "tests/unit/scripts/ops/test_check_prometheus_rules_health.py",
-          "line": 10,
+          "line": 12,
           "source_group": "tests",
           "text": "from scripts.ops.observability import check_prometheus_rules_health as mod"
         }
@@ -19038,55 +19099,6 @@
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
-      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": ".github/ISSUES/_dux6_bodies/DUX6-00.md",
-          "line": 24,
-          "source_group": "other",
-          "text": "- No-scroll helper: `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 22,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 533,
-          "source_group": "scripts",
-          "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 598,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana import ("
-        },
-        {
-          "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-          "line": 149,
-          "source_group": "scripts",
-          "text": "- No-scroll helper: `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 57,
-          "source_group": "tests",
-          "text": "\"_fix_no_scroll_triage_panels.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off dashboard no-scroll migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
       "type": "py",
       "status": "supporting",
@@ -19101,7 +19113,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 58,
+          "line": 57,
           "source_group": "tests",
           "text": "\"apply_dux2_residual.py\","
         }
@@ -19110,154 +19122,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 143,
-          "source_group": "docs",
-          "text": "- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 59,
-          "source_group": "tests",
-          "text": "\"apply_dux4_enforcement.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX4 dashboard enforcement helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": ".github/ISSUES/_dux6_bodies/DUX6-00.md",
-          "line": 23,
-          "source_group": "other",
-          "text": "- Applicator: `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 21,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 532,
-          "source_group": "scripts",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 597,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana import apply_dux5_residual as dux5"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "- Applicator: `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 60,
-          "source_group": "tests",
-          "text": "\"apply_dux5_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux6_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 61,
-          "source_group": "tests",
-          "text": "\"apply_dux6_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux7_live_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "python scripts/ops/observability/grafana/apply_dux7_live_residual.py"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 62,
-          "source_group": "tests",
-          "text": "\"apply_dux7_live_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -19310,7 +19174,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 323,
+          "line": 315,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         }
@@ -19361,13 +19225,13 @@
           "text": "from scripts.ops.observability.grafana.check_dashboard_panel_fill import ("
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_check_dashboard_panel_fill.py",
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_check_dashboard_panel_fill.py",
           "line": 17,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import check_dashboard_panel_fill as fill"
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_check_dashboard_panel_fill.py",
+          "path": "tests/unit/repo_backed/scripts/ops/observability/test_check_dashboard_panel_fill.py",
           "line": 49,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_dashboard_panel_fill.py\","
@@ -19383,7 +19247,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -19410,12 +19274,6 @@
           "text": "$GrafanaPreflight = Join-Path $ProjectRoot \"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
-          "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 755,
-          "source_group": "scripts",
-          "text": "python scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py"
-        },
-        {
           "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
           "line": 27,
           "source_group": "scripts",
@@ -19423,7 +19281,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 427,
+          "line": 419,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -19432,8 +19290,33 @@
           "line": 25,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
+          "line": 134,
+          "source_group": "tests",
+          "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/ops/observability/grafana/dashboard_context_links.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper."
     },
     {
       "path": "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py",
@@ -19444,7 +19327,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 656,
+          "line": 665,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
         },
@@ -19488,7 +19371,7 @@
       "references": [
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 63,
+          "line": 58,
           "source_group": "tests",
           "text": "\"generate_dux4_issue_pack.py\","
         }
@@ -19497,44 +19380,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 64,
-          "source_group": "tests",
-          "text": "\"generate_dux5_issue_pack.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 65,
-          "source_group": "tests",
-          "text": "\"generate_dux6_issue_pack.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py",
@@ -19551,25 +19396,25 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 99,
+          "line": 91,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 115,
+          "line": 107,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text \""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 184,
+          "line": 191,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 199,
+          "line": 206,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -19578,6 +19423,25 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as the bounded #8576/#8578 Trust-panel fixture generator; consolidate it into the canonical dashboard-audit command or remove it when the reviewed close-up campaign is complete."
+    },
+    {
+      "path": "scripts/ops/observability/grafana/qa_context.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/test_observability_qa_context.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.qa_context import ("
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-17",
+      "next_step": "Retain as the canonical observability QA-context loader imported by dashboard tooling and tests; keep it supporting unless it becomes a governed standalone entrypoint."
     },
     {
       "path": "scripts/ops/observability/grafana/recover_renderer.ps1",
@@ -19696,7 +19560,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -19724,9 +19588,9 @@
         },
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 24,
+          "line": 23,
           "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/render_nav_bus.py`"
+          "text": "`render_nav_bus.py` remains the maintained navigation generator."
         },
         {
           "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
@@ -19757,7 +19621,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
@@ -19776,12 +19640,6 @@
           "line": 52,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 757,
-          "source_group": "scripts",
-          "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
@@ -19806,45 +19664,14 @@
           "line": 274,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": "python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux7_live_residual.py",
-          "line": 137,
-          "source_group": "scripts",
-          "text": "python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 67,
+          "line": 316,
           "source_group": "tests",
-          "text": "\"run_dux7_live_residual.py\","
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_run_dux7_live_residual.py",
-          "line": 9,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.run_dux7_live_residual import ("
+          "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
@@ -19867,7 +19694,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 322,
+          "line": 314,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
@@ -20018,19 +19845,19 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1477,
+          "line": 1487,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1564,
+          "line": 1574,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 424,
+          "line": 416,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -20091,18 +19918,6 @@
       "next_step": "Retain only as the bounded #8576 JSON-source evidence refresher; remove it after visual-baseline closeout or consolidate it into the canonical dashboard audit command."
     },
     {
-      "path": "scripts/ops/observability/relayout_trust_review_panels.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-observability",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as the bounded Trust Review* hoist helper used during first-window layout work; remove it after the Trust first-screen layout is frozen or fold it into a governed dashboard command."
-    },
-    {
       "path": "scripts/ops/observability/start_read_only_audit_stack.py",
       "type": "py",
       "status": "active",
@@ -20132,19 +19947,19 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 96,
+          "line": 88,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 181,
+          "line": 188,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -20527,7 +20342,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/verify_report_bind.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight"
         },
@@ -20560,7 +20375,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1098,
+          "line": 1100,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -20872,7 +20687,7 @@
       "agent_usage": [
         "observability-dashboard"
       ],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".codex/skills/observability-dashboard/SKILL.md",
@@ -20885,6 +20700,12 @@
           "line": 147,
           "source_group": "docs",
           "text": "| TREE_MISSING / LAYOUT_UNHEALTHY | `TREAT_BIND_FAILURE` + `verify_report_bind.py` |"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md",
+          "line": 50,
+          "source_group": "docs",
+          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         },
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
@@ -20915,12 +20736,6 @@
           "line": 168,
           "source_group": "docs",
           "text": "6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`."
-        },
-        {
-          "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 206,
-          "source_group": "docs",
-          "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         }
       ]
     },
@@ -21724,7 +21539,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 432,
+          "line": 441,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
@@ -21958,13 +21773,13 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 65,
+          "line": 62,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 117,
+          "line": 114,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         }
@@ -22686,7 +22501,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1035,
+          "line": 1037,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22754,7 +22569,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1035,
+          "line": 1037,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

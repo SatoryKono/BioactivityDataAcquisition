@@ -112,26 +112,13 @@ Nested titles (must match JSON):
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
 
-### Inspect Full Processed Records
+## Additional shipped panels
+### 16. Inspect Recent Runs (last 20)
 
-Docs for Inspect Full Processed Records.
+Shipped in `bioetl-run-explorer-v1.json`.
+### 17. Inspect Full Run Identity
 
-### Inspect Full Run Identity
+Shipped in `bioetl-run-explorer-v1.json`.
+### 18. Inspect Full Processed Records
 
-Docs for Inspect Full Run Identity.
-
-### Inspect Recent Runs (last 20)
-
-Docs for Inspect Recent Runs (last 20).
-
-### 99. Inspect Full Processed Records
-
-Docs for Inspect Full Processed Records.
-
-### 99. Inspect Full Run Identity
-
-Docs for Inspect Full Run Identity.
-
-### 99. Inspect Recent Runs (last 20)
-
-Docs for Inspect Recent Runs (last 20).
+Shipped in `bioetl-run-explorer-v1.json`.

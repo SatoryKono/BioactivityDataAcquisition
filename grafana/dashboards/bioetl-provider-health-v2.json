@@ -30,15 +30,15 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"3. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">3. Provider Health (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=$__all&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:2px 6px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-current\" href=\"#bioetl-provider-health-v2\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"3. Provider Health (Provider Health)\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">3. Provider Health (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><span style=\"flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;border:0\" aria-hidden=\"true\"></span><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;border-radius:3px;font-weight:600;line-height:1.25;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
-      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0\u20134: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5\u20136: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
+      "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
       "type": "text",
       "links": [
         {
           "title": "0. Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -49,7 +49,7 @@
         },
         {
           "title": "1. Overview",
-          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -60,7 +60,7 @@
         },
         {
           "title": "2. Pipeline Diagnostics",
-          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -71,7 +71,7 @@
         },
         {
           "title": "4. Data Quality",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -82,7 +82,7 @@
         },
         {
           "title": "5. Incident Workspace",
-          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-pipeline=$pipeline_context&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -93,7 +93,7 @@
         },
         {
           "title": "6. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-pipeline=$pipeline_context&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline_context&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -117,8 +117,9 @@
       "description": "Provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness \u00b7 <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry \u2014 inspect scrape target</div></div></div>"
-      }
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). Chip IN RANGE / OUT OF RANGE / UNKNOWN comes from Review Selected Run Summary (<code>coverage_chip</code>). A run inside the window is IN RANGE and must not show an outside-range warning. OUT OF RANGE still offers Set range to run. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code>${provider}</code> · adapter=<code>${adapter}</code> · pipeline_context=<code>${pipeline_context}</code></div></div></div></div>"
+      },
+      "links": []
     },
     {
       "id": 9401,
@@ -134,7 +135,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current verdict for the selected provider. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable\u2014check Telemetry Freshness and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
+      "description": "TIME RANGE · Current verdict for the selected provider. Mapping: `0=OK`, `1=WARN`, `>=2=CRIT`, `null=UNKNOWN`. The verdict uses current status and successful provider activity observed in the selected range; it does not prove that a pipeline run succeeded. TELEMETRY MISSING means status evidence is unavailable—check Telemetry Freshness and Raw Health Status; it is not evidence of a healthy fleet. Fleet panels can disagree because they cover all providers.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -157,6 +158,10 @@
                 "2": {
                   "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
                 }
               }
             },
@@ -196,6 +201,10 @@
               {
                 "color": "red",
                 "value": 2
+              },
+              {
+                "color": "gray",
+                "value": 3
               }
             ]
           },
@@ -208,25 +217,25 @@
         "dataLinks": [
           {
             "title": "Inspect Provider Telemetry Freshness",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9104&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9104&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Review Raw Provider Health Enum",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=114&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=114&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Inspect Severity Matrix",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9101&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9101&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           },
           {
             "title": "Inspect Provider Top Causes",
-            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9103&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9103&${__url_time_range}",
             "targetBlank": false,
             "includeVars": false
           }
@@ -269,19 +278,19 @@
       "links": [
         {
           "title": "Review severity matrix",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9101&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9101&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Inspect critical providers",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9102&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9102&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },
         {
           "title": "Inspect provider top causes",
-          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?viewPanel=9103&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-provider=$provider&var-pipeline_context=$pipeline_context&var-adapter=$adapter&viewPanel=9103&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         }
@@ -294,7 +303,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Do not put full UUIDs into Prometheus labels. First-screen worst four providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence.",
+      "description": "CURRENT · Do not put full UUIDs into Prometheus labels. First-screen worst four providers by current status. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Interpret with freshness: critical -> degraded -> unknown/stale -> healthy. TELEMETRY MISSING or no data with UNKNOWN Status is a blind spot, not evidence of a healthy fleet. Complete fleet rows remain in Inspect Full Fleet Evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -347,6 +356,10 @@
               {
                 "color": "red",
                 "value": 2
+              },
+              {
+                "color": "gray",
+                "value": 3
               }
             ]
           },
@@ -355,7 +368,7 @@
           "links": [
             {
               "title": "Open selected provider context",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
@@ -404,6 +417,10 @@
                       "2": {
                         "text": "CRIT",
                         "color": "red"
+                      },
+                      "3": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
                       }
                     }
                   },
@@ -435,7 +452,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 10
       },
@@ -468,7 +485,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(4, max by (provider) (bioetl_provider_current_status))",
+          "expr": "topk(4, max by (provider) (bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -507,7 +524,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "[GLOBAL] Do not put full UUIDs into Prometheus labels. Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive",
+      "description": "CURRENT · Status reason and source_state for the selected provider (or worst four when provider=All). Enum 0=OK, 1=WARN, 2=CRIT, 3=UNKNOWN. missing_health_status means no health_status series — not a healthy fleet. Adapter filter is hidden; adapter=All unless a chip says otherwise. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -525,6 +542,16 @@
               "type": "special",
               "options": {
                 "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "nan",
                 "result": {
                   "text": "UNKNOWN",
                   "color": "gray"
@@ -550,19 +577,15 @@
               {
                 "color": "red",
                 "value": 2
+              },
+              {
+                "color": "gray",
+                "value": 3
               }
             ]
           },
           "unit": "short",
-          "links": [
-            {
-              "title": "Open selected provider context",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ],
-          "noValue": "None observed; healthy only when Fleet Severity is OK and Telemetry Presence is PRESENT."
+          "noValue": "UNKNOWN — missing health_status for this provider, or VALID EMPTY if the selected provider has no universe row."
         },
         "overrides": [
           {
@@ -573,7 +596,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Count"
+                "value": "Status"
               }
             ]
           },
@@ -607,185 +630,10 @@
                       "2": {
                         "text": "CRIT",
                         "color": "red"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
+                      },
+                      "3": {
                         "text": "UNKNOWN",
                         "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "nan",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 8,
-        "y": 10
-      },
-      "id": 9102,
-      "options": {
-        "cellHeight": "sm",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Provider Incident Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
-          }
-        ],
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Severity"
-          }
-        ]
-      },
-      "pluginVersion": "10.4.0",
-      "targets": [
-        {
-          "expr": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
-          "format": "table",
-          "instant": true,
-          "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Inspect Non-OK Providers",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "[SELECTED] Top current causes of provider degradation, bounded to the worst four rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. If fleet severity is non-OK and this table is empty, check scrape and recording-rule health. Complete cause evidence remains in Inspect Full Fleet Evidence.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "noValue": "No active causes; valid only when Fleet Severity is OK and Telemetry Presence is PRESENT.",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short",
-          "links": [
-            {
-              "title": "Open selected provider context",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-provider=${__data.fields.provider:percentencode}&var-pipeline=${pipeline}&var-run_type=${run_type}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "mode": "basic"
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "0": {
-                        "text": "OK",
-                        "color": "green"
-                      },
-                      "1": {
-                        "text": "WARN",
-                        "color": "orange"
-                      },
-                      "2": {
-                        "text": "CRIT",
-                        "color": "red"
                       }
                     }
                   },
@@ -816,7 +664,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "cause"
+              "options": "reason"
             },
             "properties": [
               {
@@ -829,10 +677,6 @@
                   "type": "auto",
                   "wrapText": true
                 }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
               }
             ]
           }
@@ -840,20 +684,13 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 10,
-        "x": 14,
+        "w": 12,
+        "x": 12,
         "y": 10
       },
-      "id": 9103,
+      "id": 9107,
       "options": {
         "cellHeight": "sm",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Provider Incident Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
-          }
-        ],
         "footer": {
           "countRows": false,
           "fields": "",
@@ -866,56 +703,50 @@
         "sortBy": [
           {
             "desc": true,
-            "displayName": "Severity"
+            "displayName": "Status"
           }
         ]
       },
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+          "expr": "topk(4, max by (provider, reason, source_state) (bioetl_provider_current_status_info{provider=~\"$provider\"}))",
           "format": "table",
           "instant": true,
-          "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
+          "legendFormat": "{{provider}} {{reason}} {{source_state}}",
           "refId": "A"
         }
       ],
+      "title": "Inspect Status Reason",
+      "type": "table",
       "transformations": [
         {
           "id": "organize",
           "options": {
             "excludeByName": {
               "Time": true,
-              "__name__": true,
-              "Value": true,
-              "bioetl_provider_current_cause": true
+              "__name__": true
             },
             "indexByName": {
               "provider": 0,
-              "cause": 1,
-              "severity": 2
+              "reason": 1,
+              "source_state": 2,
+              "Value": 3
             },
             "renameByName": {
-              "provider": "Provider",
-              "cause": "Cause",
-              "severity": "Severity",
-              "Value": "Count",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
+              "Value": "Status",
+              "source_state": "source_state"
             }
           }
         }
-      ],
-      "title": "Inspect Top Provider Causes",
-      "type": "table"
+      ]
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Presence gate for selected-provider current status (max(status)*0). 0=PRESENT means the status series exists; null=UNKNOWN means telemetry is absent. This is not sample age/staleness. Alias mapping: PRESENT=OK. On 1366 this chip sits at y=15 (below conservative fold); 1920 shows it. Confidence marker for current provider telemetry evidence. PRESENT means at least one selected-provider status series exists; missing evidence is fail-closed UNKNOWN and must never be read as healthy. Alias mapping: PRESENT=OK.",
+      "description": "TIME RANGE · CURRENT · Presence of raw bioetl_provider_health_status for the selected provider (excluding synthetic test). 0=PRESENT means the health_status series exists; null=UNKNOWN means health_status is missing. PRESENT is not a healthy verdict and is not completeness. missing_health_status on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. Alias PRESENT≠OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -929,7 +760,7 @@
               "options": {
                 "0": {
                   "text": "PRESENT",
-                  "color": "green"
+                  "color": "blue"
                 }
               }
             },
@@ -949,7 +780,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
               },
               {
@@ -992,7 +823,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0",
+          "expr": "max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
           "format": "time_series",
           "instant": true,
           "legendFormat": "Provider status evidence",
@@ -1003,13 +834,443 @@
       "type": "stat"
     },
     {
+      "type": "row",
+      "id": 9106,
+      "title": "Inspect Fleet Non-OK and Causes",
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Only providers currently observed as DEGRADED or FAILING on the first-screen provider-status recording rule (instant/current semantics, not selected-range history). Empty table means no provider is currently above OK in the active trust window. Scope: GLOBAL provider fleet posture; intentionally not filtered by run_id. Fleet-first matrix: answer without forcing a provider selector; select row to deep-dive TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  },
+                  {
+                    "color": "gray",
+                    "value": 3
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [
+                {
+                  "title": "Open selected provider context",
+                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ],
+              "noValue": "UNKNOWN — missing/stale provider telemetry, or VALID EMPTY if the fleet has no matching rows. Not a selected-run verdict."
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "mode": "basic"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          },
+                          "3": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 9102,
+          "options": {
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Provider Incident Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+              }
+            ],
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Severity"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "topk(4, max by (provider) (bioetl_provider_current_status) >= 1)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect Non-OK Providers",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "TIME RANGE · CURRENT · Top current causes of provider degradation, bounded to the worst four rows, such as raw health, failures, retry exhaustion, latency, HTTP errors, or rate limiting. Scope: fleet; not filtered by run ID. If fleet severity is non-OK and this table is empty, check scrape and recording-rule health. Complete cause evidence remains in Inspect Full Fleet Evidence. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "noValue": "UNKNOWN — missing/stale provider telemetry, or VALID EMPTY if the fleet has no matching rows. Not a selected-run verdict.",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [
+                {
+                  "title": "Open selected provider context",
+                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=${__data.fields.provider:percentencode}&${__url_time_range}",
+                  "targetBlank": false,
+                  "includeVars": false
+                }
+              ]
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Count"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "mode": "basic"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "cause"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 9103,
+          "options": {
+            "cellHeight": "sm",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Provider Incident Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+              }
+            ],
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Severity"
+              }
+            ]
+          },
+          "pluginVersion": "10.4.0",
+          "targets": [
+            {
+              "expr": "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "Value": true,
+                  "bioetl_provider_current_cause": true
+                },
+                "indexByName": {
+                  "provider": 0,
+                  "cause": 1,
+                  "severity": 2
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "cause": "Cause",
+                  "severity": "Severity",
+                  "Value": "Count",
+                  "Value #A": "Series A",
+                  "Value #B": "Series B",
+                  "Value #C": "Series C"
+                }
+              }
+            }
+          ],
+          "title": "Inspect Top Provider Causes",
+          "type": "table"
+        }
+      ]
+    },
+    {
       "collapsed": true,
       "description": "Complete fleet, non-OK-provider, and cause evidence. First-screen tables stay bounded to four rows; this lane is the unbounded forensic copy. Empty domains are not a healthy-fleet verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 19
       },
       "id": 9105,
       "title": "Inspect Full Fleet Evidence",
@@ -1020,7 +1281,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet.",
+          "description": "CURRENT · TIME RANGE · Complete GLOBAL provider severity matrix. First-screen Monitor Fleet Severity is the four-row summary. TELEMETRY MISSING is a blind spot, not a healthy fleet. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "gridPos": {
             "h": 8,
             "w": 8,
@@ -1048,14 +1309,19 @@
             }
           ],
           "title": "Inspect Full Fleet Severity",
-          "type": "table"
+          "type": "table",
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+            }
+          }
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary.",
+          "description": "TIME RANGE · Complete DEGRADED or FAILING provider list. First-screen Inspect Non-OK Providers is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "gridPos": {
             "h": 8,
             "w": 6,
@@ -1083,14 +1349,19 @@
             }
           ],
           "title": "Inspect Full Non-OK Providers",
-          "type": "table"
+          "type": "table",
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+            }
+          }
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Complete current cause evidence. First-screen Inspect Top Provider Causes is the four-row summary.",
+          "description": "TIME RANGE · Complete current cause evidence. First-screen Inspect Top Provider Causes is the four-row summary. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "gridPos": {
             "h": 8,
             "w": 10,
@@ -1118,7 +1389,12 @@
             }
           ],
           "title": "Inspect Full Provider Causes",
-          "type": "table"
+          "type": "table",
+          "fieldConfig": {
+            "defaults": {
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+            }
+          }
         }
       ]
     },
@@ -1129,7 +1405,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 20
       },
       "id": 91,
       "title": "Selected Provider Details",
@@ -1175,7 +1451,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
             },
             "overrides": []
           },
@@ -1220,7 +1497,7 @@
           ],
           "title": "Track Health Failures & Degradation",
           "type": "timeseries",
-          "description": "Selected-range evidence: failure/degraded probe trend over the active Grafana interval",
+          "description": "TIME RANGE · Selected-range evidence: failure/degraded probe trend over the active Grafana interval VALID EMPTY (no events) is not TELEMETRY MISSING.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1241,7 +1518,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "\u2014",
+                      "text": "—",
                       "color": "transparent",
                       "index": 0
                     }
@@ -1276,7 +1553,8 @@
                 "cellOptions": {
                   "type": "auto"
                 }
-              }
+              },
+              "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
             },
             "overrides": []
           },
@@ -1324,7 +1602,7 @@
           ],
           "title": "Track Failure Share",
           "type": "table",
-          "description": "Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero"
+          "description": "TIME RANGE · Selected-range evidence: provider share of failed probes in the active Grafana range. The full share chart is collapsed by default and should be expanded only when total failures are non-zero VALID EMPTY (no events) is not TELEMETRY MISSING."
         },
         {
           "datasource": {
@@ -1346,7 +1624,7 @@
                   "options": {
                     "match": "null+nan",
                     "result": {
-                      "text": "\u2014",
+                      "text": "—",
                       "color": "transparent",
                       "index": 0
                     }
@@ -1374,7 +1652,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
             "overrides": [
               {
@@ -1419,7 +1698,7 @@
           ],
           "title": "Inspect Exhausted Retries",
           "type": "table",
-          "description": "Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state"
+          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -1468,7 +1747,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
             "overrides": []
           },
@@ -1501,7 +1781,7 @@
           ],
           "title": "Track Exhausted Retries",
           "type": "timeseries",
-          "description": "Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure",
+          "description": "TIME RANGE · Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1584,7 +1864,7 @@
           ],
           "title": "Inspect Health-Check Latency p95",
           "type": "gauge",
-          "description": "Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict"
+          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -1625,13 +1905,13 @@
                 {
                   "targetBlank": false,
                   "title": "Open 2. Runtime",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                  "url": "/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
                   "includeVars": false
                 },
                 {
                   "targetBlank": false,
                   "title": "Open 0. Control Plane",
-                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
+                  "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
                   "includeVars": false
                 }
               ]
@@ -1667,7 +1947,7 @@
           ],
           "title": "Track Request Latency p95",
           "type": "timeseries",
-          "description": "Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity",
+          "description": "TIME RANGE · Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1753,7 +2033,7 @@
           ],
           "title": "Track Rate-Limit Errors",
           "type": "timeseries",
-          "description": "Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope",
+          "description": "TIME RANGE · Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1831,7 +2111,7 @@
           ],
           "title": "Track Network & Timeout Errors",
           "type": "timeseries",
-          "description": "Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set",
+          "description": "TIME RANGE · Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1920,7 +2200,7 @@
           ],
           "title": "Track Rate-Limiter Wait p95",
           "type": "timeseries",
-          "description": "Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection",
+          "description": "TIME RANGE · Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1997,7 +2277,7 @@
           ],
           "title": "Monitor Available Rate-Limit Tokens",
           "type": "bargauge",
-          "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary."
+          "description": "TIME RANGE · Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK Numeric token count is primary; sequential color is secondary. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -2090,7 +2370,7 @@
           ],
           "title": "Monitor Circuit-Breaker State",
           "type": "stat",
-          "description": "Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK"
+          "description": "TIME RANGE · Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -2166,7 +2446,7 @@
           ],
           "title": "Track Circuit-Breaker Trips",
           "type": "timeseries",
-          "description": "Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own",
+          "description": "TIME RANGE · Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         }
@@ -2180,7 +2460,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 21
       },
       "id": 9404,
       "panels": [
@@ -2255,7 +2535,8 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "short",
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
             },
             "overrides": [
               {
@@ -2308,7 +2589,7 @@
           ],
           "title": "Inspect Raw Health Status",
           "type": "table",
-          "description": "Do not put full UUIDs into Prometheus labels. Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy"
+          "description": "CURRENT · TIME RANGE · Do not put full UUIDs into Prometheus labels. Raw provider health enum evidence for the current first-screen scope (instant), not the canonical first-screen verdict. Values are source enum: 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY (or dashboard-local mapping). null/NaN=UNKNOWN when raw status is absent (mapping fallback), not healthy. When raw status is absent the mapped status is unknown (fail-closed), never synthetic healthy TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -2385,7 +2666,7 @@
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix",
+          "description": "TIME RANGE · Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -2455,7 +2736,7 @@
           ],
           "title": "Monitor Healthy Checks",
           "type": "stat",
-          "description": "Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health."
+          "description": "TIME RANGE · Number of HEALTHY checks completed in the selected range. `0` means none were observed or checks have not started; it is supporting evidence, not proof of current provider health. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -2524,7 +2805,7 @@
           ],
           "title": "Monitor Degraded Checks",
           "type": "stat",
-          "description": "Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves"
+          "description": "TIME RANGE · Selected-range evidence: completed DEGRADED probes in the active Grafana range. This panel is not a current-health source, so non-zero counts remain neutral evidence rather than WARN/CRIT by themselves TELEMETRY MISSING is not a zero and not VALID EMPTY."
         },
         {
           "datasource": {
@@ -2609,7 +2890,7 @@
           ],
           "title": "Track Failure Rate",
           "type": "stat",
-          "description": "Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry."
+          "description": "TIME RANGE · Failed checks divided by all completed checks in the selected range. Warning starts at 5%; critical starts at 20%. A zero denominator is N/A rather than success. Current provider status comes from the canonical status telemetry. VALID EMPTY (no events) is not TELEMETRY MISSING."
         },
         {
           "datasource": {
@@ -2678,7 +2959,7 @@
           ],
           "title": "Monitor Health Checks",
           "type": "stat",
-          "description": "Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict."
+          "description": "TIME RANGE · Total HEALTHY, DEGRADED, and failed checks completed in the selected range. `0` means no completed checks were observed or checking has not started; it is not a health verdict. TELEMETRY MISSING is not a zero and not VALID EMPTY."
         }
       ],
       "description": "Expand for selected-range and debug evidence after current fleet severity, causes, and telemetry presence have been interpreted together."
@@ -2691,7 +2972,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 22
       },
       "id": 9405,
       "panels": [
@@ -2706,7 +2987,7 @@
             "y": 90
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA \u2014 never a synthetic healthy zero",
+          "description": "SELECTED RUN · Do not put full UUIDs into Prometheus labels. Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. This card is bounded pipeline/run context evidence only and does not prove current provider health. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2717,7 +2998,7 @@
                 "inspect": true
               },
               "unit": "none",
-              "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
               "links": [
                 {
                   "title": "Copy/Open full value (plain text)",
@@ -2849,7 +3130,8 @@
                 }
               }
             }
-          ]
+          ],
+          "links": []
         },
         {
           "id": 9403,
@@ -2862,7 +3144,7 @@
             "y": 90
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA \u2014 never a synthetic healthy zero",
+          "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -2874,7 +3156,7 @@
               },
               "decimals": 0,
               "unit": "none",
-              "noValue": "SELECT RUN \u2014 no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
+              "noValue": "SELECT RUN — no exact Run ID selected. Choose a run in Inspect Recent Runs. UNKNOWN/QUERY ERROR if a selected run has no accounting.",
               "links": [
                 {
                   "title": "Check BioETL Ops HTTP health",
@@ -3359,7 +3641,7 @@
           }
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/^\\s*(\\S(?:.*\\S)?)\\s*$/",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",

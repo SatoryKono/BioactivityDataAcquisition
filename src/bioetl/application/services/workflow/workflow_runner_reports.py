@@ -145,7 +145,6 @@ def attach_workflow_run_report(
             execution_steps=execution_rows,
         )
         written = write_workflow_run_report(report)
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
         return replace(
             result,
             run_report_json_path=str(written.json_path),
@@ -159,7 +158,6 @@ def attach_workflow_run_report(
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
         return replace(
             result,
             run_report_error=f"{type(exc).__name__}: {exc}",

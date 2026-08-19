@@ -88,79 +88,89 @@ def check_retention(
     held_count = 0
 
     for record in records:
-        if not record.record_id:
-            violations.append(
-                RetentionViolation("", "missing_record_id", "record_id is required")
-            )
-            continue
-        try:
-            created_at = _parse_utc(record.created_at, field_name="created_at")
-        except ValueError as exc:
-            violations.append(
-                RetentionViolation(record.record_id, "invalid_created_at", str(exc))
-            )
-            continue
-
-        if record.legal_hold:
-            if not record.legal_hold_reason or not record.legal_hold_reason.strip():
-                violations.append(
-                    RetentionViolation(
-                        record.record_id,
-                        "missing_legal_hold_reason",
-                        "active legal hold requires an explicit reason",
-                    )
-                )
-            else:
-                held_count += 1
-            continue
-
-        expiries: list[datetime] = []
-        if record.ttl_days is not None:
-            if record.ttl_days <= 0:
-                violations.append(
-                    RetentionViolation(
-                        record.record_id,
-                        "invalid_ttl",
-                        "ttl_days must be greater than zero",
-                    )
-                )
-                continue
-            expiries.append(created_at + timedelta(days=record.ttl_days))
-        if record.retain_until is not None:
-            try:
-                expiries.append(
-                    _parse_utc(record.retain_until, field_name="retain_until")
-                )
-            except ValueError as exc:
-                violations.append(
-                    RetentionViolation(
-                        record.record_id,
-                        "invalid_retain_until",
-                        str(exc),
-                    )
-                )
-                continue
-        if not expiries:
-            violations.append(
-                RetentionViolation(
-                    record.record_id,
-                    "missing_retention_policy",
-                    "ttl_days or retain_until is required",
-                )
-            )
-            continue
-
-        if current_time >= max(expiries):
-            violations.append(
-                RetentionViolation(
-                    record.record_id,
-                    "retention_expired",
-                    "record exceeded its explicit retention boundary",
-                )
-            )
+        held, record_violations = _evaluate_retention_record(record, current_time)
+        held_count += int(held)
+        violations.extend(record_violations)
 
     return RetentionReport(
         checked_count=len(records),
         held_count=held_count,
         violations=tuple(violations),
     )
+
+
+def _evaluate_retention_record(
+    record: RetentionRecord,
+    current_time: datetime,
+) -> tuple[bool, list[RetentionViolation]]:
+    """Evaluate one record and return its hold state and violations."""
+    if not record.record_id:
+        return False, [
+            RetentionViolation("", "missing_record_id", "record_id is required")
+        ]
+    try:
+        created_at = _parse_utc(record.created_at, field_name="created_at")
+    except ValueError as exc:
+        return False, [
+            RetentionViolation(record.record_id, "invalid_created_at", str(exc))
+        ]
+    if record.legal_hold:
+        return _evaluate_legal_hold(record)
+    return False, _retention_boundary_violations(record, created_at, current_time)
+
+
+def _evaluate_legal_hold(
+    record: RetentionRecord,
+) -> tuple[bool, list[RetentionViolation]]:
+    if record.legal_hold_reason and record.legal_hold_reason.strip():
+        return True, []
+    return False, [
+        RetentionViolation(
+            record.record_id,
+            "missing_legal_hold_reason",
+            "active legal hold requires an explicit reason",
+        )
+    ]
+
+
+def _retention_boundary_violations(
+    record: RetentionRecord,
+    created_at: datetime,
+    current_time: datetime,
+) -> list[RetentionViolation]:
+    """Validate explicit TTL/retain-until boundaries for one record."""
+    if record.ttl_days is not None and record.ttl_days <= 0:
+        return [
+            RetentionViolation(
+                record.record_id, "invalid_ttl", "ttl_days must be greater than zero"
+            )
+        ]
+    expiries = (
+        [created_at + timedelta(days=record.ttl_days)]
+        if record.ttl_days is not None
+        else []
+    )
+    if record.retain_until is not None:
+        try:
+            expiries.append(_parse_utc(record.retain_until, field_name="retain_until"))
+        except ValueError as exc:
+            return [
+                RetentionViolation(record.record_id, "invalid_retain_until", str(exc))
+            ]
+    if not expiries:
+        return [
+            RetentionViolation(
+                record.record_id,
+                "missing_retention_policy",
+                "ttl_days or retain_until is required",
+            )
+        ]
+    if current_time >= max(expiries):
+        return [
+            RetentionViolation(
+                record.record_id,
+                "retention_expired",
+                "record exceeded its explicit retention boundary",
+            )
+        ]
+    return []

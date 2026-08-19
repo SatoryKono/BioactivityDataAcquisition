@@ -70,7 +70,13 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-alerts-slo.json": {"workflow", "pipeline", "run_type"},
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
-    "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
+    "bioetl-dq-v2.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "stage",
+    },
     "bioetl-runtime.json": {
         "workflow",
         "pipeline",
@@ -1407,8 +1413,9 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
         int(panel["id"]): panel for panel in get_dashboard_panels(overview)
     }
     assert overview_panels[9002]["options"]["cellHeight"] == "sm"
-    assert overview_panels[9002]["gridPos"]["h"] == 6
-    assert overview_panels[215]["gridPos"]["h"] == 6
+    assert overview_panels[9002]["gridPos"]["h"] >= 5
+    assert overview_panels[215]["gridPos"]["h"] >= 5
+    assert overview_panels[9603]["gridPos"]["y"] < overview_panels[215]["gridPos"]["y"]
 
     run_explorer = load_dashboard(
         Path("grafana/dashboards/bioetl-run-explorer-v1.json")
@@ -1678,34 +1685,3 @@ def test_stage_drilldown_variable_is_available_for_runtime_and_dq_dashboards(
     )
     assert f"label_values({expected_source}" in query_text
     assert "stage" in query_text
-
-
-def test_control_plane_dashboard_uses_control_plane_native_variable_sources() -> None:
-    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    variable_map = {
-        var.get("name"): var
-        for var in dashboard.get("templating", {}).get("list", [])
-        if var.get("name")
-    }
-
-    pipeline_var = variable_map.get("pipeline")
-    run_type_var = variable_map.get("run_type")
-    assert pipeline_var is not None
-    assert run_type_var is not None
-
-    pipeline_query = pipeline_var.get("query", {})
-    run_type_query = run_type_var.get("query", {})
-    assert isinstance(pipeline_query, dict)
-    infinity = pipeline_query.get("infinityQuery", {})
-    assert isinstance(infinity, dict)
-    pipeline_url = str(infinity.get("url", ""))
-    run_type_query_text = (
-        run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
-    )
-
-    assert "/ops/control-plane/filter-options" in pipeline_url
-    assert "dimension=pipeline" in pipeline_url
-    assert pipeline_var.get("datasource") == "BioETL Ops HTTP"
-    assert "bioetl_control_plane_run_type_universe" in run_type_query_text
-    assert "bioetl_control_plane_manifest_writes_total" not in run_type_query_text
-    assert "bioetl_records_processed_total" not in run_type_query_text

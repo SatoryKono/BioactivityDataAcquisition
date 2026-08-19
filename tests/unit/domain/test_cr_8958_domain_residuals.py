@@ -34,7 +34,10 @@ import pytest
 
 from bioetl.domain.config.validation import ValidationConfig
 from bioetl.domain.transformations.coercion import safe_float
-from bioetl.domain.transformations.hashing import generate_content_hash, generate_entity_id
+from bioetl.domain.transformations.hashing import (
+    generate_content_hash,
+    generate_entity_id,
+)
 from bioetl.domain.transformations.quality import calculate_dq_score
 from bioetl.domain.validation.chemical import validate_molecular_weight
 from bioetl.domain.workflow.config import TransformStepConfig, WorkflowRunOptionsConfig

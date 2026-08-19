@@ -156,8 +156,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
 
     override_properties = {
         override.get("matcher", {}).get("options"): {
-            prop.get("id"): prop.get("value")
-            for prop in override.get("properties", [])
+            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
         }
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
@@ -186,10 +185,13 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
         override_properties[field]["custom.cellOptions"].get("wrapText") is False
         for field in enum_fields
     )
-    assert sum(
-        int(override_properties[field]["custom.width"])
-        for field in (*enum_fields, "reasons_text")
-    ) == 655
+    assert (
+        sum(
+            int(override_properties[field]["custom.width"])
+            for field in (*enum_fields, "reasons_text")
+        )
+        == 655
+    )
 
 
 def test_row_cap_contracts_are_unique_and_owned() -> None:

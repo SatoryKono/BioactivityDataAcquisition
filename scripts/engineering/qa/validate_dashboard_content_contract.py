@@ -29,11 +29,19 @@ ACTION_REQUIRED_ROLES = frozenset(
 )
 NON_DATA_ROLES = frozenset({"navigation", "row_group", "guidance"})
 FULL_SURFACE_COVERAGE_POLICY = "all_shipped_panels"
+ALLOWED_EMPTY_STATE_CLASSES = frozenset(
+    {"event_empty", "telemetry_missing", "unsupported", "select_run"}
+)
 
 
 def _load_mapping(path: Path) -> dict[str, object]:
     """Загрузить YAML mapping или вернуть понятную ошибку контракта."""
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    payload = yaml.safe_load(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR -- confined above
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"{path}: expected YAML mapping")
     return payload
@@ -208,6 +216,13 @@ def _validate_panel_record(
     scope = record.get("scope")
     if scope not in allowed_scopes:
         errors.append(f"{prefix}: scope must be one of the declared allowed_scopes")
+    scope_class = record.get("scope_class", scope)
+    if scope_class not in allowed_scopes:
+        errors.append(
+            f"{prefix}: scope_class must be one of the declared allowed_scopes"
+        )
+    elif scope_class != scope:
+        errors.append(f"{prefix}: scope_class must match scope (scope is the SSOT)")
     evidence_source = record.get("evidence_source")
     if evidence_source not in allowed_evidence_sources:
         errors.append(
@@ -237,6 +252,24 @@ def _validate_panel_record(
         required_columns = _string_list(record.get("required_columns"))
         if not required_columns:
             errors.append(f"{prefix}: table role requires required_columns")
+    empty_state_class = record.get("empty_state_class")
+    if role not in NON_DATA_ROLES:
+        if empty_state_class not in ALLOWED_EMPTY_STATE_CLASSES:
+            errors.append(
+                f"{prefix}: empty_state_class must be one of "
+                f"{sorted(ALLOWED_EMPTY_STATE_CLASSES)}"
+            )
+        if (
+            record.get("scope") == "selected_run"
+            and evidence_source != "ops_http"
+        ):
+            errors.append(
+                f"{prefix}: data-bearing selected_run must use evidence_source=ops_http"
+            )
+    elif empty_state_class not in {None, "unsupported"}:
+        errors.append(
+            f"{prefix}: non-data role empty_state_class must be unsupported or omitted"
+        )
     return errors
 
 

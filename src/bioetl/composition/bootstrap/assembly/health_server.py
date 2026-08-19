@@ -130,6 +130,14 @@ def _create_control_plane_ports(
     )
 
 
+def _build_health_server_monitor(metrics: MetricsPort) -> HealthMonitorPort:
+    from bioetl.infrastructure.adapters.http.health_monitor import (
+        ProviderHealthMonitor,
+    )
+
+    return ProviderHealthMonitor(metrics=metrics)
+
+
 def create_health_server_dependencies(
     *,
     metrics: MetricsPort | None = None,
@@ -147,7 +155,7 @@ def create_health_server_dependencies(
         data_root=resolved_data_root,
     )
     return HealthServerDependencies(
-        health_monitor=_ReadOnlyHealthMonitor(metrics=resolved_metrics),
+        health_monitor=_build_health_server_monitor(resolved_metrics),
         metrics=resolved_metrics,
         checkpoint_port=checkpoint_port_factory(""),
         run_manifest_port=control_plane_ports.manifest_port,

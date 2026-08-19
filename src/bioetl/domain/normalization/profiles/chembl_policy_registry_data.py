@@ -4,12 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry_defaults import (
-    DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
-)
-
 __all__ = [
-    "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
@@ -69,5 +64,3 @@ class ChemblPolicyRegistryData:
     ontology_families: tuple[ChemblOntologyPolicyFamily, ...]
     publication_classification_fields: tuple[str, ...]
     reference_identifier_families: tuple[ChemblReferenceIdentifierFamily, ...] = ()
-
-

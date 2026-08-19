@@ -1028,3 +1028,25 @@ def test_create_manifest_reports_snapshot_gap_before_dirty_source_state_in_stric
         )
 
     assert store.get("manifest-strict-snapshot-gap") is None
+
+
+class _RecordingContractEvidence:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, object]]] = []
+
+    def record(self, manifest_id: str, evidence: dict[str, object]) -> None:
+        self.calls.append((manifest_id, dict(evidence)))
+
+
+def test_create_manifest_does_not_finalize_contract_evidence() -> None:
+    store = _InMemoryRunManifestStore()
+    recorder = _RecordingContractEvidence()
+    service = RunManifestService(
+        manifest_port=store,
+        contract_evidence_recorder=recorder,
+        _manifest_id_factory=lambda: "manifest-evidence",
+    )
+
+    service.create_manifest(_make_request())
+
+    assert recorder.calls == []

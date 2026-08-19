@@ -40,6 +40,11 @@ allowed_states:
 - VALID_EMPTY
 - TELEMETRY_ABSENT
 - N/A
+allowed_empty_state_classes:
+- event_empty
+- telemetry_missing
+- unsupported
+- select_run
 dashboards:
   bioetl-control-plane-v1:
     panels:
@@ -47,8 +52,10 @@ dashboards:
         title: Track Manifest Write Failures
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -77,7 +84,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -103,7 +112,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -129,7 +140,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -155,7 +168,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -177,7 +192,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -199,7 +216,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -221,7 +240,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -247,7 +268,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -273,7 +296,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -299,7 +324,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -325,7 +352,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -347,7 +376,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -369,7 +400,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -391,7 +424,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -413,7 +448,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -435,7 +472,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -457,7 +496,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -479,7 +520,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -501,7 +544,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -527,7 +572,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -553,7 +600,9 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -579,7 +628,9 @@ dashboards:
         role: selected_range_count
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -602,8 +653,10 @@ dashboards:
         title: Compare Manifest Writes by Status
         role: trend
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -624,8 +677,10 @@ dashboards:
         title: Monitor Manifest Failures (30m)
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -651,7 +706,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -677,7 +734,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -699,7 +758,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -721,7 +782,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -747,7 +810,9 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -773,7 +838,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -792,7 +859,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -805,7 +874,9 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -833,7 +904,9 @@ dashboards:
         role: freshness
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -858,8 +931,10 @@ dashboards:
         title: Monitor Manifest/Ledger
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -885,7 +960,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -898,7 +975,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -911,7 +990,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -924,7 +1005,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -937,7 +1020,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -950,7 +1035,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -963,7 +1050,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -976,7 +1065,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1001,8 +1092,10 @@ dashboards:
         title: Review Terminal Run Outcomes
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1021,7 +1114,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1034,7 +1129,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1047,7 +1144,9 @@ dashboards:
         role: confidence
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1075,7 +1174,9 @@ dashboards:
         role: identity_table
         tier: 2
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1096,7 +1197,9 @@ dashboards:
         role: accounting_table
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - TELEMETRY_ABSENT
@@ -1122,7 +1225,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1141,7 +1246,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1160,7 +1267,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1179,7 +1288,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1198,7 +1309,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1217,7 +1330,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1236,7 +1351,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1249,7 +1366,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1262,7 +1381,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1275,7 +1396,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1294,7 +1417,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1313,7 +1438,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1332,7 +1459,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1351,7 +1480,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1370,7 +1501,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1389,7 +1522,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1404,7 +1539,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1426,7 +1563,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1452,7 +1591,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1478,7 +1619,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1504,7 +1647,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1530,7 +1675,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1556,7 +1703,9 @@ dashboards:
         role: freshness
         tier: 2
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1580,7 +1729,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1606,7 +1757,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1628,7 +1781,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1650,7 +1805,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -1676,7 +1833,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1702,7 +1861,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1715,7 +1876,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1741,7 +1904,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1760,7 +1925,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1779,7 +1946,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1798,7 +1967,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: prometheus
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1811,7 +1982,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -1837,7 +2010,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1863,7 +2038,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1885,7 +2062,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -1911,7 +2090,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -1933,7 +2114,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -1952,7 +2135,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1965,7 +2150,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1978,7 +2165,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -1991,7 +2180,9 @@ dashboards:
         role: confidence
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2017,7 +2208,9 @@ dashboards:
         role: causes_table
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2036,7 +2229,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2049,7 +2244,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2062,7 +2259,9 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2089,7 +2288,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2108,7 +2309,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2127,7 +2330,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2140,7 +2345,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2148,6 +2355,30 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9406':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: &id002
+        - full_dark
+        - full_light
+        - zoom_200
   bioetl-incident-v1:
     panels:
       '1000':
@@ -2155,7 +2386,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2168,7 +2401,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2180,8 +2415,10 @@ dashboards:
         title: Inspect Runtime Suspects
         role: forensic_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2200,7 +2437,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2219,7 +2458,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2238,7 +2479,9 @@ dashboards:
         role: causes_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - UNKNOWN
@@ -2260,7 +2503,9 @@ dashboards:
         role: alert_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - UNKNOWN
@@ -2281,7 +2526,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2294,7 +2541,9 @@ dashboards:
         role: forensic_table
         tier: 1
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2314,7 +2563,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2327,7 +2578,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2335,12 +2588,50 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '2100':
+        title: Inspect Selected Run Summary
+        role: row_group
+        tier: 4
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles: *id002
+      '2101':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
       '9400':
         title: Understand Incident Scope
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2353,7 +2644,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2381,7 +2674,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2394,7 +2689,9 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2421,7 +2718,9 @@ dashboards:
         role: next_action
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2444,7 +2743,9 @@ dashboards:
         role: navigation
         tier: 2
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2461,7 +2762,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2479,8 +2782,10 @@ dashboards:
         title: Review Runtime Status
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2499,7 +2804,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2518,7 +2825,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2537,7 +2846,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2556,7 +2867,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2575,7 +2888,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2587,8 +2902,10 @@ dashboards:
         title: Review Failed Runs
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2606,8 +2923,10 @@ dashboards:
         title: Review Recent Non-success Terminal Runs
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2626,7 +2945,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2639,7 +2960,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2658,7 +2981,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2683,8 +3008,10 @@ dashboards:
         title: Track Runtime Blockers
         role: state_timeline
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2706,7 +3033,9 @@ dashboards:
         role: state_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2728,7 +3057,9 @@ dashboards:
         role: state_timeline
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2750,7 +3081,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2763,7 +3096,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2776,7 +3111,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2795,7 +3132,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2814,7 +3153,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2833,7 +3174,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2846,7 +3189,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -2865,7 +3210,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -2873,6 +3220,27 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9603':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
   bioetl-provider-health-v2:
     panels:
       '1':
@@ -2880,7 +3248,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2902,7 +3272,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2928,7 +3300,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2954,7 +3328,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -2980,7 +3356,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3002,7 +3380,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3015,7 +3395,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3041,7 +3423,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -3067,7 +3451,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3093,7 +3479,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -3115,7 +3503,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3134,7 +3524,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3153,7 +3545,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3175,7 +3569,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3197,7 +3593,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3219,7 +3617,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3241,7 +3641,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3267,7 +3669,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3286,7 +3690,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3308,7 +3714,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3321,7 +3729,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3334,7 +3744,9 @@ dashboards:
         role: severity_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3359,7 +3771,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3378,7 +3792,9 @@ dashboards:
         role: causes_table
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3398,7 +3814,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3424,7 +3842,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3432,12 +3852,53 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
+      '9106':
+        title: Inspect Fleet Non-OK and Causes
+        role: row_group
+        tier: 4
+        scope: global
+        scope_class: global
+        evidence_source: grafana_builtin
+        empty_state_class: unsupported
+        state_model:
+        - N/A
+        required_copy:
+        - operator_guidance
+        fixture_cases:
+        - not_applicable
+        render_profiles:
+        - full_dark
+        - full_light
+        - zoom_200
+      '9107':
+        title: Inspect Status Reason
+        role: forensic_table
+        tier: 3
+        scope: current
+        scope_class: current
+        evidence_source: prometheus
+        empty_state_class: telemetry_missing
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002
       '9111':
         title: Inspect Full Fleet Severity
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3456,7 +3917,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3475,7 +3938,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3494,7 +3959,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3507,7 +3974,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -3533,7 +4002,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3552,7 +4023,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3571,7 +4044,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3584,7 +4059,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3599,7 +4076,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3612,7 +4091,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3625,7 +4106,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3638,7 +4121,9 @@ dashboards:
         role: forensic_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3658,7 +4143,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3676,7 +4163,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3695,7 +4184,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3714,7 +4205,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3727,7 +4220,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3746,7 +4241,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3759,7 +4256,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3777,7 +4276,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3796,7 +4297,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3815,7 +4318,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3834,7 +4339,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3847,7 +4354,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -3860,7 +4369,9 @@ dashboards:
         role: identity_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -3882,7 +4393,9 @@ dashboards:
         role: accounting_table
         tier: 1
         scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - TELEMETRY_ABSENT
@@ -3911,7 +4424,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -3937,7 +4452,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -3963,7 +4480,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -3989,7 +4508,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4014,8 +4535,10 @@ dashboards:
         title: Monitor Runtime Blockers
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4041,7 +4564,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4067,7 +4592,9 @@ dashboards:
         role: selected_range_count
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4091,7 +4618,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4113,7 +4642,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4135,7 +4666,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4156,8 +4689,10 @@ dashboards:
         title: Monitor Runtime Error Rate
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4183,7 +4718,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -4208,8 +4745,10 @@ dashboards:
         title: Monitor No-Records Runs
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4235,7 +4774,9 @@ dashboards:
         role: selected_range_duration
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4259,7 +4800,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4281,7 +4824,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4303,7 +4848,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4324,8 +4871,10 @@ dashboards:
         title: Compare Records by Stage & Run Type
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4343,8 +4892,10 @@ dashboards:
         title: Inspect Active Runtime Blocker Detail
         role: forensic_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4363,7 +4914,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4382,7 +4935,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4395,7 +4950,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4408,7 +4965,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4421,7 +4980,9 @@ dashboards:
         role: evidence_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4440,7 +5001,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: event_empty
         state_model:
         - OK
         - WARN
@@ -4466,7 +5029,9 @@ dashboards:
         role: navigation
         tier: 3
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4479,7 +5044,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4492,7 +5059,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4505,7 +5074,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4517,8 +5088,10 @@ dashboards:
         title: Review Runtime Blockers
         role: evidence_table
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4537,7 +5110,9 @@ dashboards:
         role: confidence
         tier: 2
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4564,7 +5139,9 @@ dashboards:
         role: trend
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4586,7 +5163,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4599,7 +5178,9 @@ dashboards:
         role: verdict
         tier: 1
         scope: current
+        scope_class: current
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4627,7 +5208,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4646,7 +5229,9 @@ dashboards:
         role: forensic_table
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
         - VALID_EMPTY
         - ERROR
@@ -4665,7 +5250,9 @@ dashboards:
         role: guidance
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4678,7 +5265,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4691,7 +5280,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: selected_run
+        scope_class: selected_run
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4704,7 +5295,9 @@ dashboards:
         role: row_group
         tier: 4
         scope: global
+        scope_class: global
         evidence_source: grafana_builtin
+        empty_state_class: unsupported
         state_model:
         - N/A
         required_copy:
@@ -4716,8 +5309,10 @@ dashboards:
         title: Track Failed Workflow Runs
         role: indicator
         tier: 3
-        scope: selected_run
+        scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4743,7 +5338,9 @@ dashboards:
         role: indicator
         tier: 3
         scope: time_range
+        scope_class: time_range
         evidence_source: prometheus
+        empty_state_class: telemetry_missing
         state_model:
         - OK
         - WARN
@@ -4764,3 +5361,24 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+      '9998':
+        title: Review Selected Run Summary
+        role: evidence_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+        - VALID_EMPTY
+        - ERROR
+        - TELEMETRY_ABSENT
+        required_copy:
+        - evidence_scope
+        - no_data
+        fixture_cases:
+        - populated
+        - valid_empty
+        - telemetry_absent
+        - backend_error
+        render_profiles: *id002

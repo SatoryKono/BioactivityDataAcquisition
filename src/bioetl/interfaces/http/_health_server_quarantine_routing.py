@@ -77,17 +77,9 @@ async def dispatch_quarantine_request(
         return
 
     try:
-        if path == "/ops/quarantine/filtered-records":
-            await handle_filtered_records(host, writer, query)
-            return
-        if path == "/ops/quarantine/filtered-stats":
-            await handle_filtered_stats(host, writer, query)
-            return
-        if path == "/ops/quarantine/filtered-timeseries":
-            await handle_filtered_timeseries(host, writer, query)
-            return
-        if path == "/ops/quarantine/filter-options":
-            await handle_filter_options(host, writer, query)
+        handler = _QUARANTINE_EXACT_HANDLERS.get(path)
+        if handler is not None:
+            await handler(host, writer, query)
             return
         if path.startswith("/ops/quarantine/filtered-record/"):
             payload_hash = unquote(path.rsplit("/", maxsplit=1)[-1]).strip()
@@ -238,3 +230,11 @@ async def handle_filtered_record_detail(
         await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
         return
     await host._send_payload_response(writer, 200, payload)
+
+
+_QUARANTINE_EXACT_HANDLERS = {
+    "/ops/quarantine/filtered-records": handle_filtered_records,
+    "/ops/quarantine/filtered-stats": handle_filtered_stats,
+    "/ops/quarantine/filtered-timeseries": handle_filtered_timeseries,
+    "/ops/quarantine/filter-options": handle_filter_options,
+}

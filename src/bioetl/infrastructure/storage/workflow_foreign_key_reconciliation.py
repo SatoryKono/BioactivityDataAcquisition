@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol, cast, runtime_checkable
 
 from bioetl.domain.ports import (
+    ClockPort,
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
@@ -23,8 +24,12 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     build_reconciliation_result,
     complete_dry_run,
     complete_without_mutation,
+    emit_reconcile_debug_artifacts,
     filter_source_rows_to_current_run,
+    log_reconciliation,
+    log_reconciliation_started,
     partition_source_rows,
+    record_reconciliation_metrics,
     reference_value_set,
 )
 
@@ -35,14 +40,12 @@ __all__ = [
     "StorageForeignKeyReconciliationAdapter",
     "filter_current_rows",
 ]
-
 _RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
 _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
-
 
 @runtime_checkable
 class GoldReconciliationReaderProtocol(Protocol):
@@ -129,10 +132,9 @@ def filter_current_rows(
 
 @dataclass(slots=True)
 class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
-    """Reconcile Silver/Gold foreign keys through existing storage seams."""
-
     silver_writer: SilverWriter
     logger: LoggerPort
+    clock: ClockPort | None = None
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
@@ -147,19 +149,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             raise ValueError(
                 "SilverForeignKeyReconciliationAdapter supports only delete_orphans"
             )
-
-        self._log(
-            "info",
-            "workflow foreign-key reconciliation started",
-            source_table=request.source_table,
-            reference_table=request.reference_table,
-            source_layer=request.source_layer,
-            reference_layer=request.reference_layer,
-            mutation_layer=request.effective_mutation_layer,
-            source_keys=list(request.effective_source_keys),
-            reference_keys=list(request.effective_reference_keys),
-            nulls_equal=request.nulls_equal,
-        )
+        log_reconciliation_started(self, request)
 
         source_rows = await self._read_source_rows(request)
         if source_rows is None:
@@ -218,28 +208,18 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
 
     def _record_metrics(self, *, scanned: int, retained: int, deleted: int) -> None:
-        if self.metrics is None:
-            return
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_SCANNED_TOTAL,
-            scanned,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_RETAINED_TOTAL,
-            retained,
-            {},
-        )
-        self.metrics.increment_counter(
-            _RECONCILIATION_ROWS_DELETED_TOTAL,
-            deleted,
-            {},
+        record_reconciliation_metrics(
+            self.metrics,
+            scanned=scanned,
+            retained=retained,
+            deleted=deleted,
+            scanned_metric=_RECONCILIATION_ROWS_SCANNED_TOTAL,
+            retained_metric=_RECONCILIATION_ROWS_RETAINED_TOTAL,
+            deleted_metric=_RECONCILIATION_ROWS_DELETED_TOTAL,
         )
 
     def _log(self, level: str, message: str, **context: object) -> None:
-        log_method = getattr(self.logger, level, None)
-        if callable(log_method):
-            log_method(message, **context)
+        log_reconciliation(self.logger, level, message, **context)
 
     async def _read_source_rows(
         self,
@@ -422,20 +402,12 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         retained_rows: list[dict[str, object]],
         orphan_rows: list[dict[str, object]],
     ) -> None:
-        if self.artifact_sink is None:
-            return
-        if (
-            not request.debug_export_enabled
-            or request.workflow_run_id is None
-            or request.step_id is None
-        ):
-            return
-        self.artifact_sink.write_reconcile_debug_artifacts(
-            context=request,
-            request=request,
-            result=result,
-            retained_rows=tuple(retained_rows),
-            orphan_rows=tuple(orphan_rows),
+        emit_reconcile_debug_artifacts(
+            self.artifact_sink,
+            request,
+            result,
+            retained_rows=retained_rows,
+            orphan_rows=orphan_rows,
         )
 
 

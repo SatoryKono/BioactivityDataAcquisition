@@ -33,6 +33,10 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
+from bioetl.domain.behavior.composite_validation_helpers import (
+    _extract_priority,
+    _is_valid_lineage_config,
+)
 from bioetl.domain.behavior.composite_validation_layer import (
     CompositeValidationConfig,
     CompositeValidator,
@@ -125,9 +129,9 @@ def test_aggregation_and_cross_validation_config_conversion_paths() -> None:
 
     assert aggregation_issues == []
     assert cross_validation_issues == []
-    assert validator._extract_priority({"priority": ["a"]}) == ["a"]
-    assert validator._extract_priority("bad") is None
-    assert validator._is_valid_lineage_config(
+    assert _extract_priority({"priority": ["a"]}) == ["a"]
+    assert _extract_priority("bad") is None
+    assert _is_valid_lineage_config(
         {"tracking_level": "record", "source_fields": ["id"]}
     )
 

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "390034bea3d2b097c92e5ccf95949e68dcf64ad93344388325039c0a6ef53cbf",
-    "bioetl-dq-v2": "af4ba15e766e7b02c10a7dbf79432f7f75406dabded96417c6b9fce673f5cbec",
-    "bioetl-incident-v1": "73ab46df533b08c38b46e2daf8c1836ed10b79960aed9da931d64dec8d77889f",
-    "bioetl-overview-v2": "9dd67a37af7afde2f21b62ab926f776aa374ad1e2de906850b600fe20fec58b6",
-    "bioetl-provider-health-v2": "f4c32e6448d9b86816ffdd959d5bd608ce0b018a2a1a7b4196a24f084dd04e62",
-    "bioetl-run-explorer-v1": "1fbc594b9a7ec7fb4afe08df58491efc9522d092c97158e3e6225194c2243c21",
-    "bioetl-runtime": "498aef2ff04608f6d6835f68c03c62730d3ec12423ee738c10729937fc6d1a8b"
+    "bioetl-control-plane-v1": "f88f3f3c5af92ac5c1a43eda21953f887f8f60a15a25d3f3428873045076eb3d",
+    "bioetl-dq-v2": "4d1921dc00f471e863149027a640c62d0424897919fbc65452acfc20e18c3ea7",
+    "bioetl-incident-v1": "815e1ec6039f096fb3f9cd263151a06b2d00b9851a1580700e836836b2629122",
+    "bioetl-overview-v2": "a05b9026bb04636a9d7dc0030371e8ad39724a2ce5043ee7c90776ebde8e8182",
+    "bioetl-provider-health-v2": "fb15cbfbeb00a5f937941ac87ad5a83dcd18dbadd4f8520a0add85c098a619ed",
+    "bioetl-run-explorer-v1": "e0734427624d48d00b8ea7bb85daa7340716f7eb1a81611514a277bbc4f7a18c",
+    "bioetl-runtime": "84f8de4f2e4758c1133f899699ada460bd46c97e3abf4f0bdc4d5698dd608193"
   },
   "panels": [
     {
@@ -115,7 +115,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ],
         "target_count": 1
       }
@@ -1261,6 +1261,25 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-dq-v2",
+      "panel_id": 9406,
+      "panel_title": "Review Selected Run Summary",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-dq-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-dq-v2",
       "panel_id": 9102,
       "panel_title": "Inspect Current DQ Reasons",
       "route": "data-trust-recovery",
@@ -1933,6 +1952,25 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-incident-v1",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-incident-v1",
+      "panel_id": 2101,
+      "panel_title": "Review Selected Run Summary",
+      "route": "incident-console",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-overview-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2346,6 +2384,25 @@
     {
       "basis": "preserved-from-json",
       "component": "JSON fallback",
+      "dashboard_uid": "bioetl-overview-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-overview-v2",
+      "panel_id": 9603,
+      "panel_title": "Review Selected Run Summary",
+      "route": "operations-home",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
       "dashboard_uid": "bioetl-provider-health-v2",
       "disposition": "fallback-only",
       "empty_semantics": "preserved-from-json",
@@ -2434,6 +2491,44 @@
     },
     {
       "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-provider-health-v2",
+      "panel_id": 9107,
+      "panel_title": "Inspect Status Reason",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "topk(4, max by (provider, reason, source_state) (bioetl_provider_current_status_info{provider=~\"$provider\"}))"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "Context Bar",
+      "dashboard_uid": "bioetl-provider-health-v2",
+      "disposition": "route-primary",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-provider-health-v2",
+      "panel_id": 9104,
+      "panel_title": "Monitor Telemetry Presence",
+      "route": "dependency-health",
+      "source": {
+        "datasource_type": "prometheus",
+        "datasource_uid": "prometheus",
+        "expressions": [
+          "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
       "component": "Context Bar",
       "dashboard_uid": "bioetl-provider-health-v2",
       "disposition": "route-primary",
@@ -2466,25 +2561,6 @@
         "datasource_uid": "prometheus",
         "expressions": [
           "topk(4, max by (provider, cause) (bioetl_provider_current_cause) > 0)"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-provider-health-v2",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-provider-health-v2",
-      "panel_id": 9104,
-      "panel_title": "Monitor Telemetry Presence",
-      "route": "dependency-health",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "max(bioetl_provider_current_status{provider=~\"$provider\"}) * 0"
         ],
         "target_count": 1
       }
@@ -3876,6 +3952,25 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-runtime",
+      "panel_id": 9998,
+      "panel_title": "Review Selected Run Summary",
+      "route": "pipeline-flow",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [
+          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
+        ],
+        "target_count": 1
+      }
+    },
+    {
+      "basis": "preserved-from-json",
+      "component": "JSON fallback",
+      "dashboard_uid": "bioetl-runtime",
+      "disposition": "advanced-evidence",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-runtime",
       "panel_id": 9996,
       "panel_title": "Track Failed Workflow Runs",
       "route": "pipeline-flow",
@@ -3914,7 +4009,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 206,
+    "panel_disposition_count": 211,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

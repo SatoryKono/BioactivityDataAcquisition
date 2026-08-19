@@ -38,7 +38,7 @@ _WSL_UNC_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 _DOCKER_DESKTOP_DRIVE_PATTERN = re.compile(
-    r"^/(?:run/desktop/mnt/host|host_mnt)/([A-Za-z])(?:/(.*))?$",
+    r"^/(?:run/desktop/mnt/host|host_mnt)/([a-z])(?:/(.*))?$",
     flags=re.IGNORECASE,
 )
 _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
@@ -376,6 +376,14 @@ def _read_repository_env_file(path: Path, allowed: set[str]) -> dict[str, str]:
     return values
 
 
+def _strip_repository_env_inline_comment(value: str) -> str:
+    """Strip a shell-style inline comment from an unquoted env value."""
+    for index, character in enumerate(value):
+        if character == "#" and index > 0 and value[index - 1].isspace():
+            return value[:index].rstrip()
+    return value.rstrip()
+
+
 def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] | None:
     stripped = raw.strip()
     if not stripped or stripped.startswith("#") or "=" not in raw:
@@ -387,4 +395,4 @@ def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] |
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return key, value[1:-1]
-    return key, re.sub(r"\s+#.*$", "", value).rstrip()
+    return key, _strip_repository_env_inline_comment(value)

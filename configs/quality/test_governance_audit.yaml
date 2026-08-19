@@ -1082,6 +1082,12 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/infrastructure/adapters/chembl/test_fetch_multi_filter_mixin.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/infrastructure/adapters/chembl/fetch_multi_filter_mixin.py
+    - path: tests/unit/repo_backed/infrastructure/test_cr_8917_wsl_secret_redaction.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/memory/setup/wsl_startup.sh secret-bearing value handoff contract
+    - path: tests/unit/repo_backed/interfaces/http/test_run_report_ops_golden.py
+      target_lane: repo-backed-unit
+      protected_surface: tests/fixtures/reports/pipeline_run_report_golden.json
     - path: tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py
       target_lane: repo-backed-unit
       protected_surface:
@@ -1096,6 +1102,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/{__main__.py,observability/grafana/**}
+    - path: tests/unit/repo_backed/scripts/ops/observability/test_check_dashboard_panel_fill.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/ops/{__main__.py,observability/grafana/check_dashboard_panel_fill.py} + checked-in dashboards
     - path: tests/unit/repo_backed/scripts/ops/observability/test_grafana_rerender_fallback.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/observability/grafana/rerender_grafana_screenshots.py

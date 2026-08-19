@@ -32,6 +32,13 @@ def _attest_reports(tmp_path: Path, *, source_id: str | None = None) -> str:
     return expected
 
 
+def test_security_guards_reject_remote_urls_and_shell_like_container_names() -> None:
+    with pytest.raises(ValueError, match="non-local URL host"):
+        mod._json_get("https://example.com/health/ready")
+    with pytest.raises(ValueError, match="invalid Docker container name"):
+        mod._docker_inspect_mounts("bioetl;touch-pwned")
+
+
 def test_host_report_root_ignores_container_bioetl_report_root(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

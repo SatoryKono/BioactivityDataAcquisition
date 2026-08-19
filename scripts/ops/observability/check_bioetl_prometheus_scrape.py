@@ -43,6 +43,25 @@ def _fetch_targets(prometheus_url: str, timeout: float) -> list[dict[str, object
     return [item for item in active if isinstance(item, dict)]
 
 
+def _emit_error(detail: str, *, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps({"status": "error", "detail": detail}, indent=2))
+    else:
+        print(detail, file=sys.stderr)
+
+
+def _emit_summary(summary: dict[str, object], *, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(summary, indent=2))
+        return
+    targets = summary.get("targets")
+    if not isinstance(targets, list):
+        return
+    for item in targets:
+        if isinstance(item, dict):
+            print(f"{item.get('scrapeUrl')}: {item.get('health')}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -63,10 +82,7 @@ def main(argv: list[str] | None = None) -> int:
         json.JSONDecodeError,
     ) as exc:
         detail = f"prometheus unreachable or invalid: {exc}"
-        if args.json:
-            print(json.dumps({"status": "error", "detail": detail}, indent=2))
-        else:
-            print(detail, file=sys.stderr)
+        _emit_error(detail, as_json=args.json)
         return EXIT_PROMETHEUS
 
     bioetl: list[dict[str, object]] = []
@@ -79,10 +95,7 @@ def main(argv: list[str] | None = None) -> int:
             "no active Prometheus job named 'bioetl' "
             "(expected target bioetl:8000 in grafana/prometheus.yml)"
         )
-        if args.json:
-            print(json.dumps({"status": "error", "detail": detail}, indent=2))
-        else:
-            print(detail, file=sys.stderr)
+        _emit_error(detail, as_json=args.json)
         return EXIT_NO_TARGET
 
     unhealthy = [
@@ -103,11 +116,7 @@ def main(argv: list[str] | None = None) -> int:
         "scrape_interval": "30s",
         "targets": target_summaries,
     }
-    if args.json:
-        print(json.dumps(summary, indent=2))
-    else:
-        for item in target_summaries:
-            print(f"{item['scrapeUrl']}: {item['health']}")
+    _emit_summary(summary, as_json=args.json)
     return EXIT_OK if not unhealthy else EXIT_TARGET_DOWN
 
 
