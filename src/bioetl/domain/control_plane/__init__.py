@@ -9,6 +9,8 @@ from bioetl.domain.control_plane.artifact_lifecycle import (
     ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactRef,
     ControlPlaneArtifactReplayImpact,
+    ControlPlaneArtifactResolutionIssue,
+    ControlPlaneArtifactResolutionIssueCode,
     ControlPlaneArtifactSurface,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (
@@ -72,6 +74,8 @@ __all__ = [
     "ControlPlaneArtifactLifecyclePolicy",
     "ControlPlaneArtifactRef",
     "ControlPlaneArtifactReplayImpact",
+    "ControlPlaneArtifactResolutionIssue",
+    "ControlPlaneArtifactResolutionIssueCode",
     "ControlPlaneArtifactSurface",
     "DQPolicySnapshot",
     "EffectiveConfigArtifact",

@@ -454,7 +454,14 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "No retention-compliance rows. Valid empty if the selected run has no retention checks. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK."
+          "noValue": "No retention-compliance rows. Valid empty if the selected run has no retention checks. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK.",
+          "links": [
+            {
+              "title": "Retry selected-run retention",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9416&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}&var-workflow=$workflow",
+              "targetBlank": false
+            }
+          ]
         },
         "overrides": [
           {
@@ -563,7 +570,7 @@
           },
           {
             "title": "Open Retention Compliance",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9416&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=9416&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}&var-workflow=$workflow",
             "targetBlank": false,
             "includeVars": false
           }
