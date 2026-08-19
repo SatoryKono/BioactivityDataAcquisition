@@ -148,6 +148,7 @@ log_test.txt
 !/reports/quality/documentation-governance-2026-07-28-closeout.md
 !/reports/quality/architecture-coderabbit-2026-07-29-issue-publish.json
 !/reports/quality/architecture-coderabbit-2026-07-29-arch-cr2-closeout.md
+!/reports/quality/ref-consolidation-rf-001-004-2026-08-19.json
 # CodeRabbit campaign artifacts (CR-FULL)
 !/reports/quality/coderabbit/
 !/reports/quality/coderabbit/**
