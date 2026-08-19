@@ -168,6 +168,13 @@ def _collect_rows() -> list[dict[str, str]]:
                     "content_contract_status": (
                         "covered" if content_record is not None else "missing"
                     ),
+                    "eligible": "true",
+                    "enrolled": "true" if content_record is not None else "false",
+                    "coverage_reason": (
+                        "all_shipped_panels"
+                        if content_record is not None
+                        else "missing_shipped_panel"
+                    ),
                     "content_role": (
                         str(content_record.get("role", ""))
                         if content_record is not None

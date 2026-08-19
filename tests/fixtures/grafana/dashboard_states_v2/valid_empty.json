@@ -1,0 +1,20 @@
+{
+  "case_id": "valid_empty",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "rows": [],
+    "status": "VALID_EMPTY"
+  },
+  "expected_copy_tokens": [
+    "VALID_EMPTY"
+  ],
+  "expected_panels": [
+    {
+      "classification": "VALID_EMPTY",
+      "id": "9418"
+    }
+  ],
+  "http_status": 200,
+  "response_sha256": "ef76de41b67f7b482404ac5912826e3e3839e9d53a5619767ae7608e7d4d5707",
+  "scope": "selected_run"
+}
