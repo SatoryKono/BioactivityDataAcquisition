@@ -224,9 +224,7 @@ class UserMemoryStore:
             json.dumps(content, sort_keys=True),
             trust=current.envelope.trust,
         )
-        corrected = cast(
-            "UserMemoryRecord", replace(current, content=dict(content))
-        )
+        corrected = cast("UserMemoryRecord", replace(current, content=dict(content)))
         atomic_write_json(
             self._record_path(owner_id, context.repo_id, record_id),
             corrected.to_dict(),

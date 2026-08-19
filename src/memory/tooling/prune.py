@@ -181,9 +181,7 @@ def prune_episodic_notes(
     invalid_metadata = _find_invalid_metadata(resolved_root)
     removed_paths = _remove_prune_candidates(candidates) if apply else []
     effective_max_active = _default_max_active() if max_active is None else max_active
-    density_status, density_excess = _density_result(
-        active_count, effective_max_active
-    )
+    density_status, density_excess = _density_result(active_count, effective_max_active)
     return {
         "apply": apply,
         "candidate_count": len(candidates),
