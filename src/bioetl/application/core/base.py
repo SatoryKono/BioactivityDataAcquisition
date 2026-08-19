@@ -35,7 +35,7 @@ def _resolve_replay_timestamp_anchor(runtime: RuntimeConfig) -> datetime | None:
     return datetime.combine(replay_date, datetime.min.time(), tzinfo=UTC)
 
 
-class BasePipeline(ABC):  # noqa: B024
+class BasePipeline(ABC):
     """Base class for ETL pipelines.
     Acts as a container for:
     - Configuration (Static & Runtime)
