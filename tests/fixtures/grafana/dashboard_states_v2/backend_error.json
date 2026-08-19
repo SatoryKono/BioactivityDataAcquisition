@@ -1,0 +1,20 @@
+{
+  "case_id": "backend_error",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "error": "backend_unavailable",
+    "status": "ERROR"
+  },
+  "expected_copy_tokens": [
+    "backend_unavailable"
+  ],
+  "expected_panels": [
+    {
+      "classification": "ERROR",
+      "id": "9418"
+    }
+  ],
+  "http_status": 503,
+  "response_sha256": "ca752f32c64b47bfbb9e7802d07e2edfad0c7764c5859a38f5f79a0a3bd13f9d",
+  "scope": "selected_run"
+}

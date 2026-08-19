@@ -1,0 +1,25 @@
+{
+  "case_id": "warn",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "rows": [
+      {
+        "message": "degraded",
+        "state": "WARN"
+      }
+    ],
+    "status": "WARN"
+  },
+  "expected_copy_tokens": [
+    "degraded"
+  ],
+  "expected_panels": [
+    {
+      "classification": "WARN",
+      "id": "9418"
+    }
+  ],
+  "http_status": 200,
+  "response_sha256": "fe4526d92c46a593280cf71542a0e1357d25a4245bfa9e1eda6aaabe3b8b1899",
+  "scope": "selected_run"
+}

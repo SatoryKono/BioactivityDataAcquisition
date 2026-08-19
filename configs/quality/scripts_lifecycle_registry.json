@@ -1602,6 +1602,12 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-17"
     }
   },
   "schema_version": "1.0"

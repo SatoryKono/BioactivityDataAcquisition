@@ -1,0 +1,25 @@
+{
+  "case_id": "ok",
+  "contract": "dashboard_state_fixture_v2",
+  "datasource_response": {
+    "rows": [
+      {
+        "message": "healthy",
+        "state": "OK"
+      }
+    ],
+    "status": "OK"
+  },
+  "expected_copy_tokens": [
+    "healthy"
+  ],
+  "expected_panels": [
+    {
+      "classification": "OK",
+      "id": "9418"
+    }
+  ],
+  "http_status": 200,
+  "response_sha256": "5b4aa05d44e3d2736396cb982a849ea511b6e4bd7dd8ff85e276cd4a65919923",
+  "scope": "selected_run"
+}
