@@ -47,7 +47,7 @@
 #   - Kubernetes deployment documentation
 #   - Infrastructure deployment guides
 
-set -e
+set -euo pipefail
 
 ACTION=${1:-deploy}
 ENV=${2:-dev}
@@ -56,7 +56,17 @@ NAMESPACE="bioetl-${ENV}"
 # Configuration
 REGISTRY=${BIOETL_IMAGE_REGISTRY:-your-registry}
 IMAGE_TAG=${BIOETL_IMAGE_TAG:-6.1.0}
-CONFIG_DIR="."
+
+# Kubernetes manifests live under docs/05-operations/deployment/ (repo-relative),
+# not at the repository root. Resolve the directory from this script location so
+# the deploy/update paths work regardless of the caller's CWD. Override with
+# BIOETL_K8S_MANIFEST_DIR when manifests are staged elsewhere.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../../.." && pwd)"
+CONFIG_DIR="${BIOETL_K8S_MANIFEST_DIR:-${REPO_ROOT}/docs/05-operations/deployment}"
+
+# Set DRY_RUN=1 to validate/plan without mutating the cluster.
+DRY_RUN="${DRY_RUN:-0}"
 
 echo "🚀 BioETL Kubernetes Deployment Script"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -66,6 +76,22 @@ echo "Namespace: $NAMESPACE"
 echo "Registry: $REGISTRY"
 echo "Image tag: $IMAGE_TAG"
 echo ""
+
+# Fail fast when the expected manifests are missing under CONFIG_DIR.
+require_manifests() {
+  local missing=0 manifest
+  for manifest in k8s-deployment.yaml k8s-monitoring.yaml k8s-networking.yaml; do
+    if [[ ! -f "${CONFIG_DIR}/${manifest}" ]]; then
+      echo "❌ Missing manifest: ${CONFIG_DIR}/${manifest}" >&2
+      missing=1
+    fi
+  done
+  if [[ "${missing}" -ne 0 ]]; then
+    echo "   Set BIOETL_K8S_MANIFEST_DIR to the directory containing the k8s-*.yaml files." >&2
+    return 1
+  fi
+  return 0
+}
 
 # Create namespace if it doesn't exist
 create_namespace() {
@@ -80,15 +106,32 @@ create_namespace() {
 deploy() {
   echo "📦 Starting deployment..."
 
+  require_manifests
+
+  if [[ "$DRY_RUN" == "1" ]]; then
+    echo "🧪 DRY_RUN=1: client-side manifest validation only (no cluster changes)."
+    kubectl apply -n "$NAMESPACE" --dry-run=client \
+      -f "$CONFIG_DIR/k8s-deployment.yaml" \
+      -f "$CONFIG_DIR/k8s-monitoring.yaml" \
+      -f "$CONFIG_DIR/k8s-networking.yaml"
+    echo "✅ Dry-run validation complete."
+    return 0
+  fi
+
   create_namespace
 
-  # Update image reference in manifests
-  sed -i.bak "s|^[[:space:]]*image: .*|        image: $REGISTRY/bioetl:$IMAGE_TAG  # Updated by deploy-bioetl.sh|g" "$CONFIG_DIR/k8s-deployment.yaml"
+  # Render the pinned image into a temp copy so the tracked manifest under
+  # docs/** is never mutated in place (keeps the deploy idempotent + clean tree).
+  local rendered
+  rendered="$(mktemp)"
+  sed "s|^[[:space:]]*image: .*|        image: $REGISTRY/bioetl:$IMAGE_TAG  # Updated by deploy-bioetl.sh|g" \
+    "$CONFIG_DIR/k8s-deployment.yaml" > "$rendered"
 
   echo "📋 Applying manifests..."
-  kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-deployment.yaml"
+  kubectl apply -n "$NAMESPACE" -f "$rendered"
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-monitoring.yaml"
   kubectl apply -n "$NAMESPACE" -f "$CONFIG_DIR/k8s-networking.yaml"
+  rm -f "$rendered"
 
   echo "⏳ Waiting for deployment to be ready..."
   kubectl rollout status deployment/bioetl -n "$NAMESPACE" --timeout=5m
@@ -107,10 +150,18 @@ deploy() {
 update() {
   echo "🔄 Updating image..."
 
+  if [[ "$DRY_RUN" == "1" ]]; then
+    echo "🧪 DRY_RUN=1: would set image to $REGISTRY/bioetl:$IMAGE_TAG (skipped)."
+    return 0
+  fi
+
+  # --record is deprecated; record the change cause via an explicit annotation.
   kubectl set image deployment/bioetl \
     -n "$NAMESPACE" \
-    bioetl="$REGISTRY/bioetl:$IMAGE_TAG" \
-    --record
+    bioetl="$REGISTRY/bioetl:$IMAGE_TAG"
+  kubectl annotate deployment/bioetl -n "$NAMESPACE" \
+    "kubernetes.io/change-cause=deploy-bioetl.sh update ${REGISTRY}/bioetl:${IMAGE_TAG}" \
+    --overwrite
 
   echo "⏳ Waiting for rollout..."
   kubectl rollout status deployment/bioetl -n "$NAMESPACE" --timeout=5m
@@ -121,15 +172,28 @@ update() {
 
 # Delete deployment
 delete() {
-  echo "🗑️  Deleting deployment..."
+  echo "🗑️  Deleting deployment (namespace: $NAMESPACE)..."
 
-  read -p "Are you sure? (yes/no) " -n 3 -r
+  if [[ "$DRY_RUN" == "1" ]]; then
+    echo "🧪 DRY_RUN=1: would delete namespace $NAMESPACE (skipped)."
+    return 0
+  fi
+
+  # Extra gate for production: refuse unless explicitly acknowledged.
+  if [[ "$ENV" == "prod" && "${BIOETL_CONFIRM_PROD:-0}" != "1" ]]; then
+    echo "❌ Refusing to delete a prod namespace without BIOETL_CONFIRM_PROD=1." >&2
+    return 1
+  fi
+
+  # Require the exact namespace name to avoid accidental data loss.
+  local reply
+  read -r -p "Type the namespace to confirm deletion (${NAMESPACE}): " reply
   echo
-  if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
+  if [[ "$reply" == "$NAMESPACE" ]]; then
     kubectl delete namespace "$NAMESPACE"
     echo "✅ Deleted!"
   else
-    echo "❌ Cancelled."
+    echo "❌ Cancelled (input did not match ${NAMESPACE})."
   fi
   return 0
 }
@@ -182,9 +246,14 @@ logs() {
 
 # Port forwarding
 port_forward() {
-  local service="$3"
-  local local_port="$4"
-  local remote_port="$5"
+  local service="${3:-}"
+  local local_port="${4:-}"
+  local remote_port="${5:-}"
+
+  if [[ -z "$service" || -z "$local_port" || -z "$remote_port" ]]; then
+    echo "❌ Usage: deploy-bioetl.sh port-forward <env> <service> <local_port> <remote_port>" >&2
+    return 1
+  fi
 
   echo "🔗 Port forwarding $service..."
   echo "   Local: $local_port → Remote: $remote_port"
