@@ -3,7 +3,7 @@
 
 # DUX6 residual readability (post-DUX5 re-audit)
 
-**Status:** active  
+**Status:** archived  
 **Epic:** #7139  
 **Predecessor:** DUX5 #7116 (closed)
 
@@ -21,10 +21,9 @@ re-submitted screenshot audit (SG-01..SG-07):
 
 ## Applicators
 
-1. `scripts/ops/observability/grafana/apply_dux5_residual.py`
-1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`
-1. `scripts/ops/observability/grafana/apply_dux6_residual.py`
-1. `scripts/ops/observability/grafana/render_nav_bus.py`
+The completed DUX5/DUX6 one-shot applicators were retired on 2026-08-19.
+The shipped dashboard JSON and archived evidence are the durable record;
+`render_nav_bus.py` remains the maintained navigation generator.
 
 ## Copy SSOT
 

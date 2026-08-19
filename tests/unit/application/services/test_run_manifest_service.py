@@ -1050,6 +1050,3 @@ def test_create_manifest_does_not_finalize_contract_evidence() -> None:
     service.create_manifest(_make_request())
 
     assert recorder.calls == []
-
-
-

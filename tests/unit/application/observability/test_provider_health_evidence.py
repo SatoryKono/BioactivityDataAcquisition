@@ -65,6 +65,7 @@ def test_stale_evidence_does_not_publish_health_status(tmp_path: Path) -> None:
     assert "bioetl_provider_observed_universe" in names
     assert "bioetl_provider_health_status" not in names
 
+
 def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
     from unittest.mock import MagicMock
 
@@ -91,4 +92,3 @@ def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
     assert loaded is not None
     assert loaded.status == HealthStatus.HEALTHY.to_metric_value()
     assert loaded.endpoint == "/status"
-

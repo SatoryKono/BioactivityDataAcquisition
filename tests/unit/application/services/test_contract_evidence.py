@@ -81,4 +81,3 @@ def test_build_runtime_contract_evidence_records_lock_owner() -> None:
     assert evidence["lock_owner_id"] == "run-owner"
     assert evidence["lock_owner_reason"] == "distributed_lock_recorded"
     assert evidence["resume_contract"] == "resume_not_requested"
-

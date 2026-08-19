@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-19T17:51:28.149370+00:00",
+  "generated_at": "2026-08-19T17:59:17.461975+00:00",
   "summary": {
-    "total_scripts": 607,
+    "total_scripts": 599,
     "status_counts": {
       "active": 338,
-      "supporting": 269
+      "supporting": 261
     },
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
       "ci": 81,
-      "docs": 256,
-      "other": 78,
-      "scripts": 502,
+      "docs": 250,
+      "other": 76,
+      "scripts": 498,
       "skills": 12,
-      "tests": 401
+      "tests": 393
     }
   },
   "scripts": [
@@ -16016,7 +16016,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 325,
+          "line": 317,
           "source_group": "tests",
           "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         },
@@ -17627,7 +17627,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 67,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -19099,55 +19099,6 @@
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
-      "path": "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": ".github/ISSUES/_dux6_bodies/DUX6-00.md",
-          "line": 24,
-          "source_group": "other",
-          "text": "- No-scroll helper: `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 22,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 533,
-          "source_group": "scripts",
-          "text": "1. `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 598,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana import ("
-        },
-        {
-          "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-          "line": 149,
-          "source_group": "scripts",
-          "text": "- No-scroll helper: `scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 57,
-          "source_group": "tests",
-          "text": "\"_fix_no_scroll_triage_panels.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off dashboard no-scroll migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
       "type": "py",
       "status": "supporting",
@@ -19162,7 +19113,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 58,
+          "line": 57,
           "source_group": "tests",
           "text": "\"apply_dux2_residual.py\","
         }
@@ -19171,154 +19122,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux4_enforcement.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 143,
-          "source_group": "docs",
-          "text": "- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 59,
-          "source_group": "tests",
-          "text": "\"apply_dux4_enforcement.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX4 dashboard enforcement helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": ".github/ISSUES/_dux6_bodies/DUX6-00.md",
-          "line": 23,
-          "source_group": "other",
-          "text": "- Applicator: `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 21,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 532,
-          "source_group": "scripts",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-          "line": 597,
-          "source_group": "scripts",
-          "text": "from scripts.ops.observability.grafana import apply_dux5_residual as dux5"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-          "line": 148,
-          "source_group": "scripts",
-          "text": "- Applicator: `scripts/ops/observability/grafana/apply_dux5_residual.py`"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 60,
-          "source_group": "tests",
-          "text": "\"apply_dux5_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux6_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 23,
-          "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/apply_dux6_residual.py`"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 61,
-          "source_group": "tests",
-          "text": "\"apply_dux6_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/apply_dux7_live_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 3,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": "python scripts/ops/observability/grafana/apply_dux7_live_residual.py"
-        },
-        {
-          "path": "docs/03-guides/dashboards/operator-ux-v2.md",
-          "line": 135,
-          "source_group": "docs",
-          "text": "- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_resid"
-        },
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 62,
-          "source_group": "tests",
-          "text": "\"apply_dux7_live_residual.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/audit_live_grafana_panels.py",
@@ -19371,7 +19174,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 323,
+          "line": 315,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
         }
@@ -19444,7 +19247,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -19471,12 +19274,6 @@
           "text": "$GrafanaPreflight = Join-Path $ProjectRoot \"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
-          "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 755,
-          "source_group": "scripts",
-          "text": "python scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py"
-        },
-        {
           "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
           "line": 27,
           "source_group": "scripts",
@@ -19484,7 +19281,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 427,
+          "line": 419,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
@@ -19493,6 +19290,12 @@
           "line": 25,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
+          "line": 134,
+          "source_group": "tests",
+          "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
       ]
     },
@@ -19549,7 +19352,7 @@
       "references": [
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 63,
+          "line": 58,
           "source_group": "tests",
           "text": "\"generate_dux4_issue_pack.py\","
         }
@@ -19558,44 +19361,6 @@
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded DUX4 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/generate_dux5_issue_pack.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 64,
-          "source_group": "tests",
-          "text": "\"generate_dux5_issue_pack.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
-    },
-    {
-      "path": "scripts/ops/observability/grafana/generate_dux6_issue_pack.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 65,
-          "source_group": "tests",
-          "text": "\"generate_dux6_issue_pack.py\","
-        }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record."
     },
     {
       "path": "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py",
@@ -19612,13 +19377,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 99,
+          "line": 91,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 115,
+          "line": 107,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text \""
         },
@@ -19776,7 +19541,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 12,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",
@@ -19804,9 +19569,9 @@
         },
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md",
-          "line": 24,
+          "line": 23,
           "source_group": "docs",
-          "text": "1. `scripts/ops/observability/grafana/render_nav_bus.py`"
+          "text": "`render_nav_bus.py` remains the maintained navigation generator."
         },
         {
           "path": "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
@@ -19837,7 +19602,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
@@ -19856,12 +19621,6 @@
           "line": 52,
           "source_group": "scripts",
           "text": "\"rerender-grafana\": \"observability/grafana/rerender_grafana_screenshots.py\","
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux5_residual.py",
-          "line": 757,
-          "source_group": "scripts",
-          "text": "# python scripts/ops/observability/grafana/rerender_grafana_screenshots.py"
         },
         {
           "path": "scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py",
@@ -19886,45 +19645,14 @@
           "line": 274,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
-        }
-      ]
-    },
-    {
-      "path": "scripts/ops/observability/grafana/run_dux7_live_residual.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 4,
-      "references": [
-        {
-          "path": "docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": "python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence"
-        },
-        {
-          "path": "scripts/ops/observability/grafana/apply_dux7_live_residual.py",
-          "line": 137,
-          "source_group": "scripts",
-          "text": "python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence"
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 67,
+          "line": 316,
           "source_group": "tests",
-          "text": "\"run_dux7_live_residual.py\","
-        },
-        {
-          "path": "tests/unit/scripts/ops/observability/test_run_dux7_live_residual.py",
-          "line": 9,
-          "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.run_dux7_live_residual import ("
+          "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
-      ],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record."
+      ]
     },
     {
       "path": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
@@ -19947,7 +19675,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 322,
+          "line": 314,
           "source_group": "tests",
           "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
         },
@@ -20110,7 +19838,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 424,
+          "line": 416,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -20200,7 +19928,7 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 96,
+          "line": 88,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         },

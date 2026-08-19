@@ -308,4 +308,3 @@ def test_tracked_rules_bundle_sha256_is_stable() -> None:
     second = mod.tracked_rules_bundle_sha256(mod.DEFAULT_RULES_DIR)
     assert first == second
     assert len(first) == 64
-

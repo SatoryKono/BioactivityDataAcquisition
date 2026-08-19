@@ -143,6 +143,7 @@ from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
     _iter_unique_candidates,
 )
 
+
 def _attach_candidate_artifact_recorder(
     candidate: object,
     run_ledger_service: RunLedgerService,
