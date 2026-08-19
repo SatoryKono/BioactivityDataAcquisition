@@ -141,7 +141,10 @@ class CompatibilityRegistry:
 
 
 def _load_yaml(path: Path) -> dict[str, object]:
-    with path.open(encoding="utf-8") as stream:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    safe_path = resolve_output_path(path)
+    with safe_path.open(encoding="utf-8") as stream:
         payload = yaml.safe_load(stream) or {}
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a mapping root")
@@ -486,6 +489,13 @@ def _candidate_import_paths_via_rg(
     """Use ripgrep when available to avoid opening every source file in Python."""
     if shutil.which("rg") is None or not measured_module_names:
         return None
+    invalid_names = sorted(
+        name
+        for name in measured_module_names
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", name) is None
+    )
+    if invalid_names:
+        raise ValueError(f"invalid measured module names: {invalid_names!r}")
     pattern = "|".join(re.escape(name) for name in sorted(measured_module_names))
     result = subprocess.run(
         ["rg", "-l", "-g", "*.py", "-e", pattern, str(src_root)],

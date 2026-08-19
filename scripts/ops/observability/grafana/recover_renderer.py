@@ -64,9 +64,12 @@ class RecoverReport:
 def _run(
     args: list[str], *, timeout: float = 120.0, cwd: Path = ROOT
 ) -> tuple[int, str, str]:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_args = ensure_safe_cli_argv(args)
     try:
         proc = subprocess.run(
-            args,
+            safe_args,
             capture_output=True,
             text=True,
             timeout=timeout,

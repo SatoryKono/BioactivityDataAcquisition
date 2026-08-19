@@ -209,8 +209,17 @@ def recover_backup(
     """Verify and optionally recover a backup via rollback-safe directory swap."""
     manifest = verify_backup(bundle_path)
     recovered = tuple(Path(entry["path"]) for entry in manifest["files"])
-    if not apply:
-        return recovered
+    if apply:
+        _apply_recovery(bundle_path, target, recovered)
+    return recovered
+
+
+def _apply_recovery(
+    bundle_path: Path,
+    target: Path,
+    recovered: tuple[Path, ...],
+) -> None:
+    """Apply a verified recovery via a rollback-safe directory swap."""
     target_parent = target.parent
     target_parent.mkdir(parents=True, exist_ok=True)
     staging = Path(
@@ -237,4 +246,3 @@ def recover_backup(
     finally:
         if staging.exists():
             shutil.rmtree(staging)
-    return recovered

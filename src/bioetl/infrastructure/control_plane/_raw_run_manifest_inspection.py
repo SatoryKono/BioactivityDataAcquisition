@@ -64,7 +64,7 @@ class RawRunManifestInspectionMixin:
             return RawManifestInspection(False, ("manifest_not_found",))
         try:
             raw_payload = deserialize_from_json(path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, ValueError):
+        except ValueError:
             return RawManifestInspection(False, ("manifest_parse_error",))
         except (OSError, UnicodeError):
             return RawManifestInspection(False, ("manifest_read_error",))
@@ -108,10 +108,12 @@ def persist_contract_evidence(
     from bioetl.infrastructure.storage.atomic import atomic_write_text
 
     path = contract_evidence_path(base_path, manifest_id)
-    payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + chr(10)
+    payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + chr(
+        10
+    )
     if path.is_file():
         try:
-            existing = path.read_text(encoding='utf-8')
+            existing = path.read_text(encoding="utf-8")
         except (OSError, UnicodeError) as error:
             raise ContractEvidenceConflictError(
                 f"Contract evidence sidecar '{path}' cannot be compared"
@@ -123,7 +125,6 @@ def persist_contract_evidence(
         )
     path.parent.mkdir(parents=True, exist_ok=True)
     atomic_write_text(path, payload)
-
 
 
 def _load_contract_evidence(

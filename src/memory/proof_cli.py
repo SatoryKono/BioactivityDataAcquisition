@@ -44,8 +44,11 @@ def _default_run_id() -> str:
 
 
 def _write_json(path: Path, payload: Any) -> None:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path, root=ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
+    path.write_text(  # NOSONAR -- explicit CLI output canonicalized above
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 

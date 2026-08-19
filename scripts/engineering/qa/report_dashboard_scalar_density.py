@@ -124,9 +124,12 @@ def survey_dashboard(dashboard: dict[str, Any]) -> dict[str, Any]:
 
 
 def _atomic_write(path: Path, payload: str) -> None:
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    path = resolve_output_path(path, root=REPO_ROOT)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(payload, encoding="utf-8")
+    tmp.write_text(payload, encoding="utf-8")  # NOSONAR -- suffix-only sibling
     os.replace(tmp, path)
 
 

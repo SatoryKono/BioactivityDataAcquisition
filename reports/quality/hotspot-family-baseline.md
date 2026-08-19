@@ -8,8 +8,8 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 192 | 23364 | 0 | 0.369 | 0 | 6 | `bioetl.application.core.pipeline_span_lifecycle` | `files_ge_250_loc=0, max_internal_fan_in=10` | `-` | `-` |
-| `composition_bootstrap_runtime` | 51 | 6226 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
+| `application_core` | 192 | 23390 | 2 | 0.370 | 0 | 6 | `bioetl.application.core.pipeline_span_lifecycle` | `files_ge_250_loc=0, max_internal_fan_in=10` | `over_budget:files_ge_250_loc=2/0` | `-` |
+| `composition_bootstrap_runtime` | 51 | 6232 | 0 | 0.325 | 0 | 2 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `-` |
 | `composition_factories_pipeline` | 32 | 4000 | 1 | 0.342 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `-` |
-| `application_services_control_plane` | 139 | 16285 | 0 | 0.429 | 0 | 2 | `bioetl.application.services.control_plane.workflow.manifest_models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
-| `composition_runtime_builders` | 56 | 7205 | 0 | 0.358 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |
+| `application_services_control_plane` | 140 | 16369 | 2 | 0.428 | 0 | 3 | `bioetl.application.services.control_plane.manifest.models` | `files_ge_250_loc=0, max_internal_fan_in=2` | `over_budget:files_ge_250_loc=2/0, over_budget:max_internal_fan_in=3/2` | `near_budget:max_internal_fan_in=3/2` |
+| `composition_runtime_builders` | 56 | 7233 | 1 | 0.360 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `over_budget:files_ge_250_loc=1/0` | `-` |

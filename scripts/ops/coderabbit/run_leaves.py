@@ -175,10 +175,30 @@ def run_checked(cmd: list[str], cwd: Path, env: dict[str, str]) -> None:
 
 
 def materialize_leaf(base_sha: str, paths: list[str], target: Path) -> None:
+    if re.fullmatch(r"[0-9a-f]{40}", base_sha) is None:
+        raise ValueError(f"invalid base commit SHA: {base_sha!r}")
+    safe_paths: list[str] = []
+    root = ROOT.resolve()
+    for raw_path in paths:
+        relative = Path(raw_path)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError(f"unsafe repository path: {raw_path!r}")
+        if not (root / relative).resolve(strict=False).is_relative_to(root):
+            raise ValueError(f"repository path escapes checkout: {raw_path!r}")
+        safe_paths.append(relative.as_posix())
     archive_env = os.environ.copy()
     archive_env["GIT_LFS_SKIP_SMUDGE"] = "1"
     archive = subprocess.run(
-        ["git", "-C", str(ROOT), "archive", "--format=tar", base_sha, "--", *paths],
+        [
+            "git",
+            "-C",
+            str(ROOT),
+            "archive",
+            "--format=tar",
+            base_sha,
+            "--",
+            *safe_paths,
+        ],
         env=archive_env,
         check=True,
         capture_output=True,

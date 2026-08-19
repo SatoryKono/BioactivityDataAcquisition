@@ -252,10 +252,10 @@ def main() -> int:
             or args.md_out.read_text(encoding="utf-8") != md_text
         ):
             raise SystemExit("Scenes parity ledger is stale; rerun without --check")
-        return 0
-    args.json_out.parent.mkdir(parents=True, exist_ok=True)
-    args.json_out.write_text(json_text, encoding="utf-8")
-    args.md_out.write_text(md_text, encoding="utf-8")
+    else:
+        args.json_out.parent.mkdir(parents=True, exist_ok=True)
+        args.json_out.write_text(json_text, encoding="utf-8")
+        args.md_out.write_text(md_text, encoding="utf-8")
     return 0
 
 

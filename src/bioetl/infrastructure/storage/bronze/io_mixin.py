@@ -75,13 +75,12 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         if record_count == 0:
             raise ValueError("No records to write")
         if target_path.exists():
-            if self._compressed_payload_matches(target_path, temp_path):
-                # NOSONAR - same result is correct when target already matches (S1182 false positive)
-                return record_count, uncompressed_size
-            raise FileExistsError(
-                f"Bronze target already exists with different payload: {target_path}"
-            )
-        temp_path.replace(target_path)
+            if not self._compressed_payload_matches(target_path, temp_path):
+                raise FileExistsError(
+                    f"Bronze target already exists with different payload: {target_path}"
+                )
+        else:
+            temp_path.replace(target_path)
         return record_count, uncompressed_size
 
     def _write_atomic_stream(

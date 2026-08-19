@@ -179,7 +179,7 @@ def load(path: Path) -> dict[str, Any]:
 def save(path: Path, data: dict[str, Any]) -> None:
     text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_bytes(text.encode("utf-8"))
+    tmp.write_bytes(text.encode("utf-8"))  # NOSONAR -- suffix-only sibling temp path
     os.replace(tmp, path)
 
 

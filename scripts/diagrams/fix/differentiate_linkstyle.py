@@ -134,7 +134,7 @@ def build_node_layer_map(lines: list[str]) -> dict[str, str]:
     return node_layer
 
 
-_ARROW_ANY_RE = re.compile(r"(?:x-->|o-->|<-->|-.->|==>|-->|---|-.-|===|~~~|--o|--x)")
+_ARROW_ANY_RE = re.compile(r"(?:<-->|-.->|==>|-->|---|-.-|===|~~~|--o|--x)")
 
 
 def count_mermaid_arrows(lines: list[str]) -> int:

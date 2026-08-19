@@ -154,9 +154,10 @@ def main(argv: list[str] | None = None) -> int:
         },
         "devin_validation_issues": validation,
     }
-    _write_report(args.report, payload)
+    report_path = resolve_output_path(args.report, root=root)
+    _write_report(report_path, payload)
     ok = junie.returncode == 0 and not validation and not after
-    print(f"Runtime skill sync report: {args.report}")
+    print(f"Runtime skill sync report: {report_path}")
     if not ok:
         print("Runtime skill parity FAILED", file=sys.stderr)
         return 1

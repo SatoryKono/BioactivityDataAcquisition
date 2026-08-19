@@ -80,9 +80,7 @@ def _files_with_references(
             stderr=result.stderr,
         )
     return tuple(
-        root / item.decode("utf-8")
-        for item in result.stdout.split(b"\0")
-        if item
+        root / item.decode("utf-8") for item in result.stdout.split(b"\0") if item
     )
 
 
@@ -105,9 +103,11 @@ def _replacement_pairs(
         directory = root / PASSPORT_ROOT / group
         for target_path in sorted(directory.glob("*-*.md")):
             target = target_path.relative_to(root).as_posix()
-            source = target_path.with_name(
-                target_path.name.replace("-", "_")
-            ).relative_to(root).as_posix()
+            source = (
+                target_path.with_name(target_path.name.replace("-", "_"))
+                .relative_to(root)
+                .as_posix()
+            )
             pairs.add((source, target))
             pairs.add(
                 (
@@ -146,8 +146,7 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
         for source, target in pairs:
             updated = updated.replace(source, target)
         if updated != text:
-            # NOSONAR - S2083: path is a validated Path object from project tree, not user-controlled input
-            path.write_text(updated, encoding="utf-8")
+            path.write_text(updated, encoding="utf-8")  # NOSONAR -- validated tree path
     return references
 
 

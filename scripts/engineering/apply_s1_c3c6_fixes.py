@@ -13,8 +13,9 @@ def replace_once(path: Path, old: str, new: str, label: str) -> None:
     text = path.read_text(encoding="utf-8")
     if old not in text:
         raise SystemExit(f"{label}: target block missing in {path}")
-    # NOSONAR - S2083: path is a validated Path object from project tree, not user-controlled input
-    path.write_text(text.replace(old, new, 1), encoding="utf-8")
+    path.write_text(  # NOSONAR -- path is rooted under the constant repository root
+        text.replace(old, new, 1), encoding="utf-8"
+    )
     print(f"fixed {label}")
 
 

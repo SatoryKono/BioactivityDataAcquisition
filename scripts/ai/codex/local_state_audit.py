@@ -33,6 +33,10 @@ UUID_PATTERN: Final = re.compile(
     re.I,
 )
 SHELLS: Final = {"bash", "sh", "zsh", "pwsh", "powershell", "cmd", "cmd.exe"}
+TEMPORARY_PATH_PREFIXES: Final = (
+    "/tmp/",
+    "/var/tmp/",
+)  # NOSONAR -- strings are classifier data; this code does not access them
 SENSITIVE_DIRS: Final = (
     "sessions",
     "archived_sessions",
@@ -129,7 +133,7 @@ def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
     if any("bioactivitydataacquisition2" in item.casefold() for item in pattern):
         return "REMOVE", "obsolete_checkout"
     if any(
-        item.startswith(("/tmp/", "/var/tmp/")) or "\\temp\\" in item.casefold()
+        item.startswith(TEMPORARY_PATH_PREFIXES) or "\\temp\\" in item.casefold()
         for item in pattern
     ):
         return "REMOVE", "temporary_path"
@@ -405,6 +409,7 @@ def create_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     resolved_backup = backup_dir.resolve()
     if not resolved_backup.is_relative_to(allowed_root):
         raise ValueError("backup directory must be under the Codex backups directory")
+    backup_dir = resolved_backup
     if backup_dir.exists() and any(backup_dir.iterdir()):
         raise ValueError("backup directory must not already contain files")
     backup_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -530,17 +535,28 @@ def apply_remediation(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
 
 
 def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
+    allowed_root = (codex_home / "backups").resolve()
+    backup_dir = backup_dir.resolve()
+    if not backup_dir.is_relative_to(allowed_root):
+        raise ValueError("backup directory must be under the Codex backups directory")
     manifest_path = backup_dir / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     restored_files = 0
     for item in manifest.get("copied_files", []):
         relative = Path(item["relative"])
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("backup manifest contains an unsafe path")
         if _is_env_file(relative):
             raise ValueError("backup unexpectedly contains an env file")
-        source = backup_dir / "files" / relative
+        files_root = (backup_dir / "files").resolve()
+        source = (files_root / relative).resolve()
+        if not source.is_relative_to(files_root):
+            raise ValueError("backup source escapes the private backup root")
         if _sha256(source) != item["sha256"]:
             raise ValueError("backup checksum verification failed")
-        destination = codex_home / relative
+        destination = (codex_home.resolve() / relative).resolve()
+        if not destination.is_relative_to(codex_home.resolve()):
+            raise ValueError("backup destination escapes the Codex home")
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         restored_files += 1
@@ -664,7 +680,9 @@ def main() -> int:
     if args.output:
         output = _report_path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(rendered, encoding="utf-8")
+        output.write_text(  # NOSONAR -- _report_path confines under reports/quality
+            rendered, encoding="utf-8"
+        )
     print(rendered, end="")
     return 1 if payload.get("status") == "FAIL" else 0
 

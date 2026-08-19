@@ -17,32 +17,18 @@ ENV PIP_DEFAULT_TIMEOUT=180 \
     UV_LINK_MODE=copy \
     UV_NO_PROGRESS=1
 
-# Install build dependencies and uv.
+# Install build dependencies and the pinned binary uv wheel.
 # Debian security packages track moving distro revisions (no stable =version pins).
-# Prefer the official uv installer (binary, no sdist); fall back to pip with
-# explicit timeout/retries if the installer is unreachable.
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
-        curl \
         libffi-dev \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && ( \
-        curl -fsSL --retry 5 --retry-delay 2 --retry-all-errors \
-            --connect-timeout 30 --max-time 180 \
-            "https://astral.sh/uv/0.11.26/install.sh" \
-            | sh \
-        && ln -sf /root/.local/bin/uv /usr/local/bin/uv \
-    ) || ( \
-        echo "uv official installer failed; falling back to pip" \
-        && python -m pip install --upgrade --no-cache-dir \
-            --default-timeout=180 --retries=10 pip \
-        && python -m pip install --only-binary=:all: --no-cache-dir \
-            --default-timeout=180 --retries=10 uv==0.11.26 \
-    ) \
+    && python -m pip install --only-binary=:all: --no-cache-dir \
+        --default-timeout=180 --retries=10 uv==0.11.26 \
     && uv --version
 
 # Copy package metadata and source required by setuptools/uv build resolution.

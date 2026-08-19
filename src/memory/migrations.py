@@ -99,6 +99,7 @@ def migrate_json_file(
     migrations: Mapping[int, MigrationStep] = DEFAULT_MIGRATIONS,
 ) -> MigrationResult:
     """Dry-run or apply a migration while retaining the original bytes."""
+    path = path.expanduser().resolve(strict=True)
     original_bytes = path.read_bytes()
     original_digest = content_digest(original_bytes)
     payload = json.loads(original_bytes)

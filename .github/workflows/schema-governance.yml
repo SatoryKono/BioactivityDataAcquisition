@@ -31,9 +31,6 @@ on:
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
 
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -158,6 +155,7 @@ jobs:
           retention-days: 14
 
   schema-governance-status:
+    permissions: {}
     name: Schema Governance Status
     runs-on: ubuntu-latest
     needs: [generated-artifacts, contracts-export, schema-parity, silver-schema-drift]

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-19T14:49:58.600887+00:00",
+  "generated_at": "2026-08-19T16:40:30.241413+00:00",
   "summary": {
     "total_scripts": 606,
     "status_counts": {
@@ -8174,7 +8174,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 39,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
@@ -8207,22 +8207,22 @@
           "text": "from scripts.docs.common.bootstrap import DOCS_DIR, PROJECT_ROOT"
         },
         {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 68,
+          "source_group": "scripts",
+          "text": "from scripts.docs.common.bootstrap import ensure_repo_imports"
+        },
+        {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 70,
+          "source_group": "scripts",
+          "text": "from scripts.docs.common.bootstrap import ensure_repo_imports"
+        },
+        {
           "path": "scripts/docs/checks/report_docs_kpi.py",
           "line": 28,
           "source_group": "scripts",
           "text": "from scripts.docs.common.bootstrap import ensure_repo_imports"
-        },
-        {
-          "path": "scripts/docs/checks/report_docs_kpi.py",
-          "line": 30,
-          "source_group": "scripts",
-          "text": "from scripts.docs.common.bootstrap import ensure_repo_imports"
-        },
-        {
-          "path": "scripts/docs/matrix/build_matrix_dicts.py",
-          "line": 19,
-          "source_group": "scripts",
-          "text": "from scripts.docs.common.bootstrap import PROJECT_ROOT, ensure_repo_imports"
         }
       ],
       "owner": "@bioetl-docs",
@@ -8235,13 +8235,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 21,
           "source_group": "scripts",
           "text": "- `scripts/docs/common/markdown.py`: shared markdown/link/nav regex helpers"
+        },
+        {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "from scripts.docs.common.markdown import ("
         },
         {
           "path": "scripts/docs/checks/report_docs_kpi.py",
@@ -8266,13 +8272,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/docs/README.md",
           "line": 20,
           "source_group": "scripts",
           "text": "- `scripts/docs/common/paths.py`: repo roots, docs roots, generated-artifact filters"
+        },
+        {
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "from scripts.docs.common.paths import ("
         },
         {
           "path": "scripts/docs/checks/report_docs_kpi.py",
@@ -10252,7 +10264,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 231,
+      "reference_count": 239,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -18989,13 +19001,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 176,
           "source_group": "docs",
           "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
+        },
+        {
+          "path": "scripts/engineering/qa/check_prometheus_rules.py",
+          "line": 655,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
@@ -19606,13 +19624,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 184,
+          "line": 191,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/generate_trust_validation_fixtures.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 199,
+          "line": 206,
           "source_group": "tests",
           "text": "\"generate_trust_validation_fixtures.py must not call write_text; \""
         }
@@ -20061,13 +20079,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1477,
+          "line": 1478,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1564,
+          "line": 1565,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -20169,13 +20187,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.ops.observability.trust_validation_fixture_materialization import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_trust_validation_fixtures.py",
-          "line": 181,
+          "line": 188,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/trust_validation_fixture_materialization.py\""
         }
@@ -20558,7 +20576,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/verify_report_bind.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight"
         },
@@ -21989,13 +22007,13 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 65,
+          "line": 62,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 117,
+          "line": 114,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         }
