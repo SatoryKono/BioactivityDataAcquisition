@@ -16,6 +16,9 @@ from bioetl.application.services.execution.pipeline_run_execution_service import
 from bioetl.application.services.execution.pipeline_runner_service import (
     PipelineRunnerService,
 )
+from bioetl.application.services.run_reports.writer import (
+    configure_run_report_store,
+)
 from bioetl.composition.bootstrap.runtime.observability import (
     bootstrap_observability_bundle,
 )
@@ -26,6 +29,9 @@ from bioetl.composition.factories.pipeline.runner import (
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_run_id
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
 from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["bootstrap_pipeline_runner_service"]
@@ -57,6 +63,7 @@ def bootstrap_pipeline_runner_service(
         >>> result = await service.run("chembl_activity", options=options)
     """
     settings = get_settings()
+    configure_run_report_store(FileRunReportStoreAdapter())
     service_run_id = create_runtime_occurrence_run_id("pipeline_runner_service")
     observability = bootstrap_observability_bundle(
         pipeline="pipeline_runner_service",

@@ -15,6 +15,7 @@ from bioetl.domain.models.metadata import (
     RateLimitInfo,
     SourceMetadata,
 )
+from bioetl.domain.ports import ClockPort
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common._api_request_sanitize import (
     normalize_http_method,
@@ -31,10 +32,9 @@ from bioetl.infrastructure.time import SystemClock
 class APIRequestCollector:
     """Collect API request metadata and build SourceMetadata snapshots."""
 
-    _clock = SystemClock()
-
-    def __init__(self) -> None:
+    def __init__(self, clock: ClockPort | None = None) -> None:
         """Initialize an empty request collector."""
+        self._clock = clock or SystemClock()
         self._requests: list[APIRequestDetails] = []
         self._lock = threading.Lock()
 

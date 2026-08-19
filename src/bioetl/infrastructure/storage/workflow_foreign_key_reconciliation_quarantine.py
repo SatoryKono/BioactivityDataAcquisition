@@ -11,6 +11,7 @@ import pyarrow as pa
 from deltalake.exceptions import DeltaError
 
 from bioetl.domain.ports import (
+    ClockPort,
     ForeignKeyReconciliationRequest,
     LoggerPort,
     QuarantinePort,
@@ -40,14 +41,12 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantin
     require_sql_identifier,
     resolve_present_column,
 )
-from bioetl.infrastructure.time.system_clock import current_utc_time
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
-
 
 @dataclass(frozen=True, slots=True)
 class ReconciliationMutationSummary:
@@ -65,6 +64,7 @@ class ReconciliationMutationHost(Protocol):
     quarantine: QuarantinePort | None
     quarantine_pipeline_name: str | None
     logger: LoggerPort
+    clock: ClockPort
 
     @property
     def silver_writer(self) -> SilverWriter: ...
@@ -213,7 +213,7 @@ async def expire_gold_orphan_rows(
         f"target.{key} = source.{key}" for key in primary_keys
     )
     merge_condition += f" AND target.{current_flag_col} = true"
-    ts_iso = current_utc_time().isoformat()
+    ts_iso = host.clock.now().isoformat()
 
     async def _execute_expiry_attempt() -> object:
         return await gold_writer._run_in_executor(
@@ -371,7 +371,7 @@ async def quarantine_orphan_rows(
                         "transform_name": request.transform_name,
                     },
                 ),
-                "ingestion_ts": current_utc_time(),
+                "ingestion_ts": host.clock.now(),
             }
         )
 

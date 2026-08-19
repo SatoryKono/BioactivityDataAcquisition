@@ -34,12 +34,13 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
-    from bioetl.application.services.control_plane.manifest.contract_evidence import (
-        ContractEvidenceRecorderPort,
-    )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.ports import (
+        ContractEvidenceRecorderPort,
+        LoggerPort,
+        TracingPort,
+    )
 
 __all__ = ["PipelineRunner", "PipelineRunnerDependencies"]
 

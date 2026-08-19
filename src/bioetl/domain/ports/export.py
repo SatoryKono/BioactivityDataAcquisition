@@ -7,6 +7,7 @@ from enum import StrEnum
 from typing import Literal, Protocol, runtime_checkable
 
 __all__ = [
+    "DebugExportPort",
     "ExportCatalogPort",
     "ExportFileFingerprint",
     "ExportJobStatus",
@@ -127,3 +128,13 @@ class ExportWriterPort(Protocol):
     def fingerprint_file(self, *, path: str) -> ExportFileFingerprint:
         """Return deterministic size/checksum metadata for one export artifact."""
         ...
+
+
+@runtime_checkable
+class DebugExportPort(Protocol):
+    """Persist deterministic debug-export audit packs."""
+
+    def write_pack(self, *, pack: object) -> object:
+        """Persist the provided audit pack and return artifact metadata."""
+        ...
+

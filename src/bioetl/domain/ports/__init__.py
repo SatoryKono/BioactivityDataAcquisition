@@ -32,6 +32,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "bioetl.domain.ports.control_plane": (
         "ArtifactByteComparisonPort",
+        "ContractEvidenceRecorderPort",
         "EffectiveConfigArtifactStorePort",
         "LineageStorePort",
         "RawManifestInspection",
@@ -50,6 +51,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "bioetl.domain.ports.delta_reader": ("DeltaReaderPort",),
     "bioetl.domain.ports.export": (
+        "DebugExportPort",
         "ExportCatalogPort",
         "ExportFileFingerprint",
         "ExportJobStatus",
@@ -155,6 +157,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.serialization": ("JsonEncoderPort",),
     "bioetl.domain.ports.stage_accounting": ("StageAccountingPort",),
     "bioetl.domain.ports.storage": (
+        "RunReportStorePort",
         "BronzeStoragePort",
         "GoldStoragePort",
         "MergedStoragePort",

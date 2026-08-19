@@ -126,33 +126,30 @@ class TestCreateBatchExecutorFromPipeline:
         )
         expected = MagicMock(name="executor")
         mock_batch_executor.return_value = expected
-        metric = MagicMock(name="gold_lifecycle_state_metric")
-
-        with patch(
-            "bioetl.composition.factories.services.pipeline_batch_executor_builder._gold_lifecycle_state_total",
-            metric,
-        ):
-            result = create_batch_executor_from_pipeline(
-                BatchExecutorBuildRequest(
-                    pipeline=pipeline,
-                    callbacks=callbacks,
-                    silver_schema=None,
-                    gold_schema=MagicMock(),
-                    checkpoint_manager=MagicMock(),
-                    shutdown_signal=MagicMock(),
-                    create_batch_processing_components_fn=MagicMock(),
-                )
+        result = create_batch_executor_from_pipeline(
+            BatchExecutorBuildRequest(
+                pipeline=pipeline,
+                callbacks=callbacks,
+                silver_schema=None,
+                gold_schema=MagicMock(),
+                checkpoint_manager=MagicMock(),
+                shutdown_signal=MagicMock(),
+                create_batch_processing_components_fn=MagicMock(),
             )
+        )
 
         gold_filter = mock_build_components.call_args.kwargs["gold_filter"]
         assert gold_filter(MagicMock(), {"id": "1"}) is False
         assert result is expected
-        metric.return_value.labels.assert_called_once_with(
-            pipeline="chembl_activity",
-            table="chembl_activity",
-            state="disabled",
+        pipeline.services.metrics.increment_counter.assert_called_once_with(
+            "bioetl_gold_lifecycle_state_total",
+            1,
+            labels={
+                "pipeline": "chembl_activity",
+                "table": "chembl_activity",
+                "state": "disabled",
+            },
         )
-        metric.return_value.labels.return_value.inc.assert_called_once()
         mock_extraction_loop.assert_called_once()
 
     @patch(

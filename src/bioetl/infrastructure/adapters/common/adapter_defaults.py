@@ -66,5 +66,6 @@ def create_default_request_collector() -> APIRequestCollector:
     from bioetl.infrastructure.adapters.common.api_request_collector import (
         APIRequestCollector,
     )
+    from bioetl.infrastructure.time import SystemClock
 
-    return APIRequestCollector()
+    return APIRequestCollector(clock=SystemClock())

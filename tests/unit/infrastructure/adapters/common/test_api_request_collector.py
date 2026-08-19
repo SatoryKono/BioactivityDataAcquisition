@@ -549,3 +549,15 @@ class TestParameterSanitization:
         assert request.query_params["API_KEY"] == "[REDACTED]"
         assert request.query_params["Token"] == "[REDACTED]"
         assert request.query_params["SECRET"] == "[REDACTED]"
+
+
+class TestInjectedClock:
+    def test_injected_clock_stamps_request(self) -> None:
+        clock = MagicMock()
+        stamp = datetime(2026, 8, 19, 12, 0, tzinfo=UTC)
+        clock.now.return_value = stamp
+        collector = APIRequestCollector(clock=clock)
+        collector.record_request(url="https://api.example.com/v1/data")
+        meta = collector.to_source_metadata()
+        assert meta.api_requests[0].timestamp == stamp
+        clock.now.assert_called()

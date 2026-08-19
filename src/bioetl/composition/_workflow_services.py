@@ -116,6 +116,7 @@ def _build_workflow_transform_registry(
     from bioetl.infrastructure.storage.workflow_row_reconciliation import (
         StorageRowReconciliationAdapter,
     )
+    from bioetl.infrastructure.time import SystemClock
 
     workflow_storage_logger = create_noop_logger()
     transform_storage = SilverWriter(
@@ -171,6 +172,7 @@ def _build_workflow_transform_registry(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
             logger=foreign_key_reconciliation_logger,
+            clock=SystemClock(),
             metrics=metrics,
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING, Protocol, cast
+from typing import Any, TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_execution.state_service import (
     BatchExecutionStateService,
@@ -41,14 +41,6 @@ if TYPE_CHECKING:
         BatchProgressService,
         ShutdownSignal,
     )
-
-
-class _BoundMetric(Protocol):
-    def inc(self) -> object: ...
-
-
-class _MetricWithLabels(Protocol):
-    def labels(self, **labels: str) -> _BoundMetric: ...
 
 
 def create_batch_executor_from_pipeline(
@@ -130,6 +122,7 @@ def _resolve_gold_filter(
     """Resolve the effective gold filter based on runtime skip configuration."""
     if pipeline.runtime.skip_gold:
         _emit_gold_lifecycle_state(
+            metrics=pipeline.services.metrics,
             pipeline_name=pipeline.config.pipeline_name,
             table_name=_resolve_effective_gold_table(pipeline),
             state="disabled",
@@ -152,23 +145,24 @@ def _resolve_effective_gold_table(pipeline: BasePipeline) -> str:
 
 def _emit_gold_lifecycle_state(
     *,
+    metrics: object,
     pipeline_name: str,
     table_name: str,
     state: str,
 ) -> None:
-    """Emit bounded Gold lifecycle state at the composition decision seam."""
-    _gold_lifecycle_state_total().labels(
-        pipeline=normalize_observability_pipeline_label(pipeline_name),
-        table=normalize_observability_pipeline_label(table_name),
-        state=state,
-    ).inc()
-
-
-def _gold_lifecycle_state_total() -> _MetricWithLabels:
-    """Resolve the Gold lifecycle metric lazily to avoid import-time metric boot."""
-    from bioetl.infrastructure.observability.metrics import GOLD_LIFECYCLE_STATE_TOTAL
-
-    return GOLD_LIFECYCLE_STATE_TOTAL
+    """Emit bounded Gold lifecycle state through MetricsPort."""
+    increment = getattr(metrics, "increment_counter", None)
+    if not callable(increment):
+        return
+    increment(
+        "bioetl_gold_lifecycle_state_total",
+        1,
+        labels={
+            "pipeline": normalize_observability_pipeline_label(pipeline_name),
+            "table": normalize_observability_pipeline_label(table_name),
+            "state": state,
+        },
+    )
 
 
 def _build_batch_executor_dependencies(

@@ -37,6 +37,7 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _resolve_runtime_services_for_writer,
     _rewire_runtime_services,
 )
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
@@ -91,6 +92,7 @@ class SilverWriter(  # pyright: ignore[reportIncompatibleMethodOverride]
         )
         _assign_runtime_services(self, services)
         _rewire_runtime_services(self)
+        self._clock = SystemClock()
         self._transform_version = transform_version
         self._transform_steps = transform_steps or ()
         self._host = self

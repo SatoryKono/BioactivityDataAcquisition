@@ -47,6 +47,9 @@ from bioetl.domain.ports.control_plane import (
     ArtifactByteComparisonPort as ArtifactByteComparisonPort,
 )
 from bioetl.domain.ports.control_plane import (
+    ContractEvidenceRecorderPort as ContractEvidenceRecorderPort,
+)
+from bioetl.domain.ports.control_plane import (
     EffectiveConfigArtifactStorePort as EffectiveConfigArtifactStorePort,
 )
 from bioetl.domain.ports.control_plane import (
@@ -86,6 +89,9 @@ from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort as FilterableDataSourcePort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort as DeltaReaderPort
+from bioetl.domain.ports.export import (
+    DebugExportPort as DebugExportPort,
+)
 from bioetl.domain.ports.export import (
     ExportCatalogPort as ExportCatalogPort,
 )
@@ -331,6 +337,9 @@ from bioetl.domain.ports.stage_accounting import (
 )
 from bioetl.domain.ports.storage import (
     BronzeStoragePort as BronzeStoragePort,
+)
+from bioetl.domain.ports.storage import (
+    RunReportStorePort as RunReportStorePort,
 )
 from bioetl.domain.ports.storage import (
     GoldStoragePort as GoldStoragePort,

@@ -12,9 +12,6 @@ from bioetl.application.services.control_plane.manifest._service_support import 
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
-from bioetl.application.services.control_plane.manifest.contract_evidence import (
-    ContractEvidenceRecorderPort,
-)
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
 )
@@ -27,7 +24,11 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_run_manifest_spec,
 )
-from bioetl.domain.ports import MetricsPort, RunManifestPort
+from bioetl.domain.ports import (
+    ContractEvidenceRecorderPort,
+    MetricsPort,
+    RunManifestPort,
+)
 from bioetl.domain.types import RunType
 
 __all__ = [
