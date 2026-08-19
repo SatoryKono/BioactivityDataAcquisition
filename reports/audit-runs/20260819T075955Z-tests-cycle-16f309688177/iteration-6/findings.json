@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TEST-SYS-003",
+    "path": "tests/unit/interfaces/cli/test_workflow_cli.py:503",
+    "observation": "N=10 reruns produced the same failure every time; no flaky behavior was observed.",
+    "method": "Exact pytest node rerun 10 times",
+    "expected": "Flaky claim requires mixed outcomes; stable regressions require contract repair.",
+    "actual": "10/10 failed before the fix and the final canonical lane passed.",
+    "impact": "Correct classification avoids hiding a stable regression behind retries/quarantine.",
+    "confidence": "high",
+    "status": "PROVEN",
+    "priority": "P1",
+    "severity": "High",
+    "category": "flaky_triage",
+    "evidence": [{"path": "reports/quality/flaky-test-burndown-review.json", "command": "exact node x10", "observation": "Curated flaky total remains zero."}],
+    "root_cause": "Stable stale assertion, not timing/random/isolation.",
+    "remediation": "Keep retries/quarantine at zero and repair the expectation.",
+    "effort": "S",
+    "automation": "flaky-test-burndown-review",
+    "automated_fix_possible": true,
+    "dependencies": [],
+    "validation": ["report-flaky-test-burndown-review --check", "canonical unit-fast"],
+    "resolution_state": "RESOLVED"
+  }
+]
