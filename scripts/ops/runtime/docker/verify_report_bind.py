@@ -300,6 +300,7 @@ def verify(
         )
 
     host_count: int | None = None
+    host_latest_run_id: str | None = None
     if pipeline:
         entries = list_pipeline_reports(
             pipeline_name=pipeline,

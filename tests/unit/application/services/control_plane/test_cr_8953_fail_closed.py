@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from uuid import UUID
@@ -183,8 +184,9 @@ def test_pipeline_child_details_require_both_child_identifiers() -> None:
 
 
 def test_workflow_manifest_ignores_nested_input_mutation_after_create() -> None:
-    launch_context = {"filters": {"assay_type": "B"}, "limit": 25}
-    transform_config = {"mode": "bounded", "keys": ["assay_id"]}
+    filters: dict[str, str] = {"assay_type": "B"}
+    transform_config: dict[str, object] = {"mode": "bounded", "keys": ["assay_id"]}
+    launch_context: dict[str, object] = {"filters": filters, "limit": 25}
     saved: list[object] = []
     service = WorkflowManifestService(
         manifest_port=SimpleNamespace(save=saved.append),
@@ -208,11 +210,15 @@ def test_workflow_manifest_ignores_nested_input_mutation_after_create() -> None:
             launch_context=launch_context,
         )
     )
-    launch_context["filters"]["assay_type"] = "mutated"
+    filters["assay_type"] = "mutated"
     transform_config["mode"] = "mutated"
 
-    assert manifest.launch_context["filters"]["assay_type"] == "B"
-    assert manifest.steps[0].config["mode"] == "bounded"
+    manifest_filters = manifest.launch_context["filters"]
+    assert isinstance(manifest_filters, Mapping)
+    assert manifest_filters["assay_type"] == "B"
+    step_config = manifest.steps[0].config
+    assert step_config is not None
+    assert step_config["mode"] == "bounded"
     assert saved == [manifest]
 
 
@@ -467,10 +473,14 @@ def test_authoritative_artifacts_and_list_payloads_are_copied() -> None:
     dossier = build_authoritative_replay_dossier(
         manifest=make_run_manifest(),
         diagnostics=diagnostics,
-        identity_graph={},
+        identity_graph=dict[str, object](),
     )
-    dossier["authoritative_replay_artifacts"].append("mutated")
-    dossier["input_snapshot_ids"].append("mutated")
+    artifacts = dossier["authoritative_replay_artifacts"]
+    snapshot_ids = dossier["input_snapshot_ids"]
+    assert isinstance(artifacts, list)
+    assert isinstance(snapshot_ids, list)
+    artifacts.append("mutated")
+    snapshot_ids.append("mutated")
     _list_payload_values(diagnostics, "input_snapshot_ids").append("aliased")
 
     assert "mutated" not in _AUTHORITATIVE_REPLAY_ARTIFACTS
@@ -510,17 +520,23 @@ def test_strict_code_provenance_normalizes_profile_aliases() -> None:
 
 
 def test_identity_graph_build_does_not_mutate_caller_diagnostics() -> None:
-    published = {"stage": "bronze", "artifact_id": "a1"}
-    diagnostics = {
+    published: dict[str, object] = {"stage": "bronze", "artifact_id": "a1"}
+    diagnostics: dict[str, object] = {
         "identity_graph": {"canonical_execution_identity": {"fingerprint": "fp"}},
         "artifact_refs": [published],
     }
 
     graph = RunManifestIdentityGraphAssembler.build(make_run_manifest(), diagnostics)
-    graph["published_artifacts"][0]["stage"] = "mutated"
+    published_artifacts = graph.get("published_artifacts")
+    assert isinstance(published_artifacts, list)
+    first_artifact = published_artifacts[0]
+    assert isinstance(first_artifact, dict)
+    first_artifact["stage"] = "mutated"
     graph["extra"] = True
 
-    assert "published_artifacts" not in diagnostics["identity_graph"]
+    existing_graph = diagnostics["identity_graph"]
+    assert isinstance(existing_graph, dict)
+    assert "published_artifacts" not in existing_graph
     assert published["stage"] == "bronze"
 
 

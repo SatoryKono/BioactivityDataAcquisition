@@ -56,10 +56,11 @@ class FixtureHandler(BaseHTTPRequestHandler):
     fixture_root: Path = DEFAULT_ROOT
     default_state: str = "populated"
 
-    def log_message(self, _fmt: str, *_args: object) -> None:
+    def log_message(self, format: str, *args: object) -> None:
         # Keep stdout free of secrets; only method + path.
         import sys
 
+        _ = (format, args)
         print(f"[fixture] {self.command} {self.path}", file=sys.stderr)
 
     def do_GET(self) -> None:

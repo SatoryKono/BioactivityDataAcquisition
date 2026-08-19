@@ -34,8 +34,7 @@ from scripts.engineering.qa.observability_metric_inventory_scan import (
     _normalize_mapping_lists,
     _read_runtime_event_candidate_text,
 )
-from scripts.engineering.qa.report_observability_metric_inventory import (
-    REGISTERED_PROMETHEUS_METRIC_LABELS as REGISTERED_PROMETHEUS_METRIC_LABELS,
+from scripts.engineering.qa.observability_metric_inventory_shared import (
     MetricInventoryReport,
     _CANONICAL_METRIC_RE,
     _DEFAULT_DRIFT_ALLOWLIST,
@@ -44,6 +43,9 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _PROMETHEUS_BEARER_TOKEN_ENV_VAR,
     _PROMETHEUS_QUERY_TIMEOUT_SECONDS,
 )
+
+
+REGISTERED_PROMETHEUS_METRIC_LABELS: dict[str, frozenset[str]] = {}
 
 
 def _declared_pipeline_event_names() -> set[str]:

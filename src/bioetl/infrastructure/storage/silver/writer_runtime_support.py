@@ -10,6 +10,7 @@ from typing import Any, Protocol
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import (
+    ClockPort,
     LoggerPort,
     TracingPort,
 )
@@ -39,7 +40,7 @@ class _SilverWriterDispatchHost(Protocol):
     """Minimal SilverWriter surface required by runtime helpers."""
 
     logger: LoggerPort
-    _clock: object
+    _clock: ClockPort
     _pipeline_name: str | None
     _tracing: TracingPort | None
     _contract_rollout_policy: ContractRolloutPolicy | None

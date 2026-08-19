@@ -236,7 +236,7 @@ class ProteinClassificationResolutionService:
                 f"{sorted(_INVALID_RECORD_POLICIES)}, got {invalid_record_policy!r}"
             )
         self._classification_port = classification_port
-        self._invalid_record_policy = invalid_record_policy
+        self._invalid_record_policy: InvalidRecordPolicy = invalid_record_policy
         self._target_type_mapping_data = (
             target_type_mapping_data or current_protein_class_target_type_mapping()
         )

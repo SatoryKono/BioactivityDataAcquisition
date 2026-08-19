@@ -47,11 +47,11 @@ def test_fixture_state_evidence_binds_validated_registry_and_fixture_hashes(
     assert evidence is not None
     assert evidence["contract"] == "dashboard_state_fixture_v1"
     assert evidence["path"] == str(FIXTURE_INDEX_RELATIVE_PATH)
-    assert evidence["cases"] == sorted(evidence["fixtures"])
-    assert isinstance(evidence["sha256"], str) and len(evidence["sha256"]) == 64
     fixtures = evidence["fixtures"]
     assert isinstance(fixtures, dict)
-    assert fixtures["ok"]["path"].endswith("dashboard_states/ok.json")
+    assert evidence["cases"] == sorted(fixtures)
+    assert isinstance(evidence["sha256"], str) and len(evidence["sha256"]) == 64
+    assert fixtures["ok"]["path"].replace("\\", "/").endswith("dashboard_states/ok.json")
     assert isinstance(fixtures["ok"]["sha256"], str)
 
 
