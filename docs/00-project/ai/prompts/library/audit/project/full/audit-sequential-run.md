@@ -320,7 +320,7 @@ worktree.
 
 ## Последовательность (обязательная)
 
-Канон — `prompt.audit.cycle.*` 1→10 ([cycle/README.md](cycle/README.md)).
+Канон — `prompt.audit.cycle.*` 1→10 ([cycle/README.md](../../cycle/README.md)).
 Method card читать как метод, не как второй полный прогон.
 
 | # | Card | Файл |

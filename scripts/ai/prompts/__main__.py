@@ -7,6 +7,7 @@ Usage:
   python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=src/bioetl/domain
   python -m scripts.ai.prompts check-registry
   python -m scripts.ai.prompts check
+  python -m scripts.ai.prompts project-full-links --check
   python -m scripts.ai.prompts catalog
   python -m scripts.ai.prompts new --id prompt.example.demo --class operator-paste
 """
@@ -24,6 +25,10 @@ from scripts.ai.prompts.check import (
     write_quality_artifact,
 )
 from scripts.ai.prompts.registry import PROMPTS_ROOT, REPO_ROOT
+from scripts.ai.prompts.project_full import (
+    find_project_full_link_drift,
+    sync_project_full_links,
+)
 from scripts.ai.prompts.render import (
     generate_catalog_markdown,
     list_entries,
@@ -179,9 +184,17 @@ def cmd_check(args: argparse.Namespace) -> int:
     # merge
     reg.errors.extend(hyg.errors)
     reg.warnings.extend(hyg.warnings)
+    project_full_drift = find_project_full_link_drift()
+    for path in project_full_drift:
+        reg.add_error(
+            "project_full_link_drift",
+            "generated full-paste links require source-relative rebasing",
+            path.relative_to(REPO_ROOT).as_posix(),
+        )
     reg.stats = {
         "registry": reg.stats,
         "hygiene": hyg.stats,
+        "project_full_link_drift": len(project_full_drift),
         "errors": len(reg.errors),
         "warnings": len(reg.warnings),
     }
@@ -191,6 +204,24 @@ def cmd_check(args: argparse.Namespace) -> int:
         write_quality_artifact(reg, REPO_ROOT / artifact)
         print(f"artifact: {artifact}", file=sys.stderr)
     return EXIT_OK if reg.ok else EXIT_CHECK
+
+
+def cmd_project_full_links(args: argparse.Namespace) -> int:
+    if args.sync:
+        changed = sync_project_full_links()
+        for path in changed:
+            print(f"rebased {path.relative_to(REPO_ROOT).as_posix()}")
+        print(f"project/full link sync: {len(changed)} file(s) changed")
+        return EXIT_OK
+
+    drift = find_project_full_link_drift()
+    for path in drift:
+        print(f"link drift: {path.relative_to(REPO_ROOT).as_posix()}")
+    if drift:
+        print("run project-full-links --sync", file=sys.stderr)
+        return EXIT_CHECK
+    print("project/full link check: OK")
+    return EXIT_OK
 
 
 def cmd_catalog(args: argparse.Namespace) -> int:
@@ -338,6 +369,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write reports/quality/prompts/check.json",
     )
     p_check.set_defaults(func=cmd_check)
+
+    p_project_links = sub.add_parser(
+        "project-full-links",
+        help="Check or sync source-relative links in generated project/full pastes",
+    )
+    mode = p_project_links.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when generated links require rebasing (default)",
+    )
+    mode.add_argument(
+        "--sync",
+        action="store_true",
+        help="Rebase links that resolve beside the source prompt card",
+    )
+    p_project_links.set_defaults(func=cmd_project_full_links)
 
     p_cat = sub.add_parser(
         "catalog", help="Generate generated/CATALOG.md from REGISTRY"

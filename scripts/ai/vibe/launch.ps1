@@ -50,9 +50,8 @@ try {
 if (-not $vibeExists) {
     Write-MistralError "Mistral Vibe CLI not found in WSL"
     Write-Host "[mistral] Install with one of:"
-    Write-Host "[mistral]   wsl -e bash -c 'curl -LsSf https://mistral.ai/vibe/install.sh | bash'"
-    Write-Host "[mistral]   wsl -e bash -c 'python3 -m pip install --user mistral-vibe'"
     Write-Host "[mistral]   wsl -e bash -c 'pipx install mistral-vibe'"
+    Write-Host "[mistral]   wsl -e bash -c 'python3 -m pip install --user mistral-vibe'"
     exit 1
 }
 

@@ -21,6 +21,11 @@ import setup_mcp  # pyright: ignore[reportImplicitRelativeImport]
 from mcp_profile_contract import profile_plan, validate_profile_matrix  # pyright: ignore[reportImplicitRelativeImport]
 from native_runtime_contract import Finding, REPO_ROOT, validate_native_runtime  # pyright: ignore[reportImplicitRelativeImport]
 
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.ai.sync.governance import normalize_codex_agents
+
 
 def _as_str_list(value: object) -> list[str]:
     if isinstance(value, (list, tuple, set)):
@@ -34,6 +39,14 @@ DAILY_PROFILES = {"stable", "shared"}
 
 def run_static(repo_root: Path, *, output_json: bool = False) -> int:
     findings = validate_native_runtime(repo_root)
+    findings.extend(
+        Finding(
+            "governance.normalization",
+            issue,
+            issue.split(":", 1)[0],
+        )
+        for issue in normalize_codex_agents(repo_root, check_only=True)
+    )
     findings.extend(
         Finding("mcp.matrix", error, "scripts/ai/codex/setup_mcp.py")
         for error in validate_profile_matrix(repo_root)

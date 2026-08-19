@@ -29,7 +29,12 @@ Regenerate:
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.audit.cycle.docs `
   --param N=10 --param MODE=full --param LANGUAGE=ru
+.\.venv-win\Scripts\python.exe -m scripts.ai.prompts project-full-links --sync
 ```
+
+The link-sync step rebases source-card-relative links for the deeper
+`project/full/` output directory. `python -m scripts.ai.prompts check` fails if
+that generated-link step was skipped.
 
 ## Files (`full/`)
 
