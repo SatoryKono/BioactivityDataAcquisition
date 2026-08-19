@@ -112,40 +112,32 @@ def list_renderer_snapshots(project: str, compose_file: Path) -> list[RendererSn
             timeout=30.0,
         )
     ids = [line.strip() for line in out.splitlines() if line.strip()]
-    snapshots: list[RendererSnapshot] = []
-    for cid in ids:
-        code, raw, _ = _run(
-            [
-                "docker",
-                "inspect",
-                "--format",
-                "{{json .}}",
-                cid,
-            ],
-            timeout=15.0,
-        )
-        if code != 0 or not raw:
-            continue
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            continue
-        state = payload.get("State") or {}
-        health = (state.get("Health") or {}).get("Status") or "none"
-        host = payload.get("HostConfig") or {}
-        mem = host.get("Memory")
-        snapshots.append(
-            RendererSnapshot(
-                container_id=cid[:12],
-                name=str(payload.get("Name") or "").lstrip("/"),
-                status=str(state.get("Status") or "unknown"),
-                health=str(health),
-                oom_killed=bool(state.get("OOMKilled")),
-                restart_count=int(state.get("RestartCount") or 0),
-                memory_limit_bytes=int(mem) if mem else None,
-            )
-        )
-    return snapshots
+    return [snapshot for cid in ids if (snapshot := _inspect_renderer(cid)) is not None]
+
+
+def _inspect_renderer(container_id: str) -> RendererSnapshot | None:
+    code, raw, _ = _run(
+        ["docker", "inspect", "--format", "{{json .}}", container_id],
+        timeout=15.0,
+    )
+    if code != 0 or not raw:
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    state = payload.get("State") or {}
+    health = (state.get("Health") or {}).get("Status") or "none"
+    mem = (payload.get("HostConfig") or {}).get("Memory")
+    return RendererSnapshot(
+        container_id=container_id[:12],
+        name=str(payload.get("Name") or "").lstrip("/"),
+        status=str(state.get("Status") or "unknown"),
+        health=str(health),
+        oom_killed=bool(state.get("OOMKilled")),
+        restart_count=int(state.get("RestartCount") or 0),
+        memory_limit_bytes=int(mem) if mem else None,
+    )
 
 
 def probe_grafana_ui(*, timeout: float = 5.0) -> bool | None:
@@ -156,6 +148,48 @@ def probe_grafana_ui(*, timeout: float = 5.0) -> bool | None:
             return 200 <= int(resp.status) < 300
     except Exception:
         return False
+
+
+def _recreate_renderer(
+    project: str,
+    compose_path: Path,
+    *,
+    wait_seconds: float,
+) -> tuple[bool, str | None]:
+    code, out, err = _run(
+        [
+            *_compose_base(project, compose_path),
+            "up",
+            "-d",
+            "--force-recreate",
+            "--no-deps",
+            "renderer",
+        ],
+        timeout=max(120.0, wait_seconds + 30.0),
+    )
+    return code == 0, None if code == 0 else f"compose up renderer failed: {err or out}"
+
+
+def _wait_for_renderer(
+    project: str,
+    compose_path: Path,
+    *,
+    wait_seconds: float,
+    messages: list[str],
+) -> tuple[bool, list[dict[str, Any]]]:
+    deadline = time.monotonic() + max(5.0, wait_seconds)
+    after: list[dict[str, Any]] = []
+    while time.monotonic() < deadline:
+        snaps = list_renderer_snapshots(project, compose_path)
+        after = [asdict(s) for s in snaps]
+        if any(s.oom_killed for s in snaps):
+            messages.append("renderer OOMKilled — free host RAM before retry")
+            return False, after
+        if any(s.health == "healthy" for s in snaps):
+            messages.append("renderer health=healthy")
+            return True, after
+        time.sleep(3.0)
+    return False, after
 
 
 def recover_renderer(
@@ -193,20 +227,11 @@ def recover_renderer(
     before = [asdict(s) for s in list_renderer_snapshots(project, compose_path)]
     recreated = False
     if not skip_recreate:
-        code, out, err = _run(
-            [
-                *_compose_base(project, compose_path),
-                "up",
-                "-d",
-                "--force-recreate",
-                "--no-deps",
-                "renderer",
-            ],
-            timeout=max(120.0, wait_seconds + 30.0),
+        recreated, recreate_error = _recreate_renderer(
+            project, compose_path, wait_seconds=wait_seconds
         )
-        recreated = code == 0
-        if code != 0:
-            messages.append(f"compose up renderer failed: {err or out}")
+        if recreate_error:
+            messages.append(recreate_error)
             return RecoverReport(
                 ok=False,
                 action="recover-renderer",
@@ -223,20 +248,12 @@ def recover_renderer(
             )
         messages.append("recreated renderer via compose --no-deps")
 
-    deadline = time.monotonic() + max(5.0, wait_seconds)
-    healthy = False
-    after: list[dict[str, Any]] = []
-    while time.monotonic() < deadline:
-        snaps = list_renderer_snapshots(project, compose_path)
-        after = [asdict(s) for s in snaps]
-        if any(s.oom_killed for s in snaps):
-            messages.append("renderer OOMKilled — free host RAM before retry")
-            break
-        if any(s.health == "healthy" for s in snaps):
-            healthy = True
-            messages.append("renderer health=healthy")
-            break
-        time.sleep(3.0)
+    healthy, after = _wait_for_renderer(
+        project,
+        compose_path,
+        wait_seconds=wait_seconds,
+        messages=messages,
+    )
 
     if not healthy and after:
         # Accept running only after wait exhausted if health missing (rare).
@@ -281,6 +298,34 @@ def check_renderer_health(
     )
 
 
+def _as_check_only_report(report: RecoverReport) -> RecoverReport:
+    snapshots = report.after or report.before
+    healthy = any(snapshot.get("health") == "healthy" for snapshot in snapshots)
+    if healthy:
+        status_message = ["renderer healthy"]
+        remediation: list[str] = []
+    else:
+        status_message = ["renderer not healthy (optional service)"]
+        remediation = [
+            "python scripts/ops/observability/grafana/recover_renderer.py",
+            "or: python -m scripts.ops.runtime.docker.runtime_manager recover-renderer --stack monitoring",
+        ]
+    return RecoverReport(
+        ok=healthy,
+        action="check-renderer",
+        project=report.project,
+        compose_file=report.compose_file,
+        recreated=False,
+        healthy=healthy,
+        grafana_ui_ok=report.grafana_ui_ok,
+        wait_seconds=0.0,
+        before=report.before,
+        after=report.after,
+        messages=report.messages + status_message,
+        remediation=remediation,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=DEFAULT_PROJECT)
@@ -300,34 +345,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         # check-only with wait 0.1 may not see healthy if just starting;
         # re-evaluate from after snapshots.
-        snaps = report.after or report.before
-        healthy = any(s.get("health") == "healthy" for s in snaps)
-        report = RecoverReport(
-            ok=healthy,
-            action="check-renderer",
-            project=report.project,
-            compose_file=report.compose_file,
-            recreated=False,
-            healthy=healthy,
-            grafana_ui_ok=report.grafana_ui_ok,
-            wait_seconds=0.0,
-            before=report.before,
-            after=report.after,
-            messages=report.messages
-            + (
-                ["renderer healthy"]
-                if healthy
-                else ["renderer not healthy (optional service)"]
-            ),
-            remediation=(
-                []
-                if healthy
-                else [
-                    "python scripts/ops/observability/grafana/recover_renderer.py",
-                    "or: python -m scripts.ops.runtime.docker.runtime_manager recover-renderer --stack monitoring",
-                ]
-            ),
-        )
+        report = _as_check_only_report(report)
     else:
         report = recover_renderer(
             project=args.project,

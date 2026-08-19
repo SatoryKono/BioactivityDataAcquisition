@@ -443,7 +443,7 @@ function isFirstWindowPanel(panel, firstWindowY = FIRST_WINDOW_Y) {
   if (!panel || typeof panel !== "object" || panel.type === "row") {
     return false;
   }
-  const y = panel.gridPos && panel.gridPos.y;
+  const y = panel.gridPos?.y;
   return Number.isInteger(y) && y < firstWindowY;
 }
 
@@ -476,29 +476,70 @@ function summarizeFirstWindowPanel(panel) {
   };
 }
 
-function evaluatePanelContainment(measurement, policy = {}) {
-  const tolerance = Number.isFinite(policy.tolerancePx)
-    ? policy.tolerancePx
-    : CONTAINMENT_TOLERANCE_PX;
-  const firstWindowY = Number.isInteger(policy.firstWindowY)
-    ? policy.firstWindowY
-    : FIRST_WINDOW_Y;
-  const containedTypes = new Set(
-    Array.isArray(policy.containedTypes)
-      ? policy.containedTypes
-      : FIRST_WINDOW_CONTAINMENT_TYPES,
-  );
-  const horizontalAllow = new Set(
-    Array.isArray(policy.horizontalScrollAllowlist)
-      ? policy.horizontalScrollAllowlist
-      : [],
-  );
-  const firstWindowOverflowAllow = new Set(
-    Array.isArray(policy.firstWindowOverflowAllowlist)
-      ? policy.firstWindowOverflowAllowlist
-      : [],
-  );
+function resolvedContainmentPolicy(policy) {
+  return {
+    tolerance: Number.isFinite(policy.tolerancePx)
+      ? policy.tolerancePx
+      : CONTAINMENT_TOLERANCE_PX,
+    firstWindowY: Number.isInteger(policy.firstWindowY)
+      ? policy.firstWindowY
+      : FIRST_WINDOW_Y,
+    containedTypes: new Set(
+      Array.isArray(policy.containedTypes)
+        ? policy.containedTypes
+        : FIRST_WINDOW_CONTAINMENT_TYPES,
+    ),
+    horizontalAllow: new Set(
+      Array.isArray(policy.horizontalScrollAllowlist)
+        ? policy.horizontalScrollAllowlist
+        : [],
+    ),
+    firstWindowOverflowAllow: new Set(
+      Array.isArray(policy.firstWindowOverflowAllowlist)
+        ? policy.firstWindowOverflowAllowlist
+        : [],
+    ),
+  };
+}
 
+function overflowFlags(measurement, tolerance) {
+  const clientHeight = Number(measurement.clientHeight);
+  const scrollHeight = Number(measurement.scrollHeight);
+  const clientWidth = Number(measurement.clientWidth);
+  const scrollWidth = Number(measurement.scrollWidth);
+  return {
+    verticalOverflow:
+      Number.isFinite(scrollHeight) &&
+      Number.isFinite(clientHeight) &&
+      scrollHeight > clientHeight + tolerance,
+    horizontalOverflow:
+      Number.isFinite(scrollWidth) &&
+      Number.isFinite(clientWidth) &&
+      scrollWidth > clientWidth + tolerance,
+  };
+}
+
+function containmentReasons(measurement, resolvedPolicy, flags) {
+  const firstWindow =
+    Number.isInteger(measurement.gridPos?.y) &&
+    measurement.gridPos.y < resolvedPolicy.firstWindowY;
+  const allowKey = `${measurement.uid || ""}:${measurement.id}`;
+  const allowed = (allowlist) =>
+    allowlist.has(allowKey) || allowlist.has(String(measurement.id));
+  const reasons = [];
+  if (firstWindow && resolvedPolicy.containedTypes.has(measurement.type)) {
+    if (allowed(resolvedPolicy.firstWindowOverflowAllow)) {
+      reasons.push("forbidden-first-window-overflow-exception");
+    }
+    if (flags.verticalOverflow) reasons.push("vertical-overflow");
+    if (flags.horizontalOverflow) reasons.push("horizontal-overflow");
+  } else if (flags.horizontalOverflow && !allowed(resolvedPolicy.horizontalAllow)) {
+    reasons.push("horizontal-overflow");
+  }
+  return reasons;
+}
+
+function evaluatePanelContainment(measurement, policy = {}) {
   if (!measurement || typeof measurement !== "object") {
     return {
       status: "error",
@@ -518,46 +559,13 @@ function evaluatePanelContainment(measurement, policy = {}) {
     };
   }
 
-  const y = measurement.gridPos && measurement.gridPos.y;
-  const firstWindow = Number.isInteger(y) && y < firstWindowY;
-  const clientHeight = Number(measurement.clientHeight);
-  const scrollHeight = Number(measurement.scrollHeight);
-  const clientWidth = Number(measurement.clientWidth);
-  const scrollWidth = Number(measurement.scrollWidth);
-  const verticalOverflow =
-    Number.isFinite(scrollHeight) &&
-    Number.isFinite(clientHeight) &&
-    scrollHeight > clientHeight + tolerance;
-  const horizontalOverflow =
-    Number.isFinite(scrollWidth) &&
-    Number.isFinite(clientWidth) &&
-    scrollWidth > clientWidth + tolerance;
-  const allowKey = `${measurement.uid || ""}:${measurement.id}`;
-  const reasons = [];
-
-  if (firstWindow && containedTypes.has(measurement.type)) {
-    if (firstWindowOverflowAllow.has(allowKey) || firstWindowOverflowAllow.has(String(measurement.id))) {
-      reasons.push("forbidden-first-window-overflow-exception");
-    }
-    if (verticalOverflow) {
-      reasons.push("vertical-overflow");
-    }
-    if (horizontalOverflow) {
-      reasons.push("horizontal-overflow");
-    }
-  } else if (horizontalOverflow) {
-    if (
-      !horizontalAllow.has(allowKey) &&
-      !horizontalAllow.has(String(measurement.id))
-    ) {
-      reasons.push("horizontal-overflow");
-    }
-  }
+  const resolvedPolicy = resolvedContainmentPolicy(policy);
+  const flags = overflowFlags(measurement, resolvedPolicy.tolerance);
+  const reasons = containmentReasons(measurement, resolvedPolicy, flags);
 
   return {
     ...measurement,
-    verticalOverflow,
-    horizontalOverflow,
+    ...flags,
     status: reasons.length > 0 ? "error" : "ok",
     reasons,
   };
@@ -579,6 +587,23 @@ function evaluateContainmentResults(measurements, policy = {}) {
     panels,
     overflowCount,
   };
+}
+
+function containmentPanelSchemaReasons(panel, index, required) {
+  if (!panel || typeof panel !== "object") {
+    return [`panel-${index}-invalid`];
+  }
+  const reasons = required
+    .filter((field) => !(field in panel))
+    .map((field) => `panel-${index}-missing-${field}`);
+  if (panel.gridPos && typeof panel.gridPos === "object") {
+    reasons.push(
+      ...["x", "y", "w", "h"]
+        .filter((axis) => !Number.isInteger(panel.gridPos[axis]))
+        .map((axis) => `panel-${index}-grid-${axis}`),
+    );
+  }
+  return reasons;
 }
 
 function validateContainmentManifest(payload) {
@@ -617,22 +642,7 @@ function validateContainmentManifest(payload) {
     "status",
   ];
   for (const [index, panel] of payload.panels.entries()) {
-    if (!panel || typeof panel !== "object") {
-      reasons.push(`panel-${index}-invalid`);
-      continue;
-    }
-    for (const field of required) {
-      if (!(field in panel)) {
-        reasons.push(`panel-${index}-missing-${field}`);
-      }
-    }
-    if (panel.gridPos && typeof panel.gridPos === "object") {
-      for (const axis of ["x", "y", "w", "h"]) {
-        if (!Number.isInteger(panel.gridPos[axis])) {
-          reasons.push(`panel-${index}-grid-${axis}`);
-        }
-      }
-    }
+    reasons.push(...containmentPanelSchemaReasons(panel, index, required));
   }
   if (
     Number.isInteger(payload.overflowCount) &&
@@ -642,6 +652,24 @@ function validateContainmentManifest(payload) {
     reasons.push("overflow-count-mismatch");
   }
   return { status: reasons.length > 0 ? "error" : "ok", reasons };
+}
+
+function summarizeRequiredPanel(panel) {
+  if (!Number.isInteger(panel.id)) return null;
+  const pluginOptions =
+    panel.options && typeof panel.options === "object" ? panel.options : {};
+  const displayTitle =
+    typeof pluginOptions.bioetlDisplayTitle === "string"
+      ? pluginOptions.bioetlDisplayTitle.trim()
+      : "";
+  return {
+    id: panel.id,
+    title:
+      displayTitle ||
+      (typeof panel.title === "string" ? panel.title.trim() : ""),
+    type: typeof panel.type === "string" ? panel.type : "unknown",
+    gridPos: summarizeFirstWindowPanel(panel).gridPos,
+  };
 }
 
 function requiredNonRowPanels(panels, includeCollapsedRows) {
@@ -656,23 +684,8 @@ function requiredNonRowPanels(panels, includeCollapsedRows) {
       }
       continue;
     }
-    if (!Number.isInteger(panel.id)) {
-      continue;
-    }
-    const pluginOptions =
-      panel.options && typeof panel.options === "object" ? panel.options : {};
-    const displayTitle =
-      typeof pluginOptions.bioetlDisplayTitle === "string"
-        ? pluginOptions.bioetlDisplayTitle.trim()
-        : "";
-    required.push({
-      id: panel.id,
-      title:
-        displayTitle ||
-        (typeof panel.title === "string" ? panel.title.trim() : ""),
-      type: typeof panel.type === "string" ? panel.type : "unknown",
-      gridPos: summarizeFirstWindowPanel(panel).gridPos,
-    });
+    const summary = summarizeRequiredPanel(panel);
+    if (summary) required.push(summary);
   }
   return required;
 }
@@ -1728,7 +1741,7 @@ async function collectTypographyValidation(page, dashboard) {
   }) => {
     const round = (value) => Math.round(value * 100) / 100;
     const visible = (element) => {
-      if (!(element instanceof Element)) return false;
+      if (element?.nodeType !== Node.ELEMENT_NODE) return false;
       const rect = element.getBoundingClientRect();
       const style = getComputedStyle(element);
       return (
@@ -1739,9 +1752,13 @@ async function collectTypographyValidation(page, dashboard) {
       );
     };
     const panelElement = (panel) =>
-      document.querySelector(`[data-panelid="${panel.id}"]`) ||
-      document.querySelector(`[data-viz-panel-key="panel-${panel.id}"]`) ||
-      document.querySelector(`[data-griditem-key="grid-item-${panel.id}"]`);
+      [
+        `[data-panelid="${panel.id}"]`,
+        `[data-viz-panel-key="panel-${panel.id}"]`,
+        `[data-griditem-key="grid-item-${panel.id}"]`,
+      ]
+        .map((selector) => document.querySelector(selector))
+        .find(Boolean) || null;
     const panelTitleElement = (container) =>
       container.querySelector("[data-bioetl-panel-title]") ||
       container.querySelector(".bioetl-panel-title") ||
@@ -1764,56 +1781,38 @@ async function collectTypographyValidation(page, dashboard) {
         .join(" ")
         .trim();
 
-    const panels = [];
-    const violations = [];
-    for (const panel of requiredPanels) {
-      const container = panelElement(panel);
-      if (!container) {
-        violations.push({
-          id: panel.id,
-          title: panel.title,
-          kind: "panel_missing",
-        });
-        continue;
-      }
-
-      const titleElement = panelTitleElement(container);
-      const authoredTitle = Boolean(
-        titleElement?.matches(
-          "[data-bioetl-panel-title], .bioetl-panel-title",
-        ),
+    const titleEvidence = (panel, container) => {
+      const element = panelTitleElement(container);
+      const authored = Boolean(
+        element?.matches("[data-bioetl-panel-title], .bioetl-panel-title"),
       );
-      const titleMinimumPx = authoredTitle
-        ? minAuthoredTitlePx
-        : minGrafanaTitlePx;
-      const titleFontPx = titleElement
-        ? Number.parseFloat(getComputedStyle(titleElement).fontSize)
+      const minimumPx = authored ? minAuthoredTitlePx : minGrafanaTitlePx;
+      const fontPx = element
+        ? Number.parseFloat(getComputedStyle(element).fontSize)
         : null;
-      if (!Number.isFinite(titleFontPx) || titleFontPx + 0.01 < titleMinimumPx) {
-        violations.push({
-          id: panel.id,
-          title: panel.title,
-          kind: "panel_title_font",
-          observedPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
-          minimumPx: round(titleMinimumPx),
-          surface: authoredTitle ? "authored" : "grafana-managed",
-        });
-      }
+      const violation =
+        !Number.isFinite(fontPx) || fontPx + 0.01 < minimumPx
+          ? {
+              id: panel.id,
+              title: panel.title,
+              kind: "panel_title_font",
+              observedPx: Number.isFinite(fontPx) ? round(fontPx) : null,
+              minimumPx: round(minimumPx),
+              surface: authored ? "authored" : "grafana-managed",
+            }
+          : null;
+      return { element, authored, minimumPx, fontPx, violation };
+    };
 
+    const bodyEvidence = (panel, container, titleElement) => {
       const bodyRoot = panelBodyRoot(container);
-      const bodyMinimumPx = panel.type === "text"
-        ? minAuthoredBodyPx
-        : minGrafanaBodyPx;
-      const navigationRoot = container.querySelector(".bioetl-nav");
-      const bodyFontSamples = [bodyRoot, ...Array.from(bodyRoot.querySelectorAll("*"))]
+      const minimumPx =
+        panel.type === "text" ? minAuthoredBodyPx : minGrafanaBodyPx;
+      const surface = panel.type === "text" ? "authored" : "grafana-managed";
+      const samples = [bodyRoot, ...Array.from(bodyRoot.querySelectorAll("*"))]
         .filter((element) => {
           if (!visible(element) || !ownText(element)) return false;
-          if (
-            titleElement &&
-            (element === titleElement || titleElement.contains(element))
-          ) {
-            return false;
-          }
+          if (titleElement?.contains(element) || element === titleElement) return false;
           return !element.closest("script, style, noscript");
         })
         .map((element) => ({
@@ -1823,43 +1822,40 @@ async function collectTypographyValidation(page, dashboard) {
           text: ownText(element).slice(0, 120),
         }))
         .filter((sample) => Number.isFinite(sample.fontPx));
-      const bodyFonts = bodyFontSamples.map((sample) => sample.fontPx);
-      const minimumBodyFontPx =
-        bodyFonts.length > 0 ? Math.min(...bodyFonts) : null;
-      const minimumBodyFontSample = bodyFontSamples.find(
-        (sample) => sample.fontPx === minimumBodyFontPx,
-      );
-      const populatedNavigation = Boolean(
-        container.querySelector('.bioetl-nav a[href*="/d/"]'),
-      );
-      if (populatedNavigation && bodyFonts.length === 0) {
+      const fonts = samples.map((sample) => sample.fontPx);
+      const fontPx = fonts.length > 0 ? Math.min(...fonts) : null;
+      const minimumSample = samples.find((sample) => sample.fontPx === fontPx);
+      const violations = [];
+      if (container.querySelector('.bioetl-nav a[href*="/d/"]') && fonts.length === 0) {
         violations.push({
           id: panel.id,
           title: panel.title,
           kind: "panel_body_font_missing",
-          minimumPx: round(bodyMinimumPx),
-          surface: panel.type === "text" ? "authored" : "grafana-managed",
+          minimumPx: round(minimumPx),
+          surface,
         });
       }
-      if (
-        Number.isFinite(minimumBodyFontPx) &&
-        minimumBodyFontPx + 0.01 < bodyMinimumPx
-      ) {
+      if (Number.isFinite(fontPx) && fontPx + 0.01 < minimumPx) {
         violations.push({
           id: panel.id,
           title: panel.title,
           kind: "panel_body_font",
-          observedPx: round(minimumBodyFontPx),
-          minimumPx: round(bodyMinimumPx),
-          surface: panel.type === "text" ? "authored" : "grafana-managed",
+          observedPx: round(fontPx),
+          minimumPx: round(minimumPx),
+          surface,
         });
       }
-      panels.push({
+      return { minimumPx, surface, samples, fonts, fontPx, minimumSample, violations };
+    };
+
+    const panelMeasurement = (panel, container, title, body) => {
+      const navigationRoot = container.querySelector(".bioetl-nav");
+      return {
         id: panel.id,
         title: panel.title,
-        measuredTitleText: titleElement?.textContent?.trim().slice(0, 80) || "",
-        measuredTitleTag: titleElement?.tagName || null,
-        measuredTitleClass: titleElement?.className || null,
+        measuredTitleText: title.element?.textContent?.trim().slice(0, 80) || "",
+        measuredTitleTag: title.element?.tagName || null,
+        measuredTitleClass: title.element?.className || null,
         navigationClassFound: Boolean(navigationRoot),
         navigationFirstChildTag: navigationRoot?.firstElementChild?.tagName || null,
         navigationFirstChildFontPx: navigationRoot?.firstElementChild
@@ -1869,20 +1865,36 @@ async function collectTypographyValidation(page, dashboard) {
               ),
             )
           : null,
-        titleFontPx: Number.isFinite(titleFontPx) ? round(titleFontPx) : null,
-        titleSurface: authoredTitle ? "authored" : "grafana-managed",
-        titleMinimumPx: round(titleMinimumPx),
-        minimumBodyFontPx: Number.isFinite(minimumBodyFontPx)
-          ? round(minimumBodyFontPx)
-          : null,
-        bodySurface: panel.type === "text" ? "authored" : "grafana-managed",
-        bodyMinimumPx: round(bodyMinimumPx),
-        bodyTextSampleCount: bodyFonts.length,
-        minimumBodyFontTag: minimumBodyFontSample?.tag || null,
-        minimumBodyFontClass: minimumBodyFontSample?.className || null,
-        minimumBodyFontText: minimumBodyFontSample?.text || null,
-      });
-    }
+        titleFontPx: Number.isFinite(title.fontPx) ? round(title.fontPx) : null,
+        titleSurface: title.authored ? "authored" : "grafana-managed",
+        titleMinimumPx: round(title.minimumPx),
+        minimumBodyFontPx: Number.isFinite(body.fontPx) ? round(body.fontPx) : null,
+        bodySurface: body.surface,
+        bodyMinimumPx: round(body.minimumPx),
+        bodyTextSampleCount: body.fonts.length,
+        minimumBodyFontTag: body.minimumSample?.tag || null,
+        minimumBodyFontClass: body.minimumSample?.className || null,
+        minimumBodyFontText: body.minimumSample?.text || null,
+      };
+    };
+
+    const results = requiredPanels.map((panel) => {
+      const container = panelElement(panel);
+      if (!container) {
+        return {
+          measurement: null,
+          violations: [{ id: panel.id, title: panel.title, kind: "panel_missing" }],
+        };
+      }
+      const title = titleEvidence(panel, container);
+      const body = bodyEvidence(panel, container, title.element);
+      return {
+        measurement: panelMeasurement(panel, container, title, body),
+        violations: [title.violation, ...body.violations].filter(Boolean),
+      };
+    });
+    const panels = results.map((result) => result.measurement).filter(Boolean);
+    const violations = results.flatMap((result) => result.violations);
     return {
       status: violations.length === 0 ? "ok" : "error",
       bodyMinimumPx: minAuthoredBodyPx,
@@ -1900,6 +1912,120 @@ async function collectTypographyValidation(page, dashboard) {
     minGrafanaBodyPx: MIN_GRAFANA_BODY_FONT_PX,
     minGrafanaTitlePx: MIN_GRAFANA_TITLE_FONT_PX,
   });
+}
+
+async function verifyRenderedPanelCount(page, dashboard, index, total) {
+  const evidence = await countRenderedPanels(page);
+  dashboard.renderedPanelCount = evidence.count;
+  dashboard.renderedPanelSelector = evidence.selector;
+  if (evidence.count === 0) {
+    throw new Error(
+      `Render gate failed for ${dashboard.uid}: renderedPanelCount=0 (blank/zero panels are fail-closed)`,
+    );
+  }
+  console.log(
+    `[${index}/${total}] detected ${evidence.count} rendered panel marker(s) for ${dashboard.uid} using ${evidence.selector}`,
+  );
+}
+
+async function collectVerifiedRenderContext(page, dashboard) {
+  dashboard.requestedViewport = { ...CONFIG.viewport };
+  dashboard.layoutViewport =
+    page.viewportSize() || layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
+  dashboard.actualViewport = physicalViewportFromLayout(
+    dashboard.layoutViewport,
+    CONFIG.browserZoom,
+  );
+  dashboard.requestedTheme = CONFIG.theme;
+  dashboard.actualTheme = await detectActualTheme(page);
+  if (dashboard.actualTheme !== CONFIG.theme) {
+    throw new Error(
+      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
+    );
+  }
+  dashboard.browserState = await detectBrowserAndKioskState(page);
+  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
+    throw new Error(
+      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
+    );
+  }
+  dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
+  if (dashboard.layoutGeometry.horizontalOverflow) {
+    throw new Error(
+      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
+    );
+  }
+}
+
+async function collectVerifiedPanelSurfaces(page, dashboard) {
+  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
+  const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
+  if (containmentSchema.status !== "ok") {
+    throw new Error(
+      `Panel containment schema failed for ${dashboard.uid}: ${containmentSchema.reasons.join(", ")}`,
+    );
+  }
+  if (dashboard.panelContainment.status !== "ok") {
+    const overflow = dashboard.panelContainment.panels
+      .filter((panel) => panel.status !== "ok")
+      .map(
+        (panel) =>
+          `panel ${panel.id} (${panel.title || panel.type}): ${(panel.reasons || []).join(",")}`,
+      );
+    throw new Error(
+      `Panel containment failed for ${dashboard.uid}: ${overflow.join("; ")}`,
+    );
+  }
+  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
+  if (dashboard.typographyValidation.status !== "ok") {
+    throw new Error(
+      `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
+    );
+  }
+  dashboard.navigationValidation = await collectNavigationValidation(page);
+  if (CONFIG.navigationOnly && dashboard.navigationValidation.status !== "ok") {
+    throw new Error(
+      `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
+    );
+  }
+}
+
+async function collectVerifiedTerminalState(page, dashboard, index, total) {
+  dashboard.terminalStateValidation = CONFIG.navigationOnly
+    ? {
+        status: "ok",
+        mode: "navigation-only",
+        checkedPanelCount: 0,
+        panels: [],
+      }
+    : await validateDashboardTerminalStates(page, dashboard, index, total);
+  if (dashboard.terminalStateValidation.status !== "ok") {
+    throw new Error(
+      `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
+    );
+  }
+}
+
+function screenshotOptions(dashboard, filePath) {
+  const options = {
+    path: filePath,
+    timeout: CONFIG.captureTimeoutMs,
+    animations: "disabled",
+    caret: "hide",
+  };
+  if (CONFIG.captureSurface === "viewport") {
+    options.clip = { x: 0, y: 0, ...CONFIG.viewport };
+  } else if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
+    options.clip = {
+      x: 0,
+      y: 0,
+      width: CONFIG.viewport.width,
+      height: dashboard.captureHeight,
+    };
+  } else {
+    options.fullPage = true;
+  }
+  return options;
 }
 
 async function renderDashboard(page, dashboard, index, total) {
@@ -1946,17 +2072,7 @@ async function renderDashboard(page, dashboard, index, total) {
   await waitForDashboardContent(page, dashboard, index, total);
   await materializeLazyPanels(page, dashboard, index, total);
 
-  const renderedPanelEvidence = await countRenderedPanels(page);
-  dashboard.renderedPanelCount = renderedPanelEvidence.count;
-  dashboard.renderedPanelSelector = renderedPanelEvidence.selector;
-  if (renderedPanelEvidence.count === 0) {
-    throw new Error(
-      `Render gate failed for ${dashboard.uid}: renderedPanelCount=0 (blank/zero panels are fail-closed)`,
-    );
-  }
-  console.log(
-    `[${index}/${total}] detected ${renderedPanelEvidence.count} rendered panel marker(s) for ${dashboard.uid} using ${renderedPanelEvidence.selector}`,
-  );
+  await verifyRenderedPanelCount(page, dashboard, index, total);
   const viewportChanged = await prepareDashboardForCapture(
     page,
     dashboard,
@@ -1966,111 +2082,15 @@ async function renderDashboard(page, dashboard, index, total) {
   if (viewportChanged) {
     await settleDashboardAfterViewportChange(page, dashboard, index, total);
   }
-  dashboard.requestedViewport = { ...CONFIG.viewport };
-  dashboard.layoutViewport = page.viewportSize() ||
-    layoutViewportForZoom(CONFIG.viewport, CONFIG.browserZoom);
-  dashboard.actualViewport = physicalViewportFromLayout(
-    dashboard.layoutViewport,
-    CONFIG.browserZoom,
-  );
-  dashboard.requestedTheme = CONFIG.theme;
-  dashboard.actualTheme = await detectActualTheme(page);
-  if (dashboard.actualTheme !== CONFIG.theme) {
-    throw new Error(
-      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
-    );
-  }
-  dashboard.browserState = await detectBrowserAndKioskState(page);
-  if (dashboard.browserState.actualKiosk !== CONFIG.kioskMode) {
-    throw new Error(
-      `Kiosk verification failed for ${dashboard.uid}: requested=${CONFIG.kioskMode} actual=${dashboard.browserState.actualKiosk}`,
-    );
-  }
-  dashboard.layoutGeometry = await collectLayoutGeometry(page, dashboard);
-  if (dashboard.layoutGeometry.horizontalOverflow) {
-    throw new Error(
-      `Layout validation failed for ${dashboard.uid}: documentWidth=${dashboard.layoutGeometry.documentWidth} layoutViewportWidth=${dashboard.layoutGeometry.layoutViewport.width}`,
-    );
-  }
-  dashboard.panelContainment = await collectPanelContainment(page, dashboard);
-  const containmentSchema = validateContainmentManifest(dashboard.panelContainment);
-  if (containmentSchema.status !== "ok") {
-    throw new Error(
-      `Panel containment schema failed for ${dashboard.uid}: ${containmentSchema.reasons.join(", ")}`,
-    );
-  }
-  if (dashboard.panelContainment.status !== "ok") {
-    const overflow = dashboard.panelContainment.panels
-      .filter((panel) => panel.status !== "ok")
-      .map(
-        (panel) =>
-          `panel ${panel.id} (${panel.title || panel.type}): ${(panel.reasons || []).join(",")}`,
-      );
-    throw new Error(
-      `Panel containment failed for ${dashboard.uid}: ${overflow.join("; ")}`,
-    );
-  }
-  dashboard.typographyValidation = await collectTypographyValidation(page, dashboard);
-  if (dashboard.typographyValidation.status !== "ok") {
-    throw new Error(
-      `Typography validation failed for ${dashboard.uid}: ${dashboard.typographyValidation.violations.length} violation(s)`,
-    );
-  }
-  dashboard.navigationValidation = await collectNavigationValidation(page);
-  if (CONFIG.navigationOnly && dashboard.navigationValidation.status !== "ok") {
-    throw new Error(
-      `Navigation validation failed for ${dashboard.uid}: ${JSON.stringify(dashboard.navigationValidation)}`,
-    );
-  }
-  if (CONFIG.navigationOnly) {
-    dashboard.terminalStateValidation = {
-      status: "ok",
-      mode: "navigation-only",
-      checkedPanelCount: 0,
-      panels: [],
-    };
-  } else {
-    dashboard.terminalStateValidation = await validateDashboardTerminalStates(
-      page,
-      dashboard,
-      index,
-      total,
-    );
-  }
-  if (dashboard.terminalStateValidation.status !== "ok") {
-    throw new Error(
-      `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
-    );
-  }
+  await collectVerifiedRenderContext(page, dashboard);
+  await collectVerifiedPanelSurfaces(page, dashboard);
+  await collectVerifiedTerminalState(page, dashboard, index, total);
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
   console.log(
     `[${index}/${total}] capturing screenshot ${dashboard.uid} with timeout ${CONFIG.captureTimeoutMs}ms ...`,
   );
-  const screenshotOptions = {
-    path: filePath,
-    timeout: CONFIG.captureTimeoutMs,
-    animations: "disabled",
-    caret: "hide",
-  };
-  if (CONFIG.captureSurface === "viewport") {
-    screenshotOptions.clip = {
-      x: 0,
-      y: 0,
-      width: CONFIG.viewport.width,
-      height: CONFIG.viewport.height,
-    };
-  } else if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
-    screenshotOptions.clip = {
-      x: 0,
-      y: 0,
-      width: CONFIG.viewport.width,
-      height: dashboard.captureHeight,
-    };
-  } else {
-    screenshotOptions.fullPage = true;
-  }
-  await page.screenshot(screenshotOptions);
+  await page.screenshot(screenshotOptions(dashboard, filePath));
   const screenshotBuffer = await fs.promises.readFile(filePath);
   dashboard.screenshotEvidence = {
     file: dashboard.file,

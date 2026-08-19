@@ -1267,39 +1267,9 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/grafana/_fix_no_scroll_triage_panels.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a one-off dashboard no-scroll migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ops/observability/grafana/apply_dux2_residual.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a one-off DUX2 residual migration helper for auditability; do not promote it to an active operator workflow.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/apply_dux4_enforcement.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a one-off DUX4 dashboard enforcement helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/apply_dux5_residual.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a one-off DUX5 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/apply_dux6_residual.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a one-off DUX6 residual dashboard migration helper for auditability; retire it after the dashboard migration is verified and the generated artifacts become the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/apply_dux7_live_residual.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a one-off DUX7 live residual dashboard migration helper for auditability; retire it after the live review protocol is complete and the generated evidence becomes the durable record.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
@@ -1327,23 +1297,17 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/grafana/generate_dux5_issue_pack.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded DUX5 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/generate_dux6_issue_pack.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as a bounded DUX6 issue-pack generator for auditability; retire it after the issue campaign is published and the generated pack becomes the durable record.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ops/observability/grafana/generate_trust_validation_fixtures.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as the bounded #8576/#8578 Trust-panel fixture generator; consolidate it into the canonical dashboard-audit command or remove it when the reviewed close-up campaign is complete.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/qa_context.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the canonical observability QA-context loader imported by dashboard tooling and tests; keep it supporting unless it becomes a governed standalone entrypoint.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-17"
     },
     "scripts/ops/observability/grafana/recover_renderer.ps1": {
       "decision": "windows_compatibility_wrapper",
@@ -1372,12 +1336,6 @@
     "scripts/ops/observability/grafana/render_nav_bus.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded manual dashboard JSON regeneration helper while navigation-bus generation remains owned by the Grafana dashboard extension workflow; keep it supporting until it is exposed through a canonical governed command surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/observability/grafana/run_dux7_live_residual.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as the bounded DUX7 live residual review runner for auditability; retire it after the review protocol is complete and the generated evidence becomes the durable record.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },

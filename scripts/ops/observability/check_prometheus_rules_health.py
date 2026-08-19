@@ -20,7 +20,7 @@ import argparse
 import hashlib
 import json
 import sys
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -107,6 +107,31 @@ def _is_bioetl_group(file_path: str, group_name: str) -> bool:
     return BIOETL_RULE_FILE_HINT in haystack
 
 
+def _group_rows(rules_payload: Mapping[str, Any]) -> list[object]:
+    data = rules_payload.get("data")
+    rows = data.get("groups") if isinstance(data, Mapping) else None
+    return rows if isinstance(rows, list) else []
+
+
+def _iter_bioetl_groups(
+    rules_payload: Mapping[str, Any],
+) -> Iterator[tuple[str, str, Mapping[str, Any]]]:
+    for group in _group_rows(rules_payload):
+        if not isinstance(group, Mapping):
+            continue
+        file_path = str(group.get("file") or "")
+        group_name = str(group.get("name") or "")
+        if _is_bioetl_group(file_path, group_name):
+            yield file_path, group_name, group
+
+
+def _iter_mapping_rules(group: Mapping[str, Any]) -> Iterator[Mapping[str, Any]]:
+    rules = group.get("rules")
+    if not isinstance(rules, list):
+        return
+    yield from (rule for rule in rules if isinstance(rule, Mapping))
+
+
 def collect_rule_issues(
     rules_payload: Mapping[str, Any],
 ) -> tuple[list[RuleIssue], int, int]:
@@ -114,21 +139,9 @@ def collect_rule_issues(
     issues: list[RuleIssue] = []
     groups = 0
     rules_n = 0
-    data = rules_payload.get("data")
-    group_rows = data.get("groups") if isinstance(data, Mapping) else None
-    if not isinstance(group_rows, list):
-        return issues, 0, 0
-    for group in group_rows:
-        if not isinstance(group, Mapping):
-            continue
-        file_path = str(group.get("file") or "")
-        group_name = str(group.get("name") or "")
-        if not _is_bioetl_group(file_path, group_name):
-            continue
+    for file_path, group_name, group in _iter_bioetl_groups(rules_payload):
         groups += 1
-        for rule in group.get("rules") or []:
-            if not isinstance(rule, Mapping):
-                continue
+        for rule in _iter_mapping_rules(group):
             rules_n += 1
             name = str(
                 rule.get("name") or rule.get("alert") or rule.get("record") or "?"
@@ -181,9 +194,7 @@ def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
         for group in groups:
             if not isinstance(group, Mapping):
                 continue
-            for rule in group.get("rules") or []:
-                if not isinstance(rule, Mapping):
-                    continue
+            for rule in _iter_mapping_rules(group):
                 name = str(rule.get("record") or "").strip()
                 expr = rule.get("expr")
                 if not name or not isinstance(expr, str) or not expr.strip():
@@ -197,20 +208,8 @@ def collect_live_recording_exprs(
 ) -> dict[str, tuple[str, ...]]:
     """Collect live recording-rule expressions from /api/v1/rules."""
     collected: dict[str, list[str]] = {}
-    data = rules_payload.get("data")
-    group_rows = data.get("groups") if isinstance(data, Mapping) else None
-    if not isinstance(group_rows, list):
-        return {}
-    for group in group_rows:
-        if not isinstance(group, Mapping):
-            continue
-        file_path = str(group.get("file") or "")
-        group_name = str(group.get("name") or "")
-        if not _is_bioetl_group(file_path, group_name):
-            continue
-        for rule in group.get("rules") or []:
-            if not isinstance(rule, Mapping):
-                continue
+    for _file_path, _group_name, group in _iter_bioetl_groups(rules_payload):
+        for rule in _iter_mapping_rules(group):
             name = str(rule.get("name") or rule.get("record") or "").strip()
             expr = rule.get("query") or rule.get("expr")
             if not name or not isinstance(expr, str) or not expr.strip():
@@ -242,18 +241,83 @@ def compare_expr_parity(
                 f"tracked={tracked_exprs!r} live={live_exprs!r}"
             )
         if name == "bioetl_provider_current_status":
-            joined = " | ".join(live_exprs)
-            if NAN_FALLBACK_NEEDLE not in joined:
-                issues.append(
-                    f"{name}: live expr missing finite UNKNOWN fallback "
-                    f"{NAN_FALLBACK_NEEDLE!r}"
-                )
-            if NAN_DIVISION_NEEDLE in joined:
-                issues.append(
-                    f"{name}: live expr still contains division "
-                    "(NaN fallback x*0/x*0 is forbidden)"
-                )
+            issues.extend(_provider_status_expr_issues(name, live_exprs))
     return issues
+
+
+def _provider_status_expr_issues(name: str, live_exprs: tuple[str, ...]) -> list[str]:
+    joined = " | ".join(live_exprs)
+    issues: list[str] = []
+    if NAN_FALLBACK_NEEDLE not in joined:
+        issues.append(
+            f"{name}: live expr missing finite UNKNOWN fallback "
+            f"{NAN_FALLBACK_NEEDLE!r}"
+        )
+    if NAN_DIVISION_NEEDLE in joined:
+        issues.append(
+            f"{name}: live expr still contains division "
+            "(NaN fallback x*0/x*0 is forbidden)"
+        )
+    return issues
+
+
+def _fetch_rule_health(
+    prometheus_url: str, *, timeout: float, query_errors: list[str]
+) -> tuple[Mapping[str, Any] | None, list[RuleIssue], int, int]:
+    try:
+        payload = _fetch_json(
+            f"{prometheus_url.rstrip('/')}/api/v1/rules", timeout=timeout
+        )
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        query_errors.append(f"rules API: {exc}")
+        return None, [], 0, 0
+    if payload.get("status") != "success":
+        query_errors.append(f"rules API status={payload.get('status')!r}")
+        return None, [], 0, 0
+    issues, groups, rules_n = collect_rule_issues(payload)
+    return payload, issues, groups, rules_n
+
+
+def _evaluation_signals(
+    prometheus_url: str, *, timeout: float, query_errors: list[str]
+) -> tuple[float | None, float | None]:
+    queries = (
+        (
+            "evaluation_failures",
+            "sum(increase(prometheus_rule_evaluation_failures_total"
+            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)',
+        ),
+        (
+            "iterations_missed",
+            "sum(increase(prometheus_rule_group_iterations_missed_total"
+            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)',
+        ),
+    )
+    values: list[float | None] = []
+    for label, query in queries:
+        value, error = _instant_query(prometheus_url, query, timeout=timeout)
+        values.append(value)
+        if error:
+            query_errors.append(f"{label} query: {error}")
+    return values[0], values[1]
+
+
+def _expr_parity_result(
+    *,
+    enabled: bool,
+    unreachable: bool,
+    rules_payload: Mapping[str, Any] | None,
+    rules_dir: Path | None,
+) -> tuple[bool, bool, list[str], str | None]:
+    if not enabled:
+        return False, False, [], None
+    if unreachable:
+        return False, True, [], None
+    rules_root = rules_dir or DEFAULT_RULES_DIR
+    tracked_sha = tracked_rules_bundle_sha256(rules_root)
+    tracked = load_tracked_recording_exprs(rules_root)
+    live = collect_live_recording_exprs(rules_payload or {})
+    return True, False, compare_expr_parity(tracked=tracked, live=live), tracked_sha
 
 
 def check_rules_health(
@@ -267,67 +331,26 @@ def check_rules_health(
 ) -> HealthReport:
     """Inspect /api/v1/rules + evaluation counters for silent partial failures."""
     query_errors: list[str] = []
-    issues: list[RuleIssue] = []
-    groups = 0
-    rules_n = 0
-    rules_payload: Mapping[str, Any] | None = None
-    try:
-        payload = _fetch_json(
-            f"{prometheus_url.rstrip('/')}/api/v1/rules", timeout=timeout
-        )
-        if payload.get("status") != "success":
-            query_errors.append(f"rules API status={payload.get('status')!r}")
-        else:
-            rules_payload = payload
-            issues, groups, rules_n = collect_rule_issues(payload)
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
-        query_errors.append(f"rules API: {exc}")
-
-    failures, err_f = _instant_query(
-        prometheus_url,
-        (
-            "sum(increase(prometheus_rule_evaluation_failures_total"
-            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)'
-        ),
-        timeout=timeout,
+    rules_payload, issues, groups, rules_n = _fetch_rule_health(
+        prometheus_url, timeout=timeout, query_errors=query_errors
     )
-    if err_f:
-        query_errors.append(f"evaluation_failures query: {err_f}")
-
-    missed, err_m = _instant_query(
-        prometheus_url,
-        (
-            "sum(increase(prometheus_rule_group_iterations_missed_total"
-            '{rule_group=~".*bioetl.*[.]yml;.*"}[10m])) or vector(0)'
-        ),
-        timeout=timeout,
+    failures, missed = _evaluation_signals(
+        prometheus_url, timeout=timeout, query_errors=query_errors
     )
-    if err_m:
-        query_errors.append(f"iterations_missed query: {err_m}")
 
     metric_bad = fail_on_metric_signals and (
         (failures is not None and failures > 0) or (missed is not None and missed > 0)
     )
     unreachable = any(item.startswith("rules API") for item in query_errors)
     skipped_unreachable = bool(skip_if_unreachable and unreachable)
-    expr_parity_issues: list[str] = []
-    expr_parity_checked = False
-    expr_parity_skipped = False
-    tracked_sha: str | None = None
-    if expr_parity:
-        if unreachable:
-            expr_parity_skipped = True
-        else:
-            expr_parity_checked = True
-            rules_root = rules_dir or DEFAULT_RULES_DIR
-            tracked_sha = tracked_rules_bundle_sha256(rules_root)
-            tracked = load_tracked_recording_exprs(rules_root)
-            live = (
-                collect_live_recording_exprs(rules_payload)
-                if isinstance(rules_payload, Mapping)
-                else {}
-            )
-            expr_parity_issues = compare_expr_parity(tracked=tracked, live=live)
+    expr_parity_checked, expr_parity_skipped, expr_parity_issues, tracked_sha = (
+        _expr_parity_result(
+            enabled=expr_parity,
+            unreachable=unreachable,
+            rules_payload=rules_payload,
+            rules_dir=rules_dir,
+        )
+    )
     ok = skipped_unreachable or (
         (not issues)
         and (not query_errors)
@@ -351,7 +374,7 @@ def check_rules_health(
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--prometheus-url",
@@ -381,7 +404,58 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit 0 when Prometheus is unreachable (ADR-010 optional monitoring)",
     )
-    args = parser.parse_args(argv)
+    return parser
+
+
+def _report_payload(report: HealthReport) -> dict[str, object]:
+    return {
+        "schema_version": "bioetl-prometheus-rules-health-v1",
+        "ok": report.ok,
+        "prometheus_url": report.prometheus_url,
+        "bioetl_groups": report.bioetl_groups,
+        "bioetl_rules": report.bioetl_rules,
+        "evaluation_failures_10m": report.evaluation_failures_10m,
+        "iterations_missed_10m": report.iterations_missed_10m,
+        "query_errors": report.query_errors,
+        "issues": [asdict(issue) for issue in report.issues],
+        "expr_parity_checked": report.expr_parity_checked,
+        "expr_parity_skipped": report.expr_parity_skipped,
+        "expr_parity_issues": report.expr_parity_issues,
+        "skipped_unreachable": report.skipped_unreachable,
+        "tracked_rules_sha256": report.tracked_rules_sha256,
+    }
+
+
+def _print_text_report(report: HealthReport) -> None:
+    print(
+        f"=== Prometheus rules health ({report.prometheus_url}) ===\n"
+        f"bioetl groups={report.bioetl_groups} rules={report.bioetl_rules}\n"
+        f"evaluation_failures_10m={report.evaluation_failures_10m}\n"
+        f"iterations_missed_10m={report.iterations_missed_10m}"
+    )
+    for issue in report.issues:
+        print(
+            f"[FAIL] {issue.kind} {issue.rule!r} "
+            f"group={issue.group!r} health={issue.health} "
+            f"lastError={issue.last_error!r}"
+        )
+    for error in report.query_errors:
+        print(f"[FAIL] {error}")
+    for error in report.expr_parity_issues:
+        print(f"[FAIL] expr-parity {error}")
+    if report.expr_parity_skipped or report.skipped_unreachable:
+        print("[SKIP] Prometheus unreachable (ADR-010 optional monitoring)")
+    if report.ok:
+        print("\nOK: no partial BioETL rule errors detected.")
+    else:
+        print(
+            "\nFAIL: partial rule errors cause silent metric gaps "
+            "(Prometheus may still be /-/healthy)."
+        )
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _build_parser().parse_args(argv)
 
     skip_if_unreachable = args.skip_if_unreachable or args.expr_parity
     report = check_rules_health(
@@ -392,50 +466,10 @@ def main(argv: list[str] | None = None) -> int:
         rules_dir=Path(args.rules_dir),
         skip_if_unreachable=skip_if_unreachable,
     )
-    payload = {
-        "schema_version": "bioetl-prometheus-rules-health-v1",
-        "ok": report.ok,
-        "prometheus_url": report.prometheus_url,
-        "bioetl_groups": report.bioetl_groups,
-        "bioetl_rules": report.bioetl_rules,
-        "evaluation_failures_10m": report.evaluation_failures_10m,
-        "iterations_missed_10m": report.iterations_missed_10m,
-        "query_errors": report.query_errors,
-        "issues": [asdict(i) for i in report.issues],
-        "expr_parity_checked": report.expr_parity_checked,
-        "expr_parity_skipped": report.expr_parity_skipped,
-        "expr_parity_issues": report.expr_parity_issues,
-        "skipped_unreachable": report.skipped_unreachable,
-        "tracked_rules_sha256": report.tracked_rules_sha256,
-    }
     if args.json:
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        print(json.dumps(_report_payload(report), indent=2, sort_keys=True))
     else:
-        print(
-            f"=== Prometheus rules health ({report.prometheus_url}) ===\n"
-            f"bioetl groups={report.bioetl_groups} rules={report.bioetl_rules}\n"
-            f"evaluation_failures_10m={report.evaluation_failures_10m}\n"
-            f"iterations_missed_10m={report.iterations_missed_10m}"
-        )
-        for issue in report.issues:
-            print(
-                f"[FAIL] {issue.kind} {issue.rule!r} "
-                f"group={issue.group!r} health={issue.health} "
-                f"lastError={issue.last_error!r}"
-            )
-        for err in report.query_errors:
-            print(f"[FAIL] {err}")
-        for err in report.expr_parity_issues:
-            print(f"[FAIL] expr-parity {err}")
-        if report.expr_parity_skipped or report.skipped_unreachable:
-            print("[SKIP] Prometheus unreachable (ADR-010 optional monitoring)")
-        if report.ok:
-            print("\nOK: no partial BioETL rule errors detected.")
-        else:
-            print(
-                "\nFAIL: partial rule errors cause silent metric gaps "
-                "(Prometheus may still be /-/healthy)."
-            )
+        _print_text_report(report)
     return 0 if report.ok else 1
 
 

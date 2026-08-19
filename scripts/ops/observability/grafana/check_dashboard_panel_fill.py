@@ -295,19 +295,26 @@ def _normalize_datasource(
     if raw in (None, "", {}):
         raw = panel.get("datasource")
     if isinstance(raw, dict):
-        uid = str(raw.get("uid") or "").strip()
-        typ = str(raw.get("type") or "").strip()
-        if uid == "bioetl-ops-http" or "infinity" in typ.lower():
-            return dict(_HTTP_DATASOURCE)
-        if uid == "prometheus" or typ == "prometheus":
-            return dict(_PROMETHEUS_DATASOURCE)
-        if uid:
-            return {"type": typ or "prometheus", "uid": uid}
-        raw = typ
+        normalized = _normalize_datasource_mapping(raw)
+        if isinstance(normalized, dict):
+            return normalized
+        raw = normalized
     text = str(raw or "").strip().lower()
     if "ops" in text or "http" in text or "infinity" in text:
         return dict(_HTTP_DATASOURCE)
     return dict(_PROMETHEUS_DATASOURCE)
+
+
+def _normalize_datasource_mapping(raw: dict[str, Any]) -> dict[str, str] | str:
+    uid = str(raw.get("uid") or "").strip()
+    typ = str(raw.get("type") or "").strip()
+    if uid == "bioetl-ops-http" or "infinity" in typ.lower():
+        return dict(_HTTP_DATASOURCE)
+    if uid == "prometheus" or typ == "prometheus":
+        return dict(_PROMETHEUS_DATASOURCE)
+    if uid:
+        return {"type": typ or "prometheus", "uid": uid}
+    return typ
 
 
 def _render_target(
@@ -391,22 +398,27 @@ def _collect_result_error_texts(result: object) -> list[str]:
     if not isinstance(frames, list):
         return texts
     for frame in frames:
-        if not isinstance(frame, dict):
-            continue
-        meta = frame.get("meta")
-        if not isinstance(meta, dict):
-            continue
-        notices = meta.get("notices")
-        if not isinstance(notices, list):
-            continue
-        for notice in notices:
-            if not isinstance(notice, dict):
-                continue
-            severity = str(notice.get("severity") or "").lower()
-            text = notice.get("text")
-            if severity == "error" and isinstance(text, str) and text.strip():
-                texts.append(text.strip())
+        texts.extend(_frame_error_notices(frame))
     return texts
+
+
+def _frame_error_notices(frame: object) -> list[str]:
+    if not isinstance(frame, dict):
+        return []
+    meta = frame.get("meta")
+    if not isinstance(meta, dict):
+        return []
+    notices = meta.get("notices")
+    if not isinstance(notices, list):
+        return []
+    return [
+        text.strip()
+        for notice in notices
+        if isinstance(notice, dict)
+        and str(notice.get("severity") or "").lower() == "error"
+        and isinstance((text := notice.get("text")), str)
+        and text.strip()
+    ]
 
 
 def _post_json(
