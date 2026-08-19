@@ -1,0 +1,1 @@
+{"iteration":4,"commands":["git grep -Il provider ENV interpolation","git grep -Il secret-like literal keys","git grep -Il private-key markers"],"outcome":"pass_no_matches","findings":[]}
