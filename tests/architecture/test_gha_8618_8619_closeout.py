@@ -35,3 +35,8 @@ def test_github_policy_documents_active_root_hygiene_ruleset() -> None:
     assert "`checks-complete`" in text
     assert "`root-hygiene`" in text
     assert "Direct merge allowed; no active required-check ruleset" not in text
+    assert "no bypass actors" in text
+    assert (
+        "enforcement=disabled"
+        not in text.split("Live GitHub enforcement state:", 1)[-1]
+    )

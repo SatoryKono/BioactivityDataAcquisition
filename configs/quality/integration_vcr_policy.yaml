@@ -148,6 +148,7 @@ tracked_suite_inventory:
     - tests/integration/test_cross_pipeline_normalization.py
     - tests/integration/test_cross_provider_doi_normalization.py
     - tests/integration/test_dashboard_collapsed_rows.py
+    - tests/integration/test_dashboard_content_contract.py
     - tests/integration/test_dashboard_critical_panels_have_actionable_links.py
     - tests/integration/test_dashboard_cross_scope_titles.py
     - tests/integration/test_dashboard_first_screen.py
@@ -163,7 +164,9 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_presentation_requirements.py
     - tests/integration/test_dashboard_provider_context_mapping.py
     - tests/integration/test_dashboard_required_panel_links.py
+    - tests/integration/test_dashboard_scope_refactor.py
     - tests/integration/test_dashboard_scope_reset_tooltips.py
+    - tests/integration/test_dashboard_state_fixture_contract.py
     - tests/integration/test_dashboard_static_fill_gates.py
     - tests/integration/test_dashboard_structural_invariants.py
     - tests/integration/test_dashboard_units_decimals.py
@@ -172,9 +175,11 @@ tracked_suite_inventory:
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
     - tests/integration/test_dux6_residual_contracts.py
+    - tests/integration/test_grafana_control_plane_variables.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_run_explorer_http_catalog.py
+    - tests/integration/test_run_explorer_request_fixtures.py
     - tests/integration/test_runtime_metric_emission_consistency.py
     - tests/integration/test_uniprot_idmapping_pipeline.py
     - tests/integration/workflow/test_workflow_foreign_key_reconciliation.py
@@ -203,6 +208,7 @@ tracked_suite_inventory:
       - tests/integration/test_dashboard_operator_readability.py
       - tests/integration/test_dashboard_ux_report_freshness.py
       - tests/integration/test_grafana_config.py
+      - tests/integration/test_grafana_control_plane_variables.py
       - tests/integration/test_grafana_dashboard_cta_links.py
       - tests/integration/test_grafana_dashboard_first_screen_contract.py
       - tests/integration/test_grafana_dashboard_links.py

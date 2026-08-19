@@ -68,7 +68,6 @@ def run_observability_contract_checks(
     )
 
 
-
 def _safe_contract_check(
     name: str,
     checker: Callable[[Path], ContractCheck],
