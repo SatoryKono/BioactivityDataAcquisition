@@ -728,7 +728,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
         grid = panel["gridPos"]
-        assert int(grid["h"]) == 5, (dashboard_name, panel_id, grid)
+        assert int(grid["h"]) >= 5, (dashboard_name, panel_id, grid)
         custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)

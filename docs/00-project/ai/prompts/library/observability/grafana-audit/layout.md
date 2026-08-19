@@ -144,13 +144,19 @@ detail/forensics → runbook or adjacent dashboard`.
 - unexplained vertical gaps;
 - inconsistent widths/alignment;
 - panel height, не соответствующий content volume;
-- internal scroll, clipping и hidden actions;
+- **internal panel scroll** (`DASH-FIT-004`): `scrollHeight > clientHeight` или
+  `scrollWidth > clientWidth` у root non-row `y < FIRST_WINDOW_Y` (`18`).
+  Это не page scroll дашборда. First-window `text`/`stat`/`table` fail-closed.
+  HTML `overflow: hidden|auto|scroll` на first window запрещён (кроме nav
+  spacer `height:0`). Не предлагай overflow-clip как fix.
 - repeated panels, выходящие за ожидаемый band;
 - row expansion collision;
 - first-screen content, вытесненный chrome/variables.
 
 Покажи evidence как panel IDs + rectangles + screenshot/render. JSON geometry
-без фактического clipping не доказывает render defect, но может доказать overlap.
+без фактического clipping не доказывает render defect, но может доказать overlap
+и declared overflow. Чинить first-window scroll — карточка
+`prompt.observability.dashboard-first-window-noscroll`, не этот read-only audit.
 
 ### 6. Проверь variables и context
 

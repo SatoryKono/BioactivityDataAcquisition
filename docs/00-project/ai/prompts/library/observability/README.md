@@ -69,6 +69,9 @@ Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
   вопрос, связь с вопросом дашборда, маршрут оператора, 5–10 сценариев
   с выбором от значения (`STAY` / hop / CLI / bind). Артефакт в
   `reports/audit/observability-seq/`.
+- `prompt.observability.dashboard-first-window-noscroll` — implement
+  `DASH-FIT-004`: убрать внутренний scroll first-window `text`/`stat`/`table`
+  на семи UID без overflow-clip и без роста `first_screen_max_panels`.
 - `prompt.observability.group-scalar-density-audit` — re-measure scalar
   information density per panel group vs first screen (`DASH-DENSITY-002`,
   REQUIREMENTS §5.4) and rank groups that must be made denser. Static (no

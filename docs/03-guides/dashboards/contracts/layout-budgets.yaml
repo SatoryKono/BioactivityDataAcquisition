@@ -134,12 +134,12 @@ first_window_summary_tables:
     bind: topk
   - dashboard: bioetl-provider-health-v2.json
     id: 9101
-    max_rows: 4
+    max_rows: 3
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-provider-health-v2.json
     id: 9107
-    max_rows: 4
+    max_rows: 3
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-incident-v1.json

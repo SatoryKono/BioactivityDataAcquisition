@@ -117,7 +117,7 @@
       "description": "Provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). Chip IN RANGE / OUT OF RANGE / UNKNOWN comes from Review Selected Run Summary (<code>coverage_chip</code>). A run inside the window is IN RANGE and must not show an outside-range warning. OUT OF RANGE still offers Set range to run. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code>${provider}</code> · adapter=<code>${adapter}</code> · pipeline_context=<code>${pipeline_context}</code></div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code>${provider}</code> · adapter=<code>${adapter}</code> · pipeline_context=<code>${pipeline_context}</code></div></div></div></div>"
       },
       "links": []
     },
@@ -485,7 +485,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(4, max by (provider) (bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}))",
+          "expr": "topk(3, max by (provider) (bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
@@ -710,7 +710,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(4, max by (provider, reason, source_state) (bioetl_provider_current_status_info{provider=~\"$provider\"}))",
+          "expr": "topk(3, max by (provider, reason, source_state) (bioetl_provider_current_status_info{provider=~\"$provider\"}))",
           "format": "table",
           "instant": true,
           "legendFormat": "{{provider}} {{reason}} {{source_state}}",

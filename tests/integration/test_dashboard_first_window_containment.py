@@ -124,7 +124,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9418)
 
-    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 0, "y": 8}
+    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 0, "y": 8}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("inspect") is True

@@ -116,7 +116,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK<div><span>Run coverage:</span> Coverage uses selected-run timestamps via <em>Review Run Summary</em> (<code>covers_selected_run</code>). Chip IN RANGE / OUT OF RANGE / UNKNOWN comes from Review Selected Run Summary (<code>coverage_chip</code>). A run inside the window is IN RANGE and must not show an outside-range warning. OUT OF RANGE still offers Set range to run. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> stage=<code>${stage}</code> · provider_hint=<code>${provider_hint}</code></div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>Scope:</b> <b>CURRENT</b> = health/phase/blockers · <b>SELECTED RUN</b> = ID/accounting</div><div><b>STAGE</b> = diagnostic context · <b>SCRAPING</b> does not mean delivery OK<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> stage=<code>${stage}</code> · provider_hint=<code>${provider_hint}</code></div></div></div></div>"
       },
       "links": []
     },
@@ -396,7 +396,7 @@
         ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 16,
         "x": 0,
         "y": 10
@@ -519,7 +519,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 6,
         "w": 8,
         "x": 16,
         "y": 10
