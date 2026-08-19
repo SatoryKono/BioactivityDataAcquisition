@@ -57,7 +57,12 @@ def test_router_exposes_panel_fill_command() -> None:
         (502, "Bad Gateway", None, "HTTP 502"),
         (503, "Service Unavailable", None, "HTTP 503"),
         (505, "HTTP Version Not Supported", None, "HTTP 505"),
-        (200, {"results": {"A": {"error": "Gateway Timeout"}}}, None, "gateway timeout"),
+        (
+            200,
+            {"results": {"A": {"error": "Gateway Timeout"}}},
+            None,
+            "gateway timeout",
+        ),
         (200, {"results": {"A": {"error": "query error"}}}, None, "query error"),
         (
             200,
@@ -102,7 +107,11 @@ def test_classify_fill_error_detects_gateway_and_query_failures(
     "body",
     [
         {"results": {"A": {"status": 200, "frames": []}}},
-        {"results": {"A": {"frames": [{"schema": {"name": "A"}, "data": {"values": []}}]}}},
+        {
+            "results": {
+                "A": {"frames": [{"schema": {"name": "A"}, "data": {"values": []}}]}
+            }
+        },
         {"message": "No data"},
         None,
     ],
@@ -112,7 +121,9 @@ def test_classify_fill_error_treats_empty_or_no_data_as_ok(body: object) -> None
     assert verdict.kind == "ok"
 
 
-def test_classify_fill_error_does_not_treat_timeout_in_payload_values_as_error() -> None:
+def test_classify_fill_error_does_not_treat_timeout_in_payload_values_as_error() -> (
+    None
+):
     verdict = fill.classify_fill_error(
         http_status=200,
         body={
@@ -245,14 +256,19 @@ def test_query_panel_fill_accepts_successful_empty_frames(monkeypatch: Any) -> N
     monkeypatch.setattr(
         fill,
         "_post_json",
-        lambda *args, **kwargs: (200, {"results": {"A": {"status": 200, "frames": []}}}),
+        lambda *args, **kwargs: (
+            200,
+            {"results": {"A": {"status": 200, "frames": []}}},
+        ),
     )
     verdict = fill.query_panel_fill(panel, config=_config())
     assert verdict.kind == "ok"
 
 
 def test_text_and_row_panels_are_not_queryable() -> None:
-    assert fill._is_queryable_panel({"id": 1000, "type": "text", "targets": []}) is False
+    assert (
+        fill._is_queryable_panel({"id": 1000, "type": "text", "targets": []}) is False
+    )
     assert fill._is_queryable_panel({"id": 902, "type": "row", "panels": []}) is False
     assert (
         fill._is_queryable_panel(

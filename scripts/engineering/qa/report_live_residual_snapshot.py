@@ -281,6 +281,24 @@ def _check_int_metric_non_growth(
         )
 
 
+def _check_metric_group_non_growth(
+    *,
+    group_name: str,
+    committed: dict[str, Any],
+    live: dict[str, Any],
+    metrics: tuple[str, ...],
+) -> None:
+    """Enforce the same scalar residual ratchets as the architecture gate."""
+    for key in metrics:
+        if key not in committed:
+            continue
+        _check_int_metric_non_growth(
+            live_value=int(live[key]),
+            committed_value=int(committed[key]),
+            label=f"{group_name}.{key}",
+        )
+
+
 def check_snapshot(path: Path = DEFAULT_OUTPUT) -> None:
     from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 
@@ -312,6 +330,25 @@ def check_snapshot(path: Path = DEFAULT_OUTPUT) -> None:
         live_value=int(live["config_surface"]["duplicate_cluster_count"]),
         committed_value=int(committed["config_surface"]["duplicate_cluster_count"]),
         label="config_surface.duplicate_cluster_count",
+    )
+    _check_metric_group_non_growth(
+        group_name="module_coverage",
+        committed=committed.get("module_coverage", {}),
+        live=live.get("module_coverage", {}),
+        metrics=("uncovered_module_count", "unmeasured_module_count"),
+    )
+    _check_metric_group_non_growth(
+        group_name="closeout_program",
+        committed=committed.get("closeout_program", {}),
+        live=live.get("closeout_program", {}),
+        metrics=(
+            "tech_debt_closeout_test_file_count",
+            "tech_debt_closeout_test_function_count",
+            "tech_debt_closeout_test_loc",
+            "fold_into_generic_inventory_count",
+            "retained_public_entrypoint_count",
+            "zero_reference_supporting_script_count",
+        ),
     )
     print(f"[ok] live residual snapshot non-growth holds: {path}")
 

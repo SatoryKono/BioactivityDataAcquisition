@@ -146,6 +146,27 @@ def test_closeout_program_mass_metrics_only_shrink() -> None:
         )
 
 
+def test_live_residual_cli_check_enforces_closeout_program_ratchets() -> None:
+    """The CLI checker must not omit residuals enforced by this test module."""
+    from scripts.engineering.qa.report_live_residual_snapshot import (
+        _check_metric_group_non_growth,
+    )
+
+    with pytest.raises(
+        SystemExit,
+        match=(
+            r"closeout_program\.zero_reference_supporting_script_count: "
+            "live=1 committed=0"
+        ),
+    ):
+        _check_metric_group_non_growth(
+            group_name="closeout_program",
+            committed={"zero_reference_supporting_script_count": 0},
+            live={"zero_reference_supporting_script_count": 1},
+            metrics=("zero_reference_supporting_script_count",),
+        )
+
+
 def test_historical_tech_debt_closeout_json_artifacts_remain_present() -> None:
     """Evidence of closed issue packs remains as reports, not thrashing freezes.
 
