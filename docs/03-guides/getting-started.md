@@ -267,7 +267,12 @@ WSL via `setup_env_windows.ps1` / `setup_env_wsl.sh`.
 
 ### Permission Denied on data/
 
-Ensure the `data/` directory is writable. On Linux/macOS: `chmod -R 755 data/`
+Ensure the `data/` directory is writable by the BioETL process owner only.
+On Linux/macOS use least-privilege access, not world-readable modes:
+
+```bash
+chmod -R u+rwX,go-rwx data/
+```
 
 ### Tests Fail with "VCR cassette not found"
 

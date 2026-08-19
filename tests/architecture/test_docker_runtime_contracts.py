@@ -959,6 +959,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert monitoring["services"]["renderer"]["healthcheck"]["start_period"] == "45s"
 
     dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
+    assert "PYTHONPATH=/app/src" not in dockerfile
+    assert "COPY --chown=root:root src/ ./src/" not in dockerfile
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(
         encoding="utf-8"
     )
