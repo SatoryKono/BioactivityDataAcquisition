@@ -33,7 +33,12 @@ FULL_SURFACE_COVERAGE_POLICY = "all_shipped_panels"
 
 def _load_mapping(path: Path) -> dict[str, object]:
     """Загрузить YAML mapping или вернуть понятную ошибку контракта."""
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    payload = yaml.safe_load(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR -- confined above
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"{path}: expected YAML mapping")
     return payload

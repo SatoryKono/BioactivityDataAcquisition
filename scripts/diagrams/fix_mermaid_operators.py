@@ -102,7 +102,7 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
     except ValueError as err:
         raise ValueError(f"Path {path} is outside repository root {repo_root}") from err
 
-    content = path.read_text(encoding="utf-8")
+    content = resolved_path.read_text(encoding="utf-8")
 
     diagram_type = _get_diagram_type(content)
     if diagram_type is None:
@@ -129,7 +129,7 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
         return 0
 
     if not dry_run:
-        path.write_text(fixed_content, encoding="utf-8")
+        resolved_path.write_text(fixed_content, encoding="utf-8")
 
     return replacements
 

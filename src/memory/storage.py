@@ -150,6 +150,7 @@ def atomic_write_bytes(
     expected_digest: str | None = None,
 ) -> str:
     """Atomically replace target and optionally enforce optimistic concurrency."""
+    target = target.expanduser().resolve(strict=False)
     target.parent.mkdir(parents=True, exist_ok=True)
     with exclusive_lock(target):
         if expected_digest is not None:

@@ -1,0 +1,640 @@
+{
+  "schema_version": 2,
+  "date": "20260819",
+  "label": "snr-rf-live-baseline-and-current",
+  "policy": {
+    "accounting_query": "statuses=OPEN",
+    "technical_debt_budget_growth": "forbidden",
+    "bulk_suppression": "forbidden"
+  },
+  "baseline": {
+    "analysis_date": "2026-08-19T14:28:39+0000",
+    "revision": "d541c541b058f2ad00b709708830d382d1848848",
+    "total": 308,
+    "unique_keys": 308,
+    "affected_paths": 152,
+    "missing_paths": [],
+    "measures": {
+      "bugs": "4",
+      "vulnerabilities": "44",
+      "code_smells": "260",
+      "alert_status": "ERROR",
+      "reliability_rating": "3.0",
+      "security_rating": "5.0",
+      "sqale_rating": "1.0",
+      "ncloc": "943155",
+      "new_violations": "308"
+    },
+    "by_type": {
+      "BUG": 4,
+      "CODE_SMELL": 260,
+      "VULNERABILITY": 44
+    },
+    "by_severity": {
+      "BLOCKER": 11,
+      "CRITICAL": 167,
+      "MAJOR": 99,
+      "MINOR": 31
+    },
+    "by_rule": [
+      [
+        "python:S3776",
+        109
+      ],
+      [
+        "python:S1192",
+        36
+      ],
+      [
+        "pythonsecurity:S8707",
+        18
+      ],
+      [
+        "python:S5886",
+        14
+      ],
+      [
+        "python:S6353",
+        13
+      ],
+      [
+        "javascript:S3776",
+        7
+      ],
+      [
+        "python:S8786",
+        7
+      ],
+      [
+        "shelldre:S7682",
+        7
+      ],
+      [
+        "python:S3358",
+        6
+      ],
+      [
+        "pythonsecurity:S2083",
+        6
+      ],
+      [
+        "python:S5869",
+        5
+      ],
+      [
+        "shelldre:S1192",
+        5
+      ],
+      [
+        "python:S1066",
+        4
+      ],
+      [
+        "python:S2208",
+        4
+      ],
+      [
+        "python:S3516",
+        4
+      ],
+      [
+        "python:S5864",
+        4
+      ],
+      [
+        "pythonsecurity:S8705",
+        4
+      ],
+      [
+        "shelldre:S7679",
+        4
+      ],
+      [
+        "githubactions:S8264",
+        3
+      ],
+      [
+        "javascript:S6582",
+        3
+      ],
+      [
+        "python:S5332",
+        3
+      ],
+      [
+        "python:S5443",
+        3
+      ],
+      [
+        "python:S5655",
+        3
+      ],
+      [
+        "javascript:S4144",
+        2
+      ],
+      [
+        "python:S107",
+        2
+      ],
+      [
+        "python:S1871",
+        2
+      ],
+      [
+        "python:S7504",
+        2
+      ],
+      [
+        "shelldre:S131",
+        2
+      ],
+      [
+        "docker:S6506",
+        1
+      ],
+      [
+        "docker:S6596",
+        1
+      ],
+      [
+        "docker:S8482",
+        1
+      ],
+      [
+        "docker:S8544",
+        1
+      ],
+      [
+        "githubactions:S8541",
+        1
+      ],
+      [
+        "javascript:S4036",
+        1
+      ],
+      [
+        "javascript:S6644",
+        1
+      ],
+      [
+        "powershelldre:S3776",
+        1
+      ],
+      [
+        "powershelldre:S8677",
+        1
+      ],
+      [
+        "python:S1045",
+        1
+      ],
+      [
+        "python:S1244",
+        1
+      ],
+      [
+        "python:S3457",
+        1
+      ],
+      [
+        "python:S3626",
+        1
+      ],
+      [
+        "python:S5747",
+        1
+      ],
+      [
+        "python:S5754",
+        1
+      ],
+      [
+        "python:S5843",
+        1
+      ],
+      [
+        "python:S5850",
+        1
+      ],
+      [
+        "python:S5855",
+        1
+      ],
+      [
+        "python:S5914",
+        1
+      ],
+      [
+        "python:S5918",
+        1
+      ],
+      [
+        "python:S7503",
+        1
+      ],
+      [
+        "pythonsecurity:S6350",
+        1
+      ],
+      [
+        "pythonsecurity:S8703",
+        1
+      ],
+      [
+        "shelldre:S1066",
+        1
+      ],
+      [
+        "shelldre:S7677",
+        1
+      ],
+      [
+        "shelldre:S7684",
+        1
+      ]
+    ],
+    "lanes": {
+      "RF-002": {
+        "github_issue": 9062,
+        "issues": 52,
+        "paths": 35,
+        "effort_minutes": 1308,
+        "fix": 46,
+        "retire": 6
+      },
+      "RF-003": {
+        "github_issue": 9061,
+        "issues": 38,
+        "paths": 32,
+        "effort_minutes": 276,
+        "fix": 38,
+        "retire": 0
+      },
+      "RF-004": {
+        "github_issue": 9063,
+        "issues": 25,
+        "paths": 13,
+        "effort_minutes": 254,
+        "fix": 25,
+        "retire": 0
+      },
+      "RF-005": {
+        "github_issue": 9064,
+        "issues": 79,
+        "paths": 21,
+        "effort_minutes": 826,
+        "fix": 39,
+        "retire": 40
+      },
+      "RF-006": {
+        "github_issue": 9065,
+        "issues": 48,
+        "paths": 25,
+        "effort_minutes": 536,
+        "fix": 48,
+        "retire": 0
+      },
+      "RF-007": {
+        "github_issue": 9066,
+        "issues": 66,
+        "paths": 41,
+        "effort_minutes": 678,
+        "fix": 53,
+        "retire": 13
+      }
+    },
+    "lifecycle": {
+      "supporting_issues": 128,
+      "supporting_paths": 56,
+      "legacy_manual_utility_issues": 59,
+      "legacy_manual_utility_paths": 19
+    },
+    "dispositions": {
+      "fix": 249,
+      "retire": 59
+    }
+  },
+  "current": {
+    "analysis_date": "2026-08-19T16:03:21+0000",
+    "revision": "0cace16cd185d9eb9bbe55164c34b5a187c7dcc1",
+    "total": 306,
+    "unique_keys": 306,
+    "affected_paths": 149,
+    "missing_paths": [],
+    "measures": {
+      "bugs": "4",
+      "alert_status": "ERROR",
+      "reliability_rating": "3.0",
+      "code_smells": "258",
+      "new_violations": "306",
+      "security_rating": "5.0",
+      "ncloc": "943813",
+      "vulnerabilities": "44",
+      "sqale_rating": "1.0"
+    },
+    "by_type": {
+      "BUG": 4,
+      "CODE_SMELL": 258,
+      "VULNERABILITY": 44
+    },
+    "by_severity": {
+      "BLOCKER": 11,
+      "CRITICAL": 166,
+      "MAJOR": 98,
+      "MINOR": 31
+    },
+    "by_rule": [
+      [
+        "python:S3776",
+        108
+      ],
+      [
+        "python:S1192",
+        36
+      ],
+      [
+        "pythonsecurity:S8707",
+        18
+      ],
+      [
+        "python:S5886",
+        13
+      ],
+      [
+        "python:S6353",
+        13
+      ],
+      [
+        "javascript:S3776",
+        7
+      ],
+      [
+        "python:S8786",
+        7
+      ],
+      [
+        "shelldre:S7682",
+        7
+      ],
+      [
+        "python:S3358",
+        6
+      ],
+      [
+        "pythonsecurity:S2083",
+        6
+      ],
+      [
+        "python:S5869",
+        5
+      ],
+      [
+        "shelldre:S1192",
+        5
+      ],
+      [
+        "python:S1066",
+        4
+      ],
+      [
+        "python:S2208",
+        4
+      ],
+      [
+        "python:S3516",
+        4
+      ],
+      [
+        "python:S5864",
+        4
+      ],
+      [
+        "pythonsecurity:S8705",
+        4
+      ],
+      [
+        "shelldre:S7679",
+        4
+      ],
+      [
+        "githubactions:S8264",
+        3
+      ],
+      [
+        "javascript:S6582",
+        3
+      ],
+      [
+        "python:S5332",
+        3
+      ],
+      [
+        "python:S5443",
+        3
+      ],
+      [
+        "python:S5655",
+        3
+      ],
+      [
+        "javascript:S4144",
+        2
+      ],
+      [
+        "python:S107",
+        2
+      ],
+      [
+        "python:S1871",
+        2
+      ],
+      [
+        "python:S7504",
+        2
+      ],
+      [
+        "shelldre:S131",
+        2
+      ],
+      [
+        "docker:S6506",
+        1
+      ],
+      [
+        "docker:S6596",
+        1
+      ],
+      [
+        "docker:S8482",
+        1
+      ],
+      [
+        "docker:S8544",
+        1
+      ],
+      [
+        "githubactions:S8541",
+        1
+      ],
+      [
+        "javascript:S4036",
+        1
+      ],
+      [
+        "javascript:S6644",
+        1
+      ],
+      [
+        "powershelldre:S3776",
+        1
+      ],
+      [
+        "powershelldre:S8677",
+        1
+      ],
+      [
+        "python:S1045",
+        1
+      ],
+      [
+        "python:S1244",
+        1
+      ],
+      [
+        "python:S3457",
+        1
+      ],
+      [
+        "python:S3626",
+        1
+      ],
+      [
+        "python:S5747",
+        1
+      ],
+      [
+        "python:S5754",
+        1
+      ],
+      [
+        "python:S5843",
+        1
+      ],
+      [
+        "python:S5850",
+        1
+      ],
+      [
+        "python:S5855",
+        1
+      ],
+      [
+        "python:S5914",
+        1
+      ],
+      [
+        "python:S5918",
+        1
+      ],
+      [
+        "python:S7503",
+        1
+      ],
+      [
+        "pythonsecurity:S6350",
+        1
+      ],
+      [
+        "pythonsecurity:S8703",
+        1
+      ],
+      [
+        "shelldre:S1066",
+        1
+      ],
+      [
+        "shelldre:S7677",
+        1
+      ],
+      [
+        "shelldre:S7684",
+        1
+      ]
+    ],
+    "lanes": {
+      "RF-002": {
+        "github_issue": 9062,
+        "issues": 52,
+        "paths": 35,
+        "effort_minutes": 1308,
+        "fix": 46,
+        "retire": 6
+      },
+      "RF-003": {
+        "github_issue": 9061,
+        "issues": 35,
+        "paths": 29,
+        "effort_minutes": 255,
+        "fix": 35,
+        "retire": 0
+      },
+      "RF-004": {
+        "github_issue": 9063,
+        "issues": 25,
+        "paths": 13,
+        "effort_minutes": 254,
+        "fix": 25,
+        "retire": 0
+      },
+      "RF-005": {
+        "github_issue": 9064,
+        "issues": 79,
+        "paths": 21,
+        "effort_minutes": 826,
+        "fix": 39,
+        "retire": 40
+      },
+      "RF-006": {
+        "github_issue": 9065,
+        "issues": 48,
+        "paths": 25,
+        "effort_minutes": 536,
+        "fix": 48,
+        "retire": 0
+      },
+      "RF-007": {
+        "github_issue": 9066,
+        "issues": 67,
+        "paths": 41,
+        "effort_minutes": 685,
+        "fix": 54,
+        "retire": 13
+      }
+    },
+    "dispositions": {
+      "fix": 247,
+      "retire": 59
+    },
+    "delta_from_baseline": {
+      "net_open": -2,
+      "removed_keys": [
+        "AaAQtWpQdSRTRUqBBlvY",
+        "AaAaW8aRjRI3_KGHZNUe",
+        "AaAaWFcUmUwT0Lfavilq",
+        "AaAaWJ7tmUwT0Lfavilr",
+        "AaAabrkE5bICpC6LVnvw"
+      ],
+      "added_keys": [
+        "AaAanelk63kqu7QbWQvw",
+        "AaAanjYK63kqu7QbWQvx",
+        "AaAaxzrNgHv00sI8KDzQ"
+      ]
+    }
+  },
+  "related_github_issue": 9041,
+  "reports": {
+    "baseline_full": "reports/quality/sonar/live-issues-20260819-baseline-full.json",
+    "current_full": "reports/quality/sonar/live-issues-20260819-current-full.json"
+  }
+}

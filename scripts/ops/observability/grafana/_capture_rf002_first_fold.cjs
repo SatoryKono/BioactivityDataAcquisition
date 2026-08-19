@@ -6,7 +6,7 @@ const { chromium } = require("playwright");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { execSync } = require("node:child_process");
+const { execFileSync } = require("node:child_process");
 
 const UIDS = (
   process.env.GRAFANA_SCREENSHOT_UIDS ||
@@ -46,7 +46,9 @@ const navTimeout = Number(process.env.NAV_TIMEOUT_MS || 180000);
 
 function gitSha() {
   try {
-    return execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+    return execFileSync("/usr/bin/git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+    }).trim();
   } catch {
     return "";
   }

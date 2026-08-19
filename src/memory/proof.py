@@ -67,6 +67,7 @@ def file_digest(path: Path | None) -> str:
     """Hash an output artifact, using the empty digest when no file exists."""
     if path is None or not path.exists() or not path.is_file():
         return hashlib.sha256(b"").hexdigest()
+    path = path.expanduser().resolve(strict=True)
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):

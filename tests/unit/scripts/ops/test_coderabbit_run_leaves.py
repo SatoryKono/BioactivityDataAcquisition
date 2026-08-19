@@ -13,6 +13,7 @@ from scripts.ops.coderabbit.run_leaves import (
     classify_output,
     extract_rate_limit_wait_seconds,
     has_review_completion,
+    materialize_leaf,
     parse_backoff_schedule,
     parse_wait_time_to_seconds,
     selected_leaves,
@@ -20,6 +21,15 @@ from scripts.ops.coderabbit.run_leaves import (
 
 
 pytestmark = [pytest.mark.unit]
+
+
+def test_materialize_leaf_rejects_untrusted_revision_and_paths(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="invalid base commit SHA"):
+        materialize_leaf("HEAD;touch-pwned", ["pyproject.toml"], tmp_path)
+    with pytest.raises(ValueError, match="unsafe repository path"):
+        materialize_leaf("a" * 40, ["../outside"], tmp_path)
 
 
 def test_parse_backoff_schedule_uses_default_when_blank() -> None:
