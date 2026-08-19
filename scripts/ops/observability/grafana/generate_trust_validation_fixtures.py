@@ -366,7 +366,7 @@ def build_matrix() -> dict[str, dict[str, dict[str, object]]]:
                     )
                     for index, reason in enumerate(
                         (
-                            "manifest_contract_compatibility_not_verified",
+                            "contract_evidence_not_finalized",
                             "checkpoint_artifact_not_observed",
                             "lineage_closure_not_verified",
                             "retention_plan_not_observed",

@@ -17,6 +17,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from collections.abc import Mapping
@@ -68,6 +69,7 @@ class HealthReport:
     expr_parity_skipped: bool = False
     expr_parity_issues: list[str] = field(default_factory=list)
     skipped_unreachable: bool = False
+    tracked_rules_sha256: str | None = None
 
 
 def _fetch_json(url: str, *, timeout: float) -> Any:
@@ -153,6 +155,17 @@ def collect_rule_issues(
 def normalize_promql(expr: str) -> str:
     """Collapse whitespace so git YAML and live API text can be compared."""
     return " ".join(expr.split())
+
+
+def tracked_rules_bundle_sha256(rules_dir: Path) -> str:
+    """Return SHA-256 of tracked Prometheus YAML files in stable path order."""
+    digest = hashlib.sha256()
+    for path in sorted(rules_dir.glob("*.yml")):
+        digest.update(path.name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
@@ -300,12 +313,15 @@ def check_rules_health(
     expr_parity_issues: list[str] = []
     expr_parity_checked = False
     expr_parity_skipped = False
+    tracked_sha: str | None = None
     if expr_parity:
         if unreachable:
             expr_parity_skipped = True
         else:
             expr_parity_checked = True
-            tracked = load_tracked_recording_exprs(rules_dir or DEFAULT_RULES_DIR)
+            rules_root = rules_dir or DEFAULT_RULES_DIR
+            tracked_sha = tracked_rules_bundle_sha256(rules_root)
+            tracked = load_tracked_recording_exprs(rules_root)
             live = (
                 collect_live_recording_exprs(rules_payload)
                 if isinstance(rules_payload, Mapping)
@@ -331,6 +347,7 @@ def check_rules_health(
         expr_parity_skipped=expr_parity_skipped,
         expr_parity_issues=expr_parity_issues,
         skipped_unreachable=skipped_unreachable,
+        tracked_rules_sha256=tracked_sha,
     )
 
 
@@ -389,6 +406,7 @@ def main(argv: list[str] | None = None) -> int:
         "expr_parity_skipped": report.expr_parity_skipped,
         "expr_parity_issues": report.expr_parity_issues,
         "skipped_unreachable": report.skipped_unreachable,
+        "tracked_rules_sha256": report.tracked_rules_sha256,
     }
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))

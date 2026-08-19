@@ -95,20 +95,35 @@ def contract_evidence_path(base_path: Path, manifest_id: str) -> Path:
     return base_path / f"{manifest_id}.contract-evidence.json"
 
 
+class ContractEvidenceConflictError(ValueError):
+    """Raised when a retry would overwrite a different sidecar payload."""
+
+
 def persist_contract_evidence(
     base_path: Path,
     manifest_id: str,
     evidence: dict[str, object],
 ) -> None:
-    """Write one deterministic contract-evidence sidecar."""
+    """Create one sidecar, or no-op when an identical payload already exists."""
     from bioetl.infrastructure.storage.atomic import atomic_write_text
 
     path = contract_evidence_path(base_path, manifest_id)
+    payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + chr(10)
+    if path.is_file():
+        try:
+            existing = path.read_text(encoding='utf-8')
+        except (OSError, UnicodeError) as error:
+            raise ContractEvidenceConflictError(
+                f"Contract evidence sidecar '{path}' cannot be compared"
+            ) from error
+        if existing == payload:
+            return
+        raise ContractEvidenceConflictError(
+            f"Contract evidence sidecar '{path}' already exists with different content"
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
-    atomic_write_text(
-        path,
-        json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-    )
+    atomic_write_text(path, payload)
+
 
 
 def _load_contract_evidence(
@@ -229,6 +244,7 @@ def _invalid_parsed_text(
 
 
 __all__ = [
+    "ContractEvidenceConflictError",
     "RawRunManifestInspectionMixin",
     "contract_evidence_path",
     "persist_contract_evidence",
