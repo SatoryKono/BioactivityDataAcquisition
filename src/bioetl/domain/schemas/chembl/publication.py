@@ -108,7 +108,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="Record creation date in ChEMBL database (YYYY-MM-DD).",
     )
 
-    @pa.check("creation_date", name="creation_date_calendar")
+    @pa.check("creation_date", name="str_matches")
     def _check_creation_date(cls, series: Series[str]) -> Series[bool]:
         return cast("Series[bool]", series.isna() | series.map(_is_iso_calendar_date))
 

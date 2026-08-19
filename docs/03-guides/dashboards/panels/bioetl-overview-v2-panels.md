@@ -208,3 +208,10 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
   Action + Domain Status). L1 Historical Trends, Range Evidence, and Domain
   Diagnostics stay collapsed progressive disclosure.
 - First Action panel provides operator guidance based on current state.
+
+## Shipped panel title synchronization
+
+| ID | Panel title | Type | Notes |
+|---:|---|---|---|
+| 9031 | Review All Domain Status | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+| 9603 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |

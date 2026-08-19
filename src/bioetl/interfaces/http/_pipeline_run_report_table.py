@@ -178,74 +178,55 @@ def _coverage_fields(
     return "partial", "overlaps window"
 
 
-def _summary_rows_pipeline_run_report(
-    payload: dict[str, object],
-    *,
-    grafana_from: object = None,
-    grafana_to: object = None,
-) -> dict[str, object]:
-    """Compact selected-run projection for entry-dashboard summary tables.
-
-    ``rows`` is the parameter/value shape used by existing Infinity tables.
-    ``summary`` is a one-row wide table so Grafana data links can set
-    ``from``/``to`` to started_at-5m .. completed_at+5m without rewriting
-    ``$__from`` silently.
-    """
-    identity = payload.get("identity")
-    if not isinstance(identity, dict):
-        identity = {}
-    funnel = payload.get("funnel")
+def _funnel_summary_values(funnel: object) -> tuple[object, int]:
+    """Extract Gold output and contract exclusions from a funnel payload."""
     gold_out: object = ""
     excluded = 0
-    if isinstance(funnel, list):
-        for stage in funnel:
-            if not isinstance(stage, dict):
+    if not isinstance(funnel, list):
+        return gold_out, excluded
+    for stage in funnel:
+        if not isinstance(stage, dict):
+            continue
+        if stage.get("stage_id") == "gold":
+            gold_out = stage.get("records_out")
+        removals = stage.get("removals")
+        if not isinstance(removals, list):
+            continue
+        for item in removals:
+            if not isinstance(item, dict) or item.get("outcome") != "excluded_by_contract":
                 continue
-            if stage.get("stage_id") == "gold":
-                gold_out = stage.get("records_out")
-            removals = stage.get("removals")
-            if isinstance(removals, list):
-                for item in removals:
-                    if not isinstance(item, dict):
-                        continue
-                    if item.get("outcome") == "excluded_by_contract":
-                        count = item.get("count")
-                        if isinstance(count, int):
-                            excluded += count
-    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
-    status = str(identity.get("status") or payload.get("status") or "")
-    started_at = str(identity.get("started_at") or "")
-    completed_at = str(identity.get("completed_at") or "")
-    started_ms = _parse_iso_to_ms(started_at)
-    completed_ms = _parse_iso_to_ms(completed_at)
-    from_ms = ""
-    to_ms = ""
-    if started_ms is not None:
-        from_ms = str(started_ms - int(_RANGE_PAD.total_seconds() * 1000))
-        end_ms = completed_ms if completed_ms is not None else started_ms
-        to_ms = str(end_ms + int(_RANGE_PAD.total_seconds() * 1000))
-    covers, offset = _coverage_fields(
-        started_ms=started_ms,
-        completed_ms=completed_ms,
-        grafana_from_ms=_parse_grafana_ms(grafana_from),
-        grafana_to_ms=_parse_grafana_ms(grafana_to),
-        status=status,
-    )
-    set_range = "Set range to run (started_at-5m .. completed_at+5m)"
-    rows = [
-        {"parameter": "run_id", "value": run_id},
-        {"parameter": "status", "value": status},
-        {"parameter": "started_at", "value": started_at},
-        {"parameter": "completed_at", "value": completed_at},
-        {"parameter": "gold_records_out", "value": str(gold_out)},
-        {"parameter": "excluded_by_contract", "value": str(excluded)},
-        {"parameter": "covers_selected_run", "value": covers},
-        {"parameter": "coverage_offset", "value": offset},
-        {"parameter": "from_ms", "value": str(from_ms)},
-        {"parameter": "to_ms", "value": str(to_ms)},
-        {"parameter": "set_range_to_run", "value": set_range},
-    ]
-    summary_row = {
+            count = item.get("count")
+            if isinstance(count, int):
+                excluded += count
+    return gold_out, excluded
+
+
+def _run_range_bounds(
+    started_ms: int | None, completed_ms: int | None
+) -> tuple[str, str]:
+    """Return Grafana millisecond bounds padded around a selected run."""
+    if started_ms is None:
+        return "", ""
+    padding_ms = int(_RANGE_PAD.total_seconds() * 1000)
+    end_ms = completed_ms if completed_ms is not None else started_ms
+    return str(started_ms - padding_ms), str(end_ms + padding_ms)
+
+
+def _summary_fields(
+    *,
+    run_id: str,
+    status: str,
+    started_at: str,
+    completed_at: str,
+    gold_out: object,
+    excluded: int,
+    covers: str,
+    offset: str,
+    from_ms: str,
+    to_ms: str,
+) -> dict[str, str]:
+    """Build the stable wide row shared by rows and Grafana summary views."""
+    return {
         "run_id": run_id,
         "status": status,
         "started_at": started_at,
@@ -254,14 +235,55 @@ def _summary_rows_pipeline_run_report(
         "excluded_by_contract": str(excluded),
         "covers_selected_run": covers,
         "coverage_offset": offset,
-        "from_ms": str(from_ms),
-        "to_ms": str(to_ms),
-        "set_range_to_run": set_range,
+        "from_ms": from_ms,
+        "to_ms": to_ms,
+        "set_range_to_run": "Set range to run (started_at-5m .. completed_at+5m)",
     }
+
+
+def _summary_rows_pipeline_run_report(
+    payload: dict[str, object],
+    *,
+    grafana_from: object = None,
+    grafana_to: object = None,
+) -> dict[str, object]:
+    """Build compact selected-run rows and a wide summary for Grafana tables."""
+    identity_candidate = payload.get("identity")
+    identity = identity_candidate if isinstance(identity_candidate, dict) else {}
+    gold_out, excluded = _funnel_summary_values(payload.get("funnel"))
+    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
+    status = str(identity.get("status") or payload.get("status") or "")
+    started_at = str(identity.get("started_at") or "")
+    completed_at = str(identity.get("completed_at") or "")
+    started_ms = _parse_iso_to_ms(started_at)
+    completed_ms = _parse_iso_to_ms(completed_at)
+    from_ms, to_ms = _run_range_bounds(started_ms, completed_ms)
+    covers, offset = _coverage_fields(
+        started_ms=started_ms,
+        completed_ms=completed_ms,
+        grafana_from_ms=_parse_grafana_ms(grafana_from),
+        grafana_to_ms=_parse_grafana_ms(grafana_to),
+        status=status,
+    )
+    summary_row = _summary_fields(
+        run_id=run_id,
+        status=status,
+        started_at=started_at,
+        completed_at=completed_at,
+        gold_out=gold_out,
+        excluded=excluded,
+        covers=covers,
+        offset=offset,
+        from_ms=from_ms,
+        to_ms=to_ms,
+    )
     return {
         "schema_version": "pipeline_run_report_v1",
         "view": "summary",
-        "rows": rows,
+        "rows": [
+            {"parameter": parameter, "value": value}
+            for parameter, value in summary_row.items()
+        ],
         "summary": [summary_row],
         "status": status or "ok",
         "run_id": run_id,

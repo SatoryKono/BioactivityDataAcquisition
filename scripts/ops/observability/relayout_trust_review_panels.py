@@ -64,7 +64,7 @@ def ensure_organize(
         {
             "id": "organize",
             "options": {
-                "excludeByName": {name: True for name in exclude},
+                "excludeByName": dict.fromkeys(exclude, True),
                 "indexByName": index_by,
                 "renameByName": {},
             },

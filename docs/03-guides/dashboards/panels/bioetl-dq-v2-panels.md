@@ -230,3 +230,9 @@ query, links, and operator fact.
   Range`, and `Track: DQ Blocked Records in Range (Evidence)` render a zero as
   neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
   WARN/CRIT verdict.
+
+## Shipped panel title synchronization
+
+| ID | Panel title | Type | Notes |
+|---:|---|---|---|
+| 9406 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |

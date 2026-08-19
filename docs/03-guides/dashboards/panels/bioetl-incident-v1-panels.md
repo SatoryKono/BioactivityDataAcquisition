@@ -80,3 +80,10 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** Structured impact/confidence template; no scored ranking claims;
   no owner/ack write-path.
 - **Data sources:** Static operator copy.
+
+## Shipped panel title synchronization
+
+| ID | Panel title | Type | Notes |
+|---:|---|---|---|
+| 2100 | Inspect Selected Run Summary | row | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+| 2101 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |

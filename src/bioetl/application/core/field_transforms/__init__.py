@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.dict_transformers import *
-from bioetl.application.core.entity_id import *
-from bioetl.application.core.field_specs import *
+from bioetl.application.core.dict_transformers import *  # noqa: F403 - compatibility facade; explicit __all__ below
+from bioetl.application.core.entity_id import *  # noqa: F403 - compatibility facade; explicit __all__ below
+from bioetl.application.core.field_specs import *  # noqa: F403 - compatibility facade; explicit __all__ below

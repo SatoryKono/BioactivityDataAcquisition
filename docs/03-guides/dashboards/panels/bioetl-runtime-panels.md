@@ -250,3 +250,9 @@ used.
 - Row-based workflows (Detect, Localize, Escalate) provide structured triage
   paths and remain collapsed until the headline/cause row points to one branch.
 - GLOBAL panels show cross-scope aggregate signals for escalation context.
+
+## Shipped panel title synchronization
+
+| ID | Panel title | Type | Notes |
+|---:|---|---|---|
+| 9998 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |

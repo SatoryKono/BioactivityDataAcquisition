@@ -113,8 +113,6 @@ def canonical_column_order(columns: list[str] | tuple[str, ...]) -> list[str]:
         >>> canonical_column_order(["z_field", "a_field", "entity_id", "_run_type"])
         ['entity_id', '_run_type', 'a_field', 'z_field']
     """
-    if len(columns) != len(set(columns)):
-        raise ValueError("canonical_column_order does not allow duplicate names")
     columns_set = frozenset(columns)
 
     # 1. System prefix fields (preserve defined order, skip missing)

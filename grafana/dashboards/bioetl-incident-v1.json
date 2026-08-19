@@ -109,13 +109,7 @@
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>Scope:</b> <b>CURRENT</b> = Status/active suspects · <b>SELECTED RUN</b> = exact-run proof</div><div><b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict<div><span>Run coverage:</span> SELECTED RUN <code>${run_id}</code> may sit outside TIME RANGE. Set range to run: open <b>6. Run Explorer</b>, then set From/To to started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code>${provider}</code></div></div></div></div>"
       },
-      "links": [
-        {
-          "title": "Set range to run — open 6. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1?var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}",
-          "targetBlank": false
-        }
-      ]
+      "links": []
     },
     {
       "id": 9401,
@@ -339,25 +333,25 @@
           "links": [
             {
               "title": "Open Pipeline Diagnostics",
-              "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+              "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=$run_type&var-run_id=$run_id",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Open Provider Health",
-              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-pipeline_context=$pipeline&var-run_type=${run_type}&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
+              "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-pipeline_context=$pipeline&var-run_type=$run_type&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Open Data Quality",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=$workflow&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=$run_type&var-run_id=$run_id",
               "targetBlank": false,
               "includeVars": false
             },
             {
               "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=$run_id",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
               "targetBlank": false,
               "includeVars": false
             }
@@ -779,7 +773,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+                  "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=$run_type&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -957,7 +951,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=$pipeline&var-pipeline_context=$pipeline&var-run_type=$run_type&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
+                  "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-pipeline_context=$pipeline&var-run_type=$run_type&var-provider=${__data.fields.provider:percentencode}&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -1117,7 +1111,7 @@
               "links": [
                 {
                   "title": "Open domain workspace",
-                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=${workflow}&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=${run_type}&var-run_id=$run_id",
+                  "url": "/d/bioetl-dq-v2/bioetl-dq-v2?${__url_time_range}&var-workflow=$workflow&var-pipeline=${__data.fields.pipeline:percentencode}&var-run_type=$run_type&var-run_id=$run_id",
                   "targetBlank": false,
                   "includeVars": false
                 }
@@ -1344,20 +1338,7 @@
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
-              "links": [
-                {
-                  "title": "Open 6. Run Explorer for selected run",
-                  "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-                  "targetBlank": false,
-                  "includeVars": false
-                },
-                {
-                  "title": "Set range to run",
-                  "url": "/d/bioetl-run-explorer-v1?from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-                  "targetBlank": false,
-                  "includeVars": false
-                }
-              ]
+              "links": []
             },
             "overrides": [
               {
@@ -1368,14 +1349,7 @@
                 "properties": [
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Set range to run",
-                        "url": "/d/bioetl-run-explorer-v1?from=${__data.fields.from_ms}&to=${__data.fields.to_ms}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               },
@@ -1387,14 +1361,7 @@
                 "properties": [
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Open 6. Run Explorer for selected run",
-                        "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               }
@@ -1449,14 +1416,7 @@
               }
             }
           ],
-          "links": [
-            {
-              "title": "Open 6. Run Explorer for selected run",
-              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
+          "links": []
         }
       ]
     }

@@ -108,13 +108,7 @@
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting · <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Fail-closed:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> show no runs — not a missing store and not a healthy run.<div><span>Run coverage:</span> SELECTED RUN <code>${run_id}</code> may sit outside TIME RANGE. Set range to run: open <b>6. Run Explorer</b>, then set From/To to started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
       },
       "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Fail-closed empty state: default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells.",
-      "links": [
-        {
-          "title": "Set range to run — open 6. Run Explorer",
-          "url": "/d/bioetl-run-explorer-v1?var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}",
-          "targetBlank": false
-        }
-      ]
+      "links": []
     },
     {
       "id": 3010,
@@ -135,14 +129,7 @@
             "inspect": true
           },
           "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 4).",
-          "links": [
-            {
-              "title": "Open 6. Run Explorer for selected run",
-              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
+          "links": []
         },
         "overrides": [
           {
@@ -217,14 +204,7 @@
             "properties": [
               {
                 "id": "links",
-                "value": [
-                  {
-                    "title": "Select this run",
-                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-run_id=${__value.raw}&var-pipeline=${__data.fields.Pipeline}&var-run_type=$run_type&var-workflow=$workflow&${__url_time_range}",
-                    "targetBlank": false,
-                    "includeVars": false
-                  }
-                ]
+                "value": []
               }
             ]
           },
@@ -351,12 +331,6 @@
               "title": "Open monitoring backend setup docs",
               "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
               "targetBlank": true
-            },
-            {
-              "title": "Open 6. Run Explorer for selected run",
-              "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-              "targetBlank": false,
-              "includeVars": false
             }
           ]
         },
@@ -497,13 +471,7 @@
           }
         }
       ],
-      "links": [
-        {
-          "title": "Open 6. Run Explorer for selected run",
-          "url": "/d/bioetl-run-explorer-v1?${__url_time_range}&var-pipeline=${pipeline}&var-run_type=${run_type}&var-run_id=${run_id}&var-workflow=${workflow}&viewPanel=9402",
-          "targetBlank": false
-        }
-      ]
+      "links": []
     },
     {
       "id": 9403,
@@ -919,14 +887,7 @@
                 "properties": [
                   {
                     "id": "links",
-                    "value": [
-                      {
-                        "title": "Select this run",
-                        "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-run_id=${__value.raw}&var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-workflow=$workflow&${__url_time_range}",
-                        "targetBlank": false,
-                        "includeVars": false
-                      }
-                    ]
+                    "value": []
                   }
                 ]
               }
@@ -1287,14 +1248,7 @@
               "expr": ""
             }
           ],
-          "links": [
-            {
-              "title": "Open Processed Records",
-              "url": "/d/bioetl-run-explorer-v1/6-run-explorer?viewPanel=9403&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-workflow=$workflow&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
+          "links": []
         },
         {
           "id": 3016,

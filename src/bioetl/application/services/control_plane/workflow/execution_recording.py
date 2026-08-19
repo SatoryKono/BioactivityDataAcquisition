@@ -19,9 +19,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
-    _clear_ambiguous_step,
     _find_step_state,
-    _record_completed_transform_fingerprint,
     _record_step_state,
     _remove_step_ids,
 )

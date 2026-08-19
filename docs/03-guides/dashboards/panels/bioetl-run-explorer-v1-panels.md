@@ -111,3 +111,11 @@ Nested titles (must match JSON):
   processed records, expand Selected Run Details, then open Trust for
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
+
+## Shipped panel title synchronization
+
+| ID | Panel title | Type | Notes |
+|---:|---|---|---|
+| 3021 | Inspect Recent Runs (last 20) | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+| 3022 | Inspect Full Run Identity | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+| 3023 | Inspect Full Processed Records | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |

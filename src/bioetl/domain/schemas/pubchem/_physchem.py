@@ -87,7 +87,7 @@ class PubchemPhysChemSchema(pa.DataFrameModel):  # Pandera typing limitation
     @pa.check("heavy_atom_count", name="heavy_atom_count_range")
     def _check_heavy_atom_count(cls, series: Series[pd.Int64Dtype]) -> Series[bool]:
         """Validate heavy atom count range."""
-        return cast(Series[bool], series.isna() | ((series >= 0) & (series <= 500)))
+        return cast(Series[bool], series.isna() | ((series >= 1) & (series <= 500)))
 
     h_bond_donor_count: Series[pd.Int64Dtype] | None = pa.Field(
         nullable=True, description="Hydrogen bond donor count"

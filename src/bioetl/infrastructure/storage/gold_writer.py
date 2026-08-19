@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, cast
 
-from deltalake.exceptions import CommitFailedError, TableNotFoundError
+from deltalake.exceptions import CommitFailedError
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports.noop import _NoOpSpan
@@ -20,7 +20,6 @@ from bioetl.domain.types import (
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     _clear_delta_tables,
-    coerce_null_types_for_delta,
 )
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,

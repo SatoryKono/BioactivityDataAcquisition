@@ -133,7 +133,18 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
             encoding="utf-8"
         )
     )
-    panels = {panel.get("id"): panel for panel in dashboard["panels"]}
+    panels: dict[int, dict[str, object]] = {}
+    stack = list(dashboard["panels"])
+    while stack:
+        panel = stack.pop()
+        if not isinstance(panel, dict):
+            continue
+        panel_id = panel.get("id")
+        if isinstance(panel_id, int):
+            panels[panel_id] = panel
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            stack.extend(nested)
 
     status_description = str(panels[9401].get("description", ""))
     assert "selected provider" in status_description
