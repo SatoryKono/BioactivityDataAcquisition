@@ -126,9 +126,9 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     from bioetl.composition.health_api import get_health_server_dependencies
 
     try:
-        result = rehydrate_current_pipeline_run_metrics(
-            get_health_server_dependencies().metrics
-        )
+        deps = get_health_server_dependencies()
+        result = rehydrate_current_pipeline_run_metrics(deps.metrics)
+        _rehydrate_provider_health_gauges(deps)
     except (
         ImportError,
         OSError,
@@ -160,6 +160,26 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     )
 
 
+def _rehydrate_provider_health_gauges(deps: object) -> None:
+    from bioetl.composition.runtime_builders import control_plane_root
+    from bioetl.composition.runtime_builders.config_access import get_settings
+    from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
+        FileProviderHealthEvidenceStore,
+    )
+    from bioetl.infrastructure.control_plane.provider_health_evidence import (
+        rehydrate_provider_health_evidence,
+    )
+
+    try:
+        settings = get_settings()
+        store = FileProviderHealthEvidenceStore(
+            base_path=control_plane_root(settings, "provider_health")
+        )
+        rehydrate_provider_health_evidence(deps.metrics, store)  # type: ignore[attr-defined]
+    except (OSError, RuntimeError, TypeError, ValueError, AttributeError):
+        return
+
+
 __all__ = [
     "_rehydrate_current_metrics",
     "_start_health_observability",
@@ -167,3 +187,4 @@ __all__ = [
     "get_runtime_settings",
     "start_metrics_server",
 ]
+

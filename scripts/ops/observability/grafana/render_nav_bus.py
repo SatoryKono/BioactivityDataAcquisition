@@ -131,7 +131,7 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
         # Fail-closed context mapping from non-provider sources.
         return (
             f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-provider=unknown&var-pipeline_context={pipe}"
+            f"&var-provider={dollar}provider&var-pipeline_context={pipe}"
             f"&{dollar}{{__url_time_range}}"
             f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
         )

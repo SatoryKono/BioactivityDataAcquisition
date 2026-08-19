@@ -30,6 +30,7 @@ typed_observability_views:
     - catalog_aliases_without_declaration
     - http_semantics_violations
     - panel_contract_drift
+    - coverage_class_violations
     - prometheus_run_id_selector_violations
   coverage_fields:
     documented: documented_metrics
@@ -101,6 +102,7 @@ runtime_cardinality_review:
       changed_path_trigger_static_paths:
       - configs/quality/observability_metric_inventory_allowlist.yaml
       - configs/quality/observability_metric_declarations.yaml
+      - configs/quality/observability_coverage_classes.yaml
       changed_path_trigger_prefixes:
       - grafana/dashboards/
       - grafana/prometheus-rules/
