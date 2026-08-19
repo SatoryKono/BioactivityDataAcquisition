@@ -17,7 +17,7 @@
   "allow_merge": false,
   "allow_close": true,
   "surface_score": 1,
-  "status": "completed_with_external_blocker",
+  "status": "completed_with_external_blockers",
   "proof_or_stop": {
     "outcome": "STOP",
     "claim_qualified": false,
@@ -30,6 +30,23 @@
     "bundle": "reports/quality/proof-or-stop/20260819T075955Z-tests-cycle-16f309688177/bundle.json"
   },
   "open_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/8619",
+  "pull_request": {
+    "number": 9039,
+    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/pull/9039",
+    "draft": true,
+    "merge_state": "BLOCKED",
+    "merge_performed": false
+  },
+  "created_issues": [
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9040",
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9041",
+    "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9042"
+  ],
+  "ci_blockers": [
+    "git_lfs_budget_exhausted",
+    "current_main_quality_gates_red",
+    "forbidden_python_under_reports"
+  ],
   "agent_merge_performed": false,
   "external_merge_observed": {
     "merge_sha": "21dcaa936808fba3e3368136b8865db180ee36e1",

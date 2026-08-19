@@ -1,1 +1,4 @@
 {"action":"keep_open","issue":8619,"reason":"acceptance not met"}
+{"action":"create","issue":9040,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9040","finding":"TEST-SYS-012","reason":"PR CI proves exhausted Git LFS budget"}
+{"action":"create","issue":9041,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9041","finding":"TEST-SYS-013","reason":"PR CI proves current-main Ruff/C901/Xenon failures"}
+{"action":"create","issue":9042,"url":"https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9042","finding":"TEST-SYS-014","reason":"PR CI proves forbidden Python helper under reports"}
