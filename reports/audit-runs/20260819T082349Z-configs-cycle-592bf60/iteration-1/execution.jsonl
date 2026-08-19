@@ -1,0 +1,1 @@
+{"iteration":1,"commands":["git ls-files configs","comm -3 provider/entity inventories","comm -3 composite/config inventories"],"outcome":"pass","findings":[]}

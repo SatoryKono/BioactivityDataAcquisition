@@ -1,0 +1,20 @@
+{
+  "method": "git ls-files configs/quality | git hash-object --stdin-paths | sha256sum",
+  "baseline": {
+    "quality_tree_aggregate_sha256": "be7dcdb5fec98cb304865c53bd78ff5c989b5a0fae98ce035fe3c1dd0a3c84a0",
+    "selected_files": {
+      "configs/quality/debt_scorecard.yaml": "e17777af9eda3cbda47987abb456e1d3b7b8d9342385c7b7bfdc3942a224da72",
+      "configs/quality/architecture_metric_exemptions.yaml": "33bdd9f3d4867cf368da357b6d181fa0027dfabef056d67402e8c714cbb17bdb",
+      "configs/quality/duplication_complexity_exemptions.yaml": "2a0e2e12dba4fe4b44d211e84100d8a49fbfb411aab6a5ca13742928786389cb",
+      "configs/quality/vcr_cassette_size_budget.yaml": "7ac43bfd1aa4c8018b90eff32311b49489bc53689fe8e124ae1d3dc5bc350353",
+      "configs/quality/vcr_provider_budget.yaml": "17e4a6190cd07348e6b1f788bf7b097b6f8e7ff22db858c48fe0f54d7afb7598",
+      "configs/quality/test_skip_inventory.yaml": "70b1b2f51a76036c86220d7fedacf5317a9b198785fca23d122bdbafcbb62f58"
+    }
+  },
+  "final": {
+    "quality_tree_aggregate_sha256": "be7dcdb5fec98cb304865c53bd78ff5c989b5a0fae98ce035fe3c1dd0a3c84a0",
+    "delta": "flat"
+  },
+  "policy_result": "ACCEPTED",
+  "budget_growth": false
+}

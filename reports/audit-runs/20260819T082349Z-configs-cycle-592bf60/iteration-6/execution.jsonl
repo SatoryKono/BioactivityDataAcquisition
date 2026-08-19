@@ -1,0 +1,1 @@
+{"iteration":6,"commands":["inspect publication join policy","inspect EnricherConfig.primary_join_key","pytest semantic field/join policy tests","GitHub issue lookup #3907"],"outcome":"pass_canonical_profile","findings":[]}
