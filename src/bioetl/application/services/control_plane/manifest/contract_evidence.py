@@ -14,6 +14,7 @@ CONTRACT_EVIDENCE_SCHEMA_VERSION = "contract_evidence_v1"
 __all__ = [
     "CONTRACT_EVIDENCE_SCHEMA_VERSION",
     "ContractEvidenceRecorderPort",
+    "RunManifestCreateSpec",
     "build_contract_evidence",
     "build_runtime_contract_evidence",
 ]

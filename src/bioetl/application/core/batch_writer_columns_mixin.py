@@ -233,18 +233,8 @@ class BatchWriterColumnsMixin:
 
     def _apply_system_prefix_order(self, columns: list[str]) -> list[str]:
         """Ensure system fields are first and DQ fields are last."""
-        from bioetl.domain.schemas.column_order import (
-            DQ_FIELDS_SUFFIX,
-            LOOKUP_FIELDS_PREFIX,
-            SYSTEM_FIELDS_PREFIX,
+        from bioetl.application.core._batch_writer_column_order import (
+            apply_system_prefix_order,
         )
 
-        if not columns:
-            return columns
-        column_set = set(columns)
-        prefix = [c for c in SYSTEM_FIELDS_PREFIX if c in column_set]
-        lookup = [c for c in LOOKUP_FIELDS_PREFIX if c in column_set]
-        suffix = [c for c in DQ_FIELDS_SUFFIX if c in column_set]
-        assigned = {*prefix, *lookup, *suffix}
-        middle = [c for c in columns if c not in assigned]
-        return prefix + lookup + middle + suffix
+        return apply_system_prefix_order(columns)
