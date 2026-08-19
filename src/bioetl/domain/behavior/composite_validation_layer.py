@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import replace
+from typing import cast
 
 from bioetl.domain.behavior.aggregation_validator import AggregationValidator
 from bioetl.domain.behavior.composite_validation_config import CompositeValidationConfig
@@ -88,9 +89,10 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(
-            validation_report, execution_decision=governance_decision
-        )  # NOSONAR
+        return cast(
+            "CompositeValidationReport",
+            replace(validation_report, execution_decision=governance_decision),
+        )
 
     def _run_structural_validation(
         self,

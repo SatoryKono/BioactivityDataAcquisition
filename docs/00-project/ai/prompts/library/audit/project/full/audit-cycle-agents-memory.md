@@ -258,7 +258,7 @@ Prefer `scripts/**` or `reports/**` for any helper scratch.
 
 | Param | Default |
 | --- | --- |
-| `N` / `CYCLE_COUNT` | `1` |
+| `N` / `CYCLE_COUNT` | `10` |
 | `ALLOW_ISSUE_WRITE` | `false` |
 | `ALLOW_PUSH` | `false` |
 | `ALLOW_MERGE` | `false` |
@@ -315,7 +315,7 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 | Param | Default |
 | --- | --- |
 | `N` | `10` |
-| `SCOPE` | `AGENTS.md .codex/ .junie/ .devin/ docs/00-project/ai/ scripts/ai/ src/memory/ scripts/memory/` |
+| `SCOPE` | и |
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |

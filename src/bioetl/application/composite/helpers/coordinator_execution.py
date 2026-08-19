@@ -131,6 +131,7 @@ def complete_enricher_execution(
 def handle_enricher_timeout(
     host: _CoordinatorExecutionHost,
     execution_context: EnricherExecutionContext,
+    error: TimeoutError,
 ) -> EnrichmentResult:
     """Apply timeout policy, re-raising for required enrichers only."""
     enricher = execution_context.enricher
@@ -145,8 +146,7 @@ def handle_enricher_timeout(
             timeout_seconds=enricher.timeout_seconds,
             duration_seconds=duration,
         )
-        # NOSONAR - raise outside except block is intentional for timeout handling (S1172 false positive)
-        raise
+        raise error
     return host._build_timeout_result(
         enricher,
         execution_context.records_input,

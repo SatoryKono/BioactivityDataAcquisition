@@ -78,13 +78,27 @@ def _replace_with_retry(
             temp_resolved.replace(target_resolved)
             return
         except OSError as error:
-            if not _is_retryable_replace_error(error):
-                raise
-            if not retry_policy.should_retry(retry_count):
-                raise
-            delay_seconds = retry_policy.calculate_delay(retry_count)
+            delay_seconds = _retry_delay_or_raise(
+                error,
+                retry_policy=retry_policy,
+                retry_count=retry_count,
+            )
             if on_retry is not None:
                 on_retry(retry_count + 1, delay_seconds, error)
             if delay_seconds > 0.0:
                 time.sleep(delay_seconds)
             retry_count += 1
+
+
+def _retry_delay_or_raise(
+    error: OSError,
+    *,
+    retry_policy: AdaptiveRetryPolicy,
+    retry_count: int,
+) -> float:
+    """Return the next delay or re-raise a terminal replace failure."""
+    if not _is_retryable_replace_error(error):
+        raise error
+    if not retry_policy.should_retry(retry_count):
+        raise error
+    return retry_policy.calculate_delay(retry_count)

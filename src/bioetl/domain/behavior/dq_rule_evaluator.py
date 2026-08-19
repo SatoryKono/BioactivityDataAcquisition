@@ -8,7 +8,7 @@ contract-aware dispositions resolved from the effective DQ configuration.
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.behavior._dq_rule_evaluators import (
     _conditional_matches,
@@ -161,10 +161,15 @@ def _apply_invalid_record_policy(
         "skip": DQDisposition.SKIP,
         "fail": DQDisposition.FAIL,
     }[dq_config.invalid_record_policy]
-    return replace(
-        outcome,
-        disposition=policy_disposition,
-        disposition_reason=(f"invalid_record_policy={dq_config.invalid_record_policy}"),
+    return cast(
+        "DQRuleOutcome",
+        replace(
+            outcome,
+            disposition=policy_disposition,
+            disposition_reason=(
+                f"invalid_record_policy={dq_config.invalid_record_policy}"
+            ),
+        ),
     )
 
 

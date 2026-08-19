@@ -189,8 +189,8 @@ class EnrichmentCoordinatorService(EnrichmentCoordinatorResultMixin):
                     completed_at=completed_at,
                     duration=duration,
                 )
-            except TimeoutError:
-                return handle_enricher_timeout(self, execution_context)
+            except TimeoutError as error:
+                return handle_enricher_timeout(self, execution_context, error)
             except _ENRICHER_EXECUTION_ERRORS as e:
                 return handle_enricher_execution_error(
                     self,

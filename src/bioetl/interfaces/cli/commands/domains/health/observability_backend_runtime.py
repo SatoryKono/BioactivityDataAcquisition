@@ -68,6 +68,7 @@ if TYPE_CHECKING:
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
 _CONTROL_PLANE_READY_PROBE_PATH = "/ops/control-plane/ready"
+_NUMERIC_PORT_ERROR = "observability_backend_port must be a numeric CLI value"
 
 _DETACHED_STATUS = frozenset({"reused", "started"})
 
@@ -125,15 +126,13 @@ def resolve_observability_backend_cli_options(
 def _parse_observability_backend_port(raw_port: object) -> int:
     """Parse one integral backend-port value without lossy truncation."""
     if isinstance(raw_port, bool):
-        raise TypeError("observability_backend_port must be a numeric CLI value")
+        raise TypeError(_NUMERIC_PORT_ERROR)
     if not isinstance(raw_port, (str, bytes, bytearray, int, float)):
-        raise TypeError("observability_backend_port must be a numeric CLI value")
+        raise TypeError(_NUMERIC_PORT_ERROR)
     try:
         port = int(raw_port)
     except (TypeError, ValueError, OverflowError) as exc:
-        raise TypeError(
-            "observability_backend_port must be a numeric CLI value"
-        ) from exc
+        raise TypeError(_NUMERIC_PORT_ERROR) from exc
     if isinstance(raw_port, float):
         _require_integral_backend_port(raw_port)
     return port

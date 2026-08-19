@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from types import TracebackType
@@ -160,8 +161,7 @@ class CircuitBreakerDataSourceDecorator:
         """
 
         async def _mark_success() -> None:
-            # NOSONAR - async required for circuit_breaker.call() compatibility (S7503 false positive)
-            return None
+            await asyncio.sleep(0)
 
         try:
             await self.circuit_breaker.call(_mark_success)

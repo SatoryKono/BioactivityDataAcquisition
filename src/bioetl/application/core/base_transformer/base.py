@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import replace
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from bioetl.application.core.base_transformer.types import (
     T,
@@ -37,16 +37,19 @@ def _merge_legacy_collaborators(
     identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    return replace(
-        dependencies,
-        tracer=dependencies.tracer if tracer is None else tracer,
-        metrics=dependencies.metrics if metrics is None else metrics,
-        identity_service=(
-            dependencies.identity_service
-            if identity_service is None
-            else identity_service
+    return cast(
+        "TransformerDependencyContext",
+        replace(
+            dependencies,
+            tracer=dependencies.tracer if tracer is None else tracer,
+            metrics=dependencies.metrics if metrics is None else metrics,
+            identity_service=(
+                dependencies.identity_service
+                if identity_service is None
+                else identity_service
+            ),
+            pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
         ),
-        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
     )
 
 

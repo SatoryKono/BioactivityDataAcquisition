@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
@@ -178,16 +178,22 @@ def finalize_pipeline_run_report(
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:
-        return replace(
-            result,
-            run_report_error=f"{type(exc).__name__}: {exc}",
+        return cast(
+            "RunResult",
+            replace(
+                result,
+                run_report_error=f"{type(exc).__name__}: {exc}",
+            ),
         )
 
-    return replace(
-        result,
-        run_report_json_path=str(written.json_path),
-        run_report_markdown_path=str(written.markdown_path),
-        run_report_funnel=report.funnel,
+    return cast(
+        "RunResult",
+        replace(
+            result,
+            run_report_json_path=str(written.json_path),
+            run_report_markdown_path=str(written.markdown_path),
+            run_report_funnel=report.funnel,
+        ),
     )
 
 

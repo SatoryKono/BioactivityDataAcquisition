@@ -9,7 +9,7 @@ import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from bioetl.application.services.run_reports.markdown import (
     render_pipeline_run_report_markdown,
@@ -210,12 +210,15 @@ def write_pipeline_run_report(
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
-    enriched = replace(
-        report,
-        artifacts=_with_self_artifacts(
-            report.artifacts,
-            json_path=json_path,
-            markdown_path=md_path,
+    enriched = cast(
+        "PipelineRunReport",
+        replace(
+            report,
+            artifacts=_with_self_artifacts(
+                report.artifacts,
+                json_path=json_path,
+                markdown_path=md_path,
+            ),
         ),
     )
     write_json(json_path, enriched.to_dict())
