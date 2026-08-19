@@ -32,7 +32,7 @@ SVG_NS = urlunsplit(("http", "www.w3.org", "/2000/svg", "", ""))
 NS = {"svg": SVG_NS}
 
 CLASS_DECL_RE = re.compile(r"^\s*class\s+([A-Za-z_]\w*)\s*\{\s*$")
-METHOD_DECL_RE = re.compile(r"^\s*[+\-#~]\s*([A-Za-z_\\][\\w]*)\s*\(")
+METHOD_DECL_RE = re.compile(r"^\s*[+\-#~]\s*([A-Za-z_\\][\w\\]*)\s*\(")
 
 
 @dataclass
