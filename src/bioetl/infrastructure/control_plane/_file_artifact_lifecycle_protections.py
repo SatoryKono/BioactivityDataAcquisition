@@ -92,3 +92,23 @@ def resolve_protected_refs(
     collect_checkpoint_protections(base_path=base_path, cutoff=cutoff, refs=refs)
     collect_lineage_protections(base_path=base_path, refs=refs)
     return refs.freeze()
+
+
+def resolve_protected_refs_for_manifest(
+    *,
+    manifest: object,
+    policy: ControlPlaneArtifactLifecyclePolicy,
+) -> _ProtectedRefs:
+    """Build protections from one selected manifest without catalog scans."""
+    refs = ProtectedRefAccumulator.from_policy(policy)
+    manifest_id = str(getattr(manifest, "manifest_id", "") or "")
+    if manifest_id:
+        refs.manifest_ids.add(manifest_id)
+    run_id = getattr(manifest, "run_id", None)
+    if run_id is not None:
+        refs.run_ids.add(str(run_id))
+    provenance = getattr(manifest, "code_provenance", None)
+    artifact_id = getattr(provenance, "effective_config_artifact_id", None)
+    if isinstance(artifact_id, str) and artifact_id.strip():
+        refs.effective_config_artifact_ids.add(artifact_id.strip())
+    return refs.freeze()

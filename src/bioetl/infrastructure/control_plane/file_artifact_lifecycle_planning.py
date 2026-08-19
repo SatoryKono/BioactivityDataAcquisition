@@ -8,6 +8,9 @@ from bioetl.infrastructure.control_plane._file_artifact_lifecycle_protections im
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_protections import (
     resolve_protected_refs as _resolve_protected_refs,
 )
+from bioetl.infrastructure.control_plane._file_artifact_lifecycle_protections import (
+    resolve_protected_refs_for_manifest as _resolve_protected_refs_for_manifest,
+)
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
     build_artifact_ref as _build_artifact_ref,
 )
@@ -42,6 +45,7 @@ __all__ = [
     "_iter_surface_files",
     "_lineage_fragment_files",
     "_resolve_protected_refs",
+    "_resolve_protected_refs_for_manifest",
     "_resolve_replay_impact",
     "_surface_root",
 ]

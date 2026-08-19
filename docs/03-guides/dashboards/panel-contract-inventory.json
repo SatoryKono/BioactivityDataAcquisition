@@ -1711,12 +1711,13 @@
       "kind": "http",
       "panel_id": 9416,
       "panel_title": "Review Retention Compliance",
-      "query": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+      "query": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
       "query_tokens": [
         "/ops/control-plane/retention-compliance",
         "pipeline",
         "run_type",
-        "run_id"
+        "run_id",
+        "error_as_row"
       ],
       "ref_id": "A",
       "runbook_urls": [],

@@ -265,3 +265,52 @@ async def test_missing_evidence_service_returns_unknown_table_contract() -> None
         )
     finally:
         await server.stop()
+
+
+@pytest.mark.asyncio
+async def test_retention_deadline_returns_table_row_and_keeps_504(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.interfaces.http import _health_server_control_plane_evidence_routing as routing
+    from bioetl.interfaces.http._forensic_request_budget import (
+        ForensicEndpointUnavailable,
+    )
+
+    manifest = _manifest()
+    manifests = InMemoryRunManifestStore()
+    manifests.save(manifest)
+    server = HealthServer(
+        host="127.0.0.1",
+        port=0,
+        run_manifest_port=manifests,
+        control_plane_evidence_service=ControlPlaneEvidenceService(),
+    )
+
+    async def deadline(**_kwargs: object) -> dict[str, object]:
+        raise ForensicEndpointUnavailable(reason="deadline_exceeded", status_code=504)
+
+    monkeypatch.setattr(routing, "run_bounded_forensic_operation", deadline)
+    await server.start()
+    try:
+        status, payload = await _get_json(
+            server,
+            "/ops/control-plane/retention-compliance?pipeline=chembl_activity"
+            f"&run_id={manifest.run_id}",
+        )
+        assert status == 504
+        assert payload["contract"] == "forensic_endpoint_error_v1"
+        assert payload["reason"] == "deadline_exceeded"
+        assert payload["rows"][0]["status"] == "ERROR"
+        assert payload["rows"][0]["reason"] == "deadline_exceeded"
+
+        status_ok, payload_ok = await _get_json(
+            server,
+            "/ops/control-plane/retention-compliance?pipeline=chembl_activity"
+            f"&run_id={manifest.run_id}&error_as_row=1",
+        )
+        assert status_ok == 200
+        assert payload_ok["contract"] == "forensic_endpoint_error_v1"
+        assert payload_ok["rows"][0]["check"] == "endpoint_availability"
+    finally:
+        await server.stop()
+

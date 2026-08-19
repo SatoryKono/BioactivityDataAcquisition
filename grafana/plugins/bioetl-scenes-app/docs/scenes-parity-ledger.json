@@ -899,7 +899,7 @@
         "datasource_type": null,
         "target_count": 1,
         "expressions": [
-          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
+          "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1"
         ]
       },
       "basis": "preserved-from-json",
