@@ -269,6 +269,13 @@ entries:
     tags: [observability, dashboard, grafana, audit, sequential, operator]
     summary: Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix
 
+  - id: prompt.observability.dashboard-operator-playbook
+    path: library/observability/dashboard-operator-playbook.md
+    status: active
+    class: operator-paste
+    tags: [observability, dashboard, grafana, operator, playbook, scenario, verification]
+    summary: Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices
+
   - id: prompt.observability.dashboard-v5.pack
     path: library/observability/dashboard-v5/pack.md
     status: active

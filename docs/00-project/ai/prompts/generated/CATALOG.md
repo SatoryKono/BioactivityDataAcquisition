@@ -28,6 +28,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit (v2.0) of every panel, viewport, theme, zoom (Tier-1 100% / Tier-2 200%), density, typography, color, scroll, whitespace, data, and render contract |
 | `prompt.observability.sequential-run` | `library/observability/sequential-run.md` | Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix |
+| `prompt.observability.dashboard-operator-playbook` | `library/observability/dashboard-operator-playbook.md` | Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices |
 | `prompt.observability.dashboard-v5.pack` | `library/observability/dashboard-v5/pack.md` | Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover |
 | `prompt.observability.dashboard-v5.implement` | `library/observability/dashboard-v5/implement.md` | Implement leftover V5 residuals — babysit |
 | `prompt.observability.dashboard-v5.closeout` | `library/observability/dashboard-v5/closeout.md` | Close V5 residual issues/PRs with origin/main evidence only |
@@ -127,6 +128,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
 | `prompt.observability.sequential-run` | operator-paste | active | `library/observability/sequential-run.md` |
+| `prompt.observability.dashboard-operator-playbook` | operator-paste | active | `library/observability/dashboard-operator-playbook.md` |
 | `prompt.observability.dashboard-v5.pack` | operator-paste | active | `library/observability/dashboard-v5/pack.md` |
 | `prompt.observability.dashboard-v5.implement` | operator-paste | active | `library/observability/dashboard-v5/implement.md` |
 | `prompt.observability.dashboard-v5.closeout` | operator-paste | active | `library/observability/dashboard-v5/closeout.md` |
