@@ -372,8 +372,7 @@ def test_monitoring_compose_exposes_ops_http_soft_gate_env() -> None:
         "/var/lib/grafana/dashboards-prometheus-only:ro" in volumes
     )
     assert not any(
-        item.endswith(":/etc/grafana/provisioning/dashboards:ro")
-        for item in volumes
+        item.endswith(":/etc/grafana/provisioning/dashboards:ro") for item in volumes
     )
 
 
@@ -413,9 +412,7 @@ def _run_bootstrap_profile(
             "BIOETL_GRAFANA_DATASOURCE_CORE_DIR": str(datasource_core),
             "BIOETL_GRAFANA_DASHBOARD_PROVIDER_TARGET_DIR": str(provider_target),
             "BIOETL_GRAFANA_DASHBOARD_PROVIDER_FULL_DIR": str(provider_full),
-            "BIOETL_GRAFANA_DASHBOARD_PROVIDER_FALLBACK_DIR": str(
-                provider_fallback
-            ),
+            "BIOETL_GRAFANA_DASHBOARD_PROVIDER_FALLBACK_DIR": str(provider_fallback),
             "BIOETL_GRAFANA_BOOTSTRAP_STATUS_FILE": str(status_file),
             "BIOETL_GRAFANA_RUN_SCRIPT": shutil.which("true") or "/bin/true",
             "BIOETL_EXPECTED_RUNTIME_SOURCE_ID": runtime_source_id,
@@ -432,7 +429,7 @@ def _run_bootstrap_profile(
         wget = fake_bin / "wget"
         wget.write_text(
             "#!/bin/sh\nprintf '%s\\n' "
-            f"'{{\"runtime_source_id\":\"{runtime_source_id}\"}}'\n",
+            f'\'{{"runtime_source_id":"{runtime_source_id}"}}\'\n',
             encoding="utf-8",
         )
         wget.chmod(0o755)
@@ -459,18 +456,16 @@ def _run_bootstrap_profile(
 def test_bootstrap_selects_static_dashboard_profile_when_ops_http_is_deferred(
     tmp_path: Path,
 ) -> None:
-    result, datasource_target, provider_target, status_file = (
-        _run_bootstrap_profile(
-            tmp_path,
-            runtime_source_id="unmanaged",
-            ready=False,
-        )
+    result, datasource_target, provider_target, status_file = _run_bootstrap_profile(
+        tmp_path,
+        runtime_source_id="unmanaged",
+        ready=False,
     )
 
     assert result.returncode == 0, result.stderr
-    assert "profile: prometheus_only" in (
-        provider_target / "bioetl.yaml"
-    ).read_text(encoding="utf-8")
+    assert "profile: prometheus_only" in (provider_target / "bioetl.yaml").read_text(
+        encoding="utf-8"
+    )
     assert not (datasource_target / "bioetl-ops-http.yml").exists()
     status = json.loads(status_file.read_text(encoding="utf-8"))
     assert status["ops_http"] == "deferred"
@@ -482,12 +477,10 @@ def test_bootstrap_selects_full_dashboard_profile_after_identity_match(
     tmp_path: Path,
 ) -> None:
     runtime_source_id = "a" * 64
-    result, datasource_target, provider_target, status_file = (
-        _run_bootstrap_profile(
-            tmp_path,
-            runtime_source_id=runtime_source_id,
-            ready=True,
-        )
+    result, datasource_target, provider_target, status_file = _run_bootstrap_profile(
+        tmp_path,
+        runtime_source_id=runtime_source_id,
+        ready=True,
     )
 
     assert result.returncode == 0, result.stderr

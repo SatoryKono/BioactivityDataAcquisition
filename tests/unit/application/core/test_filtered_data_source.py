@@ -1327,9 +1327,7 @@ class TestFilteredDataSourceValidCombinations:
         )
 
         with pytest.raises(ValueError, match="filter_ids and filter_field"):
-            await _drain_async_iter(
-                filtered.fetch("activity", filter_ids=["CHEMBL1"])
-            )
+            await _drain_async_iter(filtered.fetch("activity", filter_ids=["CHEMBL1"]))
 
     @pytest.mark.asyncio
     async def test_fetch_single_column_raises_without_filter_ids(self):

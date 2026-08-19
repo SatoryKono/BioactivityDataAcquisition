@@ -248,7 +248,9 @@ def augment_dq_summary_with_composite_cv(
         return dq_summary
 
     error_records = max(dq_summary.error_records, int(cv_summary["error_records"]))
-    warning_records = max(dq_summary.warning_records, int(cv_summary["warning_records"]))
+    warning_records = max(
+        dq_summary.warning_records, int(cv_summary["warning_records"])
+    )
     total_records = dq_summary.total_records
     existing_provenance = normalize_rule_provenance_entries(dq_summary.rule_provenance)
     composite_provenance = normalize_rule_provenance_entries(

@@ -440,9 +440,12 @@ def test_first_screen_budget_excludes_nav_and_named_shell() -> None:
         "title": "Monitor Replay Readiness",
         "gridPos": {"x": 18, "y": 4, "w": 6, "h": 4},
     }
-    assert is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_nav) is False
     assert (
-        is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_shell) is False
+        is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_nav) is False
+    )
+    assert (
+        is_first_screen_budget_panel("bioetl-control-plane-v1.json", extra_shell)
+        is False
     )
     assert is_first_screen_budget_panel("bioetl-control-plane-v1.json", data) is True
 

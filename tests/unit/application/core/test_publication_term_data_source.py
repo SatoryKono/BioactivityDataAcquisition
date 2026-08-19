@@ -245,10 +245,7 @@ class TestPublicationTermDataSourceFetch:
             data_source=mock_data_source_single_document
         )
 
-        _ = [
-            term
-            async for term in wrapper.fetch("publication_term", query="kinase")
-        ]
+        _ = [term async for term in wrapper.fetch("publication_term", query="kinase")]
 
         assert mock_data_source_single_document.fetch_calls[-1]["query"] == "kinase"
 
