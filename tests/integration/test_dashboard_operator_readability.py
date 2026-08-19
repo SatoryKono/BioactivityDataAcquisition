@@ -21,7 +21,6 @@ These tests are the required check whenever grafana/dashboards/*.json changes
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 from typing import Any
@@ -404,7 +403,6 @@ def test_first_window_panels_do_not_declare_internal_scroll() -> None:
                     and ("aria-hidden" in window or "flex:11 100%" in compact)
                 )
                 if spacer:
-
                     continue
                 violations.append(
                     f"{path.name}:id={panel.get('id')} first-window overflow:{kind} "

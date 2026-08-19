@@ -21,8 +21,8 @@ _SCHEMA_EXTRACTION_ERRORS = (
 class BatchWriterColumnsMixin:
     """Column resolution helpers extracted from BatchWriter."""
 
-    _column_orderer: Any = cast(Any, None)  # Optional column-order service
-    _data_schema: Any = cast(Any, None)  # Heterogeneous schema adapter
+    _column_orderer: Any = cast(Any, None)  # Any: optional column-order service
+    _data_schema: Any = cast(Any, None)  # Any: heterogeneous schema adapter
 
     def _project_via_to_schema(
         self,

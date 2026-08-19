@@ -178,6 +178,31 @@ def _coverage_fields(
     return "partial", "overlaps window"
 
 
+def _funnel_gold_out_and_excluded(funnel: object) -> tuple[object, int]:
+    """Return gold records_out and excluded_by_contract count from a funnel."""
+    gold_out: object = ""
+    excluded = 0
+    if not isinstance(funnel, list):
+        return gold_out, excluded
+    for stage in funnel:
+        if not isinstance(stage, dict):
+            continue
+        if stage.get("stage_id") == "gold":
+            gold_out = stage.get("records_out")
+        removals = stage.get("removals")
+        if not isinstance(removals, list):
+            continue
+        for item in removals:
+            if not isinstance(item, dict):
+                continue
+            if item.get("outcome") != "excluded_by_contract":
+                continue
+            count = item.get("count")
+            if isinstance(count, int):
+                excluded += count
+    return gold_out, excluded
+
+
 def _summary_rows_pipeline_run_report(
     payload: dict[str, object],
     *,
@@ -194,24 +219,7 @@ def _summary_rows_pipeline_run_report(
     identity = payload.get("identity")
     if not isinstance(identity, dict):
         identity = {}
-    funnel = payload.get("funnel")
-    gold_out: object = ""
-    excluded = 0
-    if isinstance(funnel, list):
-        for stage in funnel:
-            if not isinstance(stage, dict):
-                continue
-            if stage.get("stage_id") == "gold":
-                gold_out = stage.get("records_out")
-            removals = stage.get("removals")
-            if isinstance(removals, list):
-                for item in removals:
-                    if not isinstance(item, dict):
-                        continue
-                    if item.get("outcome") == "excluded_by_contract":
-                        count = item.get("count")
-                        if isinstance(count, int):
-                            excluded += count
+    gold_out, excluded = _funnel_gold_out_and_excluded(payload.get("funnel"))
     run_id = str(identity.get("run_id") or payload.get("run_id") or "")
     status = str(identity.get("status") or payload.get("status") or "")
     started_at = str(identity.get("started_at") or "")
