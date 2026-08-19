@@ -409,6 +409,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/ai/prompts/project_full.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the source-aware generated-link helper behind the canonical python -m scripts.ai.prompts command surface; do not expose it as a second standalone entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/ai/prompts/registry.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prompt Library registry-loading helper behind the canonical python -m scripts.ai.prompts command surface; do not expose it as a second standalone entrypoint.",

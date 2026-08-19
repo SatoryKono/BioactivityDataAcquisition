@@ -75,21 +75,21 @@ metadata; do not log full prompt if it may contain sensitive material.
 # Cyclic audit pack (tests / docs / tech-debt / repo hygiene / …)
 
 **Десять** канонических циклических аудитов живут в
-[cycle/](cycle/README.md) (`prompt.audit.cycle.*`). Старые циклы
+[cycle/](../../cycle/README.md) (`prompt.audit.cycle.*`). Старые циклы
 (`docs-cycle`, `tests-cycle`, …) остаются совместимыми one-family cards.
 
 | # | Domain | Card | Domain method | Artifacts |
 | --- | --- | --- | --- | --- |
-| 1 | Документация + `scripts/docs` | `prompt.audit.cycle.docs` → [cycle/docs.md](cycle/docs.md) | `docs-content` + `docs-pipeline` | `reports/audit-runs/<run_id>/` |
-| 2 | Диаграммы + `scripts/diagrams` | `prompt.audit.cycle.diagrams` → [cycle/diagrams.md](cycle/diagrams.md) | `prompt.audit.diagrams` | same |
-| 3 | Агенты + память | `prompt.audit.cycle.agents-memory` → [cycle/agents-memory.md](cycle/agents-memory.md) | `agents-runtime` + memory workflow | same |
-| 4 | Конфиги | `prompt.audit.cycle.configs` → [cycle/configs.md](cycle/configs.md) | py-config-bot hierarchy | same |
-| 5 | Тестовый слой | `prompt.audit.cycle.tests` → [cycle/tests.md](cycle/tests.md) | `prompt.audit.tests-system` | same |
-| 6 | Техдолг | `prompt.audit.cycle.tech-debt` → [cycle/tech-debt.md](cycle/tech-debt.md) | `prompt.audit.tech-debt` | same |
-| 7 | Архитектура | `prompt.audit.cycle.architecture` → [cycle/architecture.md](cycle/architecture.md) | 10-category scorecard | same |
-| 8 | Наблюдаемость / feed | `prompt.audit.cycle.telemetry` → [cycle/telemetry.md](cycle/telemetry.md) | metrics + recording rules | same |
-| 9 | Рендер / дизайн панелей | `prompt.audit.cycle.dashboards` → [cycle/dashboards.md](cycle/dashboards.md) | panel-audit + BI-acceptance | `reports/audit/dashboard-cycle/` |
-| 10 | Проект + CodeRabbit | `prompt.audit.cycle.coderabbit` → [cycle/coderabbit.md](cycle/coderabbit.md) | multi-domain + CR dual-pass | `reports/audit/coderabbit-project/` |
+| 1 | Документация + `scripts/docs` | `prompt.audit.cycle.docs` → [cycle/docs.md](../../cycle/docs.md) | `docs-content` + `docs-pipeline` | `reports/audit-runs/<run_id>/` |
+| 2 | Диаграммы + `scripts/diagrams` | `prompt.audit.cycle.diagrams` → [cycle/diagrams.md](../../cycle/diagrams.md) | `prompt.audit.diagrams` | same |
+| 3 | Агенты + память | `prompt.audit.cycle.agents-memory` → [cycle/agents-memory.md](../../cycle/agents-memory.md) | `agents-runtime` + memory workflow | same |
+| 4 | Конфиги | `prompt.audit.cycle.configs` → [cycle/configs.md](../../cycle/configs.md) | py-config-bot hierarchy | same |
+| 5 | Тестовый слой | `prompt.audit.cycle.tests` → [cycle/tests.md](../../cycle/tests.md) | `prompt.audit.tests-system` | same |
+| 6 | Техдолг | `prompt.audit.cycle.tech-debt` → [cycle/tech-debt.md](../../cycle/tech-debt.md) | `prompt.audit.tech-debt` | same |
+| 7 | Архитектура | `prompt.audit.cycle.architecture` → [cycle/architecture.md](../../cycle/architecture.md) | 10-category scorecard | same |
+| 8 | Наблюдаемость / feed | `prompt.audit.cycle.telemetry` → [cycle/telemetry.md](../../cycle/telemetry.md) | metrics + recording rules | same |
+| 9 | Рендер / дизайн панелей | `prompt.audit.cycle.dashboards` → [cycle/dashboards.md](../../cycle/dashboards.md) | panel-audit + BI-acceptance | `reports/audit/dashboard-cycle/` |
+| 10 | Проект + CodeRabbit | `prompt.audit.cycle.coderabbit` → [cycle/coderabbit.md](../../cycle/coderabbit.md) | multi-domain + CR dual-pass | `reports/audit/coderabbit-project/` |
 
 ## Shared defaults (operator full-run)
 
