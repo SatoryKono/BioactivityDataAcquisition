@@ -74,7 +74,7 @@ N-итерационный цикл: **оценить архитектуру п�
 | Loop shell | `prompt.audit.orchestrator` |
 
 Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**,
-**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, все **`ALLOW_*=false`**.
+**`LAYERS=all`**, **`SCORE_SOURCE=live+committed`**, все **`ALLOW_*=true`**.
 
 Operator **full-run** paste must set `ALLOW_ISSUE_WRITE/PUSH/MERGE/CLOSE=true`
 explicitly before Phases G–I mutate GitHub/git. Without flags → plan/payloads only.
