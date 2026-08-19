@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, SupportsInt, TypeGuard, cast
+from typing import Any, SupportsIndex, SupportsInt, TypeGuard
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 
@@ -17,7 +17,7 @@ def normalize_top_reasons(
     """Normalize and bound child pipeline reason payloads."""
     if not _is_reason_sequence(raw):
         return ()
-    reason_entries = cast("Sequence[object]", raw)
+    reason_entries = raw
     items = [
         item for item in (_normalize_reason(entry) for entry in reason_entries) if item
     ]

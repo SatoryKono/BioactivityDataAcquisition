@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
@@ -220,14 +220,14 @@ class PipelineRunnerService:
     async def _execute_prepared_run(
         self,
         *,
-        context: object,
-        run_logger: object,
+        context: PipelineRunContext,
+        run_logger: LoggerPort,
         pipeline_name: str,
-        run_id: UUID,
+        run_id: RunID,
         options: RunOptions,
-        started_at: object,
-        started_monotonic: object,
-        record_constructor_failure,
+        started_at: datetime,
+        started_monotonic: float,
+        record_constructor_failure: Callable[[Exception], Awaitable[None]],
     ) -> RunResult:
         runner = await create_execution_runner_audited(
             lambda: _require_execution_runner(self.runner_factory.create(context)),

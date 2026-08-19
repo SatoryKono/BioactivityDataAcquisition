@@ -7,6 +7,7 @@ from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.ports import CheckpointPort, RunManifestPort
+from bioetl.domain.types import MetaDict, RunID
 from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
     build_checkpoint_freshness_ok_payload,
     build_checkpoint_freshness_unknown_payload,
@@ -110,7 +111,7 @@ async def _load_checkpoint_freshness_context(
     host: _CheckpointFreshnessHost,
     writer: asyncio.StreamWriter,
     query: dict[str, str],
-) -> tuple[object, str, tuple[object, dict[str, object]], str, str | None] | None:
+) -> tuple[_IdentityScope, str, tuple[RunID, MetaDict], str, str | None] | None:
     """Resolve scope and load checkpoint evidence, or send unknown and return None."""
     assert host._run_manifest_port is not None
     if host._checkpoint_port is None:
@@ -124,7 +125,7 @@ async def _load_checkpoint_freshness_context(
         )
         return None
     try:
-        scope = await asyncio.wait_for(
+        resolved_scope = await asyncio.wait_for(
             asyncio.to_thread(resolve_control_plane_identity_scope, host, query),
             timeout=_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS,
         )
@@ -138,6 +139,9 @@ async def _load_checkpoint_freshness_context(
             evidence_source="scope_resolve_timeout",
         )
         return None
+    if not isinstance(resolved_scope, _IdentityScope):
+        raise TypeError(f"expected _IdentityScope, got {type(resolved_scope)!r}")
+    scope = resolved_scope
     target_pipeline = _resolved_scope_pipeline(scope)
     try:
         (
