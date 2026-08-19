@@ -120,21 +120,38 @@ def _coerce_boolean(
             return bool(value)
         return None
     if isinstance(value, str):
-        if not allow_string_coercion:
-            return None
-        normalized = value.strip().lower()
-        true_vocabulary = (
-            frozenset(item.strip().lower() for item in true_values)
-            if true_values
-            else _BOOL_TRUE_VALUES
+        return _coerce_boolean_from_str(
+            value,
+            allow_string_coercion=allow_string_coercion,
+            true_values=true_values,
+            false_values=false_values,
         )
-        false_vocabulary = (
-            frozenset(item.strip().lower() for item in false_values)
-            if false_values
-            else _BOOL_FALSE_VALUES
-        )
-        if normalized in true_vocabulary:
-            return True
-        if normalized in false_vocabulary:
-            return False
+    return None
+
+
+def _coerce_boolean_from_str(
+    value: str,
+    *,
+    allow_string_coercion: bool,
+    true_values: tuple[str, ...],
+    false_values: tuple[str, ...],
+) -> bool | None:
+    """Coerce a string token to boolean using the configured vocabulary."""
+    if not allow_string_coercion:
+        return None
+    normalized = value.strip().lower()
+    true_vocabulary = (
+        frozenset(item.strip().lower() for item in true_values)
+        if true_values
+        else _BOOL_TRUE_VALUES
+    )
+    false_vocabulary = (
+        frozenset(item.strip().lower() for item in false_values)
+        if false_values
+        else _BOOL_FALSE_VALUES
+    )
+    if normalized in true_vocabulary:
+        return True
+    if normalized in false_vocabulary:
+        return False
     return None

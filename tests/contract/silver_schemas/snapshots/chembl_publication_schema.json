@@ -201,6 +201,9 @@
       {
         "name": "str_matches",
         "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+      },
+      {
+        "name": "creation_date_calendar"
       }
     ],
     "coerce": false,
@@ -305,7 +308,7 @@
       }
     ],
     "coerce": false,
-    "description": "Open-access status token retained for compatibility when present.",
+    "description": "Open Access status (compatibility field for baseline contracts).",
     "dtype": "str",
     "nullable": true,
     "required": false,

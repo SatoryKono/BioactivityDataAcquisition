@@ -3,7 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import Literal, Protocol, cast, runtime_checkable
+from typing import Literal, Protocol, runtime_checkable
+
+from bioetl.domain.ports._foreign_key_reconciliation_guards import (
+    normalize_layer,
+    normalize_request_layers,
+    normalize_source_run_ids,
+    require_non_empty_primary_keys,
+    require_non_empty_str,
+    require_optional_str,
+    require_source_scope,
+    validate_optional_source_reference_keys_pair,
+)
 
 __all__ = [
     "ForeignKeyReconciliationAction",
@@ -31,101 +42,9 @@ ForeignKeyReconciliationMutationMode = Literal[
 ]
 
 
-def _normalize_layer(
-    value: ForeignKeyReconciliationLayer | str,
-    field_name: str,
-) -> ForeignKeyReconciliationLayer:
-    """Normalize a reconciliation storage layer."""
-    normalized = str(value).strip().lower()
-    if normalized not in {"silver", "gold"}:
-        raise ValueError(f"{field_name} must be 'silver' or 'gold'")
-    return cast("ForeignKeyReconciliationLayer", normalized)
-
-
-def _require_non_empty_str(value: str, field_name: str) -> None:
-    """Validate that a string is non-empty after trimming."""
-    if not value.strip():
-        raise ValueError(f"{field_name} cannot be empty")
-
-
-def _require_optional_str(value: str | None, field_name: str) -> None:
-    """Validate optional string-like fields when present."""
-    if value is None:
-        return
-    if not value.strip():
-        raise ValueError(f"{field_name} cannot be empty")
-
-
-def _require_non_empty_primary_keys(primary_keys: tuple[str, ...]) -> None:
-    """Validate that primary_keys is non-empty."""
-    if not primary_keys:
-        raise ValueError("primary_keys cannot be empty")
-
-
-def _require_non_empty_keys_tuples(
-    source_keys: tuple[str, ...],
-    reference_keys: tuple[str, ...],
-) -> None:
-    """Validate that source_keys/reference_keys are not empty."""
-    if not source_keys or not reference_keys:
-        raise ValueError("source_keys and reference_keys cannot be empty")
-
-
-def _require_equal_key_tuple_lengths(
-    source_keys: tuple[str, ...],
-    reference_keys: tuple[str, ...],
-) -> None:
-    """Validate that source_keys and reference_keys have equal cardinality."""
-    if len(source_keys) != len(reference_keys):
-        raise ValueError("source_keys and reference_keys must have the same length")
-
-
-def _require_first_keys_match(
-    *,
-    source_keys: tuple[str, ...],
-    reference_keys: tuple[str, ...],
-    source_key: str,
-    reference_key: str,
-) -> None:
-    """Validate that the first tuple entries match the canonical single keys."""
-    if source_keys[0].strip() != source_key.strip():
-        raise ValueError("source_key must match the first source_keys entry")
-    if reference_keys[0].strip() != reference_key.strip():
-        raise ValueError("reference_key must match the first reference_keys entry")
-
-
-def _validate_optional_source_reference_keys_pair(
-    *,
-    source_keys: tuple[str, ...] | None,
-    reference_keys: tuple[str, ...] | None,
-    source_key: str,
-    reference_key: str,
-) -> None:
-    """Validate optional tuple-form keys while preserving single-key invariants."""
-    if source_keys is None:
-        if reference_keys is None:
-            return
-        raise ValueError("source_keys and reference_keys must be provided together")
-
-    if reference_keys is None:
-        raise ValueError("source_keys and reference_keys must be provided together")
-
-    # After the guards above both tuple forms are present (S2589).
-    present_source_keys = source_keys
-    present_reference_keys = reference_keys
-    _require_non_empty_keys_tuples(present_source_keys, present_reference_keys)
-    _require_equal_key_tuple_lengths(present_source_keys, present_reference_keys)
-    _require_first_keys_match(
-        source_keys=present_source_keys,
-        reference_keys=present_reference_keys,
-        source_key=source_key,
-        reference_key=reference_key,
-    )
-
-
 @dataclass(frozen=True, slots=True)
 class ForeignKeyReconciliationRequest:
-    """Canonical request for one workflow foreign-key reconciliation action."""
+    """Typed request for one foreign-key reconciliation action."""
 
     source_table: str
     reference_table: str
@@ -152,46 +71,36 @@ class ForeignKeyReconciliationRequest:
     mutation_layer: ForeignKeyReconciliationLayer | None = None
 
     def __post_init__(self) -> None:
-        _require_non_empty_str(self.source_table, "source_table")
-        _require_non_empty_str(self.reference_table, "reference_table")
-        _require_non_empty_str(self.source_key, "source_key")
-        _require_non_empty_str(self.reference_key, "reference_key")
-        _require_non_empty_primary_keys(self.primary_keys)
-
-        source_layer = _normalize_layer(self.source_layer, "source_layer")
-        reference_layer = _normalize_layer(self.reference_layer, "reference_layer")
-        mutation_layer = (
-            _normalize_layer(self.mutation_layer, "mutation_layer")
-            if self.mutation_layer is not None
-            else None
+        require_non_empty_str(self.source_table, "source_table")
+        require_non_empty_str(self.reference_table, "reference_table")
+        require_non_empty_str(self.source_key, "source_key")
+        require_non_empty_str(self.reference_key, "reference_key")
+        require_non_empty_primary_keys(self.primary_keys)
+        source_layer, reference_layer, mutation_layer = normalize_request_layers(
+            self.source_layer,
+            self.reference_layer,
+            self.mutation_layer,
         )
-        if mutation_layer is not None and mutation_layer != source_layer:
-            raise ValueError("mutation_layer must match source_layer")
         object.__setattr__(self, "source_layer", source_layer)
         object.__setattr__(self, "reference_layer", reference_layer)
         object.__setattr__(self, "mutation_layer", mutation_layer)
-
-        _validate_optional_source_reference_keys_pair(
+        validate_optional_source_reference_keys_pair(
             source_keys=self.source_keys,
             reference_keys=self.reference_keys,
             source_key=self.source_key,
             reference_key=self.reference_key,
         )
-        _require_optional_str(self.workflow_name, "workflow_name")
-        _require_optional_str(self.workflow_run_id, "workflow_run_id")
-        _require_optional_str(self.manifest_id, "manifest_id")
-        _require_optional_str(self.step_id, "step_id")
-        _require_optional_str(self.transform_name, "transform_name")
-        _require_optional_str(self.debug_export_dir, "debug_export_dir")
-        if self.source_scope not in {"all_current", "current_run"}:
-            raise ValueError(
-                "source_scope must be 'all_current' or 'current_run', "
-                f"got {self.source_scope!r}"
-            )
+        require_optional_str(self.workflow_name, "workflow_name")
+        require_optional_str(self.workflow_run_id, "workflow_run_id")
+        require_optional_str(self.manifest_id, "manifest_id")
+        require_optional_str(self.step_id, "step_id")
+        require_optional_str(self.transform_name, "transform_name")
+        require_optional_str(self.debug_export_dir, "debug_export_dir")
+        require_source_scope(self.source_scope)
         object.__setattr__(
             self,
             "source_run_ids",
-            tuple(str(item) for item in self.source_run_ids if str(item).strip()),
+            normalize_source_run_ids(self.source_run_ids),
         )
 
     @property
@@ -267,9 +176,9 @@ class ForeignKeyReconciliationResult:
             raise ValueError(
                 f"mutation_mode must be one of {sorted(allowed_modes)}, got {self.mutation_mode!r}"
             )
-        source_layer = _normalize_layer(self.source_layer, "source_layer")
-        reference_layer = _normalize_layer(self.reference_layer, "reference_layer")
-        mutation_layer = _normalize_layer(
+        source_layer = normalize_layer(self.source_layer, "source_layer")
+        reference_layer = normalize_layer(self.reference_layer, "reference_layer")
+        mutation_layer = normalize_layer(
             self.mutation_layer if self.mutation_layer is not None else source_layer,
             "mutation_layer",
         )

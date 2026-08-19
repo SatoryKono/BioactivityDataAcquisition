@@ -80,3 +80,11 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Purpose:** Structured impact/confidence template; no scored ranking claims;
   no owner/ack write-path.
 - **Data sources:** Static operator copy.
+
+## Additional shipped panels
+### 11. Inspect Selected Run Summary
+
+Shipped in `bioetl-incident-v1.json`.
+### 12. Review Selected Run Summary
+
+Shipped in `bioetl-incident-v1.json`.

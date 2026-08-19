@@ -12,7 +12,6 @@ from bioetl.domain.behavior.composite_validation_helpers import (
     _convert_to_aggregation_config,
     _convert_to_cross_validation_config,
     _create_issue,
-    _extract_priority,
     _is_valid_field_priorities,
     _is_valid_lineage_config,
     append_invalid_config_section,
@@ -293,14 +292,3 @@ class CompositeValidator:
         config: JsonDict,
     ) -> list[ValidationIssue]:
         return precheck_cross_validation_config(config)
-
-    def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
-        return _is_valid_field_priorities(priorities)
-
-    @staticmethod
-    def _extract_priority(priority_config: object) -> object | None:
-        return _extract_priority(priority_config)
-
-    @staticmethod
-    def _is_valid_lineage_config(config: JsonDict) -> bool:
-        return _is_valid_lineage_config(config)

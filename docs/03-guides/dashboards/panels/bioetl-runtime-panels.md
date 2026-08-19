@@ -250,3 +250,8 @@ used.
 - Row-based workflows (Detect, Localize, Escalate) provide structured triage
   paths and remain collapsed until the headline/cause row points to one branch.
 - GLOBAL panels show cross-scope aggregate signals for escalation context.
+
+## Additional shipped panels
+### 43. Review Selected Run Summary
+
+Shipped in `bioetl-runtime.json`.

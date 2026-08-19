@@ -149,6 +149,23 @@ def _parse_grafana_ms(value: object) -> int | None:
         return None
 
 
+def _coverage_offset_outside(
+    *,
+    started_ms: int,
+    end_ms: int,
+    grafana_from_ms: int,
+    grafana_to_ms: int,
+) -> tuple[str, str]:
+    """Describe a run that is not fully inside the Grafana window."""
+    if end_ms < grafana_from_ms:
+        hours = (grafana_from_ms - end_ms) / 3_600_000
+        return "outside", f"{hours:.1f}h before window"
+    if started_ms > grafana_to_ms:
+        hours = (started_ms - grafana_to_ms) / 3_600_000
+        return "outside", f"{hours:.1f}h after window"
+    return "partial", "overlaps window"
+
+
 def _coverage_fields(
     *,
     started_ms: int | None,
@@ -169,13 +186,68 @@ def _coverage_fields(
     end_ms = completed_ms if completed_ms is not None else started_ms
     if started_ms >= grafana_from_ms and end_ms <= grafana_to_ms:
         return "yes", "0h"
-    if end_ms < grafana_from_ms:
-        hours = (grafana_from_ms - end_ms) / 3_600_000
-        return "outside", f"{hours:.1f}h before window"
-    if started_ms > grafana_to_ms:
-        hours = (started_ms - grafana_to_ms) / 3_600_000
-        return "outside", f"{hours:.1f}h after window"
-    return "partial", "overlaps window"
+    return _coverage_offset_outside(
+        started_ms=started_ms,
+        end_ms=end_ms,
+        grafana_from_ms=grafana_from_ms,
+        grafana_to_ms=grafana_to_ms,
+    )
+
+
+def _excluded_by_contract_count(removals: object) -> int:
+    """Sum excluded_by_contract counts from one stage's removals list."""
+    total = 0
+    if not isinstance(removals, list):
+        return total
+    for item in removals:
+        if not isinstance(item, dict):
+            continue
+        if item.get("outcome") != "excluded_by_contract":
+            continue
+        count = item.get("count")
+        if isinstance(count, int):
+            total += count
+    return total
+
+
+def _funnel_gold_and_excluded(funnel: object) -> tuple[object, int]:
+    """Extract gold records_out and excluded_by_contract counts from funnel stages."""
+    gold_out: object = ""
+    excluded = 0
+    if not isinstance(funnel, list):
+        return gold_out, excluded
+    for stage in funnel:
+        if not isinstance(stage, dict):
+            continue
+        if stage.get("stage_id") == "gold":
+            gold_out = stage.get("records_out")
+        excluded += _excluded_by_contract_count(stage.get("removals"))
+    return gold_out, excluded
+
+
+def _padded_range_ms(
+    started_ms: int | None, completed_ms: int | None
+) -> tuple[str, str]:
+    """Return padded from/to epoch-ms strings for Grafana range links."""
+    if started_ms is None:
+        return "", ""
+    pad_ms = int(_RANGE_PAD.total_seconds() * 1000)
+    end_ms = completed_ms if completed_ms is not None else started_ms
+    return str(started_ms - pad_ms), str(end_ms + pad_ms)
+
+
+def _identity_summary_fields(
+    payload: dict[str, object],
+) -> tuple[dict[str, object], str, str, str, str]:
+    """Return identity dict plus run_id/status/started_at/completed_at strings."""
+    identity = payload.get("identity")
+    if not isinstance(identity, dict):
+        identity = {}
+    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
+    status = str(identity.get("status") or payload.get("status") or "")
+    started_at = str(identity.get("started_at") or "")
+    completed_at = str(identity.get("completed_at") or "")
+    return identity, run_id, status, started_at, completed_at
 
 
 def _summary_rows_pipeline_run_report(
@@ -191,39 +263,13 @@ def _summary_rows_pipeline_run_report(
     ``from``/``to`` to started_at-5m .. completed_at+5m without rewriting
     ``$__from`` silently.
     """
-    identity = payload.get("identity")
-    if not isinstance(identity, dict):
-        identity = {}
-    funnel = payload.get("funnel")
-    gold_out: object = ""
-    excluded = 0
-    if isinstance(funnel, list):
-        for stage in funnel:
-            if not isinstance(stage, dict):
-                continue
-            if stage.get("stage_id") == "gold":
-                gold_out = stage.get("records_out")
-            removals = stage.get("removals")
-            if isinstance(removals, list):
-                for item in removals:
-                    if not isinstance(item, dict):
-                        continue
-                    if item.get("outcome") == "excluded_by_contract":
-                        count = item.get("count")
-                        if isinstance(count, int):
-                            excluded += count
-    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
-    status = str(identity.get("status") or payload.get("status") or "")
-    started_at = str(identity.get("started_at") or "")
-    completed_at = str(identity.get("completed_at") or "")
+    identity, run_id, status, started_at, completed_at = _identity_summary_fields(
+        payload
+    )
+    gold_out, excluded = _funnel_gold_and_excluded(payload.get("funnel"))
     started_ms = _parse_iso_to_ms(started_at)
     completed_ms = _parse_iso_to_ms(completed_at)
-    from_ms = ""
-    to_ms = ""
-    if started_ms is not None:
-        from_ms = str(started_ms - int(_RANGE_PAD.total_seconds() * 1000))
-        end_ms = completed_ms if completed_ms is not None else started_ms
-        to_ms = str(end_ms + int(_RANGE_PAD.total_seconds() * 1000))
+    from_ms, to_ms = _padded_range_ms(started_ms, completed_ms)
     covers, offset = _coverage_fields(
         started_ms=started_ms,
         completed_ms=completed_ms,
@@ -232,19 +278,6 @@ def _summary_rows_pipeline_run_report(
         status=status,
     )
     set_range = "Set range to run (started_at-5m .. completed_at+5m)"
-    rows = [
-        {"parameter": "run_id", "value": run_id},
-        {"parameter": "status", "value": status},
-        {"parameter": "started_at", "value": started_at},
-        {"parameter": "completed_at", "value": completed_at},
-        {"parameter": "gold_records_out", "value": str(gold_out)},
-        {"parameter": "excluded_by_contract", "value": str(excluded)},
-        {"parameter": "covers_selected_run", "value": covers},
-        {"parameter": "coverage_offset", "value": offset},
-        {"parameter": "from_ms", "value": str(from_ms)},
-        {"parameter": "to_ms", "value": str(to_ms)},
-        {"parameter": "set_range_to_run", "value": set_range},
-    ]
     summary_row = {
         "run_id": run_id,
         "status": status,
@@ -258,6 +291,7 @@ def _summary_rows_pipeline_run_report(
         "to_ms": str(to_ms),
         "set_range_to_run": set_range,
     }
+    rows = [{"parameter": key, "value": value} for key, value in summary_row.items()]
     return {
         "schema_version": "pipeline_run_report_v1",
         "view": "summary",
