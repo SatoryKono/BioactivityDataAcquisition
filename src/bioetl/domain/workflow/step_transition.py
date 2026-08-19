@@ -42,9 +42,7 @@ class WorkflowStepTransitionPolicy:
             _DISPOSITION_SKIP_COMPLETED,
         }
         if self.disposition not in allowed:
-            raise ValueError(
-                f"Unknown workflow step disposition: {self.disposition!r}"
-            )
+            raise ValueError(f"Unknown workflow step disposition: {self.disposition!r}")
         self.ensure_runnable()
 
     @property

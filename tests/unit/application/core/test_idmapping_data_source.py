@@ -260,8 +260,7 @@ class TestIDMappingDataSourceFetch:
         """Offset is applied before limit so later pages do not repeat earlier IDs."""
         await asyncio.sleep(0)
         records = [
-            record
-            async for record in data_source.fetch("idmapping", limit=1, offset=1)
+            record async for record in data_source.fetch("idmapping", limit=1, offset=1)
         ]
         assert len(records) == 1
         assert records[0]["target_id"] == "CHEMBL205"

@@ -96,7 +96,9 @@ class WorkflowManifestService(ManifestServiceScaffoldMixin):
         payload = {
             "workflow_name": request.config.name,
             "workflow_version": request.config.version,
-            "launch_context": self._normalize_fingerprint_launch_context(launch_context),
+            "launch_context": self._normalize_fingerprint_launch_context(
+                launch_context
+            ),
             "defaults": defaults,
             "selected_step_ids": list(request.config.topological_step_ids),
             "steps": [step.to_dict() for step in steps],

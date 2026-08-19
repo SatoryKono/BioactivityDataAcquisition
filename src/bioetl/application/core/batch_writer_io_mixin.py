@@ -41,6 +41,7 @@ _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
+
     # Host attributes from BatchWriter MRO (runtime-typed by concrete class).
     _context: PipelineContext
     _storage: BatchWriteStorageProtocol
@@ -239,6 +240,7 @@ class BatchWriterIOMixin:
         except BaseException:
             self._end_span(span)
             raise
+
     def _prepare_gold_records(
         self,
         records: list[GoldRecord],

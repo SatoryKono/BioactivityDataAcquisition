@@ -260,7 +260,6 @@ async def _persist_reconcile_result_artifact(
     return artifact_refs_as_dicts(tuple(refs))  # pyright: ignore[reportArgumentType]
 
 
-
 def _source_scope(config: Mapping[str, object]) -> str:
     raw = config.get("source_scope", "all_current")
     if raw in {"all_current", "current_run"}:

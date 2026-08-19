@@ -310,6 +310,7 @@ class WorkflowConfig:
                 return step
         return None
 
+
 def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowConfig:
     """Scope delete_orphans to the current run when an extract is limited.
 
@@ -365,7 +366,7 @@ def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None
             raise ValueError(
                 "reconcile_foreign_keys action=delete_orphans cannot depend on "
                 "pipeline steps with run_options.limit "
-                f"({", ".join(limited)}); independently bounded extracts "
+                f"({', '.join(limited)}); independently bounded extracts "
                 "make Gold FK orphans false positives"
             )
 
@@ -393,4 +394,3 @@ def _limited_upstream_pipeline_ids(
         if merged.limit is not None:
             limited.append(dep_id)
     return limited
-

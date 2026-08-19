@@ -90,8 +90,8 @@ def test_issue_6097_public_facades_have_explicit_owners_and_bounded_census() -> 
 def test_issue_6098_runtime_scc_budget_was_reduced_without_stale_acceptance() -> None:
     accepted = set(ACCEPTED_RUNTIME_SCCS)
 
-    assert REVIEWED_RUNTIME_SCC_BUDGET_MAX == 2
-    assert len(ACCEPTED_RUNTIME_SCCS) == 2
+    assert REVIEWED_RUNTIME_SCC_BUDGET_MAX == 1
+    assert len(ACCEPTED_RUNTIME_SCCS) == 1
     assert not any(
         {
             "bioetl.infrastructure.storage.support.atomic_group",

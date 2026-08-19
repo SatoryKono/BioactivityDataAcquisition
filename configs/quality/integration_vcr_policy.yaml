@@ -175,6 +175,7 @@ tracked_suite_inventory:
     - tests/integration/test_dux4_scope_title_helpers.py
     - tests/integration/test_dux5_residual_contracts.py
     - tests/integration/test_dux6_residual_contracts.py
+    - tests/integration/test_grafana_control_plane_variables.py
     - tests/integration/test_json_hash_stability.py
     - tests/integration/test_organism_classification_csv_coverage.py
     - tests/integration/test_run_explorer_http_catalog.py

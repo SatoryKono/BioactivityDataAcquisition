@@ -134,7 +134,9 @@ def emit_pipeline_start(host: _PipelineRunnerFlowHostProtocol) -> None:
 
 def emit_pipeline_completion(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Emit the pipeline completion event."""
-    host._logger.debug(PipelineEvent.COMPLETE, records_fetched=host._executor.records_fetched)
+    host._logger.debug(
+        PipelineEvent.COMPLETE, records_fetched=host._executor.records_fetched
+    )
 
 
 def record_run_started(host: _PipelineRunnerFlowHostProtocol) -> None:
@@ -201,6 +203,7 @@ def record_run_finished(host: _PipelineRunnerFlowHostProtocol) -> None:
             "finished_flow_projections_failed",
             run_id=str(host._context.run_id),
         )
+
 
 def record_run_shutdown(host: _PipelineRunnerFlowHostProtocol) -> None:
     """Append graceful shutdown ledger entry."""

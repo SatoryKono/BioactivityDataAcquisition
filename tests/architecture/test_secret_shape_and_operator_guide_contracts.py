@@ -39,7 +39,9 @@ def test_commitlint_does_not_ignore_nonconventional_headers() -> None:
     text = _read("commitlint.config.mjs")
     assert "message.startsWith('Merge')" in text
     assert "historical commits that cannot be rewritten" not in text
-    assert "feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)[(:]" not in text
+    assert (
+        "feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)[(:]" not in text
+    )
 
 
 def test_runtime_dockerfile_does_not_shadow_installed_wheel() -> None:
@@ -47,7 +49,7 @@ def test_runtime_dockerfile_does_not_shadow_installed_wheel() -> None:
     assert "PYTHONPATH=/app/src" not in text
     assert "COPY --chown=root:root src/ ./src/" not in text
     assert "COPY --chown=root:root configs/ ./configs/" in text
-    assert "ENTRYPOINT [\"bioetl\"]" in text
+    assert 'ENTRYPOINT ["bioetl"]' in text
 
 
 def test_getting_started_data_permissions_are_least_privilege() -> None:
