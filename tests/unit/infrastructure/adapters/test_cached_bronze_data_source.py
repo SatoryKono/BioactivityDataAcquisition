@@ -46,6 +46,8 @@ from bioetl.infrastructure.adapters.cached_bronze_data_source import (
     CachedBronzeDataSource,
 )
 
+pytestmark = pytest.mark.unit
+
 TEST_ROOT = synthetic_test_root("bioetl-cached-bronze-data-source")
 BRONZE_ROOT = TEST_ROOT / "bronze"
 BRONZE_ACTIVITY_ROOT = BRONZE_ROOT / "chembl" / "activity"

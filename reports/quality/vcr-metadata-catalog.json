@@ -362,7 +362,9 @@
       "metadata_status": "managed_inventory",
       "reachability_status": "direct_reference",
       "reachability_owner_paths": [
-        "tests/e2e/test_chembl_activity_e2e.py"
+        "tests/e2e/conftest.py",
+        "tests/e2e/test_chembl_activity_e2e.py",
+        "tests/unit/helpers/test_e2e_conftest.py"
       ]
     },
     {

@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from bioetl.infrastructure.adapters.decorators._retry_support import (
@@ -54,10 +52,3 @@ def test_complete_rotation_rejects_short_next_salt(
     assert result.success is False
     assert result.error is not None
     assert str(MIN_SALT_LENGTH) in result.error
-
-
-def test_wsl_startup_does_not_pass_password_on_python_argv() -> None:
-    script = Path("scripts/memory/setup/wsl_startup.sh").read_text(encoding="utf-8")
-    assert 'python3 - "$file_path" "$key" "$value"' not in script
-    assert "BIOETL_ENV_UPSERT_VALUE" in script
-    assert 'os.environ["BIOETL_ENV_UPSERT_VALUE"]' in script

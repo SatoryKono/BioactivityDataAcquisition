@@ -95,6 +95,7 @@ def _limit_safe_multi_pipeline_workflow() -> WorkflowConfig:
         ),
     )
 
+
 # Mirrors _WORKFLOW_PUBLICATION_METRIC_NAMES (no high-cardinality grouping).
 _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES = (
     "bioetl_workflow_expected",
@@ -499,15 +500,23 @@ def test_workflow_run_accepts_pipeline_style_runtime_overrides(
     )
 
 
-def test_workflow_run_rejects_limit_when_delete_orphans_follows_extracts(
+def test_workflow_run_scopes_delete_orphans_when_limit_follows_extracts(
     cli_runner: CliRunner,
+    monkeypatch: Any,
     tmp_path: Path,
 ) -> None:
-    """#8989: chembl_core + --limit must fail closed, not skip the guard."""
-    from bioetl.interfaces.cli.exit_codes import ExitCode
+    """CLI limits must scope delete_orphans to this run before execution."""
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
+    fake_service = _FakeWorkflowRunnerService()
     cached_bronze_path = tmp_path / "bronze"
     cached_bronze_path.mkdir()
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: fake_service,
+        raising=True,
+    )
     result = cli_runner.invoke(
         cli,
         [
@@ -524,11 +533,16 @@ def test_workflow_run_rejects_limit_when_delete_orphans_follows_extracts(
         ],
     )
 
-    assert result.exit_code == ExitCode.CONFIG_ERROR, result.output
-    assert "delete_orphans" in result.output
-    assert "run_options.limit" in result.output
-    assert "chembl_assay_ingest" in result.output
-    assert "chembl_target_ingest" in result.output
+    assert result.exit_code == 0, result.output
+    received = fake_service.received_config
+    assert isinstance(received, WorkflowConfig)
+    steps = {step.step_id: step for step in received.steps}
+    assert steps["chembl_assay_ingest"].run_options.limit == 1000
+    assert steps["chembl_target_ingest"].run_options.limit == 1000
+    reconcile = steps["reconcile_assay_target_orphans"]
+    assert reconcile.config is not None
+    assert reconcile.config["action"] == "delete_orphans"
+    assert reconcile.config["source_scope"] == "current_run"
 
 
 def test_workflow_run_forwards_baseline_resume_repair_steps(

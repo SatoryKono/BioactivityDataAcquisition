@@ -3,13 +3,20 @@
 
 from __future__ import annotations
 
+import pytest
+
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support import (
     filter_source_rows_to_current_run,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_all_current_scope_keeps_every_row() -> None:
-    rows = [{"assay_id": "A1", "_run_id": "run-a"}, {"assay_id": "A2", "_run_id": "run-b"}]
+    rows = [
+        {"assay_id": "A1", "_run_id": "run-a"},
+        {"assay_id": "A2", "_run_id": "run-b"},
+    ]
     scoped, disposition = filter_source_rows_to_current_run(
         rows, source_scope="all_current", source_run_ids=("run-a",)
     )
