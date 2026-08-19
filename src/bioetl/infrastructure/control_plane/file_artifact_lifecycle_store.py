@@ -16,7 +16,7 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_planning import (
     _iter_artifact_refs,
-    _iter_artifact_refs_for_manifest,
+    _plan_manifest_artifact_refs,
     _resolve_protected_refs,
     _resolve_protected_refs_for_manifest,
 )
@@ -78,7 +78,7 @@ class FileControlPlaneArtifactLifecycleStore:
             manifest=manifest,
             policy=policy,
         )
-        artifacts = _iter_artifact_refs_for_manifest(
+        artifacts, issues = _plan_manifest_artifact_refs(
             base_path=self.base_path,
             cutoff=cutoff,
             protected_refs=protected_refs,
@@ -89,6 +89,7 @@ class FileControlPlaneArtifactLifecycleStore:
             cutoff=cutoff,
             dry_run=dry_run,
             artifacts=artifacts,
+            resolution_issues=issues,
         )
 
     def apply(

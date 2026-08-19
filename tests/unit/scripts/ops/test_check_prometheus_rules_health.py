@@ -302,3 +302,10 @@ def test_load_tracked_recording_exprs_includes_provider_unknown_fallback() -> No
     assert "* 0 + 3" in exprs
     assert "/" not in exprs
 
+
+def test_tracked_rules_bundle_sha256_is_stable() -> None:
+    first = mod.tracked_rules_bundle_sha256(mod.DEFAULT_RULES_DIR)
+    second = mod.tracked_rules_bundle_sha256(mod.DEFAULT_RULES_DIR)
+    assert first == second
+    assert len(first) == 64
+
