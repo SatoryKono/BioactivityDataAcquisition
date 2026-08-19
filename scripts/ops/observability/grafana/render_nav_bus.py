@@ -11,9 +11,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
+if __package__ in {None, ""}:
+    root_str = str(ROOT)
+    if root_str not in sys.path:
+        sys.path.insert(0, root_str)
 DASH_DIR = ROOT / "grafana" / "dashboards"
 
 # Full portfolio bus (order is normative).
@@ -88,6 +93,7 @@ CONTAINER_STYLE = (
     "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
     "padding:2px 6px;overflow:visible;white-space:normal;font-size:16px"
 )
+_PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
@@ -129,9 +135,14 @@ def _url_for(target: dict[str, str], *, source_uid: str) -> str:
 
     if uid == "bioetl-provider-health-v2":
         # Fail-closed context mapping from non-provider sources.
+        provider = (
+            f"{dollar}provider"
+            if source_uid in _PROVIDER_VARIABLE_UIDS
+            else "unknown"
+        )
         return (
             f"{base}?var-pipeline={pipe}&var-run_type={dollar}run_type"
-            f"&var-provider={dollar}provider&var-pipeline_context={pipe}"
+            f"&var-provider={provider}&var-pipeline_context={pipe}"
             f"&{dollar}{{__url_time_range}}"
             f"&var-workflow={dollar}workflow&var-run_id={dollar}run_id"
         )
@@ -232,6 +243,43 @@ def _walk_panels(panels: list[object]) -> list[dict[str, object]]:
     return discovered
 
 
+def _remove_obsolete_provider_handoff_variable(payload: dict[str, object]) -> None:
+    templating = payload.setdefault("templating", {})
+    if not isinstance(templating, dict):
+        raise SystemExit("dashboard templating must be an object")
+    variables = templating.setdefault("list", [])
+    if not isinstance(variables, list):
+        raise SystemExit("dashboard templating.list must be an array")
+    variables[:] = [
+        item
+        for item in variables
+        if not (
+            isinstance(item, dict)
+            and item.get("name") == "provider"
+            and item.get("label") == "Provider handoff"
+        )
+    ]
+
+
+def _fail_closed_provider_handoffs(value: object, *, provider_declared: bool) -> None:
+    if provider_declared:
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(item, str):
+                value[key] = item.replace("var-provider=$provider", "var-provider=unknown")
+            else:
+                _fail_closed_provider_handoffs(item, provider_declared=False)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            if isinstance(item, str):
+                value[index] = item.replace(
+                    "var-provider=$provider", "var-provider=unknown"
+                )
+            else:
+                _fail_closed_provider_handoffs(item, provider_declared=False)
+
+
 def _expand_nav_height(
     nav: dict[str, object], panels: list[object], *, new_height: int
 ) -> None:
@@ -258,6 +306,10 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     safe_path = ensure_path_within_root(path, DASH_DIR)
     payload = json.loads(
         safe_path.read_text(encoding="utf-8")  # NOSONAR - confined under DASH_DIR
+    )
+    _remove_obsolete_provider_handoff_variable(payload)
+    _fail_closed_provider_handoffs(
+        payload, provider_declared=current_uid in _PROVIDER_VARIABLE_UIDS
     )
     panels = payload.get("panels") or []
     nav = next((p for p in panels if p.get("id") == 1000), None)

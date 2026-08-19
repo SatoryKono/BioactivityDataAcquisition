@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import cast
 
+
 def _metadata_from_layer_writer(writer: object) -> object | None:
     """Resolve a metadata writer from one layer storage writer."""
     writer_metadata = None
@@ -56,5 +57,3 @@ def _iter_unique_candidates(candidates: list[object]) -> list[object]:
         seen.add(candidate_id)
         unique_candidates.append(candidate)
     return unique_candidates
-
-

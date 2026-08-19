@@ -18,11 +18,8 @@
 # auth from runtime env (GRAFANA_PASSWORD / token)
 python -m scripts.ops check-grafana-audit-preflight --json --skip-screenshot-check
 
-# copy affordance apply
-python scripts/ops/observability/grafana/apply_dux7_live_residual.py
-
-# live residual runner (contrast + a11y + screenshots)
-python scripts/ops/observability/grafana/run_dux7_live_residual.py --output-dir reports/quality/dux7-live-evidence
+# The completed DUX7 applicator and campaign runner were retired on 2026-08-19.
+# The shipped dashboard JSON and archived evidence are the durable record.
 ```
 
 ## Acceptance
