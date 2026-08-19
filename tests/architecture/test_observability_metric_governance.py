@@ -193,7 +193,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     report = inventory.collect_typed_observability_inventory(ROOT)
 
     # Includes bioetl_l0_next_action_no_route (#6574 First Action diet fallback).
-    assert len(report["recording_rule_outputs"]) == 109
+    assert len(report["recording_rule_outputs"]) == 110
     assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
@@ -203,6 +203,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert report["catalog_aliases_without_declaration"] == []
     assert report["prometheus_run_id_selector_violations"] == []
     assert report["http_semantics_violations"] == []
+    assert report["coverage_class_violations"] == []
     assert report["panel_contract_drift"] == []
     assert report["documented_metrics"]
     assert report["direct_dashboard_targets"]
@@ -269,6 +270,10 @@ def test_workflow_planned_pipeline_universe_rules_cover_selectors() -> None:
     )
     assert (
         "bioetl_workflow_pipeline_expected"
+        in control_plane_exprs["bioetl_control_plane_run_type_universe"]
+    )
+    assert (
+        "bioetl_control_plane_manifest_present"
         in control_plane_exprs["bioetl_control_plane_run_type_universe"]
     )
 
@@ -341,6 +346,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "catalog_aliases_without_declaration",
         "http_semantics_violations",
         "panel_contract_drift",
+        "coverage_class_violations",
         "prometheus_run_id_selector_violations",
     ]
     assert set(typed_views["coverage_fields"]) == {
@@ -417,6 +423,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
     assert touched_metric_change_gate["changed_path_trigger_static_paths"] == [
         "configs/quality/observability_metric_inventory_allowlist.yaml",
         "configs/quality/observability_metric_declarations.yaml",
+        "configs/quality/observability_coverage_classes.yaml",
     ]
     assert touched_metric_change_gate["changed_path_trigger_prefixes"] == [
         "grafana/dashboards/",

@@ -37,6 +37,53 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
 )
 
 
+
+_COVERAGE_CLASSES_PATH = Path("configs/quality/observability_coverage_classes.yaml")
+_PROMETHEUS_BUILTIN_METRIC_RE = re.compile(r"\b(?:ALERTS|ALERTS_FOR_STATE)\b")
+_COVERAGE_CLASS_MAP: dict[str, str] = {}
+_EMPTY_STATE_MAP: dict[str, str] = {}
+
+
+def _load_coverage_policy(repo_root: Path) -> tuple[dict[str, str], dict[str, str]]:
+    import yaml
+
+    path = repo_root / _COVERAGE_CLASSES_PATH
+    if not path.is_file():
+        return {}, {}
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    classes = payload.get("metric_coverage_classes") if isinstance(payload, dict) else {}
+    empty = payload.get("empty_state_by_class") if isinstance(payload, dict) else {}
+    class_map = {
+        str(key): str(value)
+        for key, value in (classes or {}).items()
+        if str(value) in {
+            "required_current",
+            "required_when_active",
+            "event_optional",
+            "historical_only",
+            "deprecated",
+        }
+    }
+    empty_map = {
+        str(key): str(value)
+        for key, value in (empty or {}).items()
+        if str(value) in {"valid_empty", "coverage_gap", "not_applicable"}
+    }
+    return class_map, empty_map
+
+
+def _coverage_for_tokens(
+    tokens: list[str],
+    class_map: dict[str, str],
+    empty_map: dict[str, str],
+) -> tuple[str | None, str | None]:
+    for token in tokens:
+        klass = class_map.get(token)
+        if klass:
+            return klass, empty_map.get(klass)
+    return None, None
+
+
 def _coerce_int(value: object, *, default: int = -1) -> int:
     if isinstance(value, int):
         return value
@@ -130,7 +177,9 @@ def _target_query_tokens(kind: str, query: str) -> list[str]:
         parsed = urlsplit(query)
         return [parsed.path, *(key for key, _value in parse_qsl(parsed.query))]
     if kind == "promql":
-        return sorted(set(_CANONICAL_METRIC_RE.findall(query)))
+        tokens = set(_CANONICAL_METRIC_RE.findall(query))
+        tokens.update(_PROMETHEUS_BUILTIN_METRIC_RE.findall(query))
+        return sorted(tokens)
     if kind == "loki":
         return sorted(
             set(re.findall(r"\b(?:job|pipeline|level|event|logger)\b", query))
@@ -165,6 +214,12 @@ def _panel_contract(
     threshold_steps = (
         thresholds.get("steps", []) if isinstance(thresholds, dict) else []
     )
+    tokens = _target_query_tokens(kind, query)
+    coverage_class, empty_state = _coverage_for_tokens(
+        tokens, _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP
+    )
+    if kind == "http":
+        empty_state = empty_state or "valid_empty"
     return {
         "dashboard_uid": dashboard_uid,
         "panel_id": panel_id,
@@ -173,7 +228,9 @@ def _panel_contract(
         "kind": kind,
         "datasource_type": _canonical_datasource_type(datasource_type),
         "query": query,
-        "query_tokens": _target_query_tokens(kind, query),
+        "query_tokens": tokens,
+        "coverage_class": coverage_class,
+        "empty_state": empty_state,
         "formula": str(target.get("expr") or target.get("expression") or ""),
         "unit": str(defaults.get("unit", "")),
         "thresholds": threshold_steps if isinstance(threshold_steps, list) else [],
@@ -238,6 +295,8 @@ def _panel_contract_document(
         "fields": [
             "datasource_type",
             "query_tokens",
+            "coverage_class",
+            "empty_state",
             "formula",
             "unit",
             "thresholds",
@@ -484,6 +543,19 @@ def _http_target_sort_key(row: dict[str, object]) -> tuple[str, int, str, str]:
     )
 
 
+
+def _coverage_class_violations(typed_targets: list[dict[str, object]]) -> list[str]:
+    violations: list[str] = []
+    for row in typed_targets:
+        if row.get("kind") != "promql":
+            continue
+        if row.get("coverage_class"):
+            continue
+        violations.append(
+            f"{row['dashboard_uid']}::panel={row['panel_id']}::ref={row['ref_id']}"
+        )
+    return violations
+
 def _http_semantics_violations(typed_targets: list[dict[str, object]]) -> list[str]:
     return [
         f"{row['dashboard_uid']}::panel={row['panel_id']}"
@@ -540,6 +612,9 @@ def _build_typed_inventory_report(
         "http_semantics_violations": sorted(
             set(_http_semantics_violations(typed_targets))
         ),
+        "coverage_class_violations": sorted(
+            set(_coverage_class_violations(typed_targets))
+        ),
         "prometheus_run_id_selector_violations": sorted(run_id_selector_violations),
     }
     report["panel_contract_drift"] = _panel_contract_drift(repo_root, report)
@@ -555,6 +630,8 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
             "PyYAML is required for typed observability inventory"
         ) from exc
 
+    global _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP
+    _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP = _load_coverage_policy(repo_root)
     declarations = _load_declared_metric_definitions(repo_root)
     (
         recording_outputs,

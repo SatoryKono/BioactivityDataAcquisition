@@ -5,11 +5,16 @@ from __future__ import annotations
 from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
+    "CONTROL_PLANE_CHECKPOINT_PRESENT",
+    "CONTROL_PLANE_INTEGRITY_PAIR_PRESENT",
+    "CONTROL_PLANE_LAST_OBSERVED_TIMESTAMP_SECONDS",
     "CONTROL_PLANE_LEDGER_APPENDS_TOTAL",
     "CONTROL_PLANE_LEDGER_APPEND_DURATION_SECONDS",
+    "CONTROL_PLANE_LEDGER_PRESENT",
     "CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL",
     "CONTROL_PLANE_LIFECYCLE_DELETED_TOTAL",
     "CONTROL_PLANE_LIFECYCLE_DELETE_CANDIDATES",
+    "CONTROL_PLANE_MANIFEST_PRESENT",
     "CONTROL_PLANE_MANIFEST_WRITES_TOTAL",
     "CONTROL_PLANE_MANIFEST_WRITE_DURATION_SECONDS",
     "CONTROL_PLANE_READS_TOTAL",
@@ -85,3 +90,34 @@ CONTROL_PLANE_LIFECYCLE_APPLY_TOTAL = Counter(
     "Total control-plane lifecycle plan apply attempts by dry-run policy",
     ["dry_run"],
 )
+
+CONTROL_PLANE_MANIFEST_PRESENT = Gauge(
+    "bioetl_control_plane_manifest_present",
+    "Latest indexed run-manifest present for one pipeline and run_type (1=present)",
+    ["pipeline", "run_type"],
+)
+
+CONTROL_PLANE_LEDGER_PRESENT = Gauge(
+    "bioetl_control_plane_ledger_present",
+    "Latest indexed run-ledger present for one pipeline and run_type (1=present)",
+    ["pipeline", "run_type"],
+)
+
+CONTROL_PLANE_INTEGRITY_PAIR_PRESENT = Gauge(
+    "bioetl_control_plane_integrity_pair_present",
+    "Latest indexed manifest+ledger pair present for one pipeline and run_type",
+    ["pipeline", "run_type"],
+)
+
+CONTROL_PLANE_CHECKPOINT_PRESENT = Gauge(
+    "bioetl_control_plane_checkpoint_present",
+    "Latest indexed checkpoint evidence present for one pipeline and run_type",
+    ["pipeline", "run_type"],
+)
+
+CONTROL_PLANE_LAST_OBSERVED_TIMESTAMP_SECONDS = Gauge(
+    "bioetl_control_plane_last_observed_timestamp_seconds",
+    "Unix timestamp of latest indexed control-plane observation",
+    ["pipeline", "run_type"],
+)
+

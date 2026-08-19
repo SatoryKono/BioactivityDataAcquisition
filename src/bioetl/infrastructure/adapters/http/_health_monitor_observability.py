@@ -19,6 +19,13 @@ _OUTCOME_COUNTERS: dict[HealthStatus, str] = {
 }
 
 
+_STATUS_BY_METRIC_VALUE: dict[int, HealthStatus] = {
+    0: HealthStatus.UNHEALTHY,
+    1: HealthStatus.DEGRADED,
+    2: HealthStatus.HEALTHY,
+}
+
+
 def emit_provider_health_metric(
     *,
     metrics: MetricsPort,
@@ -29,6 +36,23 @@ def emit_provider_health_metric(
         "bioetl_provider_health_status",
         state.status.to_metric_value(),
         labels={"provider": state.provider},
+    )
+
+
+def restore_provider_health_status(
+    *,
+    metrics: MetricsPort,
+    provider: str,
+    status: int,
+) -> None:
+    """Restore CURRENT provider health gauge without incrementing RANGE counters."""
+    resolved = _STATUS_BY_METRIC_VALUE.get(status)
+    if resolved is None:
+        return
+    metrics.set_gauge(
+        "bioetl_provider_health_status",
+        float(resolved.to_metric_value()),
+        labels={"provider": provider},
     )
 
 
