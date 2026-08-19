@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TEST-SYS-004",
+    "path": "configs/quality/test_skip_inventory.yaml:169",
+    "observation": "One integration pytest.skip call lacked tracked owner/lifecycle metadata.",
+    "method": "pytest test_test_skip_inventory.py test_validation_test_debt_markers.py test_test_structural_debt.py",
+    "expected": "Every skip/xfail surface is exactly inventoried with owner or issue.",
+    "actual": "test_grafana_datasource_provisioning.py was absent from the inventory.",
+    "impact": "Disabled coverage can grow silently and lose accountable ownership.",
+    "confidence": "high",
+    "status": "PROVEN",
+    "priority": "P2",
+    "severity": "Medium",
+    "category": "skip_governance",
+    "evidence": [{"path": "configs/quality/test_skip_inventory.yaml", "line": 169, "command": "pytest skip governance tests", "observation": "Owner @bioetl-observability and #7249 now recorded."}],
+    "root_cause": "New platform-conditional test was added without the generated/manual inventory entry.",
+    "remediation": "Track the existing conditional guard; do not add a new skip.",
+    "effort": "S",
+    "automation": "test_test_skip_inventory.py",
+    "automated_fix_possible": true,
+    "dependencies": [],
+    "validation": ["pytest tests/architecture/test_test_skip_inventory.py -q"],
+    "resolution_state": "RESOLVED"
+  }
+]
