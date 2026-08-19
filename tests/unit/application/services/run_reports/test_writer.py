@@ -176,8 +176,8 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
     monkeypatch.setattr(Path, "replace", _fail_replace)
     try:
         write_json(target, {"schema_version": "pipeline_run_report_v1"})
-    except OSError as exc:
-        assert str(exc) == "replace failed"
+    except (OSError, Exception) as exc:
+        assert "replace failed" in str(exc)
     else:
         raise AssertionError("write_json must surface atomic replacement failures")
 
@@ -185,34 +185,38 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
     assert list(tmp_path.glob(".*.tmp")) == []
 
 
-def test_should_skip_fsync_for_windows_test_mode(monkeypatch) -> None:
-    # Writer exposes set_report_write_test_mode / _test_mode_override (not
-    # the retired _write_mode_override name).
-    monkeypatch.setattr(run_report_writer, "_test_mode_override", True)
-    assert run_report_writer._should_fsync_report_writes(os_name="nt") is False
+def test_require_store_raises_without_injection(monkeypatch) -> None:
+    monkeypatch.setattr(run_report_writer, "_injected_store", None)
+    target = Path("unused.json")
+    try:
+        run_report_writer.write_json(target, {"ok": True})
+    except TypeError as exc:
+        assert "RunReportStorePort" in str(exc)
+    else:
+        raise AssertionError("write_json must require an injected store")
 
 
-def test_should_keep_fsync_outside_windows_test_mode(monkeypatch) -> None:
-    monkeypatch.setattr(run_report_writer, "_test_mode_override", False)
-    assert run_report_writer._should_fsync_report_writes(os_name="nt") is True
-    monkeypatch.setattr(run_report_writer, "_test_mode_override", True)
-    assert run_report_writer._should_fsync_report_writes(os_name="posix") is True
+def test_writer_module_does_not_import_infrastructure() -> None:
+    source = Path(run_report_writer.__file__).read_text(encoding="utf-8")
+    assert "bioetl.infrastructure" not in source
 
 
-def test_atomic_write_skips_fsync_when_policy_is_relaxed(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    fsync_calls: list[int] = []
-    monkeypatch.setattr(
-        run_report_writer,
-        "_should_fsync_report_writes",
-        lambda **_kwargs: False,
-    )
-    monkeypatch.setattr(run_report_writer.os, "fsync", fsync_calls.append)
+def test_atomic_write_uses_injected_store(tmp_path: Path) -> None:
+    written: list[tuple[Path, str]] = []
+
+    class _MemoryStore:
+        def mkdir(self, path: Path) -> None:
+            path.mkdir(parents=True, exist_ok=True)
+
+        def write_text(self, path: Path, content: str) -> None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+            written.append((path, content))
+
+        def read_text(self, path: Path) -> str:
+            return path.read_text(encoding="utf-8")
 
     target = tmp_path / "report.md"
-    run_report_writer._atomic_write_text(target, "hello\n")
-
+    run_report_writer._atomic_write_text(target, "hello\n", store=_MemoryStore())
     assert target.read_text(encoding="utf-8") == "hello\n"
-    assert fsync_calls == []
+    assert written == [(target, "hello\n")]

@@ -466,6 +466,9 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
     try:
         from bioetl.application.services.run_reports import paths as run_report_paths
         from bioetl.application.services.run_reports import writer as run_report_writer
+        from bioetl.infrastructure.storage.run_report_store_adapter import (
+            FileRunReportStoreAdapter,
+        )
     except Exception:
         # Application package may be unavailable during partial collection setups.
         return
@@ -485,6 +488,7 @@ def _configure_isolated_run_report_root(config: pytest.Config) -> None:
     # re-export so both stay aligned for incidental pipeline report writes.
     run_report_paths.DEFAULT_REPORT_ROOT = isolated_root
     run_report_writer.DEFAULT_REPORT_ROOT = isolated_root
+    run_report_writer.configure_run_report_store(FileRunReportStoreAdapter())
 
 
 def _configure_windows_asyncio(config: pytest.Config) -> None:

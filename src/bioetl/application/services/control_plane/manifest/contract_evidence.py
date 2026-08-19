@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Protocol, runtime_checkable
-
 from bioetl.application.services.control_plane.manifest.models import (
     RunManifestCreateSpec,
 )
+from bioetl.domain.ports import ContractEvidenceRecorderPort
 
 CONTRACT_EVIDENCE_SCHEMA_VERSION = "contract_evidence_v1"
 
@@ -18,15 +16,6 @@ __all__ = [
     "build_contract_evidence",
     "build_runtime_contract_evidence",
 ]
-
-
-@runtime_checkable
-class ContractEvidenceRecorderPort(Protocol):
-    """Persist one forensic contract-evidence sidecar per manifest."""
-
-    def record(self, manifest_id: str, evidence: Mapping[str, object]) -> None:
-        """Write one deterministic sidecar for manifest_id."""
-        ...
 
 
 def build_runtime_contract_evidence(
