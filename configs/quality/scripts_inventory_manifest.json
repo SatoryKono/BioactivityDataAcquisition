@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-18T16:23:10.720517+00:00",
+  "generated_at": "2026-08-19T07:56:30.016222+00:00",
   "summary": {
     "total_scripts": 605,
     "status_counts": {
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 263,
+          "line": 269,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2610,7 +2610,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 103,
+          "line": 106,
           "source_group": "docs",
           "text": "- Install skills: `.\\scripts\\ai\\grok\\install_skills.ps1`"
         },
@@ -2652,7 +2652,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 241,
+          "line": 247,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -4975,7 +4975,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
-          "line": 104,
+          "line": 107,
           "source_group": "docs",
           "text": "- CLI: `python -m scripts.ai.prompts list|render|check`"
         },
@@ -4987,37 +4987,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 153,
+          "line": 158,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 192,
+          "line": 198,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 193,
+          "line": 199,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 194,
+          "line": 200,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 196,
+          "line": 202,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 197,
+          "line": 203,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -14833,7 +14833,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_geometry_and_purpose_contracts.py",
-          "line": 53,
+          "line": 57,
           "source_group": "tests",
           "text": "from scripts.engineering.qa import report_dashboard_scalar_density as scalar_report"
         },
@@ -20838,13 +20838,19 @@
       "agent_usage": [
         "observability-dashboard"
       ],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/observability-dashboard/SKILL.md",
           "line": 43,
           "source_group": "skills",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
+        },
+        {
+          "path": "docs/00-project/ai/prompts/library/observability/dashboard-operator-playbook.md",
+          "line": 147,
+          "source_group": "docs",
+          "text": "| TREE_MISSING / LAYOUT_UNHEALTHY | `TREAT_BIND_FAILURE` + `verify_report_bind.py` |"
         },
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
@@ -20881,12 +20887,6 @@
           "line": 206,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
-        },
-        {
-          "path": "grafana/README.md",
-          "line": 2643,
-          "source_group": "other",
-          "text": "`python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay`."
         }
       ]
     },

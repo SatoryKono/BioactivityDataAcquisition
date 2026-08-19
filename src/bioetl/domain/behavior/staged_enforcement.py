@@ -271,7 +271,7 @@ def _build_default_policies() -> dict[str, EnforcementPolicy]:
     }
 
 
-from bioetl.domain.behavior._staged_enforcement_diagnostics import (  # noqa: E402,F401
+from bioetl.domain.behavior._staged_enforcement_diagnostics import (
     _build_diagnostics_report,
     _calculate_pass_rate,
     _check_details,
