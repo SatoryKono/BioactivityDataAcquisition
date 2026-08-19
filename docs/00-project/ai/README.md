@@ -100,6 +100,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
   `prompt.observability.dashboard-audit-cycle`)
 - V5 residuals: `prompt.observability.dashboard-v5.pack` (implement /
   closeout / R-F audit)
+- Operator playbook: `prompt.observability.dashboard-operator-playbook`
 - Cyclic testing: `prompt.tests.cycle` (see
   [prompts/README.md](prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`
