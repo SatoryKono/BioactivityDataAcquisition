@@ -11,6 +11,7 @@
 - Proof-or-Stop: `STOP` (`failed_receipt:governance`, trust `local_single_host`). Канонический pretest guard дошёл до test/repo checks, но остановился на 19 ранее истёкших episodic memory entries; чужие записи не удалялись.
 - Merge этим агентом не выполнялся (`ALLOW_MERGE=false`). Во время аудита `origin/main` внешне включил commit `d94e49c623` через merge `21dcaa9368`.
 - Ветка опубликована; draft PR: https://github.com/SatoryKono/BioactivityDataAcquisition/pull/9039 (`BLOCKED`, merge не выполнялся).
+- Closeout live recheck: branch protection API всё ещё 404; ruleset `main` остаётся `disabled`, а `root-hygiene-required-check` внешне переключён в `active`. Полное acceptance #8619 не достигнуто.
 - PR CI доказал три base/infrastructure blocker: исчерпан LFS budget (#9040), текущий `main` красный по Ruff/C901/Xenon (#9041), Python helper находится в запрещённом `reports/**` (#9042).
 
 ## Проверки
