@@ -657,6 +657,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
                 fixture_case_evidence,
                 load_v2_case,
             )
+
             fixture_state = fixture_case_evidence(
                 load_v2_case(fixture_manifest, fixture_case)
             )
