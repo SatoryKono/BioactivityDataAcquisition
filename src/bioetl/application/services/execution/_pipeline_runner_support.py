@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from bioetl.application.services.execution.pipeline_runner_models import (
     PipelineRunResult,
@@ -37,7 +38,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_run_execution_service import (
         PipelineExecutionResult,
     )
-    from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort, LoggerPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        ClockPort,
+        ExecutionMetricsRunnerPort,
+        LoggerPort,
+    )
     from bioetl.domain.types import RunID
 
 
@@ -178,22 +184,16 @@ def finalize_pipeline_run_report(
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:
-        return cast(
-            "RunResult",
-            replace(
-                result,
-                run_report_error=f"{type(exc).__name__}: {exc}",
-            ),
+        return replace(
+            result,
+            run_report_error=f"{type(exc).__name__}: {exc}",
         )
 
-    return cast(
-        "RunResult",
-        replace(
-            result,
-            run_report_json_path=str(written.json_path),
-            run_report_markdown_path=str(written.markdown_path),
-            run_report_funnel=report.funnel,
-        ),
+    return replace(
+        result,
+        run_report_json_path=str(written.json_path),
+        run_report_markdown_path=str(written.markdown_path),
+        run_report_funnel=report.funnel,
     )
 
 
@@ -250,12 +250,12 @@ def build_pipeline_run_result(
 
 async def complete_pipeline_dry_run(
     *,
-    audit: object,
+    audit: AuditPort,
     pipeline_name: str,
-    run_id: object,
+    run_id: RunID,
     options: RunOptions,
     dry_run_result: RunResult,
-    record_event,
+    record_event: Callable[..., Awaitable[None]],
 ) -> RunResult:
     """Record dry-run completion and finalize the pipeline run report."""
     await record_event(
@@ -273,7 +273,11 @@ async def complete_pipeline_dry_run(
     )
 
 
-async def create_execution_runner_audited(create_runner, *, record_failure):
+async def create_execution_runner_audited(
+    create_runner: Callable[[], ExecutionMetricsRunnerPort],
+    *,
+    record_failure: Callable[[Exception], Awaitable[None]],
+) -> ExecutionMetricsRunnerPort:
     """Create a runner and audit unexpected constructor failures."""
     try:
         return create_runner()

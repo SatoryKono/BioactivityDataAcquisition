@@ -3,6 +3,8 @@
 Дата: 2026-08-17
 Статус: refreshed
 
+Refresh note (2026-08-19): TYP-RF RF-007 hash-only reconcile after the mypy zero-error typing track; `source_tree_sha256` and `source_module_count` now match `reports/quality/module-coverage-inventory.json`.
+
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
 `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md`
 for wave status, retained-vs-reopened interpretation, and current review scope.
@@ -18,8 +20,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2427` with
-`source_tree_sha256=e10426c41d09fa9c54e524f1bf4556269d6de7a13d7734a0b271c3f17092534d`.
+`source_module_count=2436` with
+`source_tree_sha256=49d35e0f86187aeb681234ab86265f830dd98c0cd49af0acabc3087aa5b6a903`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -27,7 +29,7 @@ and related module-coverage inventory hash-only reconcile.
 
 Refresh note (2026-08-17): remeasured after the validation-helper and
 service-invocation refactors. Source baseline remains
-`source_module_count=2427` with the updated `source_tree_sha256` above; the
+`source_module_count=2436` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -64,7 +66,7 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2427`, including two
+- Current Python file count under `src/bioetl` is `2436`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=609`, `application=750`,
   `infrastructure=626`, `composition=283`, `interfaces=157`.
@@ -86,6 +88,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `e10426c41d09fa9c54e524f1bf4556269d6de7a13d7734a0b271c3f17092534d`
+- source_tree_sha256: `49d35e0f86187aeb681234ab86265f830dd98c0cd49af0acabc3087aa5b6a903`
 
-`source_module_count=2427`
+`source_module_count=2436`

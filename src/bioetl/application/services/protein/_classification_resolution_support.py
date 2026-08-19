@@ -7,7 +7,9 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.chembl.protein_classification import ProteinClassHierarchy
+    from bioetl.domain.value_objects.protein_class_hierarchy import (
+        ProteinClassHierarchy,
+    )
 
 
 def json_array(values: Iterable[object]) -> str:

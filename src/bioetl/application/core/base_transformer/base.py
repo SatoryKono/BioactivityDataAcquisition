@@ -37,19 +37,16 @@ def _merge_legacy_collaborators(
     identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    return cast(
-        "TransformerDependencyContext",
-        replace(
-            dependencies,
-            tracer=dependencies.tracer if tracer is None else tracer,
-            metrics=dependencies.metrics if metrics is None else metrics,
-            identity_service=(
-                dependencies.identity_service
-                if identity_service is None
-                else identity_service
-            ),
-            pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
+    return replace(
+        dependencies,
+        tracer=dependencies.tracer if tracer is None else tracer,
+        metrics=dependencies.metrics if metrics is None else metrics,
+        identity_service=(
+            dependencies.identity_service
+            if identity_service is None
+            else identity_service
         ),
+        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
     )
 
 
@@ -127,7 +124,6 @@ class BaseTransformer(
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
 
-        from typing import cast
 
         from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import TypedDict, cast
+from typing import TypedDict
 
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
@@ -180,13 +180,10 @@ def enrich_metadata_with_execution_identity(
     """Fill checkpoint metadata gaps from current execution identity."""
     if identity is None:
         return metadata
-    return cast(
-        "CheckpointMetadata",
-        replace(
-            metadata,
-            **_build_core_identity_overrides(metadata, identity),
-            **_build_replay_identity_overrides(metadata, identity),
-        ),
+    return replace(
+        metadata,
+        **_build_core_identity_overrides(metadata, identity),
+        **_build_replay_identity_overrides(metadata, identity),
     )
 
 
