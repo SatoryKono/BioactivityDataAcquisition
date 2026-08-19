@@ -28,6 +28,19 @@ CANONICAL_SOURCES_BLOCK = """## Canonical Sources
 Load only the role- and risk-relevant sources selected by those contracts.
 """
 
+CODEX_RUNTIME_CANONICAL_SOURCES_BLOCK = """## Canonical Sources
+
+- Runtime contract and precedence: `AGENTS.md`
+- Normative source index: `docs/00-project/NORMATIVE_SOURCES.md`
+- Project rules: `docs/00-project/RULES.md`
+- Requirements: `docs/01-requirements/REQUIREMENTS.md`
+- Accepted architecture decisions: `docs/02-architecture/decisions/`
+- Memory usage guide: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- Post-change validation policy: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+Load only the role- and risk-relevant sources selected by those contracts.
+"""
+
 NORMATIVE_SKILL_LINE_CODEX = (
     "- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`\n"
 )
@@ -61,15 +74,19 @@ def _strip_mirror_header(text: str) -> str:
     return MIRROR_HEADER_PATTERN.sub("", text, count=1)
 
 
-def _ensure_canonical_sources(text: str) -> str:
+def _ensure_canonical_sources(
+    text: str,
+    *,
+    canonical_block: str = CANONICAL_SOURCES_BLOCK,
+) -> str:
     cleaned = _strip_mirror_header(text)
     if CANONICAL_SOURCES_PATTERN.search(cleaned):
         return CANONICAL_SOURCES_PATTERN.sub(
-            CANONICAL_SOURCES_BLOCK.rstrip() + "\n\n",
+            canonical_block.rstrip() + "\n\n",
             cleaned,
             count=1,
         )
-    return CANONICAL_SOURCES_BLOCK + "\n" + cleaned.lstrip("\n")
+    return canonical_block + "\n" + cleaned.lstrip("\n")
 
 
 GOVERNANCE_SKILL_LINES_CODEX = (
@@ -116,7 +133,15 @@ def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
 
     for path in sorted(agents_dir.glob("*.md")):
         original = path.read_text(encoding="utf-8")
-        updated = _ensure_canonical_sources(original)
+        canonical_block = (
+            CODEX_RUNTIME_CANONICAL_SOURCES_BLOCK
+            if path.name == "CODEX-RUNTIME.md"
+            else CANONICAL_SOURCES_BLOCK
+        )
+        updated = _ensure_canonical_sources(
+            original,
+            canonical_block=canonical_block,
+        )
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
