@@ -287,9 +287,14 @@ __all__ = [
     "build_reconciliation_result",
     "complete_dry_run",
     "complete_without_mutation",
+    "emit_reconcile_debug_artifacts",
+    "filter_source_rows_to_current_run",
+    "log_reconciliation",
+    "log_reconciliation_started",
     "normalize_row_key",
     "normalize_value",
     "partition_source_rows",
+    "record_reconciliation_metrics",
     "reference_value_set",
     "row_has_null_foreign_key",
 ]
@@ -321,6 +326,25 @@ def log_reconciliation(
     log_method = getattr(logger, level, None)
     if callable(log_method):
         log_method(message, **context)
+
+
+def log_reconciliation_started(
+    adapter: ReconciliationLoggingHost,
+    request: ForeignKeyReconciliationRequest,
+) -> None:
+    """Log the start of one delete_orphans reconciliation pass."""
+    adapter._log(
+        "info",
+        "workflow foreign-key reconciliation started",
+        source_table=request.source_table,
+        reference_table=request.reference_table,
+        source_layer=request.source_layer,
+        reference_layer=request.reference_layer,
+        mutation_layer=request.effective_mutation_layer,
+        source_keys=list(request.effective_source_keys),
+        reference_keys=list(request.effective_reference_keys),
+        nulls_equal=request.nulls_equal,
+    )
 
 
 def emit_reconcile_debug_artifacts(
