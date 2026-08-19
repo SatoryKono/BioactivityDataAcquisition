@@ -26,9 +26,9 @@ function Set-BioetlGithubEnvAliases {
             $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_TOKEN
         } elseif ($env:GITHUB_CDX_PERSONAL_ACCESS_TOKEN) {
             $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_CDX_PERSONAL_ACCESS_TOKEN
-        } elseif ($env:GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN) {
-            # Historical typo key kept for local compat (do not introduce in new .env files).
-            $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN
+        } elseif ($env:GITHUB_ANY_PERSONAL_ACCESS_TOKEN) {
+            # Local-compat alias (do not introduce in new .env files).
+            $env:GITHUB_PERSONAL_ACCESS_TOKEN = $env:GITHUB_ANY_PERSONAL_ACCESS_TOKEN
         }
     }
     if (-not $env:GITHUB_TOKEN -and $env:GITHUB_PERSONAL_ACCESS_TOKEN) {

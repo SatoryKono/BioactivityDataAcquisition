@@ -41,7 +41,7 @@ def main() -> None:
         "HUB_PAT_TOKEN",
         "DOCKER_API_KEY",
         "NEEDLE_API_KEY",
-        "GITHUB_ANY_PERSONAL_ADjCCESS_TOKEN",
+        "GITHUB_ANY_PERSONAL_ACCESS_TOKEN",
         "GITHUB_CDX_PERSONAL_ACCESS_TOKEN",
     ]
     for key in keys:
