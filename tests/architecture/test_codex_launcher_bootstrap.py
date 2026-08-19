@@ -40,6 +40,11 @@ def _fake_codex_prefix(tmp_path: Path) -> Path:
     fake_codex.parent.mkdir(parents=True)
     fake_codex.write_text(
         "#!/usr/bin/env bash\n"
+        'if [[ -n "${BIOETL_TEST_ENV_CAPTURE:-}" ]]; then\n'
+        "printf 'NPM_CONFIG_PREFIX=%s\\nnpm_config_prefix=%s\\nPATH_HEAD=%s\\n' "
+        '"${NPM_CONFIG_PREFIX:-}" "${npm_config_prefix:-}" '
+        '"${PATH%%:*}" >"${BIOETL_TEST_ENV_CAPTURE}"\n'
+        "fi\n"
         'if [[ -n "${REF_TOOL_API_KEY:-}" ]]; then echo ref_key=set; '
         "else echo ref_key=missing; fi\n"
         "printf 'arg=%s\\n' \"$@\"\n",
@@ -222,8 +227,11 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
 
     direct_env = {
         **env,
+        "BIOETL_TEST_ENV_CAPTURE": str(tmp_path / "direct-env.txt"),
         "CODEX_SKIP_MCP_SETUP": "1",
+        "NPM_CONFIG_PREFIX": str(tmp_path / "wrong-prefix"),
         "REF_TOOL_API_KEY": "synthetic-ref-key",
+        "npm_config_prefix": str(tmp_path / "wrong-prefix"),
     }
     direct = subprocess.run(
         [str(shim), "mcp", "get", "ref"],
@@ -240,6 +248,11 @@ def test_direct_codex_command_installer_is_bounded_and_secret_free(
         "arg=mcp",
         "arg=get",
         "arg=ref",
+    ]
+    assert (tmp_path / "direct-env.txt").read_text(encoding="utf-8").splitlines() == [
+        f"NPM_CONFIG_PREFIX={fake_prefix}",
+        f"npm_config_prefix={fake_prefix}",
+        f"PATH_HEAD={fake_prefix / 'bin'}",
     ]
 
 
