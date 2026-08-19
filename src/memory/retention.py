@@ -105,7 +105,9 @@ def _evaluate_retention_record(
 ) -> tuple[bool, list[RetentionViolation]]:
     """Evaluate one record and return its hold state and violations."""
     if not record.record_id:
-        return False, [RetentionViolation("", "missing_record_id", "record_id is required")]
+        return False, [
+            RetentionViolation("", "missing_record_id", "record_id is required")
+        ]
     try:
         created_at = _parse_utc(record.created_at, field_name="created_at")
     except ValueError as exc:

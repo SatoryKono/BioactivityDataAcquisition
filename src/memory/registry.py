@@ -157,10 +157,14 @@ def _validate_surface_fields(
 ) -> None:
     missing = sorted(REQUIRED_SURFACE_FIELDS - surface.keys())
     if missing:
-        issues.append(RegistryIssue(path, f"missing required fields: {', '.join(missing)}"))
+        issues.append(
+            RegistryIssue(path, f"missing required fields: {', '.join(missing)}")
+        )
     unexpected = sorted(surface.keys() - REQUIRED_SURFACE_FIELDS)
     if unexpected:
-        issues.append(RegistryIssue(path, f"unexpected fields: {', '.join(unexpected)}"))
+        issues.append(
+            RegistryIssue(path, f"unexpected fields: {', '.join(unexpected)}")
+        )
 
 
 def _validate_surface_identity(

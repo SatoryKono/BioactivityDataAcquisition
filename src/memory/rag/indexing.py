@@ -275,22 +275,19 @@ def _build_stable_source_records(
     )
 
 
-def build_rag_manifests(
+def _build_initial_source_maps(
     root: Path,
+    sources: list[Path],
     *,
-    build_scope: str = DEFAULT_BUILD_SCOPE,
-    focus_query: str | None = None,
-    max_sources: int | None = None,
-) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """Build deterministic corpus catalog and chunk records for project sources."""
-    sources = _resolve_rag_sources(
-        root,
-        build_scope=build_scope,
-        focus_query=focus_query,
-        max_sources=max_sources,
-    )
-    owner_specs = _load_owner_specs()
-    zone_specs = _load_repo_zone_specs()
+    owner_specs: list[tuple[str, tuple[str, ...]]],
+    zone_specs: list[tuple[str, tuple[str, ...]]],
+) -> tuple[
+    dict[str, dict[str, Any]],
+    dict[str, list[dict[str, Any]]],
+    dict[str, tuple[int, int]],
+    dict[str, FileNotFoundError],
+]:
+    """Build initial source maps while recording concurrent disappearances."""
     corpus_by_path: dict[str, dict[str, Any]] = {}
     chunks_by_path: dict[str, list[dict[str, Any]]] = {}
     signatures_by_path: dict[str, tuple[int, int]] = {}
@@ -310,7 +307,90 @@ def build_rag_manifests(
         corpus_by_path[rel_path_str] = corpus_source
         chunks_by_path[rel_path_str] = chunk_rows
         signatures_by_path[rel_path_str] = signature
+    return corpus_by_path, chunks_by_path, signatures_by_path, missing_sources
 
+
+def _resolve_missing_sources(
+    root: Path,
+    source_paths: set[str],
+    missing_sources: dict[str, FileNotFoundError],
+) -> None:
+    for missing_path, error in tuple(missing_sources.items()):
+        if missing_path in source_paths and not (root / missing_path).is_file():
+            raise error
+        missing_sources.pop(missing_path)
+
+
+def _drop_removed_sources(
+    source_paths: set[str],
+    corpus_by_path: dict[str, dict[str, Any]],
+    chunks_by_path: dict[str, list[dict[str, Any]]],
+    signatures_by_path: dict[str, tuple[int, int]],
+) -> None:
+    for removed_path in set(corpus_by_path) - source_paths:
+        corpus_by_path.pop(removed_path)
+        chunks_by_path.pop(removed_path)
+        signatures_by_path.pop(removed_path)
+
+
+def _changed_source_paths(
+    root: Path,
+    sources: list[Path],
+    signatures_by_path: dict[str, tuple[int, int]],
+) -> list[Path] | None:
+    rebuild_paths: list[Path] = []
+    for rel_path in sources:
+        try:
+            current_signature = _source_signature(root / rel_path)
+        except FileNotFoundError:
+            return None
+        if signatures_by_path.get(rel_path.as_posix()) != current_signature:
+            rebuild_paths.append(rel_path)
+    return rebuild_paths
+
+
+def _rebuild_changed_sources(
+    root: Path,
+    rebuild_paths: list[Path],
+    *,
+    corpus_by_path: dict[str, dict[str, Any]],
+    chunks_by_path: dict[str, list[dict[str, Any]]],
+    signatures_by_path: dict[str, tuple[int, int]],
+    owner_specs: list[tuple[str, tuple[str, ...]]],
+    zone_specs: list[tuple[str, tuple[str, ...]]],
+) -> bool:
+    try:
+        for rel_path in rebuild_paths:
+            corpus_source, chunk_rows, signature = _build_stable_source_records(
+                root,
+                rel_path,
+                owner_specs=owner_specs,
+                zone_specs=zone_specs,
+            )
+            rel_path_str = rel_path.as_posix()
+            corpus_by_path[rel_path_str] = corpus_source
+            chunks_by_path[rel_path_str] = chunk_rows
+            signatures_by_path[rel_path_str] = signature
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def _reconcile_source_maps(
+    root: Path,
+    sources: list[Path],
+    *,
+    corpus_by_path: dict[str, dict[str, Any]],
+    chunks_by_path: dict[str, list[dict[str, Any]]],
+    signatures_by_path: dict[str, tuple[int, int]],
+    missing_sources: dict[str, FileNotFoundError],
+    owner_specs: list[tuple[str, tuple[str, ...]]],
+    zone_specs: list[tuple[str, tuple[str, ...]]],
+    build_scope: str,
+    focus_query: str | None,
+    max_sources: int | None,
+) -> list[Path]:
+    """Reconcile concurrent source additions, removals, and modifications."""
     for _ in range(SOURCE_RECONCILIATION_MAX_ATTEMPTS):
         sources = _resolve_rag_sources(
             root,
@@ -319,52 +399,64 @@ def build_rag_manifests(
             max_sources=max_sources,
         )
         source_paths = {path.as_posix() for path in sources}
-        for missing_path, error in tuple(missing_sources.items()):
-            if missing_path not in source_paths:
-                missing_sources.pop(missing_path)
-                continue
-            if not (root / missing_path).is_file():
-                raise error
-            missing_sources.pop(missing_path)
-        for removed_path in set(corpus_by_path) - source_paths:
-            corpus_by_path.pop(removed_path)
-            chunks_by_path.pop(removed_path)
-            signatures_by_path.pop(removed_path)
-
-        rebuild_paths: list[Path] = []
-        for rel_path in sources:
-            rel_path_str = rel_path.as_posix()
-            try:
-                current_signature = _source_signature(root / rel_path)
-            except FileNotFoundError:
-                rebuild_paths = []
-                break
-            if signatures_by_path.get(rel_path_str) != current_signature:
-                rebuild_paths.append(rel_path)
-        else:
-            try:
-                for rel_path in rebuild_paths:
-                    (
-                        corpus_source,
-                        chunk_rows,
-                        signature,
-                    ) = _build_stable_source_records(
-                        root,
-                        rel_path,
-                        owner_specs=owner_specs,
-                        zone_specs=zone_specs,
-                    )
-                    rel_path_str = rel_path.as_posix()
-                    corpus_by_path[rel_path_str] = corpus_source
-                    chunks_by_path[rel_path_str] = chunk_rows
-                    signatures_by_path[rel_path_str] = signature
-            except FileNotFoundError:
-                continue
-            if not rebuild_paths:
-                break
+        _resolve_missing_sources(root, source_paths, missing_sources)
+        _drop_removed_sources(
+            source_paths, corpus_by_path, chunks_by_path, signatures_by_path
+        )
+        rebuild_paths = _changed_source_paths(root, sources, signatures_by_path)
+        if rebuild_paths is None:
             continue
-    else:
-        sources = [path for path in sources if path.as_posix() in corpus_by_path]
+        rebuilt = _rebuild_changed_sources(
+            root,
+            rebuild_paths,
+            corpus_by_path=corpus_by_path,
+            chunks_by_path=chunks_by_path,
+            signatures_by_path=signatures_by_path,
+            owner_specs=owner_specs,
+            zone_specs=zone_specs,
+        )
+        if rebuilt and not rebuild_paths:
+            return sources
+    return [path for path in sources if path.as_posix() in corpus_by_path]
+
+
+def build_rag_manifests(
+    root: Path,
+    *,
+    build_scope: str = DEFAULT_BUILD_SCOPE,
+    focus_query: str | None = None,
+    max_sources: int | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Build deterministic corpus catalog and chunk records for project sources."""
+    sources = _resolve_rag_sources(
+        root,
+        build_scope=build_scope,
+        focus_query=focus_query,
+        max_sources=max_sources,
+    )
+    owner_specs = _load_owner_specs()
+    zone_specs = _load_repo_zone_specs()
+    corpus_by_path, chunks_by_path, signatures_by_path, missing_sources = (
+        _build_initial_source_maps(
+            root,
+            sources,
+            owner_specs=owner_specs,
+            zone_specs=zone_specs,
+        )
+    )
+    sources = _reconcile_source_maps(
+        root,
+        sources,
+        corpus_by_path=corpus_by_path,
+        chunks_by_path=chunks_by_path,
+        signatures_by_path=signatures_by_path,
+        missing_sources=missing_sources,
+        owner_specs=owner_specs,
+        zone_specs=zone_specs,
+        build_scope=build_scope,
+        focus_query=focus_query,
+        max_sources=max_sources,
+    )
 
     ordered_paths = [path.as_posix() for path in sources]
     corpus_sources = [corpus_by_path[path] for path in ordered_paths]

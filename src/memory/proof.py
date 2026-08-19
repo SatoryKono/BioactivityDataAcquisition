@@ -585,6 +585,31 @@ def verify_bundle(
         errors.append("tampered_bundle")
 
     claim = str(bundle["claim"])
+    source = bundle["source"]
+    errors.extend(_bundle_policy_errors(bundle, policy, claim))
+    if check_current_source:
+        errors.extend(_current_source_errors(bundle, repo_root, policy, claim))
+
+    receipts = bundle["receipts"]
+    receipt_errors, receipt_degradations = _verify_receipts(receipts, bundle, policy)
+    errors.extend(receipt_errors)
+    degradations.extend(receipt_degradations)
+    trust_errors, trust_degradations = _trust_tier_findings(bundle, policy, receipts)
+    errors.extend(trust_errors)
+    degradations.extend(trust_degradations)
+
+    if claim == "ready_to_merge" and (source["dirty"] or source["untracked_paths"]):
+        errors.append("dirty_source_for_full_claim")
+    return _verification_result(errors, degradations)
+
+
+def _bundle_policy_errors(
+    bundle: dict[str, Any],
+    policy: dict[str, Any],
+    claim: str,
+) -> list[str]:
+    """Return acceptance and policy-binding drift findings."""
+    errors: list[str] = []
     expected_claim_policy = policy["claims"][claim]
     if bundle["acceptance"]["required_evidence"] != list(
         expected_claim_policy["required_evidence"]
@@ -600,27 +625,46 @@ def verify_bundle(
         errors.append("policy_drift")
     if source["command_set_hash"] != expected_command_hash:
         errors.append("command_set_drift")
+    return errors
 
-    if check_current_source:
-        current_repo, current_source = discover_context(
-            repo_root,
-            policy=policy,
-            claim=claim,
-            ci_run_id=bundle["repository"].get("ci_run_id"),
-        )
-        if current_repo["repo_id"] != bundle["repository"]["repo_id"]:
-            errors.append("cross_scope:repo_id")
-        for field in (
-            "head_sha",
-            "material_hash",
-            "task_diff_hash",
-            "policy_hash",
-            "command_set_hash",
-        ):
-            if current_source[field] != source[field]:
-                errors.append(f"stale_bundle:{field}")
 
-    receipts = bundle["receipts"]
+def _current_source_errors(
+    bundle: dict[str, Any],
+    repo_root: Path,
+    policy: dict[str, Any],
+    claim: str,
+) -> list[str]:
+    """Compare a bundle's source binding with the current checkout."""
+    current_repo, current_source = discover_context(
+        repo_root,
+        policy=policy,
+        claim=claim,
+        ci_run_id=bundle["repository"].get("ci_run_id"),
+    )
+    errors = []
+    if current_repo["repo_id"] != bundle["repository"]["repo_id"]:
+        errors.append("cross_scope:repo_id")
+    source = bundle["source"]
+    for field in (
+        "head_sha",
+        "material_hash",
+        "task_diff_hash",
+        "policy_hash",
+        "command_set_hash",
+    ):
+        if current_source[field] != source[field]:
+            errors.append(f"stale_bundle:{field}")
+    return errors
+
+
+def _verify_receipts(
+    receipts: list[dict[str, Any]],
+    bundle: dict[str, Any],
+    policy: dict[str, Any],
+) -> tuple[list[str], list[str]]:
+    """Verify receipt identity, content, and required evidence coverage."""
+    errors: list[str] = []
+    degradations: list[str] = []
     receipt_ids = [str(receipt["receipt_id"]) for receipt in receipts]
     if len(receipt_ids) != len(set(receipt_ids)):
         errors.append("duplicate_receipt_id")
@@ -636,26 +680,41 @@ def verify_bundle(
     for kind in required:
         if observed.get(kind, 0) == 0:
             errors.append(f"missing_receipt:{kind}")
+    return errors, degradations
 
+
+def _trust_tier_findings(
+    bundle: dict[str, Any],
+    policy: dict[str, Any],
+    receipts: list[dict[str, Any]],
+) -> tuple[list[str], list[str]]:
+    """Validate attestation parity and maximum outcome for the trust tier."""
+    errors: list[str] = []
+    degradations: list[str] = []
     trust_tier = str(bundle["trust_tier"])
     tier_policy = policy.get("trust_tiers", {}).get(trust_tier)
     if not isinstance(tier_policy, dict):
         errors.append(f"unsupported_trust_tier:{trust_tier}")
-    else:
-        expected_attestation = tier_policy.get("execution_attestation")
-        for receipt in receipts:
-            if receipt.get("execution_attestation") != expected_attestation:
-                errors.append(
-                    f"attestation_mismatch:{receipt.get('receipt_id', '<unknown>')}"
-                )
-        maximum = tier_policy.get("maximum_outcome")
-        if maximum == "STOP":
-            errors.append(f"untrusted_execution:{trust_tier}")
-        elif maximum == "DEGRADED":
-            degradations.append(f"trust_tier:{trust_tier}")
+        return errors, degradations
+    expected_attestation = tier_policy.get("execution_attestation")
+    for receipt in receipts:
+        if receipt.get("execution_attestation") != expected_attestation:
+            errors.append(
+                f"attestation_mismatch:{receipt.get('receipt_id', '<unknown>')}"
+            )
+    maximum = tier_policy.get("maximum_outcome")
+    if maximum == "STOP":
+        errors.append(f"untrusted_execution:{trust_tier}")
+    elif maximum == "DEGRADED":
+        degradations.append(f"trust_tier:{trust_tier}")
+    return errors, degradations
 
-    if claim == "ready_to_merge" and (source["dirty"] or source["untracked_paths"]):
-        errors.append("dirty_source_for_full_claim")
+
+def _verification_result(
+    errors: list[str],
+    degradations: list[str],
+) -> VerificationResult:
+    """Normalize verifier findings into the stable gate result."""
     if errors:
         return VerificationResult(
             "STOP", False, tuple(sorted(set(errors))), tuple(sorted(set(degradations)))
