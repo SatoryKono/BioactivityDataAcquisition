@@ -339,13 +339,13 @@ from bioetl.domain.ports.storage import (
     BronzeStoragePort as BronzeStoragePort,
 )
 from bioetl.domain.ports.storage import (
-    RunReportStorePort as RunReportStorePort,
-)
-from bioetl.domain.ports.storage import (
     GoldStoragePort as GoldStoragePort,
 )
 from bioetl.domain.ports.storage import (
     MergedStoragePort as MergedStoragePort,
+)
+from bioetl.domain.ports.storage import (
+    RunReportStorePort as RunReportStorePort,
 )
 from bioetl.domain.ports.storage import (
     SilverStoragePort as SilverStoragePort,
