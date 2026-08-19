@@ -41,10 +41,7 @@ async def build_readiness_response(host: _ReadinessHost) -> HealthResponse:
         ),
     }
     status = "healthy"
-    if (
-        enforce_report_root_marker()
-        and report_root_check.get("status") != "healthy"
-    ):
+    if enforce_report_root_marker() and report_root_check.get("status") != "healthy":
         status = "unhealthy"
     if not host._health_monitor:
         checks["message"] = "No health monitor configured"

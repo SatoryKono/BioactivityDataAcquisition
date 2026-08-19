@@ -49,3 +49,17 @@ def test_vibe_powershell_launcher_passes_prompt_as_data() -> None:
     assert "wsl -e bash -c $VibeCommand -- $PromptB64" in launcher
     assert "decoded_prompt=\"$(printf ''%s'' \"$1\" | base64 -d)\"" in launcher
     assert "\\$(printf" not in launcher
+
+
+def test_vibe_launchers_do_not_log_prompt_or_recommend_curl_pipe() -> None:
+    """#9004: launchers must not emit prompt text or curl|bash installers."""
+    root = Path(__file__).resolve().parents[2]
+    for name in ("launch.sh", "launch.ps1"):
+        text = (root / "scripts" / "ai" / "vibe" / name).read_text(encoding="utf-8")
+        assert "Prompt: $*" not in text
+        assert "Prompt:" not in text or "Prompt length:" in text
+        assert "mistral.ai/vibe/install.sh" not in text
+        lowered = text.replace(" ", "")
+        assert "|bash" not in lowered.lower()
+        assert "|sh" not in lowered.lower()
+        assert "Prompt length:" in text

@@ -80,7 +80,9 @@ class EnricherDeduplicatorService:
         if not non_key_columns:
             # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
             # We explicitly sort afterwards to ensure deterministic output.
-            result = df.select(key_columns).unique(maintain_order=False).sort(key_columns)
+            result = (
+                df.select(key_columns).unique(maintain_order=False).sort(key_columns)
+            )
             self._record_deduplicated(records_before - len(result))
             self._log_deduplication(
                 enricher_name, key_columns, records_before, len(result), []
@@ -97,7 +99,11 @@ class EnricherDeduplicatorService:
 
         # OPTIMIZATION: maintain_order=False avoids high FFI overhead for large cardinality data.
         # We explicitly sort afterwards to ensure deterministic output.
-        result = df.group_by(key_columns, maintain_order=False).agg(agg_exprs).sort(key_columns)
+        result = (
+            df.group_by(key_columns, maintain_order=False)
+            .agg(agg_exprs)
+            .sort(key_columns)
+        )
         self._record_deduplicated(records_before - len(result))
 
         self._log_deduplication(

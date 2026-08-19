@@ -230,8 +230,9 @@ PR merges to `main` require the always-on status checks below. Repo-side
 evidence is the active repository ruleset plus the workflows that materialize
 those checks.
 
-Activated and re-verified on `2026-08-11` with repository admin credentials via
-the GitHub REST API (closeout for #8619 / parent #8607).
+Activated and re-verified on `2026-08-19` with repository admin credentials via
+the GitHub REST API (closeout for #8619 / parent #8607; regression after the
+2026-08-11 activation drifted to `enforcement=disabled`).
 
 Live GitHub enforcement state:
 
@@ -240,10 +241,13 @@ Live GitHub enforcement state:
 - Enforcement: `active`.
 - Required status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
-- The ruleset has no bypass actors.
+- The ruleset has no bypass actors (`current_user_can_bypass: never`).
+- Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
+  SSOT; a 404 on `GET .../branches/main/protection` is expected.
 - Tracking references: `#3380`, `#8619`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
+- Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)

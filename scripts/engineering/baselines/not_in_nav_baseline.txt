@@ -176,16 +176,6 @@
 02-architecture/diagrams/descriptions/architecture/47-run-manifest-domain-model-and-serialization-surface.md
 02-architecture/diagrams/descriptions/architecture/48-effective-config-artifact-domain-model.md
 02-architecture/diagrams/descriptions/foundation/35-bootstrap-sequence.md
-02-architecture/diagrams/descriptions/sequence/01-pipeline-execution-sequence.md
-02-architecture/diagrams/descriptions/sequence/02-composite-pipeline-sequence.md
-02-architecture/diagrams/descriptions/sequence/03-http-request-response-flow.md
-02-architecture/diagrams/descriptions/sequence/04-dq-validation-sequence.md
-02-architecture/diagrams/descriptions/sequence/05-quarantine-handling-sequence.md
-02-architecture/diagrams/descriptions/state-machines/01-pipeline-state-machine.md
-02-architecture/diagrams/descriptions/state-machines/02-lock-acquisition-state-machine.md
-02-architecture/diagrams/descriptions/state-machines/03-checkpoint-state-machine.md
-02-architecture/diagrams/descriptions/state-machines/04-error-recovery-state-machine.md
-02-architecture/diagrams/descriptions/state-machines/05-dq-validation-state-machine.md
 03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md
 03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md
 03-guides/dashboards/archive/audit-protocols/dux3-screenshot-regression-protocol.md

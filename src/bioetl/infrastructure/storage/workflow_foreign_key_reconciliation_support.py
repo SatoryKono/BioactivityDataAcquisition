@@ -53,7 +53,6 @@ def filter_source_rows_to_current_run(
     return scoped, "current_run"
 
 
-
 class ReconciliationLoggingHost(Protocol):
     """Adapter logging surface required by completion helpers."""
 

@@ -516,9 +516,9 @@ def test_status_grafana_bootstrap_deferred_is_finding() -> None:
     assert findings[0]["reason"] == "identity_mismatch"
     assert findings[0]["code"] == "GRAFANA_OPS_HTTP_BOOTSTRAP"
     assert findings[0]["dashboard_profile"] == "prometheus_only"
-    assert "static Prometheus-only dashboard notices are active" in findings[0][
-        "message"
-    ]
+    assert (
+        "static Prometheus-only dashboard notices are active" in findings[0]["message"]
+    )
 
 
 def test_status_grafana_bootstrap_ready_has_no_finding() -> None:

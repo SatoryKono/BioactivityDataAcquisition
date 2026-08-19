@@ -48,6 +48,7 @@ not_in_nav: |
   00-project/ai/memory/memory-*.md
   00-project/ai/memory/gh-issues-documentation-update.md
   00-project/ai/prompts/*.md
+  00-project/ai/prompts/library/**
   00-project/ai/skills/SKILLS-CATALOG.md
   00-project/ai/skills/_references/**
   00-project/ai/skills/global/.system/**

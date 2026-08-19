@@ -42,7 +42,11 @@ def _setting(name: str, default: str = "") -> str:
 
 
 def _fill_config() -> FillConfig:
-    base = _setting("GRAFANA_BASE_URL") or _setting("GRAFANA_URL") or "http://127.0.0.1:3000"
+    base = (
+        _setting("GRAFANA_BASE_URL")
+        or _setting("GRAFANA_URL")
+        or "http://127.0.0.1:3000"
+    )
     return FillConfig(
         grafana_base_url=base.rstrip("/"),
         grafana_username=_setting("GRAFANA_USERNAME", "admin") or "admin",

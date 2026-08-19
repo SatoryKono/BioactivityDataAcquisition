@@ -82,9 +82,7 @@ def track_storage_write_metrics(
         else len(transform_result.silver_records)
     )
     gold_count = (
-        gold_written
-        if gold_written is not None
-        else len(transform_result.gold_records)
+        gold_written if gold_written is not None else len(transform_result.gold_records)
     )
     batch_metrics.track_stage_records(
         stage="storage",

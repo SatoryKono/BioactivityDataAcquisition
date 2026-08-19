@@ -67,7 +67,7 @@ def detect_diagram_type(svg_root: ET.Element) -> str | None:
         return "state"
     if "classGroup" in svg_text or "classDiagram" in svg_text:
         return "class"
-    if "er " in svg_text or "entityBox" in svg_text:
+    if "erDiagram" in svg_text or "entityBox" in svg_text:
         return "er"
     if "flowchart" in svg_text or "edgePath" in svg_text:
         return "flowchart"

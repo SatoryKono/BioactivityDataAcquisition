@@ -41,9 +41,7 @@ async def fetch_records(
     """Fetch ID mapping records for the requested source IDs."""
     _ = query, filter_field
     warn_unexpected_entity_type(state, entity_type)
-    chembl_ids, source = await resolve_chembl_ids(
-        state, filter_ids, limit, offset
-    )
+    chembl_ids, source = await resolve_chembl_ids(state, filter_ids, limit, offset)
     if not chembl_ids:
         state._logger.warning("no_ids_to_map", input_path=str(state._input_path))
         return

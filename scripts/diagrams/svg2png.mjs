@@ -16,13 +16,12 @@ import {createRequire} from "node:module";
 import {promises as fs} from "node:fs";
 import path from "node:path";
 
-// Resolve puppeteer from explicit path, local install, or historical global mmdc path.
+// Resolve puppeteer from PUPPETEER_MODULE_PATH or a local/node_modules install.
 const require = createRequire(import.meta.url);
 let puppeteer;
 const moduleCandidates = [
   process.env.PUPPETEER_MODULE_PATH,
   "puppeteer",
-  "C:/Users/Fedor/AppData/Roaming/npm/node_modules/@mermaid-js/mermaid-cli/node_modules/puppeteer",
 ].filter(Boolean);
 
 for (const candidate of moduleCandidates) {

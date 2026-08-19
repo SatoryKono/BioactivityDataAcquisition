@@ -93,6 +93,10 @@ path. Поэтому config не изменялся, а wording prompt source н
   `configs/quality/scripts_inventory_manifest.json` drift вне текущего diff.
 - `python -m scripts.docs verify --skip-links` — FAIL на существующем
   documentation cleanup inventory drift вне текущего diff.
+- `python -m scripts.engineering.qa report-debt-governance-gates --check` —
+  PASS на audited base, но после синхронизации с текущим `origin/main` FAIL на
+  upstream module-coverage/scorecard generated-artifact drift; audited product diff не
+  изменяет эти artifacts или их budgets.
 
 Canonical WSL venv `/home/fedor/.venvs/bioetl` не содержит `pytest`; test
 commands выполнены эквивалентным repository venv согласно wrapper fallback.
@@ -101,6 +105,9 @@ commands выполнены эквивалентным repository venv согл�
 
 - `configs/quality/**` aggregate SHA-256: baseline = final =
   `be7dcdb5fec98cb304865c53bd78ff5c989b5a0fae98ce035fe3c1dd0a3c84a0`.
+- После rebase upstream quality aggregate =
+  `1f96c5ebbf77681d7f95593c576f3f1947dd7bba8c81d55a66877192cc2d911b`;
+  `git diff origin/main -- configs/quality` пуст, поэтому product budget delta = 0.
 - Budget delta: flat; debt outcome: `unchanged`.
 - Generated artifacts refreshed only by the canonical generator.
 - Runtime/docs mirror sync: not applicable; `.codex/**` and `.junie/**` were not changed.
@@ -110,15 +117,28 @@ commands выполнены эквивалентным repository venv согл�
 
 Worktree-bound bundle:
 `reports/quality/proof-or-stop/20260819T082349Z-configs-cycle-592bf60/bundle.json`.
-Offline verification вернул `STOP`: `failed_receipt:governance` и
-`failed_receipt:docs_runtime`; tests/debt receipts имеют `pass`. Дополнительно
-trust tier `local_single_host` помечен degradation. По текущему rollout это
-soft-fail evidence, но claim `done` не qualified и не должен называться
-готовым к merge. Исправление двух inventories не применялось, поскольку это
+После синхронизации со свежим `origin/main@7857c349dcdf9ec091d2ce6b1bee587ab7f71225`
+финальная offline verification возвращает `STOP`:
+`failed_receipt:governance`, `failed_receipt:docs_runtime` и
+`failed_receipt:debt`; tests receipt имеет `pass`. Дополнительно trust tier
+`local_single_host` помечен degradation. По текущему rollout это soft-fail
+evidence, но claim `done` не qualified и не должен называться готовым к merge.
+Исправление внешних generated inventories не применялось, поскольку это
 расширило бы явно заданный `Schema/config` scope.
+
+## Evidence-only close
+
+Перед публикацией `origin/main` продвинулся до
+`21dcaa936808fba3e3368136b8865db180ee36e1` и уже содержит product fix в
+commit `3ade5d6e2a74b024737cfc6dd91402eb41cf793c`.
+`git diff --quiet origin/main -- docs/04-reference/config_comparison_matrix.csv reports/quality/config-discrepancy-baseline.json`
+вернул 0. В отдельном detached worktree текущего `origin/main` повторно прошли
+`validate-configs` (66), `check-invariants` (27), canonical matrix `--check`,
+focused drift test и `check-exemptions`. Поэтому feature branch не push-илась
+и новый PR не создавался: это был бы дубликат уже принятого исправления.
 
 ## Open gaps
 
-В audited config surface открытых findings нет: `CFG-001` resolved; P0/P1
-отсутствуют. На repository closeout остаются два внешних validation blockers,
-описанных выше.
+В audited config surface открытых findings нет: `CFG-001` resolved upstream;
+P0/P1 отсутствуют. На repository closeout остаются три внешних validation
+blockers, описанных выше.

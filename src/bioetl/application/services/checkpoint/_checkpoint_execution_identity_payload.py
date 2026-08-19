@@ -110,6 +110,4 @@ def has_canonical_checkpoint_execution_identity_fields(payload: JsonDict) -> boo
     if any(field in payload for field in CANONICAL_ONLY_IDENTITY_FIELDS):
         return True
     mode = payload.get("silver_filter_compatibility_mode")
-    return (
-        mode is not None and mode != CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE
-    )
+    return mode is not None and mode != CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE

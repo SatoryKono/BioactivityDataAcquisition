@@ -19,9 +19,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
-    _clear_ambiguous_step,
     _find_step_state,
-    _record_completed_transform_fingerprint,
     _record_step_state,
     _remove_step_ids,
 )
@@ -165,7 +163,9 @@ def record_transform_commit(
             "confirmation. Resume requires explicit --repair-steps or "
             "--force-steps for the ambiguous step."
         ),
-        ambiguous_step_ids=tuple(dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))),
+        ambiguous_step_ids=tuple(
+            dict.fromkeys((*context.state.ambiguous_step_ids, commit.step_id))
+        ),
     )
     context.state_port.save(context.state)
 
