@@ -61,13 +61,52 @@ class IDMappingRetryMixin:
             return "FINISHED"
         return str(result.get("jobStatus", "UNKNOWN"))
 
+    @staticmethod
+    def _completed_poll_result(
+        deps: IDMappingRetryDependencies,
+        *,
+        response: object,
+        result: dict[str, object],
+        status: str,
+        job_id: str,
+        attempt: int,
+    ) -> tuple[bool, str | None]:
+        """Handle terminal polling states and return completion plus URL."""
+        if status == "HAS_RESULTS":
+            deps.logger.debug(
+                "idmapping_job_finished",
+                job_id=job_id,
+                attempts=attempt + 1,
+                detected_by="results_in_response",
+            )
+            response_url = (
+                str(response.url) if hasattr(response, "url") else ""  # pyright: ignore[reportAttributeAccessIssue]
+            )
+            return True, response_url or None
+        if status == "FINISHED":
+            deps.logger.debug(
+                "idmapping_job_finished",
+                job_id=job_id,
+                attempts=attempt + 1,
+                detected_by="job_status",
+            )
+            return True, None
+        if status == "ERROR":
+            error_msg = str(result.get("errorMessage", "Unknown error"))
+            deps.logger.error(
+                "idmapping_job_error",
+                job_id=job_id,
+                error=error_msg,
+            )
+            raise IDMappingJobError(job_id=job_id, message=error_msg)
+        return False, None
+
     async def _poll_until_ready(self, job_id: str) -> str | None:
         """Poll job status until complete.
 
         Returns:
             Results URL string if available from redirect, None if polling succeeded without redirect.
         """
-        # NOSONAR - complexity 17 exceeds 15; extraction would obscure retry loop logic (S3776 false positive)
         deps = self._retry_deps()
         url = f"{deps.base_url}/idmapping/status/{job_id}"
 
@@ -107,34 +146,16 @@ class IDMappingRetryMixin:
                 continue
             result: dict[str, object] = raw_payload
             status = self._resolve_job_status(response, result)
-
-            if status == "HAS_RESULTS":
-                deps.logger.debug(
-                    "idmapping_job_finished",
-                    job_id=job_id,
-                    attempts=attempt + 1,
-                    detected_by="results_in_response",
-                )
-                response_url = str(response.url) if hasattr(response, "url") else ""
-                return response_url or None
-
-            if status == "FINISHED":
-                deps.logger.debug(
-                    "idmapping_job_finished",
-                    job_id=job_id,
-                    attempts=attempt + 1,
-                    detected_by="job_status",
-                )
-                return None
-
-            if status == "ERROR":
-                error_msg = str(result.get("errorMessage", "Unknown error"))
-                deps.logger.error(
-                    "idmapping_job_error",
-                    job_id=job_id,
-                    error=error_msg,
-                )
-                raise IDMappingJobError(job_id=job_id, message=error_msg)
+            completed, result_url = self._completed_poll_result(
+                deps,
+                response=response,
+                result=result,
+                status=status,
+                job_id=job_id,
+                attempt=attempt,
+            )
+            if completed:
+                return result_url
 
             await asyncio.sleep(deps.POLLING_INTERVAL)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import cast
 
 from bioetl.domain.workflow.config import (
     TransformStepConfig,
@@ -109,7 +110,7 @@ def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowCon
             changed = True
     if not changed:
         return config
-    return replace(config, steps=tuple(updated_steps))
+    return cast("WorkflowConfig", replace(config, steps=tuple(updated_steps)))
 
 
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:

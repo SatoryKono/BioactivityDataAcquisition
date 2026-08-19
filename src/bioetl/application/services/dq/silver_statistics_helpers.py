@@ -358,19 +358,7 @@ def profile_categorical_column(
         cardinality = df[col].n_unique()
         top_values = []
         for row in value_counts.iter_rows(named=True):
-            if col in row:
-                val = row[col]
-            elif "value" in row:
-                val = row["value"]
-            else:
-                val = None
-            if "count" in row:
-                count = row["count"]
-            elif "counts" in row:
-                count = row["counts"]
-            else:
-                count = 0
-            numeric_count = 0 if count is None else count
+            val, numeric_count = _categorical_row_value_count(row, col)
             top_values.append(
                 {
                     "value": str(val) if val is not None else None,
@@ -384,3 +372,14 @@ def profile_categorical_column(
         )
     except profile_errors:
         return None
+
+
+def _categorical_row_value_count(
+    row: dict[str, object],
+    column: str,
+) -> tuple[object | None, int]:
+    """Normalize Polars value-count row variants."""
+    value = row.get(column, row.get("value"))
+    raw_count = row.get("count", row.get("counts", 0))
+    count = raw_count if isinstance(raw_count, int) else 0
+    return value, count

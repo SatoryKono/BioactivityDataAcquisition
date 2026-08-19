@@ -44,7 +44,7 @@ _OPTIONAL_STRING_FIELDS = (
     "replay_of_manifest_id",
     "replay_capability",
 )
-_SCHEMA_VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+(?:\.[0-9]+)?")
+_SCHEMA_VERSION_PATTERN = re.compile(r"\d+\.\d+(?:\.\d+)?")
 
 
 class _RawManifestInspectionHost(Protocol):

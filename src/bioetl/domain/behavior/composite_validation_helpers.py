@@ -130,11 +130,10 @@ def _append_named_config_issue_if_invalid(
     section_value = composite_config.get(config_key)
     if section_value is None:
         return
-    is_valid = (
-        isinstance(section_value, dict)
-        and callable(validator)
-        and validator(section_value)
-    )
+    is_valid = False
+    if isinstance(section_value, dict) and callable(validator):
+        validate = cast("Callable[[dict[str, object]], bool]", validator)
+        is_valid = validate(section_value)
     _append_config_issue_if_invalid(
         issues=issues,
         is_valid=is_valid,

@@ -47,10 +47,20 @@ def raw_nested_schema_errors(payload: Mapping[str, object]) -> tuple[str, ...]:
     return tuple(sorted(set(errors)))
 
 
+def _as_mapping(value: object) -> Mapping[str, object]:
+    """Narrow a mapping after the caller validates its runtime type."""
+    return cast("Mapping[str, object]", value)
+
+
+def _as_object_list(value: object) -> list[object]:
+    """Narrow a list after the caller validates its runtime type."""
+    return cast("list[object]", value)
+
+
 def _check_code_provenance(raw_value: object, errors: list[str]) -> None:
     if not isinstance(raw_value, dict):
         return
-    payload = cast("Mapping[str, object]", raw_value)
+    payload = _as_mapping(raw_value)
     _check_optional_strings(
         payload,
         _CODE_PROVENANCE_STRING_FIELDS,
@@ -62,8 +72,8 @@ def _check_code_provenance(raw_value: object, errors: list[str]) -> None:
 def _check_source_refs(raw_sources: object, errors: list[str]) -> None:
     if not isinstance(raw_sources, list):
         return
-    for raw_item in cast("list[object]", raw_sources):
-        item = cast("Mapping[str, object]", raw_item)
+    for raw_item in _as_object_list(raw_sources):
+        item = _as_mapping(raw_item)
         if not isinstance(item, dict):
             errors.append("manifest_source_ref_not_object")
             continue
@@ -81,7 +91,7 @@ def _check_source_refs(raw_sources: object, errors: list[str]) -> None:
         if not isinstance(snapshots, list):
             errors.append("manifest_source_ref_input_snapshots_not_array")
             continue
-        _check_input_snapshots(cast("list[object]", snapshots), errors)
+        _check_input_snapshots(_as_object_list(snapshots), errors)
 
 
 def _check_input_snapshots(snapshots: list[object], errors: list[str]) -> None:
@@ -89,7 +99,7 @@ def _check_input_snapshots(snapshots: list[object], errors: list[str]) -> None:
         if not isinstance(snapshot, dict):
             errors.append("manifest_input_snapshot_not_object")
             continue
-        payload = cast("Mapping[str, object]", snapshot)
+        payload = _as_mapping(snapshot)
         _check_required_strings(
             payload,
             ("snapshot_id", "content_hash"),
@@ -115,11 +125,11 @@ def _check_input_snapshots(snapshots: list[object], errors: list[str]) -> None:
 def _check_planned_artifacts(raw_artifacts: object, errors: list[str]) -> None:
     if not isinstance(raw_artifacts, list):
         return
-    for raw_item in cast("list[object]", raw_artifacts):
+    for raw_item in _as_object_list(raw_artifacts):
         if not isinstance(raw_item, dict):
             errors.append("manifest_planned_artifact_not_object")
             continue
-        item = cast("Mapping[str, object]", raw_item)
+        item = _as_mapping(raw_item)
         _check_required_strings(
             item,
             ("layer", "path"),

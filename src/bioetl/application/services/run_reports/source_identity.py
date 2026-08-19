@@ -38,7 +38,7 @@ _WSL_UNC_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 _DOCKER_DESKTOP_DRIVE_PATTERN = re.compile(
-    r"^/(?:run/desktop/mnt/host|host_mnt)/([A-Za-z])(?:/(.*))?$",
+    r"^/(?:run/desktop/mnt/host|host_mnt)/([a-z])(?:/(.*))?$",
     flags=re.IGNORECASE,
 )
 _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
@@ -387,4 +387,8 @@ def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] |
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return key, value[1:-1]
-    return key, re.sub(r"\s+#.*$", "", value).rstrip()
+    for index, character in enumerate(value):
+        if character == "#" and index > 0 and value[index - 1].isspace():
+            value = value[:index]
+            break
+    return key, value.rstrip()

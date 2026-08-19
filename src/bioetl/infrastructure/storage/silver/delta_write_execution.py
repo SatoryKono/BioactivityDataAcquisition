@@ -342,7 +342,7 @@ async def _evolve_delta_schema_with_empty_append(
         mode="append",
         schema_mode="merge",
     )
-    return replace(request, merge_schema=False)
+    return cast("_DeltaWriteRequest", replace(request, merge_schema=False))
 
 
 async def _load_delta_table(

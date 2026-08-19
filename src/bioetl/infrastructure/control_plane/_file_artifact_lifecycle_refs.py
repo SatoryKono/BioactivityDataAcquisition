@@ -321,43 +321,74 @@ def _append_cached_bronze_candidates(
     seen: set[Path] = set()
     for source in manifest.source_refs:
         for snapshot in source.input_snapshots:
-            uri = snapshot.immutable_uri
-            if uri is None or not str(uri).strip():
-                issues.append(
-                    _resolution_issue(
-                        ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED,
-                        ControlPlaneArtifactSurface.CACHED_BRONZE,
-                        "Input snapshot "
-                        f"'{snapshot.snapshot_id}' has no immutable_uri.",
-                    )
-                )
-                continue
-            path = resolve_bronze_uri(bronze_root, str(uri).strip())
-            if path is None:
-                issues.append(
-                    _resolution_issue(
-                        ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED,
-                        ControlPlaneArtifactSurface.CACHED_BRONZE,
-                        "Input snapshot "
-                        f"'{snapshot.snapshot_id}' immutable_uri is not a usable "
-                        "bronze:// location.",
-                    )
-                )
-                continue
-            if path in seen:
-                continue
-            seen.add(path)
-            candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
+            _append_snapshot_bronze_candidate(
+                candidates,
+                issues,
+                bronze_root=bronze_root,
+                snapshot=snapshot,
+                seen=seen,
+            )
     for artifact in manifest.planned_artifacts:
-        layer = str(getattr(artifact, "layer", "") or "").strip().lower()
-        raw_path = str(getattr(artifact, "path", "") or "").strip()
-        if layer not in {"bronze", "cached_bronze"} or not raw_path:
-            continue
-        path = Path(raw_path)
-        if not path.is_absolute():
-            path = (base_path.parent / path).resolve()
-        if path in seen:
-            continue
+        _append_planned_bronze_candidate(
+            candidates,
+            base_path=base_path,
+            artifact=artifact,
+            seen=seen,
+        )
+
+
+def _append_snapshot_bronze_candidate(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    issues: list[ControlPlaneArtifactResolutionIssue],
+    *,
+    bronze_root: Path,
+    snapshot: object,
+    seen: set[Path],
+) -> None:
+    """Append one immutable snapshot URI or record its bounded issue."""
+    uri = getattr(snapshot, "immutable_uri", None)
+    snapshot_id = getattr(snapshot, "snapshot_id", "unknown")
+    if uri is None or not str(uri).strip():
+        issues.append(
+            _resolution_issue(
+                ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED,
+                ControlPlaneArtifactSurface.CACHED_BRONZE,
+                f"Input snapshot '{snapshot_id}' has no immutable_uri.",
+            )
+        )
+        return
+    path = resolve_bronze_uri(bronze_root, str(uri).strip())
+    if path is None:
+        issues.append(
+            _resolution_issue(
+                ControlPlaneArtifactResolutionIssueCode.SNAPSHOT_URI_NOT_RECORDED,
+                ControlPlaneArtifactSurface.CACHED_BRONZE,
+                f"Input snapshot '{snapshot_id}' immutable_uri is not a usable "
+                "bronze:// location.",
+            )
+        )
+        return
+    if path not in seen:
+        seen.add(path)
+        candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
+
+
+def _append_planned_bronze_candidate(
+    candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
+    *,
+    base_path: Path,
+    artifact: object,
+    seen: set[Path],
+) -> None:
+    """Append one planned Bronze artifact when it is usable and new."""
+    layer = str(getattr(artifact, "layer", "") or "").strip().lower()
+    raw_path = str(getattr(artifact, "path", "") or "").strip()
+    if layer not in {"bronze", "cached_bronze"} or not raw_path:
+        return
+    path = Path(raw_path)
+    if not path.is_absolute():
+        path = (base_path.parent / path).resolve()
+    if path not in seen:
         seen.add(path)
         candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
 

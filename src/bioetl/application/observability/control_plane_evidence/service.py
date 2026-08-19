@@ -92,14 +92,17 @@ class ControlPlaneEvidenceService:
 
     def manifest_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return manifest parsing, schema, version, and contract compatibility."""
+        raw_inspection = None
+        if scope.manifest is not None and self.manifest_inspector is not None:
+            raw_inspection = self.manifest_inspector.inspect_raw_manifest(
+                scope.manifest.manifest_id
+            )
         checks = (
             (unresolved_scope_check(scope.resolved_via),)
             if scope.manifest is None
             else build_manifest_checks(
                 scope.manifest,
-                self.manifest_inspector.inspect_raw_manifest(scope.manifest.manifest_id)
-                if self.manifest_inspector is not None
-                else None,
+                raw_inspection,
             )
         )
         return service_payload(

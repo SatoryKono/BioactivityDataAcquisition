@@ -6,7 +6,7 @@ import json
 from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
@@ -145,11 +145,13 @@ def attach_workflow_run_report(
             execution_steps=execution_rows,
         )
         written = write_workflow_run_report(report)
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
-        return replace(
-            result,
-            run_report_json_path=str(written.json_path),
-            run_report_markdown_path=str(written.markdown_path),
+        return cast(
+            "WorkflowRunExecutionResult",
+            replace(
+                result,
+                run_report_json_path=str(written.json_path),
+                run_report_markdown_path=str(written.markdown_path),
+            ),
         )
     except Exception as exc:
         if logger is not None:
@@ -159,8 +161,10 @@ def attach_workflow_run_report(
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
-        # NOSONAR - mypy infers correct type; Sonar S5886 false positive on dataclass.replace()
-        return replace(
-            result,
-            run_report_error=f"{type(exc).__name__}: {exc}",
+        return cast(
+            "WorkflowRunExecutionResult",
+            replace(
+                result,
+                run_report_error=f"{type(exc).__name__}: {exc}",
+            ),
         )
