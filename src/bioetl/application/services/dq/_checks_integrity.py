@@ -63,8 +63,8 @@ def _count_scd_overlaps(
 ) -> int:
     """Count overlapping SCD validity periods for a bounded entity sample."""
     try:
-        # Limit to 100 entities; maintain_order keeps the overlap sample deterministic.
-        entities = df[entity_key].unique(maintain_order=True).head(100)
+        # Limit to 100 entities; maintain_order=False + sort keeps the overlap sample deterministic.
+        entities = df[entity_key].unique(maintain_order=False).sort().head(100)
         bounded_df = df.filter(pl.col(entity_key).is_in(entities.implode()))
 
         sorted_df = bounded_df.sort([entity_key, valid_from])
