@@ -156,7 +156,9 @@ def test_boolean_coercion_honors_custom_vocabularies() -> None:
 
 
 def test_boolean_coercion_lowercases_configured_vocabularies() -> None:
-    contract = _contract("boolean", true_values=("Yes", "ON"), false_values=("No", "OFF"))
+    contract = _contract(
+        "boolean", true_values=("Yes", "ON"), false_values=("No", "OFF")
+    )
 
     assert coerce_value("YES", contract) is True
     assert coerce_value("on", contract) is True

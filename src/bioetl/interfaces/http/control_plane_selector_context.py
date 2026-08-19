@@ -104,7 +104,10 @@ def _prefix_run_id_no_selection(dimension: str, values: list[str]) -> list[str]:
     if dimension == "run_id":
         return [RUN_ID_NO_SELECTION, *[value for value in values if value]]
     if dimension == "pipeline":
-        return [UNKNOWN_SCOPE, *[value for value in values if value and value != UNKNOWN_SCOPE]]
+        return [
+            UNKNOWN_SCOPE,
+            *[value for value in values if value and value != UNKNOWN_SCOPE],
+        ]
     return values
 
 
