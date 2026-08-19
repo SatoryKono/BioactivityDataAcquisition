@@ -1,0 +1,25 @@
+[
+  {
+    "id": "TEST-SYS-005",
+    "path": "reports/quality/vcr-metadata-catalog.json",
+    "observation": "VCR metadata and integration/e2e exact inventory drifted from tracked test/cassette surfaces.",
+    "method": "check-vcr-replay-preflight, report-vcr-metadata --check, VCR architecture tests",
+    "expected": "Replay blockers=0 and tracked catalogs equal live inventory.",
+    "actual": "Metadata owner paths and five integration paths were stale; initial LFS-skipped worktree had pointer files.",
+    "impact": "Replay evidence can be incomplete or non-reproducible on a clean audit checkout.",
+    "confidence": "high",
+    "status": "PROVEN",
+    "priority": "P2",
+    "severity": "Medium",
+    "category": "vcr_replay",
+    "evidence": [{"path": "configs/quality/integration_vcr_policy.yaml", "line": 151, "command": "sync-integration-vcr-policy --check", "observation": "Final exact inventory includes new dashboard tests."}],
+    "root_cause": "Generated VCR catalogs were not refreshed with new test ownership paths.",
+    "remediation": "Hydrate VCR LFS assets and regenerate policy/catalog artifacts.",
+    "effort": "S",
+    "automation": "VCR preflight and architecture drift tests",
+    "automated_fix_possible": true,
+    "dependencies": ["Git LFS for replay checkout"],
+    "validation": ["python -m scripts.engineering.qa check-vcr-replay-preflight", "pytest tests/architecture/test_vcr_*.py -q"],
+    "resolution_state": "RESOLVED"
+  }
+]
