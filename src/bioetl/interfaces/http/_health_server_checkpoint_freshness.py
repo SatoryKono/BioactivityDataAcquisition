@@ -68,57 +68,10 @@ async def handle_control_plane_checkpoint_freshness(
     query: dict[str, str],
 ) -> None:
     """Handle HTTP-backed checkpoint freshness evidence for Control Plane."""
-    assert host._run_manifest_port is not None
-    if host._checkpoint_port is None:
-        await _send_checkpoint_unknown(
-            host,
-            writer,
-            pipeline=host._read_required_param(query, "pipeline"),
-            resolved_via="checkpoint_port_unavailable",
-            detail="Checkpoint persistence port is unavailable in this backend.",
-            evidence_source="checkpoint_port_missing",
-        )
+    loaded = await _load_checkpoint_freshness_context(host, writer, query)
+    if loaded is None:
         return
-
-    try:
-        scope = await asyncio.wait_for(
-            asyncio.to_thread(resolve_control_plane_identity_scope, host, query),
-            timeout=_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS,
-        )
-    except TimeoutError:
-        await _send_scope_resolve_timeout(host, writer, query)
-        return
-    target_pipeline = _resolved_scope_pipeline(scope)
-
-    try:
-        (
-            checkpoint_tuple,
-            evidence_source,
-            manifest_id,
-            aggregate_scope_unknown,
-        ) = await asyncio.wait_for(
-            load_checkpoint_freshness_evidence(
-                host,
-                scope=scope,
-                target_pipeline=target_pipeline,
-            ),
-            timeout=_IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS,
-        )
-    except TimeoutError:
-        await _send_evidence_load_timeout(host, writer, target_pipeline, scope)
-        return
-    if await _send_incomplete_freshness_if_needed(
-        host,
-        writer,
-        scope=scope,
-        target_pipeline=target_pipeline,
-        checkpoint_tuple=checkpoint_tuple,
-        evidence_source=evidence_source,
-        manifest_id=manifest_id,
-        aggregate_scope_unknown=aggregate_scope_unknown,
-    ):
-        return
-    assert checkpoint_tuple is not None
+    scope, target_pipeline, checkpoint_tuple, evidence_source, manifest_id = loaded
     checkpoint_run_id, metadata = checkpoint_tuple
     saved_at_epoch_seconds = extract_checkpoint_saved_at_epoch_seconds(metadata)
     if saved_at_epoch_seconds is None:
@@ -153,17 +106,63 @@ async def handle_control_plane_checkpoint_freshness(
     )
 
 
-async def _send_incomplete_freshness_if_needed(
+async def _load_checkpoint_freshness_context(
     host: _CheckpointFreshnessHost,
     writer: asyncio.StreamWriter,
-    *,
-    scope: _IdentityScope,
-    target_pipeline: str,
-    checkpoint_tuple: object,
-    evidence_source: str,
-    manifest_id: str | None,
-    aggregate_scope_unknown: bool,
-) -> bool:
+    query: dict[str, str],
+) -> tuple[object, str, tuple[object, dict[str, object]], str, str | None] | None:
+    """Resolve scope and load checkpoint evidence, or send unknown and return None."""
+    assert host._run_manifest_port is not None
+    if host._checkpoint_port is None:
+        await _send_checkpoint_unknown(
+            host,
+            writer,
+            pipeline=host._read_required_param(query, "pipeline"),
+            resolved_via="checkpoint_port_unavailable",
+            detail="Checkpoint persistence port is unavailable in this backend.",
+            evidence_source="checkpoint_port_missing",
+        )
+        return None
+    try:
+        scope = await asyncio.wait_for(
+            asyncio.to_thread(resolve_control_plane_identity_scope, host, query),
+            timeout=_IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        await _send_checkpoint_unknown(
+            host,
+            writer,
+            pipeline=query.get("pipeline") or "unknown",
+            resolved_via="scope_resolve_timeout",
+            detail="Checkpoint freshness scope resolve timed out.",
+            evidence_source="scope_resolve_timeout",
+        )
+        return None
+    target_pipeline = _resolved_scope_pipeline(scope)
+    try:
+        (
+            checkpoint_tuple,
+            evidence_source,
+            manifest_id,
+            aggregate_scope_unknown,
+        ) = await asyncio.wait_for(
+            load_checkpoint_freshness_evidence(
+                host,
+                scope=scope,
+                target_pipeline=target_pipeline,
+            ),
+            timeout=_IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        await _send_checkpoint_unknown(
+            host,
+            writer,
+            pipeline=target_pipeline,
+            resolved_via=scope.resolved_via,
+            detail="Checkpoint freshness evidence load timed out.",
+            evidence_source="scope_resolve_timeout",
+        )
+        return None
     if aggregate_scope_unknown:
         await _send_checkpoint_unknown(
             host,
@@ -176,7 +175,7 @@ async def _send_incomplete_freshness_if_needed(
             ),
             evidence_source="aggregate_scope_requires_exact_pipeline",
         )
-        return True
+        return None
     if checkpoint_tuple is None:
         await _send_checkpoint_unknown(
             host,
@@ -187,39 +186,8 @@ async def _send_incomplete_freshness_if_needed(
             evidence_source=evidence_source,
             manifest_id=manifest_id,
         )
-        return True
-    return False
-
-
-async def _send_scope_resolve_timeout(
-    host: _CheckpointFreshnessHost,
-    writer: asyncio.StreamWriter,
-    query: dict[str, str],
-) -> None:
-    await _send_checkpoint_unknown(
-        host,
-        writer,
-        pipeline=query.get("pipeline") or "unknown",
-        resolved_via="scope_resolve_timeout",
-        detail="Checkpoint freshness scope resolve timed out.",
-        evidence_source="scope_resolve_timeout",
-    )
-
-
-async def _send_evidence_load_timeout(
-    host: _CheckpointFreshnessHost,
-    writer: asyncio.StreamWriter,
-    target_pipeline: str,
-    scope: _IdentityScope,
-) -> None:
-    await _send_checkpoint_unknown(
-        host,
-        writer,
-        pipeline=target_pipeline,
-        resolved_via=scope.resolved_via,
-        detail="Checkpoint freshness evidence load timed out.",
-        evidence_source="scope_resolve_timeout",
-    )
+        return None
+    return scope, target_pipeline, checkpoint_tuple, evidence_source, manifest_id
 
 
 async def _send_checkpoint_unknown(

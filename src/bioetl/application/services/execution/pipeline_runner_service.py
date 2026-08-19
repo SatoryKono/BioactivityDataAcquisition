@@ -27,7 +27,8 @@ from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
     build_dry_run_result,
     build_pipeline_run_result,
-    finalize_pipeline_run_report,
+    complete_pipeline_dry_run,
+    create_execution_runner_audited,
 )
 from bioetl.application.services.execution.pipeline_run_context_service import (
     PipelineRunContextService,
@@ -176,7 +177,7 @@ class PipelineRunnerService:
             status="started",
             timestamp=started_at,
         )
-        dry_run_result = await self._complete_dry_run_if_needed(
+        dry_run_result = self._maybe_dry_run_result(
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
             options=effective_options,
@@ -184,11 +185,16 @@ class PipelineRunnerService:
             run_logger=run_logger,
         )
         if dry_run_result is not None:
-            return dry_run_result
+            return await complete_pipeline_dry_run(
+                audit=self.audit,
+                pipeline_name=pipeline_name,
+                run_id=effective_run_id,
+                options=effective_options,
+                dry_run_result=dry_run_result,
+                record_event=_record_pipeline_audit_event,
+            )
 
-        try:
-            runner = _require_execution_runner(self.runner_factory.create(context))
-        except Exception as exc:
+        async def _record_constructor_failure(exc: Exception) -> None:
             await _record_pipeline_audit_event(
                 self.audit,
                 event_name="PipelineRunCompleted",
@@ -199,7 +205,34 @@ class PipelineRunnerService:
                 timestamp=self.clock.now(),
                 error_type=type(exc).__name__,
             )
-            raise
+
+        return await self._execute_prepared_run(
+            context=context,
+            run_logger=run_logger,
+            pipeline_name=pipeline_name,
+            run_id=effective_run_id,
+            options=effective_options,
+            started_at=started_at,
+            started_monotonic=started_monotonic,
+            record_constructor_failure=_record_constructor_failure,
+        )
+
+    async def _execute_prepared_run(
+        self,
+        *,
+        context: object,
+        run_logger: object,
+        pipeline_name: str,
+        run_id: UUID,
+        options: RunOptions,
+        started_at: object,
+        started_monotonic: object,
+        record_constructor_failure,
+    ) -> RunResult:
+        runner = await create_execution_runner_audited(
+            lambda: _require_execution_runner(self.runner_factory.create(context)),
+            record_failure=record_constructor_failure,
+        )
         accounting = StageAccountingAccumulator()
         accounting_token = bind_stage_accounting(accounting)
         try:
@@ -207,11 +240,11 @@ class PipelineRunnerService:
                 runner=runner,
                 run_logger=run_logger,
                 pipeline_name=pipeline_name,
-                run_id=effective_run_id,
-                run_type=effective_options.run_type,
+                run_id=run_id,
+                run_type=options.run_type,
                 started_at=started_at,
                 started_monotonic=started_monotonic,
-                options=effective_options,
+                options=options,
             )
         finally:
             reset_stage_accounting(accounting_token)
@@ -253,38 +286,6 @@ class PipelineRunnerService:
             options=options,
             started_at=started_at,
             run_logger=run_logger,
-        )
-
-    async def _complete_dry_run_if_needed(
-        self,
-        *,
-        pipeline_name: str,
-        run_id: RunID,
-        options: RunOptions,
-        started_at: datetime,
-        run_logger: LoggerPort,
-    ) -> RunResult | None:
-        dry_run_result = self._maybe_dry_run_result(
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            options=options,
-            started_at=started_at,
-            run_logger=run_logger,
-        )
-        if dry_run_result is None:
-            return None
-        await _record_pipeline_audit_event(
-            self.audit,
-            event_name="PipelineRunCompleted",
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            run_type=options.run_type,
-            status=dry_run_result.status.value,
-            timestamp=dry_run_result.completed_at,
-        )
-        return finalize_pipeline_run_report(
-            result=dry_run_result,
-            options=options,
         )
 
     def list_pipelines(self) -> list[str]:

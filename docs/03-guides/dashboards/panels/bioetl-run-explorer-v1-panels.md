@@ -111,3 +111,14 @@ Nested titles (must match JSON):
   processed records, expand Selected Run Details, then open Trust for
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
+
+## Additional shipped panels
+### 16. Inspect Recent Runs (last 20)
+
+Shipped in `bioetl-run-explorer-v1.json`.
+### 17. Inspect Full Run Identity
+
+Shipped in `bioetl-run-explorer-v1.json`.
+### 18. Inspect Full Processed Records
+
+Shipped in `bioetl-run-explorer-v1.json`.

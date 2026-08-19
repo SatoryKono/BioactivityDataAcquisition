@@ -42,15 +42,19 @@ def filter_source_rows_to_current_run(
     if not source_run_ids:
         return [], "blocked"
     allowed = {item.strip() for item in source_run_ids if item.strip()}
-    column = None
-    for candidate in _RUN_IDENTITY_COLUMNS:
-        if any(candidate in row for row in rows):
-            column = candidate
-            break
+    column = _first_run_identity_column(rows)
     if column is None:
         return [], "blocked"
     scoped = [row for row in rows if str(row.get(column) or "").strip() in allowed]
     return scoped, "current_run"
+
+
+def _first_run_identity_column(rows: list[dict[str, object]]) -> str | None:
+    """Return the first known run-identity column present in any row."""
+    for candidate in _RUN_IDENTITY_COLUMNS:
+        if any(candidate in row for row in rows):
+            return candidate
+    return None
 
 
 class ReconciliationLoggingHost(Protocol):
@@ -279,36 +283,66 @@ def normalize_value(value: object) -> object | None:
     return ("other", type(value).__name__, rendered)
 
 
-class _ReconciliationLogger(Protocol):
-    def _log(self, level: str, message: str, **fields: object) -> None: ...
-
-
-def log_reconciliation_started(
-    adapter: _ReconciliationLogger,
-    request: ForeignKeyReconciliationRequest,
-) -> None:
-    adapter._log(
-        "info",
-        "workflow foreign-key reconciliation started",
-        source_table=request.source_table,
-        reference_table=request.reference_table,
-        source_layer=request.source_layer,
-        reference_layer=request.reference_layer,
-        mutation_layer=request.effective_mutation_layer,
-        source_keys=list(request.effective_source_keys),
-        reference_keys=list(request.effective_reference_keys),
-        nulls_equal=request.nulls_equal,
-    )
-
-
 __all__ = [
     "build_reconciliation_result",
     "complete_dry_run",
     "complete_without_mutation",
-    "log_reconciliation_started",
     "normalize_row_key",
     "normalize_value",
     "partition_source_rows",
     "reference_value_set",
     "row_has_null_foreign_key",
 ]
+
+
+def record_reconciliation_metrics(
+    metrics: object | None,
+    *,
+    scanned: int,
+    retained: int,
+    deleted: int,
+    scanned_metric: str,
+    retained_metric: str,
+    deleted_metric: str,
+) -> None:
+    if metrics is None:
+        return
+    increment = getattr(metrics, "increment_counter", None)
+    if not callable(increment):
+        return
+    increment(scanned_metric, scanned, {})
+    increment(retained_metric, retained, {})
+    increment(deleted_metric, deleted, {})
+
+
+def log_reconciliation(
+    logger: object, level: str, message: str, **context: object
+) -> None:
+    log_method = getattr(logger, level, None)
+    if callable(log_method):
+        log_method(message, **context)
+
+
+def emit_reconcile_debug_artifacts(
+    artifact_sink: object | None,
+    request: ForeignKeyReconciliationRequest,
+    result: ForeignKeyReconciliationResult,
+    *,
+    retained_rows: list[dict[str, object]],
+    orphan_rows: list[dict[str, object]],
+) -> None:
+    if artifact_sink is None:
+        return
+    if (
+        not request.debug_export_enabled
+        or request.workflow_run_id is None
+        or request.step_id is None
+    ):
+        return
+    artifact_sink.write_reconcile_debug_artifacts(
+        context=request,
+        request=request,
+        result=result,
+        retained_rows=tuple(retained_rows),
+        orphan_rows=tuple(orphan_rows),
+    )

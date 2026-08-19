@@ -41,7 +41,6 @@ absence.
 | 892 | Monitor Checkpoint Age | stat | BioETL Ops HTTP | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor Manifest/Ledger | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
 | 907 | Monitor Telemetry | stat | Prometheus | Missing-control-plane-telemetry signal from `bioetl_control_plane_telemetry_missing_5m`. | shared shell | Value mapping distinguishes no-data vs telemetry-missing. |
-| 906 | Review Recovery Action | text | Static | Next-step rail: do not replay this run if Trust status is INCOMPLETE or UNKNOWN; first-screen tables are Review Selected-Run Trust and Review Retention Compliance; then expand the row Review Lineage Validation. | shared shell | Links: 130 blockers, 9418 this-run Trust, 9415 lineage, 9416 retention. |
 
 ### Inspect Replay & Checkpoint Evidence
 

@@ -1,12 +1,15 @@
-"""Target protein classification hierarchy resolution."""
+"""Application service for target protein classification hierarchy resolution."""
 
 from __future__ import annotations
 
-import json
 from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Literal
 
+from bioetl.application.services.protein._classification_resolution_support import (
+    json_array,
+    record_component_hierarchies,
+)
 from bioetl.domain.mapping.protein_class_target_type import (
     PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION,
     ProteinClassTargetTypeMappingData,
@@ -36,6 +39,8 @@ _INVALID_RECORD_POLICIES: frozenset[str] = frozenset({"quarantine", "missing"})
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassificationDQIssue:
+    """DQ issue raised while resolving target protein classifications."""
+
     component_id: int | None
     error_code: str
     message: str
@@ -43,6 +48,8 @@ class ProteinClassificationDQIssue:
 
 @dataclass(frozen=True, slots=True)
 class TargetProteinClassificationRecord:
+    """Gold-facing target protein classification relation row."""
+
     target_id: str
     classification_status: str
     component_id: int | None = None
@@ -82,6 +89,7 @@ class TargetProteinClassificationRecord:
         *,
         mapping_version: str | None = None,
     ) -> TargetProteinClassificationRecord:
+        """Build a sentinel row for targets without classification evidence."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_MISSING,
@@ -100,6 +108,7 @@ class TargetProteinClassificationRecord:
         *,
         mapping_version: str | None = None,
     ) -> TargetProteinClassificationRecord:
+        """Build a sentinel row for targets whose classification failed DQ."""
         return cls(
             target_id=target_id,
             classification_status=_STATUS_QUARANTINED,
@@ -130,9 +139,9 @@ class TargetProteinClassificationRecord:
             target_id=target_id,
             component_id=component_id,
             leaf_id=hierarchy.leaf_id,
-            path_ids=_json_array(hierarchy.path_ids),
-            path_names=_json_array(hierarchy.path_names),
-            path_labels=_json_array(hierarchy.path_labels),
+            path_ids=json_array(hierarchy.path_ids),
+            path_names=json_array(hierarchy.path_names),
+            path_labels=json_array(hierarchy.path_labels),
             depth=hierarchy.depth,
             root_id=hierarchy.root_id,
             is_leaf=hierarchy.is_leaf,
@@ -199,16 +208,21 @@ class TargetProteinClassificationRecord:
 
 @dataclass(frozen=True, slots=True)
 class ProteinClassificationResolutionResult:
+    """Resolution result for one target."""
+
     target_id: str
     rows: tuple[TargetProteinClassificationRecord, ...]
     dq_issues: tuple[ProteinClassificationDQIssue, ...] = ()
 
     @property
     def has_quarantine(self) -> bool:
+        """Return True when resolution encountered hard DQ issues."""
         return bool(self.dq_issues)
 
 
 class ProteinClassificationResolutionService:
+    """Resolve deterministic L1-L5 protein classification rows for a target."""
+
     def __init__(
         self,
         classification_port: ProteinClassificationPort,
@@ -309,7 +323,7 @@ def _collect_target_hierarchies(
         if issue is not None:
             dq_issues.append(issue)
             continue
-        _record_component_hierarchies(
+        record_component_hierarchies(
             by_leaf_id=by_leaf_id,
             component_id=component_id,
             hierarchies=hierarchies,
@@ -341,19 +355,6 @@ def _resolution_failure_issue(
         error_code="protein_classification_resolution_failed",
         message=str(error),
     )
-
-
-def _record_component_hierarchies(
-    *,
-    by_leaf_id: dict[int, tuple[int, ProteinClassHierarchy]],
-    component_id: int,
-    hierarchies: tuple[ProteinClassHierarchy, ...],
-) -> None:
-    """Keep the lowest component ID for each resolved classification leaf."""
-    for hierarchy in hierarchies:
-        current = by_leaf_id.get(hierarchy.leaf_id)
-        if current is None or component_id < current[0]:
-            by_leaf_id[hierarchy.leaf_id] = (component_id, hierarchy)
 
 
 def _resolved_resolution(
@@ -402,7 +403,3 @@ def _unresolved_resolution(
 
 ProteinClassificationResolution = ProteinClassificationResolutionResult
 ResolveProteinClassificationUseCase = ProteinClassificationResolutionService
-
-
-def _json_array(values: Iterable[object]) -> str:
-    return json.dumps(tuple(values), ensure_ascii=False, separators=(",", ":"))

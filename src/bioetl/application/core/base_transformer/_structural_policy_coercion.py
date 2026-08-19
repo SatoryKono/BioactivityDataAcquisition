@@ -137,7 +137,9 @@ def _coerce_boolean(
         return value
     if isinstance(value, int):
         return bool(value) if value in (0, 1) else None
-    if isinstance(value, str) and allow_string_coercion:
+    if isinstance(value, str):
+        if not allow_string_coercion:
+            return None
         return _coerce_boolean_string(
             value, true_values=true_values, false_values=false_values
         )
