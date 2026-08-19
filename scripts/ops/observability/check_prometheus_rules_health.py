@@ -10,6 +10,8 @@ Usage::
     python scripts/ops/observability/check_prometheus_rules_health.py
     python scripts/ops/observability/check_prometheus_rules_health.py \\
         --prometheus-url http://127.0.0.1:9090 --json
+    python scripts/ops/observability/check_prometheus_rules_health.py \\
+        --expr-parity --json
 """
 
 from __future__ import annotations
@@ -18,14 +20,28 @@ import argparse
 import json
 import sys
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from scripts.engineering.common.repo_paths import REPO_ROOT
+
 DEFAULT_PROMETHEUS_URL = "http://127.0.0.1:9090"
 BIOETL_RULE_FILE_HINT = "bioetl"
+DEFAULT_RULES_DIR = REPO_ROOT / "grafana" / "prometheus-rules"
+EXPR_PARITY_SENTINELS = (
+    "bioetl_provider_current_status",
+    "bioetl_provider_current_status_info",
+    "bioetl_control_plane_telemetry_missing_5m",
+    "bioetl_control_plane_current_status_trusted",
+    "bioetl_dq_current_status",
+    "bioetl_l0_status",
+)
+NAN_FALLBACK_NEEDLE = "* 0 + 3"
+NAN_DIVISION_NEEDLE = "/"
 
 
 @dataclass(frozen=True)
@@ -48,6 +64,10 @@ class HealthReport:
     evaluation_failures_10m: float | None
     iterations_missed_10m: float | None
     query_errors: list[str]
+    expr_parity_checked: bool = False
+    expr_parity_skipped: bool = False
+    expr_parity_issues: list[str] = field(default_factory=list)
+    skipped_unreachable: bool = False
 
 
 def _fetch_json(url: str, *, timeout: float) -> Any:
@@ -130,17 +150,114 @@ def collect_rule_issues(
     return issues, groups, rules_n
 
 
+def normalize_promql(expr: str) -> str:
+    """Collapse whitespace so git YAML and live API text can be compared."""
+    return " ".join(expr.split())
+
+
+def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
+    """Load recording-rule expressions from tracked Prometheus YAML files."""
+    import yaml
+
+    collected: dict[str, list[str]] = {}
+    for path in sorted(rules_dir.glob("*.yml")):
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        groups = payload.get("groups") if isinstance(payload, dict) else None
+        if not isinstance(groups, list):
+            continue
+        for group in groups:
+            if not isinstance(group, Mapping):
+                continue
+            for rule in group.get("rules") or []:
+                if not isinstance(rule, Mapping):
+                    continue
+                name = str(rule.get("record") or "").strip()
+                expr = rule.get("expr")
+                if not name or not isinstance(expr, str) or not expr.strip():
+                    continue
+                collected.setdefault(name, []).append(normalize_promql(expr))
+    return {name: tuple(exprs) for name, exprs in collected.items()}
+
+
+def collect_live_recording_exprs(
+    rules_payload: Mapping[str, Any],
+) -> dict[str, tuple[str, ...]]:
+    """Collect live recording-rule expressions from /api/v1/rules."""
+    collected: dict[str, list[str]] = {}
+    data = rules_payload.get("data")
+    group_rows = data.get("groups") if isinstance(data, Mapping) else None
+    if not isinstance(group_rows, list):
+        return {}
+    for group in group_rows:
+        if not isinstance(group, Mapping):
+            continue
+        file_path = str(group.get("file") or "")
+        group_name = str(group.get("name") or "")
+        if not _is_bioetl_group(file_path, group_name):
+            continue
+        for rule in group.get("rules") or []:
+            if not isinstance(rule, Mapping):
+                continue
+            name = str(rule.get("name") or rule.get("record") or "").strip()
+            expr = rule.get("query") or rule.get("expr")
+            if not name or not isinstance(expr, str) or not expr.strip():
+                continue
+            collected.setdefault(name, []).append(normalize_promql(expr))
+    return {name: tuple(exprs) for name, exprs in collected.items()}
+
+
+def compare_expr_parity(
+    *,
+    tracked: Mapping[str, tuple[str, ...]],
+    live: Mapping[str, tuple[str, ...]],
+    sentinels: tuple[str, ...] = EXPR_PARITY_SENTINELS,
+) -> list[str]:
+    """Return human-readable mismatches for the sentinel recording suite."""
+    issues: list[str] = []
+    for name in sentinels:
+        tracked_exprs = tuple(sorted(tracked.get(name, ())))
+        live_exprs = tuple(sorted(live.get(name, ())))
+        if not tracked_exprs:
+            issues.append(f"{name}: missing from tracked grafana/prometheus-rules")
+            continue
+        if not live_exprs:
+            issues.append(f"{name}: missing from live /api/v1/rules")
+            continue
+        if tracked_exprs != live_exprs:
+            issues.append(
+                f"{name}: live expr drift vs git "
+                f"tracked={tracked_exprs!r} live={live_exprs!r}"
+            )
+        if name == "bioetl_provider_current_status":
+            joined = " | ".join(live_exprs)
+            if NAN_FALLBACK_NEEDLE not in joined:
+                issues.append(
+                    f"{name}: live expr missing finite UNKNOWN fallback "
+                    f"{NAN_FALLBACK_NEEDLE!r}"
+                )
+            if NAN_DIVISION_NEEDLE in joined:
+                issues.append(
+                    f"{name}: live expr still contains division "
+                    "(NaN fallback x*0/x*0 is forbidden)"
+                )
+    return issues
+
+
 def check_rules_health(
     *,
     prometheus_url: str = DEFAULT_PROMETHEUS_URL,
     timeout: float = 10.0,
     fail_on_metric_signals: bool = True,
+    expr_parity: bool = False,
+    rules_dir: Path | None = None,
+    skip_if_unreachable: bool = False,
 ) -> HealthReport:
     """Inspect /api/v1/rules + evaluation counters for silent partial failures."""
     query_errors: list[str] = []
     issues: list[RuleIssue] = []
     groups = 0
     rules_n = 0
+    rules_payload: Mapping[str, Any] | None = None
     try:
         payload = _fetch_json(
             f"{prometheus_url.rstrip('/')}/api/v1/rules", timeout=timeout
@@ -148,6 +265,7 @@ def check_rules_health(
         if payload.get("status") != "success":
             query_errors.append(f"rules API status={payload.get('status')!r}")
         else:
+            rules_payload = payload
             issues, groups, rules_n = collect_rule_issues(payload)
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
         query_errors.append(f"rules API: {exc}")
@@ -177,7 +295,29 @@ def check_rules_health(
     metric_bad = fail_on_metric_signals and (
         (failures is not None and failures > 0) or (missed is not None and missed > 0)
     )
-    ok = (not issues) and (not query_errors) and (not metric_bad)
+    unreachable = any(item.startswith("rules API") for item in query_errors)
+    skipped_unreachable = bool(skip_if_unreachable and unreachable)
+    expr_parity_issues: list[str] = []
+    expr_parity_checked = False
+    expr_parity_skipped = False
+    if expr_parity:
+        if unreachable:
+            expr_parity_skipped = True
+        else:
+            expr_parity_checked = True
+            tracked = load_tracked_recording_exprs(rules_dir or DEFAULT_RULES_DIR)
+            live = (
+                collect_live_recording_exprs(rules_payload)
+                if isinstance(rules_payload, Mapping)
+                else {}
+            )
+            expr_parity_issues = compare_expr_parity(tracked=tracked, live=live)
+    ok = skipped_unreachable or (
+        (not issues)
+        and (not query_errors)
+        and (not metric_bad)
+        and (not expr_parity_issues)
+    )
     return HealthReport(
         ok=ok,
         prometheus_url=prometheus_url,
@@ -187,6 +327,10 @@ def check_rules_health(
         evaluation_failures_10m=failures,
         iterations_missed_10m=missed,
         query_errors=query_errors,
+        expr_parity_checked=expr_parity_checked,
+        expr_parity_skipped=expr_parity_skipped,
+        expr_parity_issues=expr_parity_issues,
+        skipped_unreachable=skipped_unreachable,
     )
 
 
@@ -205,12 +349,31 @@ def main(argv: list[str] | None = None) -> int:
         "(still fails on /api/v1/rules lastError)",
     )
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--expr-parity",
+        action="store_true",
+        help="Compare live /api/v1/rules expressions against tracked YAML sentinels",
+    )
+    parser.add_argument(
+        "--rules-dir",
+        default=str(DEFAULT_RULES_DIR),
+        help="Tracked Prometheus rules directory (default grafana/prometheus-rules)",
+    )
+    parser.add_argument(
+        "--skip-if-unreachable",
+        action="store_true",
+        help="Exit 0 when Prometheus is unreachable (ADR-010 optional monitoring)",
+    )
     args = parser.parse_args(argv)
 
+    skip_if_unreachable = args.skip_if_unreachable or args.expr_parity
     report = check_rules_health(
         prometheus_url=args.prometheus_url,
         timeout=args.timeout,
         fail_on_metric_signals=not args.allow_metric_signals,
+        expr_parity=args.expr_parity,
+        rules_dir=Path(args.rules_dir),
+        skip_if_unreachable=skip_if_unreachable,
     )
     payload = {
         "schema_version": "bioetl-prometheus-rules-health-v1",
@@ -222,6 +385,10 @@ def main(argv: list[str] | None = None) -> int:
         "iterations_missed_10m": report.iterations_missed_10m,
         "query_errors": report.query_errors,
         "issues": [asdict(i) for i in report.issues],
+        "expr_parity_checked": report.expr_parity_checked,
+        "expr_parity_skipped": report.expr_parity_skipped,
+        "expr_parity_issues": report.expr_parity_issues,
+        "skipped_unreachable": report.skipped_unreachable,
     }
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -240,6 +407,10 @@ def main(argv: list[str] | None = None) -> int:
             )
         for err in report.query_errors:
             print(f"[FAIL] {err}")
+        for err in report.expr_parity_issues:
+            print(f"[FAIL] expr-parity {err}")
+        if report.expr_parity_skipped or report.skipped_unreachable:
+            print("[SKIP] Prometheus unreachable (ADR-010 optional monitoring)")
         if report.ok:
             print("\nOK: no partial BioETL rule errors detected.")
         else:

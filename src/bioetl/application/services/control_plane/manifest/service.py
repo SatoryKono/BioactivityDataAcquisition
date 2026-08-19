@@ -12,6 +12,10 @@ from bioetl.application.services.control_plane.manifest._service_support import 
     RunManifestHydrationMixin,
     RunManifestPayloadMixin,
 )
+from bioetl.application.services.control_plane.manifest.contract_evidence import (
+    ContractEvidenceRecorderPort,
+    build_contract_evidence,
+)
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
 )
@@ -52,6 +56,7 @@ class RunManifestService(
 
     manifest_port: RunManifestPort
     metrics: MetricsPort | None = None
+    contract_evidence_recorder: ContractEvidenceRecorderPort | None = None
 
     def _normalize_run_type(self, run_type: RunType | str) -> RunType:
         """Return the normalized runtime run type enum."""
@@ -111,8 +116,22 @@ class RunManifestService(
         )
         self.manifest_port.save(manifest)
         self._assert_manifest_persisted(manifest)
+        self._record_contract_evidence(request, manifest)
         emit_replay_write_risk_metrics(self.metrics, manifest)
         return manifest
+
+    def _record_contract_evidence(
+        self,
+        request: RunManifestCreateSpec,
+        manifest: RunManifest,
+    ) -> None:
+        """Write one sidecar when composition wired a recorder."""
+        if self.contract_evidence_recorder is None:
+            return
+        self.contract_evidence_recorder.record(
+            manifest.manifest_id,
+            build_contract_evidence(request),
+        )
 
     def _assert_manifest_persisted(self, manifest: RunManifest) -> None:
         """Fail closed when a persisted manifest cannot be reconstructed."""

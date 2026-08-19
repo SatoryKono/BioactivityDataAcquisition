@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import json
 from urllib.parse import parse_qs, urlsplit
 
@@ -181,3 +183,122 @@ def test_main_json_exit_code(
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is False
     assert payload["issues"][0]["last_error"] == "boom"
+
+
+def test_compare_expr_parity_accepts_matching_live_rules() -> None:
+    tracked = {
+        "bioetl_provider_current_status": (
+            "(x) or (bioetl_provider_health_check_provider_universe_15m * 0 + 3)",
+        ),
+        "bioetl_provider_current_status_info": ("info",),
+        "bioetl_control_plane_telemetry_missing_5m": ("missing",),
+        "bioetl_control_plane_current_status_trusted": ("trusted",),
+        "bioetl_dq_current_status": ("dq",),
+        "bioetl_l0_status": ("l0",),
+    }
+    issues = mod.compare_expr_parity(tracked=tracked, live=tracked)
+    assert issues == []
+
+
+def test_compare_expr_parity_flags_nan_division_fallback() -> None:
+    tracked = {
+        "bioetl_provider_current_status": ("universe * 0 + 3",),
+        "bioetl_provider_current_status_info": ("info",),
+        "bioetl_control_plane_telemetry_missing_5m": ("missing",),
+        "bioetl_control_plane_current_status_trusted": ("trusted",),
+        "bioetl_dq_current_status": ("dq",),
+        "bioetl_l0_status": ("l0",),
+    }
+    live = dict(tracked)
+    live["bioetl_provider_current_status"] = ("(x * 0) / (x * 0)",)
+    issues = mod.compare_expr_parity(tracked=tracked, live=live)
+    assert any("division" in item for item in issues)
+    assert any("drift" in item for item in issues)
+
+
+def test_check_rules_health_expr_parity_skips_when_prometheus_down(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_fetch(url: str, *, timeout: float):
+        del url, timeout
+        raise OSError("prometheus down")
+
+    monkeypatch.setattr(mod, "_fetch_json", fake_fetch)
+    report = mod.check_rules_health(
+        prometheus_url="http://127.0.0.1:9090",
+        expr_parity=True,
+        skip_if_unreachable=True,
+    )
+    assert report.ok is True
+    assert report.expr_parity_skipped is True
+    assert report.skipped_unreachable is True
+
+
+def test_check_rules_health_expr_parity_detects_live_drift(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    rules_dir = tmp_path / "rules"
+    rules_dir.mkdir()
+    yaml_text = """groups:
+  - name: bioetl_provider
+    rules:
+      - record: bioetl_provider_current_status
+        expr: universe * 0 + 3
+      - record: bioetl_provider_current_status_info
+        expr: info
+      - record: bioetl_control_plane_telemetry_missing_5m
+        expr: missing
+      - record: bioetl_control_plane_current_status_trusted
+        expr: trusted
+      - record: bioetl_dq_current_status
+        expr: dq
+      - record: bioetl_l0_status
+        expr: l0
+"""
+    (rules_dir / "bioetl.yml").write_text(yaml_text, encoding="utf-8")
+
+    def fake_fetch(url: str, *, timeout: float):
+        del timeout
+        if url.endswith("/api/v1/rules"):
+            return {
+                "status": "success",
+                "data": {
+                    "groups": [
+                        {
+                            "file": "bioetl.yml",
+                            "name": "bioetl_provider",
+                            "rules": [
+                                {
+                                    "name": "bioetl_provider_current_status",
+                                    "type": "recording",
+                                    "health": "ok",
+                                    "lastError": "",
+                                    "query": "(x * 0) / (x * 0)",
+                                }
+                            ],
+                        }
+                    ]
+                },
+            }
+        return {
+            "status": "success",
+            "data": {"resultType": "vector", "result": [{"value": [0, "0"]}]},
+        }
+
+    monkeypatch.setattr(mod, "_fetch_json", fake_fetch)
+    report = mod.check_rules_health(
+        prometheus_url="http://127.0.0.1:9090",
+        expr_parity=True,
+        rules_dir=rules_dir,
+    )
+    assert report.ok is False
+    assert report.expr_parity_checked is True
+    assert report.expr_parity_issues
+
+
+def test_load_tracked_recording_exprs_includes_provider_unknown_fallback() -> None:
+    tracked = mod.load_tracked_recording_exprs(mod.DEFAULT_RULES_DIR)
+    exprs = " ".join(tracked["bioetl_provider_current_status"])
+    assert "* 0 + 3" in exprs
+    assert "/" not in exprs
+

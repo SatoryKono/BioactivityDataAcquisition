@@ -18,8 +18,9 @@ from bioetl.domain.ports import CheckpointPort
 from bioetl.interfaces.http._forensic_request_budget import (
     FORENSIC_ENDPOINT_TIMEOUT_SECONDS,
     ForensicEndpointUnavailable,
-    forensic_unavailable_payload,
+    forensic_unavailable_table_payload,
     run_bounded_forensic_operation,
+    table_error_as_http_ok,
 )
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
@@ -113,10 +114,11 @@ async def dispatch_control_plane_evidence_request(
             operation_factory=operation_factory,
         )
     except ForensicEndpointUnavailable as exc:
+        status_code = 200 if table_error_as_http_ok(query) else exc.status_code
         await host._send_payload_response(
             writer,
-            exc.status_code,
-            forensic_unavailable_payload(endpoint=path, reason=exc.reason),
+            status_code,
+            forensic_unavailable_table_payload(endpoint=path, reason=exc.reason),
         )
         return True
     await host._send_payload_response(writer, 200, payload)
