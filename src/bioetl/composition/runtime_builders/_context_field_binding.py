@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import is_dataclass, replace
+from dataclasses import fields, is_dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -45,13 +45,14 @@ def _replace_dataclass_context[ContextT](
     unsupported_message: str,
 ) -> ContextT:
     """Validate dataclass fields and return a replaced context."""
-    field_names = {field.name for field in context.__dataclass_fields__.values()}
+    dataclass_context = cast("DataclassInstance", context)
+    field_names = {field.name for field in fields(dataclass_context)}
     unknown = sorted(set(updates) - field_names)
     if unknown:
         raise TypeError(
             f"{unsupported_message}: unknown context fields: {', '.join(unknown)}"
         )
-    return cast("ContextT", replace(cast("DataclassInstance", context), **updates))
+    return cast("ContextT", replace(dataclass_context, **updates))
 
 
 def _copy_object_context[ContextT](
