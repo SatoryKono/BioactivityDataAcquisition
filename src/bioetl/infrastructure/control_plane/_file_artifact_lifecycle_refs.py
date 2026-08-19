@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 
@@ -17,6 +16,7 @@ from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces impor
     iter_surface_files,
 )
 from bioetl.infrastructure.control_plane._file_lineage_index import (
+    LineageIndexCorruptionError,
     load_fragment_ids,
     stable_key_filename,
 )
@@ -97,7 +97,7 @@ def _manifest_candidate_paths(
     _append_effective_config_candidate(candidates, base_path, manifest)
     _append_lineage_candidates(candidates, base_path, manifest)
     _append_checkpoint_candidates(candidates, base_path, manifest)
-    _append_cached_bronze_candidates(candidates, base_path)
+    _append_cached_bronze_candidates(candidates, base_path, manifest)
     return candidates
 
 
@@ -128,12 +128,17 @@ def _append_lineage_candidates(
         / "_by_manifest_id"
         / f"{stable_key_filename(manifest.manifest_id)}.jsonl"
     )
-    fragment_ids = set(load_fragment_ids(lineage_index, key=manifest.manifest_id))
-    fragments_root = base_path / "lineage" / "fragments"
-    if not fragments_root.exists():
+    if not lineage_index.is_file():
         return
-    for path in fragments_root.glob("*.json"):
-        if path.stem in fragment_ids or _json_mentions_manifest(path, manifest):
+    candidates.append((ControlPlaneArtifactSurface.LINEAGE, lineage_index))
+    try:
+        fragment_ids = load_fragment_ids(lineage_index, key=manifest.manifest_id)
+    except (OSError, LineageIndexCorruptionError, ValueError):
+        return
+    fragments_root = base_path / "lineage" / "fragments"
+    for fragment_id in fragment_ids:
+        path = fragments_root / f"{stable_key_filename(fragment_id)}.json"
+        if path.is_file():
             candidates.append((ControlPlaneArtifactSurface.LINEAGE, path))
 
 
@@ -142,39 +147,60 @@ def _append_checkpoint_candidates(
     base_path: Path,
     manifest: RunManifest,
 ) -> None:
+    from bioetl.infrastructure.checkpoint._local_checkpoint_io import (
+        history_path_from_manifest_index,
+        history_run_dir,
+        manifest_index_path,
+        read_json_file,
+    )
+
     checkpoint_root = base_path.parent / "checkpoints"
     if not checkpoint_root.exists():
         return
-    for path in checkpoint_root.rglob("*"):
-        if path.is_file() and (
-            str(manifest.run_id) in path.name or manifest.manifest_id in path.name
-        ):
-            candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+    latest = checkpoint_root / f"{manifest.pipeline_name}.json"
+    if latest.is_file():
+        try:
+            latest_payload = read_json_file(latest)
+        except (OSError, ValueError, TypeError):
+            latest_payload = {}
+        if str(latest_payload.get("run_id") or "") == str(manifest.run_id):
+            candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, latest))
+    run_dir = history_run_dir(checkpoint_root, manifest.pipeline_name, manifest.run_id)
+    if run_dir.is_dir():
+        for path in run_dir.iterdir():
+            if path.is_file():
+                candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, path))
+    index_path = manifest_index_path(checkpoint_root, manifest.manifest_id)
+    if index_path.is_file():
+        candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, index_path))
+        try:
+            payload = read_json_file(index_path)
+        except (OSError, ValueError, TypeError):
+            payload = {}
+        history_rel = payload.get("history_path") if isinstance(payload, dict) else None
+        if isinstance(history_rel, str) and history_rel.strip():
+            history_path = history_path_from_manifest_index(
+                checkpoint_root, history_rel.strip()
+            )
+            if history_path.is_file():
+                candidates.append((ControlPlaneArtifactSurface.CHECKPOINT, history_path))
 
 
 def _append_cached_bronze_candidates(
     candidates: list[tuple[ControlPlaneArtifactSurface, Path]],
     base_path: Path,
+    manifest: RunManifest,
 ) -> None:
-    bronze_root = base_path.parent / "bronze"
-    if not bronze_root.exists():
-        return
-    for path in bronze_root.rglob("*"):
+    for artifact in manifest.planned_artifacts:
+        layer = str(getattr(artifact, "layer", "") or "").strip().lower()
+        raw_path = str(getattr(artifact, "path", "") or "").strip()
+        if layer not in {"bronze", "cached_bronze"} or not raw_path:
+            continue
+        path = Path(raw_path)
+        if not path.is_absolute():
+            path = (base_path.parent / path).resolve()
         if path.is_file():
             candidates.append((ControlPlaneArtifactSurface.CACHED_BRONZE, path))
-
-
-def _json_mentions_manifest(path: Path, manifest: RunManifest) -> bool:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
-        return False
-    if not isinstance(payload, dict):
-        return False
-    return manifest.manifest_id in {
-        payload.get("manifest_id"),
-        payload.get("stored_fragment_id"),
-    } or str(manifest.run_id) in {payload.get("run_id")}
 
 
 def build_artifact_ref(

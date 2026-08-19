@@ -18,6 +18,7 @@ from bioetl.infrastructure.control_plane.file_artifact_lifecycle_planning import
     _iter_artifact_refs,
     _iter_artifact_refs_for_manifest,
     _resolve_protected_refs,
+    _resolve_protected_refs_for_manifest,
 )
 
 if TYPE_CHECKING:
@@ -73,10 +74,9 @@ class FileControlPlaneArtifactLifecycleStore:
     ) -> ControlPlaneArtifactLifecyclePlan:
         """Build a deterministic retention plan for one manifest/run only."""
         cutoff = policy.now - timedelta(days=policy.retention_days)
-        protected_refs = _resolve_protected_refs(
-            base_path=self.base_path,
+        protected_refs = _resolve_protected_refs_for_manifest(
+            manifest=manifest,
             policy=policy,
-            cutoff=cutoff,
         )
         artifacts = _iter_artifact_refs_for_manifest(
             base_path=self.base_path,
