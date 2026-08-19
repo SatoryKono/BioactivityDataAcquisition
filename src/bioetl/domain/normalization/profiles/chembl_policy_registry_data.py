@@ -67,6 +67,6 @@ class ChemblPolicyRegistryData:
     reference_identifier_families: tuple[ChemblReferenceIdentifierFamily, ...] = ()
 
 
-from bioetl.domain.normalization.profiles._chembl_policy_registry_defaults import (  # noqa: E402
+from bioetl.domain.normalization.profiles._chembl_policy_registry_defaults import (
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
 )
