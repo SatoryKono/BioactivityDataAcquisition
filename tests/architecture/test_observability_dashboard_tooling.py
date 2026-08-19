@@ -54,17 +54,9 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
     reviewed_dashboard_generators = {
         "_apply_ds2_all.py",
         "_apply_dsa_residual.py",
-        "_fix_no_scroll_triage_panels.py",
         "apply_dux2_residual.py",
-        "apply_dux4_enforcement.py",
-        "apply_dux5_residual.py",
-        "apply_dux6_residual.py",
-        "apply_dux7_live_residual.py",
         "generate_dux4_issue_pack.py",
-        "generate_dux5_issue_pack.py",
-        "generate_dux6_issue_pack.py",
         "render_nav_bus.py",
-        "run_dux7_live_residual.py",
     }
 
     for script in sorted(grafana_dir.glob("*.py")):

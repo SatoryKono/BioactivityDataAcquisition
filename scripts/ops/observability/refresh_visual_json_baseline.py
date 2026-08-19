@@ -22,6 +22,7 @@ SHIPPED = (
     "bioetl-incident-v1",
     "bioetl-run-explorer-v1",
 )
+_BASELINE_ISSUE = "#8576"
 
 
 def _git_sha() -> str:
@@ -85,7 +86,7 @@ def build_baseline(repo: Path) -> dict:
         )
     return {
         "schema_version": 1,
-        "issue": "#8576",
+        "issue": _BASELINE_ISSUE,
         "kind": "json_source_baseline",
         "generated_at": datetime.now(UTC).isoformat(),
         "git_sha": _git_sha(),
@@ -111,7 +112,7 @@ def inventory_pngs(root: Path) -> dict:
         )
     return {
         "schema_version": 1,
-        "issue": "#8576",
+        "issue": _BASELINE_ISSUE,
         "kind": "png_hash_inventory",
         "generated_at": datetime.now(UTC).isoformat(),
         "git_sha": _git_sha(),

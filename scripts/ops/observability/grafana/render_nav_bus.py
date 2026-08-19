@@ -232,6 +232,26 @@ def _walk_panels(panels: list[object]) -> list[dict[str, object]]:
     return discovered
 
 
+def _expand_nav_height(
+    nav: dict[str, object], panels: list[object], *, new_height: int
+) -> None:
+    grid_pos = nav.setdefault("gridPos", {})
+    if not isinstance(grid_pos, dict):
+        raise SystemExit("navigation panel gridPos must be an object")
+    old_height = grid_pos.get("h")
+    if not isinstance(old_height, int) or old_height >= new_height:
+        return
+    delta = new_height - old_height
+    old_bottom = int(grid_pos.get("y", 0)) + old_height
+    for panel in _walk_panels(panels):
+        if panel is nav:
+            continue
+        grid = panel.get("gridPos")
+        if isinstance(grid, dict) and isinstance(grid.get("y"), int):
+            if grid["y"] >= old_bottom:
+                grid["y"] += delta
+
+
 def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
@@ -251,23 +271,15 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     nav["title"] = ""
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
-    nav.setdefault("gridPos", {})
-    old_height = nav["gridPos"].get("h")
-    if isinstance(old_height, int) and old_height < NAV_HEIGHT:
-        delta = NAV_HEIGHT - old_height
-        old_bottom = int(nav["gridPos"].get("y", 0)) + old_height
-        for panel in _walk_panels(panels):
-            if panel is nav or not isinstance(panel, dict):
-                continue
-            grid = panel.get("gridPos")
-            if isinstance(grid, dict) and isinstance(grid.get("y"), int):
-                if grid["y"] >= old_bottom:
-                    grid["y"] += delta
+    _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
     # The inline 19px title plus the wrapped 16px bus require four grid units at
     # the normative 1366px viewport. Live geometry validation guards clipping.
     # Normalize all dashboards so content containment is an executable contract.
-    nav["gridPos"]["h"] = NAV_HEIGHT
-    nav["gridPos"].update({"w": 24, "x": 0, "y": 0})
+    grid_pos = nav["gridPos"]
+    if not isinstance(grid_pos, dict):
+        raise SystemExit("navigation panel gridPos must be an object")
+    grid_pos["h"] = NAV_HEIGHT
+    grid_pos.update({"w": 24, "x": 0, "y": 0})
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

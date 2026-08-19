@@ -620,19 +620,28 @@ def _validate_dashboard_panel_containment(
         "status",
     )
     for item in panels:
-        if not isinstance(item, dict):
-            return f"render manifest dashboard {uid} has a non-object containment panel"
-        missing = [field for field in required if field not in item]
-        if missing:
-            return (
-                f"render manifest dashboard {uid} containment panel "
-                f"{item.get('id')} missing {missing}"
-            )
-        if item.get("verticalOverflow") or item.get("horizontalOverflow"):
-            return (
-                f"render manifest dashboard {uid} first-window overflow on "
-                f"panel {item.get('id')}"
-            )
+        error = _validate_containment_panel(uid, item, required=required)
+        if error:
+            return error
+    return None
+
+
+def _validate_containment_panel(
+    uid: str, item: object, *, required: tuple[str, ...]
+) -> str | None:
+    if not isinstance(item, dict):
+        return f"render manifest dashboard {uid} has a non-object containment panel"
+    missing = [field for field in required if field not in item]
+    if missing:
+        return (
+            f"render manifest dashboard {uid} containment panel "
+            f"{item.get('id')} missing {missing}"
+        )
+    if item.get("verticalOverflow") or item.get("horizontalOverflow"):
+        return (
+            f"render manifest dashboard {uid} first-window overflow on "
+            f"panel {item.get('id')}"
+        )
     return None
 
 
@@ -750,17 +759,13 @@ def _validate_fixture_state_provenance(fixture_state: object) -> str | None:
     return None
 
 
-def _validate_manifest_provenance(
+def _validate_manifest_file_sets(
     manifest: dict[str, object],
     *,
     expected_uids: tuple[str, ...],
     dashboards: dict[str, dict[str, object]],
     screenshot_dir: Path,
 ) -> str | None:
-    """Validate render manifest provenance against dashboard sources.
-
-    NOSONAR - S3776: complexity 31 exceeds 15; extraction would obscure manifest validation logic
-    """
     expected_uid_set = set(expected_uids)
     actual_uid_set = set(dashboards)
     if actual_uid_set != expected_uid_set:
@@ -784,7 +789,10 @@ def _validate_manifest_provenance(
             "render directory PNG file-set drift: "
             f"expected={expected_files} actual={actual_files}"
         )
+    return None
 
+
+def _all_shipped_uids() -> set[str]:
     all_shipped_uids: set[str] = set()
     for dashboard_path in sorted(_DASHBOARD_DIR.glob(DASHBOARD_FILE_PATTERN)):
         try:
@@ -794,6 +802,17 @@ def _validate_manifest_provenance(
         uid = payload.get("uid")
         if isinstance(uid, str) and uid:
             all_shipped_uids.add(uid)
+    return all_shipped_uids
+
+
+def _validate_manifest_identity(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    screenshot_dir: Path,
+) -> str | None:
+    expected_uid_set = set(expected_uids)
+    all_shipped_uids = _all_shipped_uids()
     expected_kind = (
         "full-set"
         if all_shipped_uids and expected_uid_set == all_shipped_uids
@@ -819,7 +838,15 @@ def _validate_manifest_provenance(
             return "render manifest immutable copy drift"
     except OSError as exc:
         return f"render manifest immutable copy is unreadable: {exc}"
+    return None
 
+
+def _validate_dashboard_sources(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    dashboards: dict[str, dict[str, object]],
+) -> str | None:
     source = manifest.get("source")
     if not isinstance(source, dict):
         return "render manifest lacks source provenance"
@@ -845,7 +872,10 @@ def _validate_manifest_provenance(
             return f"render manifest dashboard {uid} source SHA is invalid"
         if not isinstance(version, int):
             return f"render manifest dashboard {uid} version is missing"
+    return None
 
+
+def _validate_capture_context(manifest: dict[str, object]) -> str | None:
     capture_context = manifest.get("capture_context")
     if not isinstance(capture_context, dict):
         return "render manifest lacks capture context"
@@ -874,7 +904,15 @@ def _validate_manifest_provenance(
         fixture_error = _validate_fixture_state_provenance(fixture_state)
         if fixture_error is not None:
             return fixture_error
+    return None
 
+
+def _validate_browser_context(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    dashboards: dict[str, dict[str, object]],
+) -> str | None:
     requested = manifest.get("requested")
     if not isinstance(requested, dict):
         return "render manifest lacks requested browser context"
@@ -903,6 +941,46 @@ def _validate_manifest_provenance(
     return None
 
 
+def _validate_manifest_provenance(
+    manifest: dict[str, object],
+    *,
+    expected_uids: tuple[str, ...],
+    dashboards: dict[str, dict[str, object]],
+    screenshot_dir: Path,
+) -> str | None:
+    """Validate render manifest provenance against dashboard sources."""
+    error = _validate_manifest_file_sets(
+        manifest,
+        expected_uids=expected_uids,
+        dashboards=dashboards,
+        screenshot_dir=screenshot_dir,
+    )
+    if error:
+        return error
+    error = _validate_manifest_identity(
+        manifest,
+        expected_uids=expected_uids,
+        screenshot_dir=screenshot_dir,
+    )
+    if error:
+        return error
+    error = _validate_dashboard_sources(
+        manifest,
+        expected_uids=expected_uids,
+        dashboards=dashboards,
+    )
+    if error:
+        return error
+    error = _validate_capture_context(manifest)
+    if error:
+        return error
+    return _validate_browser_context(
+        manifest,
+        expected_uids=expected_uids,
+        dashboards=dashboards,
+    )
+
+
 def _validate_one_dashboard_render(
     uid: str,
     dashboard: dict[str, object],
@@ -929,13 +1007,34 @@ def _validate_one_dashboard_render(
     if containment_error:
         return containment_error
 
+    panel_error = _validate_dashboard_panel_states(
+        uid, dashboard, expected_panel_ids=expected_panel_ids
+    )
+    if panel_error:
+        return panel_error
+
+    if screenshot_dir is not None:
+        return _validate_screenshot_evidence(
+            uid,
+            dashboard,
+            requested_width=requested_width,
+            screenshot_dir=screenshot_dir,
+        )
+    return None
+
+
+def _validate_dashboard_panel_states(
+    uid: str,
+    dashboard: dict[str, object],
+    *,
+    expected_panel_ids: dict[str, tuple[int, ...]] | None,
+) -> str | None:
     dashboard_terminal, panel_states, panel_error = _extract_panel_states(
         uid, dashboard
     )
     if panel_error:
         return panel_error
     assert dashboard_terminal is not None and panel_states is not None
-
     if expected_panel_ids is not None:
         expected_ids = expected_panel_ids.get(uid)
         if expected_ids is None:
@@ -948,19 +1047,8 @@ def _validate_one_dashboard_render(
         )
         if coverage_error:
             return coverage_error
-
     if uid == "bioetl-silver-reject-explorer":
-        silver_error = _validate_silver_backend_health_panel(panel_states)
-        if silver_error:
-            return silver_error
-
-    if screenshot_dir is not None:
-        return _validate_screenshot_evidence(
-            uid,
-            dashboard,
-            requested_width=requested_width,
-            screenshot_dir=screenshot_dir,
-        )
+        return _validate_silver_backend_health_panel(panel_states)
     return None
 
 
@@ -1461,36 +1549,23 @@ def _exit_code_for_checks(checks: list[PreflightCheck]) -> int:
     if all(check.status in {"ok", "not_applicable"} for check in checks):
         return EXIT_OK
     by_name = {check.name: check for check in checks}
-    if by_name.get("credentials", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_CREDENTIALS
-    if by_name.get("grafana", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_GRAFANA_HEALTH
-    if by_name.get("grafana-render-auth", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_RENDER_AUTH
-    if by_name.get("playwright-runtime", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_PLAYWRIGHT
-    if by_name.get("expanded-row-capture", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_EXPANDED_ROW
-    if by_name.get("prometheus", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_PROMETHEUS
-    if (
-        by_name.get("bioetl-control-plane-source", PreflightCheck("", "ok", "")).status
-        != "ok"
-    ):
-        return EXIT_BIOETL_SOURCE
-    if (
-        by_name.get("bioetl-prometheus-target", PreflightCheck("", "ok", "")).status
-        != "ok"
-    ):
-        return EXIT_BIOETL_TARGET
-    if by_name.get("ops-http-bootstrap", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_OPS_HTTP_BOOTSTRAP
-    if by_name.get("ops-http-datasource", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_OPS_HTTP_BOOTSTRAP
-    if by_name.get("quarantine-explorer", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_QUARANTINE
-    if by_name.get("screenshots", PreflightCheck("", "ok", "")).status != "ok":
-        return EXIT_SCREENSHOTS
+    outcomes = (
+        ("credentials", EXIT_CREDENTIALS),
+        ("grafana", EXIT_GRAFANA_HEALTH),
+        ("grafana-render-auth", EXIT_RENDER_AUTH),
+        ("playwright-runtime", EXIT_PLAYWRIGHT),
+        ("expanded-row-capture", EXIT_EXPANDED_ROW),
+        ("prometheus", EXIT_PROMETHEUS),
+        ("bioetl-control-plane-source", EXIT_BIOETL_SOURCE),
+        ("bioetl-prometheus-target", EXIT_BIOETL_TARGET),
+        ("ops-http-bootstrap", EXIT_OPS_HTTP_BOOTSTRAP),
+        ("ops-http-datasource", EXIT_OPS_HTTP_BOOTSTRAP),
+        ("quarantine-explorer", EXIT_QUARANTINE),
+        ("screenshots", EXIT_SCREENSHOTS),
+    )
+    for name, exit_code in outcomes:
+        if by_name.get(name, PreflightCheck("", "ok", "")).status != "ok":
+            return exit_code
     return EXIT_GENERIC
 
 

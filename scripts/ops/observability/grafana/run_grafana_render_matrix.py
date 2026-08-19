@@ -26,6 +26,7 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/render-matrix")
 STANDARD_VIEWPORTS = ((1366, 768), (1440, 900), (1920, 1080))
 KIOSK_VIEWPORTS = ((2560, 1440), (3840, 2160))
 THEMES = ("dark", "light")
+_RENDER_MANIFEST = "render-manifest.json"
 
 
 @dataclass(frozen=True)
@@ -198,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
                 uids=tuple(str(uid) for uid in args.uids),
             )
         )
-        manifest_path = output_dir / profile.name / "render-manifest.json"
+        manifest_path = output_dir / profile.name / _RENDER_MANIFEST
         results.append(
             {
                 "name": profile.name,
@@ -213,8 +214,8 @@ def main(argv: list[str] | None = None) -> int:
         "status": "not-checked",
         "reason": "required repeat groups did not both complete",
     }
-    baseline_path = output_dir / "1440x900-dark" / "render-manifest.json"
-    repeat_path = output_dir / "1440x900-dark-repeat" / "render-manifest.json"
+    baseline_path = output_dir / "1440x900-dark" / _RENDER_MANIFEST
+    repeat_path = output_dir / "1440x900-dark-repeat" / _RENDER_MANIFEST
     if baseline_path.exists() and repeat_path.exists():
         consistency = compare_repeat_geometry(
             _read_manifest(baseline_path),
