@@ -24,7 +24,11 @@ from bioetl.domain.normalization import (
     compute_execution_identity_fingerprint,
     normalize_run_manifest_spec,
 )
-from bioetl.domain.ports import MetricsPort, RunManifestPort
+from bioetl.domain.ports import (
+    ContractEvidenceRecorderPort,
+    MetricsPort,
+    RunManifestPort,
+)
 from bioetl.domain.types import RunType
 
 __all__ = [
@@ -52,6 +56,7 @@ class RunManifestService(
 
     manifest_port: RunManifestPort
     metrics: MetricsPort | None = None
+    contract_evidence_recorder: ContractEvidenceRecorderPort | None = None
 
     def _normalize_run_type(self, run_type: RunType | str) -> RunType:
         """Return the normalized runtime run type enum."""

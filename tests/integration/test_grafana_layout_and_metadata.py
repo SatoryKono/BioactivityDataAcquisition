@@ -310,6 +310,28 @@ def test_control_plane_named_review_surfaces_are_findable() -> None:
     assert 9418 not in audit_ids
 
 
+def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
+    panel = next(
+        item
+        for item in dashboard.get("panels", [])
+        if isinstance(item, dict) and item.get("id") == 9416
+    )
+    target_url = str(panel["targets"][0].get("url", ""))
+    assert "error_as_row=1" in target_url
+    assert "run_id=${run_id}" in target_url
+    links = panel.get("fieldConfig", {}).get("defaults", {}).get("links") or []
+    retry = next(
+        link
+        for link in links
+        if isinstance(link, dict) and "Retry" in str(link.get("title", ""))
+    )
+    retry_url = str(retry.get("url", ""))
+    assert "var-run_id=$run_id" in retry_url
+    assert "${__url_time_range}" in retry_url
+    assert "viewPanel=9416" in retry_url
+
+
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
     """Selected-range blocker evidence stays close to the replay drilldown row."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))

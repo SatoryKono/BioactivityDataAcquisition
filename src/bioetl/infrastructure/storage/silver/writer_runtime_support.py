@@ -33,13 +33,13 @@ from bioetl.infrastructure.storage.writer_common import (
     iterate_write_targets,
     validate_write_versions,
 )
-from bioetl.infrastructure.time.system_clock import current_utc_time
 
 
 class _SilverWriterDispatchHost(Protocol):
     """Minimal SilverWriter surface required by runtime helpers."""
 
     logger: LoggerPort
+    _clock: object
     _pipeline_name: str | None
     _tracing: TracingPort | None
     _contract_rollout_policy: ContractRolloutPolicy | None
@@ -164,7 +164,8 @@ async def _write_single_target_impl(
     module_name: str,
 ) -> SilverWriteResult | None:
     """Execute one physical Silver write target with tracing."""
-    started_at, start_perf = current_utc_time(), time.perf_counter()
+    started_at = getattr(invocation, "started_at", None) or writer._clock.now()
+    start_perf = time.perf_counter()
     return await execute_with_tracing(
         tracing=writer._tracing,
         module_name=module_name,

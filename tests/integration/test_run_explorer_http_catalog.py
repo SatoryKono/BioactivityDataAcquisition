@@ -100,7 +100,9 @@ def test_run_explorer_http_catalog_matches_live_dashboard() -> None:
         assert parsed.path == endpoint["path"]
         query = {key: values[0] for key, values in parse_qs(parsed.query).items()}
         for required in endpoint["required_query"]:
-            assert required in query, f"panel {panel_id} URL missing required {required}"
+            assert required in query, (
+                f"panel {panel_id} URL missing required {required}"
+            )
 
         no_value = str(
             panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
@@ -131,5 +133,5 @@ def test_run_explorer_duplicate_http_targets_share_endpoint_id() -> None:
         if len(endpoint_ids) != 1
     }
     assert drifted == {}, (
-        "Duplicate Run Explorer URLs must share one endpoint_id: " f"{drifted}"
+        f"Duplicate Run Explorer URLs must share one endpoint_id: {drifted}"
     )

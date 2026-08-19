@@ -36,7 +36,11 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.ports import LoggerPort, TracingPort
+    from bioetl.domain.ports import (
+        ContractEvidenceRecorderPort,
+        LoggerPort,
+        TracingPort,
+    )
 
 __all__ = ["PipelineRunner", "PipelineRunnerDependencies"]
 
@@ -90,6 +94,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         self._lifecycle_service = dependencies.lifecycle_service
         self._observer = dependencies.observer
         self._run_ledger_service: RunLedgerService | None = None
+        self._contract_evidence_recorder: ContractEvidenceRecorderPort | None = None
 
     @property
     def logger(self) -> LoggerPort:
@@ -114,6 +119,12 @@ class PipelineRunner(PipelineRunnerSupportMixin):
 
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
         self._run_ledger_service = service
+
+    def attach_contract_evidence_recorder(
+        self, recorder: ContractEvidenceRecorderPort
+    ) -> None:
+        """Attach the post-lock contract-evidence finalizer."""
+        self._contract_evidence_recorder = recorder
 
     @property
     def execution_metrics(self) -> dict[str, int]:
@@ -206,37 +217,18 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         with self._pipeline_span(), self._observer:
             try:
                 async with self._services, self._lock_runtime_service:
+                    self._finalize_contract_evidence()
                     await self._run_managed_pipeline()
             finally:
                 self._observer.capture_execution_metrics(self.execution_metrics)
 
-    async def _finalize_debug_export(self, status: str) -> None:
-        finalize = getattr(self._executor, "finalize_debug_export", None)
-        if not callable(finalize):
-            return
-        try:
-            from collections.abc import Awaitable, Callable
+    def _finalize_contract_evidence(self) -> None:
+        """Write the immutable sidecar after lock acquire and before extract."""
+        from bioetl.application.core._runner_finalize import finalize_contract_evidence
 
-            finalize_fn = cast(Callable[..., Awaitable[object]], finalize)
-            result = await finalize_fn(status=status, manifest_id=self.manifest_id)
-        except _RUN_FAILURE_EXCEPTIONS as error:
-            self._logger.warning(
-                "debug_export_finalize_failed",
-                error=str(error),
-                error_type=type(error).__name__,
-                run_id=str(self._context.run_id),
-            )
-            return
-        if not isinstance(result, DebugExportResult):
-            return
-        if self._run_ledger_service is not None:
-            self._run_ledger_service.record_artifact_published(
-                layer="debug_export",
-                artifact_path=result.root_path,
-                artifact_content_hash=result.debug_export_hash,
-                dataset_ref=f"debug_export:{self._config.pipeline_name}@{self.run_id}",
-                details={
-                    "manifest_path": result.manifest_path,
-                    "debug_export_hash": result.debug_export_hash,
-                },
-            )
+        finalize_contract_evidence(self)
+
+    async def _finalize_debug_export(self, status: str) -> None:
+        from bioetl.application.core._runner_finalize import finalize_debug_export
+
+        await finalize_debug_export(self, status)

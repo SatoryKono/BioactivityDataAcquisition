@@ -251,8 +251,7 @@ used.
   paths and remain collapsed until the headline/cause row points to one branch.
 - GLOBAL panels show cross-scope aggregate signals for escalation context.
 
-## Shipped panel title synchronization
+## Additional shipped panels
+### 43. Review Selected Run Summary
 
-| ID | Panel title | Type | Notes |
-|---:|---|---|---|
-| 9998 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+Shipped in `bioetl-runtime.json`.

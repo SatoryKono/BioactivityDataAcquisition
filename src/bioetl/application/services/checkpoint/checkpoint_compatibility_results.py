@@ -19,9 +19,7 @@ def build_strict_checkpoint_compatibility_result(
 ) -> CheckpointCompatibilityResult:
     """Build the strict resume compatibility result payload."""
     overall_compatible = compatible and required_anchor_compatible
-    identity_compatible = (
-        execution_identity_compatible and required_anchor_compatible
-    )
+    identity_compatible = execution_identity_compatible and required_anchor_compatible
     continuity_proven = identity_continuity_proven and required_anchor_compatible
     if overall_compatible:
         return CheckpointCompatibilityResult(
@@ -31,8 +29,7 @@ def build_strict_checkpoint_compatibility_result(
             execution_identity_compatible=identity_compatible,
             identity_continuity_proven=continuity_proven,
             resume_verdict="resume_only",
-            messages=tuple(messages)
-            or ("Checkpoint is compatible for resume",),
+            messages=tuple(messages) or ("Checkpoint is compatible for resume",),
         )
     return CheckpointCompatibilityResult.incompatible_result(
         dq_compatible=dq_compatible,

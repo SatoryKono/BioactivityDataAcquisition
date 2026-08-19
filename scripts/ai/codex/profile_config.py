@@ -132,7 +132,7 @@ def _validate_backup_dir(codex_home: Path, backup_dir: Path) -> Path:
 
 
 def create_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
-    _validate_backup_dir(codex_home, backup_dir)
+    backup_dir = _validate_backup_dir(codex_home, backup_dir)
     if backup_dir.exists() and any(backup_dir.iterdir()):
         raise ValueError("backup directory must not already contain files")
     backup_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -210,7 +210,7 @@ def apply_profiles(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
 
 
 def restore_profiles(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
-    _validate_backup_dir(codex_home, backup_dir)
+    backup_dir = _validate_backup_dir(codex_home, backup_dir)
     manifest = json.loads((backup_dir / "manifest.json").read_text(encoding="utf-8"))
     restored = 0
     removed_new = 0

@@ -15,6 +15,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
 )
 from scripts.ops.observability.grafana.serve_trust_validation_fixtures import (
     FixtureHandler,
+    _validated_loopback_host,
 )
 from scripts.ops.observability.trust_validation_fixture_materialization import (
     materialize_trust_validation_fixture_matrix,
@@ -38,6 +39,12 @@ REQUIRED_STATES = {
     "service_unavailable",
     "empty_rows",
 }
+
+
+def test_fixture_server_rejects_non_loopback_bind_host() -> None:
+    assert _validated_loopback_host("127.0.0.1") == "127.0.0.1"
+    with pytest.raises(ValueError, match="must be loopback"):
+        _validated_loopback_host("0.0.0.0")
 
 
 def test_index_maps_trust_panels_and_required_states() -> None:

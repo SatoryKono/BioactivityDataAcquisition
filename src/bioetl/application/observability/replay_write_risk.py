@@ -69,21 +69,38 @@ def _iter_sink_modes(manifest: RunManifest) -> tuple[tuple[str, str], ...]:
     """Return enabled ``(layer, mode)`` pairs without exposing sink identity."""
     modes: set[tuple[str, str]] = set()
     for root in _iter_config_roots(manifest):
-        sink = _mapping(root.get("sink"))
-        if sink is not None:
-            for layer in ("silver", "gold"):
-                settings = _mapping(sink.get(layer))
-                if settings is None or settings.get("enabled") is False:
-                    continue
-                mode = _normalized_text(settings.get("mode"))
-                if mode:
-                    modes.add((layer, mode))
-        for layer in ("silver", "gold"):
-            for key in (f"{layer}_write_mode", f"{layer}_mode"):
-                mode = _normalized_text(root.get(key))
-                if mode:
-                    modes.add((layer, mode))
+        _add_nested_sink_modes(root, modes)
+        _add_legacy_sink_modes(root, modes)
     return tuple(sorted(modes))
+
+
+def _add_nested_sink_modes(
+    root: Mapping[str, object],
+    modes: set[tuple[str, str]],
+) -> None:
+    """Collect enabled modes from the canonical nested sink mapping."""
+    sink = _mapping(root.get("sink"))
+    if sink is None:
+        return
+    for layer in ("silver", "gold"):
+        settings = _mapping(sink.get(layer))
+        if settings is None or settings.get("enabled") is False:
+            continue
+        mode = _normalized_text(settings.get("mode"))
+        if mode:
+            modes.add((layer, mode))
+
+
+def _add_legacy_sink_modes(
+    root: Mapping[str, object],
+    modes: set[tuple[str, str]],
+) -> None:
+    """Collect legacy flat write-mode keys retained for compatibility."""
+    for layer in ("silver", "gold"):
+        for key in (f"{layer}_write_mode", f"{layer}_mode"):
+            mode = _normalized_text(root.get(key))
+            if mode:
+                modes.add((layer, mode))
 
 
 def _declares_append_semantic_sink(manifest: RunManifest) -> bool:

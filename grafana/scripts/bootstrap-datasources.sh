@@ -32,6 +32,9 @@ RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 EXPECTED_RUNTIME_SOURCE_ID="${BIOETL_EXPECTED_RUNTIME_SOURCE_ID:-unmanaged}"
 REQUIRE_OPS_HTTP="${BIOETL_GRAFANA_REQUIRE_OPS_HTTP:-0}"
+OPS_HTTP_STATE_DEFERRED="deferred"
+OPS_HTTP_STATE_FAILED="failed"
+DASHBOARD_PROFILE_FAILED="failed"
 
 # Soft vs fail-closed poll budgets (host/compose may still override explicitly).
 if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
@@ -48,7 +51,7 @@ if [ -z "${BIOETL_OPS_HTTP_URL:-}" ]; then
 fi
 export BIOETL_OPS_HTTP_URL
 
-OPS_HTTP_STATE="deferred"
+OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
 OPS_HTTP_REASON="not_checked"
 OPS_HTTP_URL_VALID=0
 SOURCE_ID_MATCHED=0
@@ -56,13 +59,24 @@ IDENTITY_VALID=0
 DASHBOARD_PROFILE="not_selected"
 BOOTSTRAP_ERRORS=0
 
-log() { echo "[bioetl-grafana] $*"; }
-log_warn() { echo "[bioetl-grafana] WARN: $*" >&2; }
-log_err() { echo "[bioetl-grafana] ERROR: $*" >&2; }
+log() {
+  echo "[bioetl-grafana] $*"
+  return 0
+}
+log_warn() {
+  echo "[bioetl-grafana] WARN: $*" >&2
+  return 0
+}
+log_err() {
+  echo "[bioetl-grafana] ERROR: $*" >&2
+  return 0
+}
 
 note_error() {
   BOOTSTRAP_ERRORS=$((BOOTSTRAP_ERRORS + 1))
-  log_warn "$1"
+  local _message="$1"
+  log_warn "${_message}"
+  return 0
 }
 
 # Validate Ops HTTP base URL before any wget/HTTP call.
@@ -76,6 +90,7 @@ is_valid_ops_http_url() {
   fi
   case "${_url}" in
     http://|https://|http:///|https:///) return 1 ;;
+    *) ;;
   esac
   if ! printf '%s' "${_url}" | grep -Eq \
     '^https?://([A-Za-z0-9._-]+|\[[0-9a-fA-F:.]+\])(:[0-9]{1,5})?(/[^[:space:]]*)?$'; then
@@ -131,6 +146,7 @@ provision_dashboard_profile() {
       note_error "refusing unsafe dashboard provider target ${DASHBOARD_PROVIDER_TARGET_DIR:-<empty>}"
       return 1
       ;;
+    *) ;;
   esac
   if [ ! -d "${_source_dir}" ]; then
     note_error "missing dashboard provider source ${_source_dir}"
@@ -168,14 +184,15 @@ provision_dashboard_profile() {
 
 fail_or_defer_ops() {
   OPS_HTTP_REASON="$1"
-  OPS_HTTP_STATE="deferred"
+  OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
   if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
-    OPS_HTTP_STATE="failed"
+    OPS_HTTP_STATE="${OPS_HTTP_STATE_FAILED}"
     write_bootstrap_status
     log_err "Ops HTTP required but unavailable (${OPS_HTTP_REASON})"
     exit 1
   fi
   log_warn "Ops HTTP deferred (${OPS_HTTP_REASON}); continuing with Prometheus-only fallback"
+  return 0
 }
 
 provision_prometheus_only() {
@@ -326,18 +343,18 @@ fi
 if [ "${OPS_HTTP_STATE}" = "ready" ]; then
   if ! provision_ops_http; then
     note_error "failed to materialize Ops HTTP datasource"
-    OPS_HTTP_STATE="deferred"
+    OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
     OPS_HTTP_REASON="ops_http_provision_failed"
   elif ! ensure_infinity_plugin; then
     if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
-      OPS_HTTP_STATE="failed"
+      OPS_HTTP_STATE="${OPS_HTTP_STATE_FAILED}"
       OPS_HTTP_REASON="infinity_plugin_install_failed"
       write_bootstrap_status
       log_err "failed to install yesoreyeram-infinity-datasource"
       exit 1
     fi
     rm -f "${TARGET_DIR}/bioetl-ops-http.yml" 2>/dev/null || true
-    OPS_HTTP_STATE="deferred"
+    OPS_HTTP_STATE="${OPS_HTTP_STATE_DEFERRED}"
     OPS_HTTP_REASON="infinity_plugin_install_failed"
     log_warn "Infinity install failed; Ops HTTP not provisioned (Prometheus-only fallback)"
   fi
@@ -348,7 +365,7 @@ fi
 # an Ops HTTP panel while its datasource is intentionally absent.
 if [ "${OPS_HTTP_STATE}" = "ready" ]; then
   if ! provision_dashboard_profile "full"; then
-    DASHBOARD_PROFILE="failed"
+    DASHBOARD_PROFILE="${DASHBOARD_PROFILE_FAILED}"
     if [ "${REQUIRE_OPS_HTTP}" = "1" ]; then
       write_bootstrap_status
       log_err "full dashboard profile required but provisioning failed"
@@ -356,12 +373,12 @@ if [ "${OPS_HTTP_STATE}" = "ready" ]; then
     fi
     log_warn "full dashboard profile unavailable; attempting static fallback"
     if ! provision_dashboard_profile "prometheus_only"; then
-      DASHBOARD_PROFILE="failed"
+      DASHBOARD_PROFILE="${DASHBOARD_PROFILE_FAILED}"
     fi
   fi
 else
   if ! provision_dashboard_profile "prometheus_only"; then
-    DASHBOARD_PROFILE="failed"
+    DASHBOARD_PROFILE="${DASHBOARD_PROFILE_FAILED}"
   fi
 fi
 

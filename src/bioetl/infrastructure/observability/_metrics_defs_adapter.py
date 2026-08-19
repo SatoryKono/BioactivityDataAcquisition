@@ -19,7 +19,9 @@ __all__ = [
     "HTTP_REQUEST_ERRORS_TOTAL",
     "HTTP_RETRIES_TOTAL",
     "HTTP_RETRY_BUDGET_EXHAUSTED_TOTAL",
+    "PROVIDER_HEALTH_OBSERVED_TIMESTAMP_SECONDS",
     "PROVIDER_HEALTH_STATUS",
+    "PROVIDER_OBSERVED_UNIVERSE",
     "RATE_LIMITER_TOKENS_AVAILABLE",
     "RATE_LIMITER_WAIT_SECONDS",
 ]
@@ -114,6 +116,18 @@ HTTP_REQUEST_ERRORS_TOTAL = Counter(
 PROVIDER_HEALTH_STATUS = Gauge(
     "bioetl_provider_health_status",
     "Provider health status (0=unhealthy, 1=degraded, 2=healthy)",
+    ["provider"],
+)
+
+PROVIDER_OBSERVED_UNIVERSE = Gauge(
+    "bioetl_provider_observed_universe",
+    "Durable observed provider identity for CURRENT status (1=present)",
+    ["provider"],
+)
+
+PROVIDER_HEALTH_OBSERVED_TIMESTAMP_SECONDS = Gauge(
+    "bioetl_provider_health_observed_timestamp_seconds",
+    "Unix timestamp of last persisted provider-health observation",
     ["provider"],
 )
 

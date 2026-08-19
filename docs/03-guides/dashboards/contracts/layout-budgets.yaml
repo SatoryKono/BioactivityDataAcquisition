@@ -113,6 +113,11 @@ first_window_containment_types:
 # (Inspect Fleet Non-OK and Causes). First-window reason replacement: 9107.
 first_window_summary_tables:
   - dashboard: bioetl-overview-v2.json
+    id: 9603
+    max_rows: 1
+    owner: "@bioetl-observability"
+    bind: limit
+  - dashboard: bioetl-overview-v2.json
     id: 215
     max_rows: 4
     owner: "@bioetl-observability"
@@ -164,7 +169,7 @@ first_window_summary_tables:
     bind: limit
   - dashboard: bioetl-control-plane-v1.json
     id: 9416
-    max_rows: 4
+    max_rows: 5
     owner: "@bioetl-observability"
     bind: limit
 

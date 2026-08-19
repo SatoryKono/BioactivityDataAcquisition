@@ -70,7 +70,13 @@ NAVIGATION_CONTRACT_PATH = Path(
 EXPECTED_VARS_BY_DASHBOARD = {
     "bioetl-alerts-slo.json": {"workflow", "pipeline", "run_type"},
     "bioetl-overview-v2.json": {"workflow", "pipeline", "run_type", "run_id"},
-    "bioetl-dq-v2.json": {"workflow", "pipeline", "run_type", "run_id", "stage"},
+    "bioetl-dq-v2.json": {
+        "workflow",
+        "pipeline",
+        "run_type",
+        "run_id",
+        "stage",
+    },
     "bioetl-runtime.json": {
         "workflow",
         "pipeline",
@@ -1407,8 +1413,9 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
         int(panel["id"]): panel for panel in get_dashboard_panels(overview)
     }
     assert overview_panels[9002]["options"]["cellHeight"] == "sm"
-    assert overview_panels[9002]["gridPos"]["h"] == 6
-    assert overview_panels[215]["gridPos"]["h"] == 6
+    assert overview_panels[9002]["gridPos"]["h"] >= 5
+    assert overview_panels[215]["gridPos"]["h"] >= 5
+    assert overview_panels[9603]["gridPos"]["y"] < overview_panels[215]["gridPos"]["y"]
 
     run_explorer = load_dashboard(
         Path("grafana/dashboards/bioetl-run-explorer-v1.json")

@@ -81,9 +81,10 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
   no owner/ack write-path.
 - **Data sources:** Static operator copy.
 
-## Shipped panel title synchronization
+## Additional shipped panels
+### 11. Inspect Selected Run Summary
 
-| ID | Panel title | Type | Notes |
-|---:|---|---|---|
-| 2100 | Inspect Selected Run Summary | row | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 2101 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+Shipped in `bioetl-incident-v1.json`.
+### 12. Review Selected Run Summary
+
+Shipped in `bioetl-incident-v1.json`.

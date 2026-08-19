@@ -133,18 +133,21 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
             encoding="utf-8"
         )
     )
-    panels: dict[int, dict[str, object]] = {}
-    stack = list(dashboard["panels"])
-    while stack:
-        panel = stack.pop()
-        if not isinstance(panel, dict):
-            continue
-        panel_id = panel.get("id")
-        if isinstance(panel_id, int):
-            panels[panel_id] = panel
-        nested = panel.get("panels")
-        if isinstance(nested, list):
-            stack.extend(nested)
+
+    def _walk(nodes: object) -> dict[object, dict[str, object]]:
+        found: dict[object, dict[str, object]] = {}
+        if not isinstance(nodes, list):
+            return found
+        for panel in nodes:
+            if not isinstance(panel, dict):
+                continue
+            pid = panel.get("id")
+            if pid is not None:
+                found[pid] = panel
+            found.update(_walk(panel.get("panels")))
+        return found
+
+    panels = _walk(dashboard.get("panels"))
 
     status_description = str(panels[9401].get("description", ""))
     assert "selected provider" in status_description

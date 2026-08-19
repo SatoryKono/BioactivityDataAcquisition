@@ -188,13 +188,22 @@ the relevant provider or evidence gap.
   renders as a dominant red gauge arc.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.
 
-## Shipped panel title synchronization
+## Additional shipped panels
+### 32. Inspect Status Reason
 
-| ID | Panel title | Type | Notes |
-|---:|---|---|---|
-| 9107 | Inspect Status Reason | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 9106 | Inspect Fleet Non-OK and Causes | row | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 9105 | Inspect Full Fleet Evidence | row | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 9111 | Inspect Full Fleet Severity | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 9112 | Inspect Full Non-OK Providers | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 9113 | Inspect Full Provider Causes | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+Shipped in `bioetl-provider-health-v2.json`.
+### 33. Inspect Fleet Non-OK and Causes
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 34. Inspect Full Fleet Evidence
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 35. Inspect Full Fleet Severity
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 36. Inspect Full Non-OK Providers
+
+Shipped in `bioetl-provider-health-v2.json`.
+### 37. Inspect Full Provider Causes
+
+Shipped in `bioetl-provider-health-v2.json`.

@@ -7,7 +7,7 @@ import json
 import pytest
 
 from memory.handoff import HandoffRecord
-from memory.records import ActorIdentity, RecordEnvelope, RecordType
+from memory.records import ActorIdentity, RecordEnvelope, RecordScope, RecordType
 
 pytestmark = pytest.mark.unit
 
@@ -16,11 +16,7 @@ def _envelope() -> RecordEnvelope:
     return RecordEnvelope.create(
         record_id="handoff-1",
         record_type=RecordType.WORKING,
-        repo_id="bioetl",
-        git_commit="b" * 40,
-        branch="main",
-        worktree_id="worktree-a",
-        task_id="issue-7190",
+        scope=RecordScope("bioetl", "b" * 40, "main", "worktree-a", "issue-7190"),
         actor=ActorIdentity(runtime="codex", agent="orchestrator", model=None),
         source_refs=("src/memory/evidence.py",),
         created_at="2026-07-29T00:00:00+00:00",

@@ -29,6 +29,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
 from bioetl.application.observability.control_plane_evidence.retention import (
     ControlPlaneLifecyclePlanner,
     build_retention_checks,
+    serialize_resolution_issues,
     summarize_retention_artifacts,
 )
 from bioetl.application.observability.control_plane_evidence.service_support import (
@@ -91,14 +92,17 @@ class ControlPlaneEvidenceService:
 
     def manifest_validation(self, *, scope: EvidenceScopeContext) -> dict[str, object]:
         """Return manifest parsing, schema, version, and contract compatibility."""
+        raw_inspection = None
+        if scope.manifest is not None and self.manifest_inspector is not None:
+            raw_inspection = self.manifest_inspector.inspect_raw_manifest(
+                scope.manifest.manifest_id
+            )
         checks = (
             (unresolved_scope_check(scope.resolved_via),)
             if scope.manifest is None
             else build_manifest_checks(
                 scope.manifest,
-                self.manifest_inspector.inspect_raw_manifest(scope.manifest.manifest_id)
-                if self.manifest_inspector is not None
-                else None,
+                raw_inspection,
             )
         )
         return service_payload(
@@ -198,6 +202,7 @@ class ControlPlaneEvidenceService:
                 "cutoff": plan.cutoff.isoformat(),
                 "artifacts": summarize_retention_artifacts(relevant_artifacts),
                 "retention_plan_scope": "manifest",
+                "resolution_issues": serialize_resolution_issues(plan),
             },
             ledger_entries=ledger_entries(self.ledger_port, scope.manifest),
         )

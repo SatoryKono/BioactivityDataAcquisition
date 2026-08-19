@@ -10,6 +10,7 @@
     "bioetl_circuit_breaker_state",
     "bioetl_control_plane_checkpoint_evidence_status",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_reads_total",
     "bioetl_control_plane_run_type_universe",
@@ -67,6 +68,7 @@
     "bioetl_provider_health_check_total_12h",
     "bioetl_provider_health_check_total_15m",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_rate_limiter_tokens_available",
     "bioetl_record_flow_invariants_total",
     "bioetl_records_processed_total",
@@ -413,6 +415,11 @@
     "bioetl_bronze_write_total_duration_seconds",
     "bioetl_checkpoint_operator_duration_seconds",
     "bioetl_checkpoint_operator_operations_total",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
+    "bioetl_control_plane_ledger_present",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_read_duration_seconds",
     "bioetl_control_plane_reads_total",
     "bioetl_data_freshness_seconds",
@@ -437,6 +444,8 @@
     "bioetl_metadata_write_outcomes_total",
     "bioetl_observability_events_total",
     "bioetl_output_artifact_publication_events_total",
+    "bioetl_provider_health_observed_timestamp_seconds",
+    "bioetl_provider_observed_universe",
     "bioetl_quarantine_operator_duration_seconds",
     "bioetl_quarantine_operator_operations_total",
     "bioetl_rate_limiter_tokens_available",
@@ -504,13 +513,19 @@
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
     "bioetl_control_plane_checkpoint_evidence_status",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_current_evidence_status",
     "bioetl_control_plane_current_status",
     "bioetl_control_plane_current_status_trusted",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
@@ -643,7 +658,9 @@
     "bioetl_provider_health_check_success_15m",
     "bioetl_provider_health_check_total_12h",
     "bioetl_provider_health_check_total_15m",
+    "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
     "bioetl_publication_raw_vocab_unknown_total",
@@ -872,11 +889,16 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
@@ -943,7 +965,9 @@
     "bioetl_pipeline_stage_expected",
     "bioetl_policy_violations_total",
     "bioetl_probe_mode_fallback_total",
+    "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
     "bioetl_quarantine_operator_operations_total",
@@ -984,9 +1008,6 @@
     "bioetl_workflow_current_status",
     "bioetl_workflow_expected",
     "bioetl_workflow_pipeline_expected",
-    "bioetl_workflow_reconciliation_rows_deleted_total",
-    "bioetl_workflow_reconciliation_rows_retained_total",
-    "bioetl_workflow_reconciliation_rows_scanned_total",
     "bioetl_workflow_row_reconciliation_excluded_rows_total",
     "bioetl_workflow_row_reconciliation_kept_rows_total",
     "bioetl_workflow_row_reconciliation_left_rows_total",
@@ -2460,11 +2481,16 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
@@ -2544,7 +2570,9 @@
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
     "bioetl_quarantine_operator_operations_total",
@@ -2678,6 +2706,15 @@
     ],
     "bioetl_processed_records_silver_valid_current": [
       "src/bioetl/interfaces/http/_processed_records_table_support.py"
+    ],
+    "bioetl_workflow_reconciliation_rows_deleted_total": [
+      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
+    ],
+    "bioetl_workflow_reconciliation_rows_retained_total": [
+      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
+    ],
+    "bioetl_workflow_reconciliation_rows_scanned_total": [
+      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
     ]
   },
   "helper_backed_live_metrics": [
@@ -2698,7 +2735,10 @@
     "bioetl_processed_records_silver_filtered_out_current",
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
-    "bioetl_processed_records_silver_valid_current"
+    "bioetl_processed_records_silver_valid_current",
+    "bioetl_workflow_reconciliation_rows_deleted_total",
+    "bioetl_workflow_reconciliation_rows_retained_total",
+    "bioetl_workflow_reconciliation_rows_scanned_total"
   ],
   "live_metrics": [
     "bioetl_adapter_batch_size",
@@ -2740,11 +2780,16 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
@@ -2824,7 +2869,9 @@
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
     "bioetl_quarantine_operator_operations_total",
@@ -2994,13 +3041,19 @@
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
     "bioetl_control_plane_checkpoint_evidence_status",
+    "bioetl_control_plane_checkpoint_present",
+    "bioetl_control_plane_current_evidence_status",
     "bioetl_control_plane_current_status",
     "bioetl_control_plane_current_status_trusted",
+    "bioetl_control_plane_integrity_pair_present",
+    "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
@@ -3133,7 +3186,9 @@
     "bioetl_provider_health_check_success_15m",
     "bioetl_provider_health_check_total_12h",
     "bioetl_provider_health_check_total_15m",
+    "bioetl_provider_health_observed_timestamp_seconds",
     "bioetl_provider_health_status",
+    "bioetl_provider_observed_universe",
     "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
     "bioetl_publication_raw_vocab_unknown_total",
@@ -3289,6 +3344,9 @@
     "bioetl_control_plane_ledger_appends_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_control_plane_manifest_present": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_control_plane_manifest_writes_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
@@ -3461,6 +3519,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_provider_health_status": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_observed_universe": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_rate_limiter_tokens_available": [
@@ -3657,18 +3718,6 @@
       "approved_max_series=500",
       "runtime_emitter_count=3",
       "label_keys=provider"
-    ],
-    "bioetl_pipeline_runs_total": [
-      "observed_series_count=0",
-      "approved_max_series=500",
-      "runtime_emitter_count=3",
-      "label_keys=pipeline,run_type,status"
-    ],
-    "bioetl_records_processed_total": [
-      "observed_series_count=0",
-      "approved_max_series=500",
-      "runtime_emitter_count=3",
-      "label_keys=pipeline,run_type,stage"
     ]
   },
   "runtime_cardinality_observed_series": {
@@ -3789,10 +3838,22 @@
     "bioetl_composite_source_selection_total": [
       "observed_series_count=0"
     ],
+    "bioetl_control_plane_checkpoint_present": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_integrity_pair_present": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_last_observed_timestamp_seconds": [
+      "observed_series_count=0"
+    ],
     "bioetl_control_plane_ledger_append_duration_seconds": [
       "observed_series_count=0"
     ],
     "bioetl_control_plane_ledger_appends_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_ledger_present": [
       "observed_series_count=0"
     ],
     "bioetl_control_plane_lifecycle_apply_total": [
@@ -3802,6 +3863,9 @@
       "observed_series_count=1"
     ],
     "bioetl_control_plane_lifecycle_deleted_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_control_plane_manifest_present": [
       "observed_series_count=0"
     ],
     "bioetl_control_plane_manifest_write_duration_seconds": [
@@ -4008,7 +4072,13 @@
     "bioetl_probe_mode_fallback_total": [
       "observed_series_count=0"
     ],
+    "bioetl_provider_health_observed_timestamp_seconds": [
+      "observed_series_count=0"
+    ],
     "bioetl_provider_health_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_provider_observed_universe": [
       "observed_series_count=0"
     ],
     "bioetl_publication_raw_vocab_unknown_total": [
@@ -4165,17 +4235,13 @@
   "runtime_cardinality_review_candidates": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds",
-    "bioetl_pipeline_runs_total",
-    "bioetl_records_processed_total"
+    "bioetl_health_check_latency_seconds"
   ],
   "runtime_cardinality_review_required": [],
   "runtime_cardinality_reviewed": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds",
-    "bioetl_pipeline_runs_total",
-    "bioetl_records_processed_total"
+    "bioetl_health_check_latency_seconds"
   ],
   "runtime_cardinality_threshold_violations": [],
   "runtime_emitters": {
@@ -4288,11 +4354,23 @@
     "bioetl_composite_source_selection_total": [
       "src/bioetl/infrastructure/storage/lineage_persistence.py"
     ],
+    "bioetl_control_plane_checkpoint_present": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
+    ],
+    "bioetl_control_plane_integrity_pair_present": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
+    ],
+    "bioetl_control_plane_last_observed_timestamp_seconds": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
+    ],
     "bioetl_control_plane_ledger_append_duration_seconds": [
       "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_control_plane_ledger_appends_total": [
       "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
+    ],
+    "bioetl_control_plane_ledger_present": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
     ],
     "bioetl_control_plane_lifecycle_apply_total": [
       "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py"
@@ -4302,6 +4380,9 @@
     ],
     "bioetl_control_plane_lifecycle_deleted_total": [
       "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py"
+    ],
+    "bioetl_control_plane_manifest_present": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py"
     ],
     "bioetl_control_plane_manifest_write_duration_seconds": [
       "src/bioetl/infrastructure/control_plane/_file_run_manifest_persistence.py"
@@ -4432,7 +4513,6 @@
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
     "bioetl_health_check_success_total": [
-      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/infrastructure/adapters/_health_check_observability.py"
     ],
     "bioetl_http_request_duration_seconds": [
@@ -4505,7 +4585,6 @@
     ],
     "bioetl_pipeline_runs_total": [
       "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
-      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_pipeline_stage_expected": [
@@ -4517,9 +4596,16 @@
     "bioetl_probe_mode_fallback_total": [
       "src/bioetl/application/observability/observer_health_mixin.py"
     ],
+    "bioetl_provider_health_observed_timestamp_seconds": [
+      "src/bioetl/infrastructure/control_plane/provider_health_evidence.py"
+    ],
     "bioetl_provider_health_status": [
       "src/bioetl/application/observability/observer_health_mixin.py",
       "src/bioetl/infrastructure/adapters/http/_health_monitor_observability.py"
+    ],
+    "bioetl_provider_observed_universe": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
+      "src/bioetl/infrastructure/control_plane/provider_health_evidence.py"
     ],
     "bioetl_publication_raw_vocab_unknown_total": [
       "src/bioetl/application/pipelines/common/publication_vocab_observability.py"
@@ -4547,8 +4633,7 @@
     ],
     "bioetl_records_processed_total": [
       "src/bioetl/application/core/_quarantine_metrics_support.py",
-      "src/bioetl/application/core/batch_metrics.py",
-      "src/bioetl/application/observability/current_metrics_rehydrate.py"
+      "src/bioetl/application/core/batch_metrics.py"
     ],
     "bioetl_replay_drift_events_total": [
       "src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py"
@@ -4611,7 +4696,6 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_stage_records_total": [
-      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_storage_optimization_total": [
@@ -4644,15 +4728,6 @@
     ],
     "bioetl_workflow_pipeline_expected": [
       "src/bioetl/application/services/workflow/workflow_runner_support.py"
-    ],
-    "bioetl_workflow_reconciliation_rows_deleted_total": [
-      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
-    ],
-    "bioetl_workflow_reconciliation_rows_retained_total": [
-      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
-    ],
-    "bioetl_workflow_reconciliation_rows_scanned_total": [
-      "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
     ],
     "bioetl_workflow_row_reconciliation_excluded_rows_total": [
       "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"

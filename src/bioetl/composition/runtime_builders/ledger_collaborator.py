@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast, TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
@@ -138,58 +138,10 @@ def _attach_artifact_recorder(
     return True
 
 
-def _metadata_from_layer_writer(writer: object) -> object | None:
-    """Resolve a metadata writer from one layer storage writer."""
-    writer_metadata = None
-    for accessor_name in (
-        "metadata_writer",
-        "get_metadata_writer",
-        "metadata",
-    ):
-        accessor = getattr(writer, accessor_name, None)
-        if callable(accessor) and accessor_name.startswith("get_"):
-            try:
-                writer_metadata = accessor()
-            except (AttributeError, RuntimeError, TypeError, ValueError):
-                writer_metadata = None
-        elif accessor is not None and not callable(accessor):
-            writer_metadata = accessor
-        if writer_metadata is not None:
-            return cast("object | None", writer_metadata)
-    return cast(object | None, getattr(writer, "_metadata_writer", None))
-
-
-def _collect_metadata_writer_candidates(services: object) -> list[object]:
-    candidates: list[object] = []
-    metadata_writer = getattr(services, "metadata_writer", None)
-    if metadata_writer is not None:
-        candidates.append(metadata_writer)
-
-    storage = getattr(services, "storage", None)
-    if storage is None:
-        return candidates
-
-    for writer_name in ("bronze", "silver", "gold"):
-        writer = getattr(storage, writer_name, None)
-        if writer is None:
-            continue
-        # Prefer public contract accessors; fall back to legacy private field.
-        writer_metadata = _metadata_from_layer_writer(writer)
-        if writer_metadata is not None:
-            candidates.append(writer_metadata)
-    return candidates
-
-
-def _iter_unique_candidates(candidates: list[object]) -> list[object]:
-    unique_candidates: list[object] = []
-    seen: set[int] = set()
-    for candidate in candidates:
-        candidate_id = id(candidate)
-        if candidate_id in seen:
-            continue
-        seen.add(candidate_id)
-        unique_candidates.append(candidate)
-    return unique_candidates
+from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
+    _collect_metadata_writer_candidates,
+    _iter_unique_candidates,
+)
 
 
 def _attach_candidate_artifact_recorder(
@@ -209,12 +161,34 @@ def _attach_candidate_artifact_recorder(
         return "failed"
 
 
+def _attach_contract_evidence_recorder(
+    runner: PipelineRunnerProtocol,
+    run_ledger_service: RunLedgerService,
+) -> None:
+    attach = getattr(runner, "attach_contract_evidence_recorder", None)
+    if not callable(attach):
+        return
+    ledger_port = getattr(run_ledger_service, "ledger_port", None)
+    base_path = getattr(ledger_port, "base_path", None)
+    if base_path is None:
+        return
+    from pathlib import Path
+
+    from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
+        FileContractEvidenceRecorder,
+    )
+
+    manifest_root = Path(base_path).parent / "run_manifest"
+    attach(FileContractEvidenceRecorder(base_path=manifest_root))
+
+
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
 ) -> ArtifactRecorderAttachmentResult:
     """Attach ledger collaborators to the runner and its metadata writers."""
     runner.attach_run_ledger_service(run_ledger_service)
+    _attach_contract_evidence_recorder(runner, run_ledger_service)
 
     services = getattr(runner, "services", None)
     if services is None:

@@ -164,7 +164,9 @@ def _apply_invalid_record_policy(
     return replace(
         outcome,
         disposition=policy_disposition,
-        disposition_reason=(f"invalid_record_policy={dq_config.invalid_record_policy}"),
+        disposition_reason=(
+            f"invalid_record_policy={dq_config.invalid_record_policy}"
+        ),
     )
 
 

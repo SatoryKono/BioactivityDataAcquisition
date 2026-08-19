@@ -36,11 +36,13 @@ if TYPE_CHECKING:
     )
     from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
 _WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 
 class BatchWriterIOMixin:
     """Layer write orchestration extracted from BatchWriter."""
+
     # Host attributes from BatchWriter MRO (runtime-typed by concrete class).
     _context: PipelineContext
     _storage: BatchWriteStorageProtocol
@@ -81,10 +83,7 @@ class BatchWriterIOMixin:
 
     def _resolve_gold_ingestion_ts(self) -> datetime:
         """Return the deterministic timestamp anchor for Gold write side effects."""
-        replay_timestamp_anchor = self._context.replay_timestamp_anchor
-        if replay_timestamp_anchor is not None:
-            return replay_timestamp_anchor
-        return self._context.started_at
+        return self._context.replay_timestamp_anchor or self._context.started_at
 
     async def write_bronze(
         self,
@@ -239,6 +238,7 @@ class BatchWriterIOMixin:
         except BaseException:
             self._end_span(span)
             raise
+
     def _prepare_gold_records(
         self,
         records: list[GoldRecord],

@@ -112,10 +112,13 @@ Nested titles (must match JSON):
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
 
-## Shipped panel title synchronization
+## Additional shipped panels
+### 16. Inspect Recent Runs (last 20)
 
-| ID | Panel title | Type | Notes |
-|---:|---|---|---|
-| 3021 | Inspect Recent Runs (last 20) | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 3022 | Inspect Full Run Identity | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
-| 3023 | Inspect Full Processed Records | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+Shipped in `bioetl-run-explorer-v1.json`.
+### 17. Inspect Full Run Identity
+
+Shipped in `bioetl-run-explorer-v1.json`.
+### 18. Inspect Full Processed Records
+
+Shipped in `bioetl-run-explorer-v1.json`.

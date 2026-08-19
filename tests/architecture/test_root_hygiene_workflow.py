@@ -113,10 +113,10 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     )
 
     assert "Branch Protection Verification" in policy
-    assert "Activated and re-verified on `2026-08-11`" in policy
+    assert "Activated and re-verified on `2026-08-19`" in policy
     assert "#3380" in policy
     assert "root-hygiene-required-check" in policy
     assert "/rules/15730586" in policy
-    assert "Enforcement: `active`" in policy
+    assert "Enforcement: `disabled`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
-    assert "Direct merge allowed; no active required-check ruleset" not in policy
+    assert "Direct merge allowed; no active required-check ruleset" in policy

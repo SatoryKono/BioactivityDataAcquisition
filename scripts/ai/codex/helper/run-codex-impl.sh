@@ -74,7 +74,12 @@ if [[ -n "${BIOETL_CODEX_DIRECT_BIN:-}" ]]; then
         exit 1
     fi
     direct_codex_bin="${BIOETL_CODEX_DIRECT_BIN}"
+    direct_codex_prefix="$(cd "$(dirname "${direct_codex_bin}")/.." && pwd)"
     unset BIOETL_CODEX_DIRECT_BIN
+    # Keep Codex's npm update target aligned with the managed direct binary
+    # instead of falling through to an ambient npm prefix such as NVM's.
+    export NPM_CONFIG_PREFIX="${direct_codex_prefix}"
+    export npm_config_prefix="${direct_codex_prefix}"
     ensure_mcp_ready "${direct_codex_bin}" || exit 1
     exec "${direct_codex_bin}" "$@"
 fi

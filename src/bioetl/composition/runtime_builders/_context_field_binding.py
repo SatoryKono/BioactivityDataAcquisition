@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import is_dataclass, replace
+from dataclasses import fields, is_dataclass, replace
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -24,34 +24,72 @@ def bind_context_fields[ContextT](
     if not updates:
         return context
     if is_dataclass(context) and not isinstance(context, type):
-        # Validate keys against dataclass fields before replace.
-        field_names = {field.name for field in context.__dataclass_fields__.values()}
-        unknown = sorted(set(updates) - field_names)
-        if unknown:
-            raise TypeError(
-                f"{unsupported_message}: unknown context fields: {', '.join(unknown)}"
-            )
-        return cast("ContextT", replace(cast("DataclassInstance", context), **updates))
+        return _replace_dataclass_context(
+            context,
+            updates=updates,
+            unsupported_message=unsupported_message,
+        )
     if hasattr(context, "__dict__") and not isinstance(context, type):
-        # Shallow copy via type(context)(**payload) to avoid mutating the input.
-        payload = {
-            key: value
-            for key, value in vars(context).items()
-            if not key.startswith("_")
-        }
-        payload.update(updates)
-        try:
-            return type(context)(**payload)
-        except TypeError:
-            # Fallback: new instance + setattr for hosts that reject **kwargs.
-            try:
-                clone = object.__new__(type(context))
-            except TypeError as exc:
-                raise TypeError(unsupported_message) from exc
-            for key, value in payload.items():
-                try:
-                    object.__setattr__(clone, key, value)
-                except (AttributeError, TypeError) as exc:
-                    raise TypeError(unsupported_message) from exc
-            return clone
+        return _copy_object_context(
+            context,
+            updates=updates,
+            unsupported_message=unsupported_message,
+        )
     raise TypeError(unsupported_message)
+
+
+def _replace_dataclass_context[ContextT](
+    context: ContextT,
+    *,
+    updates: dict[str, object],
+    unsupported_message: str,
+) -> ContextT:
+    """Validate dataclass fields and return a replaced context."""
+    dataclass_context = cast("DataclassInstance", context)
+    field_names = {field.name for field in fields(dataclass_context)}
+    unknown = sorted(set(updates) - field_names)
+    if unknown:
+        raise TypeError(
+            f"{unsupported_message}: unknown context fields: {', '.join(unknown)}"
+        )
+    return cast("ContextT", replace(dataclass_context, **updates))
+
+
+def _copy_object_context[ContextT](
+    context: ContextT,
+    *,
+    updates: dict[str, object],
+    unsupported_message: str,
+) -> ContextT:
+    """Shallow-copy a non-dataclass context without mutating its input."""
+    payload = {
+        key: value for key, value in vars(context).items() if not key.startswith("_")
+    }
+    payload.update(updates)
+    try:
+        return type(context)(**payload)
+    except TypeError:
+        return _copy_object_context_without_constructor(
+            context,
+            payload=payload,
+            unsupported_message=unsupported_message,
+        )
+
+
+def _copy_object_context_without_constructor[ContextT](
+    context: ContextT,
+    *,
+    payload: dict[str, object],
+    unsupported_message: str,
+) -> ContextT:
+    """Clone one context whose constructor rejects keyword payloads."""
+    try:
+        clone = object.__new__(type(context))
+    except TypeError as exc:
+        raise TypeError(unsupported_message) from exc
+    for key, value in payload.items():
+        try:
+            object.__setattr__(clone, key, value)
+        except (AttributeError, TypeError) as exc:
+            raise TypeError(unsupported_message) from exc
+    return clone

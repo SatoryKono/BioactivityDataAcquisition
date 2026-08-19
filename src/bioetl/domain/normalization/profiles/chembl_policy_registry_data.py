@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 __all__ = [
-    "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA",
     "ChemblControlledVocabularyFamily",
     "ChemblOntologyPolicyFamily",
     "ChemblPolicyRegistryData",
@@ -65,17 +64,3 @@ class ChemblPolicyRegistryData:
     ontology_families: tuple[ChemblOntologyPolicyFamily, ...]
     publication_classification_fields: tuple[str, ...]
     reference_identifier_families: tuple[ChemblReferenceIdentifierFamily, ...] = ()
-
-
-DEFAULT_CHEMBL_POLICY_REGISTRY_DATA: ChemblPolicyRegistryData
-
-
-def __getattr__(name: str) -> object:
-    """Resolve the default payload lazily after policy model declaration."""
-    if name != "DEFAULT_CHEMBL_POLICY_REGISTRY_DATA":
-        raise AttributeError(name)
-    from bioetl.domain.normalization.profiles._chembl_policy_registry_defaults import (
-        DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
-    )
-
-    return DEFAULT_CHEMBL_POLICY_REGISTRY_DATA

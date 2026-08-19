@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.batch_transformer_state import *  # noqa: F403 - compatibility facade; explicit __all__ below
+from bioetl.application.core.batch_transformer_state import *  # noqa: F403
 from bioetl.application.core.batch_transformer_state import (
     __all__ as _STATE_EXPORTS,
 )

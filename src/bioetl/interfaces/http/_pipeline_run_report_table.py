@@ -149,6 +149,32 @@ def _parse_grafana_ms(value: object) -> int | None:
         return None
 
 
+def _coverage_offset_outside(
+    *,
+    started_ms: int,
+    end_ms: int,
+    grafana_from_ms: int,
+    grafana_to_ms: int,
+) -> tuple[str, str]:
+    """Describe a run that is not fully inside the Grafana window."""
+    if end_ms < grafana_from_ms:
+        hours = (grafana_from_ms - end_ms) / 3_600_000
+        return "outside", f"{hours:.1f}h before window"
+    if started_ms > grafana_to_ms:
+        hours = (started_ms - grafana_to_ms) / 3_600_000
+        return "outside", f"{hours:.1f}h after window"
+    return "partial", "overlaps window"
+
+
+def _coverage_chip(covers: str) -> str:
+    """Map coverage projection to the first-window IN RANGE / OUT OF RANGE chip."""
+    if covers == "yes":
+        return "IN RANGE"
+    if covers in {"outside", "partial"}:
+        return "OUT OF RANGE"
+    return "UNKNOWN"
+
+
 def _coverage_fields(
     *,
     started_ms: int | None,
@@ -169,17 +195,32 @@ def _coverage_fields(
     end_ms = completed_ms if completed_ms is not None else started_ms
     if started_ms >= grafana_from_ms and end_ms <= grafana_to_ms:
         return "yes", "0h"
-    if end_ms < grafana_from_ms:
-        hours = (grafana_from_ms - end_ms) / 3_600_000
-        return "outside", f"{hours:.1f}h before window"
-    if started_ms > grafana_to_ms:
-        hours = (started_ms - grafana_to_ms) / 3_600_000
-        return "outside", f"{hours:.1f}h after window"
-    return "partial", "overlaps window"
+    return _coverage_offset_outside(
+        started_ms=started_ms,
+        end_ms=end_ms,
+        grafana_from_ms=grafana_from_ms,
+        grafana_to_ms=grafana_to_ms,
+    )
 
 
-def _funnel_summary_values(funnel: object) -> tuple[object, int]:
-    """Extract Gold output and contract exclusions from a funnel payload."""
+def _excluded_by_contract_count(removals: object) -> int:
+    """Sum excluded_by_contract counts from one stage's removals list."""
+    total = 0
+    if not isinstance(removals, list):
+        return total
+    for item in removals:
+        if not isinstance(item, dict):
+            continue
+        if item.get("outcome") != "excluded_by_contract":
+            continue
+        count = item.get("count")
+        if isinstance(count, int):
+            total += count
+    return total
+
+
+def _funnel_gold_and_excluded(funnel: object) -> tuple[object, int]:
+    """Extract gold records_out and excluded_by_contract counts from funnel stages."""
     gold_out: object = ""
     excluded = 0
     if not isinstance(funnel, list):
@@ -189,56 +230,33 @@ def _funnel_summary_values(funnel: object) -> tuple[object, int]:
             continue
         if stage.get("stage_id") == "gold":
             gold_out = stage.get("records_out")
-        removals = stage.get("removals")
-        if not isinstance(removals, list):
-            continue
-        for item in removals:
-            if not isinstance(item, dict) or item.get("outcome") != "excluded_by_contract":
-                continue
-            count = item.get("count")
-            if isinstance(count, int):
-                excluded += count
+        excluded += _excluded_by_contract_count(stage.get("removals"))
     return gold_out, excluded
 
 
-def _run_range_bounds(
+def _padded_range_ms(
     started_ms: int | None, completed_ms: int | None
 ) -> tuple[str, str]:
-    """Return Grafana millisecond bounds padded around a selected run."""
+    """Return padded from/to epoch-ms strings for Grafana range links."""
     if started_ms is None:
         return "", ""
-    padding_ms = int(_RANGE_PAD.total_seconds() * 1000)
+    pad_ms = int(_RANGE_PAD.total_seconds() * 1000)
     end_ms = completed_ms if completed_ms is not None else started_ms
-    return str(started_ms - padding_ms), str(end_ms + padding_ms)
+    return str(started_ms - pad_ms), str(end_ms + pad_ms)
 
 
-def _summary_fields(
-    *,
-    run_id: str,
-    status: str,
-    started_at: str,
-    completed_at: str,
-    gold_out: object,
-    excluded: int,
-    covers: str,
-    offset: str,
-    from_ms: str,
-    to_ms: str,
-) -> dict[str, str]:
-    """Build the stable wide row shared by rows and Grafana summary views."""
-    return {
-        "run_id": run_id,
-        "status": status,
-        "started_at": started_at,
-        "completed_at": completed_at,
-        "gold_records_out": str(gold_out),
-        "excluded_by_contract": str(excluded),
-        "covers_selected_run": covers,
-        "coverage_offset": offset,
-        "from_ms": from_ms,
-        "to_ms": to_ms,
-        "set_range_to_run": "Set range to run (started_at-5m .. completed_at+5m)",
-    }
+def _identity_summary_fields(
+    payload: dict[str, object],
+) -> tuple[dict[str, object], str, str, str, str]:
+    """Return identity dict plus run_id/status/started_at/completed_at strings."""
+    identity = payload.get("identity")
+    if not isinstance(identity, dict):
+        identity = {}
+    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
+    status = str(identity.get("status") or payload.get("status") or "")
+    started_at = str(identity.get("started_at") or "")
+    completed_at = str(identity.get("completed_at") or "")
+    return identity, run_id, status, started_at, completed_at
 
 
 def _summary_rows_pipeline_run_report(
@@ -247,17 +265,20 @@ def _summary_rows_pipeline_run_report(
     grafana_from: object = None,
     grafana_to: object = None,
 ) -> dict[str, object]:
-    """Build compact selected-run rows and a wide summary for Grafana tables."""
-    identity_candidate = payload.get("identity")
-    identity = identity_candidate if isinstance(identity_candidate, dict) else {}
-    gold_out, excluded = _funnel_summary_values(payload.get("funnel"))
-    run_id = str(identity.get("run_id") or payload.get("run_id") or "")
-    status = str(identity.get("status") or payload.get("status") or "")
-    started_at = str(identity.get("started_at") or "")
-    completed_at = str(identity.get("completed_at") or "")
+    """Compact selected-run projection for entry-dashboard summary tables.
+
+    ``rows`` is the parameter/value shape used by existing Infinity tables.
+    ``summary`` is a one-row wide table so Grafana data links can set
+    ``from``/``to`` to started_at-5m .. completed_at+5m without rewriting
+    ``$__from`` silently.
+    """
+    identity, run_id, status, started_at, completed_at = _identity_summary_fields(
+        payload
+    )
+    gold_out, excluded = _funnel_gold_and_excluded(payload.get("funnel"))
     started_ms = _parse_iso_to_ms(started_at)
     completed_ms = _parse_iso_to_ms(completed_at)
-    from_ms, to_ms = _run_range_bounds(started_ms, completed_ms)
+    from_ms, to_ms = _padded_range_ms(started_ms, completed_ms)
     covers, offset = _coverage_fields(
         started_ms=started_ms,
         completed_ms=completed_ms,
@@ -265,25 +286,27 @@ def _summary_rows_pipeline_run_report(
         grafana_to_ms=_parse_grafana_ms(grafana_to),
         status=status,
     )
-    summary_row = _summary_fields(
-        run_id=run_id,
-        status=status,
-        started_at=started_at,
-        completed_at=completed_at,
-        gold_out=gold_out,
-        excluded=excluded,
-        covers=covers,
-        offset=offset,
-        from_ms=from_ms,
-        to_ms=to_ms,
-    )
+    set_range = "Set range to run (started_at-5m .. completed_at+5m)"
+    coverage_chip = _coverage_chip(covers)
+    summary_row = {
+        "run_id": run_id,
+        "status": status,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "gold_records_out": str(gold_out),
+        "excluded_by_contract": str(excluded),
+        "covers_selected_run": covers,
+        "coverage_chip": coverage_chip,
+        "coverage_offset": offset,
+        "from_ms": str(from_ms),
+        "to_ms": str(to_ms),
+        "set_range_to_run": set_range,
+    }
+    rows = [{"parameter": key, "value": value} for key, value in summary_row.items()]
     return {
         "schema_version": "pipeline_run_report_v1",
         "view": "summary",
-        "rows": [
-            {"parameter": parameter, "value": value}
-            for parameter, value in summary_row.items()
-        ],
+        "rows": rows,
         "summary": [summary_row],
         "status": status or "ok",
         "run_id": run_id,

@@ -66,7 +66,12 @@ def _run(args: list[str], *, timeout: float = 15.0) -> tuple[int, str, str]:
 
 
 def _load_contract(path: Path) -> dict[str, Any]:
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    safe_path = resolve_output_path(path, root=REPO_ROOT)
+    payload = yaml.safe_load(
+        safe_path.read_text(encoding="utf-8")  # NOSONAR -- confined above
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"contract must be a mapping: {path}")
     return payload

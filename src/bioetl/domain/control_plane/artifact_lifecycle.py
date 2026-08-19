@@ -13,6 +13,8 @@ __all__ = [
     "ControlPlaneArtifactLifecyclePolicy",
     "ControlPlaneArtifactRef",
     "ControlPlaneArtifactReplayImpact",
+    "ControlPlaneArtifactResolutionIssue",
+    "ControlPlaneArtifactResolutionIssueCode",
     "ControlPlaneArtifactSurface",
 ]
 
@@ -44,6 +46,25 @@ class ControlPlaneArtifactReplayImpact(StrEnum):
     UNPROTECTED_REPLAY_EVIDENCE_DELETE_CANDIDATE = (
         "unprotected_replay_evidence_delete_candidate"
     )
+
+
+class ControlPlaneArtifactResolutionIssueCode(StrEnum):
+    """Typed selected-run resolution failures that must not invent paths."""
+
+    LINEAGE_INDEX_MISSING = "lineage_index_missing"
+    LINEAGE_INDEX_CORRUPT = "lineage_index_corrupt"
+    CHECKPOINT_INDEX_MISSING = "checkpoint_index_missing"
+    CHECKPOINT_INDEX_CORRUPT = "checkpoint_index_corrupt"
+    SNAPSHOT_URI_NOT_RECORDED = "snapshot_uri_not_recorded"
+
+
+@dataclass(frozen=True, slots=True)
+class ControlPlaneArtifactResolutionIssue:
+    """One bounded selected-run resolution issue without invented paths."""
+
+    code: ControlPlaneArtifactResolutionIssueCode
+    surface: ControlPlaneArtifactSurface
+    detail: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +117,7 @@ class ControlPlaneArtifactLifecyclePlan:
     cutoff: datetime
     dry_run: bool
     artifacts: tuple[ControlPlaneArtifactRef, ...]
+    resolution_issues: tuple[ControlPlaneArtifactResolutionIssue, ...] = ()
 
     @property
     def delete_count(self) -> int:

@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from pathlib import Path
+from time import monotonic
 from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import (
@@ -16,14 +17,19 @@ from bioetl.domain.control_plane import (
 )
 from bioetl.infrastructure.control_plane.file_artifact_lifecycle_planning import (
     _iter_artifact_refs,
-    _iter_artifact_refs_for_manifest,
+    _plan_manifest_artifact_refs,
     _resolve_protected_refs,
+    _resolve_protected_refs_for_manifest,
 )
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 __all__ = ["FileControlPlaneArtifactLifecycleStore"]
+
+# Warm GET of the same manifest must stay well under FORENSIC_ENDPOINT_TIMEOUT_SECONDS.
+# Do not raise the 12s forensic deadline; reuse a short-lived plan instead.
+_MANIFEST_PLAN_CACHE_TTL_SECONDS = 30.0
 
 
 @dataclass(slots=True)
@@ -33,6 +39,9 @@ class FileControlPlaneArtifactLifecycleStore:
     base_path: Path
     logger: LoggerPort | None = None
     metrics: MetricsPort | None = None
+    _manifest_plan_cache: dict[
+        tuple[str, int, bool], tuple[float, ControlPlaneArtifactLifecyclePlan]
+    ] = field(default_factory=dict, repr=False, compare=False)
 
     def plan(
         self,
@@ -72,24 +81,35 @@ class FileControlPlaneArtifactLifecycleStore:
         dry_run: bool = True,
     ) -> ControlPlaneArtifactLifecyclePlan:
         """Build a deterministic retention plan for one manifest/run only."""
+        cache_key = (manifest.manifest_id, policy.retention_days, dry_run)
+        cached = self._manifest_plan_cache.get(cache_key)
+        if cached is not None:
+            expires_at, plan = cached
+            if monotonic() < expires_at:
+                return plan
         cutoff = policy.now - timedelta(days=policy.retention_days)
-        protected_refs = _resolve_protected_refs(
-            base_path=self.base_path,
+        protected_refs = _resolve_protected_refs_for_manifest(
+            manifest=manifest,
             policy=policy,
-            cutoff=cutoff,
         )
-        artifacts = _iter_artifact_refs_for_manifest(
+        artifacts, issues = _plan_manifest_artifact_refs(
             base_path=self.base_path,
             cutoff=cutoff,
             protected_refs=protected_refs,
             manifest=manifest,
         )
-        return ControlPlaneArtifactLifecyclePlan(
+        plan = ControlPlaneArtifactLifecyclePlan(
             generated_at=policy.now,
             cutoff=cutoff,
             dry_run=dry_run,
             artifacts=artifacts,
+            resolution_issues=issues,
         )
+        self._manifest_plan_cache[cache_key] = (
+            monotonic() + _MANIFEST_PLAN_CACHE_TTL_SECONDS,
+            plan,
+        )
+        return plan
 
     def apply(
         self,

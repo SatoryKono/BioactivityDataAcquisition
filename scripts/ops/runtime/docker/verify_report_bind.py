@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -55,10 +56,21 @@ from bioetl.application.services.run_reports.source_identity import (
     resolve_runtime_source_identity,
 )
 from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight
+from scripts.engineering.common.repo_paths import (
+    ensure_local_http_url,
+    ensure_safe_cli_argv,
+)
 
 DEFAULT_OPS_URL = "http://127.0.0.1:8000"
 DEFAULT_CONTAINER = "bioetl"
 DEFAULT_MOUNT_TARGET = "/app/reports"
+
+
+def _validated_container_name(value: str) -> str:
+    """Return one bounded Docker object name safe for argv execution."""
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", value) is None:
+        raise ValueError(f"invalid Docker container name: {value!r}")
+    return value
 
 
 def _repo_root() -> Path:
@@ -99,8 +111,11 @@ def _host_reports_mount(repo: Path) -> Path:
 
 
 def _json_get(url: str, *, timeout: float = 5.0) -> dict[str, Any] | None:
+    safe_url = ensure_local_http_url(url)
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as response:
+        with urllib.request.urlopen(  # NOSONAR -- loopback URL validated above
+            safe_url, timeout=timeout
+        ) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
         print(f"WARN: ops HTTP unreachable at {url}: {exc}")
@@ -109,9 +124,12 @@ def _json_get(url: str, *, timeout: float = 5.0) -> dict[str, Any] | None:
 
 
 def _docker_inspect_mounts(container: str) -> list[dict[str, Any]] | None:
+    container = _validated_container_name(container)
     try:
         completed = subprocess.run(
-            ["docker", "inspect", container, "--format", "{{json .Mounts}}"],
+            ensure_safe_cli_argv(
+                ["docker", "inspect", container, "--format", "{{json .Mounts}}"]
+            ),
             check=False,
             capture_output=True,
             text=True,
@@ -138,19 +156,22 @@ def _docker_inspect_source_identity(
     container: str,
 ) -> RuntimeSourceIdentityResolutionResult | None:
     """Resolve the producer identity from container env, then its label."""
+    container = _validated_container_name(container)
     try:
         completed = subprocess.run(
-            [
-                "docker",
-                "inspect",
-                container,
-                "--format",
-                (
-                    '{"environment":{{json .Config.Env}},'
-                    '"label":{{json (index .Config.Labels '
-                    '"io.bioetl.dashboard-source-id")}}}'
-                ),
-            ],
+            ensure_safe_cli_argv(
+                [
+                    "docker",
+                    "inspect",
+                    container,
+                    "--format",
+                    (
+                        '{"environment":{{json .Config.Env}},'
+                        '"label":{{json (index .Config.Labels '
+                        '"io.bioetl.dashboard-source-id")}}}'
+                    ),
+                ]
+            ),
             check=False,
             capture_output=True,
             text=True,

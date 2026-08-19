@@ -20,7 +20,7 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-from scripts.engineering.common.repo_paths import resolve_output_path
+from scripts.engineering.common.repo_paths import resolve_cli_path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
@@ -108,12 +108,19 @@ def _run_junie(root: Path, mode: str) -> subprocess.CompletedProcess[str]:
     )
 
 
-def _write_report(path: Path, payload: dict[str, object]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _write_report(
+    path: Path,
+    payload: dict[str, object],
+    *,
+    root: Path,
+) -> Path:
+    report_path = resolve_cli_path(path, root=root)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary = report_path.with_suffix(report_path.suffix + ".tmp")
     temporary.write_text(content, encoding="utf-8")
-    os.replace(temporary, path)
+    os.replace(temporary, report_path)
+    return report_path
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -123,7 +130,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--approved", action="store_true")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args(argv)
-    root = args.root.resolve()
+    root = resolve_cli_path(args.root, root=REPO_ROOT)
     if args.mode == "sync" and not args.approved:
         parser.error("--mode sync requires explicit --approved")
 
@@ -154,9 +161,9 @@ def main(argv: list[str] | None = None) -> int:
         },
         "devin_validation_issues": validation,
     }
-    _write_report(args.report, payload)
+    report_path = _write_report(args.report, payload, root=root)
     ok = junie.returncode == 0 and not validation and not after
-    print(f"Runtime skill sync report: {args.report}")
+    print(f"Runtime skill sync report: {report_path}")
     if not ok:
         print("Runtime skill parity FAILED", file=sys.stderr)
         return 1

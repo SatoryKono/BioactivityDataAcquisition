@@ -7,7 +7,7 @@ from bioetl.application.core.batch_execution.contracts import (
     BatchExecutionStateProtocol,
     BatchResultBuilderProtocol,
 )
-from bioetl.application.core.batch_execution.lifecycle import *  # noqa: F403 - compatibility facade; explicit __all__ below
+from bioetl.application.core.batch_execution.lifecycle import *  # noqa: F403
 from bioetl.application.core.batch_execution.lifecycle import (
     __all__ as _LIFECYCLE_EXPORTS,
 )

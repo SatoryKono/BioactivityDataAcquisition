@@ -231,8 +231,7 @@ query, links, and operator fact.
   neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
   WARN/CRIT verdict.
 
-## Shipped panel title synchronization
+## Additional shipped panels
+### 38. Review Selected Run Summary
 
-| ID | Panel title | Type | Notes |
-|---:|---|---|---|
-| 9406 | Review Selected Run Summary | table | Shipped dashboard panel; see the corresponding JSON definition for query, scope and interaction details. |
+Shipped in `bioetl-dq-v2.json`.

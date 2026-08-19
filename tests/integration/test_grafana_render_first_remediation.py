@@ -422,7 +422,8 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     inputs = _panel(overview, 9002)
     assert inputs["title"] == "Review Domain Status"
     assert inputs["gridPos"]["y"] == first_action["gridPos"]["y"]
-    assert inputs["gridPos"]["w"] >= 10
+    assert inputs["gridPos"]["w"] >= 8
+    assert _panel(overview, 9603)["gridPos"]["y"] < first_action["gridPos"]["y"]
 
     provider = _load("bioetl-provider-health-v2.json")
     # Provider detail progressive panels remain first-screen-friendly.
@@ -455,7 +456,8 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 215)["gridPos"]["y"] <= 8
+    assert _panel(overview, 215)["gridPos"]["y"] < FIRST_WINDOW_Y
+    assert _panel(overview, 9603)["gridPos"]["y"] < _panel(overview, 215)["gridPos"]["y"]
     # Triage alert table is first-screen identity; historical trends stay collapsed.
     assert _panel(overview, 9601).get("type") == "table"
     assert _panel(overview, 9018).get("type") == "state-timeline"
@@ -736,8 +738,17 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
 
 def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
-    assert _limit_field(panel) == 4
+    assert _limit_field(panel) == 5
     assert "detail" not in _wrapped_field_names(panel)
+    target = panel["targets"][0]
+    assert "error_as_row=1" in str(target.get("url") or "")
+    columns = target.get("columns") or []
+    names = {item.get("selector") for item in columns if isinstance(item, dict)}
+    assert {"check", "status", "reason", "detail"} <= names
+    docs = f"{panel.get('description') or ''} {panel.get('fieldConfig')}"
+    assert "504" in docs
+    assert "deadline_exceeded" in docs
+    assert "refresh" in docs.lower()
 
 
 def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:

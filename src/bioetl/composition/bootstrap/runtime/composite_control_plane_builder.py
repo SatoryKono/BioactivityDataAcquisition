@@ -43,6 +43,9 @@ from bioetl.composition.services.versioning import get_code_revision_provenance
 from bioetl.domain.control_plane.run_manifest import RunManifest
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.control_plane import FileRunManifestStore
+from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
+    FileContractEvidenceRecorder,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -105,6 +108,9 @@ def _build_composite_control_plane_manifest(
         manifest_port=manifest_store,
         metrics=infra_context.metrics,
         clock=SystemClock(),
+        contract_evidence_recorder=FileContractEvidenceRecorder(
+            base_path=manifest_store.base_path
+        ),
         _manifest_id_factory=lambda: create_runtime_occurrence_id(
             "composite_run_manifest"
         ),

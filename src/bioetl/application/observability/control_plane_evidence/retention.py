@@ -79,6 +79,21 @@ def _manifest_snapshot_ids(manifest: RunManifest) -> set[str]:
     }
 
 
+def serialize_resolution_issues(
+    plan: ControlPlaneArtifactLifecyclePlan,
+) -> list[dict[str, object]]:
+    """Return typed selected-run resolution issues without invented paths."""
+    issues = getattr(plan, "resolution_issues", ())
+    return [
+        {
+            "code": issue.code.value,
+            "surface": issue.surface.value,
+            "detail": issue.detail,
+        }
+        for issue in issues
+    ]
+
+
 def summarize_retention_artifacts(
     artifacts: Iterable[ControlPlaneArtifactRef],
 ) -> list[dict[str, object]]:
@@ -105,5 +120,6 @@ def summarize_retention_artifacts(
 __all__ = [
     "ControlPlaneLifecyclePlanner",
     "build_retention_checks",
+    "serialize_resolution_issues",
     "summarize_retention_artifacts",
 ]

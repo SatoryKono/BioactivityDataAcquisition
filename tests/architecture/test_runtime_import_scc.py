@@ -27,25 +27,9 @@ SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
-REVIEWED_RUNTIME_SCC_BUDGET_MAX = 2
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 1
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
-    frozenset(
-        {
-            "bioetl.domain.normalization.profiles.chembl_policy_registry_data",
-            "bioetl.domain.normalization.profiles._chembl_policy_registry_defaults",
-        }
-    ): {
-        "owner": "bioetl.domain.normalization.profiles",
-        "review_date": "2026-09-30",
-        "linked_issue": "#4500",
-        "rationale": (
-            "ChEMBL normalization policy data/defaults remain in a reviewed "
-            "same-family cycle after the public policy-registry data module became "
-            "the canonical owner. The remaining default-data import cycle is "
-            "tracked separately from underscore twin import burn-down."
-        ),
-    },
     frozenset(
         {
             "bioetl.interfaces.http.control_plane_identity.anchor_values",

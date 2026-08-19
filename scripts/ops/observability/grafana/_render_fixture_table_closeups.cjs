@@ -104,6 +104,57 @@ function escapeHtml(s) {
     .replaceAll('"', "&quot;");
 }
 
+function selectedStates() {
+  const fixtureCase = arg("--fixture-case", "").trim();
+  const configuredStates = arg(
+    "--states",
+    "populated,valid_empty_or_unknown,backend_error,service_unavailable,empty_rows",
+  );
+  const states = (fixtureCase || configuredStates)
+    .split(",")
+    .map((state) => state.trim())
+    .filter(Boolean);
+  if (fixtureCase && states.length !== 1) {
+    throw new Error("--fixture-case must select exactly one case_id");
+  }
+  return states;
+}
+
+async function capturePanel(page, { fixtureRoot, stateDir, state, panelId, endpoint }) {
+  const fixturePath = path.join(fixtureRoot, endpoint, `${state}.json`);
+  if (!fs.existsSync(fixturePath)) {
+    console.error(`missing fixture ${fixturePath}`);
+    return null;
+  }
+  const payload = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+  const httpStatus =
+    state === "service_unavailable" || payload.http_status === 503 ? 503 : 200;
+  const html = tableHtml(TITLES[panelId], Number(panelId), state, httpStatus, payload);
+  const htmlPath = path.join(stateDir, `panel-${panelId}-${state}.html`);
+  fs.writeFileSync(htmlPath, html, "utf8");
+  await page.goto("file://" + htmlPath.replaceAll("\\", "/"), {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForTimeout(300);
+  const file = `trust-panel-${panelId}-${state}-closeup.png`;
+  const pngPath = path.join(stateDir, file);
+  await page.screenshot({ path: pngPath, fullPage: true });
+  const buf = fs.readFileSync(pngPath);
+  return {
+    panel_id: Number(panelId),
+    title: TITLES[panelId],
+    endpoint,
+    state,
+    http_status: httpStatus,
+    payload_status: payload.status,
+    row_count: Array.isArray(payload.rows) ? payload.rows.length : 0,
+    file,
+    bytes: buf.length,
+    sha256: crypto.createHash("sha256").update(buf).digest("hex"),
+    fixture: path.relative(process.cwd(), fixturePath).replaceAll("\\", "/"),
+  };
+}
+
 async function main() {
   const fixtureRoot = path.resolve(
     arg("--fixture-root", "tests/fixtures/grafana/control_plane_validation"),
@@ -114,21 +165,7 @@ async function main() {
       "reports/observability/grafana/visual-baseline-20260811/trust-closeups-by-state",
     ),
   );
-  const fixtureCase = arg("--fixture-case", "").trim();
-  const states = (fixtureCase
-    ? fixtureCase
-    : arg(
-        "--states",
-        "populated,valid_empty_or_unknown,backend_error,service_unavailable,empty_rows",
-      )
-  )
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (fixtureCase && states.length !== 1) {
-    console.error("--fixture-case must select exactly one case_id");
-    process.exit(2);
-  }
+  const states = selectedStates();
 
   const localNm = path.join(
     process.env.LOCALAPPDATA || "",
@@ -151,47 +188,19 @@ async function main() {
     fs.mkdirSync(stateDir, { recursive: true });
     const shots = [];
     for (const [panelId, endpoint] of Object.entries(PANEL_MAP)) {
-      const fixturePath = path.join(fixtureRoot, endpoint, `${state}.json`);
-      if (!fs.existsSync(fixturePath)) {
-        console.error(`missing fixture ${fixturePath}`);
-        continue;
-      }
-      const payload = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
-      const httpStatus =
-        state === "service_unavailable" || payload.http_status === 503 ? 503 : 200;
-      const html = tableHtml(
-        TITLES[panelId],
-        Number(panelId),
+      const shot = await capturePanel(page, {
+        fixtureRoot,
+        stateDir,
         state,
-        httpStatus,
-        payload,
-      );
-      const htmlPath = path.join(stateDir, `panel-${panelId}-${state}.html`);
-      fs.writeFileSync(htmlPath, html, "utf8");
-      await page.goto("file://" + htmlPath.replaceAll("\\", "/"), {
-        waitUntil: "domcontentloaded",
-      });
-      await page.waitForTimeout(300);
-      const file = `trust-panel-${panelId}-${state}-closeup.png`;
-      const pngPath = path.join(stateDir, file);
-      await page.screenshot({ path: pngPath, fullPage: true });
-      const buf = fs.readFileSync(pngPath);
-      const shot = {
-        panel_id: Number(panelId),
-        title: TITLES[panelId],
+        panelId,
         endpoint,
-        state,
-        http_status: httpStatus,
-        payload_status: payload.status,
-        row_count: Array.isArray(payload.rows) ? payload.rows.length : 0,
-        file,
-        bytes: buf.length,
-        sha256: crypto.createHash("sha256").update(buf).digest("hex"),
-        fixture: path.relative(process.cwd(), fixturePath).replaceAll("\\", "/"),
-      };
+      });
+      if (!shot) continue;
       shots.push(shot);
       all.push(shot);
-      console.log(`captured ${file} status=${payload.status} rows=${shot.row_count}`);
+      console.log(
+        `captured ${shot.file} status=${shot.payload_status} rows=${shot.row_count}`,
+      );
     }
     fs.writeFileSync(
       path.join(stateDir, "closeups-manifest.json"),
