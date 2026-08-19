@@ -159,3 +159,8 @@ def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:
 
     assert "ghp_" not in text
     assert "github_pat_" not in text
+
+
+def test_readme_mcp_env_block_does_not_embed_neo4j_password() -> None:
+    readme = _read("README.md")
+    assert "bioetl_secure_password" not in readme
