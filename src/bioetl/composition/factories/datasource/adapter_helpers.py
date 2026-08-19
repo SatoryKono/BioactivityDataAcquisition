@@ -21,6 +21,7 @@ from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
 from bioetl.infrastructure.adapters.error_handling import AdapterErrorHandler
+from bioetl.infrastructure.time import SystemClock
 
 __all__ = [
     "AdapterHelperServices",
@@ -128,7 +129,7 @@ class AdapterHelpersFactory:
         """
         metrics_port = resolve_metrics_port(metrics=metrics)
         adapter_metrics = AdapterMetricsRecorder(metrics_port, provider)
-        request_collector = APIRequestCollector()
+        request_collector = APIRequestCollector(clock=SystemClock())
         error_handler = cast(
             ErrorHandlerPort,
             AdapterErrorHandler(logger=logger, metrics=metrics_port),
@@ -163,7 +164,7 @@ class AdapterHelpersFactory:
         """
         del provider
         metrics_port = resolve_metrics_port(metrics=metrics)
-        request_collector = APIRequestCollector()
+        request_collector = APIRequestCollector(clock=SystemClock())
         error_handler = cast(
             ErrorHandlerPort,
             AdapterErrorHandler(logger=logger, metrics=metrics_port),

@@ -4,8 +4,6 @@
 from __future__ import annotations
 
 import json
-import os
-import tempfile
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -24,31 +22,27 @@ from bioetl.application.services.run_reports.paths import (
     report_root_marker_path,
     resolve_report_root,
 )
+from bioetl.domain.ports.storage.run_report_store import RunReportStorePort
 from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunReport
 
-# Re-export path helpers so existing imports from writer keep working.
 __all__ = (
     "DEFAULT_REPORT_ROOT",
     "REPORT_ROOT_MARKER_NAME",
     "REPORT_ROOT_MARKER_VALUE",
     "RunReportWriteResult",
+    "configure_run_report_store",
     "inspect_report_root_marker",
     "report_root_marker_is_healthy",
     "report_root_marker_path",
     "resolve_pipeline_report_dir",
     "resolve_report_root",
     "resolve_workflow_report_dir",
-    "set_report_write_test_mode",
     "write_json",
     "write_pipeline_run_report",
     "write_workflow_run_report",
 )
 
-# Application must not read process env maps or import infrastructure Settings.
-# Tests and composition can inject an explicit override; under pytest the
-# runtime is treated as test mode so Windows cloud-synced worktrees do not
-# stall on fsync during incidental report writes.
-_test_mode_override: bool | None = None
+_injected_store: RunReportStorePort | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,19 +54,20 @@ class RunReportWriteResult:
     latest_path: Path | None = None
 
 
-def set_report_write_test_mode(enabled: bool | None) -> None:
-    """Override test-mode detection for report durability policy."""
-    global _test_mode_override
-    _test_mode_override = enabled
+def configure_run_report_store(store: RunReportStorePort | None) -> None:
+    """Bind the composition-owned run-report store for default write paths."""
+    global _injected_store
+    _injected_store = store
 
 
-def _is_report_write_test_mode() -> bool:
-    if _test_mode_override is not None:
-        return _test_mode_override
-    # Avoid process env maps: detect pytest runtime without Settings.
-    import sys
-
-    return "pytest" in sys.modules
+def _require_store(store: RunReportStorePort | None) -> RunReportStorePort:
+    resolved = store if store is not None else _injected_store
+    if resolved is None:
+        raise TypeError(
+            "Run-report writes require an injected RunReportStorePort. "
+            "Compose FileRunReportStoreAdapter at the composition root."
+        )
+    return resolved
 
 
 def _safe_segment(value: str) -> str:
@@ -105,62 +100,35 @@ def resolve_workflow_report_dir(
     )
 
 
-def _should_fsync_report_writes(*, os_name: str | None = None) -> bool:
-    """Keep durable flushes unless Windows test runs explicitly relax them.
-
-    Mirrors control-plane durability policy without importing infrastructure
-    (application layer must stay free of infrastructure imports). Cloud-synced
-    Windows worktrees (Google Drive / OneDrive) can stall on ``os.fsync`` long
-    enough to trip the default 60s pytest-timeout while unit tests write
-    incidental pipeline run reports.
-    """
-    current_os_name = os.name if os_name is None else os_name
-    if current_os_name != "nt":
-        return True
-    return not _is_report_write_test_mode()
+def _atomic_write_text(
+    path: Path, content: str, *, store: RunReportStorePort | None = None
+) -> None:
+    """Atomically replace one UTF-8 text artifact through the store port."""
+    writer = _require_store(store)
+    writer.mkdir(path.parent)
+    writer.write_text(path, content)
 
 
-def _flush_report_file_descriptor(file_descriptor: int) -> None:
-    """Flush one report file descriptor when durable writes are required."""
-    if not _should_fsync_report_writes():
-        return
-    os.fsync(file_descriptor)
-
-
-def _atomic_write_text(path: Path, content: str) -> None:
-    """Atomically replace one UTF-8 text artifact."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary_name = tempfile.mkstemp(
-        dir=path.parent,
-        prefix=f".{path.name}.",
-        suffix=".tmp",
-    )
-    temporary_path = Path(temporary_name)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write(content)
-            stream.flush()
-            _flush_report_file_descriptor(stream.fileno())
-        temporary_path.replace(path)
-    except BaseException:
-        temporary_path.unlink(missing_ok=True)
-        raise
-
-
-def write_json(path: Path, payload: Mapping[str, object]) -> None:
+def write_json(
+    path: Path,
+    payload: Mapping[str, object],
+    *,
+    store: RunReportStorePort | None = None,
+) -> None:
     """Write deterministic JSON through an atomic same-directory replacement."""
     _atomic_write_text(
         path,
         json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        store=store,
     )
 
 
 def _with_self_artifacts(
-    artifacts: tuple[dict[str, Any], ...],  # Any: artifact payload
+    artifacts: tuple[dict[str, Any], ...],
     *,
     json_path: Path,
     markdown_path: Path,
-) -> tuple[dict[str, Any], ...]:  # Any: dynamic artifact payload
+) -> tuple[dict[str, Any], ...]:
     kinds = {str(item.get("kind")) for item in artifacts}
     items = list(artifacts)
     if (
@@ -186,10 +154,11 @@ def _with_self_artifacts(
 def _write_latest_pointer(
     *,
     owner_dir: Path,
-    payload: dict[str, Any],  # Any: latest pointer payload
+    payload: dict[str, Any],
+    store: RunReportStorePort,
 ) -> Path:
     latest_path = owner_dir / "_latest.json"
-    write_json(latest_path, payload)
+    write_json(latest_path, payload, store=store)
     return latest_path
 
 
@@ -198,6 +167,7 @@ def write_pipeline_run_report(
     *,
     root: Path | None = None,
     directory: Path | None = None,
+    store: RunReportStorePort | None = None,
 ) -> RunReportWriteResult:
     """Write JSON + markdown pipeline run report artifacts and `_latest` pointer."""
     identity = report.identity
@@ -207,7 +177,8 @@ def write_pipeline_run_report(
         root=root,
     )
     out_dir = directory or resolved_dir
-    out_dir.mkdir(parents=True, exist_ok=True)
+    writer = _require_store(store)
+    writer.mkdir(out_dir)
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
     enriched = replace(
@@ -218,10 +189,11 @@ def write_pipeline_run_report(
             markdown_path=md_path,
         ),
     )
-    write_json(json_path, enriched.to_dict())
+    write_json(json_path, enriched.to_dict(), store=writer)
     _atomic_write_text(
         md_path,
         render_pipeline_run_report_markdown(enriched),
+        store=writer,
     )
     latest_path = _write_latest_pointer(
         owner_dir=resolved_dir.parent,
@@ -234,6 +206,7 @@ def write_pipeline_run_report(
             "json_path": str(json_path.as_posix()),
             "markdown_path": str(md_path.as_posix()),
         },
+        store=writer,
     )
     return RunReportWriteResult(
         json_path=json_path,
@@ -247,6 +220,7 @@ def write_workflow_run_report(
     *,
     root: Path | None = None,
     directory: Path | None = None,
+    store: RunReportStorePort | None = None,
 ) -> RunReportWriteResult:
     """Write JSON + markdown workflow run report artifacts and `_latest` pointer."""
     identity = report.identity
@@ -256,11 +230,14 @@ def write_workflow_run_report(
         root=root,
     )
     out_dir = directory or resolved_dir
-    out_dir.mkdir(parents=True, exist_ok=True)
+    writer = _require_store(store)
+    writer.mkdir(out_dir)
     json_path = out_dir / "workflow-run-report.json"
     md_path = out_dir / "workflow-run-report.md"
-    write_json(json_path, report.to_dict())
-    _atomic_write_text(md_path, render_workflow_run_report_markdown(report))
+    write_json(json_path, report.to_dict(), store=writer)
+    _atomic_write_text(
+        md_path, render_workflow_run_report_markdown(report), store=writer
+    )
     latest_path = _write_latest_pointer(
         owner_dir=resolved_dir.parent,
         payload={
@@ -272,6 +249,7 @@ def write_workflow_run_report(
             "json_path": str(json_path.as_posix()),
             "markdown_path": str(md_path.as_posix()),
         },
+        store=writer,
     )
     return RunReportWriteResult(
         json_path=json_path,

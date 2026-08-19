@@ -42,6 +42,9 @@ from __future__ import annotations
 from bioetl.domain.ports.control_plane.artifact_byte_comparison import (
     ArtifactByteComparisonPort,
 )
+from bioetl.domain.ports.control_plane.contract_evidence import (
+    ContractEvidenceRecorderPort,
+)
 from bioetl.domain.ports.control_plane.effective_config_artifact import (
     EffectiveConfigArtifactStorePort,
 )
@@ -60,6 +63,7 @@ from bioetl.domain.ports.control_plane.workflow_manifest import WorkflowManifest
 
 __all__ = [
     "ArtifactByteComparisonPort",
+    "ContractEvidenceRecorderPort",
     "EffectiveConfigArtifactStorePort",
     "LineageStorePort",
     "RawManifestInspection",

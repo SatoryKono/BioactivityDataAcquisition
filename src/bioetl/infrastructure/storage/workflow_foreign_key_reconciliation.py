@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol, cast, runtime_checkable
 
 from bioetl.domain.ports import (
+    ClockPort,
     ForeignKeyReconciliationPort,
     ForeignKeyReconciliationRequest,
     ForeignKeyReconciliationResult,
@@ -39,14 +40,12 @@ __all__ = [
     "StorageForeignKeyReconciliationAdapter",
     "filter_current_rows",
 ]
-
 _RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
 _RECONCILIATION_ROWS_RETAINED_TOTAL = (
     "bioetl_workflow_reconciliation_rows_retained_total"
 )
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
-
 
 @runtime_checkable
 class GoldReconciliationReaderProtocol(Protocol):
@@ -135,6 +134,7 @@ def filter_current_rows(
 class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     silver_writer: SilverWriter
     logger: LoggerPort
+    clock: ClockPort | None = None
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
