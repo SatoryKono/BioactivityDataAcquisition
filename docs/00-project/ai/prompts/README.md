@@ -66,6 +66,7 @@ docs/00-project/ai/prompts/
 | `prompt.audit.tech-debt-cycle` | [library/audit/tech-debt-cycle.md](library/audit/tech-debt-cycle.md) | Cyclic **tech-debt** audit (v1.0) |
 | `prompt.audit.repo-tree-cycle` | [library/audit/repo-tree-cycle.md](library/audit/repo-tree-cycle.md) | Cyclic **repo hygiene** audit (v1.0) |
 | `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: 10-domain `prompt.audit.cycle.*` |
+| `prompt.audit.project.pack` | [library/audit/project/pack.md](library/audit/project/pack.md) | Full project-audit pastes (tech-debt, tests, docs, diagrams, 10-domain cycle) |
 | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) | Sequential `library/audit` run: cycle 1→10, issue/fix/close after each card |
 | `prompt.audit.cycle.docs` | [library/audit/cycle/docs.md](library/audit/cycle/docs.md) | Cyclic **docs + scripts/docs** |
 | `prompt.audit.cycle.diagrams` | [library/audit/cycle/diagrams.md](library/audit/cycle/diagrams.md) | Cyclic **diagrams + scripts/diagrams** |
