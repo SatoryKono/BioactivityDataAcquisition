@@ -122,17 +122,19 @@ class HistoricalReplayCorpusService:
         self,
         inventory_record: HistoricalReplayCertifiabilityRecord,
     ) -> HistoricalReplayBulkCertificationRecord | None:
-        status = inventory_record.certification_status
-        if status not in {
-            "already_certified",
-            "already_replayable",
-            "outside_certified_historical_scope",
-            "needs_operator_review",
-        }:
+        skip_status = {
+            "already_certified": "skipped_already_certified",
+            "already_replayable": "skipped_already_replayable",
+            "outside_certified_historical_scope": (
+                "skipped_outside_certified_historical_scope"
+            ),
+            "needs_operator_review": "skipped_needs_operator_review",
+        }.get(inventory_record.certification_status)
+        if skip_status is None:
             return None
         return self._build_skipped_record(
             inventory_record=inventory_record,
-            status=status,
+            status=skip_status,
         )
 
     def validate_bulk_manifests(
