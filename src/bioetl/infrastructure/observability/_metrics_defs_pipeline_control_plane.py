@@ -120,4 +120,3 @@ CONTROL_PLANE_LAST_OBSERVED_TIMESTAMP_SECONDS = Gauge(
     "Unix timestamp of latest indexed control-plane observation",
     ["pipeline", "run_type"],
 )
-

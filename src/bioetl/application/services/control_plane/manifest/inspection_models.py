@@ -205,7 +205,6 @@ def parse_run_id(identifier: str) -> RunID | None:
         return None
 
 
-
 def json_equal(left: object, right: object) -> bool:
     """Compare nested payloads using canonical JSON normalization."""
     return json.dumps(

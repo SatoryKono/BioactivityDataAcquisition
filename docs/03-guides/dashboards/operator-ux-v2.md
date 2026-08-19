@@ -132,7 +132,9 @@ contracts remain stable. Provenance strips carry the operator-facing legend.
 
 - `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` (#7054)
 - `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` (#7054)
-- DUX3 closeout is evidence-only (`archive/audit-protocols/dux3-first-screen-inventory.json`); no `apply_dux3_residual.py` in tree — later residuals use `apply_dux4_enforcement.py` / `apply_dux5_residual.py` / `apply_dux6_residual.py` / `apply_dux7_live_residual.py`
+- DUX3–DUX7 closeouts are evidence-only. Their one-shot applicators were retired
+  on 2026-08-19 after the shipped dashboard JSON and archived evidence became
+  the durable record.
 
 ### DUX4 visual enforcement (2026-07-29, epic #7088)
 
@@ -140,4 +142,5 @@ contracts remain stable. Provenance strips carry the operator-facing legend.
 - Override inventory: [dux4-field-override-inventory.json](archive/audit-protocols/dux4-field-override-inventory.json)
 - Panel matrix: [dux4-panel-redesign-matrix.json](archive/audit-protocols/dux4-panel-redesign-matrix.json)
 - Variable rules and closeout evidence: GitHub epic `#7088`
-- Apply script: `scripts/ops/observability/grafana/apply_dux4_enforcement.py`
+- The one-shot DUX4 applicator was retired on 2026-08-19; use the tracked
+  dashboard JSON and the linked audit artifacts as the source of truth.

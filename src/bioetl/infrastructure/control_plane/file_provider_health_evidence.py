@@ -67,7 +67,9 @@ class FileProviderHealthEvidenceStore:
     def persist(self, record: ProviderHealthEvidenceRecord) -> None:
         path = self.path_for(record.provider)
         path.parent.mkdir(parents=True, exist_ok=True)
-        payload = json.dumps(record.to_dict(), ensure_ascii=False, indent=2, sort_keys=True) + chr(10)
+        payload = json.dumps(
+            record.to_dict(), ensure_ascii=False, indent=2, sort_keys=True
+        ) + chr(10)
         atomic_write_text(path, payload)
 
     def load(self, provider: str) -> ProviderHealthEvidenceRecord | None:

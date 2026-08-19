@@ -40,9 +40,7 @@ def finalize_contract_evidence(runner: Any) -> None:
         build_runtime_contract_evidence(
             manifest_id=manifest_id,
             contract_ref=getattr(runner._context, "contract_ref", None),
-            contract_schema_hash=getattr(
-                runner._context, "contract_schema_hash", None
-            ),
+            contract_schema_hash=getattr(runner._context, "contract_schema_hash", None),
             resume_requested=bool(getattr(runner._context, "resume", False)),
             lock_owner_id=lock_owner_id,
         ),

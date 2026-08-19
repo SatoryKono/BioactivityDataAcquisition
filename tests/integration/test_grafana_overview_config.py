@@ -328,7 +328,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
         and "${__data.fields.pipeline}" in str(link.get("url", ""))
         for link in links
     ), "Action links must pass the row pipeline into target dashboards"
-    assert any("var-provider=$provider" in str(link.get("url", "")) for link in links), (
+    assert any("var-provider=unknown" in str(link.get("url", "")) for link in links), (
         "Provider Action link must fail-close provider=unknown"
     )
 
@@ -428,7 +428,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
     assert "filters do not affect this panel" in provider_description
     provider_links = provider.get("options", {}).get("dataLinks", [])
     assert any(
-        "var-provider=$provider" in str(link.get("url", "")) for link in provider_links
+        "var-provider=unknown" in str(link.get("url", "")) for link in provider_links
     )
     assert any(
         "var-pipeline_context=$pipeline" in str(link.get("url", ""))
