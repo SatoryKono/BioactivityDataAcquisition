@@ -10,7 +10,7 @@
     {
       "check": "trust_reason_0",
       "detail": "Missing or contradictory exact-run evidence.",
-      "reason": "manifest_contract_compatibility_not_verified",
+      "reason": "contract_evidence_not_finalized",
       "status": "UNKNOWN"
     },
     {
@@ -48,12 +48,12 @@
     "evidence_observed_at": "2026-08-10T00:00:00+00:00",
     "processing_status": "unknown",
     "reasons": [
-      "manifest_contract_compatibility_not_verified",
+      "contract_evidence_not_finalized",
       "checkpoint_artifact_not_observed",
       "lineage_closure_not_verified",
       "retention_plan_not_observed"
     ],
-    "reasons_text": "manifest_contract_compatibility_not_verified\ncheckpoint_artifact_not_observed\nlineage_closure_not_verified",
+    "reasons_text": "contract_evidence_not_finalized\ncheckpoint_artifact_not_observed\nlineage_closure_not_verified",
     "reasons_truncated": true,
     "scope_kind": "exact_run",
     "trust_status": "INCOMPLETE"

@@ -21,6 +21,9 @@ from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
     iter_artifact_refs_for_manifest as _iter_artifact_refs_for_manifest,
 )
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
+    plan_manifest_artifact_refs as _plan_manifest_artifact_refs,
+)
+from bioetl.infrastructure.control_plane._file_artifact_lifecycle_refs import (
     resolve_replay_impact as _resolve_replay_impact,
 )
 from bioetl.infrastructure.control_plane._file_artifact_lifecycle_surfaces import (
@@ -42,6 +45,7 @@ __all__ = [
     "_build_artifact_ref",
     "_iter_artifact_refs",
     "_iter_artifact_refs_for_manifest",
+    "_plan_manifest_artifact_refs",
     "_iter_surface_files",
     "_lineage_fragment_files",
     "_resolve_protected_refs",
