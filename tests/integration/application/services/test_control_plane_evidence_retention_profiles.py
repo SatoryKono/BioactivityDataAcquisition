@@ -54,8 +54,9 @@ def _manifest(
             RunInputSnapshotRef(
                 snapshot_id=f"sha256:{hashlib.sha256(payload).hexdigest()}",
                 content_hash=hashlib.sha256(payload).hexdigest(),
+                immutable_uri=f"bronze://{profile}-{index}.zst",
             )
-            for payload in payloads
+            for index, payload in enumerate(payloads)
         )
         source_refs = (
             RunSourceRef(
@@ -128,6 +129,28 @@ def _persist_profile_evidence(
             "manifest_id": manifest.manifest_id,
             "run_id": str(manifest.run_id),
         },
+    )
+    from bioetl.infrastructure.control_plane._file_lineage_index import (
+        stable_key_filename,
+    )
+
+    lineage_index = (
+        control_root
+        / "lineage"
+        / "_by_manifest_id"
+        / f"{stable_key_filename(manifest.manifest_id)}.jsonl"
+    )
+    lineage_index.parent.mkdir(parents=True, exist_ok=True)
+    lineage_index.write_text(
+        json.dumps(
+            {
+                "key": manifest.manifest_id,
+                "fragment_id": "fragment-forensic",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
     )
 
 

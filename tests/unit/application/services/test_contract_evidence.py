@@ -61,3 +61,24 @@ def test_build_contract_evidence_records_resume_and_lock() -> None:
     assert evidence["resume_contract"] == "resume_requested"
     assert evidence["lock_owner_id"] == "owner-1"
     assert evidence["lock_owner_reason"] == "distributed_lock_recorded"
+
+
+def test_build_runtime_contract_evidence_records_lock_owner() -> None:
+    from bioetl.application.services.control_plane.manifest.contract_evidence import (
+        CONTRACT_EVIDENCE_SCHEMA_VERSION,
+        build_runtime_contract_evidence,
+    )
+
+    evidence = build_runtime_contract_evidence(
+        manifest_id="manifest-1",
+        contract_ref="chembl.activity",
+        contract_schema_hash="abc123",
+        resume_requested=False,
+        lock_owner_id="run-owner",
+    )
+    assert evidence["schema_version"] == CONTRACT_EVIDENCE_SCHEMA_VERSION
+    assert evidence["manifest_id"] == "manifest-1"
+    assert evidence["lock_owner_id"] == "run-owner"
+    assert evidence["lock_owner_reason"] == "distributed_lock_recorded"
+    assert evidence["resume_contract"] == "resume_not_requested"
+

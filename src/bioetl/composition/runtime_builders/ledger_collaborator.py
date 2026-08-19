@@ -209,12 +209,34 @@ def _attach_candidate_artifact_recorder(
         return "failed"
 
 
+def _attach_contract_evidence_recorder(
+    runner: PipelineRunnerProtocol,
+    run_ledger_service: RunLedgerService,
+) -> None:
+    attach = getattr(runner, "attach_contract_evidence_recorder", None)
+    if not callable(attach):
+        return
+    ledger_port = getattr(run_ledger_service, "ledger_port", None)
+    base_path = getattr(ledger_port, "base_path", None)
+    if base_path is None:
+        return
+    from pathlib import Path
+
+    from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
+        FileContractEvidenceRecorder,
+    )
+
+    manifest_root = Path(base_path).parent / "run_manifest"
+    attach(FileContractEvidenceRecorder(base_path=manifest_root))
+
+
 def attach_control_plane_collaborators(
     runner: PipelineRunnerProtocol,
     run_ledger_service: RunLedgerService,
 ) -> ArtifactRecorderAttachmentResult:
     """Attach ledger collaborators to the runner and its metadata writers."""
     runner.attach_run_ledger_service(run_ledger_service)
+    _attach_contract_evidence_recorder(runner, run_ledger_service)
 
     services = getattr(runner, "services", None)
     if services is None:

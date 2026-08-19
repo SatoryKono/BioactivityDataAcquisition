@@ -217,8 +217,8 @@ def _contract_check(
     return EvidenceCheckResult(
         "contract_compatibility",
         "UNKNOWN",
-        "manifest_contract_compatibility_not_verified",
-        "Contract anchors are present, but no registry comparison was recorded.",
+        "contract_evidence_not_finalized",
+        "Contract anchors are present, but the immutable sidecar was not finalized.",
     )
 
 
