@@ -85,6 +85,8 @@ size option.
 | `DASH-FIRST-002` | Current status and first action MUST precede selected-range and forensic evidence. Forensic rows MUST ship collapsed. |
 | `DASH-STATE-002` | Operator states MUST use the canonical `OK/WARN/CRIT/UNKNOWN` palette; documented trust gates MAY add `INCOMPLETE`. Color MUST NOT be the only carrier of meaning. |
 | `DASH-NAV-001` | Every dashboard MUST expose the ordered `0..6` navigation bus, omit its self-link, preserve time, and pass only target-allowlisted variables. |
+| `DASH-SCOPE-001` | A data-bearing panel with `scope=selected_run` MUST use `evidence_source=ops_http`. Prometheus MUST NOT claim exact UUID scope (`DASH-DATA-002`). |
+| `DASH-SCOPE-002` | `bioetl-overview-v2` first window MUST show `Review Selected Run Summary` (`9603`) above CURRENT panels `214`/`215`. CURRENT copy MUST state it is not the selected UUID. |
 | `DASH-ACTION-001` | Critical operator panels MUST expose an actionable dashboard or runbook CTA without duplicate or conflicting handoffs. |
 | `DASH-LAYOUT-001` | Top-level panels MUST NOT overlap or leave unexplained gaps. Additional diagnostics MUST use progressive disclosure. |
 
@@ -247,7 +249,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | UID | Answer panel (title / id) | Notes |
 | --- | --- | --- |
 | `bioetl-control-plane-v1` | `Monitor Replay Readiness` (`9401`) | evidence-aware trust verdict |
-| `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | verdict + next route |
+| `bioetl-overview-v2` | `Monitor Fleet Health` (`214`) + `Review First Action` (`215`) | CURRENT verdict + next route. `Review Selected Run Summary` (`9603`) MUST occupy the first window as SELECTED RUN context and MUST NOT replace 214/215. |
 | `bioetl-runtime` | `Monitor Pipeline Status` (`9401`) | trust-gated runtime verdict |
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
 | `bioetl-dq-v2` | `Monitor Current DQ Status` (`9401`) | NOW-lane verdict |

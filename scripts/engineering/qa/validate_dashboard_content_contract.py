@@ -29,6 +29,9 @@ ACTION_REQUIRED_ROLES = frozenset(
 )
 NON_DATA_ROLES = frozenset({"navigation", "row_group", "guidance"})
 FULL_SURFACE_COVERAGE_POLICY = "all_shipped_panels"
+ALLOWED_EMPTY_STATE_CLASSES = frozenset(
+    {"event_empty", "telemetry_missing", "unsupported", "select_run"}
+)
 
 
 def _load_mapping(path: Path) -> dict[str, object]:
@@ -249,6 +252,24 @@ def _validate_panel_record(
         required_columns = _string_list(record.get("required_columns"))
         if not required_columns:
             errors.append(f"{prefix}: table role requires required_columns")
+    empty_state_class = record.get("empty_state_class")
+    if role not in NON_DATA_ROLES:
+        if empty_state_class not in ALLOWED_EMPTY_STATE_CLASSES:
+            errors.append(
+                f"{prefix}: empty_state_class must be one of "
+                f"{sorted(ALLOWED_EMPTY_STATE_CLASSES)}"
+            )
+        if (
+            record.get("scope") == "selected_run"
+            and evidence_source != "ops_http"
+        ):
+            errors.append(
+                f"{prefix}: data-bearing selected_run must use evidence_source=ops_http"
+            )
+    elif empty_state_class not in {None, "unsupported"}:
+        errors.append(
+            f"{prefix}: non-data role empty_state_class must be unsupported or omitted"
+        )
     return errors
 
 

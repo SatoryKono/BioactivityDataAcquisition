@@ -58,6 +58,13 @@ _ALLOWED_STATES = [
     "N/A",
 ]
 _RENDER_PROFILES = ["full_dark", "full_light", "zoom_200"]
+_ALLOWED_EMPTY_STATE_CLASSES = [
+    "event_empty",
+    "telemetry_missing",
+    "unsupported",
+    "select_run",
+]
+_NON_DATA_ROLES = frozenset({"navigation", "row_group", "guidance"})
 
 
 def _iter_panels(payload: dict[str, object]) -> Iterable[dict[str, object]]:
@@ -129,11 +136,32 @@ def _evidence_source(panel: dict[str, object]) -> str:
 
 def _scope(title: str, panel: dict[str, object]) -> str:
     normalized = title.lower()
-    if "run" in normalized or "manifest" in normalized:
-        return "selected_run"
     if panel.get("type") in {"row", "text"}:
         return "global"
+    if _is_ops_http(panel) and (
+        "run" in normalized or "manifest" in normalized or "retention" in normalized
+    ):
+        return "selected_run"
+    if _uses_prometheus(panel):
+        if "current" in normalized or "fleet" in normalized:
+            return "current"
+        return "time_range"
+    if "run" in normalized or "manifest" in normalized:
+        return "selected_run"
     return "time_range"
+
+
+def _empty_state_class(panel: dict[str, object], role: str, evidence_source: str) -> str:
+    if role in _NON_DATA_ROLES:
+        return "unsupported"
+    if evidence_source == "ops_http":
+        return "select_run"
+    if evidence_source == "grafana_builtin":
+        return "unsupported"
+    title = str(panel.get("title") or "").lower()
+    if any(token in title for token in ("event", "total", "count", "failure", "alert")):
+        return "event_empty"
+    return "telemetry_missing"
 
 
 def _role(title: str, panel: dict[str, object]) -> str:
@@ -211,6 +239,7 @@ def _record(panel: dict[str, object]) -> dict[str, object]:
     if not isinstance(panel_id, int) or not isinstance(title, str):
         raise ValueError("contractable panel requires integer id and string title")
     role = _role(title, panel)
+    evidence_source = _evidence_source(panel)
     scope = _scope(title, panel)
     return {
         "title": title,
@@ -218,7 +247,8 @@ def _record(panel: dict[str, object]) -> dict[str, object]:
         "tier": 4 if role in {"row_group", "guidance"} else 3,
         "scope": scope,
         "scope_class": scope,
-        "evidence_source": _evidence_source(panel),
+        "evidence_source": evidence_source,
+        "empty_state_class": _empty_state_class(panel, role, evidence_source),
         "state_model": _state_model(role),
         "required_copy": _required_copy(role),
         "fixture_cases": _fixture_cases(role),
@@ -271,7 +301,23 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
                 merged = {**generated, **previous}
                 merged["title"] = generated["title"]
                 merged["evidence_source"] = generated["evidence_source"]
+                role = str(merged.get("role") or generated["role"])
+                if (
+                    merged["evidence_source"] == "prometheus"
+                    and merged.get("scope") == "selected_run"
+                    and role not in _NON_DATA_ROLES
+                ):
+                    generated_scope = str(generated["scope"])
+                    merged["scope"] = (
+                        generated_scope
+                        if generated_scope != "selected_run"
+                        else "time_range"
+                    )
                 merged["scope_class"] = merged.get("scope", generated["scope"])
+                if merged.get("empty_state_class") not in _ALLOWED_EMPTY_STATE_CLASSES:
+                    merged["empty_state_class"] = generated["empty_state_class"]
+                elif role in _NON_DATA_ROLES:
+                    merged["empty_state_class"] = "unsupported"
                 panels[str(panel_id)] = merged
             else:
                 panels[str(panel_id)] = generated
@@ -285,6 +331,7 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
         "allowed_scopes": _ALLOWED_SCOPES,
         "allowed_evidence_sources": _ALLOWED_EVIDENCE_SOURCES,
         "allowed_states": _ALLOWED_STATES,
+        "allowed_empty_state_classes": _ALLOWED_EMPTY_STATE_CLASSES,
         "dashboards": dashboards,
     }
 

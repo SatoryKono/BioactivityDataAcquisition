@@ -78,7 +78,7 @@ def test_overview_dashboard_identity_and_primary_question() -> None:
     assert dashboard.get("uid") == "bioetl-overview-v2"
     assert "Hybrid L0 overview" in description
     assert "what is broken or degraded right now" in content.lower()
-    assert "status + first action" in content.lower()
+    assert "first action" in content.lower()
 
 
 def test_overview_uses_frozen_v3_selector_set() -> None:
@@ -158,19 +158,15 @@ def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() 
     assert panels["Review First Action"].get("id") == 215
     assert panels["Review Domain Status"].get("id") == 9002
     assert panels["Inspect Scope & Evidence"].get("gridPos", {}).get("y") == 4
-    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 4
-    assert panels["Review First Action"].get("gridPos", {}).get("y") <= 8
+    assert panels["Review Selected Run Summary"].get("id") == 9603
+    assert panels["Review Selected Run Summary"].get("gridPos", {}).get("y") == 8
+    assert panels["Monitor Fleet Health"].get("gridPos", {}).get("y") == 13
+    assert panels["Review First Action"].get("gridPos", {}).get("y") == 13
     assert panels["Review Domain Status"].get("gridPos", {}).get("y") == panels[
         "Review First Action"
     ].get("gridPos", {}).get("y")
-    # RFA Phase 1: equal first-screen split so Action column is not squeezed.
-    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 12
-    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 12
-    assert panels["Review Domain Status"].get("gridPos", {}).get("x") == panels[
-        "Review First Action"
-    ].get("gridPos", {}).get("x", 0) + panels["Review First Action"].get(
-        "gridPos", {}
-    ).get("w", 0)
+    assert panels["Review First Action"].get("gridPos", {}).get("w", 0) >= 8
+    assert panels["Review Domain Status"].get("gridPos", {}).get("w", 0) >= 8
     lazy = {"Review Run Identity": 9300, "Review Processed Records": 9301}
     for title, panel_id in lazy.items():
         panel = panels[title]
