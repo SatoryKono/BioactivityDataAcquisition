@@ -889,6 +889,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-07-15"
     },
+    "scripts/engineering/qa/generate_dashboard_content_contract.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported content-contract generator; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-09-30"
+    },
     "scripts/engineering/qa/generate_reproducibility_support_matrix.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the canonical reproducibility support-matrix generator while architecture/docs drift tests and operator policy docs depend on this generated surface; only fold it into broader docs tooling if the reproducibility policy generator layer is consolidated.",
@@ -1099,6 +1105,12 @@
       "owner": "@bioetl-architecture",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/qa/validate_dashboard_content_contract.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the test-imported content-contract checker; promote to an active QA router command only after it is owned by scripts.engineering.qa __main__ and a matching active slot is freed.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-09-30"
+    },
     "scripts/engineering/repo/_branch_cleanup_policy.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired.",
@@ -1289,6 +1301,12 @@
       "decision": "legacy_manual_utility",
       "next_step": "Retain as an optional Docker-based screenshot fallback for hosts where the canonical Grafana render flow cannot launch Chromium; keep it supporting and do not make Docker monitoring mandatory.",
       "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/check_dashboard_panel_fill.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the panel-fill checker routed through scripts.ops; keep it supporting until a dedicated active slot is freed. Do not raise active_script_count_max.",
+      "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
     "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
