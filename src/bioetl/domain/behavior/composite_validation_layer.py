@@ -28,9 +28,7 @@ from bioetl.domain.behavior.preflight_governance import (
     PreflightGovernanceConfig,
     PreflightGovernor,
 )
-from bioetl.domain.behavior.validation_result_envelopes import (
-    build_validation_result,
-)
+from bioetl.domain.behavior.validation_result_envelopes import build_validation_result
 from bioetl.domain.types import JsonDict
 from bioetl.domain.types.validation_result import (
     CompositeValidationReport,
