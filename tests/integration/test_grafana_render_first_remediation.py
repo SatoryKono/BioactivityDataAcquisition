@@ -738,6 +738,12 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
     assert _limit_field(panel) == 4
     assert "detail" not in _wrapped_field_names(panel)
+    target = panel["targets"][0]
+    assert "error_as_row=1" in str(target.get("url") or "")
+    docs = f"{panel.get('description') or ''} {panel.get('fieldConfig')}"
+    assert "504" in docs
+    assert "deadline_exceeded" in docs
+    assert "refresh" in docs.lower()
 
 
 def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:

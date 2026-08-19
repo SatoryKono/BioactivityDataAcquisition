@@ -1028,3 +1028,50 @@ def test_create_manifest_reports_snapshot_gap_before_dirty_source_state_in_stric
         )
 
     assert store.get("manifest-strict-snapshot-gap") is None
+
+
+class _RecordingContractEvidence:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, object]]] = []
+
+    def record(self, manifest_id: str, evidence: dict[str, object]) -> None:
+        self.calls.append((manifest_id, dict(evidence)))
+
+
+def test_create_manifest_records_contract_evidence_sidecar() -> None:
+    store = _InMemoryRunManifestStore()
+    recorder = _RecordingContractEvidence()
+    service = RunManifestService(
+        manifest_port=store,
+        contract_evidence_recorder=recorder,
+        _manifest_id_factory=lambda: "manifest-evidence",
+    )
+
+    service.create_manifest(_make_request())
+
+    assert len(recorder.calls) == 1
+    manifest_id, evidence = recorder.calls[0]
+    assert manifest_id == "manifest-evidence"
+    assert evidence["contract_comparison_status"] == "compatible"
+    assert evidence["resume_contract"] == "resume_not_requested"
+    assert evidence["lock_owner_reason"] == "no_distributed_lock"
+
+
+def test_create_manifest_records_unknown_when_contract_ref_missing() -> None:
+    store = _InMemoryRunManifestStore()
+    recorder = _RecordingContractEvidence()
+    service = RunManifestService(
+        manifest_port=store,
+        contract_evidence_recorder=recorder,
+        _manifest_id_factory=lambda: "manifest-unknown-contract",
+    )
+
+    service.create_manifest(
+        replace(_make_request(), contract_ref=None, contract_schema_hash=None)
+    )
+
+    assert recorder.calls[0][1]["contract_comparison_status"] == "UNKNOWN"
+    assert recorder.calls[0][1]["contract_comparison_reason"] == (
+        "contract_ref_or_schema_hash_missing"
+    )
+

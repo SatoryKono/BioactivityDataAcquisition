@@ -13,6 +13,9 @@ from bioetl.composition.bootstrap.control_plane_store_builders import (
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.domain.control_plane import RunManifest
+from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
+    FileContractEvidenceRecorder,
+)
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
@@ -39,6 +42,9 @@ def create_manifest_record(
         manifest_port=manifest_store,
         metrics=manifest_store.metrics,
         clock=SystemClock(),
+        contract_evidence_recorder=FileContractEvidenceRecorder(
+            base_path=manifest_store.base_path
+        ),
         _manifest_id_factory=lambda: create_runtime_occurrence_id("run_manifest"),
     ).create_manifest(manifest_create_request)
     if ledger_service is not None:

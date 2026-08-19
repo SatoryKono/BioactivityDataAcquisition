@@ -456,7 +456,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated.",
+      "description": "TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -467,7 +467,7 @@
             "inspect": true
           },
           "unit": "none",
-          "noValue": "No retention-compliance rows. Select an exact run and verify backend health; UNKNOWN or backend unavailable must not be treated as OK."
+          "noValue": "No retention-compliance rows. Valid empty if the selected run has no retention checks. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK."
         },
         "overrides": [
           {
@@ -507,7 +507,7 @@
           "root_selector": "rows",
           "source": "url",
           "type": "json",
-          "url": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url": "/ops/control-plane/retention-compliance?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}&error_as_row=1",
           "url_options": {
             "data": "",
             "method": "GET"
@@ -531,7 +531,10 @@
               "check": 0,
               "status": 1,
               "reason": 2,
-              "detail": 3
+              "detail": 3,
+              "endpoint": 4,
+              "retryable": 5,
+              "observed_at": 6
             },
             "renameByName": {}
           }

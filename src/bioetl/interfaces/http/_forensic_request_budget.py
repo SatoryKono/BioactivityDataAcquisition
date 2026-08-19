@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Mapping
+from datetime import UTC, datetime
 from typing import Any
 
 FORENSIC_ENDPOINT_CONCURRENCY = 4
@@ -34,6 +35,39 @@ def forensic_unavailable_payload(
         "reason": reason,
         "retryable": True,
     }
+
+
+def forensic_unavailable_table_payload(
+    *,
+    endpoint: str,
+    reason: str,
+    observed_at: str | None = None,
+) -> dict[str, object]:
+    """Extend the forensic error contract with one Infinity table row."""
+    stamp = observed_at or datetime.now(UTC).isoformat()
+    payload = forensic_unavailable_payload(endpoint=endpoint, reason=reason)
+    payload["observed_at"] = stamp
+    payload["rows"] = [
+        {
+            "check": "endpoint_availability",
+            "status": "ERROR",
+            "reason": reason,
+            "detail": (
+                "retryable=true; refresh the panel. HTTP 504/503 is backend "
+                "unavailable, not a valid empty table."
+            ),
+            "endpoint": endpoint,
+            "retryable": True,
+            "observed_at": stamp,
+        }
+    ]
+    return payload
+
+
+def table_error_as_http_ok(query: Mapping[str, str]) -> bool:
+    """Return whether Grafana asked to materialize forensic errors as rows."""
+    raw = str(query.get("error_as_row") or "").strip().lower()
+    return raw in {"1", "true", "yes"}
 
 
 async def run_bounded_forensic_operation[ResultT](
@@ -104,5 +138,7 @@ __all__ = [
     "FORENSIC_ENDPOINT_TIMEOUT_SECONDS",
     "ForensicEndpointUnavailable",
     "forensic_unavailable_payload",
+    "forensic_unavailable_table_payload",
     "run_bounded_forensic_operation",
+    "table_error_as_http_ok",
 ]
