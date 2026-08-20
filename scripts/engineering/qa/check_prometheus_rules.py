@@ -449,6 +449,108 @@ class RulesSyntaxResult(TypedDict):
     rules_files: list[str]
 
 
+def _empty_syntax_result(rel_files: list[str]) -> RulesSyntaxResult:
+    return {
+        "ok": False,
+        "runner": "none",
+        "returncode": 127,
+        "command": [],
+        "stdout": "",
+        "stderr": "",
+        "rules_files": rel_files,
+    }
+
+
+def _execute_rules_syntax_command(
+    command: list[str],
+    *,
+    runner: str,
+    workspace: Path,
+    rel_files: list[str],
+    timeout: float,
+) -> RulesSyntaxResult:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe = ensure_safe_cli_argv(command)
+    try:
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            safe,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(workspace),
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        return {
+            **_empty_syntax_result(rel_files),
+            "runner": runner,
+            "command": safe,
+            "stderr": str(exc),
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            **_empty_syntax_result(rel_files),
+            "runner": runner,
+            "returncode": 124,
+            "command": safe,
+            "stderr": f"promtool check rules timed out after {timeout}s",
+        }
+    return {
+        "ok": completed.returncode == 0,
+        "runner": runner,
+        "returncode": int(completed.returncode),
+        "command": safe,
+        "stdout": (completed.stdout or "")[-4000:],
+        "stderr": (completed.stderr or "")[-4000:],
+        "rules_files": rel_files,
+    }
+
+
+def _rules_syntax_command(
+    runner: str,
+    *,
+    workspace: Path,
+    rel_files: list[str],
+    promtool: str,
+    image: str,
+) -> tuple[list[str], str]:
+    if runner == "local":
+        resolved = shutil.which(promtool)
+        if resolved is None:
+            return [], _missing_promtool_message(promtool)
+        return [resolved, "check", "rules", *rel_files], ""
+    docker = shutil.which("docker")
+    if docker is None:
+        return [], (
+            "docker executable not found for promtool check rules. "
+            "Install Docker or promtool."
+        )
+    return [
+        docker,
+        "run",
+        "--rm",
+        "-v",
+        f"{workspace.as_posix()}:/workspace",
+        "-w",
+        "/workspace",
+        "--entrypoint",
+        "promtool",
+        image,
+        "check",
+        "rules",
+        *rel_files,
+    ], ""
+
+
+def _syntax_runners(prefer: str) -> tuple[str, ...]:
+    if prefer == "local":
+        return ("local",)
+    if prefer == "docker":
+        return ("docker",)
+    return ("local", "docker")
+
+
 def check_rules_syntax(
     rules_files: Sequence[Path],
     *,
@@ -467,8 +569,6 @@ def check_rules_syntax(
 
     Returns structured result; does not print or exit.
     """
-    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
     workspace = (root or Path.cwd()).resolve()
     rel_files: list[str] = []
     for path in rules_files:
@@ -476,107 +576,33 @@ def check_rules_syntax(
             path.resolve() if path.is_absolute() else (workspace / path).resolve()
         )
         rel_files.append(resolved.relative_to(workspace).as_posix())
-    empty: RulesSyntaxResult = {
-        "ok": False,
-        "runner": "none",
-        "returncode": 127,
-        "command": [],
-        "stdout": "",
-        "stderr": "",
-        "rules_files": rel_files,
-    }
+    empty = _empty_syntax_result(rel_files)
     if not rel_files:
         empty["stderr"] = "no rule files provided"
         return empty
 
-    def _exec(command: list[str], runner: str) -> RulesSyntaxResult:
-        safe = ensure_safe_cli_argv(command)
-        try:
-            completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
-                safe,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                cwd=str(workspace),
-                check=False,
-            )
-        except FileNotFoundError as exc:
-            return {
-                "ok": False,
-                "runner": runner,
-                "returncode": 127,
-                "command": safe,
-                "stdout": "",
-                "stderr": str(exc),
-                "rules_files": rel_files,
-            }
-        except subprocess.TimeoutExpired:
-            return {
-                "ok": False,
-                "runner": runner,
-                "returncode": 124,
-                "command": safe,
-                "stdout": "",
-                "stderr": f"promtool check rules timed out after {timeout}s",
-                "rules_files": rel_files,
-            }
-        return {
-            "ok": completed.returncode == 0,
-            "runner": runner,
-            "returncode": int(completed.returncode),
-            "command": safe,
-            "stdout": (completed.stdout or "")[-4000:],
-            "stderr": (completed.stderr or "")[-4000:],
-            "rules_files": rel_files,
-        }
-
-    if prefer == "local":
-        runners = ["local"]
-    elif prefer == "docker":
-        runners = ["docker"]
-    else:
-        runners = ["local", "docker"]
-
     last = empty
-    for runner in runners:
-        if runner == "local":
-            resolved = shutil.which(promtool)
-            if resolved is None:
-                last = {
-                    **empty,
-                    "runner": "local",
-                    "stderr": _missing_promtool_message(promtool),
-                }
-                continue
-            return _exec([resolved, "check", "rules", *rel_files], "local")
-        docker = shutil.which("docker")
-        if docker is None:
+    for runner in _syntax_runners(prefer):
+        command, error = _rules_syntax_command(
+            runner,
+            workspace=workspace,
+            rel_files=rel_files,
+            promtool=promtool,
+            image=image,
+        )
+        if error:
             last = {
                 **empty,
-                "runner": "docker",
-                "stderr": (
-                    "docker executable not found for promtool check rules. "
-                    "Install Docker or promtool."
-                ),
+                "runner": runner,
+                "stderr": error,
             }
             continue
-        return _exec(
-            [
-                docker,
-                "run",
-                "--rm",
-                "-v",
-                f"{workspace.as_posix()}:/workspace",
-                "-w",
-                "/workspace",
-                "--entrypoint",
-                "promtool",
-                image,
-                "check",
-                "rules",
-                *rel_files,
-            ],
-            "docker",
+        return _execute_rules_syntax_command(
+            command,
+            runner=runner,
+            workspace=workspace,
+            rel_files=rel_files,
+            timeout=timeout,
         )
     return last
 
