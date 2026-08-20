@@ -115,7 +115,10 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: docker-lint
+    needs:
+      - docker-runtime-contracts
+      - docker-lint
+      - docker-compose-validate
     permissions:
       contents: read
       security-events: write
@@ -148,6 +151,7 @@ jobs:
           format: "sarif"
           output: "reports/security/trivy-results.sarif"
           severity: "CRITICAL,HIGH"
+          exit-code: "1"
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6 # v2

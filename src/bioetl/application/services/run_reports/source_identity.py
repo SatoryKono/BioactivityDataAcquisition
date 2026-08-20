@@ -46,7 +46,6 @@ _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 
-
 @dataclass(frozen=True)
 class RuntimeSourceIdentityResolutionResult:
     """One precedence-bound identity resolution without secret-bearing data."""
@@ -149,8 +148,24 @@ def _canonical_drive_path(drive: str, suffix: str | None) -> str:
     return posixpath.normpath(normalized).casefold()
 
 
+def _canonical_comparison_path(value: str) -> str:
+    """Map a drive-letter or Desktop spelling, then casefold WSL mount form."""
+    mapped = _mapped_runtime_path(value)
+    if mapped is not None:
+        value = mapped
+    normalized = posixpath.normpath(value)
+    if re.match(r"^/mnt/[a-z](?:/|$)", normalized, flags=re.IGNORECASE):
+        return normalized.casefold()
+    return normalized
+
+
 def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
-    """Normalize Windows, WSL, and Docker Desktop paths for comparison."""
+    """Normalize Windows, WSL, and Docker Desktop paths for comparison.
+
+    Relative paths are joined with ``root`` first, then remapped. Otherwise a
+    Windows ``E:/repo/file`` expected path never equals Docker Desktop's
+    ``/mnt/e/repo/file`` for the same checkout (PROJECT_ORIGIN false positive).
+    """
     value = _clean_path_text(path)
     if not value:
         return ""
@@ -163,12 +178,10 @@ def normalize_runtime_path(path: str | Path, *, root: str | Path) -> str:
         root_text = _clean_path_text(root)
         if not _is_absolute_runtime_path(root_text):
             root_text = _clean_path_text(Path(root_text).resolve())
+        root_text = _canonical_comparison_path(root_text)
         value = f"{root_text.rstrip('/')}/{value}"
 
-    normalized = posixpath.normpath(value)
-    if re.match(r"^/mnt/[a-z](?:/|$)", normalized, flags=re.IGNORECASE):
-        return normalized.casefold()
-    return normalized
+    return _canonical_comparison_path(value)
 
 
 def runtime_path_to_local_path(path: str | Path, *, root: str | Path) -> Path:

@@ -160,7 +160,7 @@ def test_provider_freshness_is_not_present_ok_on_missing_health_status() -> None
         item for item in get_dashboard_panels(dashboard) if item.get("id") == 9101
     )
     fleet_expr = str((fleet.get("targets") or [{}])[0].get("expr") or "")
-    assert "provider=~\"$provider\"" in fleet_expr
+    assert 'provider=~"$provider"' in fleet_expr
     assert "test|synthetic" in fleet_expr
 
 

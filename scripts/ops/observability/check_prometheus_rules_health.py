@@ -143,26 +143,31 @@ def collect_rule_issues(
         groups += 1
         for rule in _iter_mapping_rules(group):
             rules_n += 1
-            name = str(
-                rule.get("name") or rule.get("alert") or rule.get("record") or "?"
+            issue = _rule_issue_from_payload(
+                rule, group_name=group_name, file_path=file_path
             )
-            kind = str(
-                rule.get("type") or ("alerting" if "alert" in rule else "recording")
-            )
-            health = str(rule.get("health") or "unknown")
-            last_error = str(rule.get("lastError") or "").strip()
-            if health.lower() in {"err", "error"} or last_error:
-                issues.append(
-                    RuleIssue(
-                        group=group_name,
-                        file=file_path,
-                        rule=name,
-                        kind=kind,
-                        health=health,
-                        last_error=last_error or health,
-                    )
-                )
+            if issue is not None:
+                issues.append(issue)
     return issues, groups, rules_n
+
+
+def _rule_issue_from_payload(
+    rule: Mapping[str, Any], *, group_name: str, file_path: str
+) -> RuleIssue | None:
+    name = str(rule.get("name") or rule.get("alert") or rule.get("record") or "?")
+    kind = str(rule.get("type") or ("alerting" if "alert" in rule else "recording"))
+    health = str(rule.get("health") or "unknown")
+    last_error = str(rule.get("lastError") or "").strip()
+    if health.lower() not in {"err", "error"} and not last_error:
+        return None
+    return RuleIssue(
+        group=group_name,
+        file=file_path,
+        rule=name,
+        kind=kind,
+        health=health,
+        last_error=last_error or health,
+    )
 
 
 def normalize_promql(expr: str) -> str:
@@ -181,25 +186,32 @@ def tracked_rules_bundle_sha256(rules_dir: Path) -> str:
     return digest.hexdigest()
 
 
-def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
-    """Load recording-rule expressions from tracked Prometheus YAML files."""
+def _tracked_file_recording_exprs(path: Path) -> dict[str, list[str]]:
     import yaml
 
     collected: dict[str, list[str]] = {}
-    for path in sorted(rules_dir.glob("*.yml")):
-        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        groups = payload.get("groups") if isinstance(payload, dict) else None
-        if not isinstance(groups, list):
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    groups = payload.get("groups") if isinstance(payload, dict) else None
+    if not isinstance(groups, list):
+        return collected
+    for group in groups:
+        if not isinstance(group, Mapping):
             continue
-        for group in groups:
-            if not isinstance(group, Mapping):
+        for rule in _iter_mapping_rules(group):
+            name = str(rule.get("record") or "").strip()
+            expr = rule.get("expr")
+            if not name or not isinstance(expr, str) or not expr.strip():
                 continue
-            for rule in _iter_mapping_rules(group):
-                name = str(rule.get("record") or "").strip()
-                expr = rule.get("expr")
-                if not name or not isinstance(expr, str) or not expr.strip():
-                    continue
-                collected.setdefault(name, []).append(normalize_promql(expr))
+            collected.setdefault(name, []).append(normalize_promql(expr))
+    return collected
+
+
+def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
+    """Load recording-rule expressions from tracked Prometheus YAML files."""
+    collected: dict[str, list[str]] = {}
+    for path in sorted(rules_dir.glob("*.yml")):
+        for name, expressions in _tracked_file_recording_exprs(path).items():
+            collected.setdefault(name, []).extend(expressions)
     return {name: tuple(exprs) for name, exprs in collected.items()}
 
 
@@ -250,8 +262,7 @@ def _provider_status_expr_issues(name: str, live_exprs: tuple[str, ...]) -> list
     issues: list[str] = []
     if NAN_FALLBACK_NEEDLE not in joined:
         issues.append(
-            f"{name}: live expr missing finite UNKNOWN fallback "
-            f"{NAN_FALLBACK_NEEDLE!r}"
+            f"{name}: live expr missing finite UNKNOWN fallback {NAN_FALLBACK_NEEDLE!r}"
         )
     if NAN_DIVISION_NEEDLE in joined:
         issues.append(

@@ -3,25 +3,23 @@
   "contract": "run_explorer_request_snapshot_v1",
   "dashboard_uid": "bioetl-run-explorer-v1",
   "first_screen_panel_ids": [
-    3010,
-    9402,
-    9403
+    3010
   ],
   "scenarios": {
     "backend_error": {
-      "panel_id": 9403,
+      "panel_id": 3023,
       "path": "backend_error.json"
     },
     "empty_selection": {
-      "panel_id": 9402,
+      "panel_id": 3022,
       "path": "empty_selection.json"
     },
     "selected_identity": {
-      "panel_id": 9402,
+      "panel_id": 3022,
       "path": "selected_identity.json"
     },
     "selected_processed_records": {
-      "panel_id": 9403,
+      "panel_id": 3023,
       "path": "selected_processed_records.json"
     },
     "selected_recent_runs": {

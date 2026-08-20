@@ -60,6 +60,13 @@ _PLAIN_DELTA_WRITE_SUBPROCESS_CODE = (
 )
 
 
+def _require_delta_write_request(value: object) -> _DeltaWriteRequest:
+    """Return a concrete Delta request after validating replacement output."""
+    if not isinstance(value, _DeltaWriteRequest):
+        raise TypeError("dataclass replacement did not preserve _DeltaWriteRequest")
+    return value
+
+
 async def _await_blocking_deltalake_call[BlockingResult](
     *,
     operation_name: str,
@@ -327,14 +334,13 @@ async def _evolve_delta_schema_with_empty_append(
     request: _DeltaWriteRequest,
 ) -> _DeltaWriteRequest:
     """Pre-evolve an existing Delta table schema without writing extra rows."""
-    empty_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
-        _DeltaWriteRequest,
+    empty_request = _require_delta_write_request(
         replace(
             request,
             validated_mode=SilverWriteMode.APPEND,
             arrow_data=request.arrow_data.slice(0, 0),
             schema_mode="merge",
-        ),
+        )
     )
     await _write_plain_delta_request(
         load_module=load_module,
@@ -342,7 +348,7 @@ async def _evolve_delta_schema_with_empty_append(
         mode="append",
         schema_mode="merge",
     )
-    return replace(request, merge_schema=False)
+    return _require_delta_write_request(replace(request, merge_schema=False))
 
 
 async def _load_delta_table(

@@ -75,8 +75,61 @@ def test_normalize_runtime_path_resolves_relative_root_without_recursion(
     monkeypatch.chdir(tmp_path)
 
     normalized = normalize_runtime_path("reports/output", root="workspace")
+    expected = normalize_runtime_path(
+        tmp_path / "workspace" / "reports" / "output",
+        root=tmp_path,
+    )
 
-    assert normalized == (tmp_path / "workspace" / "reports" / "output").as_posix()
+    assert normalized == expected
+    assert normalized.endswith("/workspace/reports/output")
+
+
+@pytest.mark.parametrize(
+    ("path", "root"),
+    [
+        (
+            "docker-compose.neo4j.yml",
+            r"E:\github\BioactivityDataAcquisition",
+        ),
+        (
+            "docker-compose.neo4j.yml",
+            "E:/github/BioactivityDataAcquisition",
+        ),
+        (
+            r"E:\github\BioactivityDataAcquisition\docker-compose.neo4j.yml",
+            r"E:\github\BioactivityDataAcquisition",
+        ),
+        (
+            "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml",
+            r"E:\github\BioactivityDataAcquisition",
+        ),
+        (
+            "/mnt/e/github/BioactivityDataAcquisition/docker-compose.neo4j.yml",
+            "E:/github/BioactivityDataAcquisition",
+        ),
+        (
+            "/run/desktop/mnt/host/e/github/BioactivityDataAcquisition/docker-compose.neo4j.yml",
+            r"E:\github\BioactivityDataAcquisition",
+        ),
+    ],
+)
+def test_normalize_runtime_path_windows_and_wsl_compose_file_are_equal(
+    path: str,
+    root: str,
+) -> None:
+    canonical = (
+        "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml"
+    )
+    assert normalize_runtime_path(path, root=root) == canonical
+
+
+def test_normalize_runtime_path_foreign_clone_stays_distinct() -> None:
+    canonical = r"E:\github\BioactivityDataAcquisition"
+    foreign = r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
+    assert normalize_runtime_path(
+        "docker-compose.yml",
+        root=canonical,
+    ) != normalize_runtime_path("docker-compose.yml", root=foreign)
 
 
 @pytest.mark.parametrize(

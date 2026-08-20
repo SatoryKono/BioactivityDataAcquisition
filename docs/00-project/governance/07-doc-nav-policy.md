@@ -122,7 +122,9 @@ Current KPI model for docs outside nav:
 Weekly CI control:
 
 - Workflow: `.github/workflows/docs-kpi-weekly.yml`
-- Command: `uv run python -m scripts.docs check-kpi`
+- Commands:
+  - `uv run python -m scripts.docs check-drift --runtime-mirrors --freshness`
+  - `uv run python -m scripts.docs check-kpi`
 - Outputs:
   - `reports/docs-kpi/docs-kpi-weekly.json`
   - `reports/docs-kpi/docs-kpi-weekly.md`

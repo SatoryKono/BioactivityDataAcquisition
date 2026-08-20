@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 import pytest
 from deltalake.exceptions import CommitFailedError
@@ -116,6 +117,11 @@ class _GoldMutationWriter:
         return func(*args)
 
 
+class _FixedClock:
+    def now(self) -> datetime:
+        return datetime(2026, 7, 7, 12, 0, tzinfo=UTC)
+
+
 @dataclass
 class _MutationHost:
     gold_writer: _GoldMutationWriter
@@ -123,6 +129,7 @@ class _MutationHost:
     quarantine: object | None = None
     quarantine_pipeline_name: str | None = None
     logger: _Logger = field(default_factory=_Logger)
+    clock: _FixedClock = field(default_factory=_FixedClock)
 
 
 class _FakeAsyncio:

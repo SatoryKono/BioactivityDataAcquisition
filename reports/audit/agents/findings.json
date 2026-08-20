@@ -1,205 +1,81 @@
-[
-  {
-    "id": "AUD-001",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "runtime-mirror",
-    "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md:27",
-    "observation": "The published dashboard skill mirror differed from its canonical .codex skill and failed the enforced mirror gate.",
-    "method": "bash scripts/ai/codex/check_skills_mirror.sh --check",
-    "evidence": [
-      {
-        "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md",
-        "line": 27,
-        "command": "bash scripts/ai/codex/check_skills_mirror.sh --check",
-        "observation": "Baseline output: Docs skill mirror mismatch: observability-dashboard/SKILL.md. Post-fix output: AI governance surfaces checked successfully."
-      }
-    ],
-    "expected": "The docs mirror is generated from the canonical runtime skill and the mirror check exits zero.",
-    "actual": "The baseline mirror omitted the dashboard release gate and Run Explorer troubleshooting content present in the canonical skill.",
-    "impact": "Operators could follow stale validation guidance, and the required governance gate failed.",
-    "root_cause": "The docs skill mirror had not been refreshed after the canonical runtime skill changed.",
-    "remediation": "Refresh the docs skill mirror with the governance synchronizer and keep the existing mirror gate required.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "bash scripts/ai/codex/check_skills_mirror.sh --check",
-      "bash scripts/ai/junie/check_junie_mirror.sh --check"
-    ],
-    "automation": "scripts/ai/codex/check_skills_mirror.sh --check",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9006"
-  },
-  {
-    "id": "AUD-002",
-    "priority": "P2",
-    "severity": "Medium",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "runtime-governance",
-    "path": "scripts/ai/sync/governance.py:31",
-    "observation": "The governance normalizer contradicted the architecture contract for CODEX-RUNTIME canonical links, while the runtime doctor did not report normalization drift.",
-    "method": "python -m scripts.ai.sync.governance --root . --only all --check; pytest tests/architecture/test_ai_runtime_governance_links.py -q",
-    "evidence": [
-      {
-        "path": "scripts/ai/sync/governance.py",
-        "line": 31,
-        "command": "pytest tests/architecture/test_ai_runtime_governance_links.py -q",
-        "observation": "The normalized result lacked RULES, requirements, ADR, memory, and post-change tokens required by the architecture test."
-      },
-      {
-        "path": "scripts/ai/codex/doctor.py",
-        "line": 40,
-        "command": "python scripts/ai/codex/doctor.py --json",
-        "observation": "Post-fix doctor output is {ok: true, findings: []} and now includes normalization findings."
-      }
-    ],
-    "expected": "All governance normalizers preserve file-specific required tokens, and the runtime doctor fails on pending normalization.",
-    "actual": "A common two-link block was previously imposed on CODEX-RUNTIME even though that surface requires seven canonical links.",
-    "impact": "Running the advertised synchronizer could create architecture drift while its own checks appeared green.",
-    "root_cause": "The normalizer used one canonical-source template for every agent file and was not wired into the doctor.",
-    "remediation": "Use a CODEX-RUNTIME-specific canonical block and include check-only normalization findings in doctor static diagnostics.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.ai.sync.governance --root . --only all --check",
-      "python scripts/ai/codex/doctor.py --json",
-      "pytest tests/architecture/test_ai_runtime_governance_links.py -q"
-    ],
-    "automation": "doctor static diagnostics plus architecture test",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9007"
-  },
-  {
-    "id": "AUD-003",
-    "priority": "P0",
-    "severity": "Critical",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "launcher-security",
-    "path": "scripts/ai/vibe/launch.sh:103",
-    "observation": "The Bash Vibe launcher printed the complete operator prompt, and both launchers recommended a pipe-to-shell installer.",
-    "method": "git show origin/main:scripts/ai/vibe/launch.sh; git show origin/main:scripts/ai/vibe/launch.ps1; static unsafe-pattern scan",
-    "evidence": [
-      {
-        "path": "scripts/ai/vibe/launch.sh",
-        "line": 103,
-        "command": "git show origin/main:scripts/ai/vibe/launch.sh | nl -ba",
-        "observation": "Baseline line 103 was log_info \"Prompt: $*\"; baseline line 82 recommended curl ... | bash."
-      },
-      {
-        "path": "scripts/ai/vibe/launch.ps1",
-        "line": 53,
-        "command": "git show origin/main:scripts/ai/vibe/launch.ps1 | nl -ba",
-        "observation": "Baseline PowerShell guidance wrapped curl ... | bash in WSL."
-      },
-      {
-        "path": "scripts/ai/codex/native_runtime_contract.py",
-        "line": 59,
-        "command": "pytest tests/architecture/test_codex_native_runtime.py -q",
-        "observation": "Post-fix contract scans both launchers for full-prompt logging and pipe-to-shell guidance."
-      }
-    ],
-    "expected": "Launchers never write prompt content to stdout and never recommend executing an unverified download through a shell.",
-    "actual": "The baseline launcher exposed the full prompt to terminal logs and offered unsafe installation guidance.",
-    "impact": "Prompts can contain sensitive task data; logs may persist or be collected, and pipe-to-shell guidance creates supply-chain execution risk.",
-    "root_cause": "Launcher diagnostics logged user payload content and had no automated safety contract for operator-facing install text.",
-    "remediation": "Log prompt length only, retain pip/pipx install guidance, and enforce forbidden patterns in the native runtime contract.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "shellcheck scripts/ai/vibe/launch.sh",
-      "bash -n scripts/ai/vibe/launch.sh",
-      "pytest tests/architecture/test_codex_native_runtime.py -q",
-      "python scripts/ai/codex/doctor.py --json"
-    ],
-    "automation": "scripts/ai/codex/native_runtime_contract.py::validate_ai_launcher_safety",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9004"
-  },
-  {
-    "id": "AUD-004",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "open",
-    "category": "memory-retention",
-    "path": "src/memory/episodic/tasks/bioactivitydataacquisition/88fe79558f4fe2f9/agent-codex-native-7507/366d7dd55149d812/codex-native-7507-20260804/summary.md:13",
-    "observation": "The memory retention check reports 13 expired episodic records and sets policy_violation=true.",
-    "method": "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-    "evidence": [
-      {
-        "path": "src/memory/episodic/tasks/bioactivitydataacquisition/88fe79558f4fe2f9/agent-codex-native-7507/366d7dd55149d812/codex-native-7507-20260804/summary.md",
-        "line": 13,
-        "command": "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-        "observation": "candidate_count=13, active_count=275, density_excess=0, invalid_metadata=[], policy_violation=true, exit 1."
-      }
-    ],
-    "expected": "Expired episodic records are pruned by an authorized retention workflow and prune --check exits zero.",
-    "actual": "Thirteen records exceeded ttl_days=14; no records were removed during the audit.",
-    "impact": "Expired working memory remains searchable and the retention policy gate stays red.",
-    "root_cause": "Scheduled or operator-authorized pruning had not removed expired episodic records by the audit timestamp.",
-    "remediation": "Review the 13-candidate dry-run, then run the authorized prune apply workflow and re-run validation.",
-    "effort": "S",
-    "dependencies": ["explicit authorization for destructive retention apply"],
-    "validation": [
-      "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-      "PYTHONPATH=src python -m memory.tooling.workflow smoke"
-    ],
-    "automation": "memory.tooling.prune retention gate; apply remains explicitly authorized",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9005"
-  },
-  {
-    "id": "AUD-005",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "generated-prompt-links",
-    "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cyclic-pack.md:78",
-    "observation": "Generated full-paste project prompts copied source-relative links without rebasing and failed the documentation link gate with 12 broken links.",
-    "method": "PYTHONPATH=src python -m scripts.docs check-links --links --specs --configs",
-    "evidence": [
-      {
-        "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cyclic-pack.md",
-        "line": 78,
-        "command": "python -m scripts.ai.prompts project-full-links --check",
-        "observation": "Baseline detected link drift in audit-cyclic-pack.md and audit-sequential-run.md; sync rebased 12 links."
-      },
-      {
-        "path": "scripts/ai/prompts/project_full.py",
-        "line": 48,
-        "command": "python -m scripts.ai.prompts check",
-        "observation": "Post-fix project_full_link_drift=0 and prompt check exits zero."
-      }
-    ],
-    "expected": "Generated prompt links resolve from the generated output directory, and prompt checks detect skipped rebasing.",
-    "actual": "Eleven cycle links in audit-cyclic-pack.md and one in audit-sequential-run.md resolved only beside their source cards.",
-    "impact": "The required docs link gate failed and operators following full-paste prompts reached missing pages.",
-    "root_cause": "The render workflow preserved Markdown link text while moving the body two directories deeper.",
-    "remediation": "Add deterministic source-aware link rebasing, expose check/sync CLI modes, and include drift in the prompt gate.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.ai.prompts project-full-links --check",
-      "python -m scripts.ai.prompts check",
-      "PYTHONPATH=src python -m scripts.docs check-links --links --specs --configs"
-    ],
-    "automation": "scripts.ai.prompts project-full-links --check plus prompts check",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9008"
-  }
-]
+{
+  "run_id": "20260820-agents-memory-cycle-c22e7b01b3",
+  "prompt_id": "prompt.audit.cycle.agents-memory",
+  "base": "origin/main@c22e7b01b3",
+  "generated_at_utc": "2026-08-20T07:15:00Z",
+  "contours": ["runtime", "scripts", "memory"],
+  "surface_score": 2,
+  "findings": [
+    {
+      "id": "AGENTS-MEM-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "scripts/determinism",
+      "evidence": [
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.sh", "line": 38, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh", "observation": "npx -y \"@vshulcz/deja-vu@0.17.0\" mcp"},
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.ps1", "line": 23, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.ps1", "observation": "& npx -y \"@vshulcz/deja-vu@0.15.7\" mcp"},
+        {"path": "docs/00-project/ai/mcp-governance.md", "line": 127, "command": "rg -n 'deja' docs/00-project/ai/mcp-governance.md", "observation": "### deja (deja-vu v0.13.1)"}
+      ],
+      "expected": "Single canonical deja-vu version across sh wrapper, ps1 wrapper, and governance doc.",
+      "actual": "Three divergent versions: 0.17.0 (Linux/WSL), 0.15.7 (Windows), 0.13.1 (doc).",
+      "impact": "Non-deterministic MCP memory runtime depending on OS entry point; governance doc drift.",
+      "root_cause": "Independent per-OS/per-doc version updates without a single source of truth.",
+      "remediation": "Choose one canonical version; sync both wrappers and mcp-governance.md.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh scripts/ai/mcp/mcp_deja_wrapper.ps1", "rg -n 'deja' docs/00-project/ai/mcp-governance.md"],
+      "automated_fix_possible": true,
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9134"
+    },
+    {
+      "id": "AGENTS-MEM-002",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "scripts/supply-chain",
+      "evidence": [
+        {"path": "scripts/ai/mcp/github-mcp-wrapper.sh", "line": 30, "command": "rg -o 'npx -y .*' scripts/ai/mcp/github-mcp-wrapper.sh", "observation": "npx -y @modelcontextprotocol/server-github --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "observation": "npx -y mcp-adr-analysis-server (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_github_actions_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_github_actions_wrapper.sh", "observation": "npx -y github-actions-mcp --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "line": 17, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "observation": "npx -y @notprolands/ast-grep-mcp / @chousyn/ast-grep-mcp (no version pin)"}
+      ],
+      "expected": "All MCP wrappers pin explicit versions (as context7@3.2.4, filesystem@2026.1.14, neo4j-server@0.2.0 do).",
+      "actual": "Mixed policy: several wrappers use bare `npx -y <pkg>` resolving to latest.",
+      "impact": "Non-reproducible MCP runtime; silent supply-chain upgrade risk. Local runtime (not production CI) => P2.",
+      "root_cause": "Inconsistent pin policy across MCP wrappers.",
+      "remediation": "Pin listed packages to verified versions in both .sh and .ps1.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": ["for f in scripts/ai/mcp/*.sh scripts/ai/mcp/*.ps1; do rg -o 'npx -y [^\"']*' \"$f\"; done"],
+      "automated_fix_possible": true,
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9135"
+    },
+    {
+      "id": "AGENTS-MEM-003",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "status": "NOT_PROVEN",
+      "category": "memory/tooling",
+      "evidence": [
+        {"path": "src/memory/storage.py", "line": 15, "command": "PYTHONPATH=src python3 -m memory.tooling.workflow smoke", "observation": "ModuleNotFoundError: No module named 'psutil' at import time"},
+        {"path": "pyproject.toml", "line": 83, "command": "rg -n 'psutil' pyproject.toml", "observation": "psutil>=5.9 IS declared as a dependency"}
+      ],
+      "expected": "memory workflow smoke runs in a properly provisioned env.",
+      "actual": "Smoke failed only because the ad-hoc system python3 lacked psutil; psutil is declared in pyproject.toml, so this is an environment provisioning gap, not a code defect.",
+      "impact": "None on product; audit-env limitation. Memory smoke NOT validated this iteration.",
+      "root_cause": "Audit ran with unprovisioned system interpreter (no project venv on this host).",
+      "remediation": "Re-run smoke inside project venv (.venv-win on Windows) to confirm memory tooling.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [".\\.venv-win\\Scripts\\python.exe -m memory.tooling.workflow smoke"],
+      "automated_fix_possible": false
+    }
+  ]
+}

@@ -255,10 +255,9 @@ fi
 # Pass -p when we have a usable config file:
 # - with resolved chrome (may include executablePath), or
 # - args-only config without executablePath (CI sandbox flags).
-if [[ -n "$PUPPETEER_CFG" && -f "$PUPPETEER_CFG" ]]; then
-  if [[ -n "$runnable_chrome" ]] || ! grep -Eq '"executablePath"' "$PUPPETEER_CFG"; then
-    mmdc_args+=(-p "$PUPPETEER_CFG")
-  fi
+if [[ -n "$PUPPETEER_CFG" && -f "$PUPPETEER_CFG" ]] && \
+  { [[ -n "$runnable_chrome" ]] || ! grep -Eq '"executablePath"' "$PUPPETEER_CFG"; }; then
+  mmdc_args+=(-p "$PUPPETEER_CFG")
 fi
 
 # Extract the Mermaid source from either a pure diagram file or a composite

@@ -223,5 +223,52 @@ def test_nightly_replay_checksums_use_run_root_relative_paths() -> None:
 def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:
     workflow = CODERABBIT_WORKFLOW.read_text(encoding="utf-8")
 
-    assert "sed '/^[[:space:]]*#/d' \"${install_script}\"" in workflow
-    assert "Install script nests a remote pipe-to-shell; refusing" in workflow
+    assert "cli.coderabbit.ai/install.sh" not in workflow
+    assert "sha256sum -c" in workflow
+    assert "0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1" in workflow
+    assert "CODERABBIT_CLI_VERSION" in workflow
+    assert "coderabbit-linux-x64.zip" in workflow
+
+
+def test_runtime_policy_rejects_coderabbit_mutable_installer() -> None:
+    sample = "curl -fsSL https://cli.coderabbit.ai/install.sh | bash\n"
+    violations = policy.remote_download_violations_in_text(
+        sample,
+        rel_path="fixture.yml",
+    )
+
+    assert any("forbidden mutable installer" in item for item in violations)
+    assert any("pipe-to-shell" in item for item in violations)
+
+
+def test_runtime_policy_requires_pinned_coderabbit_zip_digest() -> None:
+    url = "https://cli.coderabbit.ai/releases/0.7.5/coderabbit-linux-x64.zip"
+    digest = "0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1"
+    missing = policy.remote_download_violations_in_text(
+        f"curl -fsSL {url} -o archive.zip\n",
+        rel_path="fixture.yml",
+    )
+    pinned = policy.remote_download_violations_in_text(
+        f"curl -fsSL {url} -o archive.zip\necho {digest}  archive.zip | sha256sum -c -\n",
+        rel_path="fixture.yml",
+    )
+
+    assert any("missing pinned sha256" in item for item in missing)
+    assert pinned == []
+
+
+def test_release_publish_requires_same_sha_quality_gates() -> None:
+    release = _load_yaml(RELEASE_WORKFLOW)
+    security = _load_yaml(ROOT / ".github/workflows/security.yml")
+    jobs = release["jobs"]
+    on_field = security.get("on") or security.get(True) or {}
+
+    assert "workflow_call" in on_field
+    assert jobs["security-gate"]["uses"] == "./.github/workflows/security.yml"
+    step_runs = " ".join(str(step.get("run", "")) for step in jobs["release-tests"]["steps"])
+    assert "pytest" in step_runs
+    for publish in ("publish-testpypi", "publish-pypi"):
+        needs = jobs[publish]["needs"]
+        assert "security-gate" in needs
+        assert "release-tests" in needs
+        assert "test-install" in needs

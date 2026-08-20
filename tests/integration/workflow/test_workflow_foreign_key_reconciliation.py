@@ -233,6 +233,7 @@ async def test_reconcile_foreign_keys_is_idempotent(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=silver_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
         ),
     )
@@ -329,6 +330,7 @@ async def test_reconcile_foreign_keys_sends_orphans_to_quarantine(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=silver_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
             quarantine=quarantine,
             quarantine_pipeline_name="workflow_transforms",
@@ -434,6 +436,7 @@ async def test_reconcile_foreign_keys_supports_composite_keys_and_null_policy(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=silver_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
         ),
     )
@@ -539,6 +542,7 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=silver_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
         ),
     )
@@ -623,6 +627,7 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
             silver_writer=silver_writer,
             gold_writer=gold_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
             quarantine=quarantine,
             quarantine_pipeline_name="workflow_transforms",
@@ -716,6 +721,7 @@ async def test_reconcile_foreign_keys_persists_result_and_debug_artifacts(
             silver_writer=silver_writer,
             gold_writer=gold_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
             quarantine=quarantine,
             quarantine_pipeline_name="workflow_transforms",
@@ -876,6 +882,7 @@ async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
             silver_writer=silver_writer,
             gold_writer=gold_writer,
             logger=logger,
+            clock=_FixedClock(),
             metrics=metrics,
             quarantine=quarantine,
             quarantine_pipeline_name="workflow_transforms",

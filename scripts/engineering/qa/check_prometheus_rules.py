@@ -27,7 +27,7 @@ PUSHGATEWAY_COMPATIBILITY_SERIES = "1.11.x"
 EXPECTED_ALERT_DEFINITIONS = 57
 EXPECTED_RECORD_DEFINITIONS = 110
 # Floor after partial-rule-failure alerts (eval failures + iterations missed).
-MIN_TESTED_ALERTS = 38
+MIN_TESTED_ALERTS = 57
 MIN_DIRECTLY_TESTED_RECORDS = 28
 
 
@@ -343,6 +343,62 @@ def list_shipped_rule_files(rules_dir: Path) -> list[Path]:
     )
 
 
+def _load_rule_payload(rules_file: Path) -> tuple[dict[object, object] | None, str]:
+    import yaml
+
+    try:
+        payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        return None, f"{rules_file.as_posix()}: YAML parse failed: {exc}"
+    if not isinstance(payload, dict):
+        return None, f"{rules_file.as_posix()}: root must be a mapping"
+    return payload, ""
+
+
+def _recording_identities(
+    *, rules_file: Path, payload: dict[object, object]
+) -> list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]]:
+    identities: list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]] = []
+    for group in payload.get("groups") or []:
+        identities.extend(_group_recording_identities(rules_file, group))
+    return identities
+
+
+def _group_recording_identities(
+    rules_file: Path, group: object
+) -> list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]]:
+    if not isinstance(group, dict):
+        return []
+    identities: list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]] = []
+    group_name = str(group.get("name") or "?")
+    for index, rule in enumerate(group.get("rules") or []):
+        if not isinstance(rule, dict) or "record" not in rule:
+            continue
+        labels_raw = rule.get("labels") or {}
+        if not isinstance(labels_raw, dict):
+            labels_raw = {}
+        label_key = tuple(sorted((str(k), str(v)) for k, v in labels_raw.items()))
+        location = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
+        identities.append(((str(rule["record"]), label_key), location))
+    return identities
+
+
+def _duplicate_recording_identity_violations(
+    seen: dict[tuple[str, tuple[tuple[str, str], ...]], list[str]],
+) -> list[str]:
+    violations: list[str] = []
+    for (record, label_key), locations in sorted(seen.items()):
+        if len(locations) < 2:
+            continue
+        labels_fmt = ",".join(f"{key}={value}" for key, value in label_key)
+        labels_fmt = labels_fmt or "(no static labels)"
+        violations.append(
+            f"duplicate recording identity record={record!r} labels={{{labels_fmt}}} "
+            f"at: {'; '.join(locations)}"
+        )
+    return violations
+
+
 def validate_recording_rule_identity_uniqueness(
     rules_files: Sequence[Path],
 ) -> list[str]:
@@ -356,41 +412,46 @@ def validate_recording_rule_identity_uniqueness(
 
     Same metric name with **different** static labels (e.g. reason=…) is OK.
     """
-    import yaml
-
     seen: dict[tuple[str, tuple[tuple[str, str], ...]], list[str]] = {}
     for rules_file in rules_files:
-        try:
-            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError) as exc:
-            return [f"{rules_file.as_posix()}: YAML parse failed: {exc}"]
-        if not isinstance(payload, dict):
+        payload, error = _load_rule_payload(rules_file)
+        if error and "YAML parse failed" in error:
+            return [error]
+        if payload is None:
             continue
-        for group in payload.get("groups") or []:
-            if not isinstance(group, dict):
-                continue
-            group_name = str(group.get("name") or "?")
-            for index, rule in enumerate(group.get("rules") or []):
-                if not isinstance(rule, dict) or "record" not in rule:
-                    continue
-                record = str(rule["record"])
-                labels_raw = rule.get("labels") or {}
-                if not isinstance(labels_raw, dict):
-                    labels_raw = {}
-                label_key = tuple(
-                    sorted((str(k), str(v)) for k, v in labels_raw.items())
-                )
-                loc = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
-                seen.setdefault((record, label_key), []).append(loc)
+        for identity, location in _recording_identities(
+            rules_file=rules_file, payload=payload
+        ):
+            seen.setdefault(identity, []).append(location)
+    return _duplicate_recording_identity_violations(seen)
+
+
+def _rule_kind(rule: dict[object, object], index: int) -> str:
+    if "alert" in rule:
+        return f"alert={rule['alert']}"
+    if "record" in rule:
+        return f"record={rule['record']}"
+    return f"rule[{index}]"
+
+
+def _group_expr_violations(*, rules_file: Path, group: object) -> list[str]:
+    if not isinstance(group, dict):
+        return []
     violations: list[str] = []
-    for (record, label_key), locs in sorted(seen.items()):
-        if len(locs) < 2:
+    group_name = str(group.get("name") or "?")
+    for index, rule in enumerate(group.get("rules") or []):
+        if not isinstance(rule, dict):
+            violations.append(
+                f"{rules_file.as_posix()} group={group_name} "
+                f"rule[{index}]: not a mapping"
+            )
             continue
-        labels_fmt = ",".join(f"{k}={v}" for k, v in label_key) or "(no static labels)"
-        violations.append(
-            f"duplicate recording identity record={record!r} labels={{{labels_fmt}}} "
-            f"at: {'; '.join(locs)}"
-        )
+        expr = rule.get("expr")
+        if not isinstance(expr, str) or not expr.strip():
+            violations.append(
+                f"{rules_file.as_posix()} group={group_name} "
+                f"{_rule_kind(rule, index)}: missing or empty expr"
+            )
     return violations
 
 
@@ -399,41 +460,17 @@ def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
 
     Does not parse PromQL; catches missing/empty expr before promtool.
     """
-    import yaml
-
     violations: list[str] = []
     for rules_file in rules_files:
-        try:
-            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError) as exc:
-            violations.append(f"{rules_file.as_posix()}: YAML parse failed: {exc}")
+        payload, error = _load_rule_payload(rules_file)
+        if error:
+            violations.append(error)
             continue
-        if not isinstance(payload, dict):
-            violations.append(f"{rules_file.as_posix()}: root must be a mapping")
-            continue
+        assert payload is not None
         for group in payload.get("groups") or []:
-            if not isinstance(group, dict):
-                continue
-            group_name = str(group.get("name") or "?")
-            for index, rule in enumerate(group.get("rules") or []):
-                if not isinstance(rule, dict):
-                    violations.append(
-                        f"{rules_file.as_posix()} group={group_name} "
-                        f"rule[{index}]: not a mapping"
-                    )
-                    continue
-                if "alert" in rule:
-                    kind = f"alert={rule['alert']}"
-                elif "record" in rule:
-                    kind = f"record={rule['record']}"
-                else:
-                    kind = f"rule[{index}]"
-                expr = rule.get("expr")
-                if not isinstance(expr, str) or not expr.strip():
-                    violations.append(
-                        f"{rules_file.as_posix()} group={group_name} "
-                        f"{kind}: missing or empty expr"
-                    )
+            violations.extend(
+                _group_expr_violations(rules_file=rules_file, group=group)
+            )
     return violations
 
 
@@ -447,6 +484,108 @@ class RulesSyntaxResult(TypedDict):
     stdout: str
     stderr: str
     rules_files: list[str]
+
+
+def _empty_syntax_result(rel_files: list[str]) -> RulesSyntaxResult:
+    return {
+        "ok": False,
+        "runner": "none",
+        "returncode": 127,
+        "command": [],
+        "stdout": "",
+        "stderr": "",
+        "rules_files": rel_files,
+    }
+
+
+def _execute_rules_syntax_command(
+    command: list[str],
+    *,
+    runner: str,
+    workspace: Path,
+    rel_files: list[str],
+    timeout: float,
+) -> RulesSyntaxResult:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe = ensure_safe_cli_argv(command)
+    try:
+        completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
+            safe,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(workspace),
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        return {
+            **_empty_syntax_result(rel_files),
+            "runner": runner,
+            "command": safe,
+            "stderr": str(exc),
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            **_empty_syntax_result(rel_files),
+            "runner": runner,
+            "returncode": 124,
+            "command": safe,
+            "stderr": f"promtool check rules timed out after {timeout}s",
+        }
+    return {
+        "ok": completed.returncode == 0,
+        "runner": runner,
+        "returncode": int(completed.returncode),
+        "command": safe,
+        "stdout": (completed.stdout or "")[-4000:],
+        "stderr": (completed.stderr or "")[-4000:],
+        "rules_files": rel_files,
+    }
+
+
+def _rules_syntax_command(
+    runner: str,
+    *,
+    workspace: Path,
+    rel_files: list[str],
+    promtool: str,
+    image: str,
+) -> tuple[list[str], str]:
+    if runner == "local":
+        resolved = shutil.which(promtool)
+        if resolved is None:
+            return [], _missing_promtool_message(promtool)
+        return [resolved, "check", "rules", *rel_files], ""
+    docker = shutil.which("docker")
+    if docker is None:
+        return [], (
+            "docker executable not found for promtool check rules. "
+            "Install Docker or promtool."
+        )
+    return [
+        docker,
+        "run",
+        "--rm",
+        "-v",
+        f"{workspace.as_posix()}:/workspace",
+        "-w",
+        "/workspace",
+        "--entrypoint",
+        "promtool",
+        image,
+        "check",
+        "rules",
+        *rel_files,
+    ], ""
+
+
+def _syntax_runners(prefer: str) -> tuple[str, ...]:
+    if prefer == "local":
+        return ("local",)
+    if prefer == "docker":
+        return ("docker",)
+    return ("local", "docker")
 
 
 def check_rules_syntax(
@@ -467,8 +606,6 @@ def check_rules_syntax(
 
     Returns structured result; does not print or exit.
     """
-    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
-
     workspace = (root or Path.cwd()).resolve()
     rel_files: list[str] = []
     for path in rules_files:
@@ -476,107 +613,33 @@ def check_rules_syntax(
             path.resolve() if path.is_absolute() else (workspace / path).resolve()
         )
         rel_files.append(resolved.relative_to(workspace).as_posix())
-    empty: RulesSyntaxResult = {
-        "ok": False,
-        "runner": "none",
-        "returncode": 127,
-        "command": [],
-        "stdout": "",
-        "stderr": "",
-        "rules_files": rel_files,
-    }
+    empty = _empty_syntax_result(rel_files)
     if not rel_files:
         empty["stderr"] = "no rule files provided"
         return empty
 
-    def _exec(command: list[str], runner: str) -> RulesSyntaxResult:
-        safe = ensure_safe_cli_argv(command)
-        try:
-            completed = subprocess.run(  # NOSONAR - argv via ensure_safe_cli_argv
-                safe,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                cwd=str(workspace),
-                check=False,
-            )
-        except FileNotFoundError as exc:
-            return {
-                "ok": False,
-                "runner": runner,
-                "returncode": 127,
-                "command": safe,
-                "stdout": "",
-                "stderr": str(exc),
-                "rules_files": rel_files,
-            }
-        except subprocess.TimeoutExpired:
-            return {
-                "ok": False,
-                "runner": runner,
-                "returncode": 124,
-                "command": safe,
-                "stdout": "",
-                "stderr": f"promtool check rules timed out after {timeout}s",
-                "rules_files": rel_files,
-            }
-        return {
-            "ok": completed.returncode == 0,
-            "runner": runner,
-            "returncode": int(completed.returncode),
-            "command": safe,
-            "stdout": (completed.stdout or "")[-4000:],
-            "stderr": (completed.stderr or "")[-4000:],
-            "rules_files": rel_files,
-        }
-
-    if prefer == "local":
-        runners = ["local"]
-    elif prefer == "docker":
-        runners = ["docker"]
-    else:
-        runners = ["local", "docker"]
-
     last = empty
-    for runner in runners:
-        if runner == "local":
-            resolved = shutil.which(promtool)
-            if resolved is None:
-                last = {
-                    **empty,
-                    "runner": "local",
-                    "stderr": _missing_promtool_message(promtool),
-                }
-                continue
-            return _exec([resolved, "check", "rules", *rel_files], "local")
-        docker = shutil.which("docker")
-        if docker is None:
+    for runner in _syntax_runners(prefer):
+        command, error = _rules_syntax_command(
+            runner,
+            workspace=workspace,
+            rel_files=rel_files,
+            promtool=promtool,
+            image=image,
+        )
+        if error:
             last = {
                 **empty,
-                "runner": "docker",
-                "stderr": (
-                    "docker executable not found for promtool check rules. "
-                    "Install Docker or promtool."
-                ),
+                "runner": runner,
+                "stderr": error,
             }
             continue
-        return _exec(
-            [
-                docker,
-                "run",
-                "--rm",
-                "-v",
-                f"{workspace.as_posix()}:/workspace",
-                "-w",
-                "/workspace",
-                "--entrypoint",
-                "promtool",
-                image,
-                "check",
-                "rules",
-                *rel_files,
-            ],
-            "docker",
+        return _execute_rules_syntax_command(
+            command,
+            runner=runner,
+            workspace=workspace,
+            rel_files=rel_files,
+            timeout=timeout,
         )
     return last
 
@@ -650,7 +713,6 @@ def _run_docker(
     )
 
 
-
 def _run_expr_parity(*, prometheus_url: str) -> int:
     from scripts.ops.observability.check_prometheus_rules_health import (
         check_rules_health,
@@ -671,58 +733,45 @@ def _run_expr_parity(*, prometheus_url: str) -> int:
     return 0 if report.ok else 1
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Validate Prometheus rules and test coverage.
-
-    NOSONAR - S3776: complexity 18 exceeds 15; extraction would obscure validation orchestration logic
-    """
-    args = _build_parser().parse_args(argv)
-    rules_files = _resolve_rules_files(args.rules_file)
-    coverage = collect_rule_test_coverage(
-        rules_files=rules_files,
-        test_file=args.test_file,
-    )
-    coverage_violations = (
-        validate_rule_test_coverage(coverage)
-        if rules_files == DEFAULT_RULES_FILES
-        else []
-    )
-    if args.coverage_json:
+def _print_rule_coverage(coverage: RuleTestCoverage, *, as_json: bool) -> None:
+    if as_json:
         print(json.dumps(coverage, indent=2, sort_keys=True))
-    else:
-        print(
-            "Rule test coverage: "
-            f"alerts={coverage['tested_alerts']}/{coverage['alert_definitions']} "
-            f"(firing={coverage['firing_alerts']}, non_firing={coverage['non_firing_alerts']}), "
-            f"records={coverage['directly_tested_records']}/{coverage['record_definitions']}, "
-            "control_plane="
-            f"{len(coverage['control_plane_records']) - len(coverage['untested_control_plane_records'])}/"
-            f"{len(coverage['control_plane_records'])}"
-        )
-    if coverage_violations:
-        for violation in coverage_violations:
-            print(f"Rule coverage violation: {violation}", file=sys.stderr)
-        return 1
-    # Same-timestamp write conflicts (record name + static labels identity).
+        return
+    tested_control_plane = len(coverage["control_plane_records"]) - len(
+        coverage["untested_control_plane_records"]
+    )
+    print(
+        "Rule test coverage: "
+        f"alerts={coverage['tested_alerts']}/{coverage['alert_definitions']} "
+        f"(firing={coverage['firing_alerts']}, non_firing={coverage['non_firing_alerts']}), "
+        f"records={coverage['directly_tested_records']}/{coverage['record_definitions']}, "
+        f"control_plane={tested_control_plane}/{len(coverage['control_plane_records'])}"
+    )
+
+
+def _report_violations(*, label: str, violations: Sequence[str]) -> bool:
+    for violation in violations:
+        print(f"{label}: {violation}", file=sys.stderr)
+    return bool(violations)
+
+
+def _structural_rule_violations(
+    *, rules_files: tuple[Path, ...]
+) -> tuple[list[str], list[str]]:
     identity_files = (
         tuple(list_shipped_rule_files(Path("grafana/prometheus-rules")))
         if rules_files == DEFAULT_RULES_FILES
         else rules_files
     )
-    identity_violations = validate_recording_rule_identity_uniqueness(identity_files)
-    if identity_violations:
-        for violation in identity_violations:
-            print(f"Recording identity conflict: {violation}", file=sys.stderr)
-        return 1
-    expr_violations = validate_rule_expr_presence(identity_files)
-    if expr_violations:
-        for violation in expr_violations:
-            print(f"Rule expr violation: {violation}", file=sys.stderr)
-        return 1
-    if args.expr_parity:
-        parity_rc = _run_expr_parity(prometheus_url=args.prometheus_url)
-        if parity_rc != 0:
-            return parity_rc
+    return (
+        validate_recording_rule_identity_uniqueness(identity_files),
+        validate_rule_expr_presence(identity_files),
+    )
+
+
+def _run_selected_rule_checker(
+    args: argparse.Namespace, rules_files: tuple[Path, ...]
+) -> int:
     if args.runner == "docker":
         return _run_docker(
             image=args.image,
@@ -734,6 +783,40 @@ def main(argv: list[str] | None = None) -> int:
         rules_files=rules_files,
         test_file=args.test_file,
     )
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Validate Prometheus rules and test coverage."""
+    args = _build_parser().parse_args(argv)
+    rules_files = _resolve_rules_files(args.rules_file)
+    coverage = collect_rule_test_coverage(
+        rules_files=rules_files,
+        test_file=args.test_file,
+    )
+    coverage_violations = (
+        validate_rule_test_coverage(coverage)
+        if rules_files == DEFAULT_RULES_FILES
+        else []
+    )
+    _print_rule_coverage(coverage, as_json=args.coverage_json)
+    if _report_violations(
+        label="Rule coverage violation", violations=coverage_violations
+    ):
+        return 1
+    identity_violations, expr_violations = _structural_rule_violations(
+        rules_files=rules_files
+    )
+    if _report_violations(
+        label="Recording identity conflict", violations=identity_violations
+    ):
+        return 1
+    if _report_violations(label="Rule expr violation", violations=expr_violations):
+        return 1
+    if args.expr_parity:
+        parity_rc = _run_expr_parity(prometheus_url=args.prometheus_url)
+        if parity_rc != 0:
+            return parity_rc
+    return _run_selected_rule_checker(args, rules_files)
 
 
 if __name__ == "__main__":

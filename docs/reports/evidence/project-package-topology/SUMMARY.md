@@ -3,6 +3,8 @@
 Дата: 2026-08-17
 Статус: refreshed
 
+Refresh note (2026-08-20): TYP-RF RF-007 hash-only reconcile on origin/main after SNR-RF RF-002 (#9143); `source_tree_sha256` now matches `reports/quality/module-coverage-inventory.json`.
+
 Refresh note (2026-08-19): TYP-RF RF-007 hash-only reconcile after the mypy zero-error typing track; `source_tree_sha256` and `source_module_count` now match `reports/quality/module-coverage-inventory.json`.
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see
@@ -21,7 +23,7 @@ Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2436` with
-`source_tree_sha256=49d35e0f86187aeb681234ab86265f830dd98c0cd49af0acabc3087aa5b6a903`.
+`source_tree_sha256=db8bd8ffeb267b6ddf2d367f17b58fc4296d2eb3c915107912a9bfe32e92ed3e`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -88,6 +90,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `49d35e0f86187aeb681234ab86265f830dd98c0cd49af0acabc3087aa5b6a903`
+- source_tree_sha256: `db8bd8ffeb267b6ddf2d367f17b58fc4296d2eb3c915107912a9bfe32e92ed3e`
 
 `source_module_count=2436`

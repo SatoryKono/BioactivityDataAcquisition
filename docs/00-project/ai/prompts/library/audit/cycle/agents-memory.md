@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.agents-memory
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -28,6 +28,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -35,6 +36,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
   - docs/00-project/ai/agents/guides/MEMORY_USAGE.md
   - docs/00-project/ai/prompts/README.md
@@ -44,6 +47,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/audit/agents-runtime.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Treating the Prompt Library as runtime SSOT
   - Ignoring .codex / .junie / .devin discovery
   - Auto-running destructive agent scripts
@@ -85,6 +89,7 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Precedence: `AGENTS.md` → `AI_RUNTIME_MIRROR_OWNERSHIP.md`
 - Parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`
 - Memory: `MEMORY_USAGE.md`, `src/memory/DAILY_WORKFLOW.md`
@@ -112,7 +117,7 @@ Run only contours listed in `CONTOURS`.
 | **A Runtime** | Inventory `AGENTS.md`, `.codex/agents/**`, `.codex/skills/**`, `.junie/**`, `.devin/**`, `docs/00-project/ai/**` (mirrors). Build instruction scope graph: root → profile → skill → scripts → CI. Flag contradictions (commands, versions, write vs read-only). |
 | **B Scripts** | `scripts/ai/**`, `scripts/memory/**`. Idempotency, dry-run for destructive ops, non-zero on failure, no `curl\|bash`, no unquoted sinks, no secret-on-stdout. Validate bootstrap/test commands against manifests. |
 | **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, no full conversation dumps. Vendor registry stays `NOT_PROVEN` without dated evidence. |
-| **D Plan / Issues** | Cluster by contour. Create if ALLOW_ISSUE_WRITE + PROVEN. One issue per root-cause. Do not “fix” runtime by editing only a docs mirror. |
+| **D Plan / Issues** | Cluster by contour. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[agents][<REQ-id>][P#]`. Do not fix runtime via docs-mirror only. |
 | **E Fix** | Runtime source first, then mirrors. Memory: tooling/policy/docs only. Never raise debt limits in memory sheets. No `.env` edits. |
 | **F Validate** | Re-run `check_junie_mirror.sh --check` if `.codex`/`.junie` changed. Re-smoke memory workflow. Delta: resolved / unchanged / regressed / new. |
 

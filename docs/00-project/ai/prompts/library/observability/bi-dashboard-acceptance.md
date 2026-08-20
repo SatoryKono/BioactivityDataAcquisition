@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.bi-dashboard-acceptance
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -25,6 +25,7 @@ includes:
   - fragments/audit-scale.md
   - fragments/finding-schema.md
   - fragments/bi-check-schema.md
+  - fragments/dashboard-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -33,6 +34,7 @@ related_ssot:
   - docs/00-project/NORMATIVE_SOURCES.md
   - .codex/skills/observability-dashboard/SKILL.md
   - grafana/dashboards
+  - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
 anti_patterns:
   - Aesthetic-only defects without readability/task/standard/risk
   - Data FAIL from screenshot alone
@@ -63,10 +65,10 @@ needs measurable evidence (see bi-check-schema).
 | `PLATFORM` | `grafana` (BioETL default; others only if proven in repo) |
 | `DEPTH` | `quick` \| `detailed` \| `full` (full = quick+detailed+auto where tools exist) |
 | `VIEWPORT` | e.g. `1366x768` (record actual) |
-| `USER_ROLE` | `analyst` \| `manager` \| `executive` (or list) |
+| `USER_ROLE` | `operator` (also `analyst` \| `manager` \| `executive` if proven) |
 | `MODE` | `audit` \| `propose-patches` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | start stack **only** if UI needed and operator approved |
+| `MONITORING` | `false` — start stack **only** if UI needed and operator sets `true` |
 | `REQUIRE_GH_TRACKING` | `false` |
 
 ## BioETL facts
@@ -90,7 +92,7 @@ needs measurable evidence (see bi-check-schema).
 
 ### Layout (composition)
 
-- Page goal clear in 5–10s; main KPI + explaining view above the fold
+- Page goal clear in 5–10s; canonical answer panel in first window (`y < 18`)
 - No duplicate panels without new analytic function; filter overload vs role
 - Overview → driver → detail path; key insight not only in hover/drill
 - Scalar density (`DASH-DENSITY-002`): scalar panels (`stat`/`gauge`/`bargauge`)
@@ -102,6 +104,7 @@ needs measurable evidence (see bi-check-schema).
 - Classes: **source** vs **semantic** vs **presentation** error
 - Period + last-refresh visible; unit/currency/scale consistent
 - KPI vs control query delta (same filters); NULL/NaN not shown as real 0
+- Bind FAILs to `DASH-*` (`requirement_id`); CURRENT vs RANGE vs exact-run are not peers
 - Rate denominators; timezone; freshness vs SLA if defined; RLS if applicable
 - **Data fail requires SQL/API/JSON query evidence** — not screenshot alone
 

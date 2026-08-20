@@ -17,15 +17,31 @@ from scripts.ai.prompts.registry import (
 )
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
-PARAM_TABLE_DEFAULT_RE = re.compile(r"\|\s*`([A-Z][A-Z0-9_]*)`\s*\|\s*(.*?)\s*\|")
+PARAM_TABLE_KEY_RE = re.compile(r"`([A-Z][A-Z0-9_]*)`")
+
+
+def _parameter_table_cells(line: str) -> tuple[str, str] | None:
+    """Return the key/default cells from one Markdown table row."""
+    stripped = line.lstrip()
+    if not stripped.startswith("|"):
+        return None
+    cells = stripped.split("|", maxsplit=3)
+    if len(cells) != 4:
+        return None
+    key_match = PARAM_TABLE_KEY_RE.fullmatch(cells[1].strip())
+    if key_match is None:
+        return None
+    return key_match.group(1), cells[2].strip()
 
 
 def extract_defaults_from_body(body: str) -> dict[str, str]:
     """Best-effort defaults from markdown params tables."""
     defaults: dict[str, str] = {}
-    for match in PARAM_TABLE_DEFAULT_RE.finditer(body):
-        key = match.group(1)
-        raw = match.group(2).strip()
+    for line in body.splitlines():
+        cells = _parameter_table_cells(line)
+        if cells is None:
+            continue
+        key, raw = cells
         # strip surrounding backticks / code
         if raw.startswith("`") and raw.endswith("`") and len(raw) >= 2:
             raw = raw[1:-1]

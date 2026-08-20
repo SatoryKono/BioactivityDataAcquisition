@@ -47,15 +47,18 @@ declare -A PROMPT_THEMES=(
 )
 
 log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    local message="$1"
+    echo -e "${GREEN}[INFO]${NC} $message"
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+    local message="$1"
+    echo -e "${YELLOW}[WARN]${NC} $message"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    local message="$1"
+    echo -e "${RED}[ERROR]${NC} $message" >&2
 }
 
 check_prerequisites() {

@@ -7,6 +7,7 @@
 
 codex_auth_file() {
     printf '%s\n' "${CODEX_HOME:-${HOME}/.codex}/auth.json"
+    return 0
 }
 
 codex_has_env_api_key() {
@@ -48,10 +49,12 @@ PY
 
     # Fallback without Python: require a non-empty access_token field.
     grep -Eq '"access_token"[[:space:]]*:[[:space:]]*"[^"]+"' "${auth_file}" 2>/dev/null
+    return $?
 }
 
 codex_has_usable_auth() {
     codex_has_env_api_key || codex_has_persisted_auth
+    return $?
 }
 
 codex_auth_status_label() {

@@ -103,7 +103,9 @@ write/fix cards and supersedes the earlier `grafana-six` read-only route.
 | `regression.md` | `prompt.observability.grafana-audit.regression` | baseline retest and machine-readable release gate |
 
 Shared evidence/severity/release rules are defined once in
-`fragments/grafana-audit-contract.md` and included by all five cards. The
+`fragments/grafana-audit-contract.md` and included by all five cards.
+`DASH-*` IDs, bands, §8 gates, and ontology bind through
+`fragments/dashboard-requirements-audit.md`. The
 `grafana-six` cards and fragment are retained with `status: deprecated` and
 explicit `successor` fields; their full historical bodies are not deleted.
 

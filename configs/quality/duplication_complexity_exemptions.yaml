@@ -1,142 +1,164 @@
 policy_scope: duplication_complexity_exemptions
-linked_issue: "#5815"
-owner: "@bioetl-architecture"
-workflow: ".github/workflows/duplication-complexity.yml"
-rationale: >
-  Complexity exemptions are temporary reviewable debt. Every retained path or
-  function exemption must carry an owner, expiry, and concrete removal step.
+linked_issue: '#5815'
+owner: '@bioetl-architecture'
+workflow: .github/workflows/duplication-complexity.yml
+rationale: 'Complexity exemptions are temporary reviewable debt. Every retained path
+  or function exemption must carry an owner, expiry, and concrete removal step.
+
+  '
 path_entries:
-  - path: tests/*
-    scopes: [xenon]
-    owner: "@bioetl-test-platform"
-    expiry: "2026-12-31"
-    removal_step: "Keep test-only code on the dedicated test-complexity lane."
-    rationale: "Production xenon budget tracks src-only maintainability, not test scaffolding."
-  - path: src/memory/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-memory"
-    expiry: "2026-12-31"
-    removal_step: "Continue memory graph decomposition before removing the exemption."
-    rationale: "Memory maintenance flows carry orchestration branches unrelated to BioETL runtime paths."
-  # All 7 adapters now use unified fallback helpers - exemptions removed
-  # ChEMBL: Uses fetch_resilience_template (retry_with_split_batches, fetch_batch_with_reduction)
-  # OpenAlex, CrossRef, PubMed: Use FallbackFetchOrchestrator, ComposableFallbackDecorator, BaseTitleFallbackHandler
-  # Semantic Scholar: Uses BaseTitleFallbackHandler from unified helpers
-  # UniProt: Uses FallbackPolicyMixin and FallbackFetchOrchestrator
-  # PubChem: Uses DelegatingFallbackMixin (delegates to fetch_filtered)
-  # Removed 2026-07-03 as part of P0-001 implementation
-  # Remaining complexity is due to provider API specifics (entity types, pagination, parsing)
-  # - path: src/bioetl/infrastructure/adapters/chembl/
-  # - path: src/bioetl/infrastructure/adapters/openalex/
-  # - path: src/bioetl/infrastructure/adapters/crossref/
-  # - path: src/bioetl/infrastructure/adapters/pubmed/
-  # - path: src/bioetl/infrastructure/adapters/semanticscholar/
-  # - path: src/bioetl/infrastructure/adapters/uniprot/
-  # - path: src/bioetl/infrastructure/adapters/pubchem/
-  - path: src/bioetl/infrastructure/adapters/input/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-config"
-    expiry: "2026-12-31"
-    removal_step: "Collapse CSV fallback parsing behind smaller normalization helpers."
-    rationale: "Input adapter fallback readers remain compatibility-heavy."
-  - path: src/bioetl/application/services/dq/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-dq"
-    expiry: "2026-12-31"
-    removal_step: "Extract validation rule bundles from monolithic analyzer methods."
-    rationale: "DQ analyzers still aggregate many policy checks in single routines."
-  - path: src/bioetl/application/composite/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-composite"
-    expiry: "2026-12-31"
-    removal_step: "Continue splitting merge/checkpoint collaborators out of orchestration services."
-    rationale: "Composite orchestration still carries wide branching and dependency surfaces."
-  - path: src/bioetl/application/pipelines/
-    scopes: [critical_check]
-    owner: "@bioetl-application"
-    expiry: "2026-12-31"
-    removal_step: "Move extractor parsing branches into dedicated parsing helpers."
-    rationale: "Pipeline-specific extractors still exceed the strict CC guard in isolated spots."
-  - path: src/bioetl/application/pipelines/*/extractors/*
-    scopes: [xenon]
-    owner: "@bioetl-application"
-    expiry: "2026-12-31"
-    removal_step: "Break extraction/parsing flows into bounded parsing policies."
-    rationale: "Extractor modules remain broader than the global xenon baseline allows."
-  - path: src/bioetl/interfaces/cli/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-cli"
-    expiry: "2026-12-31"
-    removal_step: "Trim presentation branching from runtime-command helpers."
-    rationale: "CLI formatting and command presentation code still carry branching noise."
-  - path: src/bioetl/composition/runtime_builders/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-composition"
-    expiry: "2026-12-31"
-    removal_step: "Split runtime builder orchestration into smaller assembly helpers."
-    rationale: "Runtime assembly still contains multi-source extraction and policy wiring branches."
-  - path: src/bioetl/composition/factories/services/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-composition"
-    expiry: "2026-12-31"
-    removal_step: "Reduce factory branch counts through service-specific assemblers."
-    rationale: "Service factory wiring still exceeds the generic xenon ratchet."
-  - path: src/bioetl/infrastructure/storage/silver/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-storage"
-    expiry: "2026-12-31"
-    removal_step: "Continue splitting metadata write coercion from IO orchestration."
-    rationale: "Silver storage write paths still mix coercion, validation, and persistence."
-  - path: src/bioetl/infrastructure/control_plane/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-control-plane"
-    expiry: "2026-12-31"
-    removal_step: "Extract ID/fragment resolution helpers from control-plane artifacts."
-    rationale: "Control-plane artifact orchestration still contains broad branching."
-  - path: src/bioetl/infrastructure/quarantine/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-quarantine"
-    expiry: "2026-12-31"
-    removal_step: "Decompose row normalization and filtering branches."
-    rationale: "Quarantine normalization helpers still exceed the global baseline."
-  - path: src/bioetl/infrastructure/observability/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-observability"
-    expiry: "2026-12-31"
-    removal_step: "Extract label normalization and dispatch policies into smaller helpers."
-    rationale: "Observability dispatch paths remain branch-heavy and cardinality-sensitive."
-  - path: src/bioetl/infrastructure/quality/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-architecture"
-    expiry: "2026-12-31"
-    removal_step: "Continue decomposing registry validation helpers by policy family."
-    rationale: "Quality governance validators intentionally centralize many review rules today."
+- path: tests/*
+  scopes:
+  - xenon
+  owner: '@bioetl-test-platform'
+  expiry: '2026-12-31'
+  removal_step: Keep test-only code on the dedicated test-complexity lane.
+  rationale: Production xenon budget tracks src-only maintainability, not test scaffolding.
+- path: src/memory/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-memory'
+  expiry: '2026-12-31'
+  removal_step: Continue memory graph decomposition before removing the exemption.
+  rationale: Memory maintenance flows carry orchestration branches unrelated to BioETL
+    runtime paths.
+- path: src/bioetl/infrastructure/adapters/input/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-config'
+  expiry: '2026-12-31'
+  removal_step: Collapse CSV fallback parsing behind smaller normalization helpers.
+  rationale: Input adapter fallback readers remain compatibility-heavy.
+- path: src/bioetl/application/services/dq/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-dq'
+  expiry: '2026-12-31'
+  removal_step: Extract validation rule bundles from monolithic analyzer methods.
+  rationale: DQ analyzers still aggregate many policy checks in single routines.
+- path: src/bioetl/application/composite/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-composite'
+  expiry: '2026-12-31'
+  removal_step: Continue splitting merge/checkpoint collaborators out of orchestration
+    services.
+  rationale: Composite orchestration still carries wide branching and dependency surfaces.
+- path: src/bioetl/application/pipelines/
+  scopes:
+  - critical_check
+  owner: '@bioetl-application'
+  expiry: '2026-12-31'
+  removal_step: Move extractor parsing branches into dedicated parsing helpers.
+  rationale: Pipeline-specific extractors still exceed the strict CC guard in isolated
+    spots.
+- path: src/bioetl/application/pipelines/*/extractors/*
+  scopes:
+  - xenon
+  owner: '@bioetl-application'
+  expiry: '2026-12-31'
+  removal_step: Break extraction/parsing flows into bounded parsing policies.
+  rationale: Extractor modules remain broader than the global xenon baseline allows.
+- path: src/bioetl/interfaces/cli/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-cli'
+  expiry: '2026-12-31'
+  removal_step: Trim presentation branching from runtime-command helpers.
+  rationale: CLI formatting and command presentation code still carry branching noise.
+- path: src/bioetl/composition/runtime_builders/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-composition'
+  expiry: '2026-12-31'
+  removal_step: Split runtime builder orchestration into smaller assembly helpers.
+  rationale: Runtime assembly still contains multi-source extraction and policy wiring
+    branches.
+- path: src/bioetl/composition/factories/services/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-composition'
+  expiry: '2026-12-31'
+  removal_step: Reduce factory branch counts through service-specific assemblers.
+  rationale: Service factory wiring still exceeds the generic xenon ratchet.
+- path: src/bioetl/infrastructure/storage/silver/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-storage'
+  expiry: '2026-12-31'
+  removal_step: Continue splitting metadata write coercion from IO orchestration.
+  rationale: Silver storage write paths still mix coercion, validation, and persistence.
+- path: src/bioetl/infrastructure/control_plane/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-control-plane'
+  expiry: '2026-12-31'
+  removal_step: Extract ID/fragment resolution helpers from control-plane artifacts.
+  rationale: Control-plane artifact orchestration still contains broad branching.
+- path: src/bioetl/infrastructure/quarantine/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-quarantine'
+  expiry: '2026-12-31'
+  removal_step: Decompose row normalization and filtering branches.
+  rationale: Quarantine normalization helpers still exceed the global baseline.
+- path: src/bioetl/infrastructure/observability/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-observability'
+  expiry: '2026-12-31'
+  removal_step: Extract label normalization and dispatch policies into smaller helpers.
+  rationale: Observability dispatch paths remain branch-heavy and cardinality-sensitive.
+- path: src/bioetl/infrastructure/quality/
+  scopes:
+  - xenon
+  - critical_check
+  owner: '@bioetl-architecture'
+  expiry: '2026-12-31'
+  removal_step: Continue decomposing registry validation helpers by policy family.
+  rationale: Quality governance validators intentionally centralize many review rules
+    today.
 function_entries:
-  - name: fetch_filtered_with_fallback
-    scopes: [critical_check]
-    max_complexity: 25
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Split DOI/title fallback and batch routing into helper strategies."
-    rationale: "Provider-specific fallback fetchers still need a temporary higher cap."
-  - name: _request_with_retry
-    scopes: [critical_check]
-    max_complexity: 20
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Extract retry/circuit-breaker branches into retry policies."
-    rationale: "Retry wrappers remain shared infrastructure choke points."
-  - name: fetch_batch
-    scopes: [critical_check]
-    max_complexity: 15
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Separate batch planning from fallback item execution."
-    rationale: "Batch fetchers still mix aggregation and fallback execution."
-  - name: load_filter_with_fallback
-    scopes: [critical_check]
-    max_complexity: 15
-    owner: "@bioetl-config"
-    expiry: "2026-12-31"
-    removal_step: "Isolate file parsing fallbacks behind dedicated readers."
-    rationale: "Config fallback loading remains compatibility-driven."
+- name: fetch_filtered_with_fallback
+  scopes:
+  - critical_check
+  max_complexity: 25
+  owner: '@bioetl-platform'
+  expiry: '2026-12-31'
+  removal_step: Split DOI/title fallback and batch routing into helper strategies.
+  rationale: Provider-specific fallback fetchers still need a temporary higher cap.
+- name: _request_with_retry
+  scopes:
+  - critical_check
+  max_complexity: 20
+  owner: '@bioetl-platform'
+  expiry: '2026-12-31'
+  removal_step: Extract retry/circuit-breaker branches into retry policies.
+  rationale: Retry wrappers remain shared infrastructure choke points.
+- name: fetch_batch
+  scopes:
+  - critical_check
+  max_complexity: 15
+  owner: '@bioetl-platform'
+  expiry: '2026-12-31'
+  removal_step: Separate batch planning from fallback item execution.
+  rationale: Batch fetchers still mix aggregation and fallback execution.
+- name: load_filter_with_fallback
+  scopes:
+  - critical_check
+  max_complexity: 15
+  owner: '@bioetl-config'
+  expiry: '2026-12-31'
+  removal_step: Isolate file parsing fallbacks behind dedicated readers.
+  rationale: Config fallback loading remains compatibility-driven.

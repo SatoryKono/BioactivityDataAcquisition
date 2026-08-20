@@ -713,6 +713,13 @@
     },
     {
       "category": "intentional_no_exception_contract",
+      "line": "35",
+      "path": "tests/unit/interfaces/cli/commands/test_health_provider_health_rehydrate.py",
+      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+      "test_name": "test_rehydrate_provider_health_gauges_swallows_runtime_errors"
+    },
+    {
+      "category": "intentional_no_exception_contract",
       "line": "571",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -744,7 +751,7 @@
     "architecture_helper_guard": 16,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 85,
+    "intentional_no_exception_contract": 86,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -1069,6 +1076,12 @@
         "intentional_no_exception_contract": 2
       }
     },
+    "tests/unit/interfaces/cli/commands/test_health_provider_health_rehydrate.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
     "tests/unit/interfaces/http/test_health_server.py": {
       "assertless_tests": 4,
       "categories": {
@@ -1076,7 +1089,7 @@
       }
     }
   },
-  "assertless_total_candidates": 101,
+  "assertless_total_candidates": 102,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1085,7 +1098,7 @@
   "critical_behavior_envelope_count": 6,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
-      "assertion_backed_tests": 60,
+      "assertion_backed_tests": 59,
       "assertion_examples": [
         "tests/architecture/test_determinism_identity_policy.py:176",
         "tests/architecture/test_determinism_identity_policy.py:330",
@@ -1106,7 +1119,7 @@
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py"
       ],
-      "test_count": 60
+      "test_count": 59
     },
     "gold_strict_contracts": {
       "assertion_backed_tests": 16,
@@ -1250,7 +1263,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 85,
+  "intentional_no_exception_contract": 86,
   "markerless_examples": [],
   "markerless_test_functions": 0,
   "parse_errors": [],
@@ -1979,6 +1992,13 @@
       },
       {
         "category": "intentional_no_exception_contract",
+        "line": "35",
+        "path": "tests/unit/interfaces/cli/commands/test_health_provider_health_rehydrate.py",
+        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
+        "test_name": "test_rehydrate_provider_health_gauges_swallows_runtime_errors"
+      },
+      {
+        "category": "intentional_no_exception_contract",
         "line": "571",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -2010,7 +2030,7 @@
       "architecture_helper_guard": 16,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 85,
+      "intentional_no_exception_contract": 86,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2040,7 +2060,7 @@
       "tests/unit/application/core/test_otel_spans.py:586",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
     ],
-    "assertless_total_candidates": 101,
+    "assertless_total_candidates": 102,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2048,7 +2068,7 @@
     "critical_behavior_envelope_count": 6,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
-        "assertion_backed_tests": 60,
+        "assertion_backed_tests": 59,
         "assertion_examples": [
           "tests/architecture/test_determinism_identity_policy.py:176",
           "tests/architecture/test_determinism_identity_policy.py:330",
@@ -2069,7 +2089,7 @@
           "tests/architecture/test_determinism_identity_policy.py",
           "tests/architecture/test_replay_time_seam_inventory.py"
         ],
-        "test_count": 60
+        "test_count": 59
       },
       "gold_strict_contracts": {
         "assertion_backed_tests": 16,
@@ -2232,8 +2252,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2343,
-      "test_python_file_count": 2570,
+      "test_glob_file_count": 2351,
+      "test_python_file_count": 2578,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2272,21 +2292,21 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2343,
-    "total_test_functions": 24775,
+    "total_test_files": 2351,
+    "total_test_functions": 24824,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "af6c346b4a5b23da51610cd7efab76191e4adc5273571520f830e8bbbf95d51f",
+  "source_tree_sha256": "80ca0b95f9b7622374be3c599f6357bafc38438007e4cf4e1f6d7b17b32ab8fa",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 101,
+    "assertless_total_candidates": 102,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 85,
+    "intentional_no_exception_contract": 86,
     "markerless_examples": [],
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2298,8 +2318,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2343,
-    "test_python_file_count": 2570,
+    "test_glob_file_count": 2351,
+    "test_python_file_count": 2578,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2338,8 +2358,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2343,
-  "total_test_functions": 24775,
+  "total_test_files": 2351,
+  "total_test_functions": 24824,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

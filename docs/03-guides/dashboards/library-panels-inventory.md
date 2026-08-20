@@ -23,8 +23,8 @@ patterns by stable panel id ranges and titles across boards.
 | `entity_status_matrix` | Provider 9101, Overview Inputs 9002 | table | Population-first severity |
 | `suspect_table` | Provider causes / Runtime blockers | table | Ranked suspects |
 | `event_timeline` | Incident workspace | table/timeseries | Alert/event range |
-| `run_identity` | 9402 / Run Explorer | table HTTP | Ops HTTP identity — not Prom labels |
-| `processed_records` | 9403 / Run Explorer | table HTTP | Bronze/Silver/Gold accounting |
+| `run_identity` | 9402 (primary boards) / Run Explorer `3022` | table HTTP | Ops HTTP identity — not Prom labels |
+| `processed_records` | 9403 (primary boards) / Run Explorer `3023` | table HTTP | Bronze/Silver/Gold accounting |
 
 ## Query ownership
 

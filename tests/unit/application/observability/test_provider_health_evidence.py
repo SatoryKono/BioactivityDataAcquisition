@@ -77,7 +77,11 @@ def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
     inner = MagicMock()
     inner.update_from_health_check_result.return_value = HealthStatus.HEALTHY
     store = FileProviderHealthEvidenceStore(base_path=tmp_path)
-    monitor = PersistingProviderHealthMonitor(inner=inner, store=store)
+    from bioetl.infrastructure.time import SystemClock
+
+    monitor = PersistingProviderHealthMonitor(
+        inner=inner, store=store, clock=SystemClock()
+    )
     now = datetime(2026, 8, 19, 12, 0, tzinfo=UTC)
     monitor.update_from_health_check_result(
         HealthCheckResult(

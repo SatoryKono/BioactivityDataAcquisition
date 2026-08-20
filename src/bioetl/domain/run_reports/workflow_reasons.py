@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, SupportsInt, TypeGuard
+from typing import Any, SupportsIndex, SupportsInt
 
 from bioetl.domain.run_reports.models import WorkflowExecutionRow
 
@@ -15,9 +15,9 @@ def normalize_top_reasons(
     raw: object,
 ) -> tuple[dict[str, Any], ...]:  # Any: dynamic reason payload
     """Normalize and bound child pipeline reason payloads."""
-    if not _is_reason_sequence(raw):
+    reason_entries = _as_reason_sequence(raw)
+    if reason_entries is None:
         return ()
-    reason_entries = raw
     items = [
         item for item in (_normalize_reason(entry) for entry in reason_entries) if item
     ]
@@ -49,8 +49,13 @@ def build_reasons_rollup(
     )
 
 
-def _is_reason_sequence(raw: object) -> TypeGuard[Sequence[object]]:
-    return isinstance(raw, Sequence) and not isinstance(raw, (str, bytes))
+def _as_reason_sequence(raw: object) -> Sequence[object] | None:
+    """Narrow a dynamic reason payload to the supported sequence contract."""
+    if not isinstance(raw, Sequence):
+        return None
+    if isinstance(raw, (str, bytes)):
+        return None
+    return raw
 
 
 def _normalize_reason(

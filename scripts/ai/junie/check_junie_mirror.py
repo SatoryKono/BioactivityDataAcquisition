@@ -29,6 +29,10 @@ from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACT_PATH = REPO_ROOT / "scripts" / "ai" / "junie" / "junie-mirror-contract.json"
+CODEX_DIRNAME = ".codex"
+JUNIE_DIRNAME = ".junie"
+PROFILE_GLOB = "py-*.md"
+SKILLS_CATALOG_FILENAME = "SKILLS-CATALOG.md"
 
 type JsonObject = dict[str, Any]
 
@@ -81,11 +85,13 @@ def collect_files(root: Path, exclude_prefixes: Iterable[str] = ()) -> dict[str,
 
 def check_agents(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["agents"]
-    codex_dir = REPO_ROOT / ".codex" / "agents"
-    junie_dir = REPO_ROOT / ".junie" / "agents"
+    codex_dir = REPO_ROOT / CODEX_DIRNAME / "agents"
+    junie_dir = REPO_ROOT / JUNIE_DIRNAME / "agents"
     exclude = set(scope.get("exclude_filenames", []))
-    codex_files = {p.name for p in codex_dir.glob("py-*.md") if p.name not in exclude}
-    junie_files = {p.name for p in junie_dir.glob("py-*.md")}
+    codex_files = {
+        p.name for p in codex_dir.glob(PROFILE_GLOB) if p.name not in exclude
+    }
+    junie_files = {p.name for p in junie_dir.glob(PROFILE_GLOB)}
     missing_in_junie = sorted(codex_files - junie_files)
     extra_in_junie = sorted(junie_files - codex_files)
     for name in missing_in_junie:
@@ -137,8 +143,8 @@ def check_skills_catalog(contract: JsonObject, issues: list[str]) -> None:
 def check_skills(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["skills"]
     exclude = set(scope.get("exclude_directory_names", []))
-    codex_dir = REPO_ROOT / ".codex" / "skills"
-    junie_dir = REPO_ROOT / ".junie" / "skills"
+    codex_dir = REPO_ROOT / CODEX_DIRNAME / "skills"
+    junie_dir = REPO_ROOT / JUNIE_DIRNAME / "skills"
     codex_dirs = {
         p.name for p in codex_dir.iterdir() if p.is_dir() and p.name not in exclude
     }
@@ -154,14 +160,14 @@ def check_skills(contract: JsonObject, issues: list[str]) -> None:
 def check_skill_contents(contract: JsonObject, issues: list[str]) -> None:
     scope = contract["parity_scope"]["skill_contents"]
     exclude_prefixes = tuple(scope.get("exclude_relative_path_prefixes", []))
-    codex_dir = REPO_ROOT / ".codex" / "skills"
-    junie_dir = REPO_ROOT / ".junie" / "skills"
+    codex_dir = REPO_ROOT / CODEX_DIRNAME / "skills"
+    junie_dir = REPO_ROOT / JUNIE_DIRNAME / "skills"
     codex_files = collect_files(codex_dir, exclude_prefixes)
     junie_files = collect_files(junie_dir, exclude_prefixes)
     # SKILLS-CATALOG.md is handled by check_skills_catalog(); skip here to avoid
     # duplicate reporting.
-    codex_files.pop("SKILLS-CATALOG.md", None)
-    junie_files.pop("SKILLS-CATALOG.md", None)
+    codex_files.pop(SKILLS_CATALOG_FILENAME, None)
+    junie_files.pop(SKILLS_CATALOG_FILENAME, None)
     missing_in_junie = sorted(set(codex_files) - set(junie_files))
     extra_in_junie = sorted(set(junie_files) - set(codex_files))
     for rel_path in missing_in_junie:
@@ -196,7 +202,7 @@ def check_runtime_semantics(contract: JsonObject, issues: list[str]) -> None:
     excluded_profiles = set(agents_scope.get("exclude_filenames", []))
     expected_profiles = {
         path.stem
-        for path in (REPO_ROOT / ".codex" / "agents").glob("py-*.md")
+        for path in (REPO_ROOT / CODEX_DIRNAME / "agents").glob(PROFILE_GLOB)
         if path.name not in excluded_profiles
     }
 
@@ -259,84 +265,123 @@ def do_check(contract: JsonObject) -> int:
     return 0
 
 
+def _sync_agents(scope: JsonObject) -> None:
+    codex_agents = REPO_ROOT / CODEX_DIRNAME / "agents"
+    junie_agents = REPO_ROOT / JUNIE_DIRNAME / "agents"
+    junie_agents.mkdir(parents=True, exist_ok=True)
+    exclude_agents = set(scope["agents"].get("exclude_filenames", []))
+    source_names: set[str] = set()
+    for source in codex_agents.glob(PROFILE_GLOB):
+        if source.name in exclude_agents:
+            continue
+        source_names.add(source.name)
+        shutil.copy2(source, junie_agents / source.name)
+    for stray in junie_agents.glob(PROFILE_GLOB):
+        if stray.name not in source_names:
+            stray.unlink()
+
+
+def _sync_shared_agent_docs(scope: JsonObject) -> None:
+    for source_relative, mirror_relative in zip(
+        scope["shared_agent_docs"]["source_files"],
+        scope["shared_agent_docs"]["mirror_files"],
+        strict=True,
+    ):
+        source = REPO_ROOT / source_relative
+        mirror = REPO_ROOT / mirror_relative
+        mirror.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, mirror)
+
+
+def _sync_skills_catalog(scope: JsonObject) -> Path:
+    catalog = scope["skills_catalog"]
+    junie_skills = REPO_ROOT / JUNIE_DIRNAME / "skills"
+    junie_skills.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        REPO_ROOT / catalog["source_file"],
+        REPO_ROOT / catalog["mirror_file"],
+    )
+    return junie_skills
+
+
+def _remove_excluded_skill_dirs(
+    junie_skills: Path,
+    exclude_skill_dirs: set[str],
+) -> None:
+    for excluded in exclude_skill_dirs:
+        stale_dir = junie_skills / excluded
+        if stale_dir.exists():
+            shutil.rmtree(stale_dir)
+
+
+def _copy_skill_contents(
+    codex_files: dict[str, Path],
+    junie_skills: Path,
+    exclude_skill_dirs: set[str],
+) -> None:
+    for relative, source in codex_files.items():
+        if relative.split("/", 1)[0] in exclude_skill_dirs:
+            continue
+        destination = junie_skills / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+
+
+def _remove_stray_skill_contents(
+    codex_files: dict[str, Path],
+    junie_files: dict[str, Path],
+    junie_skills: Path,
+    exclude_skill_dirs: set[str],
+) -> None:
+    for relative in set(junie_files) - set(codex_files):
+        if relative.split("/", 1)[0] not in exclude_skill_dirs:
+            (junie_skills / relative).unlink()
+
+
+def _remove_empty_directories(root: Path) -> None:
+    directories = sorted(
+        (path for path in root.rglob("*") if path.is_dir()),
+        key=lambda path: len(path.parts),
+        reverse=True,
+    )
+    for directory in directories:
+        try:
+            directory.rmdir()
+        except OSError:
+            pass
+
+
+def _sync_skill_contents(scope: JsonObject, junie_skills: Path) -> None:
+    codex_skills = REPO_ROOT / CODEX_DIRNAME / "skills"
+    exclude_skill_dirs = set(scope["skills"].get("exclude_directory_names", []))
+    exclude_prefixes = tuple(
+        scope["skill_contents"].get("exclude_relative_path_prefixes", [])
+    )
+    _remove_excluded_skill_dirs(junie_skills, exclude_skill_dirs)
+    codex_files = collect_files(codex_skills, exclude_prefixes)
+    codex_files.pop(SKILLS_CATALOG_FILENAME, None)
+    _copy_skill_contents(codex_files, junie_skills, exclude_skill_dirs)
+    junie_files = collect_files(junie_skills, exclude_prefixes)
+    junie_files.pop(SKILLS_CATALOG_FILENAME, None)
+    _remove_stray_skill_contents(
+        codex_files,
+        junie_files,
+        junie_skills,
+        exclude_skill_dirs,
+    )
+    _remove_empty_directories(junie_skills)
+
+
 def do_sync(contract: JsonObject) -> int:
     """One-way sync .codex → .junie for every file under parity scope.
 
     Never writes into `.codex/**`. Preserves Junie runtime-only files.
     """
     scope = contract["parity_scope"]
-    # 1. Agents
-    codex_agents = REPO_ROOT / ".codex" / "agents"
-    junie_agents = REPO_ROOT / ".junie" / "agents"
-    junie_agents.mkdir(parents=True, exist_ok=True)
-    exclude_agents = set(scope["agents"].get("exclude_filenames", []))
-    for src in codex_agents.glob("py-*.md"):
-        if src.name in exclude_agents:
-            continue
-        dst = junie_agents / src.name
-        shutil.copy2(src, dst)
-    # Remove stray py-* files not in source
-    codex_agent_names = {
-        p.name for p in codex_agents.glob("py-*.md") if p.name not in exclude_agents
-    }
-    for stray in junie_agents.glob("py-*.md"):
-        if stray.name not in codex_agent_names:
-            stray.unlink()
-    # 2. Shared agent docs
-    for src_rel, mir_rel in zip(
-        scope["shared_agent_docs"]["source_files"],
-        scope["shared_agent_docs"]["mirror_files"],
-        strict=True,
-    ):
-        src = REPO_ROOT / src_rel
-        mir = REPO_ROOT / mir_rel
-        mir.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, mir)
-    # 3. Skills catalog
-    cat = scope["skills_catalog"]
-    junie_skills = REPO_ROOT / ".junie" / "skills"
-    junie_skills.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(REPO_ROOT / cat["source_file"], REPO_ROOT / cat["mirror_file"])
-    # 4. Skills directories (mirror the whole tree under .codex/skills/**)
-    codex_skills = REPO_ROOT / ".codex" / "skills"
-    exclude_skill_dirs = set(scope["skills"].get("exclude_directory_names", []))
-    exclude_prefixes = tuple(
-        scope["skill_contents"].get("exclude_relative_path_prefixes", [])
-    )
-    # Explicitly remove excluded skill directories from .junie side (they must
-    # never exist as tracked mirror content, even if they pre-existed locally).
-    for excluded in exclude_skill_dirs:
-        stale_dir = junie_skills / excluded
-        if stale_dir.exists():
-            shutil.rmtree(stale_dir)
-    codex_files = collect_files(codex_skills, exclude_prefixes)
-    codex_files.pop("SKILLS-CATALOG.md", None)
-    for rel_path, src in codex_files.items():
-        # Skip files under excluded skill dirs
-        top = rel_path.split("/", 1)[0]
-        if top in exclude_skill_dirs:
-            continue
-        dst = junie_skills / rel_path
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
-    # Remove stray files/dirs in junie skills that don't exist in codex
-    junie_files = collect_files(junie_skills, exclude_prefixes)
-    junie_files.pop("SKILLS-CATALOG.md", None)
-    for rel_path in set(junie_files) - set(codex_files):
-        top = rel_path.split("/", 1)[0]
-        if top in exclude_skill_dirs:
-            continue
-        (junie_skills / rel_path).unlink()
-    # Remove empty dirs
-    for d in sorted(
-        [p for p in junie_skills.rglob("*") if p.is_dir()],
-        key=lambda p: len(p.parts),
-        reverse=True,
-    ):
-        try:
-            d.rmdir()
-        except OSError:
-            pass
+    _sync_agents(scope)
+    _sync_shared_agent_docs(scope)
+    junie_skills = _sync_skills_catalog(scope)
+    _sync_skill_contents(scope, junie_skills)
     print("Junie mirror sync complete (.codex -> .junie).")
     print("Re-running --check to validate final state...")
     return do_check(contract)

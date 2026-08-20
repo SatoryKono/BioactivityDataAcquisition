@@ -444,63 +444,70 @@ def _runtime_composite_column_groups(data: dict[str, Any]) -> object:
     return merge.get("column_groups") if isinstance(merge, dict) else None
 
 
+def _composite_column_group_errors(path: Path, data: dict[str, Any]) -> list[str]:
+    schema = data.get("schema")
+    entity_groups = schema.get("column_groups") if isinstance(schema, dict) else None
+    runtime_path = COMPOSITES_DIR / path.name
+    runtime_groups = (
+        _runtime_composite_column_groups(_load_yaml(runtime_path))
+        if runtime_path.exists()
+        else None
+    )
+    if not isinstance(entity_groups, list) or not entity_groups:
+        return [f"INV-CFG-009 {_rel(path)}: schema.column_groups must be non-empty"]
+    if entity_groups != runtime_groups:
+        return [
+            f"INV-CFG-009 {_rel(path)}: schema.column_groups drift from "
+            f"configs/composites/{path.name}"
+        ]
+    return []
+
+
+def _composite_filter_errors(path: Path, data: dict[str, Any]) -> list[str]:
+    filters = data.get("filters")
+    if not isinstance(filters, dict):
+        return [f"INV-CFG-009 {_rel(path)}: filters must be a mapping"]
+    errors: list[str] = []
+    for layer in ("silver_filters", "gold_filters"):
+        layer_filters = filters.get(layer)
+        required_fields = (
+            layer_filters.get("required_fields")
+            if isinstance(layer_filters, dict)
+            else None
+        )
+        if not isinstance(required_fields, list) or not required_fields:
+            errors.append(
+                f"INV-CFG-009 {_rel(path)}: "
+                f"filters.{layer}.required_fields must be non-empty"
+            )
+    return errors
+
+
+def _composite_primary_key_errors(path: Path, data: dict[str, Any]) -> list[str]:
+    pipeline = data.get("pipeline")
+    contracts = data.get("contracts")
+    pipeline_keys = (
+        pipeline.get("business_primary_keys") if isinstance(pipeline, dict) else None
+    )
+    contract_keys = (
+        contracts.get("primary_key") if isinstance(contracts, dict) else None
+    )
+    if isinstance(contract_keys, list) and contract_keys == pipeline_keys:
+        return []
+    return [
+        f"INV-CFG-009 {_rel(path)}: contracts.primary_key must match "
+        "pipeline.business_primary_keys"
+    ]
+
+
 def check_inv_009(verbose: bool) -> list[str]:
     """INV-CFG-009: composite entity contracts are complete and schema-aligned."""
     errors: list[str] = []
     for path in _composite_entity_configs():
         data = _load_yaml(path)
-        schema = data.get("schema")
-        entity_groups = (
-            schema.get("column_groups") if isinstance(schema, dict) else None
-        )
-        runtime_path = COMPOSITES_DIR / path.name
-        runtime_groups = (
-            _runtime_composite_column_groups(_load_yaml(runtime_path))
-            if runtime_path.exists()
-            else None
-        )
-        if not isinstance(entity_groups, list) or not entity_groups:
-            errors.append(
-                f"INV-CFG-009 {_rel(path)}: schema.column_groups must be non-empty"
-            )
-        elif entity_groups != runtime_groups:
-            errors.append(
-                f"INV-CFG-009 {_rel(path)}: schema.column_groups drift from "
-                f"configs/composites/{path.name}"
-            )
-
-        filters = data.get("filters")
-        if not isinstance(filters, dict):
-            errors.append(f"INV-CFG-009 {_rel(path)}: filters must be a mapping")
-        else:
-            for layer in ("silver_filters", "gold_filters"):
-                layer_filters = filters.get(layer)
-                required_fields = (
-                    layer_filters.get("required_fields")
-                    if isinstance(layer_filters, dict)
-                    else None
-                )
-                if not isinstance(required_fields, list) or not required_fields:
-                    errors.append(
-                        f"INV-CFG-009 {_rel(path)}: "
-                        f"filters.{layer}.required_fields must be non-empty"
-                    )
-
-        pipeline = data.get("pipeline")
-        contracts = data.get("contracts")
-        pipeline_keys = (
-            pipeline.get("business_primary_keys")
-            if isinstance(pipeline, dict)
-            else None
-        )
-        contract_keys = (
-            contracts.get("primary_key") if isinstance(contracts, dict) else None
-        )
-        if not isinstance(contract_keys, list) or contract_keys != pipeline_keys:
-            errors.append(
-                f"INV-CFG-009 {_rel(path)}: contracts.primary_key must match "
-                "pipeline.business_primary_keys"
-            )
+        errors.extend(_composite_column_group_errors(path, data))
+        errors.extend(_composite_filter_errors(path, data))
+        errors.extend(_composite_primary_key_errors(path, data))
     if verbose and not errors:
         sys.stdout.write(
             "  INV-CFG-009: PASS (composite entity contracts complete and aligned)\n"

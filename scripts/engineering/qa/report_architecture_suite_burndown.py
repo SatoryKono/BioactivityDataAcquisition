@@ -14,8 +14,13 @@ from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
 DEFAULT_ROOT = Path("tests/architecture")
 DEFAULT_JSON = Path("reports/quality/architecture-suite-burndown-inventory.json")
 DEFAULT_MD = Path("reports/quality/architecture-suite-burndown-inventory.md")
-STEM_NORMALIZE = re.compile(
-    r"(_ratchet|_gate|_policy|_inventory|_baseline|_closeout)+$"
+STEM_SUFFIXES = (
+    "_ratchet",
+    "_gate",
+    "_policy",
+    "_inventory",
+    "_baseline",
+    "_closeout",
 )
 
 
@@ -23,7 +28,12 @@ def _stem_family(path: Path) -> str:
     stem = path.stem
     if stem.startswith("test_"):
         stem = stem[5:]
-    return STEM_NORMALIZE.sub("", stem)
+    while suffix := next(
+        (candidate for candidate in STEM_SUFFIXES if stem.endswith(candidate)),
+        None,
+    ):
+        stem = stem[: -len(suffix)]
+    return stem
 
 
 def scan(root: Path) -> dict[str, Any]:

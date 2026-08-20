@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.engineering.common.repo_paths import resolve_cli_path
+SUPPORTED_SUFFIXES = {".mermaid", ".mmd"}
 
 
 @dataclass
@@ -35,6 +35,38 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _diagram_root() -> Path:
+    """Return the only repository subtree this codemod may modify."""
+    return _repo_root() / "docs/02-architecture/diagrams"
+
+
+def _resolve_diagram_path(path: Path) -> Path:
+    """Resolve a diagram path and reject traversal or symlink escapes."""
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    if path.is_absolute():
+        raise ValueError(f"Path {path} must be repository-relative")
+    if ".." in path.parts:
+        raise ValueError(f"Path {path} contains parent traversal")
+    resolved_path = ensure_path_within_root(_repo_root() / path, _diagram_root())
+    if resolved_path.suffix.lower() not in SUPPORTED_SUFFIXES:
+        raise ValueError(f"Path {path} is not a Mermaid source file")
+    return resolved_path
+
+
+def _read_validated_diagram_text(path: Path) -> str:
+    """Read a path returned by :func:`_resolve_diagram_path`."""
+    return path.read_text(encoding="utf-8")
+
+
+def _write_validated_diagram_text(path: Path, content: str) -> None:
+    """Write a path returned by :func:`_resolve_diagram_path`."""
+    path.write_text(  # NOSONAR - confined by _resolve_diagram_path
+        content,
+        encoding="utf-8",
+    )
+
+
 def _get_diagram_type(content: str) -> str | None:
     """Get the diagram type from content."""
     first_line = content.strip().split("\n")[0].strip()
@@ -54,7 +86,8 @@ def check_file(path: Path) -> CheckResult:
     Returns:
         CheckResult with list of ArrowIssue objects.
     """
-    content = path.read_text(encoding="utf-8")
+    resolved_path = _resolve_diagram_path(path)
+    content = _read_validated_diagram_text(resolved_path)
 
     diagram_type = _get_diagram_type(content)
     if diagram_type is None:
@@ -89,13 +122,8 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
     Raises:
         ValueError: If the path is outside the repository root or uses parent traversal.
     """
-    repo_root = _repo_root()
-
-    if ".." in path.parts:
-        raise ValueError(f"Path {path} contains parent traversal")
-    resolved_path = resolve_cli_path(path, root=repo_root)
-
-    content = resolved_path.read_text(encoding="utf-8")
+    resolved_path = _resolve_diagram_path(path)
+    content = _read_validated_diagram_text(resolved_path)
 
     diagram_type = _get_diagram_type(content)
     if diagram_type is None:
@@ -122,7 +150,7 @@ def fix_file(path: Path, dry_run: bool = False) -> int:
         return 0
 
     if not dry_run:
-        resolved_path.write_text(fixed_content, encoding="utf-8")
+        _write_validated_diagram_text(resolved_path, fixed_content)
 
     return replacements
 

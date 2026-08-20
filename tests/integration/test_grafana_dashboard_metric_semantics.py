@@ -1820,20 +1820,24 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    identity_id, processed_id = (
-        (9300, 9301) if dashboard_name == "bioetl-overview-v2.json" else (9402, 9403)
-    )
+    identity_id, processed_id = {
+        "bioetl-overview-v2.json": (9300, 9301),
+        "bioetl-run-explorer-v1.json": (3022, 3023),
+    }.get(dashboard_name, (9402, 9403))
     identity = panels[identity_id]
     processed = panels[processed_id]
-    expected_height = 5 if dashboard_name == "bioetl-run-explorer-v1.json" else 6
-    assert (
-        identity.get("gridPos", {}).get("h")
-        == processed.get("gridPos", {}).get("h")
-        == expected_height
-    )
     if dashboard_name == "bioetl-run-explorer-v1.json":
+        assert identity.get("gridPos", {}).get("h") == 8
+        assert processed.get("gridPos", {}).get("h") == 8
         assert identity.get("gridPos", {}).get("w") == 10
         assert processed.get("gridPos", {}).get("w") == 14
+    else:
+        expected_height = 6
+        assert (
+            identity.get("gridPos", {}).get("h")
+            == processed.get("gridPos", {}).get("h")
+            == expected_height
+        )
         assert (
             "valid empty"
             in str(
@@ -1897,10 +1901,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
 
     transformations = processed.get("transformations", [])
     transform_ids = [transformation.get("id") for transformation in transformations]
-    if dashboard_name == "bioetl-run-explorer-v1.json":
-        assert transform_ids == ["organize", "filterByValue", "limit"]
-    else:
-        assert transform_ids == ["organize"]
+    assert transform_ids == ["organize"]
     organize_options = transformations[0].get("options", {})
     rename_by_name = organize_options.get("renameByName", {})
     assert rename_by_name.get("parameter") == "parameter"

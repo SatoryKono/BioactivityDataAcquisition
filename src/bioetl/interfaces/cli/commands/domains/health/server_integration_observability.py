@@ -6,8 +6,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
 if TYPE_CHECKING:
-    from bioetl.composition.health_api import HealthServerDependenciesProtocol
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class _HealthObservabilitySettings(Protocol):
@@ -161,22 +160,17 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     )
 
 
-def _rehydrate_provider_health_gauges(deps: HealthServerDependenciesProtocol) -> None:
-    from bioetl.composition.runtime_builders import control_plane_root
-    from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
-        FileProviderHealthEvidenceStore,
-    )
-    from bioetl.infrastructure.control_plane.provider_health_evidence import (
-        rehydrate_provider_health_evidence,
-    )
+class _ProviderHealthDeps(Protocol):
+    """Minimal typed view of health-server deps used for provider-health rehydrate."""
+
+    metrics: MetricsPort
+
+
+def _rehydrate_provider_health_gauges(deps: _ProviderHealthDeps) -> None:
+    from bioetl.composition.health_api import rehydrate_provider_health_gauges
 
     try:
-        settings = get_settings()
-        store = FileProviderHealthEvidenceStore(
-            base_path=control_plane_root(settings, "provider_health")
-        )
-        rehydrate_provider_health_evidence(deps.metrics, store)
+        rehydrate_provider_health_gauges(deps.metrics)
     except (OSError, RuntimeError, TypeError, ValueError, AttributeError):
         return
 

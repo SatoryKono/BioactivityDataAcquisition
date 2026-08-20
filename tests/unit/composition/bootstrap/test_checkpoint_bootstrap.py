@@ -517,3 +517,12 @@ class TestBootstrapObservabilityWorkflowService:
         assert result.lineage_service is lineage_service
         assert result.quarantine_service is quarantine_service
         assert result.tracer is tracer
+
+
+def test_logical_fs_path_keeps_posix_absolute_roots() -> None:
+    from bioetl.composition.bootstrap.assembly.checkpoint import _logical_fs_path
+
+    posix_root = _logical_fs_path(Path("/custom/x"))
+    assert posix_root.as_posix() == "/custom/x"
+    relative = _logical_fs_path(Path("relative/out"))
+    assert relative == Path("relative/out")

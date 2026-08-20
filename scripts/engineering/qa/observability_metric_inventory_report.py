@@ -37,7 +37,6 @@ from scripts.engineering.qa.observability_metric_inventory_shared import (
 )
 
 
-
 _COVERAGE_CLASSES_PATH = Path("configs/quality/observability_coverage_classes.yaml")
 _PROMETHEUS_BUILTIN_METRIC_RE = re.compile(r"\b(?:ALERTS|ALERTS_FOR_STATE)\b")
 _coverage_class_map: dict[str, str] = {}
@@ -51,12 +50,15 @@ def _load_coverage_policy(repo_root: Path) -> tuple[dict[str, str], dict[str, st
     if not path.is_file():
         return {}, {}
     payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    classes = payload.get("metric_coverage_classes") if isinstance(payload, dict) else {}
+    classes = (
+        payload.get("metric_coverage_classes") if isinstance(payload, dict) else {}
+    )
     empty = payload.get("empty_state_by_class") if isinstance(payload, dict) else {}
     class_map = {
         str(key): str(value)
         for key, value in (classes or {}).items()
-        if str(value) in {
+        if str(value)
+        in {
             "required_current",
             "required_when_active",
             "event_optional",
@@ -543,7 +545,6 @@ def _http_target_sort_key(row: dict[str, object]) -> tuple[str, int, str, str]:
     )
 
 
-
 def _coverage_class_violations(typed_targets: list[dict[str, object]]) -> list[str]:
     violations: list[str] = []
     for row in typed_targets:
@@ -555,6 +556,7 @@ def _coverage_class_violations(typed_targets: list[dict[str, object]]) -> list[s
             f"{row['dashboard_uid']}::panel={row['panel_id']}::ref={row['ref_id']}"
         )
     return violations
+
 
 def _http_semantics_violations(typed_targets: list[dict[str, object]]) -> list[str]:
     return [

@@ -192,6 +192,30 @@ def _wait_for_renderer(
     return False, after
 
 
+def _renderer_wait_messages(
+    healthy: bool,
+    after: list[dict[str, object]],
+    *,
+    wait_seconds: float,
+) -> list[str]:
+    if healthy or not after:
+        return []
+    if any(
+        snapshot["status"] == "running" and snapshot["health"] in {"none", ""}
+        for snapshot in after
+    ):
+        return ["renderer running without health endpoint result"]
+    return [f"renderer not healthy within {wait_seconds}s"]
+
+
+def _grafana_probe_messages(grafana_ok: bool | None) -> list[str]:
+    if grafana_ok:
+        return ["Grafana /api/health ok (UI independent of renderer)"]
+    if grafana_ok is False:
+        return ["Grafana /api/health failed (separate from renderer)"]
+    return []
+
+
 def recover_renderer(
     *,
     project: str = DEFAULT_PROJECT,
@@ -254,19 +278,9 @@ def recover_renderer(
         wait_seconds=wait_seconds,
         messages=messages,
     )
-
-    if not healthy and after:
-        # Accept running only after wait exhausted if health missing (rare).
-        if any(s["status"] == "running" and s["health"] in {"none", ""} for s in after):
-            messages.append("renderer running without health endpoint result")
-        else:
-            messages.append(f"renderer not healthy within {wait_seconds}s")
-
+    messages.extend(_renderer_wait_messages(healthy, after, wait_seconds=wait_seconds))
     grafana_ok = probe_grafana_ui()
-    if grafana_ok:
-        messages.append("Grafana /api/health ok (UI independent of renderer)")
-    elif grafana_ok is False:
-        messages.append("Grafana /api/health failed (separate from renderer)")
+    messages.extend(_grafana_probe_messages(grafana_ok))
 
     return RecoverReport(
         ok=healthy,
@@ -326,7 +340,7 @@ def _as_check_only_report(report: RecoverReport) -> RecoverReport:
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=DEFAULT_PROJECT)
     parser.add_argument("--compose-file", type=Path, default=DEFAULT_COMPOSE)
@@ -337,38 +351,46 @@ def main(argv: list[str] | None = None) -> int:
         help="Do not recreate; only report renderer health",
     )
     parser.add_argument("--json", action="store_true")
-    args = parser.parse_args(argv)
+    return parser
 
+
+def _report_for_args(args: argparse.Namespace) -> RecoverReport:
     if args.check_only:
         report = check_renderer_health(
             project=args.project, compose_file=args.compose_file
         )
         # check-only with wait 0.1 may not see healthy if just starting;
         # re-evaluate from after snapshots.
-        report = _as_check_only_report(report)
-    else:
-        report = recover_renderer(
-            project=args.project,
-            compose_file=args.compose_file,
-            wait_seconds=args.wait,
-        )
+        return _as_check_only_report(report)
+    return recover_renderer(
+        project=args.project,
+        compose_file=args.compose_file,
+        wait_seconds=args.wait,
+    )
 
-    payload = asdict(report)
+
+def _print_human_report(report: RecoverReport) -> None:
+    print(f"=== {report.action} (project={report.project}) ===")
+    for message in report.messages:
+        print(f"  {message}")
+    if report.before:
+        print("  before:", report.before)
+    if report.after:
+        print("  after:", report.after)
+    if report.remediation:
+        print("  remediation:")
+        for step in report.remediation:
+            print(f"    - {step}")
+    print("OK" if report.ok else "FAIL (Grafana UI should still work)")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _build_parser().parse_args(argv)
+    report = _report_for_args(args)
     if args.json:
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        print(json.dumps(asdict(report), indent=2, sort_keys=True))
     else:
-        print(f"=== {report.action} (project={report.project}) ===")
-        for msg in report.messages:
-            print(f"  {msg}")
-        if report.before:
-            print("  before:", report.before)
-        if report.after:
-            print("  after:", report.after)
-        if report.remediation:
-            print("  remediation:")
-            for step in report.remediation:
-                print(f"    - {step}")
-        print("OK" if report.ok else "FAIL (Grafana UI should still work)")
+        _print_human_report(report)
     return 0 if report.ok else 1
 
 

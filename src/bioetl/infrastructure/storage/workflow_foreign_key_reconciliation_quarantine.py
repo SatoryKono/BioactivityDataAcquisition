@@ -48,6 +48,7 @@ if TYPE_CHECKING:
 FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 
+
 @dataclass(frozen=True, slots=True)
 class ReconciliationMutationSummary:
     """Compact mutation/quarantine summary for one FK reconciliation pass."""

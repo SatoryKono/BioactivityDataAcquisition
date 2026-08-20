@@ -132,7 +132,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). This strip is the selected UUID, not CURRENT fleet. Missing run is VALID EMPTY / SELECT RUN, not OK. Do not treat Monitor Fleet Health or Review First Action as this run. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 9402 at from_ms..to_ms. A covered run does not show an outside-range warning.",
+      "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). This strip is the selected UUID, not CURRENT fleet. Missing run is VALID EMPTY / SELECT RUN, not OK. Do not treat Monitor Fleet Health or Review First Action as this run. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -147,7 +147,7 @@
           "links": [
             {
               "title": "Set range to run",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
               "targetBlank": false,
               "includeVars": false
             },
@@ -171,7 +171,7 @@
                 "value": [
                   {
                     "title": "Set range to run",
-                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+                    "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -236,7 +236,7 @@
         "dataLinks": [
           {
             "title": "Set range to run",
-            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+            "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
             "targetBlank": false,
             "includeVars": false
           },
@@ -309,7 +309,7 @@
       "links": [
         {
           "title": "Set range to run",
-          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9402&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+          "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
           "targetBlank": false,
           "includeVars": false
         }
@@ -1731,7 +1731,7 @@
               "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "description": "TIME RANGE · SELECTED RUN · Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · SELECTED RUN · Shows Runtime status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Pipeline Diagnostics for current blockers. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 runtime over the range; the snapshot table is Review Runtime Status (9003).",
           "maxDataPoints": 400
         },
         {
@@ -1824,7 +1824,7 @@
               "legendFormat": "{{pipeline}}/{{run_type}}"
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "CURRENT · TIME RANGE · Shows Data Quality status over the selected range for Pipeline and Run Type. Values are OK, WARN, CRIT, or UNKNOWN; missing samples remain UNKNOWN. This trend does not determine current Fleet Health; open Data Quality for current conditions. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 data-quality over the range; the snapshot table is Review Data Quality Status (9004).",
           "maxDataPoints": 400
         },
         {
@@ -1923,7 +1923,7 @@
               "legendFormat": "{{pipeline}}/{{run_type}}/{{lifecycle_state}}"
             }
           ],
-          "description": "TIME RANGE · Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows Gold lifecycle state over the selected range for Pipeline and Run Type. A disabled Gold stage is a valid non-error state, while gaps or missing series remain UNKNOWN. This trend does not determine current Fleet Health; continue in Pipeline Diagnostics or Trust. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: history (state-timeline) of L1 gold lifecycle over the range; the snapshot table is Review Data Validation Status (9005).",
           "maxDataPoints": 400
         }
       ]
@@ -2657,7 +2657,7 @@
               }
             }
           ],
-          "description": "TIME RANGE · CURRENT · SELECTED RUN · Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · CURRENT · SELECTED RUN · Shows current Runtime status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for blocker detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 runtime; history is Track Runtime Blockers (9018)."
         },
         {
           "id": 9004,
@@ -2848,7 +2848,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT · TIME RANGE · Shows current Data Quality status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Data Quality for rule and accounting detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 data-quality; history is Track Data Quality Status (9019)."
         },
         {
           "id": 9007,
@@ -3230,7 +3230,7 @@
               }
             }
           ],
-          "description": "CURRENT · TIME RANGE · Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail. TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "CURRENT · TIME RANGE · Shows current Data Validation lifecycle status for the selected Pipeline and Run Type. Values are 0=OK, 1=WARN, >=2=CRIT, and null/3=UNKNOWN; UNKNOWN is incomplete evidence. Open Pipeline Diagnostics for lifecycle detail. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of current L1 gold lifecycle; history is Track Gold Lifecycle (9020)."
         },
         {
           "id": 9013,

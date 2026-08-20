@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.grafana-audit.master
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -33,9 +33,11 @@ includes:
   - fragments/reports-output.md
   - fragments/shell-portability.md
   - fragments/grafana-audit-contract.md
+  - fragments/dashboard-requirements-audit.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - grafana/dashboards
   - docs/03-guides/dashboards/design-system.md
   - docs/03-guides/dashboards/verdict-ontology.md
@@ -64,7 +66,7 @@ max_body_lines: 260
 | `REFERENCE_SPEC` | `repo-contracts-or-gap` |
 | `VIEWPORTS` | `1366x768,1440x900,1920x1080` |
 | `THEMES` | `actual-theme` |
-| `USER_ROLES` | `SRE,BI,NOC` |
+| `USER_ROLES` | `operator` |
 | `TIME_RANGE` | `record-actual` |
 | `VARIABLES` | `record-actual` |
 | `MONITORING` | `false` |

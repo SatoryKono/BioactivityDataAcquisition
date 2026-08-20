@@ -89,3 +89,15 @@ def test_sync_cursor_rules_excludes_sonarqube_instructions(tmp_path: Path) -> No
     deploy = tmp_path / sync_cursor_rules.CURSOR_RULES_DIR
     assert (deploy / "00-test.mdc").exists()
     assert not (deploy / "sonarqube_mcp_instructions.mdc").exists()
+
+
+def test_main_defaults_to_check(tmp_path: Path) -> None:
+    """Bare CLI must not deploy into .cursor/rules (#9119)."""
+    canonical = tmp_path / sync_cursor_rules.CURSOR_RULE_DOCS_DIR
+    _write_rule(canonical, "00-test.mdc", "# Canonical\n")
+    deploy = tmp_path / sync_cursor_rules.CURSOR_RULES_DIR
+
+    exit_code = sync_cursor_rules.main(["--root", str(tmp_path)])
+
+    assert exit_code == 1
+    assert not deploy.exists()

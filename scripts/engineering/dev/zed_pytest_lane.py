@@ -35,6 +35,8 @@ from scripts.engineering.dev.zed_env_doctor import ensure_ready
 
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"
+_TESTS_ROOT = "tests/"
+_VCR_RECORD_NONE = "--vcr-record=none"
 _COMMON = (
     _TB_SHORT,
     "--no-cov",
@@ -105,7 +107,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "-q",
         "-m",
         "not slow and not benchmark and not memory",
-        "--vcr-record=none",
+        _VCR_RECORD_NONE,
         *_COMMON,
     ),
     "contracts": (
@@ -135,7 +137,7 @@ LANES: dict[str, tuple[str, ...]] = {
         *_COMMON,
     ),
     "failed": (
-        "tests/",
+        _TESTS_ROOT,
         "--lf",
         "-x",
         "-v",
@@ -146,7 +148,7 @@ LANES: dict[str, tuple[str, ...]] = {
     ),
     # Advisory local coverage estimate — NOT the canonical coverage-verify gate.
     "coverage-local": (
-        "tests/",
+        _TESTS_ROOT,
         "--ignore=tests/e2e",
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
@@ -177,6 +179,26 @@ LANES: dict[str, tuple[str, ...]] = {
 }
 
 
+def _consume_lane_token(
+    tokens: list[str], index: int
+) -> tuple[int, str | None, str | None, str | None, bool]:
+    token = tokens[index]
+    if token == "-m" and index + 1 < len(tokens):
+        return index + 2, None, None, tokens[index + 1], False
+    if token.startswith("--ignore="):
+        return index + 1, None, token.split("=", 1)[1], None, False
+    if token == "--ignore" and index + 1 < len(tokens):
+        return index + 2, None, tokens[index + 1], None, False
+    if token == _VCR_RECORD_NONE:
+        return index + 1, None, None, None, True
+    if token == "--vcr-record" and index + 1 < len(tokens):
+        return index + 2, None, None, None, tokens[index + 1] == "none"
+    if token.startswith("-"):
+        return index + 1, None, None, None, False
+    path = token if token.startswith(_TESTS_ROOT) or token.endswith(".py") else None
+    return index + 1, path, None, None, False
+
+
 def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, Any]:
     """Extract paths, marker, ignores, and vcr flags from a lane argv tail.
 
@@ -189,41 +211,16 @@ def extract_lane_membership(argv_tail: Sequence[str]) -> dict[str, Any]:
     tokens = list(argv_tail)
     index = 0
     while index < len(tokens):
-        token = tokens[index]
-        if token == "-m" and index + 1 < len(tokens):
-            marker = tokens[index + 1]
-            index += 2
-            continue
-        if token.startswith("--ignore="):
-            ignores.append(token.split("=", 1)[1])
-            index += 1
-            continue
-        if token == "--ignore" and index + 1 < len(tokens):
-            ignores.append(tokens[index + 1])
-            index += 2
-            continue
-        if token in {"--vcr-record=none", "--vcr-record", "none"}:
-            if token == "--vcr-record=none" or (
-                token == "none" and index > 0 and tokens[index - 1] == "--vcr-record"
-            ):
-                has_vcr_none = True
-            if (
-                token == "--vcr-record"
-                and index + 1 < len(tokens)
-                and tokens[index + 1] == "none"
-            ):
-                has_vcr_none = True
-                index += 2
-                continue
-            index += 1
-            continue
-        if token.startswith("-"):
-            index += 1
-            continue
-        # Positional path-like tokens (tests/..., files)
-        if token.startswith("tests/") or token.endswith(".py"):
-            paths.append(token)
-        index += 1
+        index, path, ignore, parsed_marker, records_none = _consume_lane_token(
+            tokens, index
+        )
+        if path is not None:
+            paths.append(path)
+        if ignore is not None:
+            ignores.append(ignore)
+        if parsed_marker is not None:
+            marker = parsed_marker
+        has_vcr_none = has_vcr_none or records_none
     return {
         "paths": paths,
         "ignores": ignores,

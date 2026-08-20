@@ -3,7 +3,7 @@
   "linked_issue": "#6891",
   "follow_up_issue": "#7464",
   "parent_epic": "#6890",
-  "snapshot_date": "2026-08-19",
+  "snapshot_date": "2026-08-20",
   "generated_by": "scripts.engineering.qa.report_live_residual_snapshot",
   "policy": {
     "direction": "shrink_only",
@@ -12,11 +12,11 @@
   },
   "hotspot_families": {
     "application_core": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 0,
       "max_internal_fan_in": 6,
-      "helper_function_ratio": 0.372,
-      "files": 192,
-      "total_loc": 23400,
+      "helper_function_ratio": 0.374,
+      "files": 194,
+      "total_loc": 23381,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -25,34 +25,34 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6226,
+      "total_loc": 6239,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "composition_factories_pipeline": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 2,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.342,
-      "files": 32,
-      "total_loc": 4000,
+      "files": 33,
+      "total_loc": 4050,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.431,
-      "files": 139,
-      "total_loc": 16282,
+      "helper_function_ratio": 0.425,
+      "files": 143,
+      "total_loc": 16437,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 3,
-      "helper_function_ratio": 0.358,
-      "files": 56,
-      "total_loc": 7205,
+      "helper_function_ratio": 0.368,
+      "files": 57,
+      "total_loc": 7282,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }

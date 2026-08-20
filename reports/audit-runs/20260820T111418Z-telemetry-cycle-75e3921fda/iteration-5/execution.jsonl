@@ -1,0 +1,2 @@
+{"cmd": "write reports/audit-runs/20260820T111418Z-telemetry-cycle-75e3921fda", "result": "report.md findings.json coverage_matrix.json"}
+{"cmd": "inventory --check --allow-local-cardinality-fallback", "result": "pending clean-tree regen"}

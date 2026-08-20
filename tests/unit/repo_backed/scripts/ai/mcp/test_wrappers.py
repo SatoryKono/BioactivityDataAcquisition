@@ -43,8 +43,8 @@ def test_ast_grep_windows_wrapper_preserves_runtime_contract() -> None:
     assert wrapper == wrappers.MCP_DIR / "mcp_ast_grep_wrapper.ps1"
     body = wrapper.read_text(encoding="utf-8")
     assert 'Exit-McpValidateOnly -ServerName "ast-grep"' in body
-    assert 'npx -y "@notprolands/ast-grep-mcp" --stdio @args' in body
-    assert 'npx -y "@chousyn/ast-grep-mcp" --stdio @args' in body
+    assert 'npx -y "@notprolands/ast-grep-mcp@1.1.1" --stdio @args' in body
+    assert 'npx -y "@chousyn/ast-grep-mcp@0.1.1" --stdio @args' in body
     assert wrappers.wrapper_command("ast-grep", host=windows)[-1] == str(wrapper)
 
 

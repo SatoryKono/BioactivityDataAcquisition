@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-13'
+  Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -76,9 +76,9 @@ uv run python -m scripts.docs verify
 ```
 
 Use this as the default end-to-end verification path for doc-sync changes. It
-runs link/spec/config checks, docs drift, docstring inventory, documentation
-cleanup inventory drift, and a strict MkDocs build through the in-repo helper
-chain.
+runs link/spec/config checks, docs drift (`--ports --classes --runtime-mirrors
+--freshness`), docstring inventory, documentation cleanup inventory drift, and
+a strict MkDocs build through the in-repo helper chain.
 
 ### 1. Link and reference checks
 
@@ -225,6 +225,11 @@ Documentation changes trigger the `docs.yml` workflow which:
 - Runs full docs verification including strict MkDocs build
 - Validates link integrity, config parity, and architecture drift
 - Regenerates generated documentation artifacts when needed
+
+Calendar enforcement (independent of docs-path PRs) is
+`.github/workflows/docs-kpi-weekly.yml`: it runs
+`python -m scripts.docs check-drift --runtime-mirrors --freshness`
+and then `python -m scripts.docs check-kpi`.
 
 ### Future Enhancement
 

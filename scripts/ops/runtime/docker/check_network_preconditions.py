@@ -50,9 +50,12 @@ class CheckResult:
 
 
 def _run(args: list[str], *, timeout: float = 15.0) -> tuple[int, str, str]:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_args = ensure_safe_cli_argv(args)
     try:
         proc = subprocess.run(
-            args,
+            safe_args,
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -152,7 +155,7 @@ def check_shared_network(name: str, *, expected_owner: str) -> list[CheckResult]
                     "stderr": err[:500],
                     "remediation": (
                         "python scripts/ops/runtime/docker/check_network_preconditions.py "
-                        f"--stack all --ensure"
+                        "--stack all --ensure"
                     ),
                 },
             )
@@ -309,7 +312,18 @@ def run_checks(
     return results
 
 
-def main(argv: list[str] | None = None) -> int:
+def _result_mark(result: CheckResult) -> str:
+    if result.ok:
+        return "OK "
+    if (
+        result.evidence.get("severity") == "warning"
+        or result.code == "BIOETL_NOT_RUNNING"
+    ):
+        return "WARN"
+    return "FAIL"
+
+
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Check BioETL Docker network preconditions. "
@@ -338,85 +352,109 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Emit machine-readable JSON",
     )
-    args = parser.parse_args(argv)
+    return parser
 
-    contract_path = args.contract
+
+def _resolve_contract_path(path: Path) -> Path | None:
+    contract_path = path
     if not contract_path.is_file():
-        contract_path = _REPO_ROOT / args.contract
-    if not contract_path.is_file():
+        contract_path = _REPO_ROOT / path
+    return contract_path if contract_path.is_file() else None
+
+
+def _json_payload(
+    *, stack: str, ensure: bool, results: list[CheckResult], hard_fail: bool
+) -> dict[str, object]:
+    return {
+        "schema_version": "bioetl-docker-network-preconditions-v1",
+        "stack": stack,
+        "ensure": ensure,
+        "ok": not hard_fail,
+        "results": [
+            {
+                "ok": result.ok,
+                "code": result.code,
+                "message": result.message,
+                "evidence": result.evidence,
+            }
+            for result in results
+        ],
+    }
+
+
+def _print_human_results(
+    *,
+    stack: str,
+    ensure: bool,
+    results: list[CheckResult],
+    hard_fail: bool,
+    warnings: bool,
+) -> None:
+    mode = "ensure+check" if ensure else "check"
+    print(f"=== Network preconditions (stack={stack}, mode={mode}) ===")
+    if stack == "monitoring":
+        print(
+            "Note: monitoring compose requires bioetl-monitoring only "
+            "(not bioetl-runtime)."
+        )
+    elif stack == "main":
+        print("Note: main compose requires bioetl-monitoring + bioetl-runtime.")
+    for result in results:
+        print(f"[{_result_mark(result)}] {result.code}: {result.message}")
+        remediation = result.evidence.get("remediation")
+        if remediation:
+            print(f"       remediation: {remediation}")
+    if hard_fail:
+        print(
+            "\nFAIL: fix network preconditions before compose up "
+            "(--ensure or runtime_manager start)."
+        )
+    elif warnings:
+        print("\nWARN: stack may start degraded (see messages above).")
+    else:
+        print("\nOK: network preconditions satisfied.")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _build_parser().parse_args(argv)
+    contract_path = _resolve_contract_path(args.contract)
+    if contract_path is None:
         print(f"ERROR: contract not found: {args.contract}", file=sys.stderr)
         return 2
-
     results = run_checks(
         stack=args.stack, contract_path=contract_path, ensure=args.ensure
     )
-    hard_fail = [
-        r for r in results if not r.ok and r.evidence.get("severity") != "warning"
-    ]
-    warnings = [
-        r
-        for r in results
-        if (not r.ok and r.evidence.get("severity") == "warning")
-        or r.code == "BIOETL_NOT_RUNNING"
-    ]
-
+    hard_fail = any(
+        not result.ok and result.evidence.get("severity") != "warning"
+        for result in results
+    )
+    warnings = any(
+        (not result.ok and result.evidence.get("severity") == "warning")
+        or result.code == "BIOETL_NOT_RUNNING"
+        for result in results
+    )
     if args.json:
         print(
             json.dumps(
-                {
-                    "schema_version": "bioetl-docker-network-preconditions-v1",
-                    "stack": args.stack,
-                    "ensure": args.ensure,
-                    "ok": not hard_fail,
-                    "results": [
-                        {
-                            "ok": r.ok,
-                            "code": r.code,
-                            "message": r.message,
-                            "evidence": r.evidence,
-                        }
-                        for r in results
-                    ],
-                },
+                _json_payload(
+                    stack=args.stack,
+                    ensure=args.ensure,
+                    results=results,
+                    hard_fail=hard_fail,
+                ),
                 indent=2,
             )
         )
     else:
-        mode = "ensure+check" if args.ensure else "check"
-        print(f"=== Network preconditions (stack={args.stack}, mode={mode}) ===")
-        if args.stack == "monitoring":
-            print(
-                "Note: monitoring compose requires bioetl-monitoring only "
-                "(not bioetl-runtime)."
-            )
-        elif args.stack == "main":
-            print("Note: main compose requires bioetl-monitoring + bioetl-runtime.")
-        for r in results:
-            mark = (
-                "OK "
-                if r.ok
-                else (
-                    "WARN"
-                    if r.evidence.get("severity") == "warning"
-                    or r.code == "BIOETL_NOT_RUNNING"
-                    else "FAIL"
-                )
-            )
-            print(f"[{mark}] {r.code}: {r.message}")
-            rem = r.evidence.get("remediation")
-            if rem:
-                print(f"       remediation: {rem}")
-        if hard_fail:
-            print(
-                "\nFAIL: fix network preconditions before compose up "
-                "(--ensure or runtime_manager start)."
-            )
-        elif warnings:
-            print("\nWARN: stack may start degraded (see messages above).")
-        else:
-            print("\nOK: network preconditions satisfied.")
+        _print_human_results(
+            stack=args.stack,
+            ensure=args.ensure,
+            results=results,
+            hard_fail=hard_fail,
+            warnings=warnings,
+        )
 
-    return 1 if hard_fail else 0
+    return int(hard_fail)
 
 
 if __name__ == "__main__":

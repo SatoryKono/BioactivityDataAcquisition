@@ -38,7 +38,7 @@ the human index.
 | `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct) |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, mermaid lint, render, drift |
-| `docs-kpi-weekly.yml` | Docs KPI Weekly | Documentation navigation KPI report |
+| `docs-kpi-weekly.yml` | Docs KPI Weekly | Documentation navigation KPI plus calendar freshness/runtime-mirror drift |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |

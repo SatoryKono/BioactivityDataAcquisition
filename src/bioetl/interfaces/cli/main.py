@@ -51,20 +51,10 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
         "config",
         "Inspect and validate configuration",
     ),
-    "dq": (
-        "bioetl.interfaces.cli.commands.config_dq",
-        "dq",
-        "Data quality configuration commands",
-    ),
     "diagnostics": (
         "bioetl.interfaces.cli.commands.diagnostics",
         "diagnostics",
         "Unified operator diagnostics across metrics, health, checkpoints, manifests, and quarantine",
-    ),
-    "debug": (
-        "bioetl.interfaces.cli.commands.debug",
-        "debug",
-        "Run a pipeline with breakpoints",
     ),
     "export": (
         "bioetl.interfaces.cli.commands.export",
@@ -80,11 +70,6 @@ _LAZY_COMMAND_SPECS: dict[str, tuple[str, str, str]] = {
         "bioetl.interfaces.cli.commands.lineage",
         "lineage",
         "Inspect pipeline lineage",
-    ),
-    "lock": (
-        "bioetl.interfaces.cli.commands.lock",
-        "lock",
-        "Inspect and manage local runtime locks",
     ),
     "maintenance": (
         "bioetl.interfaces.cli.commands.domains.maintenance.command_group",
@@ -164,7 +149,14 @@ def _configure_lazy_cli_group(group: Group) -> Group:
 
     def list_commands(ctx: Context) -> list[str]:
         del ctx
-        return [*_EAGER_COMMANDS, *_LAZY_COMMAND_SPECS]
+        seen: set[str] = set()
+        names: list[str] = []
+        for name in (*_EAGER_COMMANDS, *_LAZY_COMMAND_SPECS):
+            if name in seen:
+                continue
+            seen.add(name)
+            names.append(name)
+        return names
 
     def get_command(
         ctx: Context,

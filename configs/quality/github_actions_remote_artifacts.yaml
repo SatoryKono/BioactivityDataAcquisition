@@ -1,0 +1,21 @@
+version: 1.0.0
+status: active
+owner: Engineering / Security
+purpose: >
+  Repository-controlled integrity pins for remote executables fetched by GitHub
+  Actions. Workflows MUST verify sha256 before using an artifact. Mutable
+  installer scripts (curl|sh) are forbidden.
+
+forbidden_url_substrings:
+  - cli.coderabbit.ai/install.sh
+  - cli.coderabbit.ai/install.ps1
+
+artifacts:
+  - id: coderabbit-cli-linux-x64
+    version: "0.7.5"
+    url: https://cli.coderabbit.ai/releases/0.7.5/coderabbit-linux-x64.zip
+    sha256: 0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1
+    notes: >
+      Official CodeRabbit CLI linux-x64 zip. Digest taken from
+      https://cli.coderabbit.ai/releases/0.7.5/SHA256SUMS and independently
+      hashed. Bump version+digest together; do not follow /releases/latest.

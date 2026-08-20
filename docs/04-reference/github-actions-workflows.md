@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-31'
+  Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -56,13 +56,13 @@ Use it when you need to answer:
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `push`, `pull_request`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `push`, `pull_request` | Generated artifacts, schema parity, schema drift |
-| `security.yml` | `Security Scans` | `push`, `pull_request` | Secrets, dependency, and Bandit scans |
+| `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, dependency, and Bandit scans |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
-| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request` | Local skill mirrors plus Codex–Junie runtime parity |
+| `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | Local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | Vendored Mermaid asset presence check |
-| `coderabbit.yml` | `CodeRabbit` | `pull_request`, `push`, `workflow_dispatch` | CodeRabbit CLI automated code review |
+| `coderabbit.yml` | `CodeRabbit` | `push`, `workflow_dispatch` | CodeRabbit CLI automated code review |
 
 ### Scheduled / periodic workflows
 
@@ -72,7 +72,7 @@ Use it when you need to answer:
 | `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | Heavy architecture metrics and periodic boundary baselines |
 | `contract-tests.yml` | `Monthly Contract Tests` | `schedule`, `workflow_dispatch` | Scheduled full contract-test lane |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `schedule`, `workflow_dispatch` | Diagram regression/nightly canary |
-| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI/reporting lane |
+| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |

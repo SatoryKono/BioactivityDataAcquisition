@@ -13,6 +13,8 @@ from typing import Any
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 
+from memory.fs_confine import canonicalize_memory_path
+
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_POLICY_PATH = ROOT / "configs" / "quality" / "proof_or_stop_policy.yaml"
 DEFAULT_SCHEMA_PATH = ROOT / "configs" / "quality" / "proof_or_stop_bundle.schema.json"
@@ -84,9 +86,11 @@ def canonical_digest(payload: Any) -> str:
 
 def file_digest(path: Path | None) -> str:
     """Hash an output artifact, using the empty digest when no file exists."""
-    if path is None or not path.exists() or not path.is_file():
+    if path is None:
         return hashlib.sha256(b"").hexdigest()
-    path = path.expanduser().resolve(strict=True)
+    path = canonicalize_memory_path(path, must_exist=False)
+    if not path.exists() or not path.is_file():
+        return hashlib.sha256(b"").hexdigest()
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):

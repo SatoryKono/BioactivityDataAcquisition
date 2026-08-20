@@ -151,7 +151,9 @@ def _scope(title: str, panel: dict[str, object]) -> str:
     return "time_range"
 
 
-def _empty_state_class(panel: dict[str, object], role: str, evidence_source: str) -> str:
+def _empty_state_class(
+    panel: dict[str, object], role: str, evidence_source: str
+) -> str:
     if role in _NON_DATA_ROLES:
         return "unsupported"
     if evidence_source == "ops_http":
@@ -268,6 +270,67 @@ def _load_contract(path: Path) -> dict[str, object]:
     return payload
 
 
+def _previous_panel_contracts(
+    *, uid: str, existing_dashboards: dict[object, object]
+) -> dict[object, object]:
+    previous_dashboard = existing_dashboards.get(uid, {})
+    previous_panels = (
+        previous_dashboard.get("panels", {})
+        if isinstance(previous_dashboard, dict)
+        else {}
+    )
+    if not isinstance(previous_panels, dict):
+        raise ValueError(f"panel-content-contract.yaml:{uid}: panels must be a mapping")
+    return previous_panels
+
+
+def _merge_panel_contract(
+    *, generated: dict[str, object], previous: object
+) -> dict[str, object]:
+    if not isinstance(previous, dict):
+        return generated
+    merged = {**generated, **previous}
+    merged["title"] = generated["title"]
+    merged["evidence_source"] = generated["evidence_source"]
+    role = str(merged.get("role") or generated["role"])
+    if (
+        merged["evidence_source"] == "prometheus"
+        and merged.get("scope") == "selected_run"
+        and role not in _NON_DATA_ROLES
+    ):
+        generated_scope = str(generated["scope"])
+        merged["scope"] = (
+            generated_scope if generated_scope != "selected_run" else "time_range"
+        )
+    merged["scope_class"] = merged.get("scope", generated["scope"])
+    if merged.get("empty_state_class") not in _ALLOWED_EMPTY_STATE_CLASSES:
+        merged["empty_state_class"] = generated["empty_state_class"]
+    elif role in _NON_DATA_ROLES:
+        merged["empty_state_class"] = "unsupported"
+    return merged
+
+
+def _dashboard_panel_contracts(
+    *,
+    payload: dict[str, object],
+    uid: str,
+    existing_dashboards: dict[object, object],
+) -> dict[str, object]:
+    previous_panels = _previous_panel_contracts(
+        uid=uid, existing_dashboards=existing_dashboards
+    )
+    panels: dict[str, object] = {}
+    for panel in _iter_panels(payload):
+        panel_id = panel.get("id")
+        if not isinstance(panel_id, int):
+            continue
+        generated = _record(panel)
+        panels[str(panel_id)] = _merge_panel_contract(
+            generated=generated, previous=previous_panels.get(str(panel_id))
+        )
+    return dict(sorted(panels.items(), key=lambda item: int(item[0])))
+
+
 def _full_contract(existing: dict[str, object]) -> dict[str, object]:
     existing_dashboards = existing.get("dashboards", {})
     if not isinstance(existing_dashboards, dict):
@@ -280,49 +343,12 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
         uid = payload.get("uid")
         if not isinstance(uid, str) or not uid:
             raise ValueError(f"{dashboard_path}: missing dashboard uid")
-        previous_dashboard = existing_dashboards.get(uid, {})
-        previous_panels = (
-            previous_dashboard.get("panels", {})
-            if isinstance(previous_dashboard, dict)
-            else {}
-        )
-        if not isinstance(previous_panels, dict):
-            raise ValueError(
-                f"panel-content-contract.yaml:{uid}: panels must be a mapping"
-            )
-        panels: dict[str, object] = {}
-        for panel in _iter_panels(payload):
-            panel_id = panel.get("id")
-            if not isinstance(panel_id, int):
-                continue
-            generated = _record(panel)
-            previous = previous_panels.get(str(panel_id))
-            if isinstance(previous, dict):
-                merged = {**generated, **previous}
-                merged["title"] = generated["title"]
-                merged["evidence_source"] = generated["evidence_source"]
-                role = str(merged.get("role") or generated["role"])
-                if (
-                    merged["evidence_source"] == "prometheus"
-                    and merged.get("scope") == "selected_run"
-                    and role not in _NON_DATA_ROLES
-                ):
-                    generated_scope = str(generated["scope"])
-                    merged["scope"] = (
-                        generated_scope
-                        if generated_scope != "selected_run"
-                        else "time_range"
-                    )
-                merged["scope_class"] = merged.get("scope", generated["scope"])
-                if merged.get("empty_state_class") not in _ALLOWED_EMPTY_STATE_CLASSES:
-                    merged["empty_state_class"] = generated["empty_state_class"]
-                elif role in _NON_DATA_ROLES:
-                    merged["empty_state_class"] = "unsupported"
-                panels[str(panel_id)] = merged
-            else:
-                panels[str(panel_id)] = generated
         dashboards[uid] = {
-            "panels": dict(sorted(panels.items(), key=lambda item: int(item[0])))
+            "panels": _dashboard_panel_contracts(
+                payload=payload,
+                uid=uid,
+                existing_dashboards=existing_dashboards,
+            )
         }
     return {
         "schema_version": 2,
@@ -341,20 +367,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--contract", type=Path, default=CONTRACT_PATH)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    existing = _load_contract(args.contract)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    contract_path = resolve_output_path(args.contract, root=REPO_ROOT)
+    existing = _load_contract(contract_path)
     generated = _full_contract(existing)
     rendered = yaml.safe_dump(
         generated, allow_unicode=True, sort_keys=False, width=1000
     )
     if args.check:
-        current = args.contract.read_text(encoding="utf-8")
+        current = contract_path.read_text(encoding="utf-8")
         if current != rendered:
-            print(f"dashboard content contract is stale: {args.contract}")
+            print(f"dashboard content contract is stale: {contract_path}")
             return 1
         print("dashboard content contract is current")
         return 0
-    args.contract.write_text(rendered, encoding="utf-8")
-    print(f"wrote full semantic contract -> {args.contract}")
+    contract_path.write_text(rendered, encoding="utf-8")
+    print(f"wrote full semantic contract -> {contract_path}")
     return 0
 
 

@@ -9,6 +9,13 @@ from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 
+def _require_checkpoint_metadata(value: object) -> CheckpointMetadata:
+    """Return concrete metadata after validating replacement output."""
+    if not isinstance(value, CheckpointMetadata):
+        raise TypeError("dataclass replacement did not preserve CheckpointMetadata")
+    return value
+
+
 class _CoreIdentityOverrides(TypedDict):
     dq_contract_compatibility_hash: str | None
     dq_policy_hash: str | None
@@ -180,10 +187,12 @@ def enrich_metadata_with_execution_identity(
     """Fill checkpoint metadata gaps from current execution identity."""
     if identity is None:
         return metadata
-    return replace(
-        metadata,
-        **_build_core_identity_overrides(metadata, identity),
-        **_build_replay_identity_overrides(metadata, identity),
+    return _require_checkpoint_metadata(
+        replace(
+            metadata,
+            **_build_core_identity_overrides(metadata, identity),
+            **_build_replay_identity_overrides(metadata, identity),
+        )
     )
 
 

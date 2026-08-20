@@ -101,6 +101,137 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     }
 
 
+def _probe_status(*, ready: bool, required: bool) -> str:
+    if ready:
+        return "OK"
+    return "FAIL" if required else "WARN"
+
+
+def _completed_probe_result(
+    future: concurrent.futures.Future[dict[str, Any]],
+    required: set[str],
+) -> dict[str, Any]:
+    result = future.result()
+    is_required = result["server"] in required
+    result["required"] = is_required
+    result["status"] = _probe_status(
+        ready=bool(result["ready"]),
+        required=is_required,
+    )
+    return result
+
+
+def _timed_out_probe_result(
+    name: str,
+    catalog: dict[str, Any],
+    required: set[str],
+    overall_timeout: float,
+) -> dict[str, Any]:
+    is_required = name in required
+    entry = catalog[name]
+    return {
+        "server": name,
+        "url": f"http://127.0.0.1:{entry['port']}{entry.get('path') or '/mcp'}",
+        "port_open": False,
+        "ping_ok": False,
+        "ready": False,
+        "detail": f"overall timeout after {overall_timeout:.1f}s",
+        "elapsed_ms": round(overall_timeout * 1000),
+        "required": is_required,
+        "status": _probe_status(ready=False, required=is_required),
+    }
+
+
+def _run_profile_probes(
+    catalog: dict[str, Any],
+    selected_local: list[str],
+    required: set[str],
+    *,
+    timeout: float,
+    overall_timeout: float,
+) -> list[dict[str, Any]]:
+    pool = concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(8, len(selected_local) or 1)
+    )
+    futures = {
+        pool.submit(_probe, name, catalog[name], timeout): name
+        for name in selected_local
+    }
+    done, pending = concurrent.futures.wait(futures, timeout=overall_timeout)
+    results = [_completed_probe_result(future, required) for future in done]
+    for future in pending:
+        name = futures[future]
+        future.cancel()
+        results.append(
+            _timed_out_probe_result(name, catalog, required, overall_timeout)
+        )
+    pool.shutdown(wait=False, cancel_futures=True)
+    return sorted(results, key=lambda item: item["server"])
+
+
+def _mcp_payload(
+    profile: str,
+    plan: dict[str, Any],
+    results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    failed = sum(item["status"] == "FAIL" for item in results)
+    warned = sum(item["status"] == "WARN" for item in results)
+    migration_hint = None
+    if profile not in DAILY_PROFILES:
+        migration_hint = (
+            "For daily readiness, select the stable/shared profile; "
+            "this diagnostic does not rewrite persisted state."
+        )
+    return {
+        "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "profile": profile,
+        "failed": failed,
+        "warned": warned,
+        "remote_or_external_skipped": _as_str_list(plan.get("remote_or_external")),
+        "migration_hint": migration_hint,
+        "results": results,
+    }
+
+
+def _write_mcp_payload(
+    repo_root: Path, output_path: Path, payload: dict[str, Any]
+) -> None:
+    output = _governed_report_path(repo_root, output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_suffix(f"{output.suffix}.tmp")
+    temporary.write_text(  # NOSONAR - confined by _governed_report_path
+        json.dumps(payload, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(output)
+
+
+def _print_mcp_payload(
+    profile: str,
+    required: set[str],
+    selected_local: list[str],
+    payload: dict[str, Any],
+) -> None:
+    print(
+        f"MCP profile={profile} required={len(required)} "
+        f"selected_local={len(selected_local)}"
+    )
+    if payload["migration_hint"]:
+        print(f"[HINT] {payload['migration_hint']}")
+    for item in payload["results"]:
+        scope = "required" if item["required"] else "optional"
+        print(
+            f"[{item['status']}] {item['server']} {scope} "
+            f"{item['url']} — {item['detail']}"
+        )
+    for name in payload["remote_or_external_skipped"]:
+        print(f"[SKIP] {name} remote/auth-managed; inspect with 'codex mcp list'")
+    print(
+        f"Summary: failed={payload['failed']} warned={payload['warned']} "
+        f"skipped={len(payload['remote_or_external_skipped'])}"
+    )
+
+
 def run_mcp(
     repo_root: Path,
     profile: str,
@@ -117,96 +248,32 @@ def run_mcp(
     )
     required = set(_as_str_list(plan.get("required_local")))
     selected_local = sorted(required | set(_as_str_list(plan.get("optional_local"))))
-    results: list[dict[str, Any]] = []
-
-    pool = concurrent.futures.ThreadPoolExecutor(
-        max_workers=min(8, len(selected_local) or 1)
+    results = _run_profile_probes(
+        catalog,
+        selected_local,
+        required,
+        timeout=timeout,
+        overall_timeout=overall_timeout,
     )
-    futures = {
-        pool.submit(_probe, name, catalog[name], timeout): name
-        for name in selected_local
-    }
-    done, pending = concurrent.futures.wait(futures, timeout=overall_timeout)
-    for future in done:
-        result = future.result()
-        result["required"] = result["server"] in required
-        # NOSONAR - S3358: nested ternary is intentional for status classification
-        if result["ready"]:
-            result["status"] = "OK"
-        elif result["required"]:
-            result["status"] = "FAIL"
-        else:
-            result["status"] = "WARN"
-        results.append(result)
-    for future in pending:
-        name = futures[future]
-        future.cancel()
-        results.append(
-            {
-                "server": name,
-                "url": f"http://127.0.0.1:{catalog[name]['port']}{catalog[name].get('path') or '/mcp'}",
-                "port_open": False,
-                "ping_ok": False,
-                "ready": False,
-                "detail": f"overall timeout after {overall_timeout:.1f}s",
-                "elapsed_ms": round(overall_timeout * 1000),
-                "required": name in required,
-                "status": "FAIL" if name in required else "WARN",
-            }
-        )
-    pool.shutdown(wait=False, cancel_futures=True)
-    results.sort(key=lambda item: item["server"])
-
-    failed = sum(item["status"] == "FAIL" for item in results)
-    warned = sum(item["status"] == "WARN" for item in results)
-    payload = {
-        "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "profile": profile,
-        "failed": failed,
-        "warned": warned,
-        "remote_or_external_skipped": _as_str_list(plan.get("remote_or_external")),
-        "migration_hint": (
-            None
-            if profile in DAILY_PROFILES
-            else "For daily readiness, select the stable/shared profile; "
-            "this diagnostic does not rewrite persisted state."
-        ),
-        "results": results,
-    }
+    payload = _mcp_payload(profile, plan, results)
     if output_path is not None:
-        output = _governed_report_path(repo_root, output_path)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        temporary = output.with_suffix(f"{output.suffix}.tmp")
-        temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        temporary.replace(output)
+        _write_mcp_payload(repo_root, output_path, payload)
 
     if output_json:
         print(json.dumps(payload, indent=2))
     else:
-        print(
-            f"MCP profile={profile} required={len(required)} selected_local={len(selected_local)}"
-        )
-        if payload["migration_hint"]:
-            print(f"[HINT] {payload['migration_hint']}")
-        for item in results:
-            scope = "required" if item["required"] else "optional"
-            print(
-                f"[{item['status']}] {item['server']} {scope} {item['url']} — {item['detail']}"
-            )
-        for name in _as_str_list(plan.get("remote_or_external")):
-            print(f"[SKIP] {name} remote/auth-managed; inspect with 'codex mcp list'")
-        print(
-            "Summary: failed="
-            f"{failed} warned={warned} skipped="
-            f"{len(_as_str_list(plan.get('remote_or_external')))}"
-        )
-    return 1 if failed else 0
+        _print_mcp_payload(profile, required, selected_local, payload)
+    return 1 if payload["failed"] else 0
 
 
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     """Resolve an explicit MCP report path under governed quality reports."""
 
-    candidate = requested if requested.is_absolute() else repo_root / requested
+    if requested.is_absolute():
+        raise ValueError("--output must be repository-relative")
+    if ".." in requested.parts:
+        raise ValueError("--output must not contain parent traversal")
+    candidate = repo_root / requested
     resolved = candidate.resolve()
     quality_root = (repo_root / "reports/quality").resolve()
     if not resolved.is_relative_to(quality_root):

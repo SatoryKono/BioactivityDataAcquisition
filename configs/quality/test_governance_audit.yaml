@@ -732,7 +732,7 @@ assertless_triage:
       rationale: Verification is delegated to explicit check/validate/verify helper calls.
       next_review: "2026-09-30"
     intentional_no_exception_contract:
-      count: 85
+      count: 86
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract under test.
       next_review: "2026-09-30"
@@ -1055,6 +1055,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/qa/report_observability_metric_inventory.py observability metric inventory report contract (module `-m` entrypoint + collect_metric_inventory over checked-in src/docs/grafana artifacts)
+    - path: tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/engineering/qa/report_observability_metric_inventory.py CLI/main entrypoint and Prometheus cardinality review contract
     - path: tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/dev/setup_env_wsl.sh optional agent-tool installation branches executed with deterministic local stubs
@@ -1129,6 +1132,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py
       target_lane: repo-backed-unit
       protected_surface: scripts/diagrams/fix/differentiate_linkstyle.py
+    - path: tests/unit/repo_backed/tools/test_fix_mermaid_operators_security.py
+      target_lane: repo-backed-unit
+      protected_surface: tools/fix_mermaid_operators.py fail-closed operator rewrite contract
     - path: tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py
       target_lane: repo-backed-unit
       protected_surface: src/bioetl/application/pipelines/chembl/target_helpers.py
