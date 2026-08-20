@@ -32,6 +32,7 @@ UUID_PATTERN: Final = re.compile(
     r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
     re.I,
 )
+SQLITE_IDENTIFIER_PATTERN: Final = re.compile(r"[A-Za-z_]\w*", re.ASCII)
 SHELLS: Final = {"bash", "sh", "zsh", "pwsh", "powershell", "cmd", "cmd.exe"}
 SENSITIVE_DIRS: Final = (
     "sessions",
@@ -60,6 +61,10 @@ def _is_env_file(path: Path) -> bool:
     return path.name == ".env" or path.name.startswith(".env.")
 
 
+def _eligible_sensitive_node(path: Path) -> bool:
+    return not path.is_symlink() and not _is_env_file(path)
+
+
 def _iter_sensitive_nodes(codex_home: Path) -> list[Path]:
     nodes: set[Path] = {codex_home}
     for name in SENSITIVE_DIRS:
@@ -67,13 +72,11 @@ def _iter_sensitive_nodes(codex_home: Path) -> list[Path]:
         if not root.exists() or root.is_symlink():
             continue
         nodes.add(root)
-        for path in root.rglob("*"):
-            if not path.is_symlink() and not _is_env_file(path):
-                nodes.add(path)
+        nodes.update(path for path in root.rglob("*") if _eligible_sensitive_node(path))
     for pattern in SENSITIVE_TOP_GLOBS:
-        for path in codex_home.glob(pattern):
-            if not path.is_symlink() and not _is_env_file(path):
-                nodes.add(path)
+        nodes.update(
+            path for path in codex_home.glob(pattern) if _eligible_sensitive_node(path)
+        )
     return sorted(nodes, key=lambda path: (len(path.parts), path.as_posix()))
 
 
@@ -133,18 +136,17 @@ def _looks_like_temporary_path(value: str) -> bool:
     return "temp" in parts
 
 
-def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
-    if decision != "allow":
-        return "KEEP", "non_allow_policy"
-    joined = " ".join(pattern)
-    lowered = joined.casefold()
+def _removal_or_secret_rule_class(
+    pattern: list[str],
+    joined: str,
+    executable: str,
+) -> tuple[str, str] | None:
     if SECRET_PATTERN.search(joined):
         return "SECRET_REVIEW", "credential_like"
     if any("bioactivitydataacquisition2" in item.casefold() for item in pattern):
         return "REMOVE", "obsolete_checkout"
     if any(_looks_like_temporary_path(item) for item in pattern):
         return "REMOVE", "temporary_path"
-    executable = Path(pattern[0]).name.casefold() if pattern else ""
     if executable in SHELLS and (
         len(pattern) <= 2
         or any(item.casefold() in {"-c", "-lc", "/c"} for item in pattern[1:])
@@ -152,6 +154,14 @@ def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
         return "REMOVE", "broad_shell"
     if "--no-verify" in pattern:
         return "REMOVE", "verification_bypass"
+    return None
+
+
+def _narrow_rule_class(
+    pattern: list[str],
+    joined: str,
+    executable: str,
+) -> tuple[str, str] | None:
     if any(
         item.startswith(("/home/", "/mnt/", "/Users/"))
         or re.match(r"^[A-Za-z]:[\\/]", item)
@@ -160,13 +170,27 @@ def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
         return "NARROW", "machine_specific_path"
     if len(pattern) == 1 and executable not in {"pwd", "true"}:
         return "NARROW", "broad_prefix"
-    if (
+    history_derived = (
         len(pattern) > 5
         or any(len(item) > 120 for item in pattern)
         or any(token in joined for token in ("&&", "||", ";", "`", "$("))
         or (len(pattern) >= 3 and any("\n" in item for item in pattern))
-    ):
-        return "NARROW", "command_history_derived"
+    )
+    return ("NARROW", "command_history_derived") if history_derived else None
+
+
+def _rule_class(pattern: list[str], decision: str) -> tuple[str, str]:
+    if decision != "allow":
+        return "KEEP", "non_allow_policy"
+    joined = " ".join(pattern)
+    lowered = joined.casefold()
+    executable = Path(pattern[0]).name.casefold() if pattern else ""
+    classified = _removal_or_secret_rule_class(pattern, joined, executable)
+    if classified is not None:
+        return classified
+    classified = _narrow_rule_class(pattern, joined, executable)
+    if classified is not None:
+        return classified
     if not pattern or not executable:
         return "REMOVE", "invalid_empty"
     if any(value in lowered for value in ("gh auth token", "printenv", "env |")):
@@ -221,6 +245,48 @@ def audit_rules(codex_home: Path) -> dict[str, Any]:
     }
 
 
+def _sqlite_table_identifiers(
+    connection: sqlite3.Connection,
+    table: str,
+) -> set[str]:
+    if not SQLITE_IDENTIFIER_PATTERN.fullmatch(table):
+        return set()
+    columns = {
+        row[1]
+        for row in connection.execute(f'PRAGMA table_info("{table}")').fetchall()
+        if isinstance(row[1], str)
+    }
+    identifiers: set[str] = set()
+    for column in ("rollout_path", "session_id", "thread_id"):
+        if column not in columns:
+            continue
+        values = connection.execute(
+            f'SELECT "{column}" FROM "{table}" WHERE "{column}" IS NOT NULL'
+        ).fetchall()
+        for (value,) in values:
+            if isinstance(value, str):
+                identifiers.add(Path(value).name)
+                identifiers.update(UUID_PATTERN.findall(value))
+    return identifiers
+
+
+def _sqlite_database_index(path: Path) -> tuple[set[str], bool]:
+    connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        row = connection.execute("PRAGMA integrity_check").fetchone()
+        integrity_ok = row is not None and row[0] == "ok"
+        tables = connection.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+        identifiers: set[str] = set()
+        for (table,) in tables:
+            if isinstance(table, str):
+                identifiers.update(_sqlite_table_identifiers(connection, table))
+        return identifiers, integrity_ok
+    finally:
+        connection.close()
+
+
 def _sqlite_index(codex_home: Path) -> tuple[set[str], str]:
     identifiers: set[str] = set()
     databases = [
@@ -233,42 +299,59 @@ def _sqlite_index(codex_home: Path) -> tuple[set[str], str]:
     integrity = "ok"
     for path in databases:
         try:
-            connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
-            try:
-                row = connection.execute("PRAGMA integrity_check").fetchone()
-                if row is None or row[0] != "ok":
-                    integrity = "failed"
-                tables = connection.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table'"
-                ).fetchall()
-                for (table,) in tables:
-                    if not isinstance(table, str) or not re.fullmatch(
-                        r"[A-Za-z_][A-Za-z0-9_]*", table
-                    ):
-                        continue
-                    columns = {
-                        row[1]
-                        for row in connection.execute(
-                            f'PRAGMA table_info("{table}")'
-                        ).fetchall()
-                        if isinstance(row[1], str)
-                    }
-                    for column in ("rollout_path", "session_id", "thread_id"):
-                        if column not in columns:
-                            continue
-                        values = connection.execute(
-                            f'SELECT "{column}" FROM "{table}" WHERE "{column}" IS NOT NULL'
-                        ).fetchall()
-                        for (value,) in values:
-                            if not isinstance(value, str):
-                                continue
-                            identifiers.add(Path(value).name)
-                            identifiers.update(UUID_PATTERN.findall(value))
-            finally:
-                connection.close()
+            database_identifiers, integrity_ok = _sqlite_database_index(path)
+            identifiers.update(database_identifiers)
+            if not integrity_ok:
+                integrity = "failed"
         except sqlite3.Error:
             integrity = "failed"
     return identifiers, integrity
+
+
+def _session_retention_class(
+    *,
+    archived: bool,
+    age_days: float,
+    retention_days: int,
+    size: int,
+) -> str:
+    if size == 0:
+        return "CORRUPT"
+    if age_days <= retention_days:
+        return "KEEP"
+    return "REVIEW_REQUIRED" if archived else "ARCHIVE"
+
+
+def _audit_session_tree(
+    root: Path,
+    *,
+    archived: bool,
+    retention_days: int,
+    reference_time: float,
+    indexed: set[str],
+    groups: dict[str, Counter[str]],
+    index_counts: Counter[str],
+) -> None:
+    if not root.is_dir():
+        return
+    for path in root.rglob("*.jsonl"):
+        if path.is_symlink():
+            continue
+        try:
+            metadata = path.stat()
+            age_days = max(0.0, (reference_time - metadata.st_mtime) / 86_400)
+            retention_class = _session_retention_class(
+                archived=archived,
+                age_days=age_days,
+                retention_days=retention_days,
+                size=metadata.st_size,
+            )
+            groups[retention_class]["count"] += 1
+            groups[retention_class]["bytes"] += metadata.st_size
+            path_ids = {path.name, *UUID_PATTERN.findall(path.name)}
+            index_counts["indexed" if path_ids & indexed else "unindexed"] += 1
+        except OSError:
+            groups["BLOCKED"]["count"] += 1
 
 
 def audit_retention(
@@ -288,31 +371,15 @@ def audit_retention(
         ("sessions", False),
         ("archived_sessions", True),
     ):
-        root = codex_home / directory_name
-        if not root.is_dir():
-            continue
-        for path in root.rglob("*.jsonl"):
-            if path.is_symlink():
-                continue
-            try:
-                metadata = path.stat()
-                age_days = max(0.0, (reference_time - metadata.st_mtime) / 86_400)
-                if metadata.st_size == 0:
-                    retention_class = "CORRUPT"
-                elif age_days <= retention_days:
-                    retention_class = "KEEP"
-                elif archived:
-                    retention_class = "REVIEW_REQUIRED"
-                else:
-                    retention_class = "ARCHIVE"
-                groups[retention_class]["count"] += 1
-                groups[retention_class]["bytes"] += metadata.st_size
-                matches_index = path.name in indexed or any(
-                    item in indexed for item in UUID_PATTERN.findall(path.name)
-                )
-                index_counts["indexed" if matches_index else "unindexed"] += 1
-            except OSError:
-                groups["BLOCKED"]["count"] += 1
+        _audit_session_tree(
+            codex_home / directory_name,
+            archived=archived,
+            retention_days=retention_days,
+            reference_time=reference_time,
+            indexed=indexed,
+            groups=groups,
+            index_counts=index_counts,
+        )
     policy = {
         "KEEP": {"action": "retain", "restore": "not_required"},
         "ARCHIVE": {

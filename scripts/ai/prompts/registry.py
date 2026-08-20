@@ -19,7 +19,7 @@ CLASS_ENUM = frozenset(
     {"operator-paste", "campaign", "fragment", "mirror", "historical", "index"}
 )
 ID_PATTERN = re.compile(r"^prompt\.[a-z0-9]+(\.[a-z0-9-]+)+$")
-FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
+FRONTMATTER_DELIMITER = "---"
 
 # Mandatory guardrail fragments for operator-paste (basename match)
 MANDATORY_GUARDRAILS = frozenset(
@@ -97,13 +97,21 @@ def load_registry(path: Path | None = None) -> list[RegistryEntry]:
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
-    match = FRONTMATTER_RE.match(text)
-    if not match:
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != FRONTMATTER_DELIMITER:
         return {}, text
-    meta = yaml.safe_load(match.group(1)) or {}
+    offset = len(lines[0])
+    for line in lines[1:]:
+        if line.strip() == FRONTMATTER_DELIMITER:
+            meta_text = text[len(lines[0]) : offset]
+            body = text[offset + len(line) :]
+            break
+        offset += len(line)
+    else:
+        return {}, text
+    meta = yaml.safe_load(meta_text) or {}
     if not isinstance(meta, dict):
         raise ValueError("frontmatter must be a YAML mapping")
-    body = text[match.end() :]
     return meta, body
 
 
