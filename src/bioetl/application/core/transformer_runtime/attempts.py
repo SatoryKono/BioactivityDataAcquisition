@@ -1,5 +1,5 @@
 """Canonical submodule for batch-transformer per-record attempts."""
-
+from __future__ import annotations
 # ruff: noqa: I001
 
 from bioetl.application.core.batch_transformer_attempts import (

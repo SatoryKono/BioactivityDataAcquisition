@@ -205,16 +205,17 @@ def test_atomic_write_uses_injected_store(tmp_path: Path) -> None:
     written: list[tuple[Path, str]] = []
 
     class _MemoryStore:
-        def mkdir(self, path: Path) -> None:
-            path.mkdir(parents=True, exist_ok=True)
+        def mkdir(self, path: str) -> None:
+            Path(path).mkdir(parents=True, exist_ok=True)
 
-        def write_text(self, path: Path, content: str) -> None:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8")
-            written.append((path, content))
+        def write_text(self, path: str, content: str) -> None:
+            target = Path(path)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+            written.append((target, content))
 
-        def read_text(self, path: Path) -> str:
-            return path.read_text(encoding="utf-8")
+        def read_text(self, path: str) -> str:
+            return Path(path).read_text(encoding="utf-8")
 
     target = tmp_path / "report.md"
     run_report_writer._atomic_write_text(target, "hello\n", store=_MemoryStore())

@@ -85,6 +85,19 @@ def _default_pipeline_runner_service_factory(
     return bootstrap_pipeline_runner_service(registry=registry)
 
 
+def _workflow_reconciliation_loggers() -> tuple[object, object]:
+    """Return FK and row reconciliation loggers for workflow transforms."""
+    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
+
+    root = bootstrap_logger("workflow_reconciliation").bind(
+        component="workflow_reconciliation",
+    )
+    return (
+        root.bind(adapter="SilverForeignKeyReconciliationAdapter"),
+        root.bind(adapter="StorageRowReconciliationAdapter"),
+    )
+
+
 def _build_workflow_transform_registry(
     settings: Settings,
     metrics: MetricsPort,
@@ -94,9 +107,6 @@ def _build_workflow_transform_registry(
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.application.workflow.transforms.builtins import (
         register_builtin_workflow_transforms,
-    )
-    from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_logger,
     )
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
@@ -155,14 +165,8 @@ def _build_workflow_transform_registry(
             lineage_store=None,
         ),
     )
-    reconciliation_logger = bootstrap_logger("workflow_reconciliation").bind(
-        component="workflow_reconciliation",
-    )
-    foreign_key_reconciliation_logger = reconciliation_logger.bind(
-        adapter="SilverForeignKeyReconciliationAdapter",
-    )
-    row_reconciliation_logger = reconciliation_logger.bind(
-        adapter="StorageRowReconciliationAdapter",
+    foreign_key_reconciliation_logger, row_reconciliation_logger = (
+        _workflow_reconciliation_loggers()
     )
     reconciliation_quarantine = UnifiedQuarantineAdapter(
         base_path=str(settings.quarantine_path),

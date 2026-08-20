@@ -153,19 +153,19 @@
       "runtime_checkable": true
     },
     {
-      "line": 79,
+      "line": 81,
       "name": "ExportCatalogPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
     },
     {
-      "line": 103,
+      "line": 105,
       "name": "ExportWriterPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
     },
     {
-      "line": 134,
+      "line": 136,
       "name": "DebugExportPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
@@ -513,7 +513,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 12,
+      "line": 11,
       "name": "RunReportStorePort",
       "path": "src/bioetl/domain/ports/storage/run_report_store.py",
       "runtime_checkable": true
@@ -546,11 +546,11 @@
   "ports_root": "src/bioetl/domain/ports",
   "schema_version": 1,
   "summary": {
-    "port_module_files": 70,
+    "port_module_files": 69,
     "port_protocol_classes": 89,
     "runtime_checkable_coverage_pct": 100.0,
     "runtime_checkable_decorator_count": 95,
     "runtime_checkable_port_count": 89,
-    "scanned_python_files": 79
+    "scanned_python_files": 78
   }
 }

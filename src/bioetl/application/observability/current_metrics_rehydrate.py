@@ -12,8 +12,8 @@ reports. It never increments RANGE event counters and does not invent
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -31,7 +31,7 @@ _SEEDED_PROVIDER_KEYS: set[str] = set()
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineRunAnchor:
+class PipelineRunSnapshot:
     """Latest terminal run identity used to seed current-metric samples."""
 
     pipeline: str
@@ -39,6 +39,7 @@ class PipelineRunAnchor:
     status: str
     provider: str | None
     run_id: str
+    observed_unix: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,7 +70,17 @@ def _first_text(*values: object) -> str:
     return ""
 
 
-def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunAnchor | None:
+def _persisted_unix(completed_at: str, fallback_mtime: float) -> float:
+    """Prefer the report's completed_at; fall back to the artifact mtime."""
+    if completed_at:
+        try:
+            return datetime.fromisoformat(completed_at).timestamp()
+        except ValueError:
+            pass
+    return float(fallback_mtime)
+
+
+def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunSnapshot | None:
     """Build one terminal anchor from a report index entry, or None."""
     payload = _load_report_payload(entry.json_path)
     if payload is None:
@@ -85,12 +96,14 @@ def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunAnchor | No
         return None
     provider_raw = identity.get("provider")
     provider = provider_raw.strip() if isinstance(provider_raw, str) else None
-    return PipelineRunAnchor(
+    completed = _first_text(identity.get("completed_at"), entry.completed_at)
+    return PipelineRunSnapshot(
         pipeline=pipeline,
         run_type=run_type,
         status=status,
         provider=provider or None,
         run_id=run_id,
+        observed_unix=_persisted_unix(completed, entry.mtime),
     )
 
 
@@ -98,10 +111,10 @@ def collect_latest_terminal_anchors(
     *,
     root: Path | None = None,
     limit: int = 200,
-) -> tuple[PipelineRunAnchor, ...]:
+) -> tuple[PipelineRunSnapshot, ...]:
     """Return one latest terminal anchor per pipeline × run_type × status."""
     entries = list_pipeline_reports(pipeline_name=None, limit=limit, root=root)
-    selected: dict[tuple[str, str, str], PipelineRunAnchor] = {}
+    selected: dict[tuple[str, str, str], PipelineRunSnapshot] = {}
     for entry in entries:
         anchor = _anchor_from_report_entry(entry)
         if anchor is None:
@@ -150,7 +163,7 @@ def rehydrate_current_pipeline_run_metrics(
         )
 
 
-def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunAnchor) -> int:
+def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot) -> int:
     key = (anchor.pipeline, anchor.run_type, anchor.status)
     if key in _SEEDED_RUN_KEYS:
         return 0
@@ -161,14 +174,14 @@ def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunAnchor) -
     metrics.set_gauge("bioetl_control_plane_checkpoint_present", 0.0, labels)
     metrics.set_gauge(
         "bioetl_control_plane_last_observed_timestamp_seconds",
-        float(time.time()),
+        float(anchor.observed_unix),
         labels,
     )
     _SEEDED_RUN_KEYS.add(key)
     return 1
 
 
-def _seed_provider_universe(metrics: MetricsPort, anchor: PipelineRunAnchor) -> int:
+def _seed_provider_universe(metrics: MetricsPort, anchor: PipelineRunSnapshot) -> int:
     provider = anchor.provider
     if provider is None or provider in _SEEDED_PROVIDER_KEYS:
         return 0
@@ -181,7 +194,7 @@ def _seed_provider_universe(metrics: MetricsPort, anchor: PipelineRunAnchor) -> 
     return 1
 
 
-def _seed_stage_series(metrics: MetricsPort, anchor: PipelineRunAnchor) -> int:
+def _seed_stage_series(metrics: MetricsPort, anchor: PipelineRunSnapshot) -> int:
     del metrics, anchor
     return 0
 
