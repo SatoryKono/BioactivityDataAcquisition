@@ -98,17 +98,21 @@ def _looks_like_container_path(value: str) -> bool:
 
 
 def _host_report_root(repo: Path) -> Path:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
     env = os.environ.get("BIOETL_REPORT_ROOT", "").strip()
     if env and not _looks_like_container_path(env):
-        return Path(env).expanduser().resolve()
-    return (_host_reports_mount(repo) / "run-reports").resolve()
+        return resolve_output_path(Path(env).expanduser(), root=repo)
+    return resolve_output_path(repo / "reports" / "run-reports", root=repo)
 
 
 def _host_reports_mount(repo: Path) -> Path:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
     env = os.environ.get("BIOETL_DASHBOARD_REPORT_ROOT", "").strip()
     if env and not _looks_like_container_path(env):
-        return Path(env).expanduser().resolve()
-    return (repo / "reports").resolve()
+        return resolve_output_path(Path(env).expanduser(), root=repo)
+    return resolve_output_path(repo / "reports", root=repo)
 
 
 def _json_get(url: str, *, timeout: float = 5.0) -> dict[str, Any] | None:
