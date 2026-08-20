@@ -175,8 +175,28 @@ class EvidenceStore:
             f"{record.decision}\n{record.rationale}",
             trust=record.envelope.trust,
         )
+        self._validate_evidence_references(record)
+        existing = _read_jsonl(self._decision_path)
+        self._validate_supersession(record, existing)
+        record_id = record.envelope.record_id
+        try:
+            append_jsonl(
+                self._decision_path,
+                record.to_dict(),
+                reject_if=lambda row: (
+                    row.get("envelope", {}).get("record_id") == record_id
+                ),
+                conflict_message=DECISION_EXISTS_MESSAGE,
+            )
+        except StorageConflictError as exc:
+            raise ValueError(DECISION_EXISTS_MESSAGE) from exc
+        return record.decision_digest
+
+    def _validate_evidence_references(self, record: DecisionRecord) -> None:
+        """Require every cited evidence digest to exist in the decision scope."""
         missing: list[str] = []
         scope_mismatches: list[str] = []
+        decision_scope = record.envelope.to_dict()
         for digest in record.evidence_digests:
             try:
                 evidence = self.resolve_evidence(digest)
@@ -185,7 +205,7 @@ class EvidenceStore:
                 continue
             evidence_envelope = evidence.get("envelope")
             if not isinstance(evidence_envelope, dict) or not _same_scope(
-                evidence_envelope, record.envelope.to_dict()
+                evidence_envelope, decision_scope
             ):
                 scope_mismatches.append(digest)
         if missing:
@@ -195,7 +215,13 @@ class EvidenceStore:
                 "decision cites evidence outside its repository scope: "
                 + ", ".join(scope_mismatches)
             )
-        existing = _read_jsonl(self._decision_path)
+
+    @staticmethod
+    def _validate_supersession(
+        record: DecisionRecord,
+        existing: list[dict[str, Any]],
+    ) -> None:
+        """Require decision identity and supersession links to be scope-safe."""
         known_decision_ids = {
             str(row.get("envelope", {}).get("record_id")) for row in existing
         }
@@ -218,18 +244,6 @@ class EvidenceStore:
                 prior_envelope, record.envelope.to_dict()
             ):
                 raise ValueError("decision supersedes a record outside its scope")
-        try:
-            append_jsonl(
-                self._decision_path,
-                record.to_dict(),
-                reject_if=lambda row: (
-                    row.get("envelope", {}).get("record_id") == record_id
-                ),
-                conflict_message=DECISION_EXISTS_MESSAGE,
-            )
-        except StorageConflictError as exc:
-            raise ValueError(DECISION_EXISTS_MESSAGE) from exc
-        return record.decision_digest
 
     def resolve_evidence(self, digest: str) -> dict[str, Any]:
         """Resolve one exact evidence digest, failing closed when absent."""

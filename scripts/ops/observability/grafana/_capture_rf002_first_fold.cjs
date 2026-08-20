@@ -89,6 +89,39 @@ async function authenticate(context, page) {
   ]);
 }
 
+function captureSuccess(uid, file, buf, errText) {
+  const sha = crypto.createHash("sha256").update(buf).digest("hex");
+  process.stdout.write(`wrote ${file} sha=${sha}\n`);
+  return {
+    result: {
+      uid,
+      file,
+      bytes: buf.length,
+      sha256: sha,
+      viewport: { width: 1920, height: 1080 },
+      fullPage: false,
+      theme,
+      kiosk: true,
+      row_state: "default",
+      terminal_state: errText > 0 ? "RENDER_ERROR" : "ok",
+    },
+    failed: errText > 0,
+  };
+}
+
+function captureFailure(uid, file, err) {
+  process.stdout.write(`ERROR ${uid}: ${err}\n`);
+  return {
+    result: {
+      uid,
+      file,
+      error: String(err?.message ?? err),
+      terminal_state: "CAPTURE_ERROR",
+    },
+    failed: true,
+  };
+}
+
 async function captureDashboard(page, uid) {
   const file = `${uid}-dark-first-fold-1920x1080.png`;
   const outPath = path.join(outDir, file);
@@ -107,35 +140,9 @@ async function captureDashboard(page, uid) {
       process.stdout.write(`WARN RENDER_ERROR visible on ${uid}\n`);
     }
     await page.screenshot({ path: outPath, fullPage: false });
-    const buf = fs.readFileSync(outPath);
-    const sha = crypto.createHash("sha256").update(buf).digest("hex");
-    process.stdout.write(`wrote ${file} sha=${sha}\n`);
-    return {
-      result: {
-        uid,
-        file,
-        bytes: buf.length,
-        sha256: sha,
-        viewport: { width: 1920, height: 1080 },
-        fullPage: false,
-        theme,
-        kiosk: true,
-        row_state: "default",
-        terminal_state: errText > 0 ? "RENDER_ERROR" : "ok",
-      },
-      failed: errText > 0,
-    };
+    return captureSuccess(uid, file, fs.readFileSync(outPath), errText);
   } catch (err) {
-    process.stdout.write(`ERROR ${uid}: ${err}\n`);
-    return {
-      result: {
-        uid,
-        file,
-        error: String(err?.message ?? err),
-        terminal_state: "CAPTURE_ERROR",
-      },
-      failed: true,
-    };
+    return captureFailure(uid, file, err);
   }
 }
 
