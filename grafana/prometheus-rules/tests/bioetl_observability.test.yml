@@ -1496,3 +1496,256 @@ tests:
               summary: Critical DQ validation failures detected
               description: bioetl_dq_validation_failures_total increased with severity=hard_fail for pipeline=chembl stage=silver in the last 15m.
               runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
+
+  - name: pipeline-preflight-data-source-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_health_check_passed{pipeline="chembl",component="data_source"}'
+        values: "0+0x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLPipelinePreflightDataSourceFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              component: data_source
+              pipeline: chembl
+            exp_annotations:
+              summary: Pipeline preflight data-source check failed
+              description: No successful pipeline_health_check_passed=1 for component=data_source was observed for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+
+  - name: pipeline-infrastructure-validation-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_infrastructure_validated{pipeline="chembl"}'
+        values: "0+0x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLPipelineInfrastructureValidationFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+            exp_annotations:
+              summary: Pipeline infrastructure validation failed
+              description: No successful infrastructure_validated=1 was observed for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+
+  - name: ingestion-throughput-degraded
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_backlog_records{pipeline="chembl",run_type="incremental",stage="ingestion"}'
+        values: "1+0x20"
+      - series: 'bioetl_stage_lag_seconds{pipeline="chembl",run_type="incremental",stage="ingestion"}'
+        values: "300+0x20"
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLIngestionThroughputDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Ingestion throughput is degraded
+              description: Ingestion backlog remained active and stage lag exceeded 300s for pipeline=chembl run_type=incremental.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: stage-lag-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_lag_seconds{pipeline="chembl",run_type="incremental",stage="ingestion"}'
+        values: "300+0x20"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLStageLagHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+              stage: ingestion
+            exp_annotations:
+              summary: Stage lag is elevated
+              description: bioetl_stage_lag_seconds exceeded 300s for pipeline=chembl run_type=incremental stage=ingestion within the last 15m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: control-plane-manifest-write-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLControlPlaneManifestWriteFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Run manifest persistence failures detected
+              description: bioetl_control_plane_manifest_writes_total increased with status=failed for pipeline=chembl run_type=incremental in the last 15m.
+              runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+
+  - name: run-ledger-append-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",event_type="run_failed",status="failed"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLRunLedgerAppendFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              event_type: run_failed
+            exp_annotations:
+              summary: Run ledger append failures detected
+              description: bioetl_control_plane_ledger_appends_total increased with status=failed for pipeline=chembl event_type=run_failed in the last 15m.
+              runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+
+  - name: checkpoint-compatibility-blocked
+    interval: 1m
+    input_series:
+      - series: 'bioetl_checkpoint_compatibility_events_total{pipeline="chembl",disposition="strict_incompatible"}'
+        values: "0+1x40"
+    alert_rule_test:
+      - eval_time: 32m
+        alertname: BioETLCheckpointCompatibilityBlocked
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: Checkpoint compatibility blocked or degraded resume
+              description: bioetl_checkpoint_compatibility_events_total recorded incompatible resume decisions for pipeline=chembl in the last 30m.
+              runbook: docs/05-operations/runbooks/checkpoint-debugging.md
+
+  - name: lineage-fragment-persistence-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_lineage_fragments_emitted_total{pipeline="chembl",layer="silver",status="failed"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLLineageFragmentPersistenceFailed
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              layer: silver
+            exp_annotations:
+              summary: Lineage fragment persistence failures detected
+              description: bioetl_lineage_fragments_emitted_total increased with status=failed for pipeline=chembl layer=silver in the last 15m.
+              runbook: docs/05-operations/runbooks/traceability-signal-ownership.md
+
+  - name: control-plane-manifest-write-failure-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+1x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: BioETLControlPlaneManifestWriteFailureRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Manifest write failure ratio is elevated
+              description: Manifest write failure ratio exceeded 10% for pipeline=chembl run_type=incremental in the last 30m.
+              runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+
+  - name: run-ledger-append-failure-rate-high
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",event_type="run_failed",status="failed"}'
+        values: "0+1x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: BioETLRunLedgerAppendFailureRateHigh
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              event_type: run_failed
+            exp_annotations:
+              summary: Run-ledger append failure ratio is elevated
+              description: Run-ledger append failure ratio exceeded 10% for pipeline=chembl event_type=run_failed in the last 30m.
+              runbook: docs/05-operations/runbooks/run-manifest-inspection.md
+
+  - name: dq-soft-threshold-exceeded
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_soft_threshold_exceeded_total{pipeline="chembl"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLDQSoftThresholdExceeded
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+            exp_annotations:
+              summary: DQ soft threshold exceeded
+              description: bioetl_dq_soft_threshold_exceeded_total increased for pipeline=chembl in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
+
+  - name: dq-critical-anomalies-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_anomaly_detected_total{pipeline="chembl",metric="completeness",severity="critical",anomaly_type="spike"}'
+        values: "0+1x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: BioETLDQCriticalAnomaliesDetected
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              metric: completeness
+              anomaly_type: spike
+            exp_annotations:
+              summary: Critical DQ anomalies detected
+              description: bioetl_dq_anomaly_detected_total increased with severity=critical for pipeline=chembl metric=completeness anomaly_type=spike in the last 30m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
+
+  - name: silver-validation-failures-detected
+    interval: 1m
+    input_series:
+      - series: 'bioetl_silver_validation_failures_total{pipeline="chembl",table="activity"}'
+        values: "0+1x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: BioETLSilverValidationFailuresDetected
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              table: activity
+            exp_annotations:
+              summary: Silver schema validation failures detected
+              description: bioetl_silver_validation_failures_total increased for pipeline=chembl table=activity in the last 30m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
+
+  - name: silver-filter-reject-accounting-mismatch
+    interval: 1m
+    input_series:
+      - series: 'bioetl_records_processed_total{pipeline="chembl",run_type="incremental",stage="filtered_out"}'
+        values: "10+0x20"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLSilverFilterRejectAccountingMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Silver filter reject accounting mismatch detected
+              description: Filtered-out stage totals and bounded Silver rejection breakdown totals diverged for pipeline=chembl run_type=incremental in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
