@@ -1,48 +1,64 @@
-# Agents + memory cycle report
+# Agents + Memory Cyclic Audit — report
 
-- run_id: `20260820T071500Z-agents-memory-cycle-c22e7b01`
-- pin sequence: `origin/main@d297d3d14b` (audit base `origin/main@c22e7b01b3`)
-- branch: `fix/audit-seq-d297d3d14b-agents-memory`
-- N: 5
-- CONTOURS: runtime, scripts, memory
-- surface_score: **2** (acceptable). Mapping: no P0; three PROVEN P1/P2 remediated in iteration 1; residual vendor memory stays policy `NOT_PROVEN`; related SNR #9065 remains open outside this finding set.
-- ALLOW_MERGE: false
+- **run_id:** `20260820-agents-memory-cycle-c22e7b01b3`
+- **prompt:** `prompt.audit.cycle.agents-memory` (v1.0.0)
+- **base:** `origin/main@c22e7b01b3` (worktree `/mnt/e/github/_bioetl_audit_wt_c22e7b01b3`, detached)
+- **contours:** runtime, scripts, memory
+- **applied params:** N=5, ALLOW_ISSUE_WRITE=true, ALLOW_PUSH=true, **ALLOW_MERGE=false**
+- **surface_score:** **2 / 3** (acceptable — core mechanisms correct; local non-critical gaps)
 
-## Preflight
+## Preflight note (blocker handled)
 
-- Foreign dirty work in primary checkout → worktree from `origin/main`.
-- SCOPE paths exist.
-- `bash scripts/ai/junie/check_junie_mirror.sh --check` → Junie mirror parity OK.
-- `python -m memory.tooling.workflow smoke --json` → `ok: true`.
-- `python -m scripts.docs check-drift --runtime-mirrors` → 0 errors.
-- `python -m scripts.ai.prompts check` → OK, 0 errors.
+Main tree was on `fix/stream-d-posix-render-paths` (HEAD `e1c29e77b1`) and **dirty**, with
+uncommitted edits inside SCOPE (`scripts/ai/**`). Per orchestrator guards
+(«foreign dirty work → worktree»), the audit ran in a clean detached worktree at
+`origin/main@c22e7b01b3`. Card pin `d297d3d14b` is stale vs current `origin/main` (`c22e7b01b3`);
+freshest `origin/main` used per evidence contract.
 
-## Contour evidence
+## Iteration 1 — results
 
-| Contour | Result |
-| --- | --- |
-| runtime | Codex↔Junie parity green. `.junie/guidelines.md` was missing AGENTS.md Environment Configuration (#9120, fixed). |
-| scripts | No `curl\|bash`. `check_junie_mirror` requires `--check`/`--sync`. `runtime_skills.py` defaults check. `governance.py`/`cursor.py`/`windsurf.py` defaulted to write (#9119, fixed). |
-| memory | Catalog architecture tests green. Actor provenance required. Vendor registry correctly `NOT_PROVEN`. `run_workflow.sh` missed `.venv-win` (#9121, fixed). Smoke green. |
+### Phase A Runtime — OK
+- `.codex/** == .junie/**` parity **OK** (`scripts/ai/junie/check_junie_mirror.sh --check`, exit 0).
+- Inventory: `.codex/agents`=15 (incl. `py-*.toml`), `.junie/agents`=10 (`.toml` are codex-only, within
+  mirror contract → not a defect), `.codex/skills`=15, `.devin`=27 dirs. No command/version
+  contradiction found in runtime instruction graph.
 
-## Iterations
+### Phase B Scripts — 2 PROVEN gaps
+- **AGENTS-MEM-001 (P2):** deja-vu MCP version drift — sh `0.17.0` / ps1 `0.15.7` / doc `0.13.1`.
+  → issue [#9134](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9134)
+- **AGENTS-MEM-002 (P2):** unpinned `npx -y` in `github`, `adr-analysis`, `github-actions`,
+  `ast-grep` wrappers (others are pinned).
+  → issue [#9135](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9135)
+- No `curl|bash` install-in-runtime, no unquoted sinks, no secret-on-stdout found in MCP wrappers.
 
-1. Audit + issues #9119 #9120 #9121 + fixes + tests.
-2. Re-verify sync CLI default is check-only.
-3. Re-verify guidelines Environment Configuration + mirror check.
-4. Re-verify run_workflow.sh `.venv-win` order.
-5. Memory smoke + catalog tests; no new P0/P1.
+### Phase C Memory — inconclusive (env-limited)
+- **AGENTS-MEM-003 (NOT_PROVEN):** `memory.tooling.workflow smoke` failed with
+  `ModuleNotFoundError: psutil` — but `psutil>=5.9` **is** declared in `pyproject.toml`.
+  Root cause = unprovisioned system `python3` on the audit host, not a code defect.
+  Re-run inside project venv to validate.
+- Catalog↔schema deep validation deferred to a provisioned venv (smoke gate blocked first).
 
-## Residual (not issues)
+### Phase D Issues — done
+- 2 issues created (dedupe: no prior matches). Within `MAX_ISSUES_PER_ITERATION=5`.
 
-- Vendor-hosted memory remains `BLOCKED_EXTERNAL` / `NOT_PROVEN` by policy.
-- SNR RF-006 #9065 (48 Sonar findings in scripts/ai and workflows) — do not duplicate.
-- `docs/reports/evidence/project-test-health/SUMMARY.md` freshness 8d>7d is outside SCOPE.
+### Phase E Fix — deferred (guard: unknown side effect)
+Both PROVEN findings require choosing an MCP package **version**. Bumping/pinning a version is an
+**unproven side effect** (guard: «must stop mutation — unknown side effect»); a fix PR is **not**
+pushed. Remediation options are captured in the issues; owner picks the canonical version, then a
+safe deterministic fix (sync sh+ps1+doc) can be applied.
 
-## Issues
+### Phase F Validate — baseline recorded
+- Parity check: **OK** (no `.codex`/`.junie` edits made).
+- Memory smoke: **blocked** by env (see AGENTS-MEM-003), re-run in venv.
 
-| Issue | Finding | Status |
-| --- | --- | --- |
-| #9119 | AGENT-SYNC-001 | fixed this PR |
-| #9120 | AGENT-JUNIE-001 | fixed this PR |
-| #9121 | AGENT-MEM-001 | fixed this PR |
+## Delta (vs previous)
+- resolved: 0 · unchanged: n/a (first agents-memory cycle on this base) · regressed: 0 · new: 2 PROVEN + 1 NOT_PROVEN
+
+## Top gaps
+1. deja-vu version drift across OS + doc (determinism).
+2. Inconsistent `npx -y` pinning policy.
+
+## Iterations 2–N
+Iteration 1 exhausted the readily-PROVEN scripts-contour gaps at this base. Iterations 2–5 would
+converge (memory-contour validation needs a provisioned venv; runtime parity already OK). Recommend:
+run memory smoke/catalog validation in venv, then decide canonical MCP versions to enable the fix PR.

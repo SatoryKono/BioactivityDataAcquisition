@@ -1,104 +1,81 @@
 {
+  "run_id": "20260820-agents-memory-cycle-c22e7b01b3",
+  "prompt_id": "prompt.audit.cycle.agents-memory",
+  "base": "origin/main@c22e7b01b3",
+  "generated_at_utc": "2026-08-20T07:15:00Z",
+  "contours": ["runtime", "scripts", "memory"],
+  "surface_score": 2,
   "findings": [
     {
-      "id": "AGENT-SYNC-001",
-      "priority": "P1",
-      "severity": "High",
+      "id": "AGENTS-MEM-001",
+      "priority": "P2",
+      "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "agent_scripts",
-      "github_issue": 9119,
-      "iteration_resolved": 1,
+      "category": "scripts/determinism",
       "evidence": [
-        {
-          "path": "scripts/ai/sync/governance.py",
-          "line": 818,
-          "command": "python -c inspect argparse",
-          "observation": "Bare CLI defaulted check_only=False and wrote .codex/agents/*.md"
-        },
-        {
-          "path": "scripts/ai/sync/cursor.py",
-          "line": 216,
-          "observation": "if not args.check and not args.deploy: args.deploy = True"
-        },
-        {
-          "path": "scripts/ai/sync/windsurf.py",
-          "line": 284,
-          "observation": "deploy_local = not args.no_deploy and not args.check"
-        }
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.sh", "line": 38, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh", "observation": "npx -y \"@vshulcz/deja-vu@0.17.0\" mcp"},
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.ps1", "line": 23, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.ps1", "observation": "& npx -y \"@vshulcz/deja-vu@0.15.7\" mcp"},
+        {"path": "docs/00-project/ai/mcp-governance.md", "line": 127, "command": "rg -n 'deja' docs/00-project/ai/mcp-governance.md", "observation": "### deja (deja-vu v0.13.1)"}
       ],
-      "expected": "Destructive/write AI sync CLIs default to check/dry-run",
-      "actual": "governance/cursor/windsurf mutated by default",
-      "impact": "Accidental rewrite of canonical .codex/agents and local IDE rule trees",
-      "root_cause": "Write flags were opt-in inverted versus check_junie_mirror/runtime_skills",
-      "remediation": "Default to --check; require --apply/--deploy for writes",
+      "expected": "Single canonical deja-vu version across sh wrapper, ps1 wrapper, and governance doc.",
+      "actual": "Three divergent versions: 0.17.0 (Linux/WSL), 0.15.7 (Windows), 0.13.1 (doc).",
+      "impact": "Non-deterministic MCP memory runtime depending on OS entry point; governance doc drift.",
+      "root_cause": "Independent per-OS/per-doc version updates without a single source of truth.",
+      "remediation": "Choose one canonical version; sync both wrappers and mcp-governance.md.",
       "effort": "S",
       "dependencies": [],
-      "validation": [
-        "pytest tests/unit/scripts/test_sync_ai_governance.py tests/unit/scripts/test_sync_cursor_rules.py -q"
-      ],
-      "automated_fix_possible": true
+      "validation": ["rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh scripts/ai/mcp/mcp_deja_wrapper.ps1", "rg -n 'deja' docs/00-project/ai/mcp-governance.md"],
+      "automated_fix_possible": true,
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9134"
     },
     {
-      "id": "AGENT-JUNIE-001",
+      "id": "AGENTS-MEM-002",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "runtime_instructions",
-      "github_issue": 9120,
-      "iteration_resolved": 1,
+      "category": "scripts/supply-chain",
       "evidence": [
-        {
-          "path": ".junie/guidelines.md",
-          "line": 35,
-          "observation": "Required AI Context was followed by Response Language; AGENTS.md Environment Configuration was absent"
-        }
+        {"path": "scripts/ai/mcp/github-mcp-wrapper.sh", "line": 30, "command": "rg -o 'npx -y .*' scripts/ai/mcp/github-mcp-wrapper.sh", "observation": "npx -y @modelcontextprotocol/server-github --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "observation": "npx -y mcp-adr-analysis-server (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_github_actions_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_github_actions_wrapper.sh", "observation": "npx -y github-actions-mcp --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "line": 17, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "observation": "npx -y @notprolands/ast-grep-mcp / @chousyn/ast-grep-mcp (no version pin)"}
       ],
-      "expected": "guidelines.md lock-step with AGENTS.md including .env token contract",
-      "actual": "Junie root contract omitted Environment Configuration",
-      "impact": "Junie sessions may not load tokens from repository .env",
-      "root_cause": "Equal-peer root contracts drifted on env section",
-      "remediation": "Copy Environment Configuration into .junie/guidelines.md and ratchet in architecture tests",
-      "effort": "S",
+      "expected": "All MCP wrappers pin explicit versions (as context7@3.2.4, filesystem@2026.1.14, neo4j-server@0.2.0 do).",
+      "actual": "Mixed policy: several wrappers use bare `npx -y <pkg>` resolving to latest.",
+      "impact": "Non-reproducible MCP runtime; silent supply-chain upgrade risk. Local runtime (not production CI) => P2.",
+      "root_cause": "Inconsistent pin policy across MCP wrappers.",
+      "remediation": "Pin listed packages to verified versions in both .sh and .ps1.",
+      "effort": "M",
       "dependencies": [],
-      "validation": [
-        "pytest tests/architecture/test_junie_runtime_ci_contract.py -q"
-      ],
-      "automated_fix_possible": true
+      "validation": ["for f in scripts/ai/mcp/*.sh scripts/ai/mcp/*.ps1; do rg -o 'npx -y [^\"']*' \"$f\"; done"],
+      "automated_fix_possible": true,
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9135"
     },
     {
-      "id": "AGENT-MEM-001",
-      "priority": "P2",
-      "severity": "Medium",
+      "id": "AGENTS-MEM-003",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "memory_tooling",
-      "github_issue": 9121,
-      "iteration_resolved": 1,
+      "confidence_score": 0.8,
+      "status": "NOT_PROVEN",
+      "category": "memory/tooling",
       "evidence": [
-        {
-          "path": "scripts/memory/run_workflow.sh",
-          "line": 13,
-          "observation": "Python discovery skipped .venv-win/Scripts/python.exe"
-        }
+        {"path": "src/memory/storage.py", "line": 15, "command": "PYTHONPATH=src python3 -m memory.tooling.workflow smoke", "observation": "ModuleNotFoundError: No module named 'psutil' at import time"},
+        {"path": "pyproject.toml", "line": 83, "command": "rg -n 'psutil' pyproject.toml", "observation": "psutil>=5.9 IS declared as a dependency"}
       ],
-      "expected": "Windows helper prefers .venv-win per AGENTS.md / CODEX-RUNTIME.md",
-      "actual": ".venv/bin then .venv/Scripts then system python",
-      "impact": "Windows Git Bash agents using the helper can miss the canonical venv",
-      "root_cause": "Helper predated .venv-win contract",
-      "remediation": "Prefer .venv-win/Scripts/python.exe when executable",
+      "expected": "memory workflow smoke runs in a properly provisioned env.",
+      "actual": "Smoke failed only because the ad-hoc system python3 lacked psutil; psutil is declared in pyproject.toml, so this is an environment provisioning gap, not a code defect.",
+      "impact": "None on product; audit-env limitation. Memory smoke NOT validated this iteration.",
+      "root_cause": "Audit ran with unprovisioned system interpreter (no project venv on this host).",
+      "remediation": "Re-run smoke inside project venv (.venv-win on Windows) to confirm memory tooling.",
       "effort": "S",
       "dependencies": [],
-      "validation": [
-        "pytest tests/architecture/test_ai_memory_program_contracts.py -q"
-      ],
-      "automated_fix_possible": true
+      "validation": [".\\.venv-win\\Scripts\\python.exe -m memory.tooling.workflow smoke"],
+      "automated_fix_possible": false
     }
-  ],
-  "run_id": "20260820T071500Z-agents-memory-cycle-c22e7b01",
-  "sha": "c22e7b01b3"
+  ]
 }
