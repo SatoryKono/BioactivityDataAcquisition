@@ -232,6 +232,7 @@
       "enforcement_owner_paths": [
         "configs/quality/docker_helper_contracts.yaml",
         "configs/quality/docker_runtime_contracts.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/scripts_lifecycle_registry.json",
         "scripts/ops/observability/check_prometheus_rules_health.py",
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
@@ -249,6 +250,7 @@
       "implementation_owner_paths": [
         "configs/quality/docker_helper_contracts.yaml",
         "configs/quality/docker_runtime_contracts.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/scripts_lifecycle_registry.json",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
