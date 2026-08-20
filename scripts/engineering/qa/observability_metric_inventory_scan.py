@@ -12,7 +12,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypedDict, cast
 
-from scripts.engineering.qa.report_observability_metric_inventory import (
+from scripts.engineering.qa.observability_metric_inventory_shared import (
     _CANONICAL_METRIC_RE,
     _DEFAULT_DECLARED_METRIC_DEFINITIONS as _DEFAULT_DECLARED_METRIC_DEFINITIONS,
     _DIRECT_COLLECTOR_TERMINAL_METHODS,

@@ -50,6 +50,18 @@ def _manifest() -> RunManifest:
     )
 
 
+def _payload_rows(payload: dict[str, object]) -> list[dict[str, object]]:
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        raise AssertionError("payload.rows must be a list")
+    typed_rows: list[dict[str, object]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            raise AssertionError("payload.rows items must be mappings")
+        typed_rows.append(row)
+    return typed_rows
+
+
 async def _get_json(server: HealthServer, path: str) -> tuple[int, dict[str, object]]:
     assert server._server is not None
     sockets = server._server.sockets
@@ -153,7 +165,7 @@ async def test_all_control_plane_validation_routes_publish_stable_contract(
             "/ops/control-plane/failure-reasons?pipeline=chembl_activity"
             f"&run_id={manifest.run_id}",
         )
-        assert [row["category"] for row in failure_payload["rows"]] == list(
+        assert [row["category"] for row in _payload_rows(failure_payload)] == list(
             FAILURE_REASON_CATEGORIES
         )
     finally:
@@ -189,7 +201,7 @@ async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() ->
         assert status == 200
         assert payload["status"] == "ERROR"
         assert any(
-            row.get("reason") == "checkpoint_parse_error" for row in payload["rows"]
+            row.get("reason") == "checkpoint_parse_error" for row in _payload_rows(payload)
         )
         assert "raw corrupt checkpoint secret" not in str(payload)
     finally:
@@ -231,7 +243,7 @@ async def test_manifest_endpoint_reports_raw_schema_errors_before_coercion(
             f"&run_id={manifest.run_id}",
         )
 
-        reasons = {row["reason"] for row in payload["rows"]}
+        reasons = {row["reason"] for row in _payload_rows(payload)}
         assert status == 200
         assert payload["status"] == "ERROR"
         assert {
@@ -260,7 +272,7 @@ async def test_missing_evidence_service_returns_unknown_table_contract() -> None
         assert status == 503
         assert payload["contract"] == CONTROL_PLANE_EVIDENCE_CONTRACT
         assert payload["status"] == "UNKNOWN"
-        assert payload["rows"][0]["reason"] == (
+        assert _payload_rows(payload)[0]["reason"] == (
             "control_plane_evidence_service_unavailable"
         )
     finally:
@@ -302,8 +314,9 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
         assert status == 504
         assert payload["contract"] == "forensic_endpoint_error_v1"
         assert payload["reason"] == "deadline_exceeded"
-        assert payload["rows"][0]["status"] == "ERROR"
-        assert payload["rows"][0]["reason"] == "deadline_exceeded"
+        deadline_rows = _payload_rows(payload)
+        assert deadline_rows[0]["status"] == "ERROR"
+        assert deadline_rows[0]["reason"] == "deadline_exceeded"
 
         status_ok, payload_ok = await _get_json(
             server,
@@ -312,6 +325,6 @@ async def test_retention_deadline_returns_table_row_and_keeps_504(
         )
         assert status_ok == 200
         assert payload_ok["contract"] == "forensic_endpoint_error_v1"
-        assert payload_ok["rows"][0]["check"] == "endpoint_availability"
+        assert _payload_rows(payload_ok)[0]["check"] == "endpoint_availability"
     finally:
         await server.stop()

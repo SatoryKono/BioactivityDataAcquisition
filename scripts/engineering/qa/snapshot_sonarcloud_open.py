@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -57,6 +58,67 @@ def _rating_letter(value: str | None) -> str:
     return mapping.get(str(value or ""), str(value or ""))
 
 
+def _normalize_issue(item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "key": item.get("key"),
+        "rule": item.get("rule"),
+        "severity": item.get("severity"),
+        "type": item.get("type"),
+        "status": item.get("status"),
+        "resolution": item.get("resolution"),
+        "message": item.get("message"),
+        "component": item.get("component"),
+        "path": str(item.get("component") or "").split(":", 1)[-1],
+        "line": item.get("line"),
+        "effort": item.get("effort"),
+        "creationDate": item.get("creationDate"),
+        "updateDate": item.get("updateDate"),
+    }
+
+
+def _count_by(issues: list[dict[str, Any]], field: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for item in issues:
+        key = str(item.get(field) or "UNKNOWN")
+        counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def _origin_main_sha(repo_root: Path) -> str:
+    git_dir = repo_root / ".git"
+    if not git_dir.exists() and not git_dir.is_file():
+        return ""
+    completed = subprocess.run(
+        ["git", "-C", str(repo_root), "rev-parse", "origin/main"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _acceptance(
+    *,
+    open_total: int,
+    measures: dict[str, Any],
+    qg_status: str,
+    revision: str,
+    origin_main: str,
+    resolved_false_total: int,
+) -> dict[str, bool]:
+    return {
+        "open_zero": open_total == 0,
+        "bugs_zero": str(measures.get("bugs") or "0") == "0",
+        "vulnerabilities_zero": str(measures.get("vulnerabilities") or "0") == "0",
+        "code_smells_zero": str(measures.get("code_smells") or "0") == "0",
+        "quality_gate_ok": qg_status == "OK",
+        "security_rating_a": _rating_letter(measures.get("security_rating")) == "A",
+        "reliability_rating_a": _rating_letter(measures.get("reliability_rating")) == "A",
+        "revision_matches_origin_main": bool(revision) and origin_main.startswith(revision[:12]),
+        "no_indexing_discrepancy": open_total == resolved_false_total,
+    }
+
+
 def snapshot(*, repo_root: Path) -> dict[str, Any]:
     env = {**_load_dotenv(repo_root / ".env"), **os.environ}
     token = (
@@ -67,7 +129,6 @@ def snapshot(*, repo_root: Path) -> dict[str, Any]:
     host = (env.get("SONAR_HOST_URL") or DEFAULT_HOST).rstrip("/")
     org = env.get("SONARQUBE_ORG") or DEFAULT_ORG
     opener = _opener(host, token)
-
     open_issues = _get(
         opener,
         host,
@@ -110,23 +171,8 @@ def snapshot(*, repo_root: Path) -> dict[str, Any]:
         "/api/project_analyses/search",
         {"project": PROJECT_KEY, "ps": "3"},
     )
-
     issues = [
-        {
-            "key": item.get("key"),
-            "rule": item.get("rule"),
-            "severity": item.get("severity"),
-            "type": item.get("type"),
-            "status": item.get("status"),
-            "resolution": item.get("resolution"),
-            "message": item.get("message"),
-            "component": item.get("component"),
-            "path": str(item.get("component") or "").split(":", 1)[-1],
-            "line": item.get("line"),
-            "effort": item.get("effort"),
-            "creationDate": item.get("creationDate"),
-            "updateDate": item.get("updateDate"),
-        }
+        _normalize_issue(item)
         for item in open_issues.get("issues") or []
         if isinstance(item, dict)
     ]
@@ -136,25 +182,8 @@ def snapshot(*, repo_root: Path) -> dict[str, Any]:
         if isinstance(item, dict) and "metric" in item
     }
     latest = (analyses.get("analyses") or [{}])[0]
-    origin_main = (
-        os.popen(f'git -C "{repo_root}" rev-parse origin/main').read().strip()
-        if (repo_root / ".git").exists() or (repo_root / ".git").is_file()
-        else ""
-    )
+    origin_main = _origin_main_sha(repo_root)
     revision = str(latest.get("revision") or "")
-    by_type: dict[str, int] = {}
-    by_severity: dict[str, int] = {}
-    by_rule: dict[str, int] = {}
-    for item in issues:
-        by_type[str(item.get("type") or "UNKNOWN")] = (
-            by_type.get(str(item.get("type") or "UNKNOWN"), 0) + 1
-        )
-        by_severity[str(item.get("severity") or "UNKNOWN")] = (
-            by_severity.get(str(item.get("severity") or "UNKNOWN"), 0) + 1
-        )
-        by_rule[str(item.get("rule") or "UNKNOWN")] = (
-            by_rule.get(str(item.get("rule") or "UNKNOWN"), 0) + 1
-        )
     open_total = int(open_issues.get("total") or len(issues))
     resolved_false_total = int(resolved_false.get("total") or 0)
     qg_status = str((quality_gate.get("projectStatus") or {}).get("status") or "")
@@ -179,26 +208,24 @@ def snapshot(*, repo_root: Path) -> dict[str, Any]:
             "security": _rating_letter(measures.get("security_rating")),
             "maintainability": _rating_letter(measures.get("sqale_rating")),
         },
-        "by_type": by_type,
-        "by_severity": by_severity,
-        "by_rule": sorted(by_rule.items(), key=lambda pair: (-pair[1], pair[0])),
+        "by_type": _count_by(issues, "type"),
+        "by_severity": _count_by(issues, "severity"),
+        "by_rule": sorted(
+            _count_by(issues, "rule").items(), key=lambda pair: (-pair[1], pair[0])
+        ),
         "indexing": {
             "open_total": open_total,
             "resolved_false_total": resolved_false_total,
             "discrepancy": abs(open_total - resolved_false_total),
         },
-        "acceptance": {
-            "open_zero": open_total == 0,
-            "bugs_zero": str(measures.get("bugs") or "0") == "0",
-            "vulnerabilities_zero": str(measures.get("vulnerabilities") or "0") == "0",
-            "code_smells_zero": str(measures.get("code_smells") or "0") == "0",
-            "quality_gate_ok": qg_status == "OK",
-            "security_rating_a": _rating_letter(measures.get("security_rating")) == "A",
-            "reliability_rating_a": _rating_letter(measures.get("reliability_rating")) == "A",
-            "revision_matches_origin_main": bool(revision)
-            and origin_main.startswith(revision[:12]),
-            "no_indexing_discrepancy": open_total == resolved_false_total,
-        },
+        "acceptance": _acceptance(
+            open_total=open_total,
+            measures=measures,
+            qg_status=qg_status,
+            revision=revision,
+            origin_main=origin_main,
+            resolved_false_total=resolved_false_total,
+        ),
         "baseline_compare": {
             "baseline_open": 308,
             "baseline_paths": 152,

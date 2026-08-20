@@ -17,12 +17,13 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 from scripts.engineering.qa.observability_metric_inventory_scan import (
     _as_repo_relative,
     _import_from_nodes,
+    _iter_text_files,
     _load_declared_metric_definitions,
     _normalize_mapping_lists,
     _scan_canonical_metric_mentions,
     _scan_registered_metric_names,
 )
-from scripts.engineering.qa.report_observability_metric_inventory import (
+from scripts.engineering.qa.observability_metric_inventory_shared import (
     _CANONICAL_METRIC_RE,
     _DOC_SCAN_ROOTS,
     _EXPORTED_PROMETHEUS_METRIC_NAME_BINDINGS,
@@ -33,14 +34,13 @@ from scripts.engineering.qa.report_observability_metric_inventory import (
     _REPO_ROOT,
     _RULE_SCAN_ROOT,
     _TEXT_SUFFIXES,
-    _iter_text_files,
 )
 
 
 _COVERAGE_CLASSES_PATH = Path("configs/quality/observability_coverage_classes.yaml")
 _PROMETHEUS_BUILTIN_METRIC_RE = re.compile(r"\b(?:ALERTS|ALERTS_FOR_STATE)\b")
-_COVERAGE_CLASS_MAP: dict[str, str] = {}
-_EMPTY_STATE_MAP: dict[str, str] = {}
+_coverage_class_map: dict[str, str] = {}
+_empty_state_map: dict[str, str] = {}
 
 
 def _load_coverage_policy(repo_root: Path) -> tuple[dict[str, str], dict[str, str]]:
@@ -218,7 +218,7 @@ def _panel_contract(
     )
     tokens = _target_query_tokens(kind, query)
     coverage_class, empty_state = _coverage_for_tokens(
-        tokens, _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP
+        tokens, _coverage_class_map, _empty_state_map
     )
     if kind == "http":
         empty_state = empty_state or "valid_empty"
@@ -632,8 +632,8 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
             "PyYAML is required for typed observability inventory"
         ) from exc
 
-    global _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP
-    _COVERAGE_CLASS_MAP, _EMPTY_STATE_MAP = _load_coverage_policy(repo_root)
+    global _coverage_class_map, _empty_state_map
+    _coverage_class_map, _empty_state_map = _load_coverage_policy(repo_root)
     declarations = _load_declared_metric_definitions(repo_root)
     (
         recording_outputs,
