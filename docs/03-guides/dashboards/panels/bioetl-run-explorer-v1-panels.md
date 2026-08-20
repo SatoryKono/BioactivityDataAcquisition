@@ -67,8 +67,8 @@ progressive-disclosure row. `run_id` is never a Prometheus label.
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
 - **Purpose:** Progressive disclosure for last-20 browse, full identity,
-  processed-records accounting, funnel, reasons, reconciliation, layer
-  accounting, artifacts, timings, and next-step CTA.
+  processed-records accounting, funnel, reasons, reconciliation,
+  artifacts, and timings.
 - **Data sources:** Nested panels below (expand row to load).
 
 Nested titles (must match JSON):
@@ -92,10 +92,6 @@ Nested titles (must match JSON):
   (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
   Panel links: Processed Records (`3023`) + Trust.
 
-### 10. Inspect Layer Accounting
-- **Type:** Text
-- **Purpose:** Points operators at Processed Records / report `layers` rollup.
-- **Data sources:** Static operator copy + Ops HTTP report shape.
 
 ### 11. Inspect Run Artifacts
 - **Type:** Table
@@ -107,12 +103,6 @@ Nested titles (must match JSON):
 - **Purpose:** Documents optional stage_timings/failure blocks (PARTIAL when absent; not waterfall).
 - **Data sources:** Static operator copy pointing at pipeline-run-report.
 
-### 13. Continue Run Investigation
-- **Type:** Text
-- **Purpose:** Next-step CTA after browse or selection: verify identity and
-  processed records, expand Selected Run Details, then open Trust for
-  recovery/replay safety. Run Explorer is evidence-only.
-- **Data sources:** Static operator copy.
 
 ## Additional shipped panels
 ### 16. Inspect Recent Runs (last 20)
