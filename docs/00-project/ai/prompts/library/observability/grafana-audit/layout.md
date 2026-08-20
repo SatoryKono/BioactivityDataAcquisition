@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.grafana-audit.layout
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,8 +27,10 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/grafana-audit-contract.md
+  - fragments/dashboard-requirements-audit.md
 related_ssot:
   - AGENTS.md
+  - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - grafana/dashboards
   - docs/03-guides/dashboards/design-system.md
   - docs/03-guides/dashboards/verdict-ontology.md
@@ -51,7 +53,7 @@ max_body_lines: 220
 | --- | --- |
 | `SCOPE` | `grafana/dashboards` |
 | `DASHBOARD_PURPOSE` | `derive-and-mark-gaps` |
-| `USER_ROLES` | `SRE,BI,NOC` |
+| `USER_ROLES` | `operator` |
 | `USER_JOURNEYS` | `derive-from-contracts` |
 | `SERVICE_MAP` | `repo-map-or-gap` |
 | `VIEWPORT` | `1366x768` |

@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.grafana-audit.visual
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,8 +27,10 @@ includes:
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/grafana-audit-contract.md
+  - fragments/dashboard-requirements-audit.md
 related_ssot:
   - AGENTS.md
+  - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - grafana/dashboards
   - docs/03-guides/dashboards/design-system.md
   - docs/03-guides/dashboards/verdict-ontology.md

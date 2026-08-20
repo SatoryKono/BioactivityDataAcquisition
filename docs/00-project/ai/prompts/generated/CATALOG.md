@@ -24,9 +24,9 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.docs.ai-audit-planning` | `library/docs/ai-audit-planning.md` | Plan an audit of docs/00-project/ai surfaces |
 | `prompt.architecture.review` | `library/architecture/review-assessment.md` | Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs |
 | `prompt.architecture.cycle` | `library/architecture/architecture-cycle.md` | Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves |
-| `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1) |
+| `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.3) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
-| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Exhaustive cyclic Grafana audit (v2.0) of every panel, viewport, theme, zoom (Tier-1 100% / Tier-2 200%), density, typography, color, scroll, whitespace, data, and render contract |
+| `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%) |
 | `prompt.observability.sequential-run` | `library/observability/sequential-run.md` | Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix |
 | `prompt.observability.dashboard-operator-playbook` | `library/observability/dashboard-operator-playbook.md` | Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices |
 | `prompt.observability.dashboard-v5.pack` | `library/observability/dashboard-v5/pack.md` | Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover |
@@ -63,7 +63,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.cycle.tech-debt` | `library/audit/cycle/tech-debt.md` | Cyclic technical-debt audit -- register, trend, paydown, residual re-check |
 | `prompt.audit.cycle.architecture` | `library/audit/cycle/architecture.md` | Cyclic architecture audit -- 10-category scorecard, plan, implement waves |
 | `prompt.audit.cycle.telemetry` | `library/audit/cycle/telemetry.md` | Cyclic audit of observability instrumentation and dashboard data feed |
-| `prompt.audit.cycle.dashboards` | `library/audit/cycle/dashboards.md` | Cyclic render and design audit of dashboards and individual panels |
+| `prompt.audit.cycle.dashboards` | `library/audit/cycle/dashboards.md` | Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates |
 | `prompt.audit.cycle.coderabbit` | `library/audit/cycle/coderabbit.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
 
 ## Active fragments
@@ -87,6 +87,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.peer-review-gate` | `fragments/peer-review-gate.md` | Peer agent review gate before issue close |
 | `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
 | `prompt.fragment.grafana-audit-contract` | `fragments/grafana-audit-contract.md` | Shared evidence, severity, and release-gate contract for Grafana audits |
+| `prompt.fragment.dashboard-requirements-audit` | `fragments/dashboard-requirements-audit.md` | Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates, ontology |
 | `prompt.fragment.generic-nine-contract` | `fragments/generic-nine-contract.md` | Shared contract for the nine-domain generic audit kit |
 
 ## All registry entries
@@ -111,6 +112,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.bi-check-schema` | fragment | active | `fragments/bi-check-schema.md` |
 | `prompt.fragment.grafana-six-contract` | fragment | deprecated | `fragments/grafana-six-contract.md` |
 | `prompt.fragment.grafana-audit-contract` | fragment | active | `fragments/grafana-audit-contract.md` |
+| `prompt.fragment.dashboard-requirements-audit` | fragment | active | `fragments/dashboard-requirements-audit.md` |
 | `prompt.fragment.generic-nine-contract` | fragment | active | `fragments/generic-nine-contract.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
