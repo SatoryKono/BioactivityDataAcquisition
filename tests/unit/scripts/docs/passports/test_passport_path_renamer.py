@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.docs.passports.rename_underscore_to_hyphen import main
+from scripts.docs.passports.rename_underscore_to_hyphen import _materialize_repo_file, main
 
 pytestmark = pytest.mark.unit
 
@@ -67,3 +67,15 @@ def test_migration_refuses_to_overwrite_existing_target(tmp_path: Path) -> None:
 
     with pytest.raises(FileExistsError, match="target exists"):
         main(["--root", str(tmp_path), "--apply"])
+
+def test_materialize_repo_file_rejects_parent_and_absolute(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    (root / "docs").mkdir(parents=True)
+    (root / "docs" / "ok.md").write_text("x\n", encoding="utf-8")
+    safe = _materialize_repo_file(root, "docs/ok.md")
+    assert safe == root / "docs" / "ok.md"
+    with pytest.raises(ValueError, match="refusing path"):
+        _materialize_repo_file(root, "../ok.md")
+    with pytest.raises(ValueError, match="refusing path"):
+        _materialize_repo_file(root, "/etc/passwd")
+
