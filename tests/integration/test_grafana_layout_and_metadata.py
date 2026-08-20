@@ -352,7 +352,10 @@ def test_retention_panel_9416_retry_preserves_selected_run_and_time() -> None:
         for item in dashboard.get("panels", [])
         if isinstance(item, dict) and item.get("id") == 9416
     )
-    target_url = str(panel["targets"][0].get("url", ""))
+    target = panel["targets"][0]
+    assert target.get("parser") == "backend"
+    assert target.get("root_selector") == "rows"
+    target_url = str(target.get("url", ""))
     assert "error_as_row=1" in target_url
     assert "run_id=${run_id}" in target_url
     links = panel.get("fieldConfig", {}).get("defaults", {}).get("links") or []

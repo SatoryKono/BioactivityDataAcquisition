@@ -742,7 +742,20 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
     assert _limit_field(panel) == 5
     assert "detail" not in _wrapped_field_names(panel)
+    organize = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "organize"
+    ).get("options", {})
+    assert organize.get("excludeByName") == {
+        "detail": True,
+        "endpoint": True,
+        "retryable": True,
+        "observed_at": True,
+    }
     target = panel["targets"][0]
+    assert target.get("parser") == "backend"
+    assert target.get("root_selector") == "rows"
     assert "error_as_row=1" in str(target.get("url") or "")
     columns = target.get("columns") or []
     names = {item.get("selector") for item in columns if isinstance(item, dict)}

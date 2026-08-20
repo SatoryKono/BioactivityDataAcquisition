@@ -117,7 +117,7 @@
       "description": "Provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code>${provider}</code> · adapter=<code>${adapter}</code> · pipeline_context=<code>${pipeline_context}</code></div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code style='font-size:16px'>${provider}</code> · adapter=<code style='font-size:16px'>${adapter}</code> · pipeline_context=<code style='font-size:16px'>${pipeline_context}</code></div></div></div></div>"
       },
       "links": []
     },
@@ -603,9 +603,32 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Value"
             },
             "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -679,6 +702,18 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source_state"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -725,13 +760,16 @@
           "options": {
             "excludeByName": {
               "Time": true,
-              "__name__": true
+              "__name__": true,
+              "source_state": true,
+              "job": true,
+              "instance": true,
+              "endpoint": true
             },
             "indexByName": {
               "provider": 0,
               "reason": 1,
-              "source_state": 2,
-              "Value": 3
+              "Value": 2
             },
             "renameByName": {
               "Value": "Status",
@@ -2266,7 +2304,11 @@
               "fields": "",
               "values": false
             },
-            "showUnfilled": true
+            "showUnfilled": true,
+            "text": {
+              "titleSize": 14,
+              "valueSize": 14
+            }
           },
           "targets": [
             {
