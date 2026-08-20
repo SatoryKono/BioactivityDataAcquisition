@@ -305,7 +305,7 @@ Audit exactly these UIDs. Canonical answer panel must be root, non-row,
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) |
 | `bioetl-dq-v2` | `Monitor Current DQ Status` (`9401`) |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) |
-| `bioetl-run-explorer-v1` | `Inspect Run Identity` (`9402`); `3010` is empty-selection utility |
+| `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`); identity/accounting are collapsed `3022`/`3023` |
 
 Default `USER_ROLE=operator` (not analyst / SRE / BI / NOC).
 

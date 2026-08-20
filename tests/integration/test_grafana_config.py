@@ -1428,7 +1428,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     assert 3016 not in run_panels
     assert 3001 not in run_panels
     assert 9403 not in run_panels
-    assert run_panels[3023]["title"] == "Inspect Processed Records"
+    assert run_panels[3023]["title"] == "Inspect Full Processed Records"
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

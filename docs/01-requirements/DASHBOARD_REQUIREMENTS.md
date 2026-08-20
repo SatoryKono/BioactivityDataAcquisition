@@ -254,7 +254,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | `bioetl-provider-health-v2` | `Monitor Fleet Severity` (`9101`) | GLOBAL provider matrix |
 | `bioetl-dq-v2` | `Monitor Current DQ Status` (`9401`) | NOW-lane verdict |
 | `bioetl-incident-v1` | `Inspect Ranked Suspects` (`2010`) | highest-confidence suspect matrix |
-| `bioetl-run-explorer-v1` | `Inspect Run Identity` (`9402`) | `Inspect Recent Runs` (`3010`) is the empty-selection utility, not the answer |
+| `bioetl-run-explorer-v1` | `Inspect Recent Runs` (`3010`) | Browse/select the exact run. Identity and processed records live in collapsed `Selected Run Details` (`3022`/`3023`). |
 
 ## 8. Verification contract
 
