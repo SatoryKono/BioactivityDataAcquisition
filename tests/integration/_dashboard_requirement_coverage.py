@@ -800,6 +800,52 @@ def assert_http_empty_state_copy() -> None:
     )
 
 
+_DATA_EMPTY_TOKENS = (*_EMPTY_TOKENS, "unknown", "incomplete")
+
+
+def _panel_has_live_target(panel: dict[str, Any]) -> bool:
+    for target in panel.get("targets") or []:
+        if not isinstance(target, dict) or target.get("hide") is True:
+            continue
+        expr = target.get("expr")
+        url = target.get("url")
+        if isinstance(expr, str) and expr.strip():
+            return True
+        if isinstance(url, str) and url.strip():
+            return True
+    return False
+
+
+def data_panel_empty_state_violations(
+    dashboard_name: str, dashboard: dict[str, Any]
+) -> list[str]:
+    """DASH-COPY-001: data-bearing panels must name empty-state behavior."""
+    violations: list[str] = []
+    for panel in get_dashboard_panels(dashboard):
+        if panel.get("type") == "row":
+            continue
+        if not _panel_has_live_target(panel):
+            continue
+        blob = panel_copy_blob(panel).lower()
+        if not any(token in blob for token in _DATA_EMPTY_TOKENS):
+            violations.append(
+                f"{dashboard_name}:id={panel.get('id')} {panel.get('title')!r}"
+            )
+    return violations
+
+
+def assert_data_panels_name_empty_state() -> None:
+    violations: list[str] = []
+    for path in get_dashboard_files():
+        violations.extend(
+            data_panel_empty_state_violations(path.name, load_dashboard(path))
+        )
+    _fail(
+        violations,
+        "DASH-COPY-001: data-bearing panels must name empty / UNKNOWN / SELECT RUN:",
+    )
+
+
 def infinity_parser_violations(
     dashboard_name: str, dashboard: dict[str, Any]
 ) -> list[str]:

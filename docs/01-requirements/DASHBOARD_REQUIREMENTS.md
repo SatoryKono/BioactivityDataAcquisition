@@ -258,8 +258,11 @@ The §7 answers map to these root first-window panels. Ids are locked by
 
 ## 8. Verification contract
 
-Coverage matrix (pytest / QA --check / manual prompt) lives in
+Coverage matrix (named pytest nodeids / QA `--check` / manual prompt) lives in
 [requirement-test-coverage.yaml](../03-guides/dashboards/contracts/requirement-test-coverage.yaml).
+Canonical 9204 module: `tests/integration/test_dashboard_requirement_coverage.py`.
+Allowlist/operator-question contract: [requirement-gates.yaml](../03-guides/dashboards/contracts/requirement-gates.yaml)
++ `tests/integration/test_dashboard_requirement_gates.py`.
 
 
 | Requirement | Executable evidence |
