@@ -101,6 +101,8 @@ data_panel_types:
 panel_containment_tolerance_px: 2
 
 # First-window types that fail closed on internal scroll overflow.
+# Must cover every shipped first-window panel type. Adding a new type to
+# the first window without listing it here fails the no-scroll gate.
 first_window_containment_types:
   - text
   - stat

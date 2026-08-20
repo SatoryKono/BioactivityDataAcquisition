@@ -41,7 +41,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.grafana-audit.layout` | `library/observability/grafana-audit/layout.md` | Grafana layout audit for hierarchy, first viewport, variables, and drill-down |
 | `prompt.observability.grafana-audit.data-integrity` | `library/observability/grafana-audit/data-integrity.md` | Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation |
 | `prompt.observability.grafana-audit.regression` | `library/observability/grafana-audit/regression.md` | Grafana baseline-to-candidate regression acceptance and release gate |
-| `prompt.observability.dashboard-first-window-noscroll` | `library/observability/dashboard-first-window-noscroll.md` | Implement DASH-FIT-004 — no internal scroll on first-window text/stat/table panels across the seven UIDs |
+| `prompt.observability.dashboard-first-window-noscroll` | `library/observability/dashboard-first-window-noscroll.md` | Ultimate DASH-FIT-004 — no internal scroll on every first-window panel; mandatory pytest on code/tests/docs; N>=10 runs per UID and CONSECUTIVE_PASS>=5; theme and zoom recorded |
 | `prompt.audit.generic-nine.pack` | `library/audit/generic-nine/pack.md` | Pack routing for the nine-domain generic code/project audit kit |
 | `prompt.audit.docs-content` | `library/audit/docs-content.md` | Evidence-based audit of project documentation content and drift |
 | `prompt.audit.tests-system` | `library/audit/tests-system.md` | Audit test system as regression detection, not coverage vanity |

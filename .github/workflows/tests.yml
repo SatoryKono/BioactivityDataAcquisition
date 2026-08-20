@@ -520,6 +520,7 @@ jobs:
             tests/integration/ci/test_dashboard_active_docs_sync.py \
             tests/integration/test_dashboard_no_data_policy.py \
             tests/integration/test_dashboard_operator_readability.py \
+            tests/integration/test_dashboard_first_window_noscroll.py \
             tests/integration/test_dashboard_qa_check_gates.py \
             tests/integration/test_dashboard_requirement_gaps.py \
             tests/integration/test_grafana_config.py \
