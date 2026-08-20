@@ -323,6 +323,14 @@ entries:
       ]
     summary: Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices
 
+  - id: prompt.observability.dashboard-data-duplication
+    path: library/observability/dashboard-data-duplication.md
+    status: active
+    class: operator-paste
+    tags:
+      [observability, dashboard, grafana, duplication, panels, audit, operator]
+    summary: Sequential per-dashboard panel data audit — intra-dashboard duplicates and exclusion plan without breaking FIT
+
   - id: prompt.observability.dashboard-v5.pack
     path: library/observability/dashboard-v5/pack.md
     status: active
