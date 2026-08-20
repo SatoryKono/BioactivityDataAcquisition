@@ -1727,6 +1727,11 @@ class TestHealthServerControlPlaneSelector:
             "Replay [Capability.Mode]",
             "Checkpoint [Anchors]",
             "Identity Health [Gaps]",
+            "Status",
+            "Started at",
+            "Completed at",
+            "Duration seconds",
+            "Tracking coverage",
         ]
 
     @pytest.mark.asyncio(loop_scope="module")

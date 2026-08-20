@@ -149,6 +149,7 @@ FIRST_WINDOW_CONTAINMENT_TYPES = _string_set(_PAYLOAD, "first_window_containment
 SCALAR_DENSITY_TYPES = _string_set(_PAYLOAD, "scalar_density_types")
 SCALAR_DENSITY_ENFORCED_UIDS = _string_set(_PAYLOAD, "scalar_density_enforced_uids")
 SCALAR_DENSITY_ALLOWLIST = _allowlist(_PAYLOAD, "scalar_density")
+SYNTHETIC_ZERO_ALLOWLIST = _allowlist(_PAYLOAD, "synthetic_zero")
 
 
 def min_height_for(panel_type: str, *, nested: bool) -> int | None:

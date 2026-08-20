@@ -122,7 +122,7 @@ def test_trust_evidence_observed_at_is_converted_to_time():
 def test_run_explorer_completed_at_is_converted_to_time():
     """ISO completed_at strings must become time fields before unit formatting."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-run-explorer-v1.json"))
-    required = {3010, 3020, 3021}
+    required = {3010, 3020}
     seen: set[int] = set()
     for panel in get_dashboard_panels(dashboard):
         panel_id = panel.get("id")

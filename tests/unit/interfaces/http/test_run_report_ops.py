@@ -236,6 +236,10 @@ def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:
     assert shell["reasons_top_n"] == []
     assert shell["artifacts"] == []
     assert shell["reconciliation"] == []
+    assert shell["layers"] == []
+    assert shell["failure"] == []
+    assert shell["stage_timings"] == []
+    assert shell["identity_rows"] == []
 
 
 def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
@@ -265,6 +269,24 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
     assert shaped["funnel"] == [{"stage": "bronze"}]
 
 
+def test_table_shape_pipeline_run_report_layers_failure_identity() -> None:
+    shaped = _table_shape_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "layers": {"gold_written": 9, "bronze_records": 10},
+            "failure": {"failed_stage": "gold", "error_type": "ContractError"},
+            "stage_timings": {"extract": 1.5},
+            "identity": {"run_id": "abc", "status": "failed"},
+            "tracking_coverage": "full",
+        }
+    )
+    assert shaped["layers"][0] == {"parameter": "bronze_records", "value": "10"}
+    assert shaped["failure"][0]["parameter"] == "error_type"
+    assert shaped["stage_timings"] == [{"parameter": "extract", "value": "1.5"}]
+    assert {"parameter": "status", "value": "failed"} in shaped["identity_rows"]
+    assert {"parameter": "tracking_coverage", "value": "full"} in shaped["identity_rows"]
+
+
 def test_not_found_pipeline_run_report_shell_for_grafana() -> None:
     """Missing report must stay HTTP-200-friendly for Infinity tables (#7650)."""
     shell = _not_found_pipeline_run_report_shell(
@@ -275,6 +297,8 @@ def test_not_found_pipeline_run_report_shell_for_grafana() -> None:
     assert shell["reconciliation"] == []
     assert shell["funnel"] == []
     assert shell["artifacts"] == []
+    assert shell["layers"] == []
+    assert shell["failure"] == []
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:

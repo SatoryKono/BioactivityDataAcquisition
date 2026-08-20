@@ -4101,21 +4101,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '3001':
-        title: Continue Run Investigation
-        role: guidance
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
       '3010':
         title: Inspect Recent Runs (last 4)
         role: forensic_table
@@ -4202,25 +4187,29 @@ dashboards:
         render_profiles: *id001
       '3014':
         title: Inspect Timings & Failure
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
-        - N/A
+        - VALID_EMPTY
+        - ERROR
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
         fixture_cases:
-        - not_applicable
+        - populated
+        - valid_empty
+        - backend_error
         render_profiles: *id001
       '3015':
         title: Inspect Reconciliation
         role: forensic_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
@@ -4238,18 +4227,22 @@ dashboards:
         render_profiles: *id001
       '3016':
         title: Inspect Layer Accounting
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
         state_model:
-        - N/A
+        - VALID_EMPTY
+        - ERROR
         required_copy:
-        - operator_guidance
+        - evidence_scope
+        - no_data
         fixture_cases:
-        - not_applicable
+        - populated
+        - valid_empty
+        - backend_error
         render_profiles: *id001
       '3020':
         title: Inspect Recent Workflow Runs (last 20)
@@ -4271,29 +4264,8 @@ dashboards:
         - backend_error
         render_profiles:
         - full_dark
-      '3021':
-        title: Inspect Recent Runs (last 20)
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles: *id001
       '3022':
-        title: Inspect Full Run Identity
+        title: Inspect Run Identity
         role: forensic_table
         tier: 3
         scope: selected_run
@@ -4314,7 +4286,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '3023':
-        title: Inspect Full Processed Records
+        title: Inspect Processed Records
         role: accounting_table
         tier: 3
         scope: selected_run

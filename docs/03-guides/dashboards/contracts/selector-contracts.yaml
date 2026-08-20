@@ -533,7 +533,7 @@ shipped_selector_registry:
     query_source_families:
       workflow: prometheus_workflow_runs_total
       pipeline: control_plane_filter_options_api
-      run_type: prometheus_overview_pipeline_run_type_universe
+      run_type: control_plane_filter_options_api
       run_id: control_plane_filter_options_api
 ship_now_selector_contract_by_uid:
   bioetl-control-plane-v1:
