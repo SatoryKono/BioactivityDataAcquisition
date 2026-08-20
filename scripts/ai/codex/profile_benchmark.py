@@ -155,7 +155,7 @@ def _matches(actual: Any, expected: Any) -> bool:
         if len(expected) == 1:
             return actual.strip().casefold() == expected.casefold()
         return _tokens(expected) <= _tokens(actual)
-    return bool(_normalize(actual) == _normalize(expected))
+    return _normalize(actual) == _normalize(expected)
 
 
 def _render_prompt(task: Task) -> str:
@@ -215,17 +215,15 @@ def _completed_agent_response(event: dict[str, Any]) -> dict[str, Any] | None:
     item = event.get("item")
     if not isinstance(item, dict) or item.get("type") != "agent_message":
         return None
-    message = item.get("text")
-    return _agent_payload(message) if isinstance(message, str) else None
+    text = item.get("text")
+    return _agent_payload(text) if isinstance(text, str) else None
 
 
 def _completed_turn_usage(event: dict[str, Any]) -> dict[str, int] | None:
-    raw_usage = event.get("usage")
-    if event.get("type") != "turn.completed" or not isinstance(raw_usage, dict):
+    usage = event.get("usage")
+    if event.get("type") != "turn.completed" or not isinstance(usage, dict):
         return None
-    return {
-        key: int(value) for key, value in raw_usage.items() if isinstance(value, int)
-    }
+    return {key: int(value) for key, value in usage.items() if isinstance(value, int)}
 
 
 def parse_jsonl(stdout: str) -> tuple[dict[str, Any] | None, dict[str, int]]:

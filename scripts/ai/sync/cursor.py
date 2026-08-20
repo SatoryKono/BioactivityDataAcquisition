@@ -214,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if not args.check and not args.deploy:
-        args.deploy = True
+        args.check = True
 
     issues = sync_cursor_rules(
         root=_resolve_cli_root(args.root),

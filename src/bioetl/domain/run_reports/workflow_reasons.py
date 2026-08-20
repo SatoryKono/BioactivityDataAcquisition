@@ -15,9 +15,9 @@ def normalize_top_reasons(
     raw: object,
 ) -> tuple[dict[str, Any], ...]:  # Any: dynamic reason payload
     """Normalize and bound child pipeline reason payloads."""
-    if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)):
+    reason_entries = _as_reason_sequence(raw)
+    if reason_entries is None:
         return ()
-    reason_entries: Sequence[object] = raw
     items = [
         item for item in (_normalize_reason(entry) for entry in reason_entries) if item
     ]
@@ -47,6 +47,15 @@ def build_reasons_rollup(
         }
         for (code, outcome, family), count in ranked[:_REASONS_ROLLUP_LIMIT]
     )
+
+
+def _as_reason_sequence(raw: object) -> Sequence[object] | None:
+    """Narrow a dynamic reason payload to the supported sequence contract."""
+    if not isinstance(raw, Sequence):
+        return None
+    if isinstance(raw, (str, bytes)):
+        return None
+    return raw
 
 
 def _normalize_reason(

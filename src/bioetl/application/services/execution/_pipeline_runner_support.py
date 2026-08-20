@@ -127,6 +127,13 @@ def _identity_from_result(
     return identity
 
 
+def _require_run_result(value: object) -> RunResult:
+    """Return a concrete run result after validating replacement output."""
+    if not isinstance(value, RunResult):
+        raise TypeError("dataclass replacement did not preserve RunResult")
+    return value
+
+
 def finalize_pipeline_run_report(
     *,
     result: RunResult,
@@ -184,19 +191,21 @@ def finalize_pipeline_run_report(
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:
-        failed_result: RunResult = replace(
-            result,
-            run_report_error=f"{type(exc).__name__}: {exc}",
+        return _require_run_result(
+            replace(
+                result,
+                run_report_error=f"{type(exc).__name__}: {exc}",
+            )
         )
-        return failed_result
 
-    reported_result: RunResult = replace(
-        result,
-        run_report_json_path=str(written.json_path),
-        run_report_markdown_path=str(written.markdown_path),
-        run_report_funnel=report.funnel,
+    return _require_run_result(
+        replace(
+            result,
+            run_report_json_path=str(written.json_path),
+            run_report_markdown_path=str(written.markdown_path),
+            run_report_funnel=report.funnel,
+        )
     )
-    return reported_result
 
 
 def _package_version() -> str | None:

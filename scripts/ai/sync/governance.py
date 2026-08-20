@@ -152,8 +152,17 @@ def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
 
 
 def _sync_docs_runtime_mirror(
-    *, root: Path, path: Path, canonical: Path, check_only: bool
-) -> str | None:
+    root: Path,
+    path: Path,
+    original: str,
+    *,
+    check_only: bool,
+    issues: list[str],
+) -> bool:
+    """Sync a docs agent from its canonical runtime source when one exists."""
+    canonical = root / ".codex/agents" / path.name
+    if not canonical.is_file():
+        return False
     relative = canonical.relative_to(root).as_posix()
     header = (
         "> Mirror status: This file is published under "
@@ -164,26 +173,33 @@ def _sync_docs_runtime_mirror(
         "> Edit the runtime source first, then refresh this mirror.\n"
         "______________________________________________________________________\n\n"
     )
-    original = path.read_text(encoding="utf-8")
     updated = header + _strip_mirror_header(
         canonical.read_text(encoding="utf-8")
     ).lstrip("\n")
     if updated == original:
-        return None
+        return True
     if check_only:
-        return f"{path.relative_to(root)}: would sync runtime mirror"
-    _atomic_write(path, updated)
-    return None
+        issues.append(f"{path.relative_to(root)}: would sync runtime mirror")
+    else:
+        _atomic_write(path, updated)
+    return True
 
 
 def _inject_docs_canonical_sources(
-    *, root: Path, path: Path, original: str, check_only: bool
-) -> str | None:
+    root: Path,
+    path: Path,
+    original: str,
+    *,
+    check_only: bool,
+    issues: list[str],
+) -> None:
+    """Inject canonical sources into docs-only agent guidance."""
     if CANONICAL_SOURCES_PATTERN.search(original):
-        return None
+        return
     match = re.search(r"^_{10,}\s*$", original, re.MULTILINE)
     if not match:
-        return f"{path.relative_to(root)}: missing mirror separator"
+        issues.append(f"{path.relative_to(root)}: missing mirror separator")
+        return
     insert_at = match.end()
     while insert_at < len(original) and original[insert_at] in "\r\n":
         insert_at += 1
@@ -195,9 +211,9 @@ def _inject_docs_canonical_sources(
         + original[insert_at:].lstrip("\n")
     )
     if check_only:
-        return f"{path.relative_to(root)}: would inject canonical sources"
-    _atomic_write(path, updated)
-    return None
+        issues.append(f"{path.relative_to(root)}: would inject canonical sources")
+    else:
+        _atomic_write(path, updated)
 
 
 def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
@@ -207,22 +223,21 @@ def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
         if path.name == "README.md":
             continue
         original = path.read_text(encoding="utf-8")
-        canonical = root / ".codex/agents" / path.name
-        if canonical.is_file():
-            issue = _sync_docs_runtime_mirror(
-                root=root, path=path, canonical=canonical, check_only=check_only
-            )
-            if issue is not None:
-                issues.append(issue)
-            continue
-        issue = _inject_docs_canonical_sources(
-            root=root,
-            path=path,
-            original=original,
+        if _sync_docs_runtime_mirror(
+            root,
+            path,
+            original,
             check_only=check_only,
+            issues=issues,
+        ):
+            continue
+        _inject_docs_canonical_sources(
+            root,
+            path,
+            original,
+            check_only=check_only,
+            issues=issues,
         )
-        if issue is not None:
-            issues.append(issue)
     return issues
 
 
@@ -800,7 +815,17 @@ def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=_repo_root())
-    parser.add_argument("--check", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Read-only validation (default).",
+    )
+    mode.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write normalized/sync changes. Default is check-only.",
+    )
     parser.add_argument(
         "--only",
         choices=(
@@ -814,6 +839,7 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
     )
     args = parser.parse_args(argv)
+    check_only = not args.apply
 
     runners = {
         "codex-agents": normalize_codex_agents,
@@ -826,7 +852,7 @@ def main(argv: list[str] | None = None) -> int:
 
     issues: list[str] = []
     for key in selected:
-        issues.extend(runners[key](args.root, check_only=args.check))
+        issues.extend(runners[key](args.root, check_only=check_only))
 
     if issues:
         for issue in issues:

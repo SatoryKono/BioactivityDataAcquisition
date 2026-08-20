@@ -100,26 +100,19 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     lines = text.splitlines(keepends=True)
     if not lines or lines[0].strip() != FRONTMATTER_DELIMITER:
         return {}, text
-    closing_index = next(
-        (
-            index
-            for index, line in enumerate(lines[1:], start=1)
-            if line.strip() == FRONTMATTER_DELIMITER
-        ),
-        None,
-    )
-    if closing_index is None:
+    offset = len(lines[0])
+    for line in lines[1:]:
+        if line.strip() == FRONTMATTER_DELIMITER:
+            meta_text = text[len(lines[0]) : offset]
+            body = text[offset + len(line) :]
+            break
+        offset += len(line)
+    else:
         return {}, text
-    meta = yaml.safe_load("".join(lines[1:closing_index])) or {}
+    meta = yaml.safe_load(meta_text) or {}
     if not isinstance(meta, dict):
         raise ValueError("frontmatter must be a YAML mapping")
-    body = "".join(lines[closing_index + 1 :])
     return meta, body
-
-
-def _optional_text(meta: dict[str, Any], key: str) -> str | None:
-    value = meta.get(key)
-    return str(value) if value else None
 
 
 def load_card(path: Path) -> PromptCard:
@@ -140,9 +133,11 @@ def load_card(path: Path) -> PromptCard:
         anti_patterns=[str(x) for x in (meta.get("anti_patterns") or [])],
         tags=[str(x) for x in (meta.get("tags") or [])],
         summary=str(meta.get("summary") or ""),
-        supersedes=_optional_text(meta, "supersedes"),
-        successor=_optional_text(meta, "successor"),
-        waive_guardrails=_optional_text(meta, "waive_guardrails"),
+        supersedes=str(meta["supersedes"]) if meta.get("supersedes") else None,
+        successor=str(meta["successor"]) if meta.get("successor") else None,
+        waive_guardrails=(
+            str(meta["waive_guardrails"]) if meta.get("waive_guardrails") else None
+        ),
         max_body_lines=(
             int(meta["max_body_lines"])
             if meta.get("max_body_lines") is not None

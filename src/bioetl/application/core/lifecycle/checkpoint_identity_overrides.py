@@ -180,12 +180,14 @@ def enrich_metadata_with_execution_identity(
     """Fill checkpoint metadata gaps from current execution identity."""
     if identity is None:
         return metadata
-    enriched_metadata: CheckpointMetadata = replace(
+    replacement = replace(
         metadata,
         **_build_core_identity_overrides(metadata, identity),
         **_build_replay_identity_overrides(metadata, identity),
     )
-    return enriched_metadata
+    if not isinstance(replacement, CheckpointMetadata):
+        raise TypeError("dataclass replacement did not preserve CheckpointMetadata")
+    return replacement
 
 
 def checkpoint_identity_payload(

@@ -72,7 +72,7 @@ Use it when you need to answer:
 | `architecture.yml` | `Architecture Metrics` | `schedule`, `workflow_dispatch` | Heavy architecture metrics and periodic boundary baselines |
 | `contract-tests.yml` | `Monthly Contract Tests` | `schedule`, `workflow_dispatch` | Scheduled full contract-test lane |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `schedule`, `workflow_dispatch` | Diagram regression/nightly canary |
-| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI/reporting lane |
+| `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |

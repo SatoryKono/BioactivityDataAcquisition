@@ -41,6 +41,17 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
+def _require_composite_validation_report(
+    value: object,
+) -> CompositeValidationReport:
+    """Return a concrete report after validating replacement output."""
+    if not isinstance(value, CompositeValidationReport):
+        raise TypeError(
+            "dataclass replacement did not preserve CompositeValidationReport"
+        )
+    return value
+
+
 class CompositeValidator:
     """Validator for structural and deep-preflight composite checks."""
 
@@ -88,11 +99,12 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        governed_report: CompositeValidationReport = replace(
-            validation_report,
-            execution_decision=governance_decision,
+        return _require_composite_validation_report(
+            replace(
+                validation_report,
+                execution_decision=governance_decision,
+            )
         )
-        return governed_report
 
     def _run_structural_validation(
         self,
