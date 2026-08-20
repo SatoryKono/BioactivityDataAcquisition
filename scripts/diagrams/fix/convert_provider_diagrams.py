@@ -29,7 +29,7 @@ _PUBLISHED_HEADER_RE = re.compile(
     re.DOTALL,
 )
 _METADATA_RE = re.compile(
-    r"^%%\s+@(?P<key>version|date|type|level|nodes|adr)\s+(?P<value>.+)$"
+    r"^%%\s+@(?P<key>version|date|type|level|nodes|adr)\s+(?P<value>[^\r\n]+)$"
 )
 
 
