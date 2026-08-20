@@ -1004,22 +1004,19 @@ def _run_select_links(panel: dict[str, object]) -> list[str]:
 def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     first_screen = _panel(explorer, 3010)
-    last_twenty = next(
-        panel
-        for panel in _iter_panels(explorer.get("panels") or [])
-        if panel.get("id") == 3021
-    )
     first_links = _run_select_links(first_screen)
-    last_links = _run_select_links(last_twenty)
     assert first_links
-    assert last_links
     assert any("var-run_id=${__value.raw}" in url for url in first_links)
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
-    assert any("var-run_id=${__value.raw}" in url for url in last_links)
+    assert any("viewPanel=3022" in url for url in first_links)
     identity = _panel(explorer, 3022)
     assert str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     ).startswith("SELECT RUN")
+    assert all(
+        panel.get("id") != 3021
+        for panel in _iter_panels(explorer.get("panels") or [])
+    )
 
 
 def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
@@ -1029,7 +1026,9 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
     nested_ids = {panel.get("id") for panel in row.get("panels") or []}
-    assert {3011, 3012, 3015, 3013, 3014, 3021, 3022, 3023} <= nested_ids
+    assert {3011, 3012, 3015, 3016, 3013, 3014, 3022, 3023} <= nested_ids
+    assert 3021 not in nested_ids
+    assert 3001 not in nested_ids
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
     assert 3015 not in root_ids

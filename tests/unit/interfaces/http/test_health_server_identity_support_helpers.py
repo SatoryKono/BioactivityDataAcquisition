@@ -115,6 +115,8 @@ def test_identity_support_rows_cover_empty_and_composite_manifest_edges(
     )
     assert row_values["Resume|Dry run|Cached Bronze"] == "Yes | Yes | No"
     assert row_values["Identity Health [Gaps]"] == "Complete [0 gaps]"
+    assert row_values["Status"] == "not available for current scope"
+    assert row_values["Tracking coverage"] == "not available for current scope"
 
     monkeypatch.setattr(support, "_anchor_values", lambda *_args, **_kwargs: {})
     unavailable_rows = support._build_identity_rows(
