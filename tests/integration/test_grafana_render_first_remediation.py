@@ -1026,7 +1026,7 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
     nested_ids = {panel.get("id") for panel in row.get("panels") or []}
-    assert {3011, 3012, 3015, 3016, 3013, 3014, 3022, 3023} <= nested_ids
+    assert {3011, 3012, 3015, 3013, 3014, 3022, 3023} <= nested_ids
     assert 3021 not in nested_ids
     assert 3001 not in nested_ids
 

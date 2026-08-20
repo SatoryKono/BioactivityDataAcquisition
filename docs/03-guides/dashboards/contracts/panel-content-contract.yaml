@@ -4225,26 +4225,6 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
-      '3016':
-        title: Inspect Layer Accounting
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles: *id001
-
       '3020':
         title: Inspect Recent Workflow Runs (last 20)
         role: forensic_table
