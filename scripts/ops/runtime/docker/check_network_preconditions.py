@@ -152,7 +152,7 @@ def check_shared_network(name: str, *, expected_owner: str) -> list[CheckResult]
                     "stderr": err[:500],
                     "remediation": (
                         "python scripts/ops/runtime/docker/check_network_preconditions.py "
-                        f"--stack all --ensure"
+                        "--stack all --ensure"
                     ),
                 },
             )
@@ -309,6 +309,17 @@ def run_checks(
     return results
 
 
+def _result_mark(result: CheckResult) -> str:
+    if result.ok:
+        return "OK "
+    if (
+        result.evidence.get("severity") == "warning"
+        or result.code == "BIOETL_NOT_RUNNING"
+    ):
+        return "WARN"
+    return "FAIL"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
@@ -392,16 +403,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.stack == "main":
             print("Note: main compose requires bioetl-monitoring + bioetl-runtime.")
         for r in results:
-            mark = (
-                "OK "
-                if r.ok
-                else (
-                    "WARN"
-                    if r.evidence.get("severity") == "warning"
-                    or r.code == "BIOETL_NOT_RUNNING"
-                    else "FAIL"
-                )
-            )
+            mark = _result_mark(r)
             print(f"[{mark}] {r.code}: {r.message}")
             rem = r.evidence.get("remediation")
             if rem:

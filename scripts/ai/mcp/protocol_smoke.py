@@ -467,6 +467,91 @@ def _resolve_mcp_cwd(safe_config: Path) -> Path:
     return safe_config.parent
 
 
+def _stdio_initialize(process: subprocess.Popen[str], timeout: float) -> None:
+    initialized = _request(
+        process,
+        {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "bioetl-mcp-smoke", "version": "1"},
+            },
+        },
+        timeout=timeout,
+    )
+    if "error" in initialized or "result" not in initialized:
+        raise RuntimeError(f"MCP initialize failed: {initialized!r}")
+    assert process.stdin is not None
+    process.stdin.write(
+        '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}\n'
+    )
+    process.stdin.flush()
+
+
+def _stdio_tools_count(process: subprocess.Popen[str], timeout: float) -> int:
+    response = _request(
+        process,
+        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+        timeout=timeout,
+    )
+    rows = response.get("result", {}).get("tools")
+    if "error" in response or not isinstance(rows, list):
+        raise RuntimeError(f"MCP tools/list failed: {response!r}")
+    return len(rows)
+
+
+def _stdio_capability_result(
+    process: subprocess.Popen[str],
+    *,
+    method: str,
+    result_key: str,
+    request_id: int,
+    timeout: float,
+) -> tuple[str, int | None]:
+    try:
+        response = _request(
+            process,
+            {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "method": method,
+                "params": {},
+            },
+            timeout=timeout,
+        )
+    except (OSError, RuntimeError, TimeoutError, ValueError):
+        return "unavailable", None
+    if "error" in response:
+        code = response.get("error", {}).get("code")
+        return ("unsupported" if code == -32601 else "failed"), None
+    rows = response.get("result", {}).get(result_key)
+    return ("ok", len(rows)) if isinstance(rows, list) else ("invalid", None)
+
+
+def _stdio_resource_capabilities(
+    process: subprocess.Popen[str], timeout: float
+) -> dict[str, Any]:
+    capabilities: dict[str, Any] = {}
+    for method, key, request_id, prefix in (
+        ("resources/list", "resources", 3, "resources"),
+        ("resources/templates/list", "resourceTemplates", 4, "resource_templates"),
+    ):
+        status, count = _stdio_capability_result(
+            process,
+            method=method,
+            result_key=key,
+            request_id=request_id,
+            timeout=timeout,
+        )
+        capabilities[f"{prefix}_status"] = status
+        if count is not None:
+            capabilities[f"{prefix}_count"] = count
+    return capabilities
+
+
 def _run_stdio_initialize_tools(
     process: subprocess.Popen[str],
     *,
@@ -475,72 +560,14 @@ def _run_stdio_initialize_tools(
 ) -> tuple[tuple[int, dict[str, Any]], None] | tuple[None, Exception]:
     """Exchange initialize + tools/list; returns (tool_count, None) or (None, error)."""
     try:
-        initialized = _request(
-            process,
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "initialize",
-                "params": {
-                    "protocolVersion": "2025-03-26",
-                    "capabilities": {},
-                    "clientInfo": {"name": "bioetl-mcp-smoke", "version": "1"},
-                },
-            },
-            timeout=timeout,
+        _stdio_initialize(process, timeout)
+        tool_count = _stdio_tools_count(process, timeout)
+        capabilities = (
+            _stdio_resource_capabilities(process, timeout)
+            if enumerate_resources
+            else {}
         )
-        if "error" in initialized or "result" not in initialized:
-            raise RuntimeError(f"MCP initialize failed: {initialized!r}")
-        assert process.stdin is not None
-        process.stdin.write(
-            '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}\n'
-        )
-        process.stdin.flush()
-        tools = _request(
-            process,
-            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-            timeout=timeout,
-        )
-        tool_rows = tools.get("result", {}).get("tools")
-        if "error" in tools or not isinstance(tool_rows, list):
-            raise RuntimeError(f"MCP tools/list failed: {tools!r}")
-        capabilities: dict[str, Any] = {}
-        if enumerate_resources:
-            for method, key, request_id, prefix in (
-                ("resources/list", "resources", 3, "resources"),
-                (
-                    "resources/templates/list",
-                    "resourceTemplates",
-                    4,
-                    "resource_templates",
-                ),
-            ):
-                try:
-                    response = _request(
-                        process,
-                        {
-                            "jsonrpc": "2.0",
-                            "id": request_id,
-                            "method": method,
-                            "params": {},
-                        },
-                        timeout=timeout,
-                    )
-                    if "error" in response:
-                        code = response.get("error", {}).get("code")
-                        capabilities[f"{prefix}_status"] = (
-                            "unsupported" if code == -32601 else "failed"
-                        )
-                        continue
-                    rows = response.get("result", {}).get(key)
-                    capabilities[f"{prefix}_status"] = (
-                        "ok" if isinstance(rows, list) else "invalid"
-                    )
-                    if isinstance(rows, list):
-                        capabilities[f"{prefix}_count"] = len(rows)
-                except (OSError, RuntimeError, TimeoutError, ValueError):
-                    capabilities[f"{prefix}_status"] = "unavailable"
-        return (len(tool_rows), capabilities), None
+        return (tool_count, capabilities), None
     except Exception as exc:
         return None, exc
 
