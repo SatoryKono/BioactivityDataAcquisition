@@ -53,6 +53,7 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 - **Purpose:** Progressive disclosure for identity, processed-records
   accounting, funnel, reasons, reconciliation, layer accounting, artifacts,
   and timings/failure.
+
 - **Data sources:** Nested panels below (expand row to load).
 
 Nested titles (must match JSON):
@@ -82,6 +83,7 @@ Nested titles (must match JSON):
   including quarantined/dedup/excluded). Distinct from Processed Records.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `layers`
 
+
 ### 11. Inspect Run Artifacts
 - **Type:** Table
 - **Purpose:** Artifact refs (report paths, exports) for exact run. Scan cells
@@ -93,6 +95,7 @@ Nested titles (must match JSON):
 - **Purpose:** Optional `failure` and `stage_timings` blocks. Empty means not
   recorded — not zero duration and not proof of success.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `failure` + `stage_timings`
+
 
 ## Additional shipped panels
 ### 17. Inspect Run Identity

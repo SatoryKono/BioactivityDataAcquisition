@@ -95,8 +95,10 @@ requirements:
 - id: DASH-FIT-004
   gate: pytest+manual
   tests:
-  - tests/integration/test_dashboard_first_window_containment.py
-  prompt: prompt.observability.dashboard-manual-validation
+  - tests/integration/test_dashboard_first_window_noscroll.py::test_first_window_has_no_internal_scroll
+  - tests/integration/test_dashboard_operator_readability.py::test_first_window_panels_do_not_declare_internal_scroll
+  - tests/integration/test_dashboard_first_window_containment.py::test_first_window_overflow_allowlist_stays_empty
+  prompt: prompt.observability.dashboard-first-window-noscroll
 - id: DASH-FIT-005
   gate: pytest
   tests:

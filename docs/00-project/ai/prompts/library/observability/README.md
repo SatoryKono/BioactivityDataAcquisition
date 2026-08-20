@@ -73,9 +73,10 @@ Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
   вопрос, связь с вопросом дашборда, маршрут оператора, 5–10 сценариев
   с выбором от значения (`STAY` / hop / CLI / bind). Артефакт в
   `reports/audit/observability-seq/`.
-- `prompt.observability.dashboard-first-window-noscroll` — implement
-  `DASH-FIT-004`: убрать внутренний scroll first-window `text`/`stat`/`table`
-  на семи UID без overflow-clip и без роста `first_screen_max_panels`.
+- `prompt.observability.dashboard-first-window-noscroll` — ultimate
+  `DASH-FIT-004`: нет internal scroll на **каждой** first-window панели;
+  обязательный pytest на code/tests/docs; ≥10 прогонов на UID и ≥5
+  зелёных подряд; без overflow-clip и без роста `first_screen_max_panels`.
 - `prompt.observability.dashboard-data-duplication` — по каждому UID 0–6:
   данные каждой панели, таксономия дублей внутри дашборда, план исключения
   без сноса `DASH-FIT-003` / `DASH-FIT-005`.

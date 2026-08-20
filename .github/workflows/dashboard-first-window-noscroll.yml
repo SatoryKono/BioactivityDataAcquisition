@@ -1,0 +1,35 @@
+# DASH-FIT-004: first-window panels must not scroll. This workflow is not
+# path-filtered, so documentation, tests, and product-code changes still run it.
+name: Dashboard first-window no-scroll
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  first-window-noscroll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: First-window no-scroll gate (all seven UIDs)
+        run: |
+          uv run --frozen --no-build pytest \
+            tests/integration/test_dashboard_first_window_noscroll.py \
+            -q --tb=short

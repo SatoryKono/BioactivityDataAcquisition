@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-first-window-noscroll
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -13,6 +13,10 @@ params:
   - LANGUAGE
   - MONITORING
   - VIEWPORT
+  - THEME
+  - ZOOM
+  - N
+  - CONSECUTIVE_PASS
   - ALLOW_PUSH
 includes:
   - fragments/read-order.md
@@ -28,6 +32,7 @@ related_ssot:
   - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - docs/03-guides/dashboards/contracts/layout-budgets.yaml
   - grafana/dashboards
+  - tests/integration/test_dashboard_first_window_noscroll.py
   - tests/integration/test_dashboard_operator_readability.py
   - tests/integration/test_dashboard_first_window_containment.py
   - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
@@ -41,77 +46,91 @@ anti_patterns:
   - Replacing Overview CURRENT 214/215
   - Starting monitoring unless MONITORING=true
   - New active script that grows active_script_count
+  - Stopping after one green run instead of N runs and CONSECUTIVE_PASS
 tags: [observability, dashboard, grafana, first-window, scroll, containment, implement, operator]
-summary: Implement DASH-FIT-004 — no internal scroll on first-window text/stat/table panels across the seven UIDs
-max_body_lines: 160
+summary: Ultimate DASH-FIT-004 — no internal scroll on every first-window panel; mandatory pytest on code/tests/docs; N>=10 runs per UID then fix; CONSECUTIVE_PASS>=5; theme and zoom recorded
+max_body_lines: 220
 ---
 
-# BioETL — first-window no-scroll (DASH-FIT-004)
+# Ultimate first-window no-scroll (DASH-FIT-004)
 
-Убери **внутреннюю** прокрутку панелей first window на всех семи shipped UID.
-Не runtime SSOT. Язык: `{{LANGUAGE}}`.
+Ультимативно убери **внутреннюю** прокрутку **всех** панелей first window
+на семи shipped UID. Не runtime SSOT. Язык: `{{LANGUAGE}}`.
 
 Это **не** page-level scroll дашборда. Дефект — `scrollHeight > clientHeight`
-или `scrollWidth > clientWidth` внутри root non-row панели с
+или `scrollWidth > clientWidth` внутри **любой** root non-row панели с
 `gridPos.y < FIRST_WINDOW_Y` (`18`).
 
 ## Params
 
 | Param | Default |
 | --- | --- |
-| `TASK` | first-window no-scroll на семи UID |
+| `TASK` | ultimate first-window no-scroll на семи UID |
 | `MODE` | `implement` |
-| `SCOPE` | `grafana/dashboards` + `layout-budgets.yaml` + containment tests |
+| `SCOPE` | `grafana/dashboards` + containment tests + CI |
 | `WORK_BRANCH` | `fix/dash-first-window-noscroll` (never main) |
 | `LANGUAGE` | `ru` |
 | `MONITORING` | `false` |
 | `VIEWPORT` | `1366x768` |
+| `THEME` | `dark,light` |
+| `ZOOM` | `100` (Tier-2 `200` browser zoom) |
+| `N` | `10` (минимум прогонов теста на каждый UID) |
+| `CONSECUTIVE_PASS` | `5` (минимум зелёных подряд на каждый UID) |
 | `ALLOW_PUSH` | `true` (only `fix/*`) |
 
 Windows: `.\.venv-win\Scripts\python.exe`. Чужой dirty WIP — worktree.
 Skill: **observability-dashboard**.
+
+## Обязательный тест (любое изменение code / tests / docs)
+
+Гейт: `tests/integration/test_dashboard_first_window_noscroll.py`
+
+Должен оставаться в:
+
+- `.github/workflows/dashboard-first-window-noscroll.yml` (не path-filtered)
+- Tests → Dashboard semantic release policy
+- pre-push `check-dashboard-first-window-noscroll` (`src/` `tests/` `docs/` `grafana/`)
+
+Нельзя сужать glob так, чтобы docs-only PR обходил гейт.
 
 ## Контракт
 
 | ID | Правило |
 | --- | --- |
 | `DASH-FIT-001` | `max(y+h)` root non-row ≤ `VIEWPORT_ROWS` (`18`) |
-| `DASH-FIT-002` | не straddling fold (`y < 18 < y+h`) |
+| `DASH-FIT-002` | не straddling fold |
 | `DASH-FIT-003` | не заменять Overview CURRENT `214`/`215` |
-| `DASH-FIT-004` | first-window `text`/`stat`/`table`: нет internal scroll; `overflow:hidden\|auto\|scroll` в HTML запрещён (кроме nav spacer `height:0`) |
-| `DASH-FIT-005` | first-window table имеет `max_rows` в `layout-budgets.yaml` и bind в JSON |
+| `DASH-FIT-004` | **каждая** first-window панель: нет internal scroll; `overflow:hidden\|auto\|scroll` запрещён (кроме nav spacer `height:0`) |
+| `DASH-FIT-005` | first-window table имеет `max_rows` и bind |
 
-Допуск только `panel_containment_tolerance_px: 2`. Allowlist
-`first_window_overflow` должен остаться пустым.
+Allowlist `first_window_overflow` пустой. Не клиппинг.
 
-## Метод
+## Цикл на каждый UID
 
-1. Инвентарь: все root non-row `y < 18` на семи JSON.
-2. Статика: `test_first_window_panels_do_not_declare_internal_scroll`;
-   row-cap vs `limit`/`topk`; wrapText; `h` vs число строк (`cellHeight=sm`).
-3. Если `MONITORING=true` — Playwright/render containment
-   (`scrollHeight`/`clientHeight`). Иначе чинить по JSON-оценке и тестам;
-   live render не обязателен.
-4. Чинить **содержанием**, не клиппингом:
-   - укоротить banner copy / `white-space:normal` / `overflow-wrap:anywhere`;
-   - снизить `max_rows`/`topk`/`limitField` так, чтобы шапка+строки влезали в `h`;
-   - wrap только именованной text-колонки при достаточной ширине;
-   - увеличить `h` только если `y+h ≤ 18` и нет overlap.
-5. Не поднимать `first_screen_max_panels`. Не двигать `9603` ниже `214`/`215`.
+Для каждого из семи JSON:
 
-## Checks (обязательны)
+1. Прогон:
+   `pytest tests/integration/test_dashboard_first_window_noscroll.py -k <stem>`
+2. Если FAIL — чинить **содержанием** (copy, wrap, `max_rows`/`limit`/`h` при
+   `y+h ≤ 18`), не `overflow:hidden`. Сбросить consecutive.
+3. Если PASS — consecutive += 1.
+4. Повторять, пока `runs >= N` **и** `consecutive >= CONSECUTIVE_PASS`.
+
+Минимум 10 прогонов на UID. Минимум 5 зелёных **подряд**. После каждого
+FAIL — правка до следующего прогона. Не поднимать `first_screen_max_panels`.
+
+Live `scrollHeight` только при `MONITORING=true`. Иначе JSON-гейт + §8.
+
+## Checks
 
 ```powershell
 .\.venv-win\Scripts\python.exe -m pytest -q `
+  tests/integration/test_dashboard_first_window_noscroll.py `
   tests/integration/test_dashboard_operator_readability.py `
-  tests/integration/test_dashboard_first_window_containment.py `
-  tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  tests/integration/test_dashboard_first_window_containment.py
 ```
-
-После правок `grafana/dashboards/**` readability gate обязателен (CI + pre-push).
 
 ## Done
 
-Каждая first-window `text`/`stat`/`table` либо влезает без scroll, либо
-`BLOCKED` с точным panel id, `gridPos`, причиной (rows vs `h`, wrap, copy)
-и почему JSON-оценка недостаточна без live render.
+На каждом UID: ≥ `N` прогонов, из них ≥ `CONSECUTIVE_PASS` зелёных подряд.
+Иначе `BLOCKED` с panel id, `gridPos`, причиной.
