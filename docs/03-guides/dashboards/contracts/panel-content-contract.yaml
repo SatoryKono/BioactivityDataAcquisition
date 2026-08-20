@@ -4314,17 +4314,17 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '3023':
-        title: Inspect Full Processed Records
-        role: forensic_table
+        title: Inspect Processed Records
+        role: accounting_table
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: selected_run
+        scope_class: selected_run
         evidence_source: ops_http
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
-        - ERROR
         - TELEMETRY_ABSENT
+        - ERROR
         required_copy:
         - evidence_scope
         - no_data
@@ -4334,6 +4334,12 @@ dashboards:
         - telemetry_absent
         - backend_error
         render_profiles: *id001
+        required_columns:
+        - parameter
+        - value
+        - percentage
+        hidden_columns:
+        - row_status
       '3098':
         title: Browse Workflow Runs
         role: row_group
@@ -4388,35 +4394,6 @@ dashboards:
         required_columns:
         - parameter
         - value
-      '9403':
-        title: Inspect Processed Records
-        role: accounting_table
-        tier: 1
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - TELEMETRY_ABSENT
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
-        - backend_error
-        render_profiles:
-        - first_window_dark
-        - first_window_light
-        required_columns:
-        - parameter
-        - value
-        - percentage
-        hidden_columns:
-        - row_status
   bioetl-runtime:
     panels:
       '4':
