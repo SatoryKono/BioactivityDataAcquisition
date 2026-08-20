@@ -31,7 +31,7 @@ Render:
 | 6 | `prompt.audit.cycle.tech-debt` | [tech-debt.md](tech-debt.md) | Технический долг |
 | 7 | `prompt.audit.cycle.architecture` | [architecture.md](architecture.md) | Общая архитектура |
 | 8 | `prompt.audit.cycle.telemetry` | [telemetry.md](telemetry.md) | Наблюдаемость / наполнение дашбордов |
-| 9 | `prompt.audit.cycle.dashboards` | [dashboards.md](dashboards.md) | Рендер и дизайн панелей |
+| 9 | `prompt.audit.cycle.dashboards` | [dashboards.md](dashboards.md) | Рендер/дизайн панелей (`DASHBOARD_REQUIREMENTS.md`) |
 | 10 | `prompt.audit.cycle.coderabbit` | [coderabbit.md](coderabbit.md) | Полный аудит + CodeRabbit |
 
 Порядок прогона: 1→10. `#8` перед `#9`. `#10` замыкает dual-pass.

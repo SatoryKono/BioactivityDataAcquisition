@@ -4,7 +4,7 @@ Version: 1.2.0
 Status: active
 Class: internal (repo-only index; not a paste card)
 Owner: BioETL Team
-Last verified: '2026-08-14'
+Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -17,6 +17,10 @@ Not runtime SSOT. Precedence: `.codex/skills/observability-dashboard/` →
 Default for any card here: `MONITORING=false`, `LANGUAGE=ru`,
 `ALLOW_ISSUE_WRITE=false`. Start `docker-compose.monitoring.yml` only when
 the operator sets `MONITORING=true` and a live render is required.
+
+Shared contract (DASH-* IDs, bands, §8 gates, ontology):
+`fragments/dashboard-requirements-audit.md`. Do not also run
+`prompt.audit.cycle.dashboards` as a second full pass on the same SHA.
 
 ## Sequential run (this folder)
 
@@ -34,7 +38,7 @@ open fix PRs; do not open a third PR for the same root cause.
 | 4 | `prompt.observability.grafana-audit.data-integrity` | Lineage / queries / zero vs empty | live query optional |
 | 5 | `prompt.observability.bi-dashboard-acceptance` | Visual / layout / data acceptance | — |
 | 6 | `prompt.observability.dashboard-panel-audit` | 5 named phases, `CYCLE_COUNT=1` | — |
-| 7 | `prompt.observability.dashboard-audit-cycle` | `N=1`, contours `density,fill,pipeline` | write loops not authorized |
+| 7 | `prompt.observability.dashboard-audit-cycle` | `N=1`, contours `density-area,density-scalar,fill,pipeline,fit` | write loops not authorized |
 | 8 | `prompt.observability.grafana-audit.regression` | Baseline vs candidate | **no candidate change** |
 | 9 | Final issue sweep | Close/BLOCKED vs `origin/main` | — |
 
