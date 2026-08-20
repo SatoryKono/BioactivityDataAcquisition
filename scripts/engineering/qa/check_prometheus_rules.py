@@ -460,7 +460,9 @@ def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
             continue
         assert payload is not None
         for group in payload.get("groups") or []:
-            violations.extend(_group_expr_violations(rules_file=rules_file, group=group))
+            violations.extend(
+                _group_expr_violations(rules_file=rules_file, group=group)
+            )
     return violations
 
 
@@ -675,7 +677,6 @@ def _run_docker(
             test_file.as_posix(),
         ]
     )
-
 
 
 def _run_expr_parity(*, prometheus_url: str) -> int:
