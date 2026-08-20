@@ -146,7 +146,10 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
         for source, target in pairs:
             updated = updated.replace(source, target)
         if updated != text:
-            path.write_text(updated, encoding="utf-8")  # NOSONAR -- validated tree path
+            from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+            path = ensure_path_within_root(path, root)
+            path.write_text(updated, encoding="utf-8")
     return references
 
 

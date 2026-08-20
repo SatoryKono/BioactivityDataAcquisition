@@ -367,20 +367,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--contract", type=Path, default=CONTRACT_PATH)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    existing = _load_contract(args.contract)
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_output_path
+
+    contract_path = resolve_output_path(args.contract, root=REPO_ROOT)
+    existing = _load_contract(contract_path)
     generated = _full_contract(existing)
     rendered = yaml.safe_dump(
         generated, allow_unicode=True, sort_keys=False, width=1000
     )
     if args.check:
-        current = args.contract.read_text(encoding="utf-8")
+        current = contract_path.read_text(encoding="utf-8")
         if current != rendered:
-            print(f"dashboard content contract is stale: {args.contract}")
+            print(f"dashboard content contract is stale: {contract_path}")
             return 1
         print("dashboard content contract is current")
         return 0
-    args.contract.write_text(rendered, encoding="utf-8")
-    print(f"wrote full semantic contract -> {args.contract}")
+    contract_path.write_text(rendered, encoding="utf-8")
+    print(f"wrote full semantic contract -> {contract_path}")
     return 0
 
 

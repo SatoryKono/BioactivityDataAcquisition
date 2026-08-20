@@ -8,12 +8,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def replace_once(path: Path, old: str, new: str, label: str) -> None:
+    from scripts.engineering.common.repo_paths import ensure_repo_path
+
+    path = ensure_repo_path(path, root=ROOT)
     text = path.read_text(encoding="utf-8")
     if old not in text:
         raise SystemExit(f"{label}: target block missing in {path}")
-    path.write_text(  # NOSONAR -- path is rooted under the constant repository root
-        text.replace(old, new, 1), encoding="utf-8"
-    )
+    path.write_text(text.replace(old, new, 1), encoding="utf-8")
     print(f"fixed {label}")
 
 

@@ -28,6 +28,7 @@ RUN apt-get update \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
     && python -m pip install --only-binary=:all: --no-cache-dir \
+        --index-url https://pypi.org/simple \
         --default-timeout=180 --retries=10 uv==0.11.26 \
     && uv --version
 

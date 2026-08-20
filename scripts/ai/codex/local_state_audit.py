@@ -518,7 +518,9 @@ def create_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
         "copied_files": copied,
         "env_files_included": False,
     }
-    manifest_path = backup_dir / "manifest.json"
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    manifest_path = ensure_path_within_root(backup_dir / "manifest.json", backup_dir)
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     os.chmod(manifest_path, 0o600)
     verified = all(
@@ -656,6 +658,9 @@ def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     backup_dir = backup_dir.resolve()
     if not backup_dir.is_relative_to(allowed_root):
         raise ValueError("backup directory must be under the Codex backups directory")
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    backup_dir = ensure_path_within_root(backup_dir, allowed_root)
     manifest_path = backup_dir / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     restored_files = _restore_manifest_files(
@@ -711,10 +716,12 @@ def collect_audit(codex_home: Path, retention_days: int) -> dict[str, Any]:
 
 
 def _report_path(requested: Path) -> Path:
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+    quality_root = REPO_ROOT / "reports/quality"
     candidate = requested if requested.is_absolute() else REPO_ROOT / requested
-    resolved = candidate.resolve()
-    quality_root = (REPO_ROOT / "reports/quality").resolve()
-    if not resolved.is_relative_to(quality_root) or resolved.suffix != ".json":
+    resolved = ensure_path_within_root(candidate, quality_root)
+    if resolved.suffix != ".json":
         raise ValueError("--output must be a .json file under reports/quality")
     return resolved
 
