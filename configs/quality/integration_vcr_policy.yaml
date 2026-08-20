@@ -165,8 +165,11 @@ tracked_suite_inventory:
     - tests/integration/test_dashboard_presentation_requirements.py
     - tests/integration/test_dashboard_provider_context_mapping.py
     - tests/integration/test_dashboard_qa_9088.py
+    - tests/integration/test_dashboard_qa_check_gates.py
     - tests/integration/test_dashboard_required_panel_links.py
     - tests/integration/test_dashboard_requirement_coverage.py
+    - tests/integration/test_dashboard_requirement_gaps.py
+    - tests/integration/test_dashboard_requirement_gates.py
     - tests/integration/test_dashboard_scope_refactor.py
     - tests/integration/test_dashboard_scope_reset_tooltips.py
     - tests/integration/test_dashboard_state_fixture_contract.py
