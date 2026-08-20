@@ -328,7 +328,7 @@ def main() -> None:
         "SELECTED RUN · TIME RANGE · ", "SELECTED RUN · "
     )
     recon["links"] = [
-        *recon.get("links") or [],
+        *(recon.get("links") or []),
         {
             "title": "Open Trust",
             "url": TRUST_URL,
