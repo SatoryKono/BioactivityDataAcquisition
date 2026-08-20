@@ -143,26 +143,31 @@ def collect_rule_issues(
         groups += 1
         for rule in _iter_mapping_rules(group):
             rules_n += 1
-            name = str(
-                rule.get("name") or rule.get("alert") or rule.get("record") or "?"
+            issue = _rule_issue_from_payload(
+                rule, group_name=group_name, file_path=file_path
             )
-            kind = str(
-                rule.get("type") or ("alerting" if "alert" in rule else "recording")
-            )
-            health = str(rule.get("health") or "unknown")
-            last_error = str(rule.get("lastError") or "").strip()
-            if health.lower() in {"err", "error"} or last_error:
-                issues.append(
-                    RuleIssue(
-                        group=group_name,
-                        file=file_path,
-                        rule=name,
-                        kind=kind,
-                        health=health,
-                        last_error=last_error or health,
-                    )
-                )
+            if issue is not None:
+                issues.append(issue)
     return issues, groups, rules_n
+
+
+def _rule_issue_from_payload(
+    rule: Mapping[str, Any], *, group_name: str, file_path: str
+) -> RuleIssue | None:
+    name = str(rule.get("name") or rule.get("alert") or rule.get("record") or "?")
+    kind = str(rule.get("type") or ("alerting" if "alert" in rule else "recording"))
+    health = str(rule.get("health") or "unknown")
+    last_error = str(rule.get("lastError") or "").strip()
+    if health.lower() not in {"err", "error"} and not last_error:
+        return None
+    return RuleIssue(
+        group=group_name,
+        file=file_path,
+        rule=name,
+        kind=kind,
+        health=health,
+        last_error=last_error or health,
+    )
 
 
 def normalize_promql(expr: str) -> str:

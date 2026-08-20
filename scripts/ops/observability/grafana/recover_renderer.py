@@ -192,6 +192,30 @@ def _wait_for_renderer(
     return False, after
 
 
+def _renderer_wait_messages(
+    healthy: bool,
+    after: list[dict[str, object]],
+    *,
+    wait_seconds: float,
+) -> list[str]:
+    if healthy or not after:
+        return []
+    if any(
+        snapshot["status"] == "running" and snapshot["health"] in {"none", ""}
+        for snapshot in after
+    ):
+        return ["renderer running without health endpoint result"]
+    return [f"renderer not healthy within {wait_seconds}s"]
+
+
+def _grafana_probe_messages(grafana_ok: bool | None) -> list[str]:
+    if grafana_ok:
+        return ["Grafana /api/health ok (UI independent of renderer)"]
+    if grafana_ok is False:
+        return ["Grafana /api/health failed (separate from renderer)"]
+    return []
+
+
 def recover_renderer(
     *,
     project: str = DEFAULT_PROJECT,
