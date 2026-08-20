@@ -7,19 +7,18 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3348 |
-| Tracked doc-like files | 3343 |
-| Ignored local docs/reports files | 5 |
-| Duplicate groups | 7 |
-| Generated without route or exception | 1 |
-| Generated routes | 70 |
+| Doc-like files | 3379 |
+| Tracked doc-like files | 3379 |
+| Ignored local docs/reports files | 0 |
+| Duplicate groups | 2 |
+| Generated without route or exception | 0 |
+| Generated routes | 71 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 5 |
-| tracked | 3343 |
+| tracked | 3379 |
 
 ## Lifecycle Counts
 
@@ -27,10 +26,10 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 272 |
-| active_quality_baseline | 58 |
+| active_quality_baseline | 60 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 10 |
+| docs_reports_curated_or_historical_report | 5 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
 | generated_skill_license_mirror | 5 |
@@ -43,7 +42,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 786 |
+| working_report | 816 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,32 +58,32 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 741 |
+| Active | 742 |
 | Archived | 169 |
 | Canonical | 70 |
 | Deprecated | 8 |
-| Generated | 1086 |
-| Working | 1274 |
+| Generated | 1089 |
+| Working | 1301 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 741 |
+| active | 742 |
 | archive | 169 |
 | canonical | 70 |
 | duplicate | 8 |
-| generated | 1086 |
-| working | 1274 |
+| generated | 1089 |
+| working | 1301 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 326 |
-| archive-after-migration | 798 |
-| generate-automatically | 1086 |
-| keep | 1126 |
+| archive-after-migration | 823 |
+| generate-automatically | 1089 |
+| keep | 1129 |
 | reconcile-with-github-state | 4 |
 | replace-with-link | 8 |
 
@@ -117,11 +116,6 @@
 | `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-17.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | Working | 0 | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
 | `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
@@ -172,6 +166,11 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/report.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/summary.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/final-summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/audit.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/report.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -341,11 +340,6 @@
 | `docs/reports/generated/pipeline_normalization_field_matrix/non_chembl_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.csv` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
 | `docs/reports/generated/pipeline_normalization_field_matrix/pipeline_normalization_field_matrix.md` | tracked | docs_reports_generated_or_route_owned | generate-automatically |
-| `docs/reports/gh-issues/ai-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/diagrams-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/docs-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/memory-consolidation-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/gh-issues/schema-refactoring-issue.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/index.md` | tracked | docs_reports_curated_entrypoint | keep |
 
 ## Generated Route Registry
@@ -376,6 +370,7 @@
 | contract-registry-dq-diagnostics-quality-report | `scripts/engineering/ci/validate_registry_dq_refs.py` | working_output |
 | contract-schema-classifier-diagnostics-quality-report | `scripts/engineering/ci/validate_schema_classifier_gate.py` | working_output |
 | contract-tests-junit-report | `.github/workflows/contract-tests.yml` | ignored_ci_output |
+| dashboard-dux7-live-residual-protocol-archived | `historical DUX audit protocol (archived, issue` | tracked_curated_generated_doc |
 | dashboard-navigation-contract-generated-doc | `scripts/ops/observability/grafana/render_nav_bus.py` | tracked_curated_generated_doc |
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
 | dashboard-scenes-parity-ledger | `scripts/engineering/qa/report_dashboard_scenes_parity.py` | tracked_quality_evidence |

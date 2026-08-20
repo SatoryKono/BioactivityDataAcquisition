@@ -1,3 +1,5 @@
+"""Historical replay corpus certification orchestration for control-plane replay."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping

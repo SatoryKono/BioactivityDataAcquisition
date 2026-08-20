@@ -1,3 +1,5 @@
+"""Build run-manifest reproducibility and historical-replay claim payloads."""
+
 from __future__ import annotations
 
 from bioetl.application.services.control_plane._historical_claim_reason import (
