@@ -462,7 +462,8 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": false
             },
             "inspect": false
           },
@@ -589,10 +590,6 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 180
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text"
@@ -632,6 +629,10 @@
                     "includeVars": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -641,10 +642,6 @@
               "options": "Priority"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 88
-              },
               {
                 "id": "custom.align",
                 "value": "center"
@@ -674,10 +671,6 @@
                 "value": "Priority"
               },
               {
-                "id": "custom.width",
-                "value": 88
-              },
-              {
                 "id": "custom.align",
                 "value": "center"
               },
@@ -692,6 +685,10 @@
                 "value": {
                   "mode": "thresholds"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 48
               }
             ]
           },
@@ -740,14 +737,10 @@
                 ]
               },
               {
-                "id": "custom.width",
-                "value": 140
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -759,15 +752,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -778,19 +764,8 @@
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Pipeline"
-              },
-              {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -826,7 +801,7 @@
       },
       "targets": [
         {
-          "expr": "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))",
+          "expr": "topk(2, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -880,13 +855,14 @@
               "__name__": true,
               "bioetl_l0_next_action_route": true,
               "input": true,
-              "run_type": true
+              "run_type": true,
+              "pipeline": true,
+              "Pipeline": true
             },
             "indexByName": {
               "action_target": 0,
               "Value": 1,
               "action_reason": 2,
-              "pipeline": 3,
               "action_dashboard_uid": 4
             },
             "renameByName": {
@@ -946,7 +922,8 @@
           "custom": {
             "align": "left",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": false
             },
             "inspect": false
           },
@@ -1129,7 +1106,7 @@
       },
       "targets": [
         {
-          "expr": "topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))",
+          "expr": "topk(2, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))",
           "refId": "A",
           "format": "table",
           "instant": true

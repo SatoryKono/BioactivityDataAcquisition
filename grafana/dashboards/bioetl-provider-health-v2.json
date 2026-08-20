@@ -607,15 +607,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 140
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -627,7 +620,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 40
               },
               {
                 "id": "custom.cellOptions",
@@ -692,7 +685,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 280
+                "value": 260
               },
               {
                 "id": "custom.cellOptions",
@@ -764,10 +757,10 @@
               "source_state": true,
               "job": true,
               "instance": true,
-              "endpoint": true
+              "endpoint": true,
+              "provider": true
             },
             "indexByName": {
-              "provider": 0,
               "reason": 1,
               "Value": 2
             },
