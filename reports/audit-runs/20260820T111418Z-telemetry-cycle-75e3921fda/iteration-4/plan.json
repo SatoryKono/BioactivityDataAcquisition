@@ -1,0 +1,9 @@
+{
+  "phase": "D+E",
+  "actions": [
+    "collect_rule_test_coverage",
+    "add 5 firing fixtures",
+    "ratchet MIN_TESTED_ALERTS 38->43",
+    "open #9144 #9145"
+  ]
+}

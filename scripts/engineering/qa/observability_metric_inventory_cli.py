@@ -442,16 +442,18 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(typed_report, indent=2, sort_keys=True))
         return 1 if violations else 0
     report = collect_metric_inventory(args.repo_root)
-    _write_evidence_report(
-        report,
-        repo_root=args.repo_root,
-        evidence_path=args.write_evidence,
-    )
+    # Capture git provenance before writing evidence/review JSON so
+    # source_worktree_dirty reflects the pre-write tree (TELE-003 / #9145).
     review_summary = _build_runtime_cardinality_review_summary(
         report,
         repo_root=args.repo_root,
         prometheus_base_url=args.prometheus_base_url,
         allow_local_cardinality_fallback=args.allow_local_cardinality_fallback,
+    )
+    _write_evidence_report(
+        report,
+        repo_root=args.repo_root,
+        evidence_path=args.write_evidence,
     )
     _write_runtime_cardinality_review_summary(
         review_summary,
