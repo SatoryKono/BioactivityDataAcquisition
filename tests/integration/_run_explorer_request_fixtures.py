@@ -29,7 +29,7 @@ CATALOG_PATH = Path(
     "docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml"
 )
 DEFAULT_OUT = Path("tests/fixtures/grafana/run_explorer")
-FIRST_SCREEN_IDS = (3010, 9402, 9403)
+FIRST_SCREEN_IDS = (3010, 9402)
 _VAR_RE = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::csv)?\}")
 
 SELECTED = {

@@ -16,6 +16,7 @@ import pytest
 import yaml
 
 from tests.integration._grafana_test_support import (
+    get_row_child_panels,
     get_dashboard_files,
     get_dashboard_navigation_links,
     get_dashboard_panels,
@@ -664,7 +665,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
 
 
 def test_run_explorer_identity_is_on_the_first_screen() -> None:
-    """#8747: Run Explorer hub ships identity/accounting above the 1366 fold."""
+    """#8747/#9147: identity stays above the fold; accounting is collapsed."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {
         panel.get("id"): panel
@@ -674,9 +675,17 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     browse = panels[3010]
     identity = panels[9402]
     records = panels[9403]
-    assert browse.get("gridPos", {}).get("h", 99) <= 5
+    assert browse.get("gridPos", {}).get("h", 99) <= 6
     assert identity.get("gridPos", {}).get("y", 999) <= 13
-    assert records.get("gridPos", {}).get("y", 999) <= 13
+    collapsed_ids = {
+        panel.get("id")
+        for panel in get_row_child_panels(dashboard, "Selected Run Details")
+    }
+    assert 9403 in collapsed_ids, (
+        "Inspect Processed Records must ship inside collapsed Selected Run Details "
+        "so first-paint Ops HTTP stays within budget (#9147)"
+    )
+    assert records.get("gridPos", {}).get("y", 0) >= 19
     assert "last 4" in str(browse.get("title", "")).lower()
 
 
