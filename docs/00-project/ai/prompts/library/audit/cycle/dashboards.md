@@ -124,7 +124,9 @@ SHA. `grafana-six/*` → STOP.
 
 ## BioETL anchors
 
-- Requirements: `docs/01-requirements/DASHBOARD_REQUIREMENTS.md` (`DASH-*`); catalog `REQUIREMENTS.md` + CSV (`REQ-DASH-*`); PROVEN findings need `requirement_id`
+- Requirements: `docs/01-requirements/DASHBOARD_REQUIREMENTS.md` (`DASH-*`);
+  catalog projections `REQ-DASH-*` in `REQUIREMENTS.md` + traceability CSV.
+  PROVEN findings need `requirement_id`
 - Budgets: `docs/03-guides/dashboards/contracts/layout-budgets.yaml`
 - Shipped JSON: `grafana/dashboards/`
 - Design: `docs/03-guides/dashboards/design-system.md`
@@ -148,10 +150,10 @@ SHA. `grafana-six/*` → STOP.
 | Phase | Action |
 | --- | --- |
 | **A Inventory** | `uid \| panel_id \| y \| band \| type \| datasource`. Baseline SHA. |
-| **B Contours** | Only names in `CONTOURS`. Rules in the fragment. |
+| **B Contours** | Only names in `CONTOURS`. Rules in the fragment. Evidence-first. |
 | **C Normalize** | `checks.json` (bi-check-schema) + `findings.json` with `requirement_id` (PROVEN only). `surface_score` 0–3. Dedupe `uid+panel_id+requirement_id`. |
 | **D Issues** | ALLOW_ISSUE_WRITE + PROVEN + `requirement_id` (`DASH-*` or `REQ-DASH-*`). Title `[<uid>][<DASH-id>][P#]`. Cap MAX_ISSUES. |
-| **E Fix** | WORK_BRANCH; minimal JSON/query/script; no overflow-clip; no budget raises; re-check **affected** panels. |
+| **E Fix** | WORK_BRANCH; minimal JSON/query/script; no overflow-clip; no budget raises. Re-check **affected** panels. |
 | **F Validate** | Re-run §8 gates + affected panels. PR if ALLOW_PUSH. Delta: resolved / unchanged / regressed / new. |
 
 ### Contours (see fragment for rules)

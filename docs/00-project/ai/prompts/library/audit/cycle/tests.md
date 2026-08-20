@@ -6,19 +6,19 @@ class: operator-paste
 owner: BioETL Team
 runtimes: [grok, codex, any]
 params:
-  - N = `10`
-  - SCOPE = `tests/ configs/quality/ pyproject.toml` 
-  - MODE = `full`
-  - LANGUAGE = `ru` 
-  - LANE = `full`
-  - AUDIT_MODE = `full`
-  - ALLOW_ISSUE_WRITE = `true` 
-  - ALLOW_PUSH = `true` 
-  - ALLOW_MERGE = `true` 
-  - ALLOW_CLOSE  = `true` 
-  - MAX_ISSUES_PER_ITERATION = `10`
-  - BASE_BRANCH = `main`
-  - REPO = `SatoryKono/BioactivityDataAcquisition` 
+  - N
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  - LANE
+  - AUDIT_MODE
+  - ALLOW_ISSUE_WRITE
+  - ALLOW_PUSH
+  - ALLOW_MERGE
+  - ALLOW_CLOSE
+  - MAX_ISSUES_PER_ITERATION
+  - BASE_BRANCH
+  - REPO 
 includes:
   - fragments/read-order.md
   - fragments/git-safety.md

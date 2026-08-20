@@ -165,7 +165,7 @@ Split any leaf with ≥ MAX_FILES_PER_SCOPE files.
 | **D Cross-gates** | import-linter / architecture subset / debt gates. CR cannot override a green gate without evidence. |
 | **E Normalize** | `findings.json`; domain tags; dedupe vs open GH issues. |
 | **F Plan** | `plan.json` waves ≤ MAX_WAVES; P0→P1; debt ↓ or flat only. |
-| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN. One issue per root-cause. |
+| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[coderabbit][<REQ-id>][P#]`. One issue per root-cause. |
 | **H Implement** | WORK_BRANCH; minimal diffs; no drive-by; no budget raises. |
 | **I PR + CR re-pass** | If ALLOW_PUSH: PR; wait CR App + required checks; agent disposition of residual CR. |
 | **J Post** | resolved \| unchanged \| regressed \| new; re-CR fixed scopes. |
