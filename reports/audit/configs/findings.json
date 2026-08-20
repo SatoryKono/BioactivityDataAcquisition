@@ -1,37 +1,11 @@
-[
-  {
-    "id": "CFG-001",
-    "path": "docs/04-reference/config_comparison_matrix.csv",
-    "observation": "The checked-in config comparison matrix did not match the deterministic generator on the audited origin/main baseline.",
-    "method": "python -m pytest -q -p no:cacheprovider tests/architecture -k \"config or schema or dq\"",
-    "expected": "python -m scripts.schema generate-config-matrix --check exits 0 and the architecture drift test passes.",
-    "actual": "Before remediation the drift test exited 1 with a matrix mismatch; after canonical regeneration both the generator check and focused drift test exit 0.",
-    "impact": "The stale derived artifact made config governance evidence non-reproducible and caused the architecture drift gate to fail.",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "priority": "P2",
-    "severity": "Medium",
-    "category": "generated-artifact-drift",
-    "evidence": [
-      {
-        "path": "tests/architecture/test_config_discrepancy_report_drift.py",
-        "line": 32,
-        "command": "python -m pytest -q -p no:cacheprovider tests/architecture/test_config_discrepancy_report_drift.py",
-        "observation": "The guard failed before remediation and passes after canonical regeneration."
-      }
-    ],
-    "root_cause": "Unspecified; the derived matrix had not been refreshed after the current config surface changed.",
-    "remediation": "Applied the canonical generate-config-matrix --update command and retained the blocking drift guard.",
-    "effort": "S",
-    "automation": "tests/architecture/test_config_discrepancy_report_drift.py and python -m scripts.schema generate-config-matrix --check",
-    "automated_fix_possible": true,
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.schema generate-config-matrix --check",
-      "python -m pytest -q -p no:cacheprovider tests/architecture/test_config_discrepancy_report_drift.py"
-    ],
-    "resolution_status": "RESOLVED",
-    "debt_effect": "unchanged"
-  }
-]
+{
+  "source_run": "20260820T074057Z-configs-cycle-6879fc5719",
+  "surface_score": 2,
+  "finding_ids": [
+    "CFG-DOCKER-LOG-001",
+    "CFG-IMPORTLINTER-001",
+    "CFG-COMPAT-REVIEW-001",
+    "CFG-DOCKER-NET-DOCS-001"
+  ],
+  "canonical_findings": "../../audit-runs/20260820T074057Z-configs-cycle-6879fc5719/findings.json"
+}
