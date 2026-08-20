@@ -4887,29 +4887,6 @@
       "unit": "none"
     },
     {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9403,
-      "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/observability/processed-records",
-        "pipeline",
-        "run_type",
-        "run_id"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "none"
-    },
-    {
       "coverage_class": "required_when_active",
       "dashboard_uid": "bioetl-runtime",
       "datasource_type": "prometheus",

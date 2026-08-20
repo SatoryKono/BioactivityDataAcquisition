@@ -157,11 +157,6 @@ first_window_summary_tables:
     max_rows: 4
     owner: "@bioetl-observability"
     bind: filter
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 9403
-    max_rows: 4
-    owner: "@bioetl-observability"
-    bind: filter
   - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1

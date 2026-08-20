@@ -8,7 +8,7 @@
   ],
   "scenarios": {
     "backend_error": {
-      "panel_id": 9403,
+      "panel_id": 3023,
       "path": "backend_error.json"
     },
     "empty_selection": {
@@ -20,7 +20,7 @@
       "path": "selected_identity.json"
     },
     "selected_processed_records": {
-      "panel_id": 9403,
+      "panel_id": 3023,
       "path": "selected_processed_records.json"
     },
     "selected_recent_runs": {

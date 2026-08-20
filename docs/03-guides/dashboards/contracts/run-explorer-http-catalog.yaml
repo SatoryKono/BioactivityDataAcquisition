@@ -47,13 +47,6 @@ panels:
     root_selector: rows
     no_value_tokens: [SELECT RUN, VALID EMPTY]
     copy_tokens: []
-  - id: 9403
-    title: Inspect Processed Records
-    endpoint: processed_records
-    url: /ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
-    root_selector: rows
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
   - id: 3021
     title: Inspect Recent Runs (last 20)
     endpoint: pipeline_run_reports

@@ -5,9 +5,10 @@
 
 ## Overview
 
-Run-centric workspace. First paint is identity + processed records only (Ops HTTP
-performance budget). Deeper `pipeline_run_report_v1` sections live under a
-collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
+Run-centric workspace. First paint is browse index + run identity (Ops HTTP
+performance budget). Processed-records accounting lives with the other
+`pipeline_run_report_v1` slices under a collapsed progressive-disclosure row.
+`run_id` is never a Prometheus label.
 
 ## Key Panels
 
@@ -24,14 +25,6 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   as `QUERY ERROR`.
 - **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
 
-### 4. Inspect Processed Records
-- **Type:** Table
-- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
-  accounting (first paint); the panel owns 14/24 grid columns so labels and
-  values remain readable. Recorded zero, `VALID EMPTY`, and `QUERY ERROR` are
-  distinct operator states.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
-
 ### 5. Inspect Recent Runs (last 4)
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 4 pipeline-run reports for the selected pipeline. The Run
@@ -39,8 +32,8 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   does not bind a table highlight by itself). The complete last-20 browser
   lives in Selected Run Details.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** Compact index; Inspect Run Identity / Processed Records stay on
-  the first screen (`y<=13`). Selected-run forensics stay collapsed.
+- **Layout:** Compact index; Inspect Run Identity stays on the first screen
+  (`y<=13`). Selected-run forensics, including processed records, stay collapsed.
 - **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
   not embed `$pipeline` — Grafana does not interpolate `noValue`) when
   Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
@@ -120,5 +113,10 @@ Shipped in `bioetl-run-explorer-v1.json`.
 
 Shipped in `bioetl-run-explorer-v1.json`.
 ### 18. Inspect Full Processed Records
-
-Shipped in `bioetl-run-explorer-v1.json`.
+- **Type:** Table (`id=3023`)
+- **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
+  accounting for the selected run (collapsed Selected Run Details). Recorded
+  zero, `VALID EMPTY`, and `QUERY ERROR` are distinct operator states. This is
+  the only processed-records table on Run Explorer (the compact first-row
+  teaser was removed as a same-row subset).
+- **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).

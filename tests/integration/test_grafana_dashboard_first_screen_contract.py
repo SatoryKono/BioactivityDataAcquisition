@@ -674,16 +674,19 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     }
     browse = panels[3010]
     identity = panels[9402]
-    records = panels[9403]
+    records = panels[3023]
     assert browse.get("gridPos", {}).get("h", 99) <= 6
     assert identity.get("gridPos", {}).get("y", 999) <= 13
     collapsed_ids = {
         panel.get("id")
         for panel in get_row_child_panels(dashboard, "Selected Run Details")
     }
-    assert 9403 in collapsed_ids, (
-        "Inspect Processed Records must ship inside collapsed Selected Run Details "
-        "so first-paint Ops HTTP stays within budget (#9147)"
+    assert 9403 not in collapsed_ids, (
+        "compact processed-records teaser 9403 must not ship (same-row-subset of 3023)"
+    )
+    assert 3023 in collapsed_ids, (
+        "Inspect Full Processed Records must ship inside collapsed Selected Run Details "
+        "so first-paint Ops HTTP stays within budget (#9147/#9191)"
     )
     assert records.get("gridPos", {}).get("y", 0) >= 19
     assert "last 4" in str(browse.get("title", "")).lower()
@@ -697,7 +700,7 @@ def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    for panel_id in (3010, 9402, 9403):
+    for panel_id in (3010, 9402):
         no_value = str(
             panels[panel_id]
             .get("fieldConfig", {})
