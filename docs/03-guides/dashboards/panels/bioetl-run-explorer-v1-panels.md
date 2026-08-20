@@ -77,13 +77,6 @@ Nested titles (must match JSON):
   (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
   Panel links: Processed Records (`3023`) + Trust.
 
-### 10. Inspect Layer Accounting
-- **Type:** Table (`id=3016`)
-- **Purpose:** `pipeline_run_report_v1.layers` rollup (bronze/silver/gold counts
-  including quarantined/dedup/excluded). Distinct from Processed Records.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `layers`
-
-
 ### 11. Inspect Run Artifacts
 - **Type:** Table
 - **Purpose:** Artifact refs (report paths, exports) for exact run. Scan cells
