@@ -669,7 +669,10 @@ def _unexpected_local_root_dirs_on_disk(
     for entry in repo_root.iterdir():
         if entry.name == ".git" or not entry.is_dir():
             continue
-        if entry.name in tracked_root_dirs | allowed_root_dirs | tolerated_local_root_dirs:
+        if (
+            entry.name
+            in tracked_root_dirs | allowed_root_dirs | tolerated_local_root_dirs
+        ):
             continue
         if _is_active_worktrees_dir(entry):
             continue

@@ -47,6 +47,7 @@ _RECONCILIATION_ROWS_RETAINED_TOTAL = (
 _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_deleted_total"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 
+
 @runtime_checkable
 class GoldReconciliationReaderProtocol(Protocol):
     """Narrow gold reader seam required by foreign-key reconciliation.

@@ -1411,8 +1411,8 @@ def _check_tracked_portable_projections(
         )
         is not None
     ]
-    devin_mismatches, devin_relative, settings_relative = (
-        _devin_projection_mismatches(output_root, workspace_root)
+    devin_mismatches, devin_relative, settings_relative = _devin_projection_mismatches(
+        output_root, workspace_root
     )
     mismatches.extend(devin_mismatches)
     return _report_portable_projection_result(

@@ -334,7 +334,6 @@ def record_reconciliation_metrics(
     increment(deleted_metric, deleted, {})
 
 
-
 def log_reconciliation(
     logger: object, level: str, message: str, **context: object
 ) -> None:

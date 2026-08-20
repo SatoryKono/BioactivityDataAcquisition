@@ -365,8 +365,7 @@ def _append_description_examples(
         parts.append(f" Ключевые блоки/подграфы: {', '.join(subgraph_names[:6])}.")
     if node_names:
         parts.append(
-            " Показательные узлы для быстрого чтения: "
-            f"{', '.join(node_names[:6])}."
+            f" Показательные узлы для быстрого чтения: {', '.join(node_names[:6])}."
         )
 
 

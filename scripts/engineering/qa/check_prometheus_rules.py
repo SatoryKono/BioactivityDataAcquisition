@@ -460,7 +460,9 @@ def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
             continue
         assert payload is not None
         for group in payload.get("groups") or []:
-            violations.extend(_group_expr_violations(rules_file=rules_file, group=group))
+            violations.extend(
+                _group_expr_violations(rules_file=rules_file, group=group)
+            )
     return violations
 
 
@@ -703,7 +705,6 @@ def _run_docker(
     )
 
 
-
 def _run_expr_parity(*, prometheus_url: str) -> int:
     from scripts.ops.observability.check_prometheus_rules_health import (
         check_rules_health,
@@ -760,7 +761,9 @@ def _structural_rule_violations(
     )
 
 
-def _run_selected_rule_checker(args: argparse.Namespace, rules_files: tuple[Path, ...]) -> int:
+def _run_selected_rule_checker(
+    args: argparse.Namespace, rules_files: tuple[Path, ...]
+) -> int:
     if args.runner == "docker":
         return _run_docker(
             image=args.image,
