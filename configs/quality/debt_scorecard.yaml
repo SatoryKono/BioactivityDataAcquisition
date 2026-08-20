@@ -456,8 +456,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
-      files: 192
-      total_loc: 23364
+      files: 194
+      total_loc: 23335
       files_ge_250_loc: 0
       helper_function_ratio: 0.369
       max_internal_fan_in: 6
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6226
+      total_loc: 6239
       files_ge_250_loc: 0
       helper_function_ratio: 0.325
       max_internal_fan_in: 2
@@ -513,8 +513,8 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 32
-      total_loc: 4000
+      files: 33
+      total_loc: 4045
       files_ge_250_loc: 1
       helper_function_ratio: 0.342
       max_internal_fan_in: 2
@@ -540,10 +540,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 2
     metrics:
       duplication_clusters: 0
-      files: 139
-      total_loc: 16285
+      files: 142
+      total_loc: 16414
       files_ge_250_loc: 0
-      helper_function_ratio: 0.429
+      helper_function_ratio: 0.426
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
@@ -568,10 +568,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 56
-      total_loc: 7205
+      files: 57
+      total_loc: 7282
       files_ge_250_loc: 0
-      helper_function_ratio: 0.358
+      helper_function_ratio: 0.368
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:

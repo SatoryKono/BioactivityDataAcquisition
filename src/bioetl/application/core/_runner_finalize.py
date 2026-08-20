@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, cast
+from typing import Protocol, cast
 
 from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportResult,
@@ -23,7 +23,21 @@ _RUN_FAILURE_EXCEPTIONS = (
 )
 
 
-def finalize_contract_evidence(runner: Any) -> None:
+class _RunnerFinalizeHost(Protocol):
+    """Narrow runner surface consumed by terminal finalizers."""
+
+    manifest_id: str | None
+    run_id: str
+    _contract_evidence_recorder: object | None
+    _lock_runtime_service: object
+    _context: object
+    _executor: object
+    _logger: object
+    _run_ledger_service: object | None
+    _config: object
+
+
+def finalize_contract_evidence(runner: _RunnerFinalizeHost) -> None:
     """Write the immutable sidecar after lock acquire and before extract."""
     recorder = runner._contract_evidence_recorder
     manifest_id = runner.manifest_id
@@ -33,9 +47,11 @@ def finalize_contract_evidence(runner: Any) -> None:
         build_runtime_contract_evidence,
     )
 
-    lock = runner._lock_runtime_service.get_context()
+    get_context = runner._lock_runtime_service.get_context
+    lock = get_context()
     lock_owner_id = None if lock is None else str(lock.owner_id)
-    recorder.record(
+    record = recorder.record
+    record(
         manifest_id,
         build_runtime_contract_evidence(
             manifest_id=manifest_id,
@@ -47,7 +63,7 @@ def finalize_contract_evidence(runner: Any) -> None:
     )
 
 
-async def finalize_debug_export(runner: Any, status: str) -> None:
+async def finalize_debug_export(runner: _RunnerFinalizeHost, status: str) -> None:
     finalize = getattr(runner._executor, "finalize_debug_export", None)
     if not callable(finalize):
         return
@@ -55,7 +71,8 @@ async def finalize_debug_export(runner: Any, status: str) -> None:
         finalize_fn = cast(Callable[..., Awaitable[object]], finalize)
         result = await finalize_fn(status=status, manifest_id=runner.manifest_id)
     except _RUN_FAILURE_EXCEPTIONS as error:
-        runner._logger.warning(
+        warning = runner._logger.warning
+        warning(
             "debug_export_finalize_failed",
             error=str(error),
             error_type=type(error).__name__,
@@ -64,8 +81,10 @@ async def finalize_debug_export(runner: Any, status: str) -> None:
         return
     if not isinstance(result, DebugExportResult):
         return
-    if runner._run_ledger_service is not None:
-        runner._run_ledger_service.record_artifact_published(
+    ledger = runner._run_ledger_service
+    if ledger is not None:
+        publish = ledger.record_artifact_published
+        publish(
             layer="debug_export",
             artifact_path=result.root_path,
             artifact_content_hash=result.debug_export_hash,
