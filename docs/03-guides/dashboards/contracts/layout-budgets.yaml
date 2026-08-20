@@ -219,6 +219,16 @@ allowlists:
   # DASH-FIT-004: first-window internal overflow must not be excepted to
   # preserve a failing layout. Keep empty.
   first_window_overflow: []
+  # DASH-ZERO-001 / DASH-STATE-001: first-window background stats may use
+  # a documented presence-probe zero (not a healthy-zero fallback).
+  synthetic_zero:
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9104
+      owner: "@bioetl-observability"
+      rationale: >-
+        Monitor Telemetry Presence multiplies health_status by 0 so a live
+        series proves scrape presence without encoding OK. Not a healthy zero.
+      retire_when: presence is carried by an explicit UNKNOWN/OK mapping without * 0
   # Horizontal scrolling is allowed only for named below-fold explorers.
   horizontal_scroll: []
   min_height:

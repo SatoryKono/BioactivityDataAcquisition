@@ -258,6 +258,10 @@ The §7 answers map to these root first-window panels. Ids are locked by
 
 ## 8. Verification contract
 
+Coverage matrix (pytest / QA --check / manual prompt) lives in
+[requirement-test-coverage.yaml](../03-guides/dashboards/contracts/requirement-test-coverage.yaml).
+
+
 | Requirement | Executable evidence |
 | --- | --- |
 | Density, typography, and fill policy | `tests/integration/test_dashboard_presentation_requirements.py` |
