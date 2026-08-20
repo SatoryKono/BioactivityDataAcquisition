@@ -5,10 +5,10 @@
 
 ## Overview
 
-Run-centric workspace. First paint is the last-4 browse index (Ops HTTP
-performance budget). Identity and processed-records accounting live with the
-other `pipeline_run_report_v1` slices under a collapsed progressive-disclosure
-row. `run_id` is never a Prometheus label.
+Run-centric workspace. First paint is the last-4 browse index (`3010`) only
+(Ops HTTP performance budget). Identity (`3022`) and processed-records
+accounting (`3023`) live with the other `pipeline_run_report_v1` slices under a
+collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
@@ -50,8 +50,9 @@ row. `run_id` is never a Prometheus label.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
-- **Purpose:** Progressive disclosure for funnel, reasons, reconciliation,
-  layer accounting, artifacts, timings, and next-step CTA.
+- **Purpose:** Progressive disclosure for last-20 browse, full identity,
+  processed-records accounting, funnel, reasons, reconciliation, layer
+  accounting, artifacts, timings, and next-step CTA.
 - **Data sources:** Nested panels below (expand row to load).
 
 Nested titles (must match JSON):
@@ -73,7 +74,7 @@ Nested titles (must match JSON):
 - **Presentation:** Six canonical rows in stable silver→gold order; `value`
   column labeled **Value** (not Count) with color-text for status tokens
   (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
-  Panel links: Processed Records + Trust.
+  Panel links: Processed Records (`3023`) + Trust.
 
 ### 10. Inspect Layer Accounting
 - **Type:** Text
@@ -113,7 +114,8 @@ Shipped in `bioetl-run-explorer-v1.json`.
 ### 18. Inspect Full Processed Records
 - **Type:** Table (`id=3023`)
 - **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
-  accounting for the selected run (collapsed Selected Run Details). Recorded
+  accounting for the selected run (collapsed Selected Run Details). Exact
+  layer counts also exist on `pipeline_run_report_v1.layers`. Recorded
   zero, `VALID EMPTY`, and `QUERY ERROR` are distinct operator states. This is
   the only processed-records table on Run Explorer (the compact first-row
   teaser was removed as a same-row subset).
