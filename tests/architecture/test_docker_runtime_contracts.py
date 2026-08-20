@@ -80,6 +80,12 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
         "recovery_trials": 10,
     }
     assert contract["hardening_targets"]["implementation_issue"] == 6293
+    assert contract["hardening_targets"]["logging"]["allowed_drivers"] == [
+        "local",
+        "json-file",
+    ]
+    assert contract["hardening_targets"]["logging"]["max_size_required"] is True
+    assert contract["hardening_targets"]["logging"]["max_files_required"] is True
     assert contract["path_policy"]["mixed_origin_for_same_project_forbidden"] is True
     assert (
         contract["path_policy"]["discouraged_origin_scope"]
