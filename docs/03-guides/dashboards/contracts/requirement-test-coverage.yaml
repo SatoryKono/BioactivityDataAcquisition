@@ -1,39 +1,51 @@
 version: 1
 source: docs/01-requirements/DASHBOARD_REQUIREMENTS.md
-note: 'Every DASH-* ID maps to pytest, qa-check, and/or prompt.observability.dashboard-manual-validation.
-  Live render host remains GitHub #8986.'
+canonical_module: tests/integration/test_dashboard_requirement_coverage.py
+gates_module: tests/integration/test_dashboard_requirement_gates.py
+note: >-
+  Every DASH-* ID maps to named pytest nodeids (path::test_name), qa-check,
+  and/or prompt.observability.dashboard-manual-validation.
+  Canonical 9204 named-ID surface is canonical_module.
+  requirement-gates.yaml allowlists stay on gates_module.
+  Live render host remains GitHub #8986.
 requirements:
 - id: DASH-ACTION-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_answer_panels_do_not_split_primary_cta
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_action_001_copy_001_state_002_cta_empty_state_and_palette
 - id: DASH-ARCH-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_default_compose_does_not_require_grafana
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_arch_001_grafana_is_optional_and_read_only
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_arch_001_fails_closed_on_write_admin_url
 - id: DASH-COLOR-001
-  gate: manual
+  gate: pytest+manual
+  tests:
+  - tests/integration/test_dashboard_presentation_requirements.py::test_area_fills_are_confined_to_first_window
+  - tests/integration/test_dashboard_presentation_requirements.py::test_area_fill_fails_closed_on_below_fold_background_stat
   prompt: prompt.observability.dashboard-manual-validation
 - id: DASH-COPY-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_http_tables_name_empty_versus_backend_failure
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_copy_001_fails_closed_without_unavailable_wording
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_copy_001_data_panels_name_empty_state
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_copy_001_fails_closed_without_empty_state_copy
 - id: DASH-COPY-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_current_status_cards_have_guidance_and_state_mappings
 - id: DASH-COPY-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_content_panel_titles_use_canonical_action_verbs
 - id: DASH-COPY-004
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_first_window_monitor_panels_do_not_use_grafana_range
 - id: DASH-COPY-005
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_panel_titles_are_unique_within_each_dashboard
 - id: DASH-COPY-006
   gate: pytest
   tests:
@@ -41,57 +53,57 @@ requirements:
 - id: DASH-COPY-007
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_data_panels_declare_a_live_target
 - id: DASH-COPY-008
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_operator_readability.py
+  - tests/integration/test_dashboard_operator_readability.py::test_enforced_dashboards_apply_inline_copy_roles
 - id: DASH-DATA-001
   gate: pytest
   tests:
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_data_001_ops_http_and_recording_rules_cover_seven_uids
   - tests/integration/test_dashboard_static_fill_gates.py::test_ops_http_targets_use_allowlisted_ops_paths
-  - tests/integration/test_dashboard_requirement_gaps.py::test_ops_http_allowlist_covers_all_seven_uids
 - id: DASH-DATA-002
   gate: qa-check
   tests:
-  - tests/integration/test_dashboard_qa_check_gates.py
+  - tests/integration/test_dashboard_qa_check_gates.py::test_promql_scope_check_rejects_run_id_label_filters
 - id: DASH-DATA-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_no_removed_loki_tempo_or_quarantine_datasources
 - id: DASH-DATA-004
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_panel_datasources_use_allowed_identities
 - id: DASH-DENSITY-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_presentation_requirements.py
+  - tests/integration/test_dashboard_presentation_requirements.py::test_additional_panel_groups_meet_data_density_floor
 - id: DASH-DENSITY-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_group_scalar_density_exceeds_first_screen_where_enforced
 - id: DASH-FIRST-001
   gate: pytest+manual
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_answer_panels_carry_basis_copy
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_first_001_operator_question_contract
   prompt: prompt.observability.dashboard-manual-validation
 - id: DASH-FIRST-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_first_window_forensic_tables_are_allowlisted
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_first_002_forensic_rows_collapsed
 - id: DASH-FIT-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_always_visible_nonrow_stack_fits_viewport
 - id: DASH-FIT-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_no_root_panel_straddles_the_fold
 - id: DASH-FIT-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_canonical_answer_panels_are_root_first_window
 - id: DASH-FIT-004
   gate: pytest+manual
   tests:
@@ -102,63 +114,69 @@ requirements:
 - id: DASH-FIT-005
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_first_window_containment.py
+  - tests/integration/test_dashboard_first_window_containment.py::test_every_first_window_table_owns_a_row_cap
 - id: DASH-LAYOUT-001
   gate: pytest
   tests:
-  - tests/integration/test_grafana_layout_and_metadata.py
+  - tests/integration/test_grafana_layout_and_metadata.py::test_root_panels_including_rows_do_not_overlap
+  heuristic:
+    owner: "@bioetl-observability"
+    remainder: unexplained empty cells and progressive-disclosure IA are not a fail-closed empty-cell budget
+    retire_when: layout-budgets.yaml encodes an empty-cell / disclosure budget with owner + rationale
 - id: DASH-LAYOUT-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_panels_fit_within_grid_columns
 - id: DASH-LAYOUT-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_row_headers_are_single_grid_unit
 - id: DASH-LAYOUT-004
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_panels_meet_type_aware_minimum_height
 - id: DASH-LINK-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_link_urls_use_allowlisted_schemes
 - id: DASH-LINK-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_internal_dashboard_links_resolve_to_shipped_uids
 - id: DASH-META-001
   gate: qa-check
   tests:
-  - tests/integration/test_dashboard_qa_check_gates.py
+  - tests/integration/test_dashboard_qa_check_gates.py::test_dashboard_inventory_check_passes_shipped_dashboards
 - id: DASH-META-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_panel_ids_are_unique_within_each_dashboard
 - id: DASH-NAV-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_grafana_dashboard_links.py::test_dashboard_top_level_navigation_contract_by_uid
+  - tests/integration/test_grafana_dashboard_links.py::test_dashboard_bus_self_links_are_omitted
+  - tests/integration/test_grafana_dashboard_links.py::test_cross_dashboard_links_pass_only_target_scoped_variables
 - id: DASH-PERF-001
   gate: qa-check
   tests:
-  - tests/integration/test_dashboard_qa_check_gates.py
+  - tests/integration/test_dashboard_qa_check_gates.py::test_performance_budgets_pass_shipped_dashboards
 - id: DASH-PERF-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_max_data_points_are_bounded_when_present
 - id: DASH-PERF-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py::test_fold_constants_are_distinct_and_named
 - id: DASH-PORTFOLIO-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_requirement_gates.py::test_seven_shipped_uids_match_requirement_gates
 - id: DASH-QUERY-001
   gate: qa-check
   tests:
-  - tests/integration/test_dashboard_qa_check_gates.py
+  - tests/integration/test_dashboard_qa_check_gates.py::test_query_duplicates_check_passes_shipped_dashboards
 - id: DASH-REFLOW-001
   gate: manual
   prompt: prompt.observability.dashboard-manual-validation
@@ -168,19 +186,19 @@ requirements:
 - id: DASH-SCOPE-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_scope_refactor.py
+  - tests/integration/test_dashboard_scope_refactor.py::test_query_panels_declare_scope_class_matching_scope
 - id: DASH-SCOPE-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_scope_refactor.py
+  - tests/integration/test_dashboard_scope_refactor.py::test_overview_selected_run_summary_is_in_first_window
 - id: DASH-SEC-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_html_text_panels_have_no_executable_or_embed_vectors
 - id: DASH-STATE-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_first_window_verdict_stats_reject_synthetic_zero
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_state_001_zero_001_synthetic_zero_allowlist
 - id: DASH-STATE-002
   gate: pytest+manual
   tests:
@@ -189,33 +207,33 @@ requirements:
 - id: DASH-STATE-003
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_geometry_and_purpose_contracts.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_current_status_cards_fail_closed_no_value
 - id: DASH-STATE-004
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_trust_gate_keeps_processing_and_trust_distinct
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_state_004_processing_status_distinct_from_trust
 - id: DASH-STATE-005
   gate: pytest
   tests:
-  - tests/integration/test_grafana_dashboard_provisioning.py
+  - tests/integration/test_grafana_dashboard_provisioning.py::test_prometheus_only_profile_preserves_uids_without_query_targets
 - id: DASH-TIME-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_operator_readability.py
+  - tests/integration/test_dashboard_operator_readability.py::test_datetime_units_are_yyyy_mm_dd_hh_mm
 - id: DASH-TYPOGRAPHY-001
   gate: pytest+manual
   tests:
-  - tests/integration/test_dashboard_operator_readability.py
+  - tests/integration/test_dashboard_presentation_requirements.py::test_authored_text_font_sizes_meet_body_floor
   prompt: prompt.observability.dashboard-manual-validation
 - id: DASH-VIZ-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_reduce_option_calcs_are_deterministic
 - id: DASH-VIZ-002
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_structural_invariants.py
+  - tests/integration/test_dashboard_structural_invariants.py::test_panel_types_are_allowlisted
 - id: DASH-ZERO-001
   gate: pytest
   tests:
-  - tests/integration/test_dashboard_requirement_gaps.py::test_synthetic_zero_allowlist_is_governed
+  - tests/integration/test_dashboard_requirement_coverage.py::test_dash_state_001_zero_001_synthetic_zero_allowlist

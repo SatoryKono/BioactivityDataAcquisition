@@ -522,7 +522,8 @@ jobs:
             tests/integration/test_dashboard_operator_readability.py \
             tests/integration/test_dashboard_first_window_noscroll.py \
             tests/integration/test_dashboard_qa_check_gates.py \
-            tests/integration/test_dashboard_requirement_gaps.py \
+            tests/integration/test_dashboard_requirement_coverage.py \
+            tests/integration/test_dashboard_requirement_gates.py \
             tests/integration/test_grafana_config.py \
             tests/integration/test_grafana_datasource_provisioning.py \
             tests/integration/test_grafana_selector_contract.py \
