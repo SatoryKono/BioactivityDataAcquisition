@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.sequential-run
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -31,15 +31,19 @@ includes:
   - fragments/language-ru.md
   - fragments/finding-schema.md
   - fragments/audit-scale.md
+  - fragments/project-requirements-audit.md
   - fragments/reports-output.md
   - fragments/orchestrator-guards.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/ai/prompts/library/audit/cycle/README.md
   - docs/00-project/ai/prompts/library/audit/cyclic-pack.md
   - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Running every file in library/audit/ including meta/role/duplicate cards
   - Skipping ISSUE/CLOSEOUT gates between domain cards
   - Recreating closed issues that already have an open fix PR
@@ -47,11 +51,11 @@ anti_patterns:
   - Raising debt budgets
   - Starting monitoring when MONITORING=false
 tags: [audit, sequential, cycle, github, operator]
-summary: Sequential library/audit run — 10 cycle cards, per-card issue/fix/close gates
+summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close gates
 max_body_lines: 280
 ---
 
-# BioETL — последовательный аудит `library/audit` (v1.0)
+# BioETL — последовательный аудит `library/audit` (v1.1)
 
 Не runtime SSOT. Precedence: `AGENTS.md` → `docs/00-project/NORMATIVE_SOURCES.md`
 → `library/audit/cycle/` → остальные `library/audit/*` только как method cards.
@@ -150,7 +154,7 @@ Findings только PROVEN. Dedupe по root cause.
 
 Если `ALLOW_ISSUE_WRITE={{ALLOW_ISSUE_WRITE}}`:
 - один gh issue на **кластер** PROVEN-находок;
-- title `[<domain>][P#] one checkable outcome`;
+- title `[<domain>][<REQ-id>][P#] one checkable outcome`;
 - body: outcome, evidence, acceptance, verification, constraints;
 - ≤ `MAX_ISSUES_PER_STEP={{MAX_ISSUES_PER_STEP}}` новых issue; хвост →
   `issues-deferred.jsonl`;

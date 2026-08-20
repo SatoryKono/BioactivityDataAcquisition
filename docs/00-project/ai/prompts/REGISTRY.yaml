@@ -62,7 +62,7 @@ entries:
     status: active
     class: fragment
     tags: [guardrail, audit, evidence]
-    summary: Machine-oriented finding fields for domain audits
+    summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
 
   - id: prompt.fragment.unknown-params
     path: fragments/unknown-params.md
@@ -561,7 +561,7 @@ entries:
     status: active
     class: operator-paste
     tags: [audit, sequential, cycle, github, operator]
-    summary: Sequential library/audit run — 10 cycle cards, per-card issue/fix/close gates
+    summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close gates
 
   - id: prompt.audit.repo-tree
     path: library/audit/repo-tree.md

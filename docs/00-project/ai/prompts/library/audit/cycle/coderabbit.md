@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.coderabbit
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -33,6 +33,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -41,6 +42,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/RULES.md
   - docs/03-guides/coderabbit-audit-playbook.md
   - docs/03-guides/development/coderabbit-local-reviews.md
@@ -51,6 +54,7 @@ related_ssot:
   - reports/quality/debt-governance-gates.json
   - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Treating CodeRabbit as SSOT over code/ADR/gates
   - Opening issues from CR text without agent PROVEN
   - Single CLI scope over ~300 files without a split

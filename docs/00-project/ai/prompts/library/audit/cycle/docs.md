@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.docs
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -28,6 +28,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -35,6 +36,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/RULES.md
   - docs/00-project/00-map.md
   - mkdocs.yml
@@ -43,6 +46,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/audit/docs-pipeline.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Counting Markdown files instead of verifying procedures
   - Treating generator exit 0 as semantic correctness
   - Inventing commands not in manifests or CI
@@ -87,6 +91,7 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Map / ownership: `docs/00-project/00-map.md`, DOC-GOV-09 in `NORMATIVE_SOURCES.md`
 - Entry: `python -m scripts.docs` (`verify`, `check-drift`, `check-links`,
   `check-kpi`, `build-site`, `check-docstrings`)
@@ -111,7 +116,7 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 | **A Content** | Inventory README*, `docs/**`, CONTRIBUTING*, ADR, runbooks, onboarding. Per doc: audience, SoT, owner, last meaningful change. Verify bootstrap/install/test/run/lint commands against `pyproject.toml` and CI. Resolve relative links. Flag contradictory instructions. Tag findings `content`. |
 | **B Pipeline** | If `INCLUDE_PIPELINE=true`: map `python -m scripts.docs` entrypoints, MkDocs, CI docs jobs. Prove SoT → generator → validation → artifact. Run `verify` / `check-drift` / `check-links` as evidence. Exit 0 ≠ semantic correctness. Tag findings `pipeline`. |
 | **C Plan** | Cluster: onboarding / API / ops / ADR / AI mirrors / generator / CI. Prefer restore-SSOT-link over rewriting prose. One root-cause per issue. |
-| **D Issues** | Dedupe (`docs`, `documentation`). Create only if ALLOW_ISSUE_WRITE + PROVEN. Cap MAX_ISSUES_PER_ITERATION. |
+| **D Issues** | Dedupe. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[docs][<REQ-id>][P#]`. Cap MAX_ISSUES. |
 | **E Fix** | Minimal doc/comment fixes. Regenerations only via `python -m scripts.docs <cmd>`. Do not reintroduce retired top-level `scripts/docs/*.py` shims. No root scratch. |
 | **F Validate** | Re-check changed claims; sample links/commands; optional `build-site` if pipeline in scope. Delta: resolved / unchanged / regressed / new. |
 
