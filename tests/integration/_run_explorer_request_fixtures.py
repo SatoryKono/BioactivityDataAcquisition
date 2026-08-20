@@ -105,7 +105,7 @@ def build_matrix(catalog: dict[str, Any] | None = None) -> dict[str, Any]:
     catalog = catalog or load_catalog()
     browse = _panel_by_id(catalog, 3010)
     identity = _panel_by_id(catalog, 9402)
-    records = _panel_by_id(catalog, 9403)
+    records = _panel_by_id(catalog, 3023)
     scenarios = {
         "selected_recent_runs": _snapshot(
             scenario="selected_recent_runs",

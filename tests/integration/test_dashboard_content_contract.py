@@ -163,7 +163,7 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
     assert isinstance(explorer, dict)
     panels = explorer["panels"]
     assert isinstance(panels, dict)
-    records = panels["9403"]
+    records = panels["3023"]
     assert isinstance(records, dict)
     records.pop("required_columns")
     contract_path = tmp_path / "panel-content-contract.yaml"
@@ -174,6 +174,6 @@ def test_content_contract_fails_closed_when_table_columns_are_omitted(
     )
 
     assert (
-        "panel-content-contract.yaml:bioetl-run-explorer-v1:9403: table role "
+        "panel-content-contract.yaml:bioetl-run-explorer-v1:3023: table role "
         "requires required_columns" in errors
     )

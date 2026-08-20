@@ -930,7 +930,7 @@ def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
 def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     reconciliation = _panel(explorer, 3015)
-    next_panel = _panel(explorer, 3016)
+    next_panel = _panel(explorer, 3013)
     grid = reconciliation.get("gridPos", {})
 
     assert grid.get("h", 0) >= 8
@@ -1016,7 +1016,7 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
     nested_ids = {panel.get("id") for panel in row.get("panels") or []}
-    assert {3011, 3012, 3015, 3016, 3013, 3014, 3001} <= nested_ids
+    assert {3011, 3012, 3015, 3013, 3014, 3021, 3022, 3023} <= nested_ids
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
     assert 3015 not in root_ids

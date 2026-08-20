@@ -25,8 +25,8 @@
     "bioetl-incident-v1": "949af833a86a0456462985d1a08e4dd0d9d1c608460666dea5897a237b3cbb01",
     "bioetl-overview-v2": "bb11dfabd22bba40da4375a02d503585de810b7ccd308df06510a8c20f9faf7c",
     "bioetl-provider-health-v2": "ce69418c60bcc078c45ce66a19c7ed09d32f9d0064fec7389e3eaa067d52061e",
-    "bioetl-run-explorer-v1": "fbd5fb81ab7979ed097fd4580f01866348facdda709583b0cc93290d4d344059",
-    "bioetl-runtime": "4aaf365ac9c47dbc377ebd90fa24c4608992f34cabef02f2c95adec280c1a9ba"
+    "bioetl-run-explorer-v1": "d59cecc31589ed522283c044f852cd2a53856ea9cf21ec504c349e3a6e2532fd",
+    "bioetl-runtime": "6d36919455a8c7ae23fcc049a002f9d579975e222829e0d84798ee8d63055367"
   },
   "panels": [
     {
@@ -3082,25 +3082,6 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 9403,
-      "panel_title": "Inspect Processed Records",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3021,
       "panel_title": "Inspect Recent Runs (last 20)",
       "route": "run-explorer",
@@ -3134,13 +3115,13 @@
     },
     {
       "basis": "preserved-from-json",
-      "component": "JSON fallback",
+      "component": "Context Bar",
       "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "advanced-evidence",
+      "disposition": "route-primary",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3023,
-      "panel_title": "Inspect Full Processed Records",
+      "panel_title": "Inspect Processed Records",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -3210,23 +3191,6 @@
     },
     {
       "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 3016,
-      "panel_title": "Inspect Layer Accounting",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-run-explorer-v1",
       "disposition": "advanced-evidence",
@@ -3253,23 +3217,6 @@
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3014,
       "panel_title": "Inspect Timings & Failure",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 3001,
-      "panel_title": "Continue Run Investigation",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -4003,13 +3950,13 @@
       }
     }
   ],
-  "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
+  "route_contract_sha256": "d4f4671c1206105cf16f254eecd4d3f76af61cc7f03f4c36764258dff96ab03e",
   "schema_version": "bioetl-scenes-parity-v1",
   "summary": {
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 211,
+    "panel_disposition_count": 208,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],
