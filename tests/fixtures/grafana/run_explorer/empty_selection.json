@@ -16,7 +16,7 @@
     "run_type": "backfill",
     "workflow": "chembl_baseline"
   },
-  "title": "Inspect Full Run Identity",
+  "title": "Inspect Run Identity",
   "url": "/ops/control-plane/identity-table?pipeline=chembl_assay&run_type=backfill&run_id=-",
   "url_template": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
 }

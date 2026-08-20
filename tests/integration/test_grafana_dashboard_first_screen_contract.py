@@ -687,10 +687,10 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
         "compact processed-records teaser 9403 must not ship (same-row-subset of 3023)"
     )
     assert 3022 in collapsed_ids, (
-        "Inspect Full Run Identity must ship inside collapsed Selected Run Details"
+        "Inspect Run Identity must ship inside collapsed Selected Run Details"
     )
     assert 3023 in collapsed_ids, (
-        "Inspect Full Processed Records must ship inside collapsed Selected Run Details "
+        "Inspect Processed Records must ship inside collapsed Selected Run Details "
         "so first-paint Ops HTTP stays within budget (#9147/#9191)"
     )
     assert identity.get("gridPos", {}).get("y", 0) >= 19
