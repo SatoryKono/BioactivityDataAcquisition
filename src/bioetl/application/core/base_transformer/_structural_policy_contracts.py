@@ -57,7 +57,7 @@ def resolve_field_contracts(
 
 
 _LOGICAL_TYPE_RULES: tuple[tuple[re.Pattern[str], LogicalType], ...] = (
-    (re.compile(r"^(?:string|str$)"), "string"),
+    (re.compile(r"^(?:string|str)$"), "string"),
     (re.compile(r"^(?:u)?int"), "integer"),
     (re.compile(r"^(?:float|double|decimal)"), "float"),
     (re.compile(r"^bool"), "boolean"),

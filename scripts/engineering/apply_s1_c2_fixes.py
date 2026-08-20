@@ -7,10 +7,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def replace_once(path: Path, old: str, new: str, label: str) -> None:
+def replace_once(relative: str, old: str, new: str, label: str) -> None:
     from scripts.engineering.common.repo_paths import ensure_repo_path
 
-    path = ensure_repo_path(path, root=ROOT)
+    path = ensure_repo_path(ROOT / relative, root=ROOT)
     text = path.read_text(encoding="utf-8")
     if old not in text:
         raise SystemExit(f"{label}: target block missing in {path}")
@@ -20,7 +20,7 @@ def replace_once(path: Path, old: str, new: str, label: str) -> None:
 
 def main() -> None:
     replace_once(
-        ROOT / "src/bioetl/application/core/postrun/_metadata_writes.py",
+        "src/bioetl/application/core/postrun/_metadata_writes.py",
         (
             "    silver_table = config.table.silver_table\n"
             "    if not silver_table:\n"
@@ -39,7 +39,7 @@ def main() -> None:
     )
 
     replace_once(
-        ROOT / "src/bioetl/application/core/lifecycle/cleanup_service.py",
+        "src/bioetl/application/core/lifecycle/cleanup_service.py",
         (
             "        await asyncio.sleep(0)\n"
             "        # Use sync preview_cleanup from StorageMaintenancePort.\n"
@@ -60,7 +60,7 @@ def main() -> None:
     )
 
     replace_once(
-        ROOT / "src/bioetl/application/core/lifecycle/heartbeat.py",
+        "src/bioetl/application/core/lifecycle/heartbeat.py",
         (
             "    async def stop(self) -> None:\n"
             '        """Stop the background heartbeat task.\n'
@@ -160,7 +160,7 @@ def main() -> None:
     )
 
     replace_once(
-        ROOT / "src/bioetl/application/core/preflight/service.py",
+        "src/bioetl/application/core/preflight/service.py",
         (
             "from __future__ import annotations\n"
             "\n"
@@ -177,7 +177,7 @@ def main() -> None:
         "preflight_import",
     )
     replace_once(
-        ROOT / "src/bioetl/application/core/preflight/service.py",
+        "src/bioetl/application/core/preflight/service.py",
         (
             "async def validate_infrastructure(host: _PreflightExecutionHostProtocol) -> None:\n"
             '    """Validate infrastructure health before pipeline execution."""\n'
@@ -222,7 +222,7 @@ def main() -> None:
     )
 
     replace_once(
-        ROOT / "src/bioetl/application/core/runner.py",
+        "src/bioetl/application/core/runner.py",
         (
             "    async def run(self) -> None:\n"
             '        """Execute the pipeline and always finalize shutdown/telemetry cleanup."""\n'
@@ -312,7 +312,7 @@ def main() -> None:
         "runner",
     )
 
-    test_path = ROOT / "tests/unit/application/core/test_postrun_metadata_writes.py"
+    test_path = "tests/unit/application/core/test_postrun_metadata_writes.py"
     test_text = test_path.read_text(encoding="utf-8")
     old_test = "    storage.is_table_initialized = MagicMock(return_value=False)\n"
     new_test = (
