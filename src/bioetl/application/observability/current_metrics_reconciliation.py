@@ -11,7 +11,7 @@ from bioetl.application.observability.current_metrics_rehydrate import (
 
 
 @dataclass(frozen=True, slots=True)
-class CurrentMetricsReconciliation:
+class CurrentMetricsReconciliationOutcome:
     """Operator-facing reconciliation of Ops HTTP success vs scrape samples."""
 
     status: str
@@ -26,7 +26,7 @@ def reconcile_current_metrics_with_run_reports(
     *,
     root: Path | None = None,
     exposition: str | None = None,
-) -> CurrentMetricsReconciliation:
+) -> CurrentMetricsReconciliationOutcome:
     """Return an explicit gap reason when durable success lacks scrape samples."""
     anchors = collect_latest_terminal_anchors(root=root)
     successes = tuple(anchor for anchor in anchors if anchor.status == "success")
@@ -46,7 +46,7 @@ def reconcile_current_metrics_with_run_reports(
         )
     )
     if not successes:
-        return CurrentMetricsReconciliation(
+        return CurrentMetricsReconciliationOutcome(
             status="healthy",
             state="no_durable_success",
             message="No terminal success reports found; current-metrics gap is not contradicted by exact-run HTTP.",
@@ -55,7 +55,7 @@ def reconcile_current_metrics_with_run_reports(
             missing_pipelines=(),
         )
     if missing:
-        return CurrentMetricsReconciliation(
+        return CurrentMetricsReconciliationOutcome(
             status="unhealthy",
             state="durable_success_without_scrape_samples",
             message=(
@@ -68,7 +68,7 @@ def reconcile_current_metrics_with_run_reports(
             scrape_has_pipeline_runs_total=scrape_has_samples,
             missing_pipelines=missing,
         )
-    return CurrentMetricsReconciliation(
+    return CurrentMetricsReconciliationOutcome(
         status="healthy",
         state="aligned",
         message="Durable success reports have matching scraped bioetl_pipeline_runs_total samples.",

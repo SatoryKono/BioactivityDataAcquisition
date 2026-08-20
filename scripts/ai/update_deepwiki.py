@@ -201,9 +201,8 @@ def main() -> int:
     args = parser.parse_args()
     updater = DeepWikiUpdater(args.repo_path)
 
-    if args.backup:
-        if not updater.backup_wiki_files():
-            return 1
+    if args.backup and not updater.backup_wiki_files():
+        return 1
 
     if args.validate:
         json_valid = updater.validate_json_structure()

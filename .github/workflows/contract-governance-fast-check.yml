@@ -38,9 +38,6 @@ on:
       - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
       - '.github/workflows/contract-governance-*.yml'
 
-permissions:
-  contents: read
-
 env:
   PYTHON_VERSION: "3.13"
   UV_VERSION: "0.7.9"
@@ -50,6 +47,8 @@ jobs:
     name: Fast Check - Contract Identity & Registry
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository

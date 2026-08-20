@@ -1,3 +1,5 @@
+"""Historical replay corpus certification orchestration for control-plane replay."""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -116,7 +118,6 @@ class HistoricalReplayCorpusService:
             inventory_after=self.build_certifiability_inventory(),
             records=tuple(records),
         )
-
 
     def _skipped_bulk_record(
         self,

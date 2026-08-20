@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 __all__ = ["RunReportStorePort"]
@@ -12,14 +11,14 @@ __all__ = ["RunReportStorePort"]
 class RunReportStorePort(Protocol):
     """Atomic UTF-8 text writes for run-report artifacts."""
 
-    def mkdir(self, path: Path) -> None:
+    def mkdir(self, path: str) -> None:
         """Create ``path`` and parents."""
         ...
 
-    def write_text(self, path: Path, content: str) -> None:
+    def write_text(self, path: str, content: str) -> None:
         """Atomically replace ``path`` with UTF-8 text."""
         ...
 
-    def read_text(self, path: Path) -> str:
+    def read_text(self, path: str) -> str:
         """Read UTF-8 text from ``path``."""
         ...

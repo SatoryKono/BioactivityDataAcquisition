@@ -56,7 +56,7 @@
       "dominantLocalization": "run",
       "decisionObjects": ["Context Bar", "Verdict Strip", "Evidence Confidence", "Status Matrix", "Action Rail"],
       "compatibilityUids": ["bioetl-run-explorer-v1"],
-      "primaryPanelIds": [3010, 3011, 3014, 3016]
+      "primaryPanelIds": [3010, 3011, 3014, 3023]
     }
   ]
 }

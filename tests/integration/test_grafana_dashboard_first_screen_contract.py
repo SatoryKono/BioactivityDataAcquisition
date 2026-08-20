@@ -16,6 +16,7 @@ import pytest
 import yaml
 
 from tests.integration._grafana_test_support import (
+    get_row_child_panels,
     get_dashboard_files,
     get_dashboard_navigation_links,
     get_dashboard_panels,
@@ -664,7 +665,7 @@ def test_current_status_headlines_use_instant_queries() -> None:
 
 
 def test_run_explorer_identity_is_on_the_first_screen() -> None:
-    """#8747: Run Explorer hub ships identity/accounting above the 1366 fold."""
+    """#8747/#9147: browse stays on the fold; identity/accounting are collapsed."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")
     panels = {
         panel.get("id"): panel
@@ -672,11 +673,28 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
         if isinstance(panel.get("id"), int)
     }
     browse = panels[3010]
-    identity = panels[9402]
-    records = panels[9403]
-    assert browse.get("gridPos", {}).get("h", 99) <= 5
-    assert identity.get("gridPos", {}).get("y", 999) <= 13
-    assert records.get("gridPos", {}).get("y", 999) <= 13
+    identity = panels[3022]
+    records = panels[3023]
+    assert 9402 not in panels
+    assert 9403 not in panels
+    assert browse.get("gridPos", {}).get("h", 99) <= 6
+    collapsed_ids = {
+        panel.get("id")
+        for panel in get_row_child_panels(dashboard, "Selected Run Details")
+    }
+    assert 9402 not in collapsed_ids
+    assert 9403 not in collapsed_ids, (
+        "compact processed-records teaser 9403 must not ship (same-row-subset of 3023)"
+    )
+    assert 3022 in collapsed_ids, (
+        "Inspect Full Run Identity must ship inside collapsed Selected Run Details"
+    )
+    assert 3023 in collapsed_ids, (
+        "Inspect Full Processed Records must ship inside collapsed Selected Run Details "
+        "so first-paint Ops HTTP stays within budget (#9147/#9191)"
+    )
+    assert identity.get("gridPos", {}).get("y", 0) >= 19
+    assert records.get("gridPos", {}).get("y", 0) >= 19
     assert "last 4" in str(browse.get("title", "")).lower()
 
 
@@ -688,7 +706,7 @@ def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    for panel_id in (3010, 9402, 9403):
+    for panel_id in (3010, 3022):
         no_value = str(
             panels[panel_id]
             .get("fieldConfig", {})

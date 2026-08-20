@@ -142,4 +142,3 @@ class DebugExportPort(Protocol):
     ) -> DebugExportResult | Awaitable[DebugExportResult]:
         """Persist the provided audit pack and return artifact metadata."""
         ...
-

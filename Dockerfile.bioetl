@@ -28,6 +28,7 @@ RUN apt-get update \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
     && python -m pip install --only-binary=:all: --no-cache-dir \
+        --index-url https://pypi.org/simple \
         --default-timeout=180 --retries=10 uv==0.11.26 \
     && uv --version
 
@@ -90,7 +91,7 @@ ENTRYPOINT ["bioetl"]
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready').read()"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).read()"
 
 # Default command (override via docker-compose)
 CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]

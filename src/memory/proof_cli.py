@@ -55,6 +55,9 @@ def _write_json(path: Path, payload: Any) -> None:
 
 
 def _read_object(path: Path) -> dict[str, Any]:
+    from scripts.engineering.common.repo_paths import resolve_output_path
+
+    path = resolve_output_path(path, root=ROOT)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ProofError(f"expected JSON object: {path}")

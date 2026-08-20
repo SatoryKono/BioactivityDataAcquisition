@@ -1,0 +1,2 @@
+{"cmd": "inspect src/bioetl/domain/ports/noop/_tracing.py and composition/observability_resolution.py", "result": "NoOp path present"}
+{"cmd": "rg run_id grafana/prometheus-rules", "result": "no matches"}

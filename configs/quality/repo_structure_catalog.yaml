@@ -91,6 +91,8 @@ local_tolerated_root_dirs:
       role: local_mypy_cache_untracked
     - path: .jules
       role: local_vendor_workspace_state_untracked
+    - path: ledger
+      role: local_research_workflow_ledger_untracked
     - path: logs
       role: local_runtime_log_workspace_untracked
     - path: node_modules

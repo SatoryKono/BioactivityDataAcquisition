@@ -669,28 +669,27 @@ def _unexpected_local_root_dirs_on_disk(
     for entry in repo_root.iterdir():
         if entry.name == ".git" or not entry.is_dir():
             continue
-        if entry.name in tracked_root_dirs:
+        if (
+            entry.name
+            in tracked_root_dirs | allowed_root_dirs | tolerated_local_root_dirs
+        ):
             continue
-        if entry.name in allowed_root_dirs:
+        if _is_active_worktrees_dir(entry):
             continue
-        if entry.name in tolerated_local_root_dirs:
-            continue
-        if entry.name == WORKTREES_DIR and not entry.is_symlink():
-            try:
-                next(entry.iterdir())
-            except StopIteration:
-                # Empty .worktrees remains strict clutter and is handled by
-                # the cleanup tool's empty-only deletion path.
-                pass
-            except OSError:
-                # Fail closed when the directory cannot be inspected.
-                pass
-            else:
-                # Repository guides permit active local worktrees here, while
-                # cleanup intentionally refuses to delete a non-empty tree.
-                continue
         violations.append(entry.name)
     return sorted(violations)
+
+
+def _is_active_worktrees_dir(entry: Path) -> bool:
+    """Return whether an entry is the permitted non-empty local worktree root."""
+    if entry.name != WORKTREES_DIR or entry.is_symlink():
+        return False
+    try:
+        next(entry.iterdir())
+    except (StopIteration, OSError):
+        # Empty or unreadable roots fail closed and remain strict clutter.
+        return False
+    return True
 
 
 def _report_strict_local_root_clutter(

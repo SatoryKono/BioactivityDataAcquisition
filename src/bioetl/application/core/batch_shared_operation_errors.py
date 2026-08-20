@@ -1,11 +1,5 @@
-"""Shared OPERATION_ERRORS re-export for RF-005 batch runtime consumers.
-
-Keeps the canonical definition in ``batch_operation_errors`` while preventing
-a single multi-concern hub from accumulating family-internal fan-in.
-"""
-
+"""Shared OPERATION_ERRORS re-export for RF-005 batch runtime consumers."""
 from __future__ import annotations
-
-from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
-
-__all__ = ["OPERATION_ERRORS"]
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as OPERATION_ERRORS,
+)

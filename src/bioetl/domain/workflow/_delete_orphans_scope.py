@@ -17,6 +17,13 @@ __all__ = [
 ]
 
 
+def _require_workflow_config(value: object) -> WorkflowConfig:
+    """Return a concrete workflow config after validating replacement output."""
+    if not isinstance(value, WorkflowConfig):
+        raise TypeError("dataclass replacement did not preserve WorkflowConfig")
+    return value
+
+
 def _delete_orphans_transform(step: WorkflowStep) -> TransformStepConfig | None:
     """Return the step when it is a delete_orphans FK reconciliation."""
     if not isinstance(step, TransformStepConfig):
@@ -109,7 +116,7 @@ def mark_delete_orphans_current_run_scope(config: WorkflowConfig) -> WorkflowCon
             changed = True
     if not changed:
         return config
-    return replace(config, steps=tuple(updated_steps))
+    return _require_workflow_config(replace(config, steps=tuple(updated_steps)))
 
 
 def reject_delete_orphans_after_limited_extracts(config: WorkflowConfig) -> None:

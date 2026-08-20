@@ -134,7 +134,10 @@ def build_node_layer_map(lines: list[str]) -> dict[str, str]:
     return node_layer
 
 
-_ARROW_ANY_RE = re.compile(r"(?:-.->|==>|-->|---|-.-|===|~~~|--o|--x)")
+_ARROW_TOKENS = ("-.->", "==>", "-->", "---", "-.-", "===", "~~~", "--o", "--x")
+_ARROW_ANY_RE = re.compile(
+    "(?:" + "|".join(re.escape(token) for token in _ARROW_TOKENS) + ")"
+)
 
 
 def count_mermaid_arrows(lines: list[str]) -> int:

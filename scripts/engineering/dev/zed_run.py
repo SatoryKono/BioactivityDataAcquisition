@@ -108,15 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     ensure_ready(modules=_required_for_script(script_path))
     # Mirror ``python script.py args`` semantics for helpers that read sys.argv.
     sys.argv = [str(script_path), *args[1:]]
-    try:
-        runpy.run_path(str(script_path), run_name="__main__")
-    except SystemExit as exc:
-        code = exc.code
-        if code is None:
-            return 0
-        if isinstance(code, int):
-            return code
-        return 1
+    runpy.run_path(str(script_path), run_name="__main__")
     return 0
 
 

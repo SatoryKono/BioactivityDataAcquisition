@@ -11,7 +11,7 @@ Production twin of the navigation-links contract. Builds `/d/` handoffs that:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 SEVEN_UIDS: tuple[str, ...] = (
@@ -28,11 +28,13 @@ PATH_BY_UID: dict[str, str] = {uid: uid for uid in SEVEN_UIDS}
 
 CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
 TIME_TOKEN = "${__url_time_range}"
+RUN_ID_TEMPLATE = "$run_id"
+HTML_AMPERSAND = "&amp;"
 # Grafana query-variable regex: capture trimmed non-empty token.
 RUN_ID_GRAFANA_REGEX = r"/^\s*(\S(?:.*\S)?)\s*$/"
 _RUN_ID_TEMPLATE_VALUES = frozenset(
     {
-        "$run_id",
+        RUN_ID_TEMPLATE,
         "${run_id}",
         "${__value.raw}",
         "${__data.fields.run_id}",
@@ -73,7 +75,9 @@ class DashboardContext:
         object.__setattr__(self, "run_id", normalize_run_id(self.run_id))
 
 
-def _pipeline_value(*, source_uid: str, template: bool, context: DashboardContext | None) -> str:
+def _pipeline_value(
+    *, source_uid: str, template: bool, context: DashboardContext | None
+) -> str:
     if template:
         if source_uid == "bioetl-provider-health-v2":
             return "$pipeline_context"
@@ -101,7 +105,7 @@ def build_handoff_url(
     if template:
         workflow = "$workflow"
         run_type = "$run_type"
-        run_id = "$run_id"
+        run_id = RUN_ID_TEMPLATE
         provider = (
             "$provider"
             if source_uid in {"bioetl-provider-health-v2", "bioetl-incident-v1"}
@@ -158,6 +162,65 @@ def _assemble_url(
     return f"/d/{target_uid}/{PATH_BY_UID[target_uid]}?{query}"
 
 
+@dataclass(slots=True)
+class _HandoffQuery:
+    """Mutable query normalization state kept out of the public API."""
+
+    has_time_token: bool
+    has_from: bool = False
+    has_to: bool = False
+    extras: list[tuple[str, str]] = field(default_factory=list)
+    var_values: dict[str, str] = field(default_factory=dict)
+
+    def add(self, key: str, value: str) -> None:
+        if key == TIME_TOKEN or key.startswith("${__url_time_range"):
+            self.has_time_token = True
+            return
+        if key == "from":
+            self.has_from = True
+            self.extras.append((key, value))
+            return
+        if key == "to":
+            self.has_to = True
+            self.extras.append((key, value))
+            return
+        if not key.startswith("var-"):
+            self.extras.append((key, value))
+            return
+        name = key[4:]
+        self.var_values[name] = _normalize_query_variable(name, value)
+
+    def ensure_run_id(self) -> None:
+        is_panel_link = any(key == "viewPanel" for key, _ in self.extras)
+        if "run_id" not in self.var_values and not is_panel_link:
+            self.var_values["run_id"] = RUN_ID_TEMPLATE
+
+    def ordered_pairs(self) -> list[tuple[str, str]]:
+        ordered: list[tuple[str, str]] = []
+        for name in CORE_VAR_ORDER:
+            if name in self.var_values:
+                ordered.append((f"var-{name}", self.var_values.pop(name)))
+        ordered.extend(
+            (f"var-{name}", value) for name, value in self.var_values.items()
+        )
+        ordered.extend(self.extras)
+        return ordered
+
+    def append_time_token(self, query: str) -> str:
+        if not self.has_time_token and self.has_from and self.has_to:
+            return query
+        return f"{query}&{TIME_TOKEN}" if query else TIME_TOKEN
+
+
+def _normalize_query_variable(name: str, value: str) -> str:
+    if name != "run_id" or value in _RUN_ID_TEMPLATE_VALUES:
+        return value
+    try:
+        return normalize_run_id(value)
+    except RunIdError:
+        return str(value).strip()
+
+
 def rewrite_dashboard_handoff_url(url: str) -> str:
     """Normalize a shipped `/d/` URL: require run_id + time, stable var order.
 
@@ -165,75 +228,41 @@ def rewrite_dashboard_handoff_url(url: str) -> str:
     `run_id` query values are trimmed. Missing `var-run_id` is filled with
     `$run_id` so Grafana cannot silently keep a foreign UUID.
     """
-    raw = url.replace("&amp;", "&")
+    raw = url.replace(HTML_AMPERSAND, "&")
     if not raw.startswith("/d/"):
         return url
     split = urlsplit(raw)
     path = split.path
     query_pairs = parse_qsl(split.query, keep_blank_values=True)
-    extras: list[tuple[str, str]] = []
-    var_values: dict[str, str] = {}
-    has_time_token = TIME_TOKEN in raw
-    has_from = False
-    has_to = False
+    state = _HandoffQuery(has_time_token=TIME_TOKEN in raw)
     for key, value in query_pairs:
-        if key == TIME_TOKEN or key.startswith("${__url_time_range"):
-            has_time_token = True
-            continue
-        if key == "from":
-            has_from = True
-            extras.append((key, value))
-            continue
-        if key == "to":
-            has_to = True
-            extras.append((key, value))
-            continue
-        if key.startswith("var-"):
-            name = key[4:]
-            if name == "run_id" and value not in _RUN_ID_TEMPLATE_VALUES:
-                try:
-                    value = normalize_run_id(value)
-                except RunIdError:
-                    value = str(value).strip()
-            var_values[name] = value
-            continue
-        extras.append((key, value))
+        state.add(key, value)
     # Full-dashboard handoffs must carry run_id so Grafana cannot keep a foreign
     # UUID. Same-dashboard viewPanel deep-links keep authored vars (CURRENT
     # fleet CTAs must not leak run_id).
-    if "run_id" not in var_values and "viewPanel" not in {key for key, _ in extras}:
-        var_values["run_id"] = "$run_id"
-    ordered: list[tuple[str, str]] = []
-    for name in CORE_VAR_ORDER:
-        if name in var_values:
-            ordered.append((f"var-{name}", var_values.pop(name)))
-    for name, value in var_values.items():
-        ordered.append((f"var-{name}", value))
-    ordered.extend(extras)
-    query = urlencode(ordered, safe="${}:._-")
-    needs_time_token = has_time_token or not (has_from and has_to)
-    if needs_time_token:
-        query = f"{query}&{TIME_TOKEN}" if query else TIME_TOKEN
+    state.ensure_run_id()
+    query = urlencode(state.ordered_pairs(), safe="${}:._-")
+    query = state.append_time_token(query)
     rewritten = urlunsplit((split.scheme, split.netloc, path, query, split.fragment))
-    if "&amp;" in url:
-        rewritten = rewritten.replace("&", "&amp;")
+    if HTML_AMPERSAND in url:
+        rewritten = rewritten.replace("&", HTML_AMPERSAND)
     return rewritten
 
 
 def preserves_time_window(url: str) -> bool:
     """Return whether a `/d/` URL carries Grafana time-range handoff."""
-    decoded = url.replace("&amp;", "&")
+    decoded = url.replace(HTML_AMPERSAND, "&")
     return TIME_TOKEN in decoded or ("from=" in decoded and "to=" in decoded)
 
 
 __all__ = [
     "CORE_VAR_ORDER",
-    "DashboardContext",
     "PATH_BY_UID",
     "RUN_ID_GRAFANA_REGEX",
-    "RunIdError",
     "SEVEN_UIDS",
     "TIME_TOKEN",
+    "DashboardContext",
+    "RunIdError",
     "build_handoff_url",
     "normalize_run_id",
     "preserves_time_window",

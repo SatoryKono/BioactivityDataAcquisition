@@ -68,34 +68,42 @@ class FixtureHandler(BaseHTTPRequestHandler):
         path = parsed.path.rstrip("/")
         prefix = "/ops/control-plane/"
         if not path.startswith(prefix):
-            self._send(404, {"error": "not_found", "path": path})
+            self._send(404, {"error": "not_found"})
             return
         endpoint = path[len(prefix) :]
         if endpoint not in ENDPOINTS:
-            self._send(404, {"error": "unknown_endpoint", "endpoint": endpoint})
+            self._send(404, {"error": "unknown_endpoint"})
             return
         qs = parse_qs(parsed.query)
         active_file = self.fixture_root / ".active_state"
         active_from_file = ""
         if active_file.is_file():
             active_from_file = active_file.read_text(encoding="utf-8").strip()
-        state = (
+        allowed_states = {
+            "populated",
+            "valid_empty_or_unknown",
+            "backend_error",
+            "service_unavailable",
+            "empty_rows",
+        }
+        raw_state = (
             (qs.get("fixture_state") or [None])[0]
             or os.environ.get("BIOETL_TRUST_FIXTURE_STATE")
             or active_from_file
             or self.default_state
         )
-        fixture_path = self.fixture_root / endpoint / f"{state}.json"
+        if raw_state not in allowed_states:
+            self._send(404, {"error": "unknown_state"})
+            return
+        state = raw_state
+        from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+        fixture_path = ensure_path_within_root(
+            self.fixture_root / endpoint / f"{state}.json",
+            self.fixture_root,
+        )
         if not fixture_path.is_file():
-            self._send(
-                404,
-                {
-                    "error": "fixture_missing",
-                    "endpoint": endpoint,
-                    "state": state,
-                    "path": fixture_path.as_posix(),
-                },
-            )
+            self._send(404, {"error": "fixture_missing"})
             return
         payload = json.loads(fixture_path.read_text(encoding="utf-8"))
         http_status = 503 if state == "service_unavailable" else 200
@@ -124,7 +132,10 @@ def main() -> int:
         help="Default fixture state when fixture_state query is omitted",
     )
     args = parser.parse_args()
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
     args.host = _validated_loopback_host(args.host)
+    args.fixture_root = resolve_cli_path(args.fixture_root, root=REPO_ROOT)
     if not args.fixture_root.is_dir():
         raise SystemExit(f"fixture root missing: {args.fixture_root}")
     FixtureHandler.fixture_root = args.fixture_root

@@ -76,13 +76,77 @@ def _source_summary(panel: dict[str, Any]) -> dict[str, object]:
     }
 
 
+def _route_by_dashboard_uid(routes: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {str(uid): route for route in routes for uid in route["compatibilityUids"]}
+
+
+def _panel_disposition(*, panel_id: int, primary_ids: set[int], has_query: bool) -> str:
+    if panel_id in primary_ids:
+        return "route-primary"
+    return "advanced-evidence" if has_query else "fallback-only"
+
+
+def _scene_panel_row(
+    *, uid: str, panel: dict[str, Any], route: dict[str, Any]
+) -> tuple[dict[str, object], str | None]:
+    panel_id = int(panel["id"])
+    source = _source_summary(panel)
+    raw_expressions = source["expressions"]
+    expressions = (
+        [str(value) for value in raw_expressions]
+        if isinstance(raw_expressions, list)
+        else []
+    )
+    primary_ids = {int(value) for value in route["primaryPanelIds"]}
+    target_count = source["target_count"]
+    disposition = _panel_disposition(
+        panel_id=panel_id,
+        primary_ids=primary_ids,
+        has_query=isinstance(target_count, int) and target_count > 0,
+    )
+    violation = None
+    if source["datasource_type"] == "prometheus" and any(
+        "run_id" in expression for expression in expressions
+    ):
+        violation = f"{uid}#{panel_id}"
+    return {
+        "dashboard_uid": uid,
+        "panel_id": panel_id,
+        "panel_title": _display_title(panel),
+        "route": route["slug"],
+        "component": (
+            route["decisionObjects"][0]
+            if disposition == "route-primary"
+            else "JSON fallback"
+        ),
+        "disposition": disposition,
+        "source": source,
+        "basis": "preserved-from-json",
+        "empty_semantics": "preserved-from-json",
+        "json_fallback": f"/d/{uid}",
+    }, violation
+
+
+def _dashboard_scene_rows(
+    *, dashboard: dict[str, Any], route: dict[str, Any]
+) -> tuple[list[dict[str, object]], list[str]]:
+    uid = str(dashboard["uid"])
+    rows: list[dict[str, object]] = []
+    violations: list[str] = []
+    for panel in _walk_panels(dashboard.get("panels")):
+        if panel.get("type") == "row":
+            continue
+        row, violation = _scene_panel_row(uid=uid, panel=panel, route=route)
+        rows.append(row)
+        if violation is not None:
+            violations.append(violation)
+    return rows, violations
+
+
 def build_payload() -> dict[str, object]:
     contract = json.loads(ROUTES.read_text(encoding="utf-8"))
     routes = contract["routes"]
-    uid_to_route: dict[str, dict[str, Any]] = {}
-    for route in routes:
-        for uid in route["compatibilityUids"]:
-            uid_to_route[uid] = route
+    uid_to_route = _route_by_dashboard_uid(routes)
 
     rows: list[dict[str, object]] = []
     run_id_prometheus_violations: list[str] = []
@@ -92,52 +156,12 @@ def build_payload() -> dict[str, object]:
         dashboard = json.loads(path.read_text(encoding="utf-8"))
         uid = str(dashboard["uid"])
         route = uid_to_route[uid]
-        primary_ids = {int(panel_id) for panel_id in route["primaryPanelIds"]}
         dashboard_hashes[uid] = _sha256(path)
-
-        for panel in _walk_panels(dashboard.get("panels")):
-            if panel.get("type") == "row":
-                continue
-            panel_id = int(panel["id"])
-            source = _source_summary(panel)
-            raw_expressions = source["expressions"]
-            expressions = (
-                [str(value) for value in raw_expressions]
-                if isinstance(raw_expressions, list)
-                else []
-            )
-            if source["datasource_type"] == "prometheus" and any(
-                "run_id" in expression for expression in expressions
-            ):
-                run_id_prometheus_violations.append(f"{uid}#{panel_id}")
-
-            raw_target_count = source["target_count"]
-            has_query = isinstance(raw_target_count, int) and raw_target_count > 0
-            # NOSONAR - S3358: nested ternary is intentional for disposition classification
-            if panel_id in primary_ids:
-                disposition = "route-primary"
-            elif has_query:
-                disposition = "advanced-evidence"
-            else:
-                disposition = "fallback-only"
-            rows.append(
-                {
-                    "dashboard_uid": uid,
-                    "panel_id": panel_id,
-                    "panel_title": _display_title(panel),
-                    "route": route["slug"],
-                    "component": (
-                        route["decisionObjects"][0]
-                        if disposition == "route-primary"
-                        else "JSON fallback"
-                    ),
-                    "disposition": disposition,
-                    "source": source,
-                    "basis": "preserved-from-json",
-                    "empty_semantics": "preserved-from-json",
-                    "json_fallback": f"/d/{uid}",
-                }
-            )
+        dashboard_rows, violations = _dashboard_scene_rows(
+            dashboard=dashboard, route=route
+        )
+        rows.extend(dashboard_rows)
+        run_id_prometheus_violations.extend(violations)
 
     mapped_uids = sorted(uid_to_route)
     shipped_uids = sorted(dashboard_hashes)

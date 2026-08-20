@@ -586,6 +586,33 @@ def _facts(unit: ExecutableUnit, revision: str) -> JsonObject:
     return _workflow_facts(unit, revision)
 
 
+def _append_diagnostics(
+    lines: list[str], diagnostics: object, *, empty_message: bool = False
+) -> None:
+    if isinstance(diagnostics, list) and diagnostics:
+        for diagnostic in diagnostics:
+            if isinstance(diagnostic, dict):
+                lines.append(f"- `{diagnostic['severity']}` `{diagnostic['code']}`")
+        return
+    if empty_message:
+        lines.append("- No blocking diagnostics.")
+
+
+def _append_manual_context(lines: list[str], manual: dict[str, object]) -> None:
+    if not manual:
+        return
+    lines.extend(["", "## Owner-approved context", ""])
+    lines.append(f"- Owner: `{manual['owner']}`")
+    for key in ("purpose", "business_context", "rationale"):
+        value = manual.get(key)
+        if isinstance(value, str) and value:
+            lines.extend(["", f"### {key.replace('_', ' ').title()}", "", value])
+    limitations = manual.get("known_limitations")
+    if isinstance(limitations, list) and limitations:
+        lines.extend(["", "### Known limitations", ""])
+        lines.extend(f"- {item}" for item in limitations)
+
+
 def _render_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     identity = facts["identity"]
     assert isinstance(identity, dict)
@@ -613,22 +640,8 @@ def _render_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
     lines.extend(["", "## Generated facts", "", "```json"])
     lines.extend(_canonical_bytes(facts).decode("utf-8").rstrip().splitlines())
     lines.extend(["```", "", "## Diagnostics", ""])
-    if diagnostics:
-        for diagnostic in diagnostics:
-            lines.append(f"- `{diagnostic['severity']}` `{diagnostic['code']}`")
-    else:
-        lines.append("- No blocking diagnostics.")
-    if manual:
-        lines.extend(["", "## Owner-approved context", ""])
-        lines.append(f"- Owner: `{manual['owner']}`")
-        for key in ("purpose", "business_context", "rationale"):
-            value = manual.get(key)
-            if isinstance(value, str) and value:
-                lines.extend(["", f"### {key.replace('_', ' ').title()}", "", value])
-        limitations = manual.get("known_limitations")
-        if isinstance(limitations, list) and limitations:
-            lines.extend(["", "### Known limitations", ""])
-            lines.extend(f"- {item}" for item in limitations)
+    _append_diagnostics(lines, diagnostics, empty_message=True)
+    _append_manual_context(lines, manual)
     lines.append("")
     return "\n".join(lines)
 
@@ -641,6 +654,129 @@ def _inline(value: object) -> str:
     if isinstance(value, dict):
         return "; ".join(f"{key}={item}" for key, item in sorted(value.items()))
     return f"`{value}`"
+
+
+def _pipeline_extraction_lines(extraction: JsonObject) -> list[str]:
+    filters = extraction.get("filters", [])
+    filter_text = (
+        "; ".join(
+            f"`{item['name']}`: {item['description']}"
+            for item in filters
+            if isinstance(item, dict)
+        )
+        or "Нет статических filters; используется effective runtime scope"
+    )
+    lines = [
+        "",
+        "## Извлечение данных",
+        "",
+        "| Аспект | Значение |",
+        "| --- | --- |",
+        f"| Source | `{extraction.get('source_kind')}` · `{extraction.get('source_resource')}` |",
+        (
+            "| Method / endpoint | "
+            f"{_inline(extraction.get('method'))} · "
+            f"{_inline(extraction.get('endpoint_template'))} |"
+        ),
+        (
+            "| Resource / tables | "
+            f"{_inline([*extraction.get('source_tables', []), *extraction.get('source_collections', [])])} |"
+        ),
+        f"| Filters | {filter_text} |",
+    ]
+    groups = extraction.get("field_groups", [])
+    if groups:
+        lines.append(
+            "| Selected fields | "
+            + "; ".join(
+                f"`{item['name']}` ({item['field_count']} fields)" for item in groups
+            )
+            + " |"
+        )
+    return lines
+
+
+def _append_silver_and_gold(
+    lines: list[str], *, silver: JsonObject, gold: JsonObject, contract_label: str
+) -> None:
+    lines.extend(["", "## Silver и Data Quality", ""])
+    if silver:
+        dq = silver.get("dq_execution", {})
+        lines.extend(
+            [
+                f"- Normalization profile: `{silver.get('normalization_profile')}`.",
+                f"- Partitioning: {_inline(silver.get('write', {}).get('partition_by'))}.",
+                (
+                    "- DQ thresholds: "
+                    f"soft `{dq.get('soft_fail_threshold')}`, "
+                    f"hard `{dq.get('hard_fail_threshold')}`; "
+                    f"invalid policy `{dq.get('invalid_record_policy')}`."
+                ),
+            ]
+        )
+    else:
+        lines.append(
+            "- Composite Silver inputs and merge rules are listed in generated JSON."
+        )
+    lines.extend(["", "## Gold", ""])
+    validation = gold.get("contract_validation", {})
+    write = gold.get("write", {})
+    lines.extend(
+        [
+            f"- Contract: `{contract_label}`; strict validation: `{validation.get('strict', True)}`.",
+            f"- Write mode: `{write.get('mode', 'configured')}`.",
+        ]
+    )
+    if write.get("scd_config"):
+        lines.append(f"- SCD2: {_inline(write['scd_config'])}.")
+    exclusions = gold.get("column_projection", {}).get("exclude_fields", [])
+    if exclusions:
+        lines.append(f"- Technical exclusions: {_inline(exclusions)}.")
+
+
+def _append_commands_and_diagrams(lines: list[str], facts: JsonObject) -> None:
+    lines.extend(
+        [
+            "",
+            "## Операторские команды",
+            "",
+            "| Задача | Команда | Результат |",
+            "| --- | --- | --- |",
+        ]
+    )
+    for item in facts["operator_commands"]:
+        lines.append(f"| {item['task']} | `{item['command']}` | {item['result']} |")
+    lines.extend(["", "## Диаграммы", ""])
+    for diagram in facts["diagrams"]:
+        lines.extend(
+            [
+                f"### {diagram['diagram_id'].replace('_', ' ').title()}",
+                "",
+                "```mermaid",
+                str(diagram["mermaid"]),
+                "```",
+                "",
+            ]
+        )
+
+
+def _append_pipeline_tail(
+    lines: list[str],
+    *,
+    facts: JsonObject,
+    manual: dict[str, object],
+    diagnostics: object,
+) -> None:
+    purpose = manual.get("purpose") if manual else None
+    if isinstance(purpose, str) and purpose:
+        lines.extend(["## Owner-approved context", "", purpose, ""])
+    lines.extend(["## Evidence", ""])
+    for ref in facts["source_references"]:
+        lines.append(f"- `{ref['role']}`: `{ref['path']}`")
+    if diagnostics:
+        lines.extend(["", "## Diagnostics", ""])
+        _append_diagnostics(lines, diagnostics)
+    lines.append("")
 
 
 def _render_pipeline_markdown(facts: JsonObject, manual: dict[str, object]) -> str:
@@ -676,114 +812,94 @@ def _render_pipeline_markdown(facts: JsonObject, manual: dict[str, object]) -> s
         lines.append(f"| Aliases | {_inline(aliases)} |")
     lines.extend(["", "## Назначение и обработка данных", ""])
     lines.extend(str(sentence) for sentence in summary["sentences"])
-    lines.extend(
-        [
-            "",
-            "## Извлечение данных",
-            "",
-            "| Аспект | Значение |",
-            "| --- | --- |",
-            f"| Source | `{extraction.get('source_kind')}` · `{extraction.get('source_resource')}` |",
-            (
-                "| Method / endpoint | "
-                f"{_inline(extraction.get('method'))} · "
-                f"{_inline(extraction.get('endpoint_template'))} |"
-            ),
-            (
-                "| Resource / tables | "
-                f"{_inline([*extraction.get('source_tables', []), *extraction.get('source_collections', [])])} |"
-            ),
-            (
-                "| Filters | "
-                + (
-                    "; ".join(
-                        f"`{item['name']}`: {item['description']}"
-                        for item in extraction.get("filters", [])
-                    )
-                    or "Нет статических filters; используется effective runtime scope"
-                )
-                + " |"
-            ),
-        ]
+    lines.extend(_pipeline_extraction_lines(extraction))
+    _append_silver_and_gold(
+        lines, silver=silver, gold=gold, contract_label=contract_label
     )
-    groups = extraction.get("field_groups", [])
-    if groups:
-        lines.append(
-            "| Selected fields | "
-            + "; ".join(
-                f"`{item['name']}` ({item['field_count']} fields)" for item in groups
-            )
-            + " |"
-        )
-    lines.extend(["", "## Silver и Data Quality", ""])
-    if silver:
-        dq = silver.get("dq_execution", {})
-        lines.extend(
-            [
-                f"- Normalization profile: `{silver.get('normalization_profile')}`.",
-                f"- Partitioning: {_inline(silver.get('write', {}).get('partition_by'))}.",
-                (
-                    "- DQ thresholds: "
-                    f"soft `{dq.get('soft_fail_threshold')}`, "
-                    f"hard `{dq.get('hard_fail_threshold')}`; "
-                    f"invalid policy `{dq.get('invalid_record_policy')}`."
-                ),
-            ]
-        )
-    else:
-        lines.append(
-            "- Composite Silver inputs and merge rules are listed in generated JSON."
-        )
-    lines.extend(["", "## Gold", ""])
-    validation = gold.get("contract_validation", {})
-    write = gold.get("write", {})
-    lines.extend(
-        [
-            f"- Contract: `{contract_label}`; strict validation: `{validation.get('strict', True)}`.",
-            f"- Write mode: `{write.get('mode', 'configured')}`.",
-        ]
-    )
-    if write.get("scd_config"):
-        lines.append(f"- SCD2: {_inline(write['scd_config'])}.")
-    exclusions = gold.get("column_projection", {}).get("exclude_fields", [])
-    if exclusions:
-        lines.append(f"- Technical exclusions: {_inline(exclusions)}.")
-    lines.extend(
-        [
-            "",
-            "## Операторские команды",
-            "",
-            "| Задача | Команда | Результат |",
-            "| --- | --- | --- |",
-        ]
-    )
-    for item in facts["operator_commands"]:
-        lines.append(f"| {item['task']} | `{item['command']}` | {item['result']} |")
-    lines.extend(["", "## Диаграммы", ""])
-    for diagram in facts["diagrams"]:
-        lines.extend(
-            [
-                f"### {diagram['diagram_id'].replace('_', ' ').title()}",
-                "",
-                "```mermaid",
-                str(diagram["mermaid"]),
-                "```",
-                "",
-            ]
-        )
-    if manual:
-        purpose = manual.get("purpose")
-        if isinstance(purpose, str) and purpose:
-            lines.extend(["## Owner-approved context", "", purpose, ""])
-    lines.extend(["## Evidence", ""])
-    for ref in facts["source_references"]:
-        lines.append(f"- `{ref['role']}`: `{ref['path']}`")
-    if diagnostics:
-        lines.extend(["", "## Diagnostics", ""])
-        for diagnostic in diagnostics:
-            lines.append(f"- `{diagnostic['severity']}` `{diagnostic['code']}`")
-    lines.append("")
+    _append_commands_and_diagrams(lines, facts)
+    _append_pipeline_tail(lines, facts=facts, manual=manual, diagnostics=diagnostics)
     return "\n".join(lines)
+
+
+def _unit_projection(
+    unit: ExecutableUnit,
+    *,
+    revision: str,
+    sidecar_root: Path,
+    output_root: Path,
+) -> tuple[dict[Path, bytes], dict[str, object], int]:
+    facts = _facts(unit, revision)
+    errors = [
+        item for item in facts.get("diagnostics", []) if item.get("severity") == "error"
+    ]
+    group = "workflows" if unit.kind == "workflow" else "pipelines"
+    manual = load_manual_sidecar(sidecar_root / group / f"{unit.unit_id}.yaml")
+    markdown = _render_markdown(facts, manual)
+    if facts["kind"] == "pipeline":
+        publication_errors = validate_pipeline_publication(
+            facts,
+            markdown,
+            project_root=PROJECT_ROOT,
+        )
+        if publication_errors:
+            raise ValueError(
+                f"Invalid pipeline passport {unit.unit_id}: "
+                + "; ".join(publication_errors)
+            )
+    markdown_filename = passport_markdown_filename(unit.unit_id)
+    outputs = {
+        output_root / "generated" / group / f"{unit.unit_id}.json": _canonical_bytes(
+            facts
+        ),
+        output_root / group / markdown_filename: markdown.encode("utf-8"),
+    }
+    registry_row: dict[str, object] = {
+        "typed_id": unit.typed_id,
+        "aliases": list(unit.aliases),
+        "config_path": _repo_path(unit.config_path),
+        "passport_path": f"{group}/{markdown_filename}",
+    }
+    return outputs, registry_row, len(errors)
+
+
+def _passport_index(registry_rows: list[dict[str, object]]) -> bytes:
+    index = [
+        "# Pipeline and workflow passports",
+        "",
+        "Generated, evidence-backed documentation projections.",
+        "",
+        "## Governance",
+        "",
+        "- [Pipeline passport projection guide](pipeline-passport-guide.md)",
+        "- [ADR-054: passport documentation projections](../../02-architecture/decisions/ADR-054-passport-documentation-projections.md)",
+        "- [ADR-055: workflow reconciliation ownership](../../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)",
+        "- [Pipeline passport schema](schemas/pipeline-passport.schema.json)",
+        "- [Workflow passport schema](schemas/workflow-passport.schema.json)",
+        "- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)",
+        "- [Normalized duplication report](duplication-report.json)",
+        "",
+        "- Owner: `BioETL Team`; review cadence: each executable/config change and release.",
+        "- Check: `python -m scripts.docs passports check`.",
+        "- Reviewed update: `python -m scripts.docs passports generate`.",
+        "- Generated facts are read-only projections; manual sidecars cannot override them.",
+        "- Diagram dataflow passports are compatibility companions and link back here.",
+        "",
+        "## Pipelines",
+        "",
+    ]
+    for row in registry_rows:
+        typed_id = str(row["typed_id"])
+        if not typed_id.startswith("workflow:"):
+            name = typed_id.split(":", 1)[1]
+            index.append(f"- [{name}](pipelines/{passport_markdown_filename(name)})")
+    index.extend(["", "## Workflows", ""])
+    for row in registry_rows:
+        typed_id = str(row["typed_id"])
+        if typed_id.startswith("workflow:"):
+            name = typed_id.split(":", 1)[1]
+            index.append(f"- [{name}](workflows/{passport_markdown_filename(name)})")
+    index.append("")
+    return "\n".join(index).encode("utf-8")
 
 
 def build_all_outputs(
@@ -801,40 +917,15 @@ def build_all_outputs(
     registry_rows = []
     error_count = 0
     for unit in units:
-        facts = _facts(unit, revision)
-        errors = [
-            item
-            for item in facts.get("diagnostics", [])
-            if item.get("severity") == "error"
-        ]
-        error_count += len(errors)
-        group = "workflows" if unit.kind == "workflow" else "pipelines"
-        manual = load_manual_sidecar(sidecar_root / group / f"{unit.unit_id}.yaml")
-        markdown = _render_markdown(facts, manual)
-        if facts["kind"] == "pipeline":
-            publication_errors = validate_pipeline_publication(
-                facts,
-                markdown,
-                project_root=PROJECT_ROOT,
-            )
-            if publication_errors:
-                raise ValueError(
-                    f"Invalid pipeline passport {unit.unit_id}: "
-                    + "; ".join(publication_errors)
-                )
-        outputs[output_root / "generated" / group / f"{unit.unit_id}.json"] = (
-            _canonical_bytes(facts)
+        unit_outputs, registry_row, unit_error_count = _unit_projection(
+            unit,
+            revision=revision,
+            sidecar_root=sidecar_root,
+            output_root=output_root,
         )
-        markdown_filename = passport_markdown_filename(unit.unit_id)
-        outputs[output_root / group / markdown_filename] = markdown.encode("utf-8")
-        registry_rows.append(
-            {
-                "typed_id": unit.typed_id,
-                "aliases": list(unit.aliases),
-                "config_path": _repo_path(unit.config_path),
-                "passport_path": f"{group}/{markdown_filename}",
-            }
-        )
+        outputs.update(unit_outputs)
+        registry_rows.append(registry_row)
+        error_count += unit_error_count
     report = {
         "passport_schema_version": SCHEMA_VERSION,
         "source_revision": revision,
@@ -866,45 +957,7 @@ def build_all_outputs(
             "after": audit_markdown_texts(pipeline_markdown),
         }
     )
-    index = [
-        "# Pipeline and workflow passports",
-        "",
-        "Generated, evidence-backed documentation projections.",
-        "",
-        "## Governance",
-        "",
-        "- [Pipeline passport projection guide](pipeline-passport-guide.md)",
-        "- [ADR-054: passport documentation projections](../../02-architecture/decisions/ADR-054-passport-documentation-projections.md)",
-        "- [ADR-055: workflow reconciliation ownership](../../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md)",
-        "- [Pipeline passport schema](schemas/pipeline-passport.schema.json)",
-        "- [Workflow passport schema](schemas/workflow-passport.schema.json)",
-        "- [Manual metadata schema](schemas/manual-passport-metadata.schema.json)",
-        "- [Normalized duplication report](duplication-report.json)",
-        "",
-        "- Owner: `BioETL Team`; review cadence: each executable/config change and release.",
-        "- Check: `python -m scripts.docs passports check`.",
-        "- Reviewed update: `python -m scripts.docs passports generate`.",
-        "- Generated facts are read-only projections; manual sidecars cannot override them.",
-        "- Diagram dataflow passports are compatibility companions and link back here.",
-        "",
-        "## Pipelines",
-        "",
-    ]
-    for row in registry_rows:
-        if not row["typed_id"].startswith("workflow:"):
-            name = row["typed_id"].split(":", 1)[1]
-            index.append(
-                f"- [{name}](pipelines/{passport_markdown_filename(name)})"
-            )
-    index.extend(["", "## Workflows", ""])
-    for row in registry_rows:
-        if row["typed_id"].startswith("workflow:"):
-            name = row["typed_id"].split(":", 1)[1]
-            index.append(
-                f"- [{name}](workflows/{passport_markdown_filename(name)})"
-            )
-    index.append("")
-    outputs[output_root / "index.md"] = "\n".join(index).encode("utf-8")
+    outputs[output_root / "index.md"] = _passport_index(registry_rows)
     return outputs
 
 

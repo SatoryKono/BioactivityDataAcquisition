@@ -396,3 +396,19 @@ def test_skills_mirror_check_reports_docs_drift_without_writing(
     assert "Docs skill mirror mismatch: demo/SKILL.md" in issues
     assert exit_code == 1
     assert mirror.read_bytes() == before
+
+
+def test_main_defaults_to_check_only(tmp_path: Path) -> None:
+    """Bare CLI must not write Codex agent files (#9119)."""
+    agents = tmp_path / ".codex" / "agents"
+    agents.mkdir(parents=True)
+    target = agents / "py-audit-bot.md"
+    original = "# Agent\n\nBody\n"
+    target.write_text(original, encoding="utf-8")
+
+    exit_code = sync_ai_governance.main(
+        ["--root", str(tmp_path), "--only", "codex-agents"]
+    )
+
+    assert exit_code == 1
+    assert target.read_text(encoding="utf-8") == original

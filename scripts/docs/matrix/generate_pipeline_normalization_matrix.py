@@ -55,7 +55,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from bioetl.application.composite.checkpoint import (  # noqa: F401
+from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )
@@ -144,6 +144,7 @@ from scripts.docs.matrix.normalization_matrix_catalog import (
     structured_payload_policy,
     yaml,
 )
+
 
 @cache
 def _composite_gold_contract_properties(
@@ -811,6 +812,32 @@ def _default_non_chembl_classification(
     return semantic_category
 
 
+def _raw_sidecar_field(
+    classification: dict[str, str],
+    semantic_policy: Any | None,
+    publication_policy: Any | None,
+) -> str:
+    configured = classification.get("raw_sidecar", "")
+    if configured:
+        return configured
+    if semantic_policy is not None and semantic_policy.raw_sidecar_field:
+        return str(semantic_policy.raw_sidecar_field)
+    if publication_policy is not None and publication_policy.raw_sidecar_field:
+        return str(publication_policy.raw_sidecar_field)
+    return ""
+
+
+def _canonical_sidecar_field(
+    classification: dict[str, str], semantic_policy: Any | None
+) -> str:
+    configured = classification.get("canonical_sidecar", "")
+    if configured:
+        return configured
+    if semantic_policy is None:
+        return ""
+    return str(semantic_policy.canonical_sidecar_field or "")
+
+
 def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
     metadata = {
         "classification": "",
@@ -863,18 +890,11 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
         entity=entity,
         field_name=field_name,
     )
-    metadata["raw_sidecar"] = classification.get("raw_sidecar", "")
-    if not metadata["raw_sidecar"]:
-        if semantic_policy is not None and semantic_policy.raw_sidecar_field:
-            metadata["raw_sidecar"] = semantic_policy.raw_sidecar_field
-        elif publication_policy is not None and publication_policy.raw_sidecar_field:
-            metadata["raw_sidecar"] = publication_policy.raw_sidecar_field
-        else:
-            metadata["raw_sidecar"] = ""
-    metadata["canonical_sidecar"] = classification.get("canonical_sidecar", "") or (
-        (semantic_policy.canonical_sidecar_field or "")
-        if semantic_policy is not None
-        else ""
+    metadata["raw_sidecar"] = _raw_sidecar_field(
+        classification, semantic_policy, publication_policy
+    )
+    metadata["canonical_sidecar"] = _canonical_sidecar_field(
+        classification, semantic_policy
     )
     metadata["composite_usage"] = classification.get("composite_usage", "")
     metadata["observed_source"] = classification.get("observed_source", "") or (
@@ -1248,6 +1268,28 @@ def _publication_structured_policy(
     return publication_structured_field_policy(f"{provider}.{entity}", field_name)
 
 
+_RELATION_FIELDS = frozenset({"relation", "activity_relation", "parameter_relation"})
+_SOURCE_STRICTNESS = {
+    "composite_join_key_policy": "join_key_policy",
+    "upstream_inherited": "upstream_inherited",
+}
+_PRIORITY_NORMALIZER_STRICTNESS = {
+    "normalize_profile_passthrough": "technical_passthrough",
+    "normalize_profile_binary_flag": "strict_flag",
+}
+_NORMALIZER_STRICTNESS = {
+    "normalize_profile_doi": "canonical_identifier",
+    "normalize_profile_pmid": "canonical_identifier",
+    "normalize_profile_pmc_id": "canonical_identifier",
+    "normalize_profile_pubchem_cid": "canonical_identifier",
+    "normalize_profile_json_string": "canonical_json",
+    "normalize_profile_json_string_strict": "strict_json",
+    "normalize_profile_boolean": "strict_boolean",
+    "normalize_profile_oa_status": "strict_enum",
+    "normalize_oa_status": "strict_enum",
+}
+
+
 def _strictness(
     *,
     field_name: str,
@@ -1256,41 +1298,21 @@ def _strictness(
     notes: str,
 ) -> str:
     normalized_notes = notes.casefold()
-    if field_name in {"relation", "activity_relation", "parameter_relation"}:
+    if field_name in _RELATION_FIELDS:
         return "strict_operator"
-    if normalization_source == "composite_join_key_policy":
-        return "join_key_policy"
-    if normalization_source == "upstream_inherited":
-        return "upstream_inherited"
-    if normalizer_name == "normalize_profile_passthrough":
-        return "technical_passthrough"
-    if (
-        field_name.endswith("_flag")
-        or normalizer_name == "normalize_profile_binary_flag"
-    ):
+    if source_strictness := _SOURCE_STRICTNESS.get(normalization_source):
+        return source_strictness
+    if field_name.endswith("_flag"):
         return "strict_flag"
+    if normalizer_strictness := _PRIORITY_NORMALIZER_STRICTNESS.get(normalizer_name):
+        return normalizer_strictness
     category_match = _strictness_category_match(
         normalizer_name=normalizer_name,
         normalized_notes=normalized_notes,
     )
     if category_match is not None:
         return category_match
-    if normalizer_name in {
-        "normalize_profile_doi",
-        "normalize_profile_pmid",
-        "normalize_profile_pmc_id",
-        "normalize_profile_pubchem_cid",
-    }:
-        return "canonical_identifier"
-    if normalizer_name == "normalize_profile_json_string":
-        return "canonical_json"
-    if normalizer_name == "normalize_profile_json_string_strict":
-        return "strict_json"
-    if normalizer_name == "normalize_profile_boolean":
-        return "strict_boolean"
-    if normalizer_name in {"normalize_profile_oa_status", "normalize_oa_status"}:
-        return "strict_enum"
-    return "normalization_only"
+    return _NORMALIZER_STRICTNESS.get(normalizer_name, "normalization_only")
 
 
 def _strictness_category_match(
@@ -1469,7 +1491,6 @@ def _dq_coverage(
     return coverage
 
 
-
 # Row construction is isolated from policy discovery and KPI reporting.
 from scripts.docs.matrix.normalization_matrix_builder import (
     _entity_config_paths,
@@ -1502,6 +1523,7 @@ from scripts.docs.matrix.normalization_matrix_builder import (
     _composite_field_matrix_rows,
     _composite_pipeline_inputs,
 )
+
 
 def build_entity_profile_coverage_kpi(
     rows: list[dict[str, str]] | None = None,
@@ -1784,7 +1806,6 @@ def _update_non_meta_profile_semantics(
         stats.set_like_ok += 1
         return
     stats.set_like_regressions.append(_normalizer_regression(location, rule))
-
 
 
 from scripts.docs.matrix.normalization_matrix_report import (

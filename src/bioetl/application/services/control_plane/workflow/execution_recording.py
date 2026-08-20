@@ -15,8 +15,10 @@ from bioetl.application.services.control_plane.workflow.execution_recording_cont
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
     _build_result_summary,
+    _find_failed_step,
     _fingerprint_details,
     _resolve_result_fingerprint,
+    _workflow_failure_message,
     build_step_completion_details,
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
@@ -37,7 +39,9 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
 _RECORDING_HELPER_REEXPORTS = (
     _clear_ambiguous_step,
+    _find_failed_step,
     _record_completed_transform_fingerprint,
+    _workflow_failure_message,
 )
 
 __all__ = [

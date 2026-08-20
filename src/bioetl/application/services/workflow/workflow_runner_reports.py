@@ -19,6 +19,15 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
+    """Return a concrete workflow result after validating replacement output."""
+    if not isinstance(value, WorkflowRunExecutionResult):
+        raise TypeError(
+            "dataclass replacement did not preserve WorkflowRunExecutionResult"
+        )
+    return value
+
+
 def _plan_steps_from_config(config: WorkflowConfig) -> list[JsonDict]:
     plan_steps: list[JsonDict] = []
     for step_id in config.topological_step_ids:
@@ -145,10 +154,12 @@ def attach_workflow_run_report(
             execution_steps=execution_rows,
         )
         written = write_workflow_run_report(report)
-        return replace(
-            result,
-            run_report_json_path=str(written.json_path),
-            run_report_markdown_path=str(written.markdown_path),
+        return _require_workflow_result(
+            replace(
+                result,
+                run_report_json_path=str(written.json_path),
+                run_report_markdown_path=str(written.markdown_path),
+            )
         )
     except Exception as exc:
         if logger is not None:
@@ -158,7 +169,9 @@ def attach_workflow_run_report(
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
-        return replace(
-            result,
-            run_report_error=f"{type(exc).__name__}: {exc}",
+        return _require_workflow_result(
+            replace(
+                result,
+                run_report_error=f"{type(exc).__name__}: {exc}",
+            )
         )

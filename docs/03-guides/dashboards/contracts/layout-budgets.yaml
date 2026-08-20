@@ -152,16 +152,6 @@ first_window_summary_tables:
     max_rows: 4
     owner: "@bioetl-observability"
     bind: limit
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 9402
-    max_rows: 4
-    owner: "@bioetl-observability"
-    bind: filter
-  - dashboard: bioetl-run-explorer-v1.json
-    id: 9403
-    max_rows: 4
-    owner: "@bioetl-observability"
-    bind: filter
   - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1
@@ -214,8 +204,8 @@ answer_panels:
     - id: 2010
       title: Inspect Ranked Suspects
   bioetl-run-explorer-v1.json:
-    - id: 9402
-      title: Inspect Run Identity
+    - id: 3010
+      title: Inspect Recent Runs (last 4)
 
 trust_gate_panels:
   - dashboard: bioetl-control-plane-v1.json

@@ -80,6 +80,12 @@ def test_contract_preserves_adr010_and_stability_slo() -> None:
         "recovery_trials": 10,
     }
     assert contract["hardening_targets"]["implementation_issue"] == 6293
+    assert contract["hardening_targets"]["logging"]["allowed_drivers"] == [
+        "local",
+        "json-file",
+    ]
+    assert contract["hardening_targets"]["logging"]["max_size_required"] is True
+    assert contract["hardening_targets"]["logging"]["max_files_required"] is True
     assert contract["path_policy"]["mixed_origin_for_same_project_forbidden"] is True
     assert (
         contract["path_policy"]["discouraged_origin_scope"]
@@ -354,6 +360,68 @@ def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) ->
     )
     assert preflight._is_discouraged_bind_source("/host_mnt/e/repo", ("/mnt/e",))
     assert not preflight._is_discouraged_bind_source("/home/user/repo", ("/mnt/e",))
+
+
+def test_windows_and_wsl_spellings_of_same_compose_file_are_not_origin_drift() -> None:
+    """Docker Desktop WSL config path of this checkout is not PROJECT_ORIGIN."""
+    preflight = _load_preflight()
+    root = Path(r"E:\github\BioactivityDataAcquisition")
+    contract = {
+        "stacks": {
+            "neo4j": {
+                "compose_file": "docker-compose.neo4j.yml",
+                "project_name": "bioetl-neo4j",
+            }
+        },
+        "path_policy": {},
+    }
+    rows = [
+        {
+            "Name": "bioetl-neo4j",
+            "ConfigFiles": (
+                r"E:\github\BioactivityDataAcquisition\docker-compose.neo4j.yml,"
+                "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml"
+            ),
+        }
+    ]
+
+    findings = preflight._project_origin_findings(root, rows, contract)
+
+    assert findings == []
+
+
+def test_foreign_clone_compose_file_is_still_project_origin() -> None:
+    preflight = _load_preflight()
+    root = Path(r"E:\github\BioactivityDataAcquisition")
+    contract = {
+        "stacks": {
+            "neo4j": {
+                "compose_file": "docker-compose.neo4j.yml",
+                "project_name": "bioetl-neo4j",
+            }
+        },
+        "path_policy": {},
+    }
+    rows = [
+        {
+            "Name": "bioetl-neo4j",
+            "ConfigFiles": (
+                "/mnt/e/g-drive/05_ai/github/bioactivitydataacquisition2/"
+                "docker-compose.neo4j.yml"
+            ),
+        }
+    ]
+
+    findings = preflight._project_origin_findings(root, rows, contract)
+
+    assert any(finding.code == "PROJECT_ORIGIN" for finding in findings)
+    unexpected = next(
+        finding
+        for finding in findings
+        if finding.code == "PROJECT_ORIGIN"
+        and "unexpected config path" in finding.message
+    )
+    assert unexpected.severity == "error"
 
 
 def test_transient_issue_worktree_compose_is_gate_error(tmp_path: Path) -> None:
@@ -939,8 +1007,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     main_health = " ".join(map(str, main["services"]["bioetl"]["healthcheck"]["test"]))
     renderer_health = monitoring["services"]["renderer"]["healthcheck"]["test"]
 
-    assert "/health/ready" in main_health
-    assert "/health/live" not in main_health
+    assert "/health/live" in main_health
+    assert "/health/ready" not in main_health
     # Opt-in monitoring is Prom/Grafana/renderer only (Loki/Promtail/Tempo removed).
     assert "loki" not in monitoring["services"]
     assert "promtail" not in monitoring["services"]
@@ -978,7 +1046,14 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     )
     assert "uv==0.11.26" in operations_dockerfile
     assert "sys.exit(0)" not in dockerfile
-    assert "/health/ready" in dockerfile
+    assert "/health/live" in dockerfile
+    healthcheck_blob = "\n".join(
+        line
+        for line in dockerfile.splitlines()
+        if "HEALTHCHECK" in line or "health/" in line
+    )
+    assert "/health/live" in healthcheck_blob
+    assert "/health/ready" not in healthcheck_blob
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
@@ -990,7 +1065,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "quarantine serve" not in bioetl_command
     assert bioetl_service["ports"] == ["127.0.0.1:8000:8000"]
     bioetl_health = " ".join(map(str, bioetl_service["healthcheck"]["test"]))
-    assert "127.0.0.1:8000/health/ready" in bioetl_health
+    assert "127.0.0.1:8000/health/live" in bioetl_health
     assert "8081" not in bioetl_health
 
 
@@ -1172,3 +1247,49 @@ def test_migration_map_and_runbook_protect_legacy_neo4j_volume() -> None:
     assert "MUST NOT use `--volumes`" in runbook
     assert "backup/restore drill" in runbook
     assert "not_applicable_no_legacy_volume" in runbook
+
+
+def _workflow_needs(job: dict[str, Any]) -> list[str]:
+    raw = job.get("needs")
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        return [raw]
+    return list(raw)
+
+
+def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
+    seen: set[str] = set()
+    stack = list(_workflow_needs(jobs[job_name]))
+    while stack:
+        current = stack.pop()
+        if current in seen or current not in jobs:
+            continue
+        seen.add(current)
+        stack.extend(_workflow_needs(jobs[current]))
+    return seen
+
+
+def test_docker_push_requires_all_validation_jobs() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    jobs = workflow["jobs"]
+    ancestors = _workflow_ancestors(jobs, "docker-push")
+
+    assert "docker-runtime-contracts" in ancestors
+    assert "docker-lint" in ancestors
+    assert "docker-compose-validate" in ancestors
+    assert "docker-build" in ancestors
+
+
+def test_docker_built_image_trivy_blocks_on_high_critical() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    built = [
+        step
+        for step in steps
+        if step.get("uses", "").startswith("aquasecurity/trivy-action@")
+        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
+    ]
+    assert len(built) == 1
+    assert str(built[0]["with"].get("exit-code")) == "1"
+    assert built[0]["with"]["severity"] == "CRITICAL,HIGH"

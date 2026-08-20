@@ -41,6 +41,17 @@ from bioetl.domain.types.validation_severity import (
 )
 
 
+def _require_composite_validation_report(
+    value: object,
+) -> CompositeValidationReport:
+    """Return a concrete report after validating replacement output."""
+    if not isinstance(value, CompositeValidationReport):
+        raise TypeError(
+            "dataclass replacement did not preserve CompositeValidationReport"
+        )
+    return value
+
+
 class CompositeValidator:
     """Validator for structural and deep-preflight composite checks."""
 
@@ -88,7 +99,12 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(validation_report, execution_decision=governance_decision)
+        return _require_composite_validation_report(
+            replace(
+                validation_report,
+                execution_decision=governance_decision,
+            )
+        )
 
     def _run_structural_validation(
         self,
@@ -255,8 +271,7 @@ class CompositeValidator:
                 source_schema,
             )
         )
-        issues: list[ValidationIssue] = validation_result.issues
-        return issues
+        return validation_result.issues
 
     def _validate_cross_validation_config(
         self, config: JsonDict, source_names: list[str]
@@ -280,8 +295,7 @@ class CompositeValidator:
                 cross_val_config, source_names
             )
         )
-        issues: list[ValidationIssue] = validation_result.issues
-        return issues
+        return validation_result.issues
 
     def _precheck_cross_validation_config(
         self,

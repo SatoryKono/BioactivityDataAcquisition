@@ -45,18 +45,10 @@ class WrapperSpec:
     order: int
 
 
-def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSpec]:
-    """Load and validate deterministic server-to-wrapper bindings."""
-
-    payload = json.loads(catalog_path.read_text(encoding="utf-8"))
-    servers = payload.get("servers")
-    if not isinstance(servers, dict) or not servers:
-        raise ValueError(f"MCP catalog has no server object: {catalog_path}")
-
-    specs: dict[str, WrapperSpec] = {}
-    wrapper_owners: dict[str, str] = {}
-    wrapper_orders: dict[int, str] = {}
-    ordered_entries: list[tuple[int, str, dict[str, object]]] = []
+def _ordered_catalog_entries(
+    servers: dict[str, object],
+) -> list[tuple[int, str, dict[str, object]]]:
+    ordered: list[tuple[int, str, dict[str, object]]] = []
     for server_name, raw_entry in servers.items():
         if not isinstance(raw_entry, dict):
             raise ValueError(f"MCP server entry must be an object: {server_name}")
@@ -69,36 +61,63 @@ def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSp
             raise ValueError(
                 f"MCP server {server_name!r} has invalid wrapper_order: {raw_order!r}"
             )
-        ordered_entries.append((raw_order, str(server_name), raw_entry))
+        ordered.append((raw_order, str(server_name), raw_entry))
+    return sorted(ordered)
 
-    for wrapper_order, server_name, entry in sorted(ordered_entries):
-        entry = servers[server_name]
-        if not isinstance(server_name, str) or not SERVER_NAME_PATTERN.fullmatch(
-            server_name
-        ):
-            raise ValueError(f"unsafe MCP server name: {server_name!r}")
-        wrapper_stem = entry.get("wrapper")
-        if not isinstance(wrapper_stem, str) or not WRAPPER_STEM_PATTERN.fullmatch(
-            wrapper_stem
-        ):
-            raise ValueError(
-                f"MCP server {server_name!r} has unsafe wrapper stem: {wrapper_stem!r}"
-            )
-        previous_owner = wrapper_owners.get(wrapper_stem)
-        if previous_owner is not None:
-            raise ValueError(
-                f"MCP wrapper {wrapper_stem!r} is shared by "
-                f"{previous_owner!r} and {server_name!r}"
-            )
-        previous_order_owner = wrapper_orders.get(wrapper_order)
-        if previous_order_owner is not None:
-            raise ValueError(
-                f"MCP wrapper_order {wrapper_order} is shared by "
-                f"{previous_order_owner!r} and {server_name!r}"
-            )
-        wrapper_owners[wrapper_stem] = server_name
-        wrapper_orders[wrapper_order] = server_name
-        specs[server_name] = WrapperSpec(server_name, wrapper_stem, wrapper_order)
+
+def _validated_wrapper_spec(
+    wrapper_order: int,
+    server_name: str,
+    entry: dict[str, object],
+    *,
+    wrapper_owners: dict[str, str],
+    wrapper_orders: dict[int, str],
+) -> WrapperSpec:
+    if not SERVER_NAME_PATTERN.fullmatch(server_name):
+        raise ValueError(f"unsafe MCP server name: {server_name!r}")
+    wrapper_stem = entry.get("wrapper")
+    if not isinstance(wrapper_stem, str) or not WRAPPER_STEM_PATTERN.fullmatch(
+        wrapper_stem
+    ):
+        raise ValueError(
+            f"MCP server {server_name!r} has unsafe wrapper stem: {wrapper_stem!r}"
+        )
+    previous_owner = wrapper_owners.get(wrapper_stem)
+    if previous_owner is not None:
+        raise ValueError(
+            f"MCP wrapper {wrapper_stem!r} is shared by "
+            f"{previous_owner!r} and {server_name!r}"
+        )
+    previous_order_owner = wrapper_orders.get(wrapper_order)
+    if previous_order_owner is not None:
+        raise ValueError(
+            f"MCP wrapper_order {wrapper_order} is shared by "
+            f"{previous_order_owner!r} and {server_name!r}"
+        )
+    wrapper_owners[wrapper_stem] = server_name
+    wrapper_orders[wrapper_order] = server_name
+    return WrapperSpec(server_name, wrapper_stem, wrapper_order)
+
+
+def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSpec]:
+    """Load and validate deterministic server-to-wrapper bindings."""
+
+    payload = json.loads(catalog_path.read_text(encoding="utf-8"))
+    servers = payload.get("servers")
+    if not isinstance(servers, dict) or not servers:
+        raise ValueError(f"MCP catalog has no server object: {catalog_path}")
+
+    specs: dict[str, WrapperSpec] = {}
+    wrapper_owners: dict[str, str] = {}
+    wrapper_orders: dict[int, str] = {}
+    for wrapper_order, server_name, entry in _ordered_catalog_entries(servers):
+        specs[server_name] = _validated_wrapper_spec(
+            wrapper_order,
+            server_name,
+            entry,
+            wrapper_owners=wrapper_owners,
+            wrapper_orders=wrapper_orders,
+        )
     return specs
 
 

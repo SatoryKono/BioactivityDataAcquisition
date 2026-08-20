@@ -14,8 +14,8 @@ if [[ "${BIOETL_MCP_VALIDATE_ONLY:-0}" == "1" ]]; then
 fi
 
 # MCP server packages (not plain @ast-grep/cli).
-if npx -y @notprolands/ast-grep-mcp --stdio "$@"; then
+if npx -y @notprolands/ast-grep-mcp@1.1.1 --stdio "$@"; then
   exit 0
 fi
 
-exec npx -y @chousyn/ast-grep-mcp --stdio "$@"
+exec npx -y @chousyn/ast-grep-mcp@0.1.1 --stdio "$@"

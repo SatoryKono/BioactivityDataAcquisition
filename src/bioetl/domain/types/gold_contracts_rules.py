@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import TypeGuard, cast
+from typing import cast
 
 from ._gold_contracts_support import (
     GOLD_CONTRACT_VERSION_UNKNOWN,
@@ -194,12 +194,19 @@ class GoldBusinessRuleSpec:
         )
 
 
-def _is_numeric_bound(value: object) -> TypeGuard[int | float]:
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
-
-
 def _reject_inverted_numeric_range(minimum: object, maximum: object) -> None:
-    if not (_is_numeric_bound(minimum) and _is_numeric_bound(maximum)):
+    numeric_minimum = _as_numeric_bound(minimum)
+    numeric_maximum = _as_numeric_bound(maximum)
+    if numeric_minimum is None or numeric_maximum is None:
         return
-    if minimum > maximum:
+    if numeric_minimum > numeric_maximum:
         raise ValueError("minimum cannot exceed maximum")
+
+
+def _as_numeric_bound(value: object) -> int | float | None:
+    """Narrow a dynamic contract bound without accepting booleans as integers."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    return None

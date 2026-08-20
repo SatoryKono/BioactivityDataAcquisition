@@ -471,14 +471,11 @@ def build_payload(
     }
 
 
-from scripts.engineering.qa.debt_governance_gate_report import (
-    render_markdown,
-    _write_artifacts,
-    _artifact_staleness_errors,
-    _failing_gate_errors,
-    _check_artifacts,
-    main,
-)
+def main(argv: list[str] | None = None) -> int:
+    """Compatibility entrypoint for `python -m scripts.engineering.qa report-debt-governance-gates`."""
+    from scripts.engineering.qa.debt_governance_gate_report import main as _gate_main
+
+    return _gate_main(argv)
 
 
 if __name__ == "__main__":

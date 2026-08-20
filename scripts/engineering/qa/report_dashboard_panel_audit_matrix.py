@@ -143,6 +143,65 @@ def _panel_exprs(panel: dict[str, object]) -> list[str]:
     return exprs
 
 
+def _contract_field(record: dict[str, object] | None, field: str) -> object:
+    return record.get(field) if record is not None else None
+
+
+def _panel_audit_row(
+    *,
+    dashboard_path: Path,
+    uid: str,
+    panel: dict[str, object],
+    content_record: dict[str, object] | None,
+) -> dict[str, str]:
+    panel_id = str(panel.get("id", ""))
+    title = str(panel.get("title", ""))
+    normalized_title = title.strip().lower()
+    expr_blob = " | ".join(_panel_exprs(panel))
+    covered = content_record is not None
+    return {
+        "dashboard_uid": uid,
+        "dashboard_file": dashboard_path.name,
+        "panel_id": panel_id,
+        "panel_title": title,
+        "panel_type": str(panel.get("type", "")),
+        "content_contract_status": "covered" if covered else "missing",
+        "eligible": "true",
+        "enrolled": "true" if covered else "false",
+        "coverage_reason": "all_shipped_panels" if covered else "missing_shipped_panel",
+        "content_role": str(_contract_field(content_record, "role") or ""),
+        "content_tier": str(_contract_field(content_record, "tier") or ""),
+        "content_scope": str(_contract_field(content_record, "scope") or ""),
+        "content_state_model": _joined_contract_list(
+            _contract_field(content_record, "state_model")
+        ),
+        "fixture_case_count": str(
+            len(_contract_string_list(_contract_field(content_record, "fixture_cases")))
+        ),
+        "render_profile_count": str(
+            len(
+                _contract_string_list(
+                    _contract_field(content_record, "render_profiles")
+                )
+            )
+        ),
+        "datasource_kind": _datasource_kind(panel),
+        "uses_run_id_in_promql": str("run_id=" in expr_blob),
+        "uses_run_type_in_promql": str(
+            "run_type=~" in expr_blob or 'run_type="' in expr_blob
+        ),
+        "is_identity_panel": str(normalized_title == "id"),
+        "is_processed_records_panel": str(normalized_title == "processed records"),
+        "is_provider_status_panel": str(
+            normalized_title == "status" and uid == "bioetl-provider-health-v2"
+        ),
+        "query_preview": expr_blob[:500],
+        "live_audit_status": "not_run",
+        "live_classification": "",
+        "render_status": "not_run",
+    }
+
+
 def _collect_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     content_contract = _content_contract_by_panel()
@@ -152,85 +211,15 @@ def _collect_rows() -> list[dict[str, str]]:
         payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         uid = str(payload.get("uid", dashboard_path.stem))
         for panel in _iter_panels(payload):
-            panel_type = str(panel.get("type", ""))
             panel_id = str(panel.get("id", ""))
-            title = str(panel.get("title", ""))
-            exprs = _panel_exprs(panel)
-            expr_blob = " | ".join(exprs)
             content_record = content_contract.get((uid, panel_id))
             rows.append(
-                {
-                    "dashboard_uid": uid,
-                    "dashboard_file": dashboard_path.name,
-                    "panel_id": panel_id,
-                    "panel_title": title,
-                    "panel_type": panel_type,
-                    "content_contract_status": (
-                        "covered" if content_record is not None else "missing"
-                    ),
-                    "eligible": "true",
-                    "enrolled": "true" if content_record is not None else "false",
-                    "coverage_reason": (
-                        "all_shipped_panels"
-                        if content_record is not None
-                        else "missing_shipped_panel"
-                    ),
-                    "content_role": (
-                        str(content_record.get("role", ""))
-                        if content_record is not None
-                        else ""
-                    ),
-                    "content_tier": (
-                        str(content_record.get("tier", ""))
-                        if content_record is not None
-                        else ""
-                    ),
-                    "content_scope": (
-                        str(content_record.get("scope", ""))
-                        if content_record is not None
-                        else ""
-                    ),
-                    "content_state_model": (
-                        _joined_contract_list(content_record.get("state_model"))
-                        if content_record is not None
-                        else ""
-                    ),
-                    "fixture_case_count": str(
-                        len(
-                            _contract_string_list(
-                                content_record.get("fixture_cases")
-                                if content_record is not None
-                                else None
-                            )
-                        )
-                    ),
-                    "render_profile_count": str(
-                        len(
-                            _contract_string_list(
-                                content_record.get("render_profiles")
-                                if content_record is not None
-                                else None
-                            )
-                        )
-                    ),
-                    "datasource_kind": _datasource_kind(panel),
-                    "uses_run_id_in_promql": str("run_id=" in expr_blob),
-                    "uses_run_type_in_promql": str(
-                        "run_type=~" in expr_blob or 'run_type="' in expr_blob
-                    ),
-                    "is_identity_panel": str(title.strip().lower() == "id"),
-                    "is_processed_records_panel": str(
-                        title.strip().lower() == "processed records"
-                    ),
-                    "is_provider_status_panel": str(
-                        title.strip().lower() == "status"
-                        and uid == "bioetl-provider-health-v2"
-                    ),
-                    "query_preview": expr_blob[:500],
-                    "live_audit_status": "not_run",
-                    "live_classification": "",
-                    "render_status": "not_run",
-                }
+                _panel_audit_row(
+                    dashboard_path=dashboard_path,
+                    uid=uid,
+                    panel=panel,
+                    content_record=content_record,
+                )
             )
     return rows
 

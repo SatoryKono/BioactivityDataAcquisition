@@ -1,0 +1,136 @@
+[
+  {
+    "id": "TELE-001",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.95,
+    "status": "PROVEN",
+    "category": "alert-test-coverage",
+    "evidence": [
+      {
+        "path": "scripts/engineering/qa/check_prometheus_rules.py",
+        "line": 30,
+        "command": "python -c collect_rule_test_coverage(rules_files=DEFAULT_RULES_FILES, test_file=TESTS_FILE)",
+        "observation": "MIN_TESTED_ALERTS=43 after ratchet; tested_alerts=43 firing_alerts=43 alert_definitions=57; 14 untested remain"
+      },
+      {
+        "path": "grafana/prometheus-rules/tests/bioetl_observability.test.yml",
+        "line": 1,
+        "command": "git show 75e3921fda --stat",
+        "observation": "This cycle added firing fixtures for BioETLPipelineRunFailed, BioETLRecordFlowInvariantViolated, BioETLStageBacklogActive, BioETLLineageRefsMissing, BioETLDQValidationFailuresCritical"
+      }
+    ],
+    "expected": "Every shipped alert in DEFAULT_RULES_FILES has a firing promtool fixture; MIN_TESTED_ALERTS tracks the count without raising the bar without fixtures",
+    "actual": "43/57 DEFAULT_RULES_FILES alerts have firing fixtures (was 38). Residual untested: BioETLCheckpointCompatibilityBlocked, BioETLControlPlaneManifestWriteFailed, BioETLControlPlaneManifestWriteFailureRateHigh, BioETLDQCriticalAnomaliesDetected, BioETLDQSoftThresholdExceeded, BioETLIngestionThroughputDegraded, BioETLLineageFragmentPersistenceFailed, BioETLPipelineInfrastructureValidationFailed, BioETLPipelinePreflightDataSourceFailed, BioETLRunLedgerAppendFailed, BioETLRunLedgerAppendFailureRateHigh, BioETLSilverFilterRejectAccountingMismatch, BioETLSilverValidationFailuresDetected, BioETLStageLagHigh",
+    "impact": "Critical-path five alerts now have regression fixtures; remaining 14 can silently drift. Issue #9144 tracks residual.",
+    "root_cause": "Historical MIN_TESTED_ALERTS ratchet lagged shipped alert set; DEFAULT_RULES_FILES coverage tests only listed fixtures",
+    "remediation": "Add firing fixtures for residual 14 using existing recording-rule series; ratchet MIN_TESTED_ALERTS with each batch. Do not invent series.",
+    "effort": "M",
+    "dependencies": [
+      "#9144"
+    ],
+    "validation": [
+      "python -m scripts.engineering.qa check-prometheus-rules --coverage-json",
+      ".\\.venv-win\\Scripts\\python.exe -m pytest tests/unit/scripts/qa/test_check_prometheus_rules.py -q"
+    ],
+    "automated_fix_possible": false,
+    "github_issue": 9144
+  },
+  {
+    "id": "TELE-002",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.93,
+    "status": "PROVEN",
+    "category": "rules-file-scope",
+    "evidence": [
+      {
+        "path": "grafana/prometheus-rules/bioetl.yml",
+        "line": 1,
+        "command": "extract - alert names from grafana/prometheus-rules/*.yml",
+        "observation": "PrometheusDown is the only alert in bioetl.yml; DEFAULT_RULES_FILES omits this file so EXPECTED_ALERT_DEFINITIONS=57 excludes it"
+      },
+      {
+        "path": "scripts/engineering/qa/check_prometheus_rules.py",
+        "line": 19,
+        "command": "print(DEFAULT_RULES_FILES)",
+        "observation": "DEFAULT_RULES_FILES = bioetl_observability.yml + bioetl_control_plane_current_status.yml"
+      }
+    ],
+    "expected": "Every shipped alert file under grafana/prometheus-rules is either in DEFAULT_RULES_FILES with tests, or explicitly documented as out-of-gate",
+    "actual": "PrometheusDown lives in bioetl.yml and is untested; 58 unique alerts across all yml vs 57 gated",
+    "impact": "Infra PrometheusDown can regress without the BioETL rule-coverage gate",
+    "root_cause": "bioetl.yml is treated as stack-level, not BioETL application rules",
+    "remediation": "Either add bioetl.yml to DEFAULT_RULES_FILES with a PrometheusDown fixture (and bump EXPECTED_ALERT_DEFINITIONS 57->58 with tests) or document an explicit exclusion in the checker",
+    "effort": "S",
+    "dependencies": [
+      "#9144"
+    ],
+    "validation": [
+      "python -m scripts.engineering.qa check-prometheus-rules --coverage-json"
+    ],
+    "automated_fix_possible": false,
+    "github_issue": 9144
+  },
+  {
+    "id": "TELE-003",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.9,
+    "status": "PROVEN",
+    "category": "cardinality-freshness",
+    "evidence": [
+      {
+        "path": "reports/observability/runtime_cardinality_review.json",
+        "line": 1,
+        "command": "python -m scripts.engineering.qa report-observability-metric-inventory --check --allow-local-cardinality-fallback",
+        "observation": "On origin/main the committed review was generated_at=2026-08-11T22:58:21Z source_revision=c71e257c source_worktree_dirty=true prometheus_base_url=null mode=local_cardinality_fallback. This cycle regenerates after a clean reports commit so dirty=false."
+      }
+    ],
+    "expected": "Cardinality review generated from a clean tree of the current SHA; source_worktree_dirty=false; thresholds not raised",
+    "actual": "Committed main artifact is stale/dirty; live Prometheus is unconfigured (MONITORING=false, expected). Local fallback series counts are 0.",
+    "impact": "CI cardinality gate uses a stale SHA; live label explosion would not be observed until Prometheus is configured",
+    "root_cause": "Review JSON was last generated on a dirty worktree; BIOETL_OBSERVABILITY_PROMETHEUS_URL unset by design in this cycle",
+    "remediation": "Regenerate via owner command with --allow-local-cardinality-fallback on a clean tree; do not start docker-compose.monitoring.yml; do not raise thresholds",
+    "effort": "S",
+    "dependencies": [
+      "#9145"
+    ],
+    "validation": [
+      "python -m scripts.engineering.qa report-observability-metric-inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --allow-local-cardinality-fallback"
+    ],
+    "automated_fix_possible": true,
+    "github_issue": 9145
+  },
+  {
+    "id": "TELE-004",
+    "priority": "P3",
+    "severity": "Low",
+    "confidence": "high",
+    "confidence_score": 0.88,
+    "status": "PROVEN",
+    "category": "recording-rule-tests",
+    "evidence": [
+      {
+        "path": "scripts/engineering/qa/check_prometheus_rules.py",
+        "line": 1,
+        "command": "collect_rule_test_coverage",
+        "observation": "record_definitions=110 directly_tested_records=35 MIN_DIRECTLY_TESTED_RECORDS=28; untested_control_plane_records=[]; first-screen records bioetl_l0_status, bioetl_l0_next_action_route, bioetl_runtime_current_blocker_reason are in untested_records"
+      }
+    ],
+    "expected": "First-screen recording rules have direct promtool tests or an explicit documented gap",
+    "actual": "Control-plane records are fully tested. Many dashboard recording rules including L0/L1 first-screen names are untested. Floor 28 is met (35).",
+    "impact": "First-screen PromQL can drift without the record-identity tests catching it; alerts still have separate fixtures",
+    "root_cause": "MIN_DIRECTLY_TESTED_RECORDS is a floor, not full coverage of 110 records",
+    "remediation": "Add direct tests for first-screen records (bioetl_l0_status, bioetl_l0_next_action_route, bioetl_l0_input_status_selected, bioetl_runtime_current_status_trusted, bioetl_provider_current_status, bioetl_dq_current_status) and ratchet MIN_DIRECTLY_TESTED_RECORDS",
+    "effort": "M",
+    "dependencies": [],
+    "validation": [
+      "python -m scripts.engineering.qa check-prometheus-rules --coverage-json"
+    ],
+    "automated_fix_possible": false
+  }
+]

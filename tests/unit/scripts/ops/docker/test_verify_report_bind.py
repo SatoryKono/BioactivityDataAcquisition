@@ -64,6 +64,41 @@ def test_host_report_root_follows_dashboard_report_override(
     assert mod._host_report_root(tmp_path) == (active_reports / "run-reports").resolve()
 
 
+def test_ready_timeout_with_live_up_is_warning_when_bind_aligned(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_get(url: str, *, timeout: float = 5.0):
+        if url.endswith("/health/live"):
+            return {"status": "healthy"}
+        return None
+
+    monkeypatch.setattr(mod, "_json_get", fake_get)
+    state = mod._VerificationState()
+    mod._verify_ready_endpoint(
+        state,
+        ops_url="http://127.0.0.1:8000",
+        expected_source_id="a" * 64,
+        require_ops=True,
+        bind_aligned=True,
+    )
+    assert state.ok is True
+    assert any("timed out" in line for line in state.findings)
+
+    state2 = mod._VerificationState()
+    mod._verify_pipeline_endpoint(
+        state2,
+        ops_url="http://127.0.0.1:8000",
+        pipeline="chembl_assay",
+        expected_source_id="a" * 64,
+        host_count=3,
+        host_latest_run_id="run-a",
+        require_ops=True,
+        bind_aligned=True,
+    )
+    assert state2.ok is True
+    assert any("timed out" in line for line in state2.findings)
+
+
 def test_compose_host_bind_path_uses_drive_letter_forward_slashes(
     tmp_path: Path,
 ) -> None:

@@ -24,7 +24,9 @@ def _normalize_float(value: float) -> float | None:
     if math.isnan(value) or math.isinf(value):
         return None
     rounded = round(value, 10)
-    return 0.0 if math.isclose(rounded, 0.0, abs_tol=1e-15) else rounded
+    if abs(rounded) <= 1e-15:
+        return 0.0
+    return rounded
 
 
 @_normalize_scalar.register(datetime)

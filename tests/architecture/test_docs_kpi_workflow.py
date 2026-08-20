@@ -47,3 +47,12 @@ def test_docs_kpi_workflow_publishes_artifacts_and_summary() -> None:
     assert "Upload docs KPI artifacts" in workflow
     assert "reports/docs-kpi/docs-kpi-weekly.json" in workflow
     assert "reports/docs-kpi/docs-kpi-weekly.md" in workflow
+
+
+def test_docs_kpi_workflow_runs_calendar_freshness_gate() -> None:
+    workflow = Path(".github/workflows/docs-kpi-weekly.yml").read_text(encoding="utf-8")
+
+    assert (
+        "python -m scripts.docs check-drift --runtime-mirrors --freshness" in workflow
+    )
+    assert "Check docs runtime-mirror and freshness drift" in workflow

@@ -52,6 +52,14 @@ def get_legacy_vcr_cassettes_files() -> list[Path]:
     return sorted(path for path in LEGACY_VCR_ROOT.rglob("*") if path.is_file())
 
 
+def _is_managed_or_metadata_cassette(path: Path, *, relative: Path) -> bool:
+    parts = relative.parts
+    if len(parts) >= 3 and parts[:2] == ("tests", "fixtures"):
+        if parts[2] in {"vcr", "vcr_cassettes"}:
+            return True
+    return path.name.endswith("_meta.yaml")
+
+
 def get_noncanonical_test_vcr_cassettes() -> list[Path]:
     """Return VCR cassettes under tests/ outside the canonical fixtures/vcr tree.
 
@@ -69,15 +77,7 @@ def get_noncanonical_test_vcr_cassettes() -> list[Path]:
             relative = path.relative_to(ROOT)
         except ValueError:
             continue
-        parts = relative.parts
-        # Canonical managed inventory lives only under tests/fixtures/vcr/**
-        if len(parts) >= 3 and parts[0] == "tests" and parts[1] == "fixtures":
-            if len(parts) >= 3 and parts[2] == "vcr":
-                continue
-            if len(parts) >= 3 and parts[2] == "vcr_cassettes":
-                # handled by get_legacy_vcr_cassettes_files
-                continue
-        if path.name.endswith("_meta.yaml"):
+        if _is_managed_or_metadata_cassette(path, relative=relative):
             continue
         if _looks_like_vcr_cassette(path):
             noncanonical.append(path)

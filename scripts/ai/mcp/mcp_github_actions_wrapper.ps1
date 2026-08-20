@@ -30,5 +30,5 @@ if (Test-Path $localGithubActionsMain) {
 
 # Published package: github-actions-mcp (bin: github-actions-mcp)
 # (The old @modelcontextprotocol/server-github-actions package is 404.)
-& npx -y github-actions-mcp --stdio
+& npx -y "github-actions-mcp@1.0.1" --stdio
 exit $LASTEXITCODE

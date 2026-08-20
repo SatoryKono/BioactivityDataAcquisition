@@ -108,17 +108,15 @@ def classify_fill_error(
             reason=_status_reason(http_status, body),
             http_status=http_status,
         )
-    texts = _collect_error_texts(body)
-    for text in texts:
+    return _verdict_from_error_texts(http_status=http_status, body=body)
+
+
+def _verdict_from_error_texts(*, http_status: int | None, body: object) -> FillVerdict:
+    for text in _collect_error_texts(body):
         lowered = text.lower()
-        for needle in _ERROR_NEEDLES:
-            if needle in lowered:
-                return FillVerdict(
-                    kind="fill_error",
-                    reason=text.strip()[:400],
-                    http_status=http_status,
-                )
-        if _looks_like_http_gateway_status(lowered):
+        if any(needle in lowered for needle in _ERROR_NEEDLES) or (
+            _looks_like_http_gateway_status(lowered)
+        ):
             return FillVerdict(
                 kind="fill_error",
                 reason=text.strip()[:400],

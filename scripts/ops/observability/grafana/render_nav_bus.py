@@ -215,23 +215,38 @@ def _remove_obsolete_provider_handoff_variable(payload: dict[str, object]) -> No
     ]
 
 
+_PROVIDER_HANDOFF_NEEDLE = "var-provider=$provider"
+_PROVIDER_HANDOFF_UNKNOWN = "var-provider=unknown"
+
+
+def _rewrite_provider_handoff_text(text: str) -> str:
+    return text.replace(_PROVIDER_HANDOFF_NEEDLE, _PROVIDER_HANDOFF_UNKNOWN)
+
+
+def _rewrite_mapping_provider_handoffs(value: dict[str, object]) -> None:
+    for key, item in value.items():
+        if isinstance(item, str):
+            value[key] = _rewrite_provider_handoff_text(item)
+        else:
+            _fail_closed_provider_handoffs(item, provider_declared=False)
+
+
+def _rewrite_list_provider_handoffs(value: list[object]) -> None:
+    for index, item in enumerate(value):
+        if isinstance(item, str):
+            value[index] = _rewrite_provider_handoff_text(item)
+        else:
+            _fail_closed_provider_handoffs(item, provider_declared=False)
+
+
 def _fail_closed_provider_handoffs(value: object, *, provider_declared: bool) -> None:
     if provider_declared:
         return
     if isinstance(value, dict):
-        for key, item in value.items():
-            if isinstance(item, str):
-                value[key] = item.replace("var-provider=$provider", "var-provider=unknown")
-            else:
-                _fail_closed_provider_handoffs(item, provider_declared=False)
-    elif isinstance(value, list):
-        for index, item in enumerate(value):
-            if isinstance(item, str):
-                value[index] = item.replace(
-                    "var-provider=$provider", "var-provider=unknown"
-                )
-            else:
-                _fail_closed_provider_handoffs(item, provider_declared=False)
+        _rewrite_mapping_provider_handoffs(value)
+        return
+    if isinstance(value, list):
+        _rewrite_list_provider_handoffs(value)
 
 
 def _expand_nav_height(

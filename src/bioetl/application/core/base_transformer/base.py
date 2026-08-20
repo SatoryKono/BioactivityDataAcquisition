@@ -29,6 +29,15 @@ if TYPE_CHECKING:
 __all__ = ["BaseTransformer", "T"]
 
 
+def _require_dependency_context(value: object) -> TransformerDependencyContext:
+    """Return concrete dependencies after validating replacement output."""
+    if not isinstance(value, TransformerDependencyContext):
+        raise TypeError(
+            "dataclass replacement did not preserve TransformerDependencyContext"
+        )
+    return value
+
+
 def _merge_legacy_collaborators(
     dependencies: TransformerDependencyContext,
     *,
@@ -37,16 +46,18 @@ def _merge_legacy_collaborators(
     identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    return replace(
-        dependencies,
-        tracer=dependencies.tracer if tracer is None else tracer,
-        metrics=dependencies.metrics if metrics is None else metrics,
-        identity_service=(
-            dependencies.identity_service
-            if identity_service is None
-            else identity_service
-        ),
-        pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
+    return _require_dependency_context(
+        replace(
+            dependencies,
+            tracer=dependencies.tracer if tracer is None else tracer,
+            metrics=dependencies.metrics if metrics is None else metrics,
+            identity_service=(
+                dependencies.identity_service
+                if identity_service is None
+                else identity_service
+            ),
+            pii_hasher=(dependencies.pii_hasher if pii_hasher is None else pii_hasher),
+        )
     )
 
 
@@ -123,7 +134,6 @@ class BaseTransformer(
         self.entity_type = entity_type or "unknown"
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
-
 
         from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
 

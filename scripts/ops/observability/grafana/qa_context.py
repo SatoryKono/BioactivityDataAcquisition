@@ -27,15 +27,27 @@ def qa_context_path(repo_root: Path | None = None) -> Path:
     return root / _QA_CONTEXT_PATH
 
 
-def load_observability_qa_context(repo_root: Path | None = None) -> ObservabilityQaContext:
+def load_observability_qa_context(
+    repo_root: Path | None = None,
+) -> ObservabilityQaContext:
     """Load the single canonical QA context object."""
     payload = json.loads(qa_context_path(repo_root).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("observability QA context must be a JSON object")
-    required = ("schema_version", "pipeline", "run_type", "provider", "run_id", "from", "to")
+    required = (
+        "schema_version",
+        "pipeline",
+        "run_type",
+        "provider",
+        "run_id",
+        "from",
+        "to",
+    )
     missing = [key for key in required if not str(payload.get(key) or "").strip()]
     if missing:
-        raise ValueError(f"observability QA context missing fields: {', '.join(missing)}")
+        raise ValueError(
+            f"observability QA context missing fields: {', '.join(missing)}"
+        )
     return {
         "schema_version": str(payload["schema_version"]),
         "pipeline": str(payload["pipeline"]),

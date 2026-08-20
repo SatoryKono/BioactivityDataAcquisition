@@ -161,10 +161,6 @@ def test_apply_elk_default_dir_is_canonical() -> None:
     )
 
 
-@pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Skipped on Windows due to filesystem performance",
-)
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
 

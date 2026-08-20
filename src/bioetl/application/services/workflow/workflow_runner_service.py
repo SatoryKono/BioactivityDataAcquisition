@@ -61,6 +61,15 @@ __all__ = [
 ]
 
 
+def _require_workflow_result(value: object) -> WorkflowRunExecutionResult:
+    """Return a concrete workflow result after validating replacement output."""
+    if not isinstance(value, WorkflowRunExecutionResult):
+        raise TypeError(
+            "dataclass replacement did not preserve WorkflowRunExecutionResult"
+        )
+    return value
+
+
 @dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
@@ -130,14 +139,16 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
         )
         result = workflow_result_from_state(config.name, state)
-        result = replace(
-            result,
-            workflow_run_id=workflow_run_id,
-            manifest_id=manifest_id,
+        identified_result = _require_workflow_result(
+            replace(
+                result,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+            )
         )
         return attach_workflow_run_report(
             config=config,
-            result=result,
+            result=identified_result,
             logger=getattr(self.pipeline_runner, "logger", None),
         )
 

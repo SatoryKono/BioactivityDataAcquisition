@@ -457,7 +457,9 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
     assert _panel(overview, 215)["gridPos"]["y"] < FIRST_WINDOW_Y
-    assert _panel(overview, 9603)["gridPos"]["y"] < _panel(overview, 215)["gridPos"]["y"]
+    assert (
+        _panel(overview, 9603)["gridPos"]["y"] < _panel(overview, 215)["gridPos"]["y"]
+    )
     # Triage alert table is first-screen identity; historical trends stay collapsed.
     assert _panel(overview, 9601).get("type") == "table"
     assert _panel(overview, 9018).get("type") == "state-timeline"
@@ -705,7 +707,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
         "bioetl-dq-v2.json": (9102,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
-        "bioetl-run-explorer-v1.json": (9402,),
+        "bioetl-run-explorer-v1.json": (3022,),
     }
 
     for dashboard_name, panel_ids in expected_panels.items():
@@ -740,7 +742,20 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
     assert _limit_field(panel) == 5
     assert "detail" not in _wrapped_field_names(panel)
+    organize = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "organize"
+    ).get("options", {})
+    assert organize.get("excludeByName") == {
+        "detail": True,
+        "endpoint": True,
+        "retryable": True,
+        "observed_at": True,
+    }
     target = panel["targets"][0]
+    assert target.get("parser") == "backend"
+    assert target.get("root_selector") == "rows"
     assert "error_as_row=1" in str(target.get("url") or "")
     columns = target.get("columns") or []
     names = {item.get("selector") for item in columns if isinstance(item, dict)}
@@ -1001,7 +1016,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert any("var-run_id=${__value.raw}" in url for url in first_links)
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_id=${__value.raw}" in url for url in last_links)
-    identity = _panel(explorer, 9402)
+    identity = _panel(explorer, 3022)
     assert str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     ).startswith("SELECT RUN")
@@ -1014,7 +1029,7 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
     nested_ids = {panel.get("id") for panel in row.get("panels") or []}
-    assert {3011, 3012, 3015, 3016, 3013, 3014, 3001} <= nested_ids
+    assert {3011, 3012, 3015, 3016, 3013, 3014, 3001, 3023} <= nested_ids
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
     assert 3015 not in root_ids

@@ -84,20 +84,15 @@ reports/quality/coderabbit/YYYYMMDD/
 
 ## Bounded campaign helpers
 
-The following non-canonical utilities are retained only as audit evidence and
-helpers for this campaign. They are not general project entry points:
+The bounded CodeRabbit matrix, normalization, and leaf-runner utilities were
+retired after campaign closeout. Their generated evidence remains under
+`reports/quality/coderabbit/`; use the current governed quality commands for
+new audits rather than reviving those one-shot scripts.
 
-- `scripts/quality/coderabbit/build_matrix.py`
-- `scripts/quality/coderabbit/build_streams.py`
-- `scripts/quality/coderabbit/inventory_cm.py`
-- `scripts/quality/coderabbit/rebalance_streams.py`
-- `scripts/quality/coderabbit/run_leaves.py`
-
-The one-shot remediation patchers
-`scripts/engineering/apply_s1_c2_fixes.py` and
-`scripts/engineering/apply_s1_c3c6_fixes.py` are retained for closeout
-auditability only. Do not re-run them after their source changes have landed;
-remove them once the corresponding regression coverage is durable.
+The one-shot remediation patcher
+`scripts/engineering/apply_s1_c2_fixes.py` remains for closeout auditability
+only. Do not re-run it after its source changes have landed; remove it once the
+corresponding regression coverage is durable.
 
 ## Hard constraints
 

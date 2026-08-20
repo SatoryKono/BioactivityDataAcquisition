@@ -20,5 +20,5 @@ Exit-McpValidateOnly -ServerName "deja"
 
 # Package: @vshulcz/deja-vu (bin: deja). MCP transport is the `mcp` subcommand
 # (not `--stdio` — that flag is invalid for this CLI).
-& npx -y "@vshulcz/deja-vu@0.15.7" mcp
+& npx -y "@vshulcz/deja-vu@0.17.0" mcp
 exit $LASTEXITCODE

@@ -196,7 +196,9 @@ def test_resolver_emits_quarantine_row_for_invalid_chain() -> None:
 
 
 def test_classification_resolution_support_uses_canonical_hierarchy_type() -> None:
-    from bioetl.application.services.protein import _classification_resolution_support as support
+    from bioetl.application.services.protein import (
+        _classification_resolution_support as support,
+    )
 
     source = Path(support.__file__).read_text(encoding="utf-8")
     assert "bioetl.domain.chembl.protein_classification" not in source

@@ -6,7 +6,6 @@ readiness, and CLI entrypoints call these helpers instead.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from bioetl.application.services.run_reports.paths import (
@@ -111,7 +110,7 @@ def report_root_readiness_check(*, root: Path | None = None) -> dict[str, object
             check["message"] = source_check.get("source_identity_message")
     check["enforced"] = enforce_report_root_marker()
     check["env_name"] = REPORT_ROOT_ENV
-    check["env_set"] = REPORT_ROOT_ENV in os.environ
+    check["env_set"] = env_report_root_value() is not None
     check["source_identity_env_name"] = RUNTIME_SOURCE_ID_ENV
     check["source_identity_env_set"] = source_resolution.value is not None
     check["source_identity_resolution_status"] = source_resolution.status
