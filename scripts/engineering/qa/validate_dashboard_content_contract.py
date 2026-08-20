@@ -259,10 +259,7 @@ def _validate_panel_record(
                 f"{prefix}: empty_state_class must be one of "
                 f"{sorted(ALLOWED_EMPTY_STATE_CLASSES)}"
             )
-        if (
-            record.get("scope") == "selected_run"
-            and evidence_source != "ops_http"
-        ):
+        if record.get("scope") == "selected_run" and evidence_source != "ops_http":
             errors.append(
                 f"{prefix}: data-bearing selected_run must use evidence_source=ops_http"
             )
