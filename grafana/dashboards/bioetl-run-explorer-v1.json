@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Run Explorer 2.0 narrative. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id never a Prometheus label. First screen: browse recent runs + identity hub; processed-records accounting and selected-run forensics collapsed until expanded.",
+  "description": "Run Explorer 2.0 narrative. Exact completed run via Ops HTTP pipeline_run_report_v1. run_id never a Prometheus label. First screen: browse recent runs; identity, processed-records accounting, and selected-run forensics collapsed until expanded.",
   "editable": true,
   "graphTooltip": 1,
   "id": null,
