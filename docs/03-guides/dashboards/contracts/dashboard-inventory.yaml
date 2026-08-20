@@ -212,7 +212,7 @@ dashboards:
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 17
+    panel_count: 15
     key_panels:
       - id: 9402
         title: Inspect Run Identity
