@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, cast
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
 class _HealthObservabilitySettings(Protocol):
@@ -160,11 +160,17 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     )
 
 
-def _rehydrate_provider_health_gauges(deps: object) -> None:
+class _ProviderHealthDeps(Protocol):
+    """Minimal typed view of health-server deps used for provider-health rehydrate."""
+
+    metrics: MetricsPort
+
+
+def _rehydrate_provider_health_gauges(deps: _ProviderHealthDeps) -> None:
     from bioetl.composition.health_api import rehydrate_provider_health_gauges
 
     try:
-        rehydrate_provider_health_gauges(deps.metrics)  # type: ignore[attr-defined]
+        rehydrate_provider_health_gauges(deps.metrics)
     except (OSError, RuntimeError, TypeError, ValueError, AttributeError):
         return
 

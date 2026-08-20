@@ -189,8 +189,12 @@ def test_unknown_logical_type_returns_original_value() -> None:
         ("decimal128(10, 2)", "float"),
         ("datetime64[ns]", "string"),
         ("Date", "string"),
+        ("timestamp[ns]", "string"),
         ("category", "string"),
         ("object", "unknown"),
+        ("custom_timestamp", "unknown"),
+        ("customstring", "unknown"),
+        ("notafloat", "unknown"),
     ],
 )
 def test_resolve_logical_type_classifies_extended_pandera_dtypes(
