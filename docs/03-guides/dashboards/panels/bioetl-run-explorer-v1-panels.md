@@ -5,10 +5,10 @@
 
 ## Overview
 
-Run-centric workspace. First paint is browse index + run identity (Ops HTTP
-performance budget). Processed-records accounting lives with the other
-`pipeline_run_report_v1` slices under a collapsed progressive-disclosure row.
-`run_id` is never a Prometheus label.
+Run-centric workspace. First paint is the last-4 browse index (Ops HTTP
+performance budget). Identity and processed-records accounting live with the
+other `pipeline_run_report_v1` slices under a collapsed progressive-disclosure
+row. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
@@ -17,14 +17,6 @@ performance budget). Processed-records accounting lives with the other
 - **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, and where full artifact paths lead.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 3. Inspect Run Identity
-- **Type:** Table
-- **Purpose:** Run/manifest identity for selected scope (first paint). Before a
-  concrete selection the returned rows request an exact Run ID; after selection
-  an empty section is `VALID EMPTY`, while datasource/backend failure renders
-  as `QUERY ERROR`.
-- **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
-
 ### 5. Inspect Recent Runs (last 4)
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 4 pipeline-run reports for the selected pipeline. The Run
@@ -32,8 +24,8 @@ performance budget). Processed-records accounting lives with the other
   does not bind a table highlight by itself). The complete last-20 browser
   lives in Selected Run Details.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** Compact index; Inspect Run Identity stays on the first screen
-  (`y<=13`). Selected-run forensics, including processed records, stay collapsed.
+- **Layout:** Compact first-screen index. Identity (`3022`) and processed
+  records (`3023`) stay collapsed under Selected Run Details.
 - **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
   not embed `$pipeline` — Grafana does not interpolate `noValue`) when
   Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
@@ -100,8 +92,8 @@ Nested titles (must match JSON):
 
 ### 13. Continue Run Investigation
 - **Type:** Text
-- **Purpose:** Next-step CTA after browse or selection: verify identity and
-  processed records, expand Selected Run Details, then open Trust for
+- **Purpose:** Next-step CTA after browse or selection: expand Selected Run
+  Details for identity and processed records, then open Trust for
   recovery/replay safety. Run Explorer is evidence-only.
 - **Data sources:** Static operator copy.
 
@@ -110,8 +102,14 @@ Nested titles (must match JSON):
 
 Shipped in `bioetl-run-explorer-v1.json`.
 ### 17. Inspect Full Run Identity
-
-Shipped in `bioetl-run-explorer-v1.json`.
+- **Type:** Table (`id=3022`)
+- **Purpose:** Run/manifest identity for the selected run (collapsed Selected
+  Run Details). Before a concrete selection the returned rows request an exact
+  Run ID; after selection an empty section is `VALID EMPTY`, while
+  datasource/backend failure renders as `QUERY ERROR`. This is the only
+  identity table on Run Explorer (the compact first-window teaser was removed
+  as a same-row subset).
+- **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
 ### 18. Inspect Full Processed Records
 - **Type:** Table (`id=3023`)
 - **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage

@@ -199,7 +199,6 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
 | bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 4) |
-| bioetl-run-explorer-v1.json | 9402 | Inspect Run Identity |
 | bioetl-run-explorer-v1.json | 3099 | Selected Run Details |
 | bioetl-run-explorer-v1.json | 3021 | Inspect Recent Runs (last 20) |
 | bioetl-run-explorer-v1.json | 3022 | Inspect Full Run Identity |

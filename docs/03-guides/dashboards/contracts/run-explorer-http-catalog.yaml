@@ -40,13 +40,6 @@ panels:
     root_selector: items
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
-  - id: 9402
-    title: Inspect Run Identity
-    endpoint: identity_table
-    url: /ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
-    root_selector: rows
-    no_value_tokens: [SELECT RUN, VALID EMPTY]
-    copy_tokens: []
   - id: 3021
     title: Inspect Recent Runs (last 20)
     endpoint: pipeline_run_reports

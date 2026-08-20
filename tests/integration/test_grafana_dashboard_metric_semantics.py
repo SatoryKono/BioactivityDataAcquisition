@@ -1822,7 +1822,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     }
     identity_id, processed_id = {
         "bioetl-overview-v2.json": (9300, 9301),
-        "bioetl-run-explorer-v1.json": (9402, 3023),
+        "bioetl-run-explorer-v1.json": (3022, 3023),
     }.get(dashboard_name, (9402, 9403))
     identity = panels[identity_id]
     processed = panels[processed_id]

@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 37,
+    "http": 35,
     "loki": 0,
     "promql": 171,
     "tempo": 0,
@@ -4862,29 +4862,6 @@
       "runbook_urls": [],
       "thresholds": [],
       "unit": ""
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 9402,
-      "panel_title": "Inspect Run Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/control-plane/identity-table",
-        "pipeline",
-        "run_type",
-        "run_id"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": "none"
     },
     {
       "coverage_class": "required_when_active",
