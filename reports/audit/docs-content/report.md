@@ -1,11 +1,7 @@
 # Docs content audit
 
-Source run: `20260814T171455Z-audit-seq-dd076a79f5`.
+Source run: `20260820T064946Z-docs-cycle-d297d3d14b`.
 
-`surface_score=3`. The current documentation content passes relative-link,
-navigation, governance-section, version, KPI, runtime-mirror, and strict-build
-checks. The 35 heading-fragment defects proven during this run were repaired
-with stable targets; no unresolved content finding remains.
+`surface_score=2`. Core onboarding, links, ADR index, and KPI hard limits hold. Material remaining gap is the architecture-index census already tracked as #9102. This cycle refreshed the 7-day evidence summary (#9113) and documented missing `scripts.docs` commands (#9116).
 
-Canonical evidence:
-`reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/`.
+Canonical evidence: `reports/audit-runs/20260820T064946Z-docs-cycle-d297d3d14b/`.

@@ -17,13 +17,18 @@ from scripts.ai.prompts.registry import (
 )
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
-PARAM_TABLE_DEFAULT_RE = re.compile(r"\|\s*`([A-Z][A-Z0-9_]*)`\s*\|\s*(.*?)\s*\|")
+PARAM_TABLE_DEFAULT_RE = re.compile(
+    r"^\s*\|\s*`([A-Z][A-Z0-9_]*)`\s*\|\s*([^|\r\n]*)\|"
+)
 
 
 def extract_defaults_from_body(body: str) -> dict[str, str]:
     """Best-effort defaults from markdown params tables."""
     defaults: dict[str, str] = {}
-    for match in PARAM_TABLE_DEFAULT_RE.finditer(body):
+    for line in body.splitlines():
+        match = PARAM_TABLE_DEFAULT_RE.match(line)
+        if match is None:
+            continue
         key = match.group(1)
         raw = match.group(2).strip()
         # strip surrounding backticks / code
