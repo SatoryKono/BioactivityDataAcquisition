@@ -1,0 +1,19 @@
+{
+  "classification": "INCOMPLETE",
+  "contract": "trust_status_split_v1",
+  "http_status": 200,
+  "message": "Terminal processing success is not lineage closure, retention compliance, or replay readiness.",
+  "next_action": "Review required-evidence gaps; do not treat processing_status=success as OK trust.",
+  "processing_status": "success",
+  "rows": [
+    {
+      "parameter": "processing_status",
+      "value": "success"
+    },
+    {
+      "parameter": "trust_status",
+      "value": "INCOMPLETE"
+    }
+  ],
+  "trust_status": "INCOMPLETE"
+}

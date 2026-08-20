@@ -1,0 +1,109 @@
+# Fail-closed allowlists for DASHBOARD_REQUIREMENTS P0/P1 gates (#9212–#9218).
+# Tests: tests/integration/test_dashboard_requirement_gates.py
+schema_version: 1
+owner: "@bioetl-observability"
+
+shipped_uids:
+  - bioetl-control-plane-v1
+  - bioetl-overview-v2
+  - bioetl-runtime
+  - bioetl-provider-health-v2
+  - bioetl-dq-v2
+  - bioetl-incident-v1
+  - bioetl-run-explorer-v1
+
+ops_http_path_prefixes:
+  - /ops/control-plane/
+  - /ops/observability/
+
+# DASH-ZERO-001: synthetic PromQL zeros allowed only as documented event counters.
+synthetic_zero_allowlist:
+  - dashboard: bioetl-control-plane-v1.json
+    id: 5
+    owner: "@bioetl-observability"
+    rationale: >-
+      Compare Checkpoint Outcomes fills a missing disposition series so the
+      stacked comparison still lists no_events; not a status/trust verdict.
+    retire_when: recording rule emits an explicit no_events series
+  - dashboard: bioetl-runtime.json
+    id: 241
+    owner: "@bioetl-observability"
+    rationale: >-
+      Stage×run_type record counts; vector(0) is an empty event bucket, not
+      CURRENT health.
+    retire_when: table uses absent() → UNKNOWN instead of a numeric zero
+  - dashboard: bioetl-runtime.json
+    id: 256
+    owner: "@bioetl-observability"
+    rationale: >-
+      Error-code event table; missing series is a zero count of that code.
+    retire_when: table uses absent() → UNKNOWN instead of a numeric zero
+
+# DASH-FIRST-002: root Inspect* tables in the first window (y < first_window_y).
+first_window_inspect_tables:
+  - dashboard: bioetl-incident-v1.json
+    id: 2010
+    owner: "@bioetl-observability"
+    rationale: DASH-FIT-003 incident answer is the ranked-suspects table.
+    retire_when: a Monitor* verdict card replaces 2010 as the answer panel
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9107
+    owner: "@bioetl-observability"
+    rationale: >-
+      Compact status-reason companion to first-window Monitor Fleet Severity
+      (9101); not a forensic row group.
+    retire_when: reason text is inlined into 9101
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 3010
+    owner: "@bioetl-observability"
+    rationale: DASH-FIT-003 browse index (last 4); identity/accounting stay collapsed.
+    retire_when: browse index moves behind a collapsed row
+
+# DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
+operator_question:
+  bioetl-control-plane-v1.json:
+    answer_ids: [9401]
+    next_action_id: 9418
+    basis_tokens: [CURRENT, trust_status]
+    next_action_tokens: [processing_status]
+  bioetl-overview-v2.json:
+    answer_ids: [214, 215]
+    next_action_id: 215
+    basis_tokens: [CURRENT]
+    next_action_tokens: [Open Runtime]
+  bioetl-runtime.json:
+    answer_ids: [9401]
+    next_action_id: 9991
+    basis_tokens: [CURRENT]
+    next_action_tokens: [Start Pipeline Triage]
+  bioetl-provider-health-v2.json:
+    answer_ids: [9101]
+    next_action_id: 9002
+    basis_tokens: [CURRENT]
+    next_action_tokens: [Start Provider Triage]
+  bioetl-dq-v2.json:
+    answer_ids: [9401]
+    next_action_id: 9103
+    basis_tokens: [CURRENT]
+    next_action_tokens: [Start DQ Triage]
+  bioetl-incident-v1.json:
+    answer_ids: [2010]
+    next_action_id: 2001
+    basis_tokens: [Suspects]
+    next_action_tokens: [Start Incident Triage]
+  bioetl-run-explorer-v1.json:
+    answer_ids: [3010]
+    next_action_id: 1
+    basis_tokens: [BROWSE]
+    next_action_tokens: [SELECTED RUN]
+
+# DASH-STATE-004: panels that must name both processing_status and trust_status.
+trust_split_panels:
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9401
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9418
+  - dashboard: bioetl-control-plane-v1.json
+    id: 9416
+  - dashboard: bioetl-runtime.json
+    id: 9401
