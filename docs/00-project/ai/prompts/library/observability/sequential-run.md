@@ -163,6 +163,12 @@ python -m scripts.engineering.qa report-dashboard-scalar-density --check
 `check-dashboard-visual-semantics` PASS ≠ нет visual-дефектов.
 Не запускать `prompt.audit.cycle.dashboards` вторым полным проходом на том же SHA.
 
+Focused/manual (вне шагов 1–8, не второй grafana-six):
+`prompt.observability.dashboard-manual-validation` — DASH-REFLOW-001,
+computed `DASH-TYPOGRAPHY-001`, live `DASH-FIT-004`, `DASH-RENDER-001`,
+operator `DASH-FIRST-001`, UI `DASH-STATE-002`, contrast `DASH-COLOR-001`.
+При `MONITORING=false` live-строки = `Not Verifiable`. Не reopen `#8986`.
+
 ## Артефакты
 
 `reports/audit/observability-seq/<UTC>-obs-seq-<shortsha>/`
