@@ -35,5 +35,5 @@ Exit-McpValidateOnly -ServerName "adr-analysis"
 
 # Package defaults to stdio MCP transport. Do not pass a bare "--stdio" flag —
 # it is not a CLI option and can cause the process to exit immediately.
-& npx -y mcp-adr-analysis-server
+& npx -y mcp-adr-analysis-server@2.6.14
 exit $LASTEXITCODE

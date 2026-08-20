@@ -25,5 +25,5 @@ Test-McpRequiredToken `
     -AllowedPrefixes @("ghp_", "github_pat_", "gho_", "ghu_", "ghs_", "ghr_")
 Exit-McpValidateOnly -ServerName "github"
 
-& npx -y @modelcontextprotocol/server-github --stdio
+& npx -y "@modelcontextprotocol/server-github@2025.4.8" --stdio
 exit $LASTEXITCODE

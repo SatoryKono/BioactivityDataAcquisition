@@ -29,4 +29,4 @@ fi
 
 # Published package: github-actions-mcp (bin: github-actions-mcp)
 # (The old @modelcontextprotocol/server-github-actions package is 404.)
-exec npx -y github-actions-mcp --stdio
+exec npx -y "github-actions-mcp@1.0.1" --stdio
