@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 
 from bioetl.infrastructure.control_plane._file_lineage_index import stable_key_filename
@@ -47,11 +47,11 @@ class ProviderHealthEvidenceRecord:
         except ValueError:
             return None
 
-    def is_fresh(self, *, now: datetime | None = None) -> bool:
+    def is_fresh(self, *, now: datetime) -> bool:
         observed = self.observed_unix()
         if observed is None:
             return False
-        current = (now or datetime.now(UTC)).timestamp()
+        current = now.timestamp()
         return 0.0 <= current - observed <= PROVIDER_HEALTH_FRESHNESS_SECONDS
 
 

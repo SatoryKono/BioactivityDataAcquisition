@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import HealthCheckResult, HealthMonitorPort
+from bioetl.domain.ports import ClockPort, HealthCheckResult, HealthMonitorPort
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http._health_monitor_observability import (
     restore_provider_health_status,
@@ -31,6 +31,7 @@ class PersistingProviderHealthMonitor:
 
     inner: HealthMonitorPort
     store: FileProviderHealthEvidenceStore
+    clock: ClockPort
 
     def update_from_health_check_result(
         self,
@@ -38,7 +39,7 @@ class PersistingProviderHealthMonitor:
         logger: LoggerPort | None = None,
     ) -> HealthStatus:
         status = self.inner.update_from_health_check_result(result, logger)
-        observed = result.checked_at or datetime.now(UTC)
+        observed = result.checked_at or self.clock.now()
         if observed.tzinfo is None:
             observed = observed.replace(tzinfo=UTC)
         reason = None
@@ -69,11 +70,11 @@ def rehydrate_provider_health_evidence(
     metrics: MetricsPort,
     store: FileProviderHealthEvidenceStore,
     *,
-    now: datetime | None = None,
+    now: datetime,
 ) -> int:
     """Publish CURRENT gauges from persisted evidence without incrementing counters."""
     published = 0
-    current = now or datetime.now(UTC)
+    current = now
     for record in store.list_all():
         metrics.set_gauge(
             "bioetl_provider_observed_universe",

@@ -90,8 +90,8 @@ ______________________________________________________________________
   > under `src/bioetl/domain/ports/**`; **port_module_files** = `*.py` excluding
   > `__init__.py`; **runtime_checkable_port_count** = those classes with
   > `@runtime_checkable`. Live snapshot at last inventory refresh:
-  > **86** `port_protocol_classes`, **86** `runtime_checkable_port_count`
-  > (100% of `*Port` Protocols), **67** `port_module_files`, **76** scanned
+  > **89** `port_protocol_classes`, **89** `runtime_checkable_port_count`
+  > (100% of `*Port` Protocols), **69** `port_module_files`, **78** scanned
   > Python files including `__init__.py`. Raw `@runtime_checkable` decorator
   > tokens may exceed the port class count when non-`*Port` Protocols in the
   > same tree are also decorated. Minimum requirement remains the critical

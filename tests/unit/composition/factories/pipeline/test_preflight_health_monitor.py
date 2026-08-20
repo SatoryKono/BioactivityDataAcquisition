@@ -56,7 +56,9 @@ def test_rehydrate_provider_health_gauges_uses_persisted_store() -> None:
         published = module.rehydrate_provider_health_gauges(metrics)
 
     assert published == 3
-    rehydrate.assert_called_once_with(metrics, store)
+    rehydrate.assert_called_once()
+    assert rehydrate.call_args.args[:2] == (metrics, store)
+    assert "now" in rehydrate.call_args.kwargs
 
 
 def test_rehydrate_provider_health_gauges_returns_zero_without_store() -> None:
