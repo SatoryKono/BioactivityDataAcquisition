@@ -327,14 +327,11 @@ async def _evolve_delta_schema_with_empty_append(
     request: _DeltaWriteRequest,
 ) -> _DeltaWriteRequest:
     """Pre-evolve an existing Delta table schema without writing extra rows."""
-    empty_request: _DeltaWriteRequest = cast(  # type: ignore[redundant-cast]
-        _DeltaWriteRequest,
-        replace(
-            request,
-            validated_mode=SilverWriteMode.APPEND,
-            arrow_data=request.arrow_data.slice(0, 0),
-            schema_mode="merge",
-        ),
+    empty_request: _DeltaWriteRequest = replace(
+        request,
+        validated_mode=SilverWriteMode.APPEND,
+        arrow_data=request.arrow_data.slice(0, 0),
+        schema_mode="merge",
     )
     await _write_plain_delta_request(
         load_module=load_module,
@@ -342,7 +339,8 @@ async def _evolve_delta_schema_with_empty_append(
         mode="append",
         schema_mode="merge",
     )
-    return replace(request, merge_schema=False)
+    evolved_request: _DeltaWriteRequest = replace(request, merge_schema=False)
+    return evolved_request
 
 
 async def _load_delta_table(

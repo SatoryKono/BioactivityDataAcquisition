@@ -145,11 +145,12 @@ def attach_workflow_run_report(
             execution_steps=execution_rows,
         )
         written = write_workflow_run_report(report)
-        return replace(
+        reported_result: WorkflowRunExecutionResult = replace(
             result,
             run_report_json_path=str(written.json_path),
             run_report_markdown_path=str(written.markdown_path),
         )
+        return reported_result
     except Exception as exc:
         if logger is not None:
             logger.warning(
@@ -158,7 +159,8 @@ def attach_workflow_run_report(
                 error_type=type(exc).__name__,
                 error=str(exc),
             )
-        return replace(
+        failed_result: WorkflowRunExecutionResult = replace(
             result,
             run_report_error=f"{type(exc).__name__}: {exc}",
         )
+        return failed_result

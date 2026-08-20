@@ -44,6 +44,8 @@ if TYPE_CHECKING:
 
     def get_quarantine_service() -> QuarantineService: ...
 
+    def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int: ...
+
 
 __all__ = [
     "HealthServerDependencies",
@@ -53,11 +55,15 @@ __all__ = [
     "get_quarantine_port",
     "get_quarantine_runtime_service",
     "get_quarantine_service",
+    "rehydrate_provider_health_gauges",
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
 _BOOTSTRAP_HEALTH_MODULE = "bioetl.composition.bootstrap.cli.health"
 _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
+_PREFLIGHT_HEALTH_MODULE = (
+    "bioetl.composition.factories.pipeline._preflight_health_monitor"
+)
 _PUBLIC_EXPORTS = {
     "HealthServerDependencies": _BOOTSTRAP_HEALTH_MODULE,
     "get_health_server_dependencies": _SERVICES_MODULE,
@@ -65,6 +71,7 @@ _PUBLIC_EXPORTS = {
     "get_quarantine_port": _SERVICES_MODULE,
     "get_quarantine_runtime_service": _RESOURCE_MANAGEMENT_MODULE,
     "get_quarantine_service": _SERVICES_MODULE,
+    "rehydrate_provider_health_gauges": _PREFLIGHT_HEALTH_MODULE,
 }
 
 

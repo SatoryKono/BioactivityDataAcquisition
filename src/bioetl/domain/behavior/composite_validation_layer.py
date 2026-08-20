@@ -88,7 +88,11 @@ class CompositeValidator:
             execution_context=config.execution_context,
             config=governance_config,
         )
-        return replace(validation_report, execution_decision=governance_decision)
+        governed_report: CompositeValidationReport = replace(
+            validation_report,
+            execution_decision=governance_decision,
+        )
+        return governed_report
 
     def _run_structural_validation(
         self,

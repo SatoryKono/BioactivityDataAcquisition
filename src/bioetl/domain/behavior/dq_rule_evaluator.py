@@ -161,13 +161,14 @@ def _apply_invalid_record_policy(
         "skip": DQDisposition.SKIP,
         "fail": DQDisposition.FAIL,
     }[dq_config.invalid_record_policy]
-    return replace(
+    policy_outcome: DQRuleOutcome = replace(
         outcome,
         disposition=policy_disposition,
         disposition_reason=(
             f"invalid_record_policy={dq_config.invalid_record_policy}"
         ),
     )
+    return policy_outcome
 
 
 def _config_path(resolver: DQPolicyResolver) -> str | None:
