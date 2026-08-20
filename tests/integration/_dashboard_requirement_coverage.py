@@ -88,6 +88,10 @@ _UNAVAILABLE_TOKENS = (
     "timeout",
     "504",
     "deadline_exceeded",
+    "tree_missing",
+    "layout_unhealthy",
+    "identity_unhealthy",
+    "bind or origin failure",
 )
 _PALETTE_TOKENS = ("OK", "WARN", "CRIT", "UNKNOWN")
 _FORBIDDEN_MAIN_COMPOSE_SERVICES = {
