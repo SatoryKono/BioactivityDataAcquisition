@@ -8,6 +8,10 @@
   engine. Does not edit .env. Aligns volume auth with NEO4J_PASSWORD from the
   current process environment or existing local .env (read-only).
 
+  Preferred path: `runtime_manager.py start|recover --stack neo4j` performs the
+  same auth re-seed on an existing volume. This script remains the operator
+  fallback.
+
   Prerequisites:
     - Docker engine reachable
     - NEO4J_PASSWORD available (process env or local .env)
