@@ -85,11 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         _emit_error(detail, as_json=args.json)
         return EXIT_PROMETHEUS
 
-    bioetl: list[dict[str, object]] = []
-    for target in targets:
-        labels = target.get("labels")
-        if isinstance(labels, dict) and str(labels.get("job", "")).lower() == "bioetl":
-            bioetl.append(target)
+    bioetl = _bioetl_job_targets(targets)
     if not bioetl:
         detail = (
             "no active Prometheus job named 'bioetl' "
@@ -101,23 +97,37 @@ def main(argv: list[str] | None = None) -> int:
     unhealthy = [
         target for target in bioetl if str(target.get("health", "")).lower() != "up"
     ]
-    target_summaries = [
-        {
-            "scrapeUrl": target.get("scrapeUrl"),
-            "health": target.get("health"),
-            "lastError": target.get("lastError"),
-        }
-        for target in bioetl
-    ]
     summary = {
         "status": "ok" if not unhealthy else "error",
         "job": "bioetl",
         "canonical_target": "bioetl:8000",
         "scrape_interval": "30s",
-        "targets": target_summaries,
+        "targets": _target_summaries(bioetl),
     }
     _emit_summary(summary, as_json=args.json)
     return EXIT_OK if not unhealthy else EXIT_TARGET_DOWN
+
+
+def _bioetl_job_targets(
+    targets: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    selected: list[dict[str, object]] = []
+    for target in targets:
+        labels = target.get("labels")
+        if isinstance(labels, dict) and str(labels.get("job", "")).lower() == "bioetl":
+            selected.append(target)
+    return selected
+
+
+def _target_summaries(targets: list[dict[str, object]]) -> list[dict[str, object]]:
+    return [
+        {
+            "scrapeUrl": target.get("scrapeUrl"),
+            "health": target.get("health"),
+            "lastError": target.get("lastError"),
+        }
+        for target in targets
+    ]
 
 
 if __name__ == "__main__":

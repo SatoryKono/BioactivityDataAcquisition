@@ -254,19 +254,9 @@ def recover_renderer(
         wait_seconds=wait_seconds,
         messages=messages,
     )
-
-    if not healthy and after:
-        # Accept running only after wait exhausted if health missing (rare).
-        if any(s["status"] == "running" and s["health"] in {"none", ""} for s in after):
-            messages.append("renderer running without health endpoint result")
-        else:
-            messages.append(f"renderer not healthy within {wait_seconds}s")
-
+    messages.extend(_renderer_wait_messages(healthy, after, wait_seconds=wait_seconds))
     grafana_ok = probe_grafana_ui()
-    if grafana_ok:
-        messages.append("Grafana /api/health ok (UI independent of renderer)")
-    elif grafana_ok is False:
-        messages.append("Grafana /api/health failed (separate from renderer)")
+    messages.extend(_grafana_probe_messages(grafana_ok))
 
     return RecoverReport(
         ok=healthy,
