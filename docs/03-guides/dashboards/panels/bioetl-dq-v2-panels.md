@@ -107,9 +107,13 @@ query, links, and operator fact.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
 ### 17. Monitor Blocked Records
-- **Type:** Stat
-- **Purpose:** Count DQ blocked records.
-- **Data sources:** `bioetl_dq_blocked_records`
+- **Type:** Stat (`id=154`)
+- **Purpose:** Count blocked records as Silver `filtered_out` **plus** DQ
+  quarantine over `$__range`. This is a **superset** of panel `117`
+  (Monitor Silver Filter Rejects). Do not merge 117 and 154 without a 1:1
+  field contract; operators still need the reject-only funnel separately.
+- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}` +
+  `bioetl_dq_records_quarantined_total`
 
 ### 18. Inspect Latest Successful Data
 - **Type:** Stat
@@ -117,9 +121,11 @@ query, links, and operator fact.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
 ### 19. Monitor Silver Filter Rejects
-- **Type:** Stat
-- **Purpose:** Count Silver filter rejects.
-- **Data sources:** `bioetl_silver_filter_rejections_total`
+- **Type:** Stat (`id=117`)
+- **Purpose:** Count Silver structural rejects from `stage=filtered_out` only.
+  Panel `154` (Monitor Blocked Records) adds quarantine on top of this series;
+  117 is not the blocked KPI.
+- **Data sources:** `bioetl_records_processed_total{stage="filtered_out"}`
 
 ### 20. Selected Range · Reject Evidence
 - **Type:** Row

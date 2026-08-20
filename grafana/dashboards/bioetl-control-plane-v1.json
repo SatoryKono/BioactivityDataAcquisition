@@ -2479,7 +2479,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed ledger appends during the selected range. Any non-zero value requires checking the run ledger. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Counts failed ledger appends during the selected range. Any non-zero value requires checking the run ledger. Run Type does not affect this panel. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Ledger Failures (133).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2570,7 +2570,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume.",
+          "description": "TIME RANGE · SELECTED RUN · Counts failed manifest writes during the selected range. Any non-zero value requires checking manifest persistence before replay or resume. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Manifest Failures (132).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2769,7 +2769,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK.",
+          "description": "TIME RANGE · SELECTED RUN · Shows manifest-write failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Confirm telemetry coverage before trusting OK. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Manifest Write Failures (1).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2860,7 +2860,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows ledger-append failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Run Type does not affect this panel.",
+          "description": "TIME RANGE · Shows ledger-append failure severity over the last 30 minutes. Status mapping: 0=OK, 1=WARN, 2=CRIT, null=UNKNOWN. Run Type does not affect this panel. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Ledger Append Failures (2).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3029,7 +3029,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply.",
+          "description": "TIME RANGE · Counts failed reads across all control-plane stores during the selected range. Pipeline and Run Type filters do not apply. Role: selected-range failure count ($__range); the 30m fail-rate gate on this row is Monitor Global Read Failures (136).",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3120,7 +3120,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN.",
+          "description": "TIME RANGE · Shows global read failure severity over the last 30 minutes. Status mapping: 0=OK at <=5%, 1=WARN at >5%, 2=CRIT at >10%, null=UNKNOWN. Role: 30m fail-rate gate (ratio), not the selected-range count in Track Global Read Failures (4).",
           "fieldConfig": {
             "defaults": {
               "color": {

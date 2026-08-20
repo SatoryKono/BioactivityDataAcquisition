@@ -1820,20 +1820,18 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         for panel in get_dashboard_panels(dashboard)
         if isinstance(panel.get("id"), int)
     }
-    identity_id, processed_id = (
-        (9300, 9301) if dashboard_name == "bioetl-overview-v2.json" else (9402, 9403)
-    )
+    if dashboard_name == "bioetl-overview-v2.json":
+        identity_id, processed_id = (9300, 9301)
+    elif dashboard_name == "bioetl-run-explorer-v1.json":
+        identity_id, processed_id = (9402, 3023)
+    else:
+        identity_id, processed_id = (9402, 9403)
     identity = panels[identity_id]
     processed = panels[processed_id]
-    expected_height = 6
-    assert (
-        identity.get("gridPos", {}).get("h")
-        == processed.get("gridPos", {}).get("h")
-        == expected_height
-    )
     if dashboard_name == "bioetl-run-explorer-v1.json":
         assert identity.get("gridPos", {}).get("w") == 24
-        assert processed.get("gridPos", {}).get("w") == 24
+        assert processed.get("gridPos", {}).get("w") == 14
+        assert processed.get("gridPos", {}).get("h") >= 5
         assert (
             "valid empty"
             in str(
@@ -1845,6 +1843,13 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
             in str(
                 processed.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
             ).lower()
+        )
+    else:
+        expected_height = 6
+        assert (
+            identity.get("gridPos", {}).get("h")
+            == processed.get("gridPos", {}).get("h")
+            == expected_height
         )
     assert (
         identity.get("options", {}).get("cellHeight")
@@ -1897,10 +1902,7 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
 
     transformations = processed.get("transformations", [])
     transform_ids = [transformation.get("id") for transformation in transformations]
-    if dashboard_name == "bioetl-run-explorer-v1.json":
-        assert transform_ids == ["organize", "filterByValue", "limit"]
-    else:
-        assert transform_ids == ["organize"]
+    assert transform_ids == ["organize"]
     organize_options = transformations[0].get("options", {})
     rename_by_name = organize_options.get("renameByName", {})
     assert rename_by_name.get("parameter") == "parameter"

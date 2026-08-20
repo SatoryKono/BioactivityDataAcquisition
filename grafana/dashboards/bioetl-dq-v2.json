@@ -1467,7 +1467,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE delivery impact: Blocked-record evidence. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for denominator context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window. Measured 0 requires present series; No data means metric/series absence and must not be treated as healthy zero. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: blocked = Silver filtered_out (panel 117) plus DQ quarantine; do not treat 117 and 154 as the same KPI.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1712,7 +1712,7 @@
           ],
           "title": "Monitor Silver Filter Rejects",
           "type": "stat",
-          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING."
+          "description": "TIME RANGE delivery impact: Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. VALID EMPTY (no events) is not TELEMETRY MISSING. Role: Silver filtered_out rejects only — not the blocked-records superset in Monitor Blocked Records (154)."
         }
       ],
       "description": "Expand for selected-range impact and freshness after resolving the current reason lane."
