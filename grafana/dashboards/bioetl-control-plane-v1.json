@@ -443,7 +443,7 @@
     },
     {
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Retention policy, evidence floor, required evidence, snapshot evidence, and archive (five structured rows). UNKNOWN is not a healthy zero. HTTP 504 deadline_exceeded is backend unavailable — refresh; datasource error must not be treated as OK. TIME RANGE · SELECTED RUN retention policy, reproducibility evidence floor, required evidence, and archive support. First-screen table — not inside a collapsed row. UNKNOWN is not a healthy zero. No matching rows are a valid empty result; HTTP 504 deadline_exceeded is backend unavailable — refresh the panel; datasource error must not be treated as OK. SELECT RUN / VALID EMPTY is not OK. These rows are trust_status / retention evidence, not processing_status success.",
       "fieldConfig": {
         "defaults": {
           "custom": {
