@@ -236,6 +236,19 @@ def test_authored_text_font_sizes_meet_body_floor() -> None:
     assert not violations, "authored text below 12pt/16px:\n" + "\n".join(violations)
 
 
+
+def test_area_fill_fails_closed_on_below_fold_background_stat() -> None:
+    """#9237 DASH-COLOR-001: below-fold background stat is not a first-window fill."""
+    panel = {
+        "id": 99999,
+        "type": "stat",
+        "gridPos": {"x": 0, "y": FIRST_WINDOW_Y_EXCLUSIVE, "w": 4, "h": 4},
+        "options": {"colorMode": "background"},
+    }
+    assert int(panel["gridPos"]["y"]) >= FIRST_WINDOW_Y_EXCLUSIVE
+    assert _area_fill_violations(panel) == ["colorMode=background"]
+
+
 def test_area_fills_are_confined_to_first_window() -> None:
     violations: list[str] = []
     for path, dashboard in _load_dashboards():
