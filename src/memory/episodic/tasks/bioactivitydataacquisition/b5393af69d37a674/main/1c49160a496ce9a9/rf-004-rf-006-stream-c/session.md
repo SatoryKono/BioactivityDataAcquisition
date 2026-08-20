@@ -10,7 +10,6 @@ actor:
   runtime: codex
   agent: codex
   model: null
-<<<<<<< HEAD
 created_at: '2026-08-20T06:42:49.057843+00:00'
 source_refs:
 - src/memory/DAILY_WORKFLOW.md
