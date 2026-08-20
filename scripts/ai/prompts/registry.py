@@ -115,6 +115,20 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     return meta, body
 
 
+def _string_items(meta: dict[str, Any], key: str) -> list[str]:
+    return [str(item) for item in (meta.get(key) or [])]
+
+
+def _optional_text(meta: dict[str, Any], key: str) -> str | None:
+    value = meta.get(key)
+    return str(value) if value else None
+
+
+def _optional_int(meta: dict[str, Any], key: str) -> int | None:
+    value = meta.get(key)
+    return int(value) if value is not None else None
+
+
 def load_card(path: Path) -> PromptCard:
     text = path.read_text(encoding="utf-8")
     meta, body = parse_frontmatter(text)
@@ -126,23 +140,17 @@ def load_card(path: Path) -> PromptCard:
         owner=str(meta.get("owner") or ""),
         path=path,
         body=body.lstrip("\n"),
-        runtimes=[str(x) for x in (meta.get("runtimes") or [])],
-        params=[str(x) for x in (meta.get("params") or [])],
-        includes=[str(x) for x in (meta.get("includes") or [])],
-        related_ssot=[str(x) for x in (meta.get("related_ssot") or [])],
-        anti_patterns=[str(x) for x in (meta.get("anti_patterns") or [])],
-        tags=[str(x) for x in (meta.get("tags") or [])],
+        runtimes=_string_items(meta, "runtimes"),
+        params=_string_items(meta, "params"),
+        includes=_string_items(meta, "includes"),
+        related_ssot=_string_items(meta, "related_ssot"),
+        anti_patterns=_string_items(meta, "anti_patterns"),
+        tags=_string_items(meta, "tags"),
         summary=str(meta.get("summary") or ""),
-        supersedes=str(meta["supersedes"]) if meta.get("supersedes") else None,
-        successor=str(meta["successor"]) if meta.get("successor") else None,
-        waive_guardrails=(
-            str(meta["waive_guardrails"]) if meta.get("waive_guardrails") else None
-        ),
-        max_body_lines=(
-            int(meta["max_body_lines"])
-            if meta.get("max_body_lines") is not None
-            else None
-        ),
+        supersedes=_optional_text(meta, "supersedes"),
+        successor=_optional_text(meta, "successor"),
+        waive_guardrails=_optional_text(meta, "waive_guardrails"),
+        max_body_lines=_optional_int(meta, "max_body_lines"),
         raw_frontmatter=meta,
     )
 

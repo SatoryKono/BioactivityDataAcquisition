@@ -30,12 +30,12 @@ from scripts.engineering.common.repo_paths import resolve_output_path
 SVG_DIRS = [render_dir(family, "svg") for family in SOURCE_FAMILIES]
 
 FOREIGN_OBJECT_PATTERN = re.compile(
-    r"<(?:[A-Za-z_][A-Za-z0-9_.-]*:)?foreignObject\b[^>]*>.*?"
-    r"</(?:[A-Za-z_][A-Za-z0-9_.-]*:)?foreignObject\s*>",
+    r"<(?:[A-Z_][A-Z0-9_.-]*:)?foreignObject\b[^>]*>.*?"
+    r"</(?:[A-Z_][A-Z0-9_.-]*:)?foreignObject\s*>",
     flags=re.IGNORECASE | re.DOTALL,
 )
 SELF_CLOSING_FOREIGN_OBJECT_PATTERN = re.compile(
-    r"<(?:[A-Za-z_][A-Za-z0-9_.-]*:)?foreignObject\b[^>]*/\s*>",
+    r"<(?:[A-Z_][A-Z0-9_.-]*:)?foreignObject\b[^>]*/\s*>",
     flags=re.IGNORECASE | re.DOTALL,
 )
 

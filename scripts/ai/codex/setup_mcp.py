@@ -29,6 +29,7 @@ MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 MCP_JSON_FILENAME = "mcp.json"
 DOT_MCP_JSON_FILENAME = ".mcp.json"
+SETTINGS_JSON_FILENAME = "settings.json"
 CODEX_DIRNAME = ".codex"
 DEVIN_DIRNAME = ".devin"
 DEVIN_MCP_CONFIG_FILENAME = "mcp_config.json"
@@ -593,7 +594,7 @@ def _write_workspace_codex_settings(
     profile: str = "full",
     transport_mode: str = "stdio",
 ) -> Path:
-    settings_path = output_root / CODEX_DIRNAME / "settings.json"
+    settings_path = output_root / CODEX_DIRNAME / SETTINGS_JSON_FILENAME
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(
@@ -759,7 +760,7 @@ def _write_gemini_settings(
     profile: str = "full",
     transport_mode: str = "stdio",
 ) -> Path:
-    settings_path = output_root / ".gemini" / "settings.json"
+    settings_path = output_root / ".gemini" / SETTINGS_JSON_FILENAME
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(settings_path, label="Gemini settings")
@@ -1612,7 +1613,11 @@ def _check_local_profile_projections(
     ) | set(REMOVED_MCP_SERVER_NAMES)
 
     surfaces = (
-        (Path(CODEX_DIRNAME) / "settings.json", "mcpServers", codex_expected),
+        (
+            Path(CODEX_DIRNAME) / SETTINGS_JSON_FILENAME,
+            "mcpServers",
+            codex_expected,
+        ),
         (Path(".vscode/mcp.json"), "servers", portable_expected),
         (Path(".cursor/mcp.json"), "mcpServers", portable_expected),
         (Path(".qodo/mcp.json"), "mcpServers", portable_expected),

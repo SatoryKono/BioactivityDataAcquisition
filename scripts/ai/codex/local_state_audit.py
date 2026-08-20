@@ -608,36 +608,38 @@ def apply_remediation(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
     }
 
 
-def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
-    allowed_root = (codex_home / "backups").resolve()
-    backup_dir = backup_dir.resolve()
-    if not backup_dir.is_relative_to(allowed_root):
-        raise ValueError("backup directory must be under the Codex backups directory")
-    manifest_path = backup_dir / "manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+def _restore_manifest_files(
+    *, codex_root: Path, backup_dir: Path, copied_files: list[dict[str, Any]]
+) -> int:
+    files_root = (backup_dir / "files").resolve()
     restored_files = 0
-    for item in manifest.get("copied_files", []):
+    for item in copied_files:
         relative = Path(item["relative"])
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("backup manifest contains an unsafe path")
         if _is_env_file(relative):
             raise ValueError("backup unexpectedly contains an env file")
-        files_root = (backup_dir / "files").resolve()
         source = (files_root / relative).resolve()
         if not source.is_relative_to(files_root):
             raise ValueError("backup source escapes the private backup root")
         if _sha256(source) != item["sha256"]:
             raise ValueError("backup checksum verification failed")
-        destination = (codex_home.resolve() / relative).resolve()
-        if not destination.is_relative_to(codex_home.resolve()):
+        destination = (codex_root / relative).resolve()
+        if not destination.is_relative_to(codex_root):
             raise ValueError("backup destination escapes the Codex home")
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         restored_files += 1
+    return restored_files
+
+
+def _restore_manifest_modes(
+    *, codex_root: Path, mode_manifest: list[dict[str, Any]]
+) -> int:
     restored_modes = 0
-    for item in reversed(manifest.get("mode_manifest", [])):
+    for item in reversed(mode_manifest):
         relative = item["relative"]
-        destination = codex_home if relative == "." else codex_home / relative
+        destination = codex_root if relative == "." else codex_root / relative
         if (
             destination.exists()
             and not destination.is_symlink()
@@ -645,6 +647,26 @@ def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
         ):
             os.chmod(destination, int(item["mode"]))
             restored_modes += 1
+    return restored_modes
+
+
+def restore_backup(codex_home: Path, backup_dir: Path) -> dict[str, Any]:
+    codex_root = codex_home.resolve()
+    allowed_root = (codex_root / "backups").resolve()
+    backup_dir = backup_dir.resolve()
+    if not backup_dir.is_relative_to(allowed_root):
+        raise ValueError("backup directory must be under the Codex backups directory")
+    manifest_path = backup_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    restored_files = _restore_manifest_files(
+        codex_root=codex_root,
+        backup_dir=backup_dir,
+        copied_files=manifest.get("copied_files", []),
+    )
+    restored_modes = _restore_manifest_modes(
+        codex_root=codex_root,
+        mode_manifest=manifest.get("mode_manifest", []),
+    )
     return {
         "restored_files": restored_files,
         "restored_modes": restored_modes,

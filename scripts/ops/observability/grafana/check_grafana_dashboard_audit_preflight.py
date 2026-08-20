@@ -858,19 +858,28 @@ def _validate_dashboard_sources(
     for uid in expected_uids:
         dashboard_source = dashboards[uid].get("dashboardSource")
         top_source = source_dashboards.get(uid)
-        if not isinstance(dashboard_source, dict) or dashboard_source != top_source:
-            return f"render manifest dashboard {uid} source provenance drift"
-        source_path = dashboard_source.get("path")
-        source_sha = dashboard_source.get("sha256")
-        version = dashboard_source.get("version")
-        if not isinstance(source_path, str) or not source_path.endswith(".json"):
-            return f"render manifest dashboard {uid} lacks JSON source path"
-        if not isinstance(source_sha, str) or not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(
-            source_sha
-        ):
-            return f"render manifest dashboard {uid} source SHA is invalid"
-        if not isinstance(version, int):
-            return f"render manifest dashboard {uid} version is missing"
+        error = _dashboard_source_error(uid, dashboard_source, top_source)
+        if error is not None:
+            return error
+    return None
+
+
+def _dashboard_source_error(
+    uid: str, dashboard_source: object, top_source: object
+) -> str | None:
+    if not isinstance(dashboard_source, dict) or dashboard_source != top_source:
+        return f"render manifest dashboard {uid} source provenance drift"
+    source_path = dashboard_source.get("path")
+    source_sha = dashboard_source.get("sha256")
+    version = dashboard_source.get("version")
+    if not isinstance(source_path, str) or not source_path.endswith(".json"):
+        return f"render manifest dashboard {uid} lacks JSON source path"
+    if not isinstance(source_sha, str) or not _RUNTIME_SOURCE_ID_PATTERN.fullmatch(
+        source_sha
+    ):
+        return f"render manifest dashboard {uid} source SHA is invalid"
+    if not isinstance(version, int):
+        return f"render manifest dashboard {uid} version is missing"
     return None
 
 
@@ -921,22 +930,40 @@ def _validate_browser_context(
         return "render manifest lacks requested zoom/kiosk provenance"
     for uid in expected_uids:
         browser_state = dashboards[uid].get("browserState")
-        if not isinstance(browser_state, dict):
-            return f"render manifest dashboard {uid} lacks actual browser state"
-        if browser_state.get("requestedZoom") != requested_zoom:
-            return f"render manifest dashboard {uid} browser zoom drift"
-        if browser_state.get("actualKiosk") != requested_kiosk:
-            return f"render manifest dashboard {uid} kiosk state drift"
-        if browser_state.get("cssZoom") in {None, ""}:
-            return f"render manifest dashboard {uid} lacks actual CSS zoom"
-        if requested_zoom > 100 and browser_state.get("zoomEmulation") != (
-            "layout-viewport-and-device-scale-factor"
-        ):
-            return f"render manifest dashboard {uid} lacks reflow zoom evidence"
-        if requested_zoom > 100 and not isinstance(
-            browser_state.get("layoutViewport"), dict
-        ):
-            return f"render manifest dashboard {uid} lacks zoom layout viewport"
+        error = _browser_state_error(
+            uid,
+            browser_state,
+            requested_zoom=requested_zoom,
+            requested_kiosk=requested_kiosk,
+        )
+        if error is not None:
+            return error
+    return None
+
+
+def _browser_state_error(
+    uid: str,
+    browser_state: object,
+    *,
+    requested_zoom: int,
+    requested_kiosk: str,
+) -> str | None:
+    if not isinstance(browser_state, dict):
+        return f"render manifest dashboard {uid} lacks actual browser state"
+    if browser_state.get("requestedZoom") != requested_zoom:
+        return f"render manifest dashboard {uid} browser zoom drift"
+    if browser_state.get("actualKiosk") != requested_kiosk:
+        return f"render manifest dashboard {uid} kiosk state drift"
+    if browser_state.get("cssZoom") in {None, ""}:
+        return f"render manifest dashboard {uid} lacks actual CSS zoom"
+    if requested_zoom <= 100:
+        return None
+    if browser_state.get("zoomEmulation") != (
+        "layout-viewport-and-device-scale-factor"
+    ):
+        return f"render manifest dashboard {uid} lacks reflow zoom evidence"
+    if not isinstance(browser_state.get("layoutViewport"), dict):
+        return f"render manifest dashboard {uid} lacks zoom layout viewport"
     return None
 
 

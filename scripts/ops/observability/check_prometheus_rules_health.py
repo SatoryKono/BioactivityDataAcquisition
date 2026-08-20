@@ -186,25 +186,32 @@ def tracked_rules_bundle_sha256(rules_dir: Path) -> str:
     return digest.hexdigest()
 
 
-def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
-    """Load recording-rule expressions from tracked Prometheus YAML files."""
+def _tracked_file_recording_exprs(path: Path) -> dict[str, list[str]]:
     import yaml
 
     collected: dict[str, list[str]] = {}
-    for path in sorted(rules_dir.glob("*.yml")):
-        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        groups = payload.get("groups") if isinstance(payload, dict) else None
-        if not isinstance(groups, list):
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    groups = payload.get("groups") if isinstance(payload, dict) else None
+    if not isinstance(groups, list):
+        return collected
+    for group in groups:
+        if not isinstance(group, Mapping):
             continue
-        for group in groups:
-            if not isinstance(group, Mapping):
+        for rule in _iter_mapping_rules(group):
+            name = str(rule.get("record") or "").strip()
+            expr = rule.get("expr")
+            if not name or not isinstance(expr, str) or not expr.strip():
                 continue
-            for rule in _iter_mapping_rules(group):
-                name = str(rule.get("record") or "").strip()
-                expr = rule.get("expr")
-                if not name or not isinstance(expr, str) or not expr.strip():
-                    continue
-                collected.setdefault(name, []).append(normalize_promql(expr))
+            collected.setdefault(name, []).append(normalize_promql(expr))
+    return collected
+
+
+def load_tracked_recording_exprs(rules_dir: Path) -> dict[str, tuple[str, ...]]:
+    """Load recording-rule expressions from tracked Prometheus YAML files."""
+    collected: dict[str, list[str]] = {}
+    for path in sorted(rules_dir.glob("*.yml")):
+        for name, expressions in _tracked_file_recording_exprs(path).items():
+            collected.setdefault(name, []).extend(expressions)
     return {name: tuple(exprs) for name, exprs in collected.items()}
 
 

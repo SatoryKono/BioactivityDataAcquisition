@@ -62,38 +62,57 @@ def _inventory_key_panels(
     if not isinstance(dashboards, list):
         return records, ["dashboard-inventory.yaml: dashboards must be a list"]
     for dashboard in dashboards:
-        if not isinstance(dashboard, dict):
-            errors.append("dashboard-inventory.yaml: dashboard entry must be a mapping")
+        entry, error = _inventory_dashboard_entry(dashboard)
+        if error is not None:
+            errors.append(error)
             continue
-        uid = dashboard.get("uid")
-        key_panels = dashboard.get("key_panels")
-        if not isinstance(uid, str) or not uid:
-            errors.append("dashboard-inventory.yaml: dashboard uid must be a string")
-            continue
-        if not isinstance(key_panels, list):
-            errors.append(f"dashboard-inventory.yaml:{uid}: key_panels must be a list")
-            continue
-        for panel in key_panels:
-            if not isinstance(panel, dict):
-                errors.append(
-                    f"dashboard-inventory.yaml:{uid}: key panel must be a mapping"
-                )
-                continue
-            panel_id = panel.get("id")
-            title = panel.get("title")
-            if not isinstance(panel_id, int) or not isinstance(title, str) or not title:
-                errors.append(
-                    f"dashboard-inventory.yaml:{uid}: key panel needs integer id and title"
-                )
-                continue
-            key = (uid, str(panel_id))
-            if key in records:
-                errors.append(
-                    f"dashboard-inventory.yaml:{uid}:{panel_id}: duplicate key panel"
-                )
-                continue
-            records[key] = panel
+        assert entry is not None
+        uid, key_panels = entry
+        errors.extend(_add_inventory_panels(uid, key_panels, records))
     return records, errors
+
+
+def _inventory_dashboard_entry(
+    dashboard: object,
+) -> tuple[tuple[str, list[object]] | None, str | None]:
+    if not isinstance(dashboard, dict):
+        return None, "dashboard-inventory.yaml: dashboard entry must be a mapping"
+    uid = dashboard.get("uid")
+    if not isinstance(uid, str) or not uid:
+        return None, "dashboard-inventory.yaml: dashboard uid must be a string"
+    key_panels = dashboard.get("key_panels")
+    if not isinstance(key_panels, list):
+        return None, f"dashboard-inventory.yaml:{uid}: key_panels must be a list"
+    return (uid, key_panels), None
+
+
+def _add_inventory_panels(
+    uid: str,
+    key_panels: list[object],
+    records: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    errors: list[str] = []
+    for panel in key_panels:
+        if not isinstance(panel, dict):
+            errors.append(
+                f"dashboard-inventory.yaml:{uid}: key panel must be a mapping"
+            )
+            continue
+        panel_id = panel.get("id")
+        title = panel.get("title")
+        if not isinstance(panel_id, int) or not isinstance(title, str) or not title:
+            errors.append(
+                f"dashboard-inventory.yaml:{uid}: key panel needs integer id and title"
+            )
+            continue
+        key = (uid, str(panel_id))
+        if key in records:
+            errors.append(
+                f"dashboard-inventory.yaml:{uid}:{panel_id}: duplicate key panel"
+            )
+            continue
+        records[key] = panel
+    return errors
 
 
 def _contract_panel_records(
@@ -105,31 +124,44 @@ def _contract_panel_records(
     if not isinstance(dashboards, dict):
         return records, ["panel-content-contract.yaml: dashboards must be a mapping"]
     for uid, dashboard in dashboards.items():
-        if not isinstance(uid, str) or not isinstance(dashboard, dict):
-            errors.append(
-                "panel-content-contract.yaml: dashboard entry must be a mapping"
-            )
+        panels, error = _contract_dashboard_panels(uid, dashboard)
+        if error is not None:
+            errors.append(error)
             continue
-        panels = dashboard.get("panels")
-        if not isinstance(panels, dict):
-            errors.append(
-                f"panel-content-contract.yaml:{uid}: panels must be a mapping"
-            )
-            continue
-        for panel_id, panel in panels.items():
-            if not isinstance(panel_id, str) or not isinstance(panel, dict):
-                errors.append(
-                    f"panel-content-contract.yaml:{uid}: malformed panel entry"
-                )
-                continue
-            key = (uid, panel_id)
-            if key in records:
-                errors.append(
-                    f"panel-content-contract.yaml:{uid}:{panel_id}: duplicate panel"
-                )
-                continue
-            records[key] = panel
+        assert isinstance(uid, str) and panels is not None
+        errors.extend(_add_contract_panels(uid, panels, records))
     return records, errors
+
+
+def _contract_dashboard_panels(
+    uid: object, dashboard: object
+) -> tuple[dict[object, object] | None, str | None]:
+    if not isinstance(uid, str) or not isinstance(dashboard, dict):
+        return None, "panel-content-contract.yaml: dashboard entry must be a mapping"
+    panels = dashboard.get("panels")
+    if not isinstance(panels, dict):
+        return None, f"panel-content-contract.yaml:{uid}: panels must be a mapping"
+    return panels, None
+
+
+def _add_contract_panels(
+    uid: str,
+    panels: dict[object, object],
+    records: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    errors: list[str] = []
+    for panel_id, panel in panels.items():
+        if not isinstance(panel_id, str) or not isinstance(panel, dict):
+            errors.append(f"panel-content-contract.yaml:{uid}: malformed panel entry")
+            continue
+        key = (uid, panel_id)
+        if key in records:
+            errors.append(
+                f"panel-content-contract.yaml:{uid}:{panel_id}: duplicate panel"
+            )
+            continue
+        records[key] = panel
+    return errors
 
 
 def _dashboard_panel_records() -> tuple[
@@ -138,28 +170,48 @@ def _dashboard_panel_records() -> tuple[
     records: dict[tuple[str, str], dict[str, object]] = {}
     errors: list[str] = []
     for dashboard_path in sorted(DASHBOARD_DIR.glob("*.json")):
-        try:
-            payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            errors.append(f"{dashboard_path}: invalid JSON: {exc}")
+        loaded, error = _load_dashboard_payload(dashboard_path)
+        if error is not None:
+            errors.append(error)
             continue
-        if not isinstance(payload, dict):
-            errors.append(f"{dashboard_path}: expected JSON object")
-            continue
-        uid = payload.get("uid")
-        if not isinstance(uid, str):
-            errors.append(f"{dashboard_path}: missing dashboard uid")
-            continue
-        for panel in _iter_panels(payload):
-            panel_id = panel.get("id")
-            title = panel.get("title")
-            if isinstance(panel_id, int) and isinstance(title, str):
-                key = (uid, str(panel_id))
-                if key in records:
-                    errors.append(f"duplicate shipped panel id: {uid}:{panel_id}")
-                    continue
-                records[key] = panel
+        assert loaded is not None
+        uid, payload = loaded
+        errors.extend(_add_dashboard_panels(uid, payload, records))
     return records, errors
+
+
+def _load_dashboard_payload(
+    dashboard_path: Path,
+) -> tuple[tuple[str, dict[str, object]] | None, str | None]:
+    try:
+        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, f"{dashboard_path}: invalid JSON: {exc}"
+    if not isinstance(payload, dict):
+        return None, f"{dashboard_path}: expected JSON object"
+    uid = payload.get("uid")
+    if not isinstance(uid, str):
+        return None, f"{dashboard_path}: missing dashboard uid"
+    return (uid, payload), None
+
+
+def _add_dashboard_panels(
+    uid: str,
+    payload: dict[str, object],
+    records: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    errors: list[str] = []
+    for panel in _iter_panels(payload):
+        panel_id = panel.get("id")
+        title = panel.get("title")
+        if not isinstance(panel_id, int) or not isinstance(title, str):
+            continue
+        key = (uid, str(panel_id))
+        if key in records:
+            errors.append(f"duplicate shipped panel id: {uid}:{panel_id}")
+            continue
+        records[key] = panel
+    return errors
 
 
 def _iter_panels(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -308,13 +360,7 @@ def _validate_panel_record(
     return errors
 
 
-def validate_content_contract(
-    inventory_path: Path = INVENTORY_PATH,
-    content_contract_path: Path = CONTENT_CONTRACT_PATH,
-) -> list[str]:
-    """Вернуть полный список детерминированных нарушений content contract."""
-    inventory = _load_mapping(inventory_path)
-    contract = _load_mapping(content_contract_path)
+def _contract_policy_errors(contract: dict[str, object]) -> list[str]:
     errors: list[str] = []
     if contract.get("schema_version") != 2:
         errors.append("panel-content-contract.yaml: schema_version must equal 2")
@@ -322,24 +368,29 @@ def validate_content_contract(
         errors.append(
             "panel-content-contract.yaml: coverage_policy must equal all_shipped_panels"
         )
-    allowed_roles = set(_string_list(contract.get("allowed_roles")) or [])
-    allowed_scopes = set(_string_list(contract.get("allowed_scopes")) or [])
-    allowed_evidence_sources = set(
-        _string_list(contract.get("allowed_evidence_sources")) or []
-    )
-    allowed_states = set(_string_list(contract.get("allowed_states")) or [])
-    if not all(
-        (allowed_roles, allowed_scopes, allowed_evidence_sources, allowed_states)
-    ):
+    return errors
+
+
+def _allowed_value_sets(
+    contract: dict[str, object],
+) -> tuple[set[str], set[str], set[str], set[str], list[str]]:
+    roles = set(_string_list(contract.get("allowed_roles")) or [])
+    scopes = set(_string_list(contract.get("allowed_scopes")) or [])
+    evidence_sources = set(_string_list(contract.get("allowed_evidence_sources")) or [])
+    states = set(_string_list(contract.get("allowed_states")) or [])
+    errors: list[str] = []
+    if not all((roles, scopes, evidence_sources, states)):
         errors.append(
             "panel-content-contract.yaml: declared allowed value lists must be non-empty"
         )
-    inventory_records, inventory_errors = _inventory_key_panels(inventory)
-    contract_records, contract_errors = _contract_panel_records(contract)
-    errors.extend(inventory_errors)
-    errors.extend(contract_errors)
-    dashboard_records, dashboard_errors = _dashboard_panel_records()
-    errors.extend(dashboard_errors)
+    return roles, scopes, evidence_sources, states, errors
+
+
+def _inventory_alignment_errors(
+    inventory_records: dict[tuple[str, str], dict[str, object]],
+    dashboard_records: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    errors: list[str] = []
     for key, inventory_panel in sorted(inventory_records.items()):
         dashboard_panel = dashboard_records.get(key)
         if dashboard_panel is None:
@@ -347,12 +398,25 @@ def validate_content_contract(
                 f"dashboard-inventory.yaml:{key[0]}:{key[1]}: panel is missing"
             )
             continue
-        if dashboard_panel.get("title") != inventory_panel.get(
-            "title"
-        ) and not _is_navigation_bus_panel(key, dashboard_panel):
+        title_matches = dashboard_panel.get("title") == inventory_panel.get("title")
+        if not title_matches and not _is_navigation_bus_panel(key, dashboard_panel):
             errors.append(
-                f"dashboard-inventory.yaml:{key[0]}:{key[1]}: title does not match dashboard JSON"
+                f"dashboard-inventory.yaml:{key[0]}:{key[1]}: "
+                "title does not match dashboard JSON"
             )
+    return errors
+
+
+def _shipped_panel_contract_errors(
+    *,
+    dashboard_records: dict[tuple[str, str], dict[str, object]],
+    contract_records: dict[tuple[str, str], dict[str, object]],
+    allowed_roles: set[str],
+    allowed_scopes: set[str],
+    allowed_evidence_sources: set[str],
+    allowed_states: set[str],
+) -> list[str]:
+    errors: list[str] = []
     for key, dashboard_panel in sorted(dashboard_records.items()):
         record = contract_records.get(key)
         if record is None:
@@ -374,10 +438,53 @@ def validate_content_contract(
                 allowed_states=allowed_states,
             )
         )
-    for key in sorted(set(contract_records) - set(dashboard_records)):
-        errors.append(
-            f"panel-content-contract.yaml:{key[0]}:{key[1]}: panel is not shipped"
+    return errors
+
+
+def _unshipped_contract_errors(
+    contract_records: dict[tuple[str, str], dict[str, object]],
+    dashboard_records: dict[tuple[str, str], dict[str, object]],
+) -> list[str]:
+    return [
+        f"panel-content-contract.yaml:{key[0]}:{key[1]}: panel is not shipped"
+        for key in sorted(set(contract_records) - set(dashboard_records))
+    ]
+
+
+def validate_content_contract(
+    inventory_path: Path = INVENTORY_PATH,
+    content_contract_path: Path = CONTENT_CONTRACT_PATH,
+) -> list[str]:
+    """Вернуть полный список детерминированных нарушений content contract."""
+    inventory = _load_mapping(inventory_path)
+    contract = _load_mapping(content_contract_path)
+    errors = _contract_policy_errors(contract)
+    (
+        allowed_roles,
+        allowed_scopes,
+        allowed_evidence_sources,
+        allowed_states,
+        allowed_value_errors,
+    ) = _allowed_value_sets(contract)
+    errors.extend(allowed_value_errors)
+    inventory_records, inventory_errors = _inventory_key_panels(inventory)
+    contract_records, contract_errors = _contract_panel_records(contract)
+    errors.extend(inventory_errors)
+    errors.extend(contract_errors)
+    dashboard_records, dashboard_errors = _dashboard_panel_records()
+    errors.extend(dashboard_errors)
+    errors.extend(_inventory_alignment_errors(inventory_records, dashboard_records))
+    errors.extend(
+        _shipped_panel_contract_errors(
+            dashboard_records=dashboard_records,
+            contract_records=contract_records,
+            allowed_roles=allowed_roles,
+            allowed_scopes=allowed_scopes,
+            allowed_evidence_sources=allowed_evidence_sources,
+            allowed_states=allowed_states,
         )
+    )
+    errors.extend(_unshipped_contract_errors(contract_records, dashboard_records))
     return errors
 
 

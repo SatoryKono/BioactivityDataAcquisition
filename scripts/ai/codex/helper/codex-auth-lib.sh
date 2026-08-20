@@ -54,6 +54,7 @@ PY
 
 codex_has_usable_auth() {
     codex_has_env_api_key || codex_has_persisted_auth
+    return $?
 }
 
 codex_auth_status_label() {
