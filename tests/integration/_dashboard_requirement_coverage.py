@@ -99,6 +99,11 @@ _FORBIDDEN_MAIN_COMPOSE_SERVICES = {
     "tempo",
     "pushgateway",
 }
+_MONITORING_STACK_START_RE = re.compile(
+    r"docker(?:\s+|-)compose[^\n]*docker-compose\.monitoring\.yml[^\n]*\b(?:up|start)\b"
+    r"|docker-compose\.monitoring\.yml[^\n]*\b(?:up|start)\b",
+    re.IGNORECASE,
+)
 
 
 def _fail(violations: list[str], header: str) -> None:
@@ -333,8 +338,9 @@ def assert_grafana_optional_on_default_runtime() -> None:
         "DASH-ARCH-001: docker-compose.yml must not default MONITORING=true"
     )
     workflow = TESTS_WORKFLOW_PATH.read_text(encoding="utf-8")
-    assert "docker-compose.monitoring.yml" not in workflow, (
-        "DASH-ARCH-001: default CI must not start docker-compose.monitoring.yml"
+    assert _MONITORING_STACK_START_RE.search(workflow) is None, (
+        "DASH-ARCH-001: default CI must not start docker-compose.monitoring.yml "
+        "(syntax-only `compose config` remains allowed)"
     )
 
 
