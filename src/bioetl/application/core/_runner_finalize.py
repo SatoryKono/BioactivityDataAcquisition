@@ -3,12 +3,24 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportResult,
 )
 from bioetl.domain.exceptions.base import BioETLError
+
+if TYPE_CHECKING:
+    from bioetl.application.core.batch_executor import BatchExecutor
+    from bioetl.application.core.lifecycle.lock_runtime_service import (
+        LockRuntimeService,
+    )
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
+    from bioetl.domain.config import PipelineConfig
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.ports import ContractEvidenceRecorderPort, LoggerPort
 
 _RUN_FAILURE_EXCEPTIONS = (
     BioETLError,
@@ -26,15 +38,32 @@ _RUN_FAILURE_EXCEPTIONS = (
 class _RunnerFinalizeHost(Protocol):
     """Narrow runner surface consumed by terminal finalizers."""
 
-    manifest_id: str | None
-    run_id: str
-    _contract_evidence_recorder: object | None
-    _lock_runtime_service: object
-    _context: object
-    _executor: object
-    _logger: object
-    _run_ledger_service: object | None
-    _config: object
+    @property
+    def manifest_id(self) -> str | None: ...
+
+    @property
+    def run_id(self) -> str: ...
+
+    @property
+    def _contract_evidence_recorder(self) -> ContractEvidenceRecorderPort | None: ...
+
+    @property
+    def _lock_runtime_service(self) -> LockRuntimeService: ...
+
+    @property
+    def _context(self) -> PipelineContext: ...
+
+    @property
+    def _executor(self) -> BatchExecutor: ...
+
+    @property
+    def _logger(self) -> LoggerPort: ...
+
+    @property
+    def _run_ledger_service(self) -> RunLedgerService | None: ...
+
+    @property
+    def _config(self) -> PipelineConfig: ...
 
 
 def finalize_contract_evidence(runner: _RunnerFinalizeHost) -> None:
