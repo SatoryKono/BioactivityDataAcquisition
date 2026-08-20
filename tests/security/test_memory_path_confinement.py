@@ -30,7 +30,7 @@ def test_canonicalize_confines_under_root(tmp_path: Path) -> None:
 
 def test_migrate_json_file_rejects_traversal(tmp_path: Path) -> None:
     victim = tmp_path / "victim.json"
-    victim.write_text("{\"id\":\"x\"}\n", encoding="utf-8")
+    victim.write_text('{"id":"x"}\n', encoding="utf-8")
     sneaky = Path(tmp_path, "nested", "..", "victim.json")
     sneaky.parent.mkdir(exist_ok=True)
     with pytest.raises(ValueError, match="path traversal"):

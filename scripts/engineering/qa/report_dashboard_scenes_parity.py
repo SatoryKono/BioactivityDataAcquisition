@@ -77,11 +77,7 @@ def _source_summary(panel: dict[str, Any]) -> dict[str, object]:
 
 
 def _route_by_dashboard_uid(routes: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    return {
-        str(uid): route
-        for route in routes
-        for uid in route["compatibilityUids"]
-    }
+    return {str(uid): route for route in routes for uid in route["compatibilityUids"]}
 
 
 def _panel_disposition(*, panel_id: int, primary_ids: set[int], has_query: bool) -> str:

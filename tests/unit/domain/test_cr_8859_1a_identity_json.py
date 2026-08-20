@@ -97,4 +97,3 @@ def test_hash_scalar_collapses_near_zero_without_equality() -> None:
     assert tiny == 0.0
     kept = normalize_hash_scalar_for_policy(1e-9, datetime_policy="v2_datetime_utc")
     assert kept != 0.0
-

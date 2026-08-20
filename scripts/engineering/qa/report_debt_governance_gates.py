@@ -471,7 +471,7 @@ def build_payload(
     }
 
 
-def main(argv: list[str] | None = None) -> int:  # noqa: D401
+def main(argv: list[str] | None = None) -> int:
     """Compatibility entrypoint for `python -m scripts.engineering.qa report-debt-governance-gates`."""
     from scripts.engineering.qa.debt_governance_gate_report import main as _gate_main
 
