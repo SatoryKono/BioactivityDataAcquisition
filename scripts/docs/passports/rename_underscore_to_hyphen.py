@@ -134,23 +134,32 @@ def _materialize_repo_file(root: Path, relative_posix: str) -> Path:
     return materialized
 
 
+_REFERENCE_RELATIVES = (
+    "mkdocs.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "docs/04-reference/passports/index.md",
+)
+
+
 def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
-    """Rename passports and update every tracked textual reference."""
+    """Rename passports and update constant textual reference files."""
     pairs = _replacement_pairs(root, plans)
-    references = referenced_files(root, plans)
     for plan in plans:
         plan.source.rename(plan.target)
-
-    for path in references:
-        relative = path.relative_to(root).as_posix()
-        safe = _materialize_repo_file(root, relative)
-        current = safe.read_text(encoding="utf-8")
-        updated = current
+    updated_paths: list[Path] = []
+    for relative in _REFERENCE_RELATIVES:
+        path = _materialize_repo_file(root, relative)
+        if not path.is_file():
+            continue
+        current = path.read_text(encoding="utf-8")
+        rewritten = current
         for source, target in pairs:
-            updated = updated.replace(source, target)
-        if updated != current:
-            safe.write_text(updated, encoding="utf-8")
-    return references
+            rewritten = rewritten.replace(source, target)
+        if rewritten != current:
+            path.write_text(rewritten, encoding="utf-8")
+            updated_paths.append(path)
+    return tuple(updated_paths)
 
 
 def _parser() -> argparse.ArgumentParser:
