@@ -45,6 +45,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - grafana/dashboards
   - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - docs/03-guides/dashboards/design-system.md
@@ -55,6 +57,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/observability/bi-dashboard-acceptance.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Inventing panels not in shipped JSON
   - Inventing DASH-* IDs that already exist in DASHBOARD_REQUIREMENTS.md
   - Data FAIL from a screenshot alone
@@ -121,9 +124,14 @@ SHA. `grafana-six/*` → STOP.
 
 ## BioETL anchors
 
-- Requirements: `docs/01-requirements/DASHBOARD_REQUIREMENTS.md`
+- Requirements: `docs/01-requirements/DASHBOARD_REQUIREMENTS.md` (`DASH-*`); catalog `REQUIREMENTS.md` + CSV (`REQ-DASH-*`); PROVEN findings need `requirement_id`
 - Budgets: `docs/03-guides/dashboards/contracts/layout-budgets.yaml`
-- JSON: `grafana/dashboards/` · verdicts: `verdict-ontology.md`
+- Shipped JSON: `grafana/dashboards/`
+- Design: `docs/03-guides/dashboards/design-system.md`
+- Verdicts: `docs/03-guides/dashboards/verdict-ontology.md`
+- Do not invent panels or metrics missing from shipped JSON
+- ADR-010: start `docker-compose.monitoring.yml` only if UI/render is required
+  and the operator set `MONITORING=true`
 - Windows: `.\.venv-win\Scripts\python.exe`
 
 ## Preflight
@@ -141,10 +149,10 @@ SHA. `grafana-six/*` → STOP.
 | --- | --- |
 | **A Inventory** | `uid \| panel_id \| y \| band \| type \| datasource`. Baseline SHA. |
 | **B Contours** | Only names in `CONTOURS`. Rules in the fragment. |
-| **C Normalize** | `checks.json` + `findings.json` with `requirement_id`. `surface_score` 0–3. Dedupe `uid+panel_id+requirement_id`. |
-| **D Issues** | ALLOW_ISSUE_WRITE + PROVEN. Title `[<uid>][<DASH-id>][P#] …`. Cap MAX_ISSUES. |
-| **E Fix** | WORK_BRANCH; minimal JSON/query/script; no overflow-clip; no budget raises. |
-| **F Validate** | Re-run §8 gates + affected panels. PR if ALLOW_PUSH. Delta. |
+| **C Normalize** | `checks.json` (bi-check-schema) + `findings.json` with `requirement_id` (PROVEN only). `surface_score` 0–3. Dedupe `uid+panel_id+requirement_id`. |
+| **D Issues** | ALLOW_ISSUE_WRITE + PROVEN + `requirement_id` (`DASH-*` or `REQ-DASH-*`). Title `[<uid>][<DASH-id>][P#]`. Cap MAX_ISSUES. |
+| **E Fix** | WORK_BRANCH; minimal JSON/query/script; no overflow-clip; no budget raises; re-check **affected** panels. |
+| **F Validate** | Re-run §8 gates + affected panels. PR if ALLOW_PUSH. Delta: resolved / unchanged / regressed / new. |
 
 ### Contours (see fragment for rules)
 

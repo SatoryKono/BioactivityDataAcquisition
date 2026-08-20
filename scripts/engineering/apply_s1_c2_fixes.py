@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import ensure_repo_path
+
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def replace_once(relative: str, old: str, new: str, label: str) -> None:
-    from scripts.engineering.common.repo_paths import ensure_repo_path
-
     path = ensure_repo_path(ROOT / relative, root=ROOT)
     text = path.read_text(encoding="utf-8")
     if old not in text:
@@ -130,8 +130,7 @@ def main() -> None:
     )
 
     replace_once(
-        ROOT
-        / "src/bioetl/application/core/preflight/medallion_validator_idempotency.py",
+        "src/bioetl/application/core/preflight/medallion_validator_idempotency.py",
         (
             "        return [\n"
             "            ConfigValidationError(\n"
@@ -312,7 +311,10 @@ def main() -> None:
         "runner",
     )
 
-    test_path = "tests/unit/application/core/test_postrun_metadata_writes.py"
+    test_path = ensure_repo_path(
+        ROOT / "tests/unit/application/core/test_postrun_metadata_writes.py",
+        root=ROOT,
+    )
     test_text = test_path.read_text(encoding="utf-8")
     old_test = "    storage.is_table_initialized = MagicMock(return_value=False)\n"
     new_test = (
