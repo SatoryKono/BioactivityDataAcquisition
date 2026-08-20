@@ -209,4 +209,5 @@ screenshot. Monitoring start without approval. Orchestrator hard-stop.
 - `prompt.observability.dashboard-panel-audit`
 - `prompt.observability.bi-dashboard-acceptance`
 - `prompt.audit.cycle.dashboards`
+- `prompt.observability.dashboard-full-cycle` — N=10 audit→issues→close with dual STOP
 - Closeout: `prompt.closeout.grok`

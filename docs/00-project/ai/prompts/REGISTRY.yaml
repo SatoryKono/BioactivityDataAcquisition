@@ -300,6 +300,24 @@ entries:
       ]
     summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%)
 
+  - id: prompt.observability.dashboard-full-cycle
+    path: library/observability/dashboard-full-cycle.md
+    status: active
+    class: operator-paste
+    tags:
+      [
+        observability,
+        dashboard,
+        grafana,
+        audit,
+        cycle,
+        issues,
+        closeout,
+        render,
+        operator,
+      ]
+    summary: Unified N=10 dashboard cycle — full audit (render, design, fill, panels, theme, zoom) then GH issues then fix-to-close; stop when no new issues and no open cycle issues
+
   - id: prompt.observability.sequential-run
     path: library/observability/sequential-run.md
     status: active

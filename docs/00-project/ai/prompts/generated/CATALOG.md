@@ -27,6 +27,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | `library/observability/dashboard-panel-audit.md` | Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.3) |
 | `prompt.observability.bi-dashboard-acceptance` | `library/observability/bi-dashboard-acceptance.md` | BI dashboard acceptance — visual, layout, data contours with measurable checks |
 | `prompt.observability.dashboard-audit-cycle` | `library/observability/dashboard-audit-cycle.md` | Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%) |
+| `prompt.observability.dashboard-full-cycle` | `library/observability/dashboard-full-cycle.md` | Unified N=10 dashboard cycle — full audit (render, design, fill, panels, theme, zoom) then GH issues then fix-to-close; stop when no new issues and no open cycle issues |
 | `prompt.observability.sequential-run` | `library/observability/sequential-run.md` | Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix |
 | `prompt.observability.dashboard-operator-playbook` | `library/observability/dashboard-operator-playbook.md` | Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices |
 | `prompt.observability.dashboard-data-duplication` | `library/observability/dashboard-data-duplication.md` | Sequential per-dashboard panel data audit — intra-dashboard duplicates and exclusion plan without breaking FIT |
@@ -135,6 +136,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.observability.dashboard-panel-audit` | operator-paste | active | `library/observability/dashboard-panel-audit.md` |
 | `prompt.observability.bi-dashboard-acceptance` | operator-paste | active | `library/observability/bi-dashboard-acceptance.md` |
 | `prompt.observability.dashboard-audit-cycle` | operator-paste | active | `library/observability/dashboard-audit-cycle.md` |
+| `prompt.observability.dashboard-full-cycle` | operator-paste | active | `library/observability/dashboard-full-cycle.md` |
 | `prompt.observability.sequential-run` | operator-paste | active | `library/observability/sequential-run.md` |
 | `prompt.observability.dashboard-operator-playbook` | operator-paste | active | `library/observability/dashboard-operator-playbook.md` |
 | `prompt.observability.dashboard-data-duplication` | operator-paste | active | `library/observability/dashboard-data-duplication.md` |

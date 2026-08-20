@@ -84,6 +84,13 @@ Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
   type, live FIT, render states). Default `MONITORING=false` → live rows
   are `Not Verifiable`, not defects. **Not** a second grafana-six pass;
   do not reopen `#8986`.
+- `prompt.observability.dashboard-full-cycle` — unified **N=10** loop:
+  (1) full audit of all seven UIDs (render, design, fill, panels, FIT,
+  density, data, copy) → (2) GH issues per PROVEN root cause → (3)
+  fix until close. STOP when step 2 creates **zero new** issues **and**
+  no open issues with this `Cycle-run`. Do **not** also run
+  `prompt.observability.sequential-run` or `prompt.audit.cycle.dashboards`
+  as a second full pass on the same SHA.
 - `prompt.observability.group-scalar-density-audit` — re-measure scalar
   information density per panel group vs first screen (`DASH-DENSITY-002`,
   REQUIREMENTS §5.4) and rank groups that must be made denser. Static (no

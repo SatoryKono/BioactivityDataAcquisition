@@ -90,6 +90,7 @@ docs/00-project/ai/prompts/
 | `prompt.observability.dashboard-panel-audit` | [library/observability/dashboard-panel-audit.md](library/observability/dashboard-panel-audit.md) | Grafana panel audit (5 phases, v1.1) |
 | `prompt.observability.bi-dashboard-acceptance` | [library/observability/bi-dashboard-acceptance.md](library/observability/bi-dashboard-acceptance.md) | BI acceptance: visual / layout / data |
 | `prompt.observability.dashboard-audit-cycle` | [library/observability/dashboard-audit-cycle.md](library/observability/dashboard-audit-cycle.md) | Exhaustive cyclic audit (v2.0) of every panel × viewport × theme × zoom (Tier-1 100% / Tier-2 200%) — density, typography, color, scroll, whitespace, data, render |
+| `prompt.observability.dashboard-full-cycle` | [library/observability/dashboard-full-cycle.md](library/observability/dashboard-full-cycle.md) | Unified N=10: full audit → GH issues → fix-to-close; stop when no new issues and no open cycle issues |
 | `prompt.observability.dashboard-operator-playbook` | [library/observability/dashboard-operator-playbook.md](library/observability/dashboard-operator-playbook.md) | Per-panel operator questions, analysis order, 5–10 value-dependent scenarios |
 | `prompt.observability.dashboard-manual-validation` | [library/observability/dashboard-manual-validation.md](library/observability/dashboard-manual-validation.md) | Manual validation of DASH-* rules that static pytest cannot prove |
 | `prompt.observability.dashboard-v5.pack` | [library/observability/dashboard-v5/pack.md](library/observability/dashboard-v5/pack.md) | V5 residual router (R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover) |
@@ -180,6 +181,7 @@ Artifacts → `reports/audit/<domain>/` or `reports/audit-runs/<run_id>/`.
 | Specialist forensic data-integrity audit | `prompt.observability.grafana-audit.data-integrity` |
 | Baseline/candidate regression acceptance | `prompt.observability.grafana-audit.regression` |
 | **Cyclic** audit → issues → fix → re-verify | `prompt.observability.dashboard-audit-cycle` |
+| **Unified N=10** full audit → issues → fix-to-close (STOP: no new + no open cycle issues) | `prompt.observability.dashboard-full-cycle` |
 | Per-panel render/query → issues → fix (one shot) | `prompt.observability.dashboard-panel-audit` |
 | Acceptance only: a11y, layout, data DQ | `prompt.observability.bi-dashboard-acceptance` |
 | Per-panel operator questions + value-dependent scenarios | `prompt.observability.dashboard-operator-playbook` |
@@ -210,6 +212,9 @@ python -m scripts.ai.prompts render prompt.observability.bi-dashboard-acceptance
 python -m scripts.ai.prompts render prompt.observability.dashboard-audit-cycle \
   --param SCOPE="grafana/dashboards" --param N=20 --param MODE=audit \
   --param DEPTH=full --param MONITORING=false
+python -m scripts.ai.prompts render prompt.observability.dashboard-full-cycle \
+  --param SCOPE="grafana/dashboards" --param N=10 --param MODE=full \
+  --param DEPTH=full --param MONITORING=false --param THEME=dark,light --param ZOOM=100
 python -m scripts.ai.prompts render prompt.observability.grafana-audit.master \
   --param SCOPE="grafana/dashboards" --param MONITORING=false
 python -m scripts.ai.prompts render prompt.observability.grafana-audit.data-integrity \
