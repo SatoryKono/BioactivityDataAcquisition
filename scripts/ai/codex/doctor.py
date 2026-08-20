@@ -193,11 +193,16 @@ def _mcp_payload(
     }
 
 
-def _write_mcp_payload(repo_root: Path, output_path: Path, payload: dict[str, Any]) -> None:
+def _write_mcp_payload(
+    repo_root: Path, output_path: Path, payload: dict[str, Any]
+) -> None:
     output = _governed_report_path(repo_root, output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
-    temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    temporary.write_text(  # NOSONAR - confined by _governed_report_path
+        json.dumps(payload, indent=2) + "\n",
+        encoding="utf-8",
+    )
     temporary.replace(output)
 
 
@@ -264,7 +269,11 @@ def run_mcp(
 def _governed_report_path(repo_root: Path, requested: Path) -> Path:
     """Resolve an explicit MCP report path under governed quality reports."""
 
-    candidate = requested if requested.is_absolute() else repo_root / requested
+    if requested.is_absolute():
+        raise ValueError("--output must be repository-relative")
+    if ".." in requested.parts:
+        raise ValueError("--output must not contain parent traversal")
+    candidate = repo_root / requested
     resolved = candidate.resolve()
     quality_root = (repo_root / "reports/quality").resolve()
     if not resolved.is_relative_to(quality_root):

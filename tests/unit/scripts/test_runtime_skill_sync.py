@@ -82,9 +82,51 @@ def test_sync_devin_copies_missing_required_file(tmp_path: Path) -> None:
 
 
 def test_write_report_confines_destination_to_runtime_root(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="refusing path outside"):
+    with pytest.raises(ValueError, match="runtime-root-relative"):
         runtime_skill_sync._write_report(
             tmp_path.parent / "escape.json",
+            {"status": "blocked"},
+            root=tmp_path,
+        )
+
+
+def test_write_report_rejects_parent_traversal_and_non_json_suffix(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="runtime-root-relative"):
+        runtime_skill_sync._write_report(
+            tmp_path / "reports/report.json",
+            {"status": "blocked"},
+            root=tmp_path,
+        )
+    with pytest.raises(ValueError, match="parent traversal"):
+        runtime_skill_sync._write_report(
+            Path("reports/../report.json"),
+            {"status": "blocked"},
+            root=tmp_path,
+        )
+    with pytest.raises(ValueError, match=r"\.json suffix"):
+        runtime_skill_sync._write_report(
+            Path("reports/report.txt"),
+            {"status": "blocked"},
+            root=tmp_path,
+        )
+
+
+def test_write_report_rejects_symlink_escape(tmp_path: Path) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside"
+    outside.mkdir()
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    link = reports / "external"
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation is unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="refusing path outside"):
+        runtime_skill_sync._write_report(
+            Path("reports/external/report.json"),
             {"status": "blocked"},
             root=tmp_path,
         )

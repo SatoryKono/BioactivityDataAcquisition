@@ -1,11 +1,11 @@
 """Rendering, artifact persistence, and CLI for debt-governance gates."""
 
-# ruff: noqa: F403, F405
-
 from __future__ import annotations
 
-from scripts.engineering.qa.report_debt_governance_gates import *
-from scripts.engineering.qa.report_debt_governance_gates import _parse_args
+import json
+import sys
+from pathlib import Path
+from typing import Any
 
 
 def render_markdown(payload: dict[str, object]) -> str:
@@ -144,6 +144,14 @@ def _check_artifacts(
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Lazy imports to avoid circular import when this module is loaded via
+    # report_debt_governance_gates as __main__
+    from scripts.engineering.qa.report_debt_governance_gates import (
+        _parse_args,
+        build_payload,
+    )
+    from memory.proof import emit_receipt_from_environment
+
     args = _parse_args(argv)
     repo_root = Path(args.repo_root).resolve()
     payload = build_payload(

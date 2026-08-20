@@ -268,6 +268,34 @@ def test_mcp_report_path_is_explicit_and_governed(tmp_path: Path) -> None:
         doctor._governed_report_path(tmp_path, Path("logs/mcp-health.json"))
     with pytest.raises(ValueError, match=r"\.json suffix"):
         doctor._governed_report_path(tmp_path, Path("reports/quality/mcp.txt"))
+    with pytest.raises(ValueError, match="repository-relative"):
+        doctor._governed_report_path(
+            tmp_path,
+            tmp_path / "reports/quality/mcp.json",
+        )
+    with pytest.raises(ValueError, match="parent traversal"):
+        doctor._governed_report_path(
+            tmp_path,
+            Path("reports/quality/../quality/mcp.json"),
+        )
+
+
+def test_mcp_report_path_rejects_symlink_escape(tmp_path: Path) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside"
+    outside.mkdir()
+    quality_root = tmp_path / "reports/quality"
+    quality_root.mkdir(parents=True)
+    link = quality_root / "external"
+    try:
+        link.symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"symlink creation is unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="under reports/quality"):
+        doctor._governed_report_path(
+            tmp_path,
+            Path("reports/quality/external/mcp.json"),
+        )
 
 
 def test_mcp_doctor_writes_only_to_explicit_quality_report(
