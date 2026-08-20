@@ -1945,6 +1945,89 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
     assert review_path.exists()
 
 
+
+def test_main_builds_cardinality_review_before_writing_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Provenance must be captured before --write-evidence dirties the tree (#9145)."""
+    from scripts.engineering.qa import observability_metric_inventory_cli as cli
+
+    order: list[str] = []
+    fake_report = {
+        "declared_metrics": ["bioetl_example_total"],
+        "emitted_metrics": ["bioetl_example_total"],
+        "dashboarded_metrics": [],
+        "alerted_metrics": [],
+        "unused_declared_metrics": [],
+        "emitted_without_declaration": [],
+        "dashboarded_without_declaration": [],
+        "alerted_without_declaration": [],
+        "dashboarded_without_emission": [],
+        "alerted_without_emission": [],
+        "runtime_cardinality_reviewed": ["bioetl_example_total"],
+        "runtime_cardinality_review_required": [],
+        "runtime_cardinality_threshold_violations": [],
+        "declared_risky_label_review_required": [],
+        "runtime_label_contract_violations": [],
+        "runtime_label_contract_unresolved": [],
+        "live_metrics": ["bioetl_example_total"],
+        "direct_live_metrics": ["bioetl_example_total"],
+        "helper_backed_live_metrics": [],
+        "registered_without_runtime": [],
+        "runtime_without_registry": [],
+        "registry_only_metrics": [],
+        "dead_metrics": [],
+        "documented_without_registry": [],
+        "rules_without_registry": [],
+        "documented_without_runtime": [],
+        "documented_only_metrics": [],
+        "ruled_without_runtime": [],
+        "compatibility_alias_candidates": [],
+        "runtime_emitters": {},
+        "helper_backed_emitters": {},
+        "docs_mentions": {},
+        "rules_mentions": {},
+        "alias_emitters": {},
+    }
+    monkeypatch.setattr(inventory, "collect_metric_inventory", lambda _repo_root: fake_report)
+
+    def fake_build(*_args: object, **_kwargs: object) -> dict[str, object]:
+        order.append("build_review")
+        return {
+            "status": "passed",
+            "mode": "local_cardinality_fallback",
+            "prometheus_base_url_source": "unconfigured",
+            "reviewed_metrics": ["bioetl_example_total"],
+            "review_required_metrics": [],
+            "degraded_reasons": [],
+            "live_threshold_violations": [],
+            "query_errors": {},
+        }
+
+    def fake_write_evidence(*_args: object, **_kwargs: object) -> None:
+        order.append("write_evidence")
+
+    monkeypatch.setattr(inventory, "_build_runtime_cardinality_review_summary", fake_build)
+    monkeypatch.setattr(cli, "_write_evidence_report", fake_write_evidence)
+
+    evidence_path = tmp_path / "evidence.json"
+    review_path = tmp_path / "review.json"
+    exit_code = inventory.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--write-evidence",
+            str(evidence_path),
+            "--review-json-out",
+            str(review_path),
+        ]
+    )
+    assert exit_code == 0
+    assert order == ["build_review", "write_evidence"]
+    assert review_path.exists()
+
+
 def test_direct_module_entrypoint_json_bootstraps_without_circular_import() -> None:
     """#8774: `python -m scripts.engineering.qa.report_observability_metric_inventory`."""
     completed = subprocess.run(
