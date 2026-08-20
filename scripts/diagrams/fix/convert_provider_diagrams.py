@@ -33,8 +33,8 @@ _METADATA_RE = re.compile(
     r"^%%\s+@(?P<key>version|date|type|level|nodes|adr)\s+(?P<value>.+)$"
 )
 _NODE_RE = re.compile(
-    r"(?<![\w])([A-Za-z_][A-Za-z0-9_]*)\s*"
-    r"(?=(?:\[\[?|\(\(?|\{\{?|>|\[/))"
+    r"(?<![\w])([A-Za-z_][A-Za-z0-9_]*+)[ \t]*+"
+    r"(?=[\[({>/])"
 )
 _STYLE_RE = re.compile(
     r"^\s*style\s+(?P<node>[A-Za-z_][A-Za-z0-9_]*)\s+"

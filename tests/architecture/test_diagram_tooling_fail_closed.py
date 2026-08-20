@@ -81,6 +81,22 @@ def test_differentiate_linkstyle_refuses_unparsed_arrow_forms() -> None:
     assert module.count_mermaid_arrows(lines) != len(conns)
 
 
+def test_differentiate_linkstyle_counts_only_literal_arrow_tokens() -> None:
+    module = _load(
+        "differentiate_linkstyle_literal_arrows_9062",
+        "scripts/diagrams/fix/differentiate_linkstyle.py",
+    )
+    lines = [
+        "flowchart TD",
+        "A -.-> B",
+        "B -.- C",
+        "C -x-> D",
+        "D -x- E",
+    ]
+
+    assert module.count_mermaid_arrows(lines) == 2
+
+
 def test_svg2png_has_no_machine_local_puppeteer_path() -> None:
     text = (ROOT / "scripts/diagrams/svg2png.mjs").read_text(encoding="utf-8")
     assert "C:/Users/Fedor" not in text

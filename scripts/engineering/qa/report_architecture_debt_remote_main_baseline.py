@@ -69,10 +69,21 @@ def _run_git(repo_root: Path, args: list[str], *, check: bool = True) -> str:
 
 
 def _remote_main_sha(repo_root: Path, *, remote: str, branch: str) -> str:
-    output = _run_git(repo_root, ["ls-remote", remote, f"refs/heads/{branch}"])
-    if not output:
-        raise RuntimeError(f"Could not resolve {remote}/{branch}")
-    return output.split()[0]
+    try:
+        output = _run_git(repo_root, ["ls-remote", remote, f"refs/heads/{branch}"])
+    except subprocess.CalledProcessError:
+        output = ""
+    if output:
+        return output.split()[0]
+    # Fallback to local tracking ref when remote is not reachable (offline CI)
+    for fallback_ref in (f"{remote}/{branch}", "HEAD"):
+        try:
+            fallback_sha = _run_git(repo_root, ["rev-parse", "--verify", fallback_ref])
+            if fallback_sha:
+                return fallback_sha.split()[0]
+        except subprocess.CalledProcessError:
+            continue
+    raise RuntimeError(f"Could not resolve {remote}/{branch} and no local fallback")
 
 
 def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:

@@ -4,17 +4,135 @@ This module owns policy evaluation while the public report module coordinates
 artifact loading and payload assembly.
 """
 
-# ruff: noqa: F403, F405
-
 from __future__ import annotations
 
-from scripts.engineering.qa.report_debt_governance_gates import *
-from scripts.engineering.qa.report_debt_governance_gates import (
-    _load_json,
-    _load_yaml,
-    _load_yaml_from_git_ref,
+import json
+import os
+import subprocess
+import sys
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from scripts.engineering.qa import (
+    report_adr_enforcement_matrix,
+    report_architecture_debt_remote_main_baseline,
+    report_hotspot_family_baseline,
+    report_observability_metric_inventory,
+)
+from scripts.engineering.qa.report_config_surface_backlog import build_backlog
+from scripts.engineering.qa.report_module_coverage_inventory import (
     _refresh_existing_inventory_source_tree,
 )
+
+try:
+    from bioetl.infrastructure.quality.architecture_quality_scorecard import (
+        build_architecture_quality_scorecard,
+    )
+except Exception:  # pragma: no cover
+    build_architecture_quality_scorecard = None  # type: ignore[assignment]
+try:
+    from bioetl.infrastructure.quality.debt_scorecard import (
+        evaluate_debt_scorecard,
+        load_debt_scorecard,
+    )
+except Exception:  # pragma: no cover
+    evaluate_debt_scorecard = None  # type: ignore[assignment]
+    load_debt_scorecard = None  # type: ignore[assignment]
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
+DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
+RELEASE_REVIEW_MAX_AGE_DAYS = 21
+DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"
+FLAKY_TEST_REVIEW_PATH = "reports/quality/flaky-test-burndown-review.json"
+HOTSPOT_FAMILY_BASELINE_JSON = "reports/quality/hotspot-family-baseline.json"
+ARCHITECTURE_DEBT_REMOTE_MAIN_BASELINE_JSON = (
+    "reports/quality/architecture-debt-remote-main-baseline.json"
+)
+RUNTIME_CARDINALITY_INVENTORY_JSON = (
+    "reports/observability/runtime_cardinality_inventory.json"
+)
+RUNTIME_CARDINALITY_REVIEW_JSON = (
+    "reports/observability/runtime_cardinality_review.json"
+)
+MODULE_COVERAGE_INVENTORY_JSON = "reports/quality/module-coverage-inventory.json"
+COMPATIBILITY_IMPORTER_CENSUS_JSON = (
+    "reports/quality/compatibility-importer-census.json"
+)
+CONFIG_DISCREPANCY_BASELINE_JSON = "reports/quality/config-discrepancy-baseline.json"
+TEST_GOVERNANCE_CURRENT_JSON = "reports/quality/test-governance-current.json"
+RUNTIME_UUID_SEAMS_YAML = "configs/quality/runtime_uuid_seams.yaml"
+ADR_ENFORCEMENT_MATRIX_JSON = "reports/quality/adr-enforcement-matrix.json"
+SCRIPTS_INVENTORY_MANIFEST_JSON = "configs/quality/scripts_inventory_manifest.json"
+BUDGET_KEY_NAMES = frozenset(
+    {
+        "budget",
+        "max",
+        "max_count",
+        "max_loc",
+        "max_lines",
+        "max_value",
+        "limit",
+        "threshold",
+        "cap",
+    }
+)
+UNTRIAGED_FLAKY_STATUSES = frozenset({"", "needs-triage", "unknown", "untriaged"})
+
+
+@dataclass(frozen=True)
+class Gate:
+    """Normalized debt-governance gate row."""
+
+    name: str
+    status: str
+    metric: str
+    current: object
+    limit: object
+    source_artifact: str
+    remediation: str
+
+    def as_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:
+    path = repo_root / rel_path
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:
+    payload = yaml.safe_load((repo_root / rel_path).read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
+
+
+def _load_yaml_from_git_ref(
+    repo_root: Path,
+    ref: str,
+    rel_path: str,
+) -> dict[str, Any] | None:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    result = subprocess.run(
+        ensure_safe_cli_argv(
+            ["git", "-C", repo_root.as_posix(), "show", f"{ref}:{rel_path}"]
+        ),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    payload = yaml.safe_load(result.stdout)
+    return payload if isinstance(payload, dict) else {}
 
 
 def _count(value: object) -> int:

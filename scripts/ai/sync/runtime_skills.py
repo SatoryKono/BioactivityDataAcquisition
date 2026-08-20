@@ -114,11 +114,20 @@ def _write_report(
     *,
     root: Path,
 ) -> Path:
+    if path.is_absolute():
+        raise ValueError("--report must be runtime-root-relative")
+    if ".." in path.parts:
+        raise ValueError("--report must not contain parent traversal")
     report_path = resolve_cli_path(path, root=root)
+    if report_path.suffix != ".json":
+        raise ValueError("--report must use a .json suffix")
     report_path.parent.mkdir(parents=True, exist_ok=True)
     content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     temporary = report_path.with_suffix(report_path.suffix + ".tmp")
-    temporary.write_text(content, encoding="utf-8")
+    temporary.write_text(  # NOSONAR - confined by resolve_cli_path above
+        content,
+        encoding="utf-8",
+    )
     os.replace(temporary, report_path)
     return report_path
 

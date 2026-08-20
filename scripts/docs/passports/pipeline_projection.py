@@ -86,6 +86,50 @@ def _filters(payload: JsonObject) -> list[JsonObject]:
     return rows
 
 
+def _source_details(
+    *,
+    provider: str,
+    entity: str,
+    source_profile: JsonObject,
+    pipeline_source: JsonObject,
+    provider_runtime: JsonObject,
+) -> tuple[str, str, str | None, str, object]:
+    source_resource = str(
+        source_profile.get("profile_id") or pipeline_source.get("resource") or ""
+    )
+    if not source_resource:
+        source_resource = f"{provider}:{entity}"
+    base_url = provider_runtime.get("base_url")
+    derived_entities = {
+        "assay_parameters",
+        "publication_similarity",
+        "publication_term",
+        "subcellular_fraction",
+        "target_protein_classification",
+    }
+    source_kind = "derived" if provider == "chembl" and entity in derived_entities else "http_api"
+    endpoint_template: str | None = str(base_url) if base_url else None
+    source_collection = entity
+    if provider == "chembl" and entity != "target_protein_classification":
+        mapped_resource = ChemblEntityMapper.get_resource_name(entity)
+        if mapped_resource:
+            source_collection = mapped_resource
+            endpoint_template = ChemblEntityMapper.get_resource_url(entity)
+    return source_resource, source_kind, endpoint_template, source_collection, base_url
+
+
+def _field_selection_sentence(business_fields: list[object]) -> str:
+    field_sample = business_fields[:8]
+    suffix = (
+        f" и ещё {len(business_fields) - len(field_sample)} полей."
+        if len(business_fields) > len(field_sample)
+        else "."
+    )
+    return "В business-проекцию входят " + ", ".join(
+        f"`{field}`" for field in field_sample
+    ) + suffix
+
+
 def build_ordinary_projection(
     payload: JsonObject,
     *,
@@ -122,32 +166,19 @@ def build_ordinary_projection(
     ]
     source_profile = _mapping(configured_filters.get("source_profile"))
     pipeline_source = _mapping(pipeline.get("source"))
-    source_resource = str(
-        source_profile.get("profile_id") or pipeline_source.get("resource") or ""
+    (
+        source_resource,
+        source_kind,
+        endpoint_template,
+        source_collection,
+        base_url,
+    ) = _source_details(
+        provider=provider,
+        entity=entity,
+        source_profile=source_profile,
+        pipeline_source=pipeline_source,
+        provider_runtime=provider_runtime,
     )
-    if not source_resource:
-        source_resource = f"{provider}:{entity}"
-    base_url = provider_runtime.get("base_url")
-    source_kind = (
-        "derived"
-        if provider == "chembl"
-        and entity
-        in {
-            "assay_parameters",
-            "publication_similarity",
-            "publication_term",
-            "subcellular_fraction",
-            "target_protein_classification",
-        }
-        else "http_api"
-    )
-    endpoint_template: str | None = str(base_url) if base_url else None
-    source_collection = entity
-    if provider == "chembl" and entity != "target_protein_classification":
-        mapped_resource = ChemblEntityMapper.get_resource_name(entity)
-        if mapped_resource:
-            source_collection = mapped_resource
-            endpoint_template = ChemblEntityMapper.get_resource_url(entity)
     filter_summary = (
         "; ".join(f"{row['name']}={row['description']}" for row in filters)
         if filters
@@ -169,22 +200,13 @@ def build_ordinary_projection(
         pipeline.get("description")
         or f"Extract {entity} records from the {provider} provider"
     )
-    field_sample = business_fields[:8]
     sentences = [
         (
             f"{description.rstrip('.')}. Источник — `{source_resource}`"
             + (f" на `{base_url}`" if base_url else "")
             + f"; применяемые extraction/input filters: {filter_summary}."
         ),
-        (
-            "В business-проекцию входят "
-            + ", ".join(f"`{field}`" for field in field_sample)
-            + (
-                f" и ещё {len(business_fields) - len(field_sample)} полей."
-                if len(business_fields) > len(field_sample)
-                else "."
-            )
-        ),
+        _field_selection_sentence(business_fields),
         (
             f"Silver использует профиль `{provider}.{entity}` и проверяет обязательные "
             f"поля {', '.join(f'`{field}`' for field in required_silver[:6]) or 'из effective DQ contract'}; "

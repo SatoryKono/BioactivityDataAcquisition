@@ -51,7 +51,9 @@ class TestExtractNullFields:
         # Assertions
         assert not output_file.exists()
 
-    def test_extract_null_fields_csv_read_error(self, tmp_path: Path) -> None:
+    def test_extract_null_fields_csv_read_error(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
         """Test extraction when CSV file cannot be read."""
         # Create invalid CSV file
         csv_file = tmp_path / "test_publication.csv"
@@ -63,9 +65,8 @@ class TestExtractNullFields:
         # Test (should handle error gracefully)
         extract_null_fields(csv_file, fields_to_extract, output_file)
 
-        # Assertions (file should not be created on error)
-        # The function handles errors by printing, not raising
-        assert True  # Test passes if no exception is raised
+        assert not output_file.exists()
+        assert "No matching columns found" in capsys.readouterr().out
 
     def test_null_fields_structure(self) -> None:
         """Test that NULL_FIELDS has expected structure."""
