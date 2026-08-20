@@ -212,16 +212,16 @@ dashboards:
     data_sources:
       - Prometheus
       - BioETL Ops HTTP
-    panel_count: 17
+    panel_count: 16
     key_panels:
-      - id: 9402
-        title: Inspect Run Identity
+      - id: 3022
+        title: Inspect Full Run Identity
         type: table
-        description: HTTP identity hub; run_id never a Prometheus label
+        description: HTTP identity hub in collapsed Selected Run Details; run_id never a Prometheus label
       - id: 3023
-        title: Inspect Processed Records
+        title: Inspect Full Processed Records
         type: table
-        description: Bronze/Silver/Gold accounting hub via Ops HTTP (collapsed Selected Run Details)
+        description: Bronze/Silver/Gold accounting hub via Ops HTTP (collapsed row)
       - id: 3010
         title: Inspect Recent Runs (last 4)
         type: table

@@ -4314,7 +4314,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '3023':
-        title: Inspect Processed Records
+        title: Inspect Full Processed Records
         role: accounting_table
         tier: 3
         scope: selected_run
@@ -4323,8 +4323,8 @@ dashboards:
         empty_state_class: select_run
         state_model:
         - VALID_EMPTY
-        - TELEMETRY_ABSENT
         - ERROR
+        - TELEMETRY_ABSENT
         required_copy:
         - evidence_scope
         - no_data
@@ -4370,30 +4370,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '9402':
-        title: Inspect Run Identity
-        role: identity_table
-        tier: 1
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - backend_error
-        render_profiles:
-        - first_window_dark
-        - first_window_light
-        required_columns:
-        - parameter
-        - value
   bioetl-runtime:
     panels:
       '4':

@@ -1026,12 +1026,12 @@ Common context panels on primary dashboards outside Overview:
 | `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
-Run Explorer HTTP targets (`3010` / `9402` / `3023` and the below-fold
+Run Explorer HTTP targets (`3010` / `3022` / `3023` and the below-fold
 aliases) are locked by
 `docs/03-guides/dashboards/contracts/run-explorer-http-catalog.yaml`.
 Do not hand-edit a duplicate Infinity URL without updating that catalog;
 CI compares live JSON to the catalog and forbids unexpanded `$pipeline`
-in `noValue`. Selector→request snapshots for 3010/9402/3023 live in
+in `noValue`. Selector→request snapshots for 3010/3022/3023 live in
 `tests/fixtures/grafana/run_explorer/` (generated; no hosts or secrets).
 Live browser smoke is scheduled-only (ADR-010), not default CI.
 
