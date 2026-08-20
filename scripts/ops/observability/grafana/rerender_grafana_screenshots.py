@@ -132,7 +132,7 @@ def _repo_relative_path(path: Path, *, root: Path) -> tuple[Path, str]:
         raise ValueError(
             f"fixture path must stay under repository root: {path}"
         ) from exc
-    return resolved_path, str(relative)
+    return resolved_path, relative.as_posix()
 
 
 def _git_capture_source() -> dict[str, object]:
