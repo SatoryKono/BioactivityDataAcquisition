@@ -19,8 +19,8 @@ Exit-McpValidateOnly -ServerName "ast-grep"
 # fall back to the mirror. Native command failures must not abort the fallback,
 # so relax the error action around the npx invocations only.
 $ErrorActionPreference = "Continue"
-& npx -y "@notprolands/ast-grep-mcp" --stdio @args
+& npx -y "@notprolands/ast-grep-mcp@1.1.1" --stdio @args
 if ($LASTEXITCODE -eq 0) { exit 0 }
 
-& npx -y "@chousyn/ast-grep-mcp" --stdio @args
+& npx -y "@chousyn/ast-grep-mcp@0.1.1" --stdio @args
 exit $LASTEXITCODE

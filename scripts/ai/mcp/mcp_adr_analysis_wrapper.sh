@@ -29,4 +29,4 @@ mcp_exit_if_validate_only "adr-analysis"
 exec env \
   "NPM_CONFIG_IGNORE_SCRIPTS=${NPM_CONFIG_IGNORE_SCRIPTS}" \
   "npm_config_ignore_scripts=${NPM_CONFIG_IGNORE_SCRIPTS}" \
-  npx -y mcp-adr-analysis-server
+  npx -y mcp-adr-analysis-server@2.6.14
