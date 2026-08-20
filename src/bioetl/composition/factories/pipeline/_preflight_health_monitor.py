@@ -13,6 +13,7 @@ from bioetl.infrastructure.control_plane.provider_health_evidence import (
     PersistingProviderHealthMonitor,
     rehydrate_provider_health_evidence,
 )
+from bioetl.infrastructure.time import SystemClock
 
 
 def _provider_health_evidence_store() -> FileProviderHealthEvidenceStore | None:
@@ -32,7 +33,9 @@ def build_preflight_health_monitor(metrics: MetricsPort) -> HealthMonitorPort:
     store = _provider_health_evidence_store()
     if store is None:
         return inner
-    return PersistingProviderHealthMonitor(inner=inner, store=store)
+    return PersistingProviderHealthMonitor(
+        inner=inner, store=store, clock=SystemClock()
+    )
 
 
 def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
@@ -40,4 +43,4 @@ def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
     store = _provider_health_evidence_store()
     if store is None:
         return 0
-    return rehydrate_provider_health_evidence(metrics, store)
+    return rehydrate_provider_health_evidence(metrics, store, now=SystemClock().now())

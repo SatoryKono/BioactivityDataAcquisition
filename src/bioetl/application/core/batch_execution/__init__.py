@@ -1,5 +1,5 @@
 """Canonical batch-execution sublayer for application-core runtime helpers."""
-
+from __future__ import annotations
 # ruff: noqa: I001
 
 from bioetl.application.core.batch_execution.contracts import (

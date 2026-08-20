@@ -112,8 +112,8 @@ def _atomic_write_text(
 ) -> None:
     """Atomically replace one UTF-8 text artifact through the store port."""
     writer = _require_store(store)
-    writer.mkdir(path.parent)
-    writer.write_text(path, content)
+    writer.mkdir(str(path.parent))
+    writer.write_text(str(path), content)
 
 
 def write_json(
@@ -185,7 +185,7 @@ def write_pipeline_run_report(
     )
     out_dir = directory or resolved_dir
     writer = _require_store(store)
-    writer.mkdir(out_dir)
+    writer.mkdir(str(out_dir))
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
     enriched = _require_pipeline_run_report(
@@ -240,7 +240,7 @@ def write_workflow_run_report(
     )
     out_dir = directory or resolved_dir
     writer = _require_store(store)
-    writer.mkdir(out_dir)
+    writer.mkdir(str(out_dir))
     json_path = out_dir / "workflow-run-report.json"
     md_path = out_dir / "workflow-run-report.md"
     write_json(json_path, report.to_dict(), store=writer)

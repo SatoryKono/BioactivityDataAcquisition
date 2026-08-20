@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import KW_ONLY, dataclass
 from typing import Literal, Protocol, runtime_checkable
 
-from bioetl.domain.ports._foreign_key_reconciliation_guards import (
+from bioetl.domain.workflow._foreign_key_reconciliation_guards import (
     normalize_layer,
     normalize_request_layers,
     normalize_source_run_ids,
