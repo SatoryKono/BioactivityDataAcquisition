@@ -34,16 +34,23 @@ def safe_id(value: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_.-]+", "-", value).strip("-")
 
 
-def main() -> None:
-    OUT.mkdir(parents=True, exist_ok=True)
-    base_sha = _git("rev-parse", BASE_REF).decode().strip()
-    files = tracked_files(base_sha)
-    universe = set(files)
-    assigned: set[str] = set()
-    leaves: list[dict[str, object]] = []
+class LeafCollector:
+    """Accumulate an exact-cover, capped set of campaign leaves."""
 
-    def add_files(leaf_id: str, wave: str, selected: list[str], note: str) -> None:
-        available = sorted(set(selected) - assigned)
+    def __init__(self, files: list[str]) -> None:
+        self.files = files
+        self.assigned: set[str] = set()
+        self.leaves: list[dict[str, object]] = []
+        self._residual_index = 1
+
+    def add_files(
+        self,
+        leaf_id: str,
+        wave: str,
+        selected: list[str],
+        note: str,
+    ) -> None:
+        available = sorted(set(selected) - self.assigned)
         if not available:
             return
         total_parts = (len(available) + CAP - 1) // CAP
@@ -52,7 +59,7 @@ def main() -> None:
             part_id = leaf_id if total_parts == 1 else f"{leaf_id}-{index:02d}"
             manifest = OUT / f"_{safe_id(part_id)}.txt"
             manifest.write_text("\n".join(chunk) + "\n", encoding="utf-8")
-            leaves.append(
+            self.leaves.append(
                 {
                     "id": part_id,
                     "wave": wave,
@@ -62,15 +69,67 @@ def main() -> None:
                     "file_list": str(manifest.relative_to(ROOT)),
                 }
             )
-            assigned.update(chunk)
+            self.assigned.update(chunk)
 
-    def prefix(leaf_id: str, wave: str, *roots: str, note: str = "") -> None:
+    def prefix(
+        self,
+        leaf_id: str,
+        wave: str,
+        *roots: str,
+        note: str = "",
+    ) -> None:
         selected = [
             path
-            for path in files
+            for path in self.files
             if any(path == root or path.startswith(f"{root}/") for root in roots)
         ]
-        add_files(leaf_id, wave, selected, note or ", ".join(roots))
+        self.add_files(leaf_id, wave, selected, note or ", ".join(roots))
+
+    def add_remaining(self, universe: set[str]) -> None:
+        groups: dict[str, list[str]] = {}
+        for path in sorted(universe - self.assigned):
+            parts = path.split("/")
+            key = "/".join(parts[:2]) if len(parts) > 1 else "root-files"
+            groups.setdefault(key, []).append(path)
+
+        packed: list[str] = []
+        packed_groups: list[str] = []
+        for group, grouped_files in sorted(groups.items()):
+            if len(grouped_files) > CAP:
+                self._flush_packed(packed, packed_groups)
+                self.add_files(
+                    f"S-R-{safe_id(group)}",
+                    "R",
+                    grouped_files,
+                    f"residual catch-all: {group}",
+                )
+                continue
+            if packed and len(packed) + len(grouped_files) > CAP:
+                self._flush_packed(packed, packed_groups)
+            packed.extend(grouped_files)
+            packed_groups.append(group)
+        self._flush_packed(packed, packed_groups)
+
+    def _flush_packed(self, packed: list[str], groups: list[str]) -> None:
+        if not packed:
+            return
+        self.add_files(
+            f"S-R-catchall-{self._residual_index:02d}",
+            "R",
+            list(packed),
+            "residual catch-all: " + ", ".join(groups),
+        )
+        self._residual_index += 1
+        packed.clear()
+        groups.clear()
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    base_sha = _git("rev-parse", BASE_REF).decode().strip()
+    files = tracked_files(base_sha)
+    universe = set(files)
+    collector = LeafCollector(files)
 
     # Wave D is carved out first so security-sensitive paths are reviewed once,
     # not duplicated in their architecture/data-plane leaves.
