@@ -745,4 +745,3 @@ def test_incident_alert_evidence_is_collapsed_below_the_fold() -> None:
     assert row.get("gridPos", {}).get("y") == 18
     nested_ids = {child.get("id") for child in (row.get("panels") or [])}
     assert nested_ids == {2005, 2006, 2007}
-
