@@ -53,7 +53,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-function Write-Step {
+function Show-Step {
     param([Parameter(Mandatory = $true)][string]$Message)
     Write-Host "[setup_bioetl_wsl] $Message"
 }
@@ -205,12 +205,12 @@ if ($null -eq (Get-Command wsl.exe -ErrorAction SilentlyContinue)) {
     throw 'wsl.exe was not found. Install or enable WSL 2 first.'
 }
 
-Write-Step 'Checking WSL availability'
+Show-Step 'Checking WSL availability'
 $kernel = Invoke-WslCommand -ArgumentList @('uname', '-sr')
 Write-Host "WSL ready: $kernel"
 
 if ($PSCmdlet.ParameterSetName -eq 'WindowsPath') {
-    Write-Step 'Translating repository path for WSL'
+    Show-Step 'Translating repository path for WSL'
     $resolvedWindowsProjectPath = Resolve-WindowsProjectPath -Path $ProjectPath
     $WslProjectPath = Convert-WindowsPathToWslPath -WindowsPath $resolvedWindowsProjectPath
 }
@@ -245,7 +245,7 @@ $resolvedVenvPath = Resolve-WslVenvPath -ConfiguredPath $VenvPath -HomePath $wsl
 $venvPython = "$resolvedVenvPath/bin/python"
 
 if (-not $SkipSystemPackages) {
-    Write-Step 'Installing baseline WSL packages'
+    Show-Step 'Installing baseline WSL packages'
     $null = Invoke-WslCommand -User 'root' -ArgumentList @(
         'env',
         'DEBIAN_FRONTEND=noninteractive',
@@ -281,7 +281,7 @@ if (-not $SkipSystemPackages) {
     )
 }
 
-Write-Step 'Configuring Git LFS'
+Show-Step 'Configuring Git LFS'
 $null = Invoke-WslCommand -ArgumentList @('git', 'lfs', 'install')
 
 $uvPath = Invoke-WslCommand -ArgumentList @(
@@ -291,7 +291,7 @@ $uvPath = Invoke-WslCommand -ArgumentList @(
 )
 $uvPath = $uvPath.Trim()
 if ([string]::IsNullOrWhiteSpace($uvPath)) {
-    Write-Step 'Installing uv for the WSL user'
+    Show-Step 'Installing uv for the WSL user'
     $null = Invoke-WslCommand -ArgumentList @(
         'bash',
         '-lc',
@@ -310,7 +310,7 @@ if ($RecreateVenv) {
         -Candidate $resolvedVenvPath `
         -HomePath $wslHome `
         -RepositoryPath $WslProjectPath
-    Write-Step "Removing existing WSL venv: $resolvedVenvPath"
+    Show-Step "Removing existing WSL venv: $resolvedVenvPath"
     $null = Invoke-WslCommand -ArgumentList @(
         'rm',
         '-rf',
@@ -319,7 +319,7 @@ if ($RecreateVenv) {
     )
 }
 
-Write-Step 'Running the canonical BioETL WSL bootstrap'
+Show-Step 'Running the canonical BioETL WSL bootstrap'
 $runtimePath = "$wslHome/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 $null = Invoke-WslCommand -ArgumentList @(
     'env',
@@ -341,7 +341,7 @@ if ($IncludeExport) {
 }
 
 if ($IncludeDocs -or $IncludeFullTests -or $IncludeExport) {
-    Write-Step 'Synchronizing requested optional Python extras'
+    Show-Step 'Synchronizing requested optional Python extras'
     $syncArguments = @(
         'env',
         "VIRTUAL_ENV=$resolvedVenvPath",
@@ -364,7 +364,7 @@ if ($IncludeDocs -or $IncludeFullTests -or $IncludeExport) {
 }
 
 if ($InstallPreCommitHooks) {
-    Write-Step 'Installing pre-commit hooks'
+    Show-Step 'Installing pre-commit hooks'
     $null = Invoke-WslCommand -ArgumentList @(
         'sh',
         '-c',
@@ -376,7 +376,7 @@ if ($InstallPreCommitHooks) {
 }
 
 if ($IncludeMcp) {
-    Write-Step 'Installing Node/MCP dependencies from package-lock.json'
+    Show-Step 'Installing Node/MCP dependencies from package-lock.json'
     if (-not (Test-WslCommandAvailable -CommandName 'npm')) {
         throw 'npm is required for -IncludeMcp. Install a supported Node.js version in WSL first.'
     }
@@ -390,7 +390,7 @@ if ($IncludeMcp) {
 }
 
 if (-not $SkipSmoke) {
-    Write-Step 'Running smoke checks'
+    Show-Step 'Running smoke checks'
     $pythonVersion = Invoke-WslCommand -ArgumentList @($venvPython, '--version')
     Write-Host "[setup_bioetl_wsl] $pythonVersion"
     $smoke = Invoke-WslCommand -ArgumentList @(

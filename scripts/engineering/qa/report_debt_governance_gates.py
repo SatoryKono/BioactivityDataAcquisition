@@ -471,15 +471,7 @@ def build_payload(
     }
 
 
-from scripts.engineering.qa.debt_governance_gate_report import (
-    render_markdown,
-    _write_artifacts,
-    _artifact_staleness_errors,
-    _failing_gate_errors,
-    _check_artifacts,
-    main,
-)
-
-
 if __name__ == "__main__":
+    from scripts.engineering.qa.debt_governance_gate_report import main
+
     raise SystemExit(main())

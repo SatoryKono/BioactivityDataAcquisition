@@ -2,20 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pathlib import Path
 import re
+from pathlib import Path
+from typing import Any
 
 JsonObject = dict[str, Any]
 
 
-def validate_pipeline_publication(
-    facts: JsonObject,
-    markdown: str,
-    *,
-    project_root: Path,
-) -> list[str]:
-    """Validate human and machine pipeline projections as one publication unit."""
+def _publication_shape_errors(facts: JsonObject, markdown: str) -> list[str]:
     errors: list[str] = []
     sentences = facts.get("summary", {}).get("sentences", [])
     if not 2 <= len(sentences) <= 5:
@@ -41,12 +35,22 @@ def validate_pipeline_publication(
         errors.append("legacy verbose identity projection is forbidden")
     if not facts.get("operator_commands"):
         errors.append("operator command projection is empty")
+    return errors
+
+
+def _operator_command_errors(facts: JsonObject, project_root: Path) -> list[str]:
+    errors: list[str] = []
     for command in facts.get("operator_commands", []):
         if not str(command.get("command", "")).startswith("bioetl "):
             errors.append("operator command must use the bioetl CLI")
         source_ref = project_root / str(command.get("source_ref", ""))
         if not source_ref.is_file():
             errors.append(f"missing command source_ref: {command.get('source_ref')}")
+    return errors
+
+
+def _diagram_errors(facts: JsonObject) -> list[str]:
+    errors: list[str] = []
     diagrams = facts.get("diagrams", [])
     if not diagrams:
         errors.append("at least one Mermaid diagram is required")
@@ -58,10 +62,19 @@ def validate_pipeline_publication(
             errors.append("Mermaid contains occurrence/high-cardinality identity")
         if not re.search(r"\n\s+\w+\\?\\?-", mermaid) and "-->" not in mermaid:
             errors.append("Mermaid diagram has no edges")
+    return errors
+
+
+def _source_reference_errors(facts: JsonObject, project_root: Path) -> list[str]:
+    errors: list[str] = []
     for source_ref in facts.get("source_references", []):
         path = project_root / str(source_ref.get("path", ""))
         if not path.exists():
             errors.append(f"missing source reference: {source_ref.get('path')}")
+    return errors
+
+
+def _empty_section_errors(markdown: str) -> list[str]:
     section_matches = list(re.finditer(r"^##(?!#)[^\n]+$", markdown, re.MULTILINE))
     for index, match in enumerate(section_matches):
         end = (
@@ -70,9 +83,24 @@ def validate_pipeline_publication(
             else len(markdown)
         )
         if not markdown[match.end() : end].strip():
-            errors.append("empty Markdown section")
-            break
-    return errors
+            return ["empty Markdown section"]
+    return []
+
+
+def validate_pipeline_publication(
+    facts: JsonObject,
+    markdown: str,
+    *,
+    project_root: Path,
+) -> list[str]:
+    """Validate human and machine pipeline projections as one publication unit."""
+    return [
+        *_publication_shape_errors(facts, markdown),
+        *_operator_command_errors(facts, project_root),
+        *_diagram_errors(facts),
+        *_source_reference_errors(facts, project_root),
+        *_empty_section_errors(markdown),
+    ]
 
 _MERGE_STRATEGIES = {"left_outer", "inner", "outer", "right_outer"}
 _CONFLICT_RULES = {"seed_priority", "explicit_rules"}
@@ -115,46 +143,61 @@ def _validate_join_sources(
     available_sources: set[str] = set()
     for role in ("dependencies", "enrichers"):
         for item in _mapping_items(composite.get(role)):
-            join_keys = _unique_strings(item.get("join_keys"))
-            if not join_keys:
-                diagnostics.append(
-                    _error("COMPOSITE_JOIN_KEYS_EMPTY", pipeline=item.get("pipeline"))
+            diagnostics.extend(
+                _validate_join_source(
+                    item,
+                    seed_output_keys=seed_output_keys,
+                    pipeline_output_keys=pipeline_output_keys,
+                    available_sources=available_sources,
                 )
-                continue
-            key_source = item.get("key_source")
-            if isinstance(key_source, str):
-                if key_source not in available_sources:
-                    diagnostics.append(
-                        _error(
-                            "COMPOSITE_KEY_SOURCE_NOT_PRIOR",
-                            pipeline=item.get("pipeline"),
-                            key_source=key_source,
-                        )
-                    )
-                valid_keys = pipeline_output_keys.get(key_source, set())
-            else:
-                valid_keys = seed_output_keys
-            missing = sorted(set(join_keys) - valid_keys)
-            if missing:
-                diagnostics.append(
-                    _error(
-                        "COMPOSITE_JOIN_KEY_NOT_IN_SEED_OUTPUT",
-                        pipeline=item.get("pipeline"),
-                        keys=missing,
-                    )
+            )
+    return diagnostics
+
+
+def _validate_join_source(
+    item: JsonObject,
+    *,
+    seed_output_keys: set[str],
+    pipeline_output_keys: dict[str, set[str]],
+    available_sources: set[str],
+) -> list[JsonObject]:
+    diagnostics: list[JsonObject] = []
+    pipeline = item.get("pipeline")
+    join_keys = _unique_strings(item.get("join_keys"))
+    if not join_keys:
+        return [_error("COMPOSITE_JOIN_KEYS_EMPTY", pipeline=pipeline)]
+    key_source = item.get("key_source")
+    valid_keys = seed_output_keys
+    if isinstance(key_source, str):
+        if key_source not in available_sources:
+            diagnostics.append(
+                _error(
+                    "COMPOSITE_KEY_SOURCE_NOT_PRIOR",
+                    pipeline=pipeline,
+                    key_source=key_source,
                 )
-            cardinality = item.get("cardinality")
-            if cardinality not in (None, "one_to_one", "many_to_one"):
-                diagnostics.append(
-                    _error(
-                        "COMPOSITE_CARDINALITY_UNSUPPORTED",
-                        pipeline=item.get("pipeline"),
-                        value=cardinality,
-                    )
-                )
-            pipeline = item.get("pipeline")
-            if isinstance(pipeline, str):
-                available_sources.add(pipeline)
+            )
+        valid_keys = pipeline_output_keys.get(key_source, set())
+    missing = sorted(set(join_keys) - valid_keys)
+    if missing:
+        diagnostics.append(
+            _error(
+                "COMPOSITE_JOIN_KEY_NOT_IN_SEED_OUTPUT",
+                pipeline=pipeline,
+                keys=missing,
+            )
+        )
+    cardinality = item.get("cardinality")
+    if cardinality not in (None, "one_to_one", "many_to_one"):
+        diagnostics.append(
+            _error(
+                "COMPOSITE_CARDINALITY_UNSUPPORTED",
+                pipeline=pipeline,
+                value=cardinality,
+            )
+        )
+    if isinstance(pipeline, str):
+        available_sources.add(pipeline)
     return diagnostics
 
 
@@ -172,12 +215,13 @@ def _validate_merge(value: object) -> list[JsonObject]:
         diagnostics.append(
             _error("COMPOSITE_CONFLICT_RULE_INVALID", value=conflict_rule)
         )
-    if conflict_rule == "explicit_rules":
-        priorities = merge.get("field_priorities")
-        if not isinstance(priorities, dict) or not priorities:
-            diagnostics.append(_error("COMPOSITE_EXPLICIT_PRIORITIES_INCOMPLETE"))
-        elif any(not _unique_strings(value) for value in priorities.values()):
-            diagnostics.append(_error("COMPOSITE_EXPLICIT_PRIORITIES_INCOMPLETE"))
+    priorities = merge.get("field_priorities")
+    if conflict_rule == "explicit_rules" and (
+        not isinstance(priorities, dict)
+        or not priorities
+        or any(not _unique_strings(item) for item in priorities.values())
+    ):
+        diagnostics.append(_error("COMPOSITE_EXPLICIT_PRIORITIES_INCOMPLETE"))
     aggregation = merge.get("aggregation")
     if aggregation not in (None, "none", "first", "collect_unique"):
         diagnostics.append(

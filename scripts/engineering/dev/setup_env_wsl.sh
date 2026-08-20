@@ -2,6 +2,8 @@
 set -euo pipefail
 
 AGENT_TOOLS="none"
+AGENTDEBUGX_EXTRA="agentdebugx"
+PROOFAGENT_EXTRA="proofagent"
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --agent-tools)
@@ -24,7 +26,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$AGENT_TOOLS" in
-    none|agentdebugx|proofagent|all) ;;
+    none|"$AGENTDEBUGX_EXTRA"|"$PROOFAGENT_EXTRA"|all) ;;
     *)
         echo "[setup_env_wsl][error] Invalid --agent-tools value: $AGENT_TOOLS" >&2
         exit 2
@@ -64,8 +66,8 @@ if command -v uv >/dev/null 2>&1; then
     }
 
     OPTIONAL_EXTRAS=()
-    [[ "$AGENT_TOOLS" == "agentdebugx" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("agentdebugx")
-    [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")
+    [[ "$AGENT_TOOLS" == "$AGENTDEBUGX_EXTRA" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("$AGENTDEBUGX_EXTRA")
+    [[ "$AGENT_TOOLS" == "$PROOFAGENT_EXTRA" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("$PROOFAGENT_EXTRA")
     INSTALLED_EXTRAS=()
     OPTIONAL_FAILURES=0
     for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
@@ -96,8 +98,8 @@ else
     "$VENV_PYTHON" -m pip install --only-binary=:all: --upgrade "pip==25.0.1" "setuptools==75.8.0" "wheel==0.45.1"
     "$VENV_PYTHON" -m pip install --only-binary=:all: -e '.[dev,tests,tracing]'
     OPTIONAL_EXTRAS=()
-    [[ "$AGENT_TOOLS" == "agentdebugx" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("agentdebugx")
-    [[ "$AGENT_TOOLS" == "proofagent" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("proofagent")
+    [[ "$AGENT_TOOLS" == "$AGENTDEBUGX_EXTRA" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("$AGENTDEBUGX_EXTRA")
+    [[ "$AGENT_TOOLS" == "$PROOFAGENT_EXTRA" || "$AGENT_TOOLS" == "all" ]] && OPTIONAL_EXTRAS+=("$PROOFAGENT_EXTRA")
     OPTIONAL_FAILURES=0
     for EXTRA in "${OPTIONAL_EXTRAS[@]}"; do
         if "$VENV_PYTHON" -m pip install --only-binary=:all: -e ".[dev,tests,tracing,$EXTRA]"; then

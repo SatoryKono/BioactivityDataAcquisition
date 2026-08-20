@@ -1,11 +1,18 @@
 """Report assembly and CLI orchestration for observability closure campaigns."""
 
-# ruff: noqa: F403, F405
-
 from __future__ import annotations
 
-from scripts.engineering.qa.run_observability_closure_campaign import *
+import json
+import subprocess
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
 from scripts.engineering.qa.run_observability_closure_campaign import (
+    CHEMBL_PIPELINES,
+    OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT,
+    AttemptEvidence,
+    PhaseEvidence,
     _bootstrap_campaign_context,
     _build_parser,
     _campaign_binding,

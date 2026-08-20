@@ -66,8 +66,7 @@ def test_first_window_overflow_allowlist_stays_empty() -> None:
 
 
 def test_horizontal_scroll_allowlist_is_below_fold_only() -> None:
-    if not HORIZONTAL_SCROLL_ALLOWLIST:
-        return
+    assert HORIZONTAL_SCROLL_ALLOWLIST == {}
     by_name = {path.name: load_dashboard(path) for path in get_dashboard_files()}
     for (dashboard_name, panel_id), meta in HORIZONTAL_SCROLL_ALLOWLIST.items():
         dashboard = by_name[dashboard_name]

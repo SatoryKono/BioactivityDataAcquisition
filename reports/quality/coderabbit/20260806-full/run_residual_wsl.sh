@@ -29,6 +29,7 @@ CR_LIGHT="${CR_LIGHT:-1}"
 CR_MAX_LEAVES="${CR_MAX_LEAVES:-0}"
 CR_WAVE="${CR_WAVE:-}"
 CR_LEAVES="${CR_LEAVES:-}"
+SKIPPED_STATUS="skipped"
 
 if ! command -v coderabbit >/dev/null; then
   echo "coderabbit not found" >&2
@@ -137,13 +138,13 @@ while IFS= read -r leaf_json; do
       fi
     fi
     if [[ ! -f "$flist_wsl" ]]; then
-      status="skipped"
+      status="$SKIPPED_STATUS"
       reason="missing_file_list:$flist"
       review_dir=""
     else
       mapfile -t files < <(grep -v '^$' "$flist_wsl" || true)
       if [[ ${#files[@]} -eq 0 ]]; then
-        status="skipped"
+        status="$SKIPPED_STATUS"
         reason="empty_file_list"
         review_dir=""
       else
@@ -166,7 +167,7 @@ PY
       fi
     fi
   else
-    status="skipped"
+    status="$SKIPPED_STATUS"
     reason="no_dir_or_list"
     review_dir=""
   fi
@@ -174,7 +175,7 @@ PY
   if [[ "$status" == "ok" ]]; then
     git add -A >/dev/null 2>&1 || true
     if git diff --cached --quiet; then
-      status="skipped"
+      status="$SKIPPED_STATUS"
       reason="no_files_checked_out"
     else
       git commit -m "residual leaf $lid" >/dev/null 2>&1 || true

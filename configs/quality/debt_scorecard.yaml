@@ -457,9 +457,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 194
-      total_loc: 23335
+      total_loc: 23384
       files_ge_250_loc: 0
-      helper_function_ratio: 0.369
+      helper_function_ratio: 0.374
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.core.pipeline_span_lifecycle
     trend:
