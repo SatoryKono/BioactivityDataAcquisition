@@ -356,22 +356,30 @@ def profile_categorical_column(
     try:
         value_counts = df[col].value_counts().head(5)
         cardinality = df[col].n_unique()
-        top_values = []
-        for row in value_counts.iter_rows(named=True):
-            val, numeric_count = _categorical_row_value_count(row, col)
-            top_values.append(
-                {
-                    "value": str(val) if val is not None else None,
-                    "count": numeric_count,
-                    "pct": round(numeric_count / len(df), 4) if len(df) > 0 else 0,
-                }
-            )
         return CategoricalDistribution(
-            top_values=tuple(top_values),
+            top_values=tuple(
+                _categorical_top_value_row(row, col=col, row_count=len(df))
+                for row in value_counts.iter_rows(named=True)
+            ),
             cardinality=cardinality,
         )
     except profile_errors:
         return None
+
+
+
+def _categorical_top_value_row(
+    row: dict[str, object],
+    *,
+    col: str,
+    row_count: int,
+) -> dict[str, object]:
+    val, numeric_count = _categorical_row_value_count(row, col)
+    return {
+        "value": str(val) if val is not None else None,
+        "count": numeric_count,
+        "pct": round(numeric_count / row_count, 4) if row_count > 0 else 0,
+    }
 
 
 def _categorical_row_value_count(

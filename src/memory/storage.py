@@ -14,6 +14,8 @@ from typing import Any
 
 import psutil
 
+from memory.fs_confine import canonicalize_memory_path
+
 
 class StorageConflictError(RuntimeError):
     """Raised when an optimistic write or lock acquisition conflicts."""
@@ -172,7 +174,7 @@ def atomic_write_bytes(
     expected_digest: str | None = None,
 ) -> str:
     """Atomically replace target and optionally enforce optimistic concurrency."""
-    target = target.expanduser().resolve(strict=False)
+    target = canonicalize_memory_path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     with exclusive_lock(target):
         if expected_digest is not None:

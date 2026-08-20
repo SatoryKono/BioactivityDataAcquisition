@@ -69,8 +69,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         target_path: Path,
         temp_path: Path,
         record_count: int,
-        uncompressed_size: int,
-    ) -> tuple[int, int]:
+    ) -> None:
         """Validate non-empty stream write and atomically publish temp payload."""
         if record_count == 0:
             raise ValueError("No records to write")
@@ -79,9 +78,8 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                 raise FileExistsError(
                     f"Bronze target already exists with different payload: {target_path}"
                 )
-        else:
-            temp_path.replace(target_path)
-        return record_count, uncompressed_size
+            return
+        temp_path.replace(target_path)
 
     def _write_atomic_stream(
         self,
@@ -130,12 +128,12 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                 if chunk_buffer:
                     writer.write(bytes(chunk_buffer))
                     chunk_buffer.clear()
-            return self._finalize_atomic_stream_write(
+            self._finalize_atomic_stream_write(
                 target_path=target_path,
                 temp_path=temp_path,
                 record_count=record_count,
-                uncompressed_size=uncompressed_size,
             )
+            return record_count, uncompressed_size
         finally:
             if fd_owned:
                 with contextlib.suppress(OSError):
