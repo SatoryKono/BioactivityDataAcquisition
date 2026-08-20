@@ -64,9 +64,9 @@ class RawRunManifestInspectionMixin:
             return RawManifestInspection(False, ("manifest_not_found",))
         try:
             raw_payload = deserialize_from_json(path.read_text(encoding="utf-8"))
-        except UnicodeError:
-            return RawManifestInspection(False, ("manifest_read_error",))
-        except ValueError:
+        except ValueError as exc:
+            if isinstance(exc, UnicodeError):
+                return RawManifestInspection(False, ("manifest_read_error",))
             return RawManifestInspection(False, ("manifest_parse_error",))
         except OSError:
             return RawManifestInspection(False, ("manifest_read_error",))

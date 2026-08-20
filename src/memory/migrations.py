@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from memory.fs_confine import canonicalize_memory_path
 from memory.storage import atomic_write_bytes, atomic_write_json, content_digest
 
 MigrationTransform = Callable[[dict[str, Any]], dict[str, Any]]
@@ -99,7 +100,7 @@ def migrate_json_file(
     migrations: Mapping[int, MigrationStep] = DEFAULT_MIGRATIONS,
 ) -> MigrationResult:
     """Dry-run or apply a migration while retaining the original bytes."""
-    path = path.expanduser().resolve(strict=True)
+    path = canonicalize_memory_path(path, must_exist=True)
     original_bytes = path.read_bytes()
     original_digest = content_digest(original_bytes)
     payload = json.loads(original_bytes)

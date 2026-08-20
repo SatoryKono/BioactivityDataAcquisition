@@ -146,7 +146,9 @@ def handle_enricher_timeout(
             timeout_seconds=enricher.timeout_seconds,
             duration_seconds=duration,
         )
-        raise error
+        raise TimeoutError(
+            f"Required enricher timed out: {enricher.pipeline}"
+        ) from error
     return host._build_timeout_result(
         enricher,
         execution_context.records_input,
