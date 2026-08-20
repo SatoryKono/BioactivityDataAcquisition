@@ -134,6 +134,14 @@ def _materialize_repo_file(root: Path, relative_posix: str) -> Path:
     return materialized
 
 
+def _replace_pairs(text: str, pairs: tuple[tuple[str, str], ...]) -> str:
+    """Apply deterministic path-token replacements to a UTF-8 document."""
+    updated = text
+    for source, target in pairs:
+        updated = updated.replace(source, target)
+    return updated
+
+
 def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
     """Rename passports and update constant textual reference files."""
     pairs = _replacement_pairs(root, plans)
@@ -143,36 +151,28 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
     mkdocs = root / "mkdocs.yml"
     if mkdocs.is_file():
         current = mkdocs.read_text(encoding="utf-8")
-        rewritten = current
-        for source, target in pairs:
-            rewritten = rewritten.replace(source, target)
+        rewritten = _replace_pairs(current, pairs)
         if rewritten != current:
             mkdocs.write_text(rewritten, encoding="utf-8")
             updated_paths.append(mkdocs)
     readme = root / "README.md"
     if readme.is_file():
         current = readme.read_text(encoding="utf-8")
-        rewritten = current
-        for source, target in pairs:
-            rewritten = rewritten.replace(source, target)
+        rewritten = _replace_pairs(current, pairs)
         if rewritten != current:
             readme.write_text(rewritten, encoding="utf-8")
             updated_paths.append(readme)
     changelog = root / "CHANGELOG.md"
     if changelog.is_file():
         current = changelog.read_text(encoding="utf-8")
-        rewritten = current
-        for source, target in pairs:
-            rewritten = rewritten.replace(source, target)
+        rewritten = _replace_pairs(current, pairs)
         if rewritten != current:
             changelog.write_text(rewritten, encoding="utf-8")
             updated_paths.append(changelog)
     index = root / "docs" / "04-reference" / "passports" / "index.md"
     if index.is_file():
         current = index.read_text(encoding="utf-8")
-        rewritten = current
-        for source, target in pairs:
-            rewritten = rewritten.replace(source, target)
+        rewritten = _replace_pairs(current, pairs)
         if rewritten != current:
             index.write_text(rewritten, encoding="utf-8")
             updated_paths.append(index)
