@@ -134,7 +134,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Shows the sole current Pipeline Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. A telemetry gap makes the verdict incomplete; use First Action and Runtime Blockers to continue",
+      "description": "CURRENT · Shows the sole current Pipeline Health verdict. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. A telemetry gap makes the verdict incomplete; use First Action and Runtime Blockers to continue. This CURRENT pipeline verdict is not exact-run processing_status or trust_status.",
       "fieldConfig": {
         "defaults": {
           "color": {
