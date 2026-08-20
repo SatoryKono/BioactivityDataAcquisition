@@ -67,6 +67,26 @@ def _client_headers_from_env_http_headers(
     return headers or None
 
 
+def _tracked_https_entry(cfg: object) -> dict[str, object] | None:
+    if not isinstance(cfg, dict):
+        return None
+    url = str(cfg.get("url") or "")
+    if not url.startswith("https://"):
+        return None
+    entry: dict[str, object] = {"type": "http", "url": url}
+    timeout = cfg.get("startup_timeout_sec")
+    if isinstance(timeout, int) and timeout > 0:
+        entry["startup_timeout_sec"] = timeout
+    headers = cfg.get("headers")
+    if isinstance(headers, dict) and headers:
+        entry["headers"] = {str(key): str(value) for key, value in headers.items()}
+        return entry
+    projected = _client_headers_from_env_http_headers(cfg.get("env_http_headers"))
+    if projected:
+        entry["headers"] = projected
+    return entry
+
+
 def _merge_tracked_https_servers(
     servers: dict[str, dict[str, object]],
     tracked_path: Path,
@@ -75,26 +95,9 @@ def _merge_tracked_https_servers(
         return
     tracked = json.loads(tracked_path.read_text(encoding="utf-8"))
     for name, cfg in (tracked.get("mcpServers") or {}).items():
-        if not isinstance(cfg, dict):
-            continue
-        url = str(cfg.get("url") or "")
-        if not url.startswith("https://"):
-            continue
-        entry: dict[str, object] = {"type": "http", "url": url}
-        timeout = cfg.get("startup_timeout_sec")
-        if isinstance(timeout, int) and timeout > 0:
-            entry["startup_timeout_sec"] = timeout
-        # Prefer explicit headers; else project env_http_headers → ${ENV} form.
-        headers = cfg.get("headers")
-        if isinstance(headers, dict) and headers:
-            entry["headers"] = {str(k): str(v) for k, v in headers.items()}
-        else:
-            projected = _client_headers_from_env_http_headers(
-                cfg.get("env_http_headers")
-            )
-            if projected:
-                entry["headers"] = projected
-        servers[name] = entry
+        entry = _tracked_https_entry(cfg)
+        if entry is not None:
+            servers[name] = entry
 
 
 def _payload_for_target(
