@@ -456,7 +456,11 @@ def _project_path_findings(
                 },
             )
         )
-    origins = {_path_origin(path) for path in config_files}
+    # Classify origin on the canonical path so Windows `E:/repo` and Docker
+    # Desktop `/mnt/e/repo` of the same checkout are one origin, not mixed.
+    origins = {
+        _path_origin(_normalise_path(path, root=root)) for path in config_files
+    }
     if len(origins) > 1:
         findings.append(
             Finding(
