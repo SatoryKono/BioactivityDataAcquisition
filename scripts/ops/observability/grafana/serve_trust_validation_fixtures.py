@@ -84,7 +84,12 @@ class FixtureHandler(BaseHTTPRequestHandler):
             or active_from_file
             or self.default_state
         )
-        fixture_path = self.fixture_root / endpoint / f"{state}.json"
+        from scripts.engineering.common.repo_paths import ensure_path_within_root
+
+        fixture_path = ensure_path_within_root(
+            self.fixture_root / endpoint / f"{state}.json",
+            self.fixture_root,
+        )
         if not fixture_path.is_file():
             self._send(
                 404,
@@ -123,7 +128,10 @@ def main() -> int:
         help="Default fixture state when fixture_state query is omitted",
     )
     args = parser.parse_args()
+    from scripts.engineering.common.repo_paths import REPO_ROOT, resolve_cli_path
+
     args.host = _validated_loopback_host(args.host)
+    args.fixture_root = resolve_cli_path(args.fixture_root, root=REPO_ROOT)
     if not args.fixture_root.is_dir():
         raise SystemExit(f"fixture root missing: {args.fixture_root}")
     FixtureHandler.fixture_root = args.fixture_root

@@ -50,9 +50,12 @@ class CheckResult:
 
 
 def _run(args: list[str], *, timeout: float = 15.0) -> tuple[int, str, str]:
+    from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
+
+    safe_args = ensure_safe_cli_argv(args)
     try:
         proc = subprocess.run(
-            args,
+            safe_args,
             capture_output=True,
             text=True,
             timeout=timeout,

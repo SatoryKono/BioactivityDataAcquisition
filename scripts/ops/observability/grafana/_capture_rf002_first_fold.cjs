@@ -48,6 +48,7 @@ function gitSha() {
   try {
     return execFileSync("/usr/bin/git", ["rev-parse", "HEAD"], {
       encoding: "utf8",
+      env: { ...process.env, PATH: "/usr/bin:/bin" },
     }).trim();
   } catch {
     return "";

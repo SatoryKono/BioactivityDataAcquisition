@@ -42,15 +42,13 @@ def _diagram_root() -> Path:
 
 def _resolve_diagram_path(path: Path) -> Path:
     """Resolve a diagram path and reject traversal or symlink escapes."""
+    from scripts.engineering.common.repo_paths import ensure_path_within_root
+
     if path.is_absolute():
         raise ValueError(f"Path {path} must be repository-relative")
     if ".." in path.parts:
         raise ValueError(f"Path {path} contains parent traversal")
-    candidate = _repo_root() / path
-    resolved_path = candidate.resolve(strict=False)
-    resolved_root = _diagram_root().resolve(strict=False)
-    if not resolved_path.is_relative_to(resolved_root):
-        raise ValueError(f"Path {path} resolves outside {resolved_root}")
+    resolved_path = ensure_path_within_root(_repo_root() / path, _diagram_root())
     if resolved_path.suffix.lower() not in SUPPORTED_SUFFIXES:
         raise ValueError(f"Path {path} is not a Mermaid source file")
     return resolved_path
