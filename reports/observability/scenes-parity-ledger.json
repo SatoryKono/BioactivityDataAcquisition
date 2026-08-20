@@ -21,12 +21,12 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "1eec0275e13a532a4a2f693040a7dbf5d2e41c387781905aa4eb73709f973775",
-    "bioetl-dq-v2": "9f495b840a450cd0f87cd7e23b02444475178ce9fb31a87e8060ccd91d0dd1ad",
-    "bioetl-incident-v1": "ab76b1a972486c996fe1dcfc4cfb8974ae6ae26416d4533bdc6e1bdc85052ec0",
-    "bioetl-overview-v2": "8cde987e930ab6c481faa7b92d8a338b266c660b5484a5a1927635e1022a9a70",
+    "bioetl-dq-v2": "1d8f8d7280c6c01840d7ef6879393df53d51419c817baa96857b4bc49190989e",
+    "bioetl-incident-v1": "017b0526cd621166c3b788a9ffaaebd13e5bc9de711a603a5bc0fa458c382702",
+    "bioetl-overview-v2": "0835fa4575dfa55dfcb4484ef40ae1be27204d80fc89d5a233df5d6d2eddf132",
     "bioetl-provider-health-v2": "cbd1d5d9a683452a5408d1f94ef8d516a09116c7c83350cc14969689b9579194",
-    "bioetl-run-explorer-v1": "1e938f80d8ef9a772766be641337729eb8407d26c9b41b43e4f1cd01cbec4c4f",
-    "bioetl-runtime": "e23290fbb8a10c332019e25f13a793e86390daadedd9bfdcae8def275cde2285"
+    "bioetl-run-explorer-v1": "296877a3f1ca51908b324054f96d7269e4a3ee90f5b4a1cf0eef43efeea84254",
+    "bioetl-runtime": "22d648318c98f1621a0c2643be5cdc525a689ec2b22fea1d259e1a21dabb5818"
   },
   "panels": [
     {
@@ -3063,25 +3063,6 @@
       "disposition": "advanced-evidence",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 9402,
-      "panel_title": "Inspect Run Identity",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3021,
       "panel_title": "Inspect Recent Runs (last 20)",
       "route": "run-explorer",
@@ -3121,7 +3102,7 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3023,
-      "panel_title": "Inspect Processed Records",
+      "panel_title": "Inspect Full Processed Records",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -3956,7 +3937,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 208,
+    "panel_disposition_count": 207,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

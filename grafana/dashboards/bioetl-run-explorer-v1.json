@@ -105,9 +105,9 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div>BROWSE is the last 4 reports in the table below. SELECTED RUN is identity and counts for the run you click.</div><div>Open/Copy FULL PATHS are report artifacts, not triage bodies. <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> mean pick a pipeline and a run first.</div><div>IN RANGE / OUT OF RANGE / UNKNOWN compares this run to the time picker, not live fleet metrics. Refresh 60s · timezone: browser</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div>BROWSE is the last 4 reports in the table below. SELECTED RUN identity and counts are in <em>Selected Run Details</em> after you click a run.</div><div>Open/Copy FULL PATHS are report artifacts, not triage bodies. <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> mean pick a pipeline and a run first.</div><div><span>Run coverage:</span> IN RANGE / OUT OF RANGE / UNKNOWN compares this run to the time picker. Set range to run when OUT OF RANGE. <span>Effective refresh:</span> 60s · timezone: browser</div></div></div>"
       },
-      "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Fail-closed empty state: default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells.",
+      "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells.",
       "links": []
     },
     {
@@ -300,187 +300,6 @@
       ]
     },
     {
-      "id": 9402,
-      "type": "table",
-      "title": "Inspect Run Identity",
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Selected run: compact 4-row identity summary (run, manifest, provider.entity, identity health). Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Full identity rows remain in Selected Run Details. Use existing Open/Copy actions for full values.",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": true
-          },
-          "unit": "none",
-          "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity.",
-          "links": [
-            {
-              "title": "Copy/Open full value (plain text)",
-              "url": "data:text/plain,${__value.raw}",
-              "targetBlank": true,
-              "includeVars": false
-            },
-            {
-              "title": "Check BioETL Ops HTTP health",
-              "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
-              "targetBlank": true
-            },
-            {
-              "title": "Open monitoring backend setup docs",
-              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
-              "targetBlank": true
-            }
-          ]
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "parameter"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 165
-              },
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "value"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "left"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto"
-                }
-              },
-              {
-                "id": "links",
-                "value": [
-                  {
-                    "title": "Copy/Open full value (plain text)",
-                    "url": "data:text/plain,${__value.raw}",
-                    "targetBlank": true,
-                    "includeVars": false
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "value"
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "cellHeight": "sm"
-      },
-      "targets": [
-        {
-          "format": "table",
-          "parser": "backend",
-          "refId": "A",
-          "root_selector": "rows",
-          "source": "url",
-          "type": "json",
-          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "url_options": {
-            "data": "",
-            "method": "GET"
-          },
-          "expr": ""
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true,
-              "Value": true
-            },
-            "indexByName": {
-              "parameter": 0,
-              "value": 1
-            },
-            "renameByName": {
-              "parameter": "parameter",
-              "value": "value",
-              "Value": "value",
-              "Value #A": "Series A",
-              "Value #B": "Series B",
-              "Value #C": "Series C"
-            }
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "fieldName": "parameter",
-                "config": {
-                  "id": "regex",
-                  "options": {
-                    "value": "^(Run ID \\[Pipeline\\]|Manifest ID \\[Control Plane\\]|Provider\\.Entity \\[Version\\]|Identity Health \\[Gaps\\])$"
-                  }
-                }
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "limit",
-          "options": {
-            "limitField": 4
-          }
-        }
-      ],
-      "links": []
-    },
-    {
       "id": 3099,
       "type": "row",
       "title": "Selected Run Details",
@@ -489,7 +308,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 13
       },
       "panels": [
         {
@@ -501,7 +320,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 25
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -587,12 +406,12 @@
           "id": 3022,
           "type": "table",
           "title": "Inspect Full Run Identity",
-          "description": "SELECTED RUN · Complete identity rows for the selected run. First-screen Inspect Run Identity is the four-row summary. Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
+          "description": "SELECTED RUN · Complete identity rows for the selected run. Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
           "gridPos": {
             "h": 8,
             "w": 10,
             "x": 0,
-            "y": 27
+            "y": 33
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -631,13 +450,13 @@
         {
           "id": 3023,
           "type": "table",
-          "title": "Inspect Processed Records",
-          "description": "SELECTED RUN · TIME RANGE · Complete Bronze/Silver/Gold accounting for the selected run inside collapsed Selected Run Details. This is the unfiltered table; the former four-row teaser 9403 was removed as a same-row subset. Exact layer counts also exist on pipeline_run_report_v1.layers; review Inspect Reconciliation before escalating an accounting mismatch. Zero-valued outcomes remain evidence. Selection required when no run ID is set. VALID EMPTY means no matching accounting rows; backend failure renders as QUERY ERROR. SELECT RUN / VALID EMPTY is not OK.",
+          "title": "Inspect Full Processed Records",
+          "description": "SELECTED RUN · TIME RANGE · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "h": 8,
             "w": 14,
             "x": 10,
-            "y": 27
+            "y": 33
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -909,16 +728,16 @@
           },
           "options": {
             "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "cellHeight": "sm",
             "sortBy": [
               {
                 "desc": false,
                 "displayName": "parameter"
               }
-            ],
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
+            ]
           },
           "targets": [
             {
@@ -974,7 +793,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 35
+            "y": 41
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1033,7 +852,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 41
+            "y": 47
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1092,7 +911,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 46
+            "y": 52
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1211,7 +1030,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 54
+            "y": 60
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1292,7 +1111,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 59
+            "y": 65
           },
           "options": {
             "mode": "html",
