@@ -750,7 +750,9 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
         "await collectVerifiedTerminalState"
     )
     assert "dashboard.terminalStateValidation = CONFIG.navigationOnly" in script
-    assert "await validateDashboardTerminalStates(page, dashboard, index, total)" in script
+    assert (
+        "await validateDashboardTerminalStates(page, dashboard, index, total)" in script
+    )
     assert "window.scrollTo" in script
     assert "chromium.launch" in script
     assert "headless: true" in script
