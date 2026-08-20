@@ -268,6 +268,67 @@ def _load_contract(path: Path) -> dict[str, object]:
     return payload
 
 
+def _previous_panel_contracts(
+    *, uid: str, existing_dashboards: dict[object, object]
+) -> dict[object, object]:
+    previous_dashboard = existing_dashboards.get(uid, {})
+    previous_panels = (
+        previous_dashboard.get("panels", {})
+        if isinstance(previous_dashboard, dict)
+        else {}
+    )
+    if not isinstance(previous_panels, dict):
+        raise ValueError(f"panel-content-contract.yaml:{uid}: panels must be a mapping")
+    return previous_panels
+
+
+def _merge_panel_contract(
+    *, generated: dict[str, object], previous: object
+) -> dict[str, object]:
+    if not isinstance(previous, dict):
+        return generated
+    merged = {**generated, **previous}
+    merged["title"] = generated["title"]
+    merged["evidence_source"] = generated["evidence_source"]
+    role = str(merged.get("role") or generated["role"])
+    if (
+        merged["evidence_source"] == "prometheus"
+        and merged.get("scope") == "selected_run"
+        and role not in _NON_DATA_ROLES
+    ):
+        generated_scope = str(generated["scope"])
+        merged["scope"] = (
+            generated_scope if generated_scope != "selected_run" else "time_range"
+        )
+    merged["scope_class"] = merged.get("scope", generated["scope"])
+    if merged.get("empty_state_class") not in _ALLOWED_EMPTY_STATE_CLASSES:
+        merged["empty_state_class"] = generated["empty_state_class"]
+    elif role in _NON_DATA_ROLES:
+        merged["empty_state_class"] = "unsupported"
+    return merged
+
+
+def _dashboard_panel_contracts(
+    *,
+    payload: dict[str, object],
+    uid: str,
+    existing_dashboards: dict[object, object],
+) -> dict[str, object]:
+    previous_panels = _previous_panel_contracts(
+        uid=uid, existing_dashboards=existing_dashboards
+    )
+    panels: dict[str, object] = {}
+    for panel in _iter_panels(payload):
+        panel_id = panel.get("id")
+        if not isinstance(panel_id, int):
+            continue
+        generated = _record(panel)
+        panels[str(panel_id)] = _merge_panel_contract(
+            generated=generated, previous=previous_panels.get(str(panel_id))
+        )
+    return dict(sorted(panels.items(), key=lambda item: int(item[0])))
+
+
 def _full_contract(existing: dict[str, object]) -> dict[str, object]:
     existing_dashboards = existing.get("dashboards", {})
     if not isinstance(existing_dashboards, dict):
@@ -280,49 +341,12 @@ def _full_contract(existing: dict[str, object]) -> dict[str, object]:
         uid = payload.get("uid")
         if not isinstance(uid, str) or not uid:
             raise ValueError(f"{dashboard_path}: missing dashboard uid")
-        previous_dashboard = existing_dashboards.get(uid, {})
-        previous_panels = (
-            previous_dashboard.get("panels", {})
-            if isinstance(previous_dashboard, dict)
-            else {}
-        )
-        if not isinstance(previous_panels, dict):
-            raise ValueError(
-                f"panel-content-contract.yaml:{uid}: panels must be a mapping"
-            )
-        panels: dict[str, object] = {}
-        for panel in _iter_panels(payload):
-            panel_id = panel.get("id")
-            if not isinstance(panel_id, int):
-                continue
-            generated = _record(panel)
-            previous = previous_panels.get(str(panel_id))
-            if isinstance(previous, dict):
-                merged = {**generated, **previous}
-                merged["title"] = generated["title"]
-                merged["evidence_source"] = generated["evidence_source"]
-                role = str(merged.get("role") or generated["role"])
-                if (
-                    merged["evidence_source"] == "prometheus"
-                    and merged.get("scope") == "selected_run"
-                    and role not in _NON_DATA_ROLES
-                ):
-                    generated_scope = str(generated["scope"])
-                    merged["scope"] = (
-                        generated_scope
-                        if generated_scope != "selected_run"
-                        else "time_range"
-                    )
-                merged["scope_class"] = merged.get("scope", generated["scope"])
-                if merged.get("empty_state_class") not in _ALLOWED_EMPTY_STATE_CLASSES:
-                    merged["empty_state_class"] = generated["empty_state_class"]
-                elif role in _NON_DATA_ROLES:
-                    merged["empty_state_class"] = "unsupported"
-                panels[str(panel_id)] = merged
-            else:
-                panels[str(panel_id)] = generated
         dashboards[uid] = {
-            "panels": dict(sorted(panels.items(), key=lambda item: int(item[0])))
+            "panels": _dashboard_panel_contracts(
+                payload=payload,
+                uid=uid,
+                existing_dashboards=existing_dashboards,
+            )
         }
     return {
         "schema_version": 2,

@@ -44,7 +44,7 @@ services:
         - -c
         - >-
           import urllib.request;
-          urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)
+          urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=7)
       interval: 15s
       timeout: 8s
       retries: 5
