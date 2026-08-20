@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -242,7 +243,10 @@ def test_main_start_materializes_source_bound_report_attestation(
         "schema_version": "bioetl-report-source-v1",
         "runtime_source_id": expected,
     }
-    assert target.stat().st_mode & 0o777 == 0o644
+    mode = target.stat().st_mode
+    assert mode & stat.S_IRUSR
+    if os.name != "nt":
+        assert mode & 0o777 == 0o644
 
 
 def test_reject_transient_origin_blocks_issue_worktree(
@@ -499,6 +503,103 @@ def test_status_origin_findings_ignore_foreign_stack_projects(
     )
 
     assert [finding["message"] for finding in findings] == ["monitoring is foreign"]
+
+
+def test_status_origin_findings_fail_closed_for_foreign_clone_on_selected_stack(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "preflight.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "findings": [
+                    {
+                        "code": "PROJECT_ORIGIN",
+                        "severity": "error",
+                        "message": "Live Compose project originates from an unexpected config path",
+                        "evidence": {
+                            "project": "bioetl-main",
+                            "expected": (
+                                "/mnt/e/github/bioactivitydataacquisition/"
+                                "docker-compose.yml"
+                            ),
+                            "actual": [
+                                "/mnt/e/g-drive/05_ai/github/"
+                                "bioactivitydataacquisition2/docker-compose.yml"
+                            ],
+                        },
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    findings = runtime_manager._status_origin_findings(
+        report_path,
+        runtime_manager.CommandResult(["preflight"], 2),
+        _spec(),
+    )
+    assert findings
+    assert findings[0]["code"] == "PROJECT_ORIGIN"
+    assert "unexpected config path" in str(findings[0]["message"])
+
+
+def _neo4j_spec() -> runtime_manager.StackSpec:
+    return runtime_manager.StackSpec(
+        name="neo4j",
+        project="bioetl-neo4j",
+        compose_file=Path("docker-compose.neo4j.yml"),
+        required_services=("neo4j",),
+        expected_images={
+            "neo4j": "neo4j:5.15-community@sha256:0123456789abcdef"
+        },
+    )
+
+
+def test_reseed_neo4j_auth_skips_missing_volume() -> None:
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        if cmd[:3] == ["docker", "volume", "inspect"]:
+            return runtime_manager.CommandResult(list(cmd), 1, stderr="missing")
+        return runtime_manager.CommandResult(list(cmd), 0)
+
+    assert (
+        runtime_manager._reseed_neo4j_auth_volume(
+            _neo4j_spec(), runner=runner, timeout=30.0
+        )
+        is None
+    )
+
+
+def test_reseed_neo4j_auth_clears_files_on_existing_volume() -> None:
+    seen: list[list[str]] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        seen.append(list(cmd))
+        return runtime_manager.CommandResult(list(cmd), 0, stdout="cleared")
+
+    result = runtime_manager._reseed_neo4j_auth_volume(
+        _neo4j_spec(), runner=runner, timeout=30.0
+    )
+    assert result is not None
+    assert result.returncode == 0
+    run_cmds = [cmd for cmd in seen if cmd[:2] == ["docker", "run"]]
+    assert run_cmds
+    assert "bioetl-neo4j_neo4j_data:/data" in run_cmds[0]
+    assert "rm -f /data/dbms/auth /data/dbms/auth.ini /data/databases/store_lock" in (
+        run_cmds[0]
+    )
+
+
+def test_reseed_neo4j_auth_is_noop_for_other_stacks() -> None:
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    assert (
+        runtime_manager._reseed_neo4j_auth_volume(
+            _spec(), runner=runner, timeout=5.0
+        )
+        is None
+    )
 
 
 def test_status_grafana_bootstrap_deferred_is_finding() -> None:
