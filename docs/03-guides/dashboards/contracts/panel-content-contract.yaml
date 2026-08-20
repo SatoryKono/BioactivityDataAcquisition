@@ -4204,6 +4204,25 @@ dashboards:
           - valid_empty
           - backend_error
         render_profiles: *id001
+      "3016":
+        title: Inspect Layer Accounting
+        role: forensic_table
+        tier: 3
+        scope: selected_run
+        scope_class: selected_run
+        evidence_source: ops_http
+        empty_state_class: select_run
+        state_model:
+          - VALID_EMPTY
+          - ERROR
+        required_copy:
+          - evidence_scope
+          - no_data
+        fixture_cases:
+          - populated
+          - valid_empty
+          - backend_error
+        render_profiles: *id001
       "3015":
         title: Inspect Reconciliation
         role: forensic_table
@@ -4245,29 +4264,8 @@ dashboards:
           - backend_error
         render_profiles:
           - full_dark
-      "3021":
-        title: Inspect Recent Runs (last 20)
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-          - VALID_EMPTY
-          - ERROR
-          - TELEMETRY_ABSENT
-        required_copy:
-          - evidence_scope
-          - no_data
-        fixture_cases:
-          - populated
-          - valid_empty
-          - telemetry_absent
-          - backend_error
-        render_profiles: *id001
       "3022":
-        title: Inspect Full Run Identity
+        title: Inspect Run Identity
         role: forensic_table
         tier: 3
         scope: selected_run
@@ -4288,7 +4286,7 @@ dashboards:
           - backend_error
         render_profiles: *id001
       "3023":
-        title: Inspect Full Processed Records
+        title: Inspect Processed Records
         role: accounting_table
         tier: 3
         scope: selected_run
