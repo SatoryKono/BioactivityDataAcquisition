@@ -98,14 +98,14 @@
       "type": "text",
       "title": "Understand Run Scope",
       "gridPos": {
-        "h": 2,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 4
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = recent runs · <b>SELECTED RUN</b> = identity/accounting · <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Fail-closed:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> show no runs — not a missing store and not a healthy run.<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div><b>Scope:</b> <b>BROWSE</b> = last 4 reports in the table below · <b>SELECTED RUN</b> = identity and counts for the run you pick · <b>FULL PATHS</b> = report artifacts, not triage bodies</div><div><b>Empty list:</b> <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> mean nothing is selected — not a missing store and not a healthy run.</div><div><span>Coverage:</span> IN RANGE / OUT OF RANGE / UNKNOWN compares that run to the time picker. Live Prometheus is not that UUID. Refresh 60s · timezone: browser</div></div></div>"
       },
       "description": "Run Explorer has two modes. Browse mode lists recent run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP to show identity, accounting, reasons, reconciliation, and artifacts for one exact run. Fail-closed empty state: default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Select a real pipeline from the dropdown (e.g. chembl_assay, chembl_activity), keep run_type compatible (often backfill), then pick a concrete run_id (not -). Expand Selected Run Details for the last-20 browser and full identity/accounting. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions, not scan-oriented cells.",
       "links": []
@@ -116,10 +116,10 @@
       "title": "Inspect Recent Runs (last 4)",
       "description": "SELECTED RUN · Browse mode: latest four pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Choose a row to set the run ID and open exact-run evidence. An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. Has reports: chembl_assay, chembl_target, chembl_publication. chembl_activity may appear in run_id (control-plane) but has no report artifacts yet. First screen is bounded to the last 4 artifacts (limit=4). The complete last-20 browser is in Selected Run Details. Older runs are omitted by design; they are not a missing backend. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 8
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -304,10 +304,10 @@
       "type": "table",
       "title": "Inspect Run Identity",
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN · Selected run: compact 4-row identity summary (run, manifest, provider.entity, identity health). Selection required when no run ID is set. Valid empty means no matching identity was found for that run. Backend failure renders as QUERY ERROR; verify /health/live. Full identity rows remain in Selected Run Details. Use existing Open/Copy actions for full values.",
