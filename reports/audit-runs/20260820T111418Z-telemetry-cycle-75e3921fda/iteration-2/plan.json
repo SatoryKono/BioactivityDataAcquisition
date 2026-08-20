@@ -1,0 +1,8 @@
+{
+  "phase": "B",
+  "actions": [
+    "read metrics-readiness-matrix.md",
+    "map panel to recording/HTTP",
+    "mark Expected Empty"
+  ]
+}

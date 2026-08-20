@@ -1,0 +1,106 @@
+[
+  {
+    "panel": "Overview Status",
+    "query": "bioetl_l0_status",
+    "metric_or_rule": "recording:bioetl_l0_status",
+    "labels": "dashboard selectors",
+    "ready": true,
+    "blocker": "live empty until trust-anchor samples"
+  },
+  {
+    "panel": "Overview First Action route",
+    "query": "bioetl_l0_next_action_route",
+    "metric_or_rule": "recording:bioetl_l0_next_action_route",
+    "labels": "dashboard selectors",
+    "ready": true,
+    "blocker": ""
+  },
+  {
+    "panel": "Overview Inputs matrix",
+    "query": "bioetl_l0_input_status_selected",
+    "metric_or_rule": "recording:bioetl_l0_input_status_selected",
+    "labels": "dashboard selectors",
+    "ready": true,
+    "blocker": ""
+  },
+  {
+    "panel": "Runtime Status",
+    "query": "bioetl_runtime_current_status_trusted",
+    "metric_or_rule": "recording:bioetl_runtime_current_status_trusted",
+    "labels": "dashboard selectors",
+    "ready": true,
+    "blocker": ""
+  },
+  {
+    "panel": "Runtime Blockers",
+    "query": "bioetl_runtime_current_blocker_reason",
+    "metric_or_rule": "recording:bioetl_runtime_current_blocker_reason",
+    "labels": "dashboard selectors",
+    "ready": true,
+    "blocker": "empty when healthy is VALID EMPTY"
+  },
+  {
+    "panel": "Metrics Evidence",
+    "query": "scrape/rule trust series",
+    "metric_or_rule": "trust series on board",
+    "labels": "",
+    "ready": true,
+    "blocker": "operator wording only"
+  },
+  {
+    "panel": "Provider severity matrix",
+    "query": "bioetl_provider_current_status",
+    "metric_or_rule": "recording:bioetl_provider_current_status",
+    "labels": "provider",
+    "ready": true,
+    "blocker": "empty without provider traffic"
+  },
+  {
+    "panel": "Provider top causes",
+    "query": "bioetl_provider_current_cause",
+    "metric_or_rule": "recording:bioetl_provider_current_cause",
+    "labels": "cause",
+    "ready": true,
+    "blocker": "needs failure events"
+  },
+  {
+    "panel": "DQ Status",
+    "query": "bioetl_dq_current_status",
+    "metric_or_rule": "recording:bioetl_dq_current_status",
+    "labels": "",
+    "ready": true,
+    "blocker": ""
+  },
+  {
+    "panel": "DQ reasons",
+    "query": "bioetl_dq_current_reason",
+    "metric_or_rule": "recording:bioetl_dq_current_reason",
+    "labels": "reason",
+    "ready": true,
+    "blocker": ""
+  },
+  {
+    "panel": "Trust replay safety",
+    "query": "control-plane recording + HTTP",
+    "metric_or_rule": "control-plane records + /ops/control-plane",
+    "labels": "",
+    "ready": true,
+    "blocker": "INCOMPLETE when evidence gap"
+  },
+  {
+    "panel": "Incident suspects",
+    "query": "provider/runtime/dq current rules",
+    "metric_or_rule": "reuse first-screen records",
+    "labels": "",
+    "ready": true,
+    "blocker": "thin board"
+  },
+  {
+    "panel": "Run identity / records",
+    "query": "/ops/control-plane/* HTTP",
+    "metric_or_rule": "HTTP control-plane",
+    "labels": "n/a (not Prom labels)",
+    "ready": true,
+    "blocker": "needs health server"
+  }
+]

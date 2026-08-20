@@ -1,0 +1,8 @@
+{
+  "phase": "A",
+  "actions": [
+    "run metric inventory",
+    "diff catalog vs REGISTERED vs rules vs dashboards",
+    "confirm run_id not a Prom label"
+  ]
+}
