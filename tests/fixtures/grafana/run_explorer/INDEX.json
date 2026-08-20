@@ -4,8 +4,7 @@
   "dashboard_uid": "bioetl-run-explorer-v1",
   "first_screen_panel_ids": [
     3010,
-    9402,
-    9403
+    9402
   ],
   "scenarios": {
     "backend_error": {

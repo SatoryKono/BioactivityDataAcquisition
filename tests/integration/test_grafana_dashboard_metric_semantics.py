@@ -1825,15 +1825,15 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     )
     identity = panels[identity_id]
     processed = panels[processed_id]
-    expected_height = 5 if dashboard_name == "bioetl-run-explorer-v1.json" else 6
+    expected_height = 6
     assert (
         identity.get("gridPos", {}).get("h")
         == processed.get("gridPos", {}).get("h")
         == expected_height
     )
     if dashboard_name == "bioetl-run-explorer-v1.json":
-        assert identity.get("gridPos", {}).get("w") == 10
-        assert processed.get("gridPos", {}).get("w") == 14
+        assert identity.get("gridPos", {}).get("w") == 24
+        assert processed.get("gridPos", {}).get("w") == 24
         assert (
             "valid empty"
             in str(
