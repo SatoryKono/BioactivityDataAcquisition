@@ -1419,8 +1419,7 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     run_panels = {
         int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
     }
-    assert run_panels[3016]["type"] == "table"
-    assert run_panels[3016]["title"] == "Inspect Layer Accounting"
+    assert 3016 not in run_panels
     assert run_panels[3014]["type"] == "table"
     assert run_panels[3014]["title"] == "Inspect Timings & Failure"
 
