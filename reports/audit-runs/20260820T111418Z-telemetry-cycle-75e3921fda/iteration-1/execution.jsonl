@@ -1,0 +1,2 @@
+{"cmd": "python -m scripts.engineering.qa report-observability-metric-inventory --json", "result": "INV=0 undeclared/dead"}
+{"cmd": "Test-Path SCOPE paths", "result": "src/bioetl/observability MISSING; others EXIST"}
