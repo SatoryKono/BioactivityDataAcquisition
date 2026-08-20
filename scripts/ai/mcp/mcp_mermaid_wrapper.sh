@@ -14,5 +14,5 @@ fi
 
 cache_home="${XDG_CACHE_HOME:-${HOME}/.cache}"
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${cache_home}/bioetl-mcp/npm-cache}"
-export npm_config_ignore_scripts=true
+export NPM_CONFIG_IGNORE_SCRIPTS=true
 exec npx -y "${package}" --transport stdio "$@"

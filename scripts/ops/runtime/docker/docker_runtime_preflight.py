@@ -262,6 +262,97 @@ def compose_host_bind_path(path: str | Path, *, root: Path) -> str:
     return posix
 
 
+def _dashboard_source_contracts(
+    contract: Mapping[str, Any],
+) -> tuple[Mapping[str, Any], Mapping[str, Any]] | None:
+    data_plane = contract.get("dashboard_data_plane")
+    if not isinstance(data_plane, Mapping):
+        return None
+    mounts = data_plane.get("required_bind_mounts")
+    identity = data_plane.get("source_identity")
+    if not isinstance(mounts, Mapping) or not isinstance(identity, Mapping):
+        return None
+    return mounts, identity
+
+
+def _dashboard_source_repository_environment(
+    root: Path,
+    *,
+    mounts: Mapping[str, Any],
+    identity_environment: str,
+    process: Mapping[str, object],
+    repository_environment: Mapping[str, object] | None,
+) -> Mapping[str, object]:
+    if repository_environment is not None:
+        return dict(repository_environment)
+    source_names = {
+        identity_environment,
+        *(
+            str(spec.get("environment_name") or "").strip()
+            for spec in mounts.values()
+            if isinstance(spec, Mapping)
+        ),
+    }
+    return load_repository_source_environment(
+        root, names=source_names, process_environment=process
+    )
+
+
+def _dashboard_mount_environment(
+    root: Path,
+    *,
+    mounts: Mapping[str, Any],
+    process: Mapping[str, object],
+    repository: Mapping[str, object],
+) -> tuple[dict[str, str], dict[str, str]]:
+    environment: dict[str, str] = {}
+    identity_mounts: dict[str, str] = {}
+    for target, raw_spec in sorted(mounts.items(), key=lambda item: str(item[0])):
+        if not isinstance(raw_spec, Mapping):
+            continue
+        relative_source = str(raw_spec.get("relative_source") or "").strip()
+        environment_name = str(raw_spec.get("environment_name") or "").strip()
+        if not relative_source or not environment_name:
+            continue
+        selected_source = (
+            str(process.get(environment_name) or "").strip()
+            or str(repository.get(environment_name) or "").strip()
+            or relative_source
+        )
+        identity_mounts[str(target)] = _normalise_path(selected_source, root=root)
+        environment[environment_name] = compose_host_bind_path(
+            selected_source, root=root
+        )
+    return environment, identity_mounts
+
+
+def _apply_dashboard_source_identity(
+    root: Path,
+    *,
+    identity_contract: Mapping[str, Any],
+    identity_environment: str,
+    identity_mounts: Mapping[str, str],
+    process: Mapping[str, object],
+    repository: Mapping[str, object],
+    environment: dict[str, str],
+) -> None:
+    schema_version = str(identity_contract.get("schema_version") or "").strip()
+    if not identity_environment or not schema_version or not identity_mounts:
+        return
+    computed = compute_runtime_source_id(
+        runtime_root=root, mounts=identity_mounts, schema_version=schema_version
+    )
+    resolution = resolve_runtime_source_identity(
+        computed_identity=computed,
+        process_environment=process,
+        repository_environment=repository,
+        environment_name=identity_environment,
+        label_name=str(identity_contract.get("label_name") or "").strip(),
+    )
+    if resolution.value is not None:
+        environment[identity_environment] = resolution.value
+
+
 def dashboard_source_environment(
     root: Path,
     contract: Mapping[str, Any],
@@ -269,81 +360,32 @@ def dashboard_source_environment(
     process_environment: Mapping[str, object] | None = None,
     repository_environment: Mapping[str, object] | None = None,
 ) -> dict[str, str]:
-    """Build the explicit bind-root and opaque source-identity environment.
-
-    NOSONAR - S3776: complexity 19 exceeds 15; extraction would obscure configuration logic
-    """
-    data_plane = contract.get("dashboard_data_plane")
-    if not isinstance(data_plane, Mapping):
+    """Build the explicit bind-root and opaque source-identity environment."""
+    contracts = _dashboard_source_contracts(contract)
+    if contracts is None:
         return {}
-    mount_contract = data_plane.get("required_bind_mounts")
-    identity_contract = data_plane.get("source_identity")
-    if not isinstance(mount_contract, Mapping) or not isinstance(
-        identity_contract, Mapping
-    ):
-        return {}
-
+    mount_contract, identity_contract = contracts
     process = process_environment if process_environment is not None else os.environ
     identity_environment = str(identity_contract.get("environment_name") or "").strip()
-    source_names = {
-        identity_environment,
-        *(
-            str(spec.get("environment_name") or "").strip()
-            for spec in mount_contract.values()
-            if isinstance(spec, Mapping)
-        ),
-    }
-    repository = (
-        dict(repository_environment)
-        if repository_environment is not None
-        else load_repository_source_environment(
-            root,
-            names=source_names,
-            process_environment=process,
-        )
+    repository = _dashboard_source_repository_environment(
+        root,
+        mounts=mount_contract,
+        identity_environment=identity_environment,
+        process=process,
+        repository_environment=repository_environment,
     )
-
-    environment: dict[str, str] = {}
-    identity_mounts: dict[str, str] = {}
-    for target, raw_spec in sorted(
-        mount_contract.items(), key=lambda item: str(item[0])
-    ):
-        if not isinstance(raw_spec, Mapping):
-            continue
-        relative_source = str(raw_spec.get("relative_source") or "").strip()
-        environment_name = str(raw_spec.get("environment_name") or "").strip()
-        if not relative_source or not environment_name:
-            continue
-        # An explicit absolute override selects the artifact tree intentionally;
-        # otherwise the contracted path remains rooted at this checkout.
-        selected_source = (
-            str(process.get(environment_name) or "").strip()
-            or str(repository.get(environment_name) or "").strip()
-            or relative_source
-        )
-        # Identity hash stays on the canonical comparison form; Compose env uses
-        # host-safe absolute bind sources so Desktop cannot pin a stale empty tree.
-        identity_mounts[str(target)] = _normalise_path(selected_source, root=root)
-        environment[environment_name] = compose_host_bind_path(
-            selected_source, root=root
-        )
-
-    schema_version = str(identity_contract.get("schema_version") or "").strip()
-    if identity_environment and schema_version and identity_mounts:
-        computed = compute_runtime_source_id(
-            runtime_root=root,
-            mounts=identity_mounts,
-            schema_version=schema_version,
-        )
-        resolution = resolve_runtime_source_identity(
-            computed_identity=computed,
-            process_environment=process,
-            repository_environment=repository,
-            environment_name=identity_environment,
-            label_name=str(identity_contract.get("label_name") or "").strip(),
-        )
-        if resolution.value is not None:
-            environment[identity_environment] = resolution.value
+    environment, identity_mounts = _dashboard_mount_environment(
+        root, mounts=mount_contract, process=process, repository=repository
+    )
+    _apply_dashboard_source_identity(
+        root,
+        identity_contract=identity_contract,
+        identity_environment=identity_environment,
+        identity_mounts=identity_mounts,
+        process=process,
+        repository=repository,
+        environment=environment,
+    )
     return environment
 
 
@@ -386,6 +428,77 @@ def _config_files(row: Mapping[str, Any]) -> list[str]:
     return [item.strip() for item in str(value).split(",") if item.strip()]
 
 
+def _project_path_findings(
+    root: Path,
+    *,
+    project_name: str,
+    stack_name: str,
+    config_files: list[str],
+    contract: Mapping[str, Any],
+    discouraged: tuple[Any, ...],
+    transient_prefixes: tuple[Any, ...],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    expected_path = _normalise_path(
+        contract["stacks"][stack_name]["compose_file"], root=root
+    )
+    normalized_files = {_normalise_path(path, root=root) for path in config_files}
+    if normalized_files and expected_path not in normalized_files:
+        findings.append(
+            Finding(
+                "PROJECT_ORIGIN",
+                "error",
+                "Live Compose project originates from an unexpected config path",
+                {
+                    "project": project_name,
+                    "expected": expected_path,
+                    "actual": sorted(normalized_files),
+                },
+            )
+        )
+    origins = {_path_origin(path) for path in config_files}
+    if len(origins) > 1:
+        findings.append(
+            Finding(
+                "PROJECT_ORIGIN",
+                "error",
+                "Live Compose project mixes Windows and WSL/Linux path origins",
+                {"project": project_name, "origins": sorted(origins)},
+            )
+        )
+    bad_files = [
+        path for path in config_files if _is_discouraged_bind_source(path, discouraged)
+    ]
+    if bad_files:
+        findings.append(
+            Finding(
+                "PROJECT_ORIGIN",
+                "error",
+                "Live Compose project uses a discouraged Windows-backed config path",
+                {"project": project_name, "config_files": bad_files},
+            )
+        )
+    transient_files = [
+        path
+        for path in config_files
+        if _is_discouraged_bind_source(path, transient_prefixes)
+    ]
+    if transient_files:
+        findings.append(
+            Finding(
+                "TRANSIENT_ORIGIN",
+                "error",
+                "Live Compose project originates from a transient issue worktree",
+                {
+                    "project": project_name,
+                    "stack": stack_name,
+                    "config_files": transient_files,
+                },
+            )
+        )
+    return findings
+
+
 def _project_origin_findings(
     root: Path,
     project_rows: Sequence[Mapping[str, Any]],
@@ -401,7 +514,11 @@ def _project_origin_findings(
         for stack in contract.get("stacks", {}).values()
         if isinstance((migration := stack.get("migration")), dict)
     }
-    discouraged = tuple(contract.get("path_policy", {}).get("discouraged_origins", []))
+    path_policy = contract.get("path_policy", {})
+    discouraged = tuple(path_policy.get("discouraged_origins", []))
+    transient_prefixes = tuple(
+        path_policy.get("discouraged_compose_working_dir_prefixes") or []
+    )
     for row in project_rows:
         project_name = str(row.get("Name") or row.get("name") or "")
         config_files = _config_files(row)
@@ -417,71 +534,17 @@ def _project_origin_findings(
         stack_name = project_to_stack.get(project_name)
         if not stack_name:
             continue
-        expected_path = _normalise_path(
-            contract["stacks"][stack_name]["compose_file"], root=root
+        findings.extend(
+            _project_path_findings(
+                root,
+                project_name=project_name,
+                stack_name=stack_name,
+                config_files=config_files,
+                contract=contract,
+                discouraged=discouraged,
+                transient_prefixes=transient_prefixes,
+            )
         )
-        normalized_files = {_normalise_path(path, root=root) for path in config_files}
-        if normalized_files and expected_path not in normalized_files:
-            findings.append(
-                Finding(
-                    "PROJECT_ORIGIN",
-                    "error",
-                    "Live Compose project originates from an unexpected config path",
-                    {
-                        "project": project_name,
-                        "expected": expected_path,
-                        "actual": sorted(normalized_files),
-                    },
-                )
-            )
-        origins = {_path_origin(path) for path in config_files}
-        if len(origins) > 1:
-            findings.append(
-                Finding(
-                    "PROJECT_ORIGIN",
-                    "error",
-                    "Live Compose project mixes Windows and WSL/Linux path origins",
-                    {"project": project_name, "origins": sorted(origins)},
-                )
-            )
-        bad_config_files = [
-            path
-            for path in config_files
-            if _is_discouraged_bind_source(path, discouraged)
-        ]
-        if bad_config_files:
-            findings.append(
-                Finding(
-                    "PROJECT_ORIGIN",
-                    "error",
-                    "Live Compose project uses a discouraged Windows-backed config path",
-                    {"project": project_name, "config_files": bad_config_files},
-                )
-            )
-        transient_prefixes = tuple(
-            contract.get("path_policy", {}).get(
-                "discouraged_compose_working_dir_prefixes"
-            )
-            or []
-        )
-        transient_files = [
-            path
-            for path in config_files
-            if _is_discouraged_bind_source(path, transient_prefixes)
-        ]
-        if transient_files:
-            findings.append(
-                Finding(
-                    "TRANSIENT_ORIGIN",
-                    "error",
-                    "Live Compose project originates from a transient issue worktree",
-                    {
-                        "project": project_name,
-                        "stack": stack_name,
-                        "config_files": transient_files,
-                    },
-                )
-            )
     return findings
 
 
@@ -917,50 +980,60 @@ def _findings_prometheus_rules_promql(root: Path) -> list[Finding]:
     return findings
 
 
+def _shared_network_consumer_finding(
+    root: Path,
+    *,
+    logical_name: str,
+    expected_name: str,
+    stack_name: str,
+    contract: Mapping[str, Any],
+) -> Finding | None:
+    stack_contract = contract["stacks"].get(stack_name)
+    if not stack_contract:
+        return Finding(
+            "F003",
+            "error",
+            "Shared network references an unknown consumer stack",
+            {"network": logical_name, "stack": stack_name},
+        )
+    compose = _load_yaml(root / stack_contract["compose_file"])
+    actual = (compose.get("networks") or {}).get(logical_name)
+    if not isinstance(actual, dict):
+        actual = {}
+    name_ok = actual.get("name") == expected_name
+    labels = actual.get("labels") or {}
+    owner = labels.get("com.bioetl.owner") if isinstance(labels, dict) else None
+    external_ok = actual.get("external") is True and name_ok
+    managed_ok = name_ok and owner == "scripts/ops/runtime/docker/runtime_manager.py"
+    if external_ok or managed_ok:
+        return None
+    return Finding(
+        "F003",
+        "error",
+        "Shared network does not resolve to contracted name "
+        "(external:true or name+owner label)",
+        {
+            "network": logical_name,
+            "stack": stack_name,
+            "expected_name": expected_name,
+            "actual": actual,
+        },
+    )
+
+
 def _findings_shared_networks(root: Path, contract: Mapping[str, Any]) -> list[Finding]:
     findings: list[Finding] = []
     for logical_name, network_contract in contract.get("shared_networks", {}).items():
-        expected_name = network_contract["name"]
         for stack_name in network_contract.get("consumers", []):
-            stack_contract = contract["stacks"].get(stack_name)
-            if not stack_contract:
-                findings.append(
-                    Finding(
-                        "F003",
-                        "error",
-                        "Shared network references an unknown consumer stack",
-                        {"network": logical_name, "stack": stack_name},
-                    )
-                )
-                continue
-            compose = _load_yaml(root / stack_contract["compose_file"])
-            actual = (compose.get("networks") or {}).get(logical_name)
-            if not isinstance(actual, dict):
-                actual = {}
-            # Accept either legacy external:true or named auto-create networks
-            # (name + owner label) so `compose up` creates missing nets.
-            name_ok = actual.get("name") == expected_name
-            external_ok = actual.get("external") is True and name_ok
-            labels = actual.get("labels") or {}
-            owner = labels.get("com.bioetl.owner") if isinstance(labels, dict) else None
-            managed_ok = name_ok and owner == (
-                "scripts/ops/runtime/docker/runtime_manager.py"
+            finding = _shared_network_consumer_finding(
+                root,
+                logical_name=logical_name,
+                expected_name=network_contract["name"],
+                stack_name=stack_name,
+                contract=contract,
             )
-            if not (external_ok or managed_ok):
-                findings.append(
-                    Finding(
-                        "F003",
-                        "error",
-                        "Shared network does not resolve to contracted name "
-                        "(external:true or name+owner label)",
-                        {
-                            "network": logical_name,
-                            "stack": stack_name,
-                            "expected_name": expected_name,
-                            "actual": actual,
-                        },
-                    )
-                )
+            if finding is not None:
+                findings.append(finding)
     return findings
 
 
@@ -1487,6 +1560,95 @@ def _port_owners_from_containers(
     return port_owners
 
 
+def _mount_origin_scope(
+    contract: Mapping[str, Any],
+) -> tuple[bool, str, set[str]]:
+    path_policy = contract.get("path_policy")
+    scoped = (
+        isinstance(path_policy, Mapping)
+        and str(path_policy.get("discouraged_origin_scope") or "")
+        == "dashboard_data_plane_required_bind_mounts"
+    )
+    data_plane = contract.get("dashboard_data_plane")
+    if not isinstance(data_plane, Mapping):
+        return scoped, "", set()
+    producer_stack = str(data_plane.get("producer_stack") or "")
+    required_mounts = data_plane.get("required_bind_mounts")
+    targets = (
+        {str(target) for target in required_mounts}
+        if isinstance(required_mounts, Mapping)
+        else set()
+    )
+    return scoped, producer_stack, targets
+
+
+def _mount_is_in_discouraged_scope(
+    mount: Mapping[str, Any],
+    *,
+    scoped: bool,
+    stack_name: str,
+    producer_stack: str,
+    protected_targets: set[str],
+) -> bool:
+    if not scoped:
+        return True
+    target = str(mount.get("Destination") or mount.get("Target") or "")
+    return stack_name == producer_stack and target in protected_targets
+
+
+def _container_mount_origin_findings(
+    container: Mapping[str, Any],
+    *,
+    stack_name: str,
+    discouraged: tuple[Any, ...],
+    scoped: bool,
+    producer_stack: str,
+    protected_targets: set[str],
+) -> list[Finding]:
+    bind_mounts = [
+        mount
+        for mount in container.get("mounts", [])
+        if isinstance(mount, dict) and mount.get("Type") == "bind"
+    ]
+    findings: list[Finding] = []
+    origins = {
+        _path_origin(str(mount.get("Source", "")))
+        for mount in bind_mounts
+        if mount.get("Source")
+    }
+    if len(origins) > 1:
+        findings.append(
+            Finding(
+                "MOUNT_ORIGIN",
+                "error",
+                "Contracted project mixes bind-mount path origins",
+                {"stack": stack_name, "origins": sorted(origins)},
+            )
+        )
+    bad_sources = [
+        str(mount.get("Source", ""))
+        for mount in bind_mounts
+        if _mount_is_in_discouraged_scope(
+            mount,
+            scoped=scoped,
+            stack_name=stack_name,
+            producer_stack=producer_stack,
+            protected_targets=protected_targets,
+        )
+        and _is_discouraged_bind_source(str(mount.get("Source", "")), discouraged)
+    ]
+    if bad_sources:
+        findings.append(
+            Finding(
+                "MOUNT_ORIGIN",
+                "error",
+                "Contracted project uses a discouraged Windows-backed bind source",
+                {"stack": stack_name, "sources": sorted(bad_sources)},
+            )
+        )
+    return findings
+
+
 def _mount_origin_findings(
     containers: list[dict[str, Any]],
     *,
@@ -1494,72 +1656,161 @@ def _mount_origin_findings(
     project_to_stack: Mapping[Any, Any],
     discouraged: tuple[Any, ...],
 ) -> list[Finding]:
-    path_policy = contract.get("path_policy")
-    discouraged_scope = (
-        str(path_policy.get("discouraged_origin_scope") or "")
-        if isinstance(path_policy, Mapping)
-        else ""
-    )
-    data_plane = contract.get("dashboard_data_plane")
-    producer_stack = ""
-    protected_targets: set[str] = set()
-    if isinstance(data_plane, Mapping):
-        producer_stack = str(data_plane.get("producer_stack") or "")
-        required_mounts = data_plane.get("required_bind_mounts")
-        if isinstance(required_mounts, Mapping):
-            protected_targets = {str(target) for target in required_mounts}
-
+    scoped, producer_stack, protected_targets = _mount_origin_scope(contract)
     findings: list[Finding] = []
     for container in containers:
         stack_name = project_to_stack.get(container.get("project"))
         if not stack_name:
             continue
-        bind_mounts = [
-            mount
-            for mount in container.get("mounts", [])
-            if isinstance(mount, dict) and mount.get("Type") == "bind"
-        ]
-        mount_sources = [str(mount.get("Source", "")) for mount in bind_mounts]
-        origins = {_path_origin(path) for path in mount_sources if path}
-        if len(origins) > 1:
-            findings.append(
-                Finding(
-                    "MOUNT_ORIGIN",
-                    "error",
-                    "Contracted project mixes bind-mount path origins",
-                    {"stack": stack_name, "origins": sorted(origins)},
-                )
+        findings.extend(
+            _container_mount_origin_findings(
+                container,
+                stack_name=stack_name,
+                discouraged=discouraged,
+                scoped=scoped,
+                producer_stack=producer_stack,
+                protected_targets=protected_targets,
             )
-        # Docker Desktop represents ordinary WSL config binds with opaque cache
-        # paths. Project-origin checks cover those config-only mounts. Apply the
-        # discouraged-origin gate to the producer artifact mounts whose source
-        # alignment is independently attested and compared fail-closed.
-        data_plane_scope = (
-            discouraged_scope == "dashboard_data_plane_required_bind_mounts"
         )
-        bad_sources = [
-            str(mount.get("Source", ""))
-            for mount in bind_mounts
-            if (
-                not data_plane_scope
-                or (
-                    stack_name == producer_stack
-                    and str(mount.get("Destination") or mount.get("Target") or "")
-                    in protected_targets
-                )
-            )
-            and _is_discouraged_bind_source(str(mount.get("Source", "")), discouraged)
-        ]
-        if bad_sources:
+    return findings
+
+
+def _dashboard_report_source_findings(
+    root: Path,
+    *,
+    required_mounts: Mapping[str, Any],
+    expected_environment: Mapping[str, str],
+    expected_identity: str | None,
+    producer_stack: str,
+    producer_service: str,
+) -> list[Finding]:
+    reports_spec = required_mounts.get("/app/reports")
+    if not isinstance(reports_spec, Mapping) or not expected_identity:
+        return []
+    reports_environment = str(reports_spec.get("environment_name") or "").strip()
+    reports_source = expected_environment.get(reports_environment)
+    if not reports_source:
+        return []
+    report_root = host_filesystem_path(reports_source, root=root) / "run-reports"
+    source_check = inspect_report_root_source_identity(
+        report_root=report_root, expected_source_id=expected_identity
+    )
+    if source_check.get("source_identity_status") == "healthy":
+        return []
+    return [
+        Finding(
+            "DASHBOARD_REPORT_SOURCE_IDENTITY",
+            "error",
+            "Dashboard report root is not attested to this runtime source",
+            {
+                "stack": producer_stack,
+                "service": producer_service,
+                "source_identity": source_check.get("source_identity"),
+                "expected": source_check.get("source_identity_expected"),
+                "actual": source_check.get("source_identity_actual"),
+            },
+        )
+    ]
+
+
+def _dashboard_mount_findings_for_container(
+    root: Path,
+    container: Mapping[str, Any],
+    *,
+    required_mounts: Mapping[str, Any],
+    expected_environment: Mapping[str, str],
+    producer_stack: str,
+    producer_service: str,
+) -> list[Finding]:
+    mounts_by_target = {
+        str(mount.get("Destination") or ""): str(mount.get("Source") or "")
+        for mount in container.get("mounts", [])
+        if isinstance(mount, Mapping) and mount.get("Type") == "bind"
+    }
+    findings: list[Finding] = []
+    for target, raw_spec in required_mounts.items():
+        if not isinstance(raw_spec, Mapping):
+            continue
+        relative_source = str(raw_spec.get("relative_source") or "").strip()
+        environment_name = str(raw_spec.get("environment_name") or "").strip()
+        if not relative_source or not environment_name:
+            continue
+        target_text = str(target)
+        expected_source = _normalise_path(
+            expected_environment.get(environment_name, relative_source), root=root
+        )
+        actual_source = mounts_by_target.get(target_text)
+        normalized_actual = (
+            _normalise_path(actual_source, root=root) if actual_source else None
+        )
+        if normalized_actual != expected_source:
             findings.append(
                 Finding(
-                    "MOUNT_ORIGIN",
+                    "DASHBOARD_SOURCE_MOUNT",
                     "error",
-                    "Contracted project uses a discouraged Windows-backed bind source",
-                    {"stack": stack_name, "sources": sorted(bad_sources)},
+                    "Dashboard producer bind mount originates from another runtime root",
+                    {
+                        "stack": producer_stack,
+                        "service": producer_service,
+                        "target": target_text,
+                        "expected": expected_source,
+                        "actual": normalized_actual,
+                    },
                 )
             )
     return findings
+
+
+def _dashboard_identity_finding(
+    container: Mapping[str, Any],
+    *,
+    identity_contract: Mapping[str, Any],
+    identity_environment: str,
+    expected_identity: str | None,
+    producer_stack: str,
+    producer_service: str,
+) -> Finding | None:
+    label_name = str(identity_contract.get("label_name") or "").strip()
+    resolution = resolve_runtime_source_identity(
+        container_environment=_container_environment_values(container),
+        container_labels={label_name: container.get("dashboard_source_id")},
+        environment_name=identity_environment,
+        label_name=label_name,
+    )
+    actual_identity = resolution.value
+    comparison = compare_runtime_source_identity(
+        expected=expected_identity, actual=actual_identity
+    )
+    unmanaged_value = str(identity_contract.get("unmanaged_value") or "unmanaged")
+    evidence: dict[str, Any] = {
+        "stack": producer_stack,
+        "service": producer_service,
+        "expected": expected_identity,
+        "actual": actual_identity,
+        "state": comparison.state,
+        "source": resolution.source,
+    }
+    if (
+        not expected_identity
+        or not resolution.is_resolved
+        or str(container.get("dashboard_source_id") or "") == unmanaged_value
+    ):
+        return Finding(
+            "DASHBOARD_SOURCE_IDENTITY",
+            "error",
+            "Dashboard producer does not expose a managed source identity",
+            evidence,
+        )
+    if comparison.state == IDENTITY_STATE_ALIGNED and resolution.is_consistent:
+        return None
+    evidence["conflicts"] = list(resolution.conflicts)
+    evidence["invalid_sources"] = list(resolution.invalid_sources)
+    return Finding(
+        "DASHBOARD_SOURCE_IDENTITY",
+        "error",
+        "Dashboard producer source identity does not match this runtime root",
+        evidence,
+    )
 
 
 def _dashboard_source_findings(
@@ -1571,143 +1822,48 @@ def _dashboard_source_findings(
 ) -> list[Finding]:
     """Reject a healthy producer when it serves another checkout's artifacts."""
     data_plane = contract.get("dashboard_data_plane")
-    if not isinstance(data_plane, Mapping):
+    contracts = _dashboard_source_contracts(contract)
+    if not isinstance(data_plane, Mapping) or contracts is None:
         return []
+    required_mounts, identity_contract = contracts
     producer_stack = str(data_plane.get("producer_stack") or "")
     producer_service = str(data_plane.get("producer_service") or "")
-    required_mounts = data_plane.get("required_bind_mounts")
-    identity_contract = data_plane.get("source_identity")
-    if not isinstance(required_mounts, Mapping) or not isinstance(
-        identity_contract, Mapping
-    ):
-        return []
-
     expected_environment = dashboard_source_environment(root, contract)
     identity_environment = str(identity_contract.get("environment_name") or "").strip()
     expected_identity = expected_environment.get(identity_environment)
-    unmanaged_value = str(identity_contract.get("unmanaged_value") or "unmanaged")
-    findings: list[Finding] = []
-
-    reports_spec = required_mounts.get("/app/reports")
-    if isinstance(reports_spec, Mapping) and expected_identity:
-        reports_environment = str(reports_spec.get("environment_name") or "").strip()
-        reports_source = expected_environment.get(reports_environment)
-        if reports_source:
-            report_root = (
-                host_filesystem_path(reports_source, root=root) / "run-reports"
-            )
-            source_check = inspect_report_root_source_identity(
-                report_root=report_root,
-                expected_source_id=expected_identity,
-            )
-            if source_check.get("source_identity_status") != "healthy":
-                findings.append(
-                    Finding(
-                        "DASHBOARD_REPORT_SOURCE_IDENTITY",
-                        "error",
-                        "Dashboard report root is not attested to this runtime source",
-                        {
-                            "stack": producer_stack,
-                            "service": producer_service,
-                            "source_identity": source_check.get("source_identity"),
-                            "expected": source_check.get("source_identity_expected"),
-                            "actual": source_check.get("source_identity_actual"),
-                        },
-                    )
-                )
+    findings = _dashboard_report_source_findings(
+        root,
+        required_mounts=required_mounts,
+        expected_environment=expected_environment,
+        expected_identity=expected_identity,
+        producer_stack=producer_stack,
+        producer_service=producer_service,
+    )
     for container in containers:
-        stack_name = project_to_stack.get(container.get("project"))
-        if stack_name != producer_stack or container.get("service") != producer_service:
+        if project_to_stack.get(container.get("project")) != producer_stack:
             continue
-        mounts_by_target = {
-            str(mount.get("Destination") or ""): str(mount.get("Source") or "")
-            for mount in container.get("mounts", [])
-            if isinstance(mount, Mapping) and mount.get("Type") == "bind"
-        }
-        for target, raw_spec in required_mounts.items():
-            if not isinstance(raw_spec, Mapping):
-                continue
-            relative_source = str(raw_spec.get("relative_source") or "").strip()
-            environment_name = str(raw_spec.get("environment_name") or "").strip()
-            if not relative_source or not environment_name:
-                continue
-            target_text = str(target)
-            expected_source = _normalise_path(
-                expected_environment.get(environment_name, relative_source),
-                root=root,
+        if container.get("service") != producer_service:
+            continue
+        findings.extend(
+            _dashboard_mount_findings_for_container(
+                root,
+                container,
+                required_mounts=required_mounts,
+                expected_environment=expected_environment,
+                producer_stack=producer_stack,
+                producer_service=producer_service,
             )
-            actual_source = mounts_by_target.get(target_text)
-            normalized_actual = (
-                _normalise_path(actual_source, root=root) if actual_source else None
-            )
-            if normalized_actual != expected_source:
-                findings.append(
-                    Finding(
-                        "DASHBOARD_SOURCE_MOUNT",
-                        "error",
-                        "Dashboard producer bind mount originates from another runtime root",
-                        {
-                            "stack": producer_stack,
-                            "service": producer_service,
-                            "target": target_text,
-                            "expected": expected_source,
-                            "actual": normalized_actual,
-                        },
-                    )
-                )
-        label_name = str(identity_contract.get("label_name") or "").strip()
-        container_resolution = resolve_runtime_source_identity(
-            container_environment=_container_environment_values(container),
-            container_labels={label_name: container.get("dashboard_source_id")},
-            environment_name=identity_environment,
-            label_name=label_name,
         )
-        actual_identity = container_resolution.value
-        comparison = compare_runtime_source_identity(
-            expected=expected_identity,
-            actual=actual_identity,
+        identity_finding = _dashboard_identity_finding(
+            container,
+            identity_contract=identity_contract,
+            identity_environment=identity_environment,
+            expected_identity=expected_identity,
+            producer_stack=producer_stack,
+            producer_service=producer_service,
         )
-        if (
-            not expected_identity
-            or not container_resolution.is_resolved
-            or str(container.get("dashboard_source_id") or "") == unmanaged_value
-        ):
-            findings.append(
-                Finding(
-                    "DASHBOARD_SOURCE_IDENTITY",
-                    "error",
-                    "Dashboard producer does not expose a managed source identity",
-                    {
-                        "stack": producer_stack,
-                        "service": producer_service,
-                        "expected": expected_identity,
-                        "actual": actual_identity,
-                        "state": comparison.state,
-                        "source": container_resolution.source,
-                    },
-                )
-            )
-        elif (
-            comparison.state != IDENTITY_STATE_ALIGNED
-            or not container_resolution.is_consistent
-        ):
-            findings.append(
-                Finding(
-                    "DASHBOARD_SOURCE_IDENTITY",
-                    "error",
-                    "Dashboard producer source identity does not match this runtime root",
-                    {
-                        "stack": producer_stack,
-                        "service": producer_service,
-                        "expected": expected_identity,
-                        "actual": actual_identity,
-                        "state": comparison.state,
-                        "source": container_resolution.source,
-                        "conflicts": list(container_resolution.conflicts),
-                        "invalid_sources": list(container_resolution.invalid_sources),
-                    },
-                )
-            )
+        if identity_finding is not None:
+            findings.append(identity_finding)
     return findings
 
 

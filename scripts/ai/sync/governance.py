@@ -151,6 +151,55 @@ def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
     return issues
 
 
+def _sync_docs_runtime_mirror(
+    *, root: Path, path: Path, canonical: Path, check_only: bool
+) -> str | None:
+    relative = canonical.relative_to(root).as_posix()
+    header = (
+        "> Mirror status: This file is published under "
+        "`docs/00-project/ai/**` and is not a canonical runtime surface.\n"
+        f"> Canonical runtime source: `{relative}`\n"
+        "> Governance: "
+        "`docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`\n"
+        "> Edit the runtime source first, then refresh this mirror.\n"
+        "______________________________________________________________________\n\n"
+    )
+    original = path.read_text(encoding="utf-8")
+    updated = header + _strip_mirror_header(
+        canonical.read_text(encoding="utf-8")
+    ).lstrip("\n")
+    if updated == original:
+        return None
+    if check_only:
+        return f"{path.relative_to(root)}: would sync runtime mirror"
+    _atomic_write(path, updated)
+    return None
+
+
+def _inject_docs_canonical_sources(
+    *, root: Path, path: Path, original: str, check_only: bool
+) -> str | None:
+    if CANONICAL_SOURCES_PATTERN.search(original):
+        return None
+    match = re.search(r"^_{10,}\s*$", original, re.MULTILINE)
+    if not match:
+        return f"{path.relative_to(root)}: missing mirror separator"
+    insert_at = match.end()
+    while insert_at < len(original) and original[insert_at] in "\r\n":
+        insert_at += 1
+    updated = (
+        original[:insert_at]
+        + "\n"
+        + CANONICAL_SOURCES_BLOCK
+        + "\n"
+        + original[insert_at:].lstrip("\n")
+    )
+    if check_only:
+        return f"{path.relative_to(root)}: would inject canonical sources"
+    _atomic_write(path, updated)
+    return None
+
+
 def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
     agents_dir = root / "docs/00-project/ai/agents/agents"
     issues: list[str] = []
@@ -160,47 +209,20 @@ def inject_docs_agent_sources(root: Path, *, check_only: bool) -> list[str]:
         original = path.read_text(encoding="utf-8")
         canonical = root / ".codex/agents" / path.name
         if canonical.is_file():
-            relative = canonical.relative_to(root).as_posix()
-            header = (
-                "> Mirror status: This file is published under "
-                "`docs/00-project/ai/**` and is not a canonical runtime surface.\n"
-                f"> Canonical runtime source: `{relative}`\n"
-                "> Governance: "
-                "`docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`\n"
-                "> Edit the runtime source first, then refresh this mirror.\n"
-                "______________________________________________________________________\n\n"
+            issue = _sync_docs_runtime_mirror(
+                root=root, path=path, canonical=canonical, check_only=check_only
             )
-            updated = header + _strip_mirror_header(
-                canonical.read_text(encoding="utf-8")
-            ).lstrip("\n")
-            if updated != original:
-                if check_only:
-                    issues.append(
-                        f"{path.relative_to(root)}: would sync runtime mirror"
-                    )
-                else:
-                    _atomic_write(path, updated)
+            if issue is not None:
+                issues.append(issue)
             continue
-        if CANONICAL_SOURCES_PATTERN.search(original):
-            continue
-        match = re.search(r"^_{10,}\s*$", original, re.MULTILINE)
-        if not match:
-            issues.append(f"{path.relative_to(root)}: missing mirror separator")
-            continue
-        insert_at = match.end()
-        while insert_at < len(original) and original[insert_at] in "\r\n":
-            insert_at += 1
-        updated = (
-            original[:insert_at]
-            + "\n"
-            + CANONICAL_SOURCES_BLOCK
-            + "\n"
-            + original[insert_at:].lstrip("\n")
+        issue = _inject_docs_canonical_sources(
+            root=root,
+            path=path,
+            original=original,
+            check_only=check_only,
         )
-        if check_only:
-            issues.append(f"{path.relative_to(root)}: would inject canonical sources")
-        else:
-            _atomic_write(path, updated)
+        if issue is not None:
+            issues.append(issue)
     return issues
 
 
