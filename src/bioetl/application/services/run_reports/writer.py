@@ -181,7 +181,7 @@ def write_pipeline_run_report(
     writer.mkdir(out_dir)
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
-    enriched = replace(
+    enriched: PipelineRunReport = replace(
         report,
         artifacts=_with_self_artifacts(
             report.artifacts,

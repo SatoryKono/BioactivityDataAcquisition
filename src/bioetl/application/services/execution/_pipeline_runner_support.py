@@ -184,17 +184,19 @@ def finalize_pipeline_run_report(
         )
         written = write_pipeline_run_report(report, root=report_root)
     except Exception as exc:
-        return replace(
+        failed_result: RunResult = replace(
             result,
             run_report_error=f"{type(exc).__name__}: {exc}",
         )
+        return failed_result
 
-    return replace(
+    reported_result: RunResult = replace(
         result,
         run_report_json_path=str(written.json_path),
         run_report_markdown_path=str(written.markdown_path),
         run_report_funnel=report.funnel,
     )
+    return reported_result
 
 
 def _package_version() -> str | None:

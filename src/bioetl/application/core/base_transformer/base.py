@@ -37,7 +37,7 @@ def _merge_legacy_collaborators(
     identity_service: EntityIdentityGenerator | None,
     pii_hasher: PiiHasherPort | None,
 ) -> TransformerDependencyContext:
-    return replace(
+    merged_dependencies: TransformerDependencyContext = replace(
         dependencies,
         tracer=dependencies.tracer if tracer is None else tracer,
         metrics=dependencies.metrics if metrics is None else metrics,
@@ -48,6 +48,7 @@ def _merge_legacy_collaborators(
         ),
         pii_hasher=dependencies.pii_hasher if pii_hasher is None else pii_hasher,
     )
+    return merged_dependencies
 
 
 def _resolve_transformer_dependencies(

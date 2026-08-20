@@ -130,14 +130,14 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
         )
         result = workflow_result_from_state(config.name, state)
-        result = replace(
+        identified_result: WorkflowRunExecutionResult = replace(
             result,
             workflow_run_id=workflow_run_id,
             manifest_id=manifest_id,
         )
         return attach_workflow_run_report(
             config=config,
-            result=result,
+            result=identified_result,
             logger=getattr(self.pipeline_runner, "logger", None),
         )
 

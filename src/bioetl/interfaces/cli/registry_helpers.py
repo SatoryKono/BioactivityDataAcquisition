@@ -54,12 +54,16 @@ def format_command_help_rows(
     section_title: str = "Commands",
 ) -> None:
     """Render deterministic help rows for eager plus lazy CLI commands."""
-    rows = [
-        (name, help_text) for name, (_command, help_text) in eager_commands.items()
-    ] + [
-        (name, help_text)
-        for name, (_module_name, _attribute_name, help_text) in lazy_commands.items()
-    ]
+    rows: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for name, (_command, help_text) in eager_commands.items():
+        seen.add(name)
+        rows.append((name, help_text))
+    for name, (_module_name, _attribute_name, help_text) in lazy_commands.items():
+        if name in seen:
+            continue
+        seen.add(name)
+        rows.append((name, help_text))
     if rows:
         with formatter.section(section_title):
             formatter.write_dl(rows)
