@@ -22,4 +22,3 @@ def test_adapter_satisfies_port_and_round_trips_text(tmp_path: Path) -> None:
     payload = '{"ok": true}' + chr(10)
     adapter.write_text(target, payload)
     assert adapter.read_text(target) == payload
-

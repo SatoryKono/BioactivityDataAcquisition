@@ -16,7 +16,7 @@
       "max_internal_fan_in": 6,
       "helper_function_ratio": 0.374,
       "files": 194,
-      "total_loc": 23384,
+      "total_loc": 23381,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 10
     },
@@ -30,11 +30,11 @@
       "budget_max_internal_fan_in": 3
     },
     "composition_factories_pipeline": {
-      "files_ge_250_loc": 1,
+      "files_ge_250_loc": 2,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.342,
       "files": 33,
-      "total_loc": 4045,
+      "total_loc": 4047,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -43,7 +43,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.426,
       "files": 142,
-      "total_loc": 16414,
+      "total_loc": 16413,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },

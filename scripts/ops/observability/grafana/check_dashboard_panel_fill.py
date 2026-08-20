@@ -111,9 +111,7 @@ def classify_fill_error(
     return _verdict_from_error_texts(http_status=http_status, body=body)
 
 
-def _verdict_from_error_texts(
-    *, http_status: int | None, body: object
-) -> FillVerdict:
+def _verdict_from_error_texts(*, http_status: int | None, body: object) -> FillVerdict:
     for text in _collect_error_texts(body):
         lowered = text.lower()
         if any(needle in lowered for needle in _ERROR_NEEDLES) or (

@@ -454,9 +454,7 @@ def _composite_column_group_errors(path: Path, data: dict[str, Any]) -> list[str
         else None
     )
     if not isinstance(entity_groups, list) or not entity_groups:
-        return [
-            f"INV-CFG-009 {_rel(path)}: schema.column_groups must be non-empty"
-        ]
+        return [f"INV-CFG-009 {_rel(path)}: schema.column_groups must be non-empty"]
     if entity_groups != runtime_groups:
         return [
             f"INV-CFG-009 {_rel(path)}: schema.column_groups drift from "
