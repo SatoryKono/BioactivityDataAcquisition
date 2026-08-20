@@ -4101,21 +4101,6 @@ dashboards:
         fixture_cases:
         - not_applicable
         render_profiles: *id001
-      '3001':
-        title: Continue Run Investigation
-        role: guidance
-        tier: 4
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
-        render_profiles: *id001
       '3010':
         title: Inspect Recent Runs (last 4)
         role: forensic_table
@@ -4235,21 +4220,6 @@ dashboards:
         - valid_empty
         - telemetry_absent
         - backend_error
-        render_profiles: *id001
-      '3016':
-        title: Inspect Layer Accounting
-        role: guidance
-        tier: 4
-        scope: global
-        scope_class: global
-        evidence_source: grafana_builtin
-        empty_state_class: unsupported
-        state_model:
-        - N/A
-        required_copy:
-        - operator_guidance
-        fixture_cases:
-        - not_applicable
         render_profiles: *id001
       '3020':
         title: Inspect Recent Workflow Runs (last 20)

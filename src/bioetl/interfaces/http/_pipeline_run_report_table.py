@@ -6,6 +6,7 @@ parameter/value rows and HTTP 200 empty shells instead of QUERY_ERROR.
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime, timedelta
 
 # Canonical reconciliation key order for Run Explorer panel 3015 (REC-04).
@@ -16,6 +17,47 @@ _RECONCILIATION_ROW_ORDER: tuple[str, ...] = (
     "gold_accounted",
     "gold_delta",
     "gold_vs_silver_status",
+)
+
+# pipeline_run_report_v1.layers required keys (D6-IA-02).
+_LAYER_ROW_ORDER: tuple[str, ...] = (
+    "bronze_records",
+    "silver_valid",
+    "silver_filtered_out",
+    "silver_quarantined",
+    "silver_skipped",
+    "silver_deduplicated",
+    "gold_written",
+    "gold_excluded_by_contract",
+    "gold_quarantined",
+    "gold_skipped",
+    "gold_deduplicated",
+)
+
+# Optional failure object keys (D6-IA-01).
+_FAILURE_ROW_ORDER: tuple[str, ...] = (
+    "error_type",
+    "error_message",
+    "failed_stage",
+    "exit_hint",
+)
+
+# Report identity keys surfaced on Run Explorer 3022 (D6-IA-09).
+_IDENTITY_ROW_ORDER: tuple[str, ...] = (
+    "run_id",
+    "pipeline_name",
+    "run_type",
+    "status",
+    "started_at",
+    "completed_at",
+    "duration_seconds",
+    "tracking_coverage",
+    "workflow_id",
+    "workflow_run_id",
+    "workflow_step_id",
+    "manifest_id",
+    "provider",
+    "entity",
 )
 
 # Grafana selector sentinels for "no concrete run selected" (never a real run_id).
@@ -57,6 +99,10 @@ def _empty_pipeline_run_report_shell(
         "reasons_top_n": [],
         "reconciliation": [],
         "artifacts": [],
+        "layers": [],
+        "failure": [],
+        "stage_timings": [],
+        "identity_rows": [],
         "schema_version": "pipeline_run_report_v1",
     }
 
@@ -93,27 +139,76 @@ def _not_found_pipeline_run_report_shell(
     )
 
 
+def _scalar_or_json(value: object) -> str:
+    """Stringify a report field for a Grafana parameter/value table column."""
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, sort_keys=True, default=str)
+    return str(value)
+
+
+def _param_value_rows(
+    obj: object,
+    *,
+    key_order: tuple[str, ...] = (),
+) -> list[dict[str, str]]:
+    """Turn a JSON object into stable {parameter, value} rows."""
+    if not isinstance(obj, dict) or not obj:
+        return []
+    ordered = [key for key in key_order if key in obj]
+    extra = sorted(str(key) for key in obj if key not in key_order)
+    return [
+        {"parameter": str(key), "value": _scalar_or_json(obj[key])}
+        for key in (*ordered, *extra)
+    ]
+
+
 def _table_shape_pipeline_run_report(
     payload: dict[str, object],
 ) -> dict[str, object]:
     """Normalize nested report sections for Grafana Infinity table selectors.
 
-    ``reconciliation`` is stored as an object in pipeline_run_report_v1 files.
-    Run Explorer panel 3015 uses root_selector=reconciliation on a table panel,
-    so the HTTP surface exposes a list of {parameter, value} rows. Values are
-    strings because Infinity requires one stable field type when numeric
-    accounting values and textual reconciliation verdicts share the column.
+    Object-shaped ``pipeline_run_report_v1`` blocks (reconciliation, layers,
+    failure, identity, stage_timings) become lists of {parameter, value} rows
+    so table panels do not QUERY_ERROR on a JSON object root_selector.
     """
-    recon = payload.get("reconciliation")
-    if not isinstance(recon, dict):
-        return payload
     shaped = dict(payload)
-    ordered_keys = [key for key in _RECONCILIATION_ROW_ORDER if key in recon] + sorted(
-        key for key in recon if key not in _RECONCILIATION_ROW_ORDER
+    recon = payload.get("reconciliation")
+    if isinstance(recon, dict):
+        shaped["reconciliation"] = _param_value_rows(
+            recon, key_order=_RECONCILIATION_ROW_ORDER
+        )
+    layers = payload.get("layers")
+    if isinstance(layers, dict):
+        shaped["layers"] = _param_value_rows(layers, key_order=_LAYER_ROW_ORDER)
+    elif not isinstance(layers, list):
+        shaped["layers"] = []
+    failure = payload.get("failure")
+    if isinstance(failure, dict):
+        shaped["failure"] = _param_value_rows(failure, key_order=_FAILURE_ROW_ORDER)
+    elif not isinstance(failure, list):
+        shaped["failure"] = []
+    timings = payload.get("stage_timings")
+    if isinstance(timings, dict):
+        shaped["stage_timings"] = _param_value_rows(timings)
+    elif not isinstance(timings, list):
+        shaped["stage_timings"] = []
+    identity = payload.get("identity")
+    identity_rows = (
+        _param_value_rows(identity, key_order=_IDENTITY_ROW_ORDER)
+        if isinstance(identity, dict)
+        else []
     )
-    shaped["reconciliation"] = [
-        {"parameter": str(key), "value": str(recon[key])} for key in ordered_keys
-    ]
+    coverage = payload.get("tracking_coverage")
+    if coverage not in (None, ""):
+        if not any(row["parameter"] == "tracking_coverage" for row in identity_rows):
+            identity_rows.append(
+                {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
+            )
+    shaped["identity_rows"] = identity_rows
     return shaped
 
 

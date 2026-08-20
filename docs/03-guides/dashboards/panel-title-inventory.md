@@ -206,10 +206,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-run-explorer-v1.json | 3011 | Inspect Stage Funnel |
 | bioetl-run-explorer-v1.json | 3012 | Inspect Top Run Reasons |
 | bioetl-run-explorer-v1.json | 3015 | Inspect Reconciliation |
-| bioetl-run-explorer-v1.json | 3016 | Inspect Layer Accounting |
 | bioetl-run-explorer-v1.json | 3013 | Inspect Run Artifacts |
 | bioetl-run-explorer-v1.json | 3014 | Inspect Timings & Failure |
-| bioetl-run-explorer-v1.json | 3001 | Continue Run Investigation |
 | bioetl-run-explorer-v1.json | 3098 | Browse Workflow Runs |
 | bioetl-run-explorer-v1.json | 3020 | Inspect Recent Workflow Runs (last 20) |
 | bioetl-runtime.json | 1000 | Navigate Dashboards |

@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: normative
 Owner: BioETL Team
-Last verified: 2026-08-18
+Last verified: 2026-08-21
 
 ______________________________________________________________________
 
@@ -272,6 +272,7 @@ The §7 answers map to these root first-window panels. Ids are locked by
 | Geometry & purpose regression locks (`DASH-LAYOUT-003/004`, `DASH-FIT-001/002/003/004/005`, `DASH-COPY-003/004/005/006/007`, `DASH-PERF-003`) | `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` + `tests/integration/test_dashboard_first_window_containment.py` + [`layout-budgets.yaml`](../03-guides/dashboards/contracts/layout-budgets.yaml) |
 | Operator readability (`DASH-COPY-008`, `DASH-TIME-001`, static `DASH-FIT-004`) | `tests/integration/test_dashboard_operator_readability.py` — required on every `grafana/dashboards/**` change |
 | Scalar information density (`DASH-DENSITY-002`, §5.4) | `python -m scripts.engineering.qa report-dashboard-scalar-density --check` (survey/gate) + `tests/unit/scripts/qa/test_report_dashboard_scalar_density.py` (pure) + enforced-scope gate in `tests/integration/test_dashboard_geometry_and_purpose_contracts.py` |
+| Incomplete DASH-* static coverage (`DASH-ARCH-001`, `DASH-DATA-001`, `DASH-STATE-001/002/004`, `DASH-ZERO-001`, `DASH-FIRST-001/002`, `DASH-ACTION-001`, `DASH-COPY-001`, Infinity `parser: backend`) | `tests/integration/test_dashboard_requirement_coverage.py` + [`requirement-coverage.yaml`](../03-guides/dashboards/contracts/requirement-coverage.yaml) + [`synthetic-zero-policy.yaml`](../03-guides/dashboards/contracts/synthetic-zero-policy.yaml) |
 
 Static tests prove repository structure. They do not replace live datasource,
 render, or human usability evidence.

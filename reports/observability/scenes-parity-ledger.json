@@ -20,12 +20,12 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "86050c15a6006992732000732b7254f3112c236164bcbfbe7a9d67d3047f8eea",
-    "bioetl-dq-v2": "ec230d97beb5fa5495528a5a734cd75610bceaa8e08105e97e5f61ba11d4d63b",
+    "bioetl-control-plane-v1": "1eec0275e13a532a4a2f693040a7dbf5d2e41c387781905aa4eb73709f973775",
+    "bioetl-dq-v2": "1d8f8d7280c6c01840d7ef6879393df53d51419c817baa96857b4bc49190989e",
     "bioetl-incident-v1": "017b0526cd621166c3b788a9ffaaebd13e5bc9de711a603a5bc0fa458c382702",
-    "bioetl-overview-v2": "a72b69e04dfd66a60c8364254bfa785e1e33ccd6b3bced1673eb47c97b283df9",
-    "bioetl-provider-health-v2": "6977da688678e1c3ca793670998a9e16d033ee3461eda0bf3e58fc48b74d0317",
-    "bioetl-run-explorer-v1": "7af8b569c486df023e61e9cece6cc0dd9d735ca0d7d85a83553f3d00599f8c34",
+    "bioetl-overview-v2": "0835fa4575dfa55dfcb4484ef40ae1be27204d80fc89d5a233df5d6d2eddf132",
+    "bioetl-provider-health-v2": "cbd1d5d9a683452a5408d1f94ef8d516a09116c7c83350cc14969689b9579194",
+    "bioetl-run-explorer-v1": "296877a3f1ca51908b324054f96d7269e4a3ee90f5b4a1cf0eef43efeea84254",
     "bioetl-runtime": "22d648318c98f1621a0c2643be5cdc525a689ec2b22fea1d259e1a21dabb5818"
   },
   "panels": [
@@ -3096,9 +3096,9 @@
     },
     {
       "basis": "preserved-from-json",
-      "component": "JSON fallback",
+      "component": "Context Bar",
       "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "advanced-evidence",
+      "disposition": "route-primary",
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3023,
@@ -3172,23 +3172,6 @@
     },
     {
       "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 3016,
-      "panel_title": "Inspect Layer Accounting",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-run-explorer-v1",
       "disposition": "advanced-evidence",
@@ -3215,23 +3198,6 @@
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3014,
       "panel_title": "Inspect Timings & Failure",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "fallback-only",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 3001,
-      "panel_title": "Continue Run Investigation",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
@@ -3965,13 +3931,13 @@
       }
     }
   ],
-  "route_contract_sha256": "88b420a39e5db86b1c5ca6df94822b4c4bedf41ac6f34e93956d4cd8fab174a4",
+  "route_contract_sha256": "d4f4671c1206105cf16f254eecd4d3f76af61cc7f03f4c36764258dff96ab03e",
   "schema_version": "bioetl-scenes-parity-v1",
   "summary": {
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 209,
+    "panel_disposition_count": 207,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

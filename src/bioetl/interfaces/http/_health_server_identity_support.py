@@ -142,6 +142,13 @@ def _build_identity_rows(
             unavailable=manifest_unavailable,
         )
     )
+    rows.extend(
+        _report_identity_rows(
+            manifest=manifest,
+            identity_evidence_summary=identity_evidence_summary,
+            unavailable=manifest_unavailable,
+        )
+    )
     return rows
 
 
@@ -253,6 +260,30 @@ def _checkpoint_anchor_status(
         if summary_status not in (None, ""):
             return summary_status
     return values.get("checkpoint_anchor_status")
+
+
+def _report_identity_rows(
+    *,
+    manifest: RunManifest | None,
+    identity_evidence_summary: dict[str, object] | None,
+    unavailable: str,
+) -> list[dict[str, str]]:
+    """Append report/ledger identity fields (D6-IA-09) onto the compact ID table."""
+    summary = identity_evidence_summary or {}
+    status = _text(summary.get("run_status")) or _text(summary.get("status"))
+    started_at = _text(summary.get("started_at"))
+    completed_at = _text(summary.get("completed_at"))
+    duration = summary.get("duration_seconds")
+    coverage = _text(summary.get("tracking_coverage"))
+    if duration in (None, ""):
+        duration = _payload_value(manifest, "duration_seconds") if manifest else None
+    return [
+        _identity_row("Status", status, unavailable=unavailable),
+        _identity_row("Started at", started_at, unavailable=unavailable),
+        _identity_row("Completed at", completed_at, unavailable=unavailable),
+        _identity_row("Duration seconds", duration, unavailable=unavailable),
+        _identity_row("Tracking coverage", coverage, unavailable=unavailable),
+    ]
 
 
 def _identity_health(
