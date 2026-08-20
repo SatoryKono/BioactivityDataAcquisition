@@ -1403,3 +1403,96 @@ tests:
               summary: Prometheus BioETL rule group iterations missed (silent metric gaps)
               description: BioETL rule groups missed evaluation iterations in the last 10m (10). Usually means a group is too slow for its interval; recording samples are skipped until the group catches up.
               runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: pipeline-run-failed
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: BioETLPipelineRunFailed
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+            exp_annotations:
+              summary: Pipeline run failed
+              description: At least one pipeline run failed for pipeline=chembl run_type=incremental in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
+
+  - name: record-flow-invariant-violated
+    interval: 1m
+    input_series:
+      - series: 'bioetl_record_flow_invariants_total{pipeline="chembl",run_type="incremental",invariant="bronze_to_silver",status="violated"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLRecordFlowInvariantViolated
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              run_type: incremental
+              invariant: bronze_to_silver
+            exp_annotations:
+              summary: Record-flow invariant violated
+              description: bioetl_record_flow_invariants_total recorded violated status for invariant=bronze_to_silver pipeline=chembl run_type=incremental in the last 15m.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: stage-backlog-active
+    interval: 1m
+    input_series:
+      - series: 'bioetl_stage_backlog_records{pipeline="chembl",run_type="incremental",stage="ingestion"}'
+        values: "1+0x20"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BioETLStageBacklogActive
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              run_type: incremental
+              stage: ingestion
+            exp_annotations:
+              summary: Stage backlog remains active
+              description: bioetl_stage_backlog_records is above zero for pipeline=chembl run_type=incremental stage=ingestion.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: lineage-refs-missing
+    interval: 1m
+    input_series:
+      - series: 'bioetl_lineage_refs_missing_total{pipeline="chembl",layer="silver",ref_type="parent_run"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLLineageRefsMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              pipeline: chembl
+              layer: silver
+              ref_type: parent_run
+            exp_annotations:
+              summary: Missing upstream lineage references detected
+              description: bioetl_lineage_refs_missing_total increased for pipeline=chembl layer=silver ref_type=parent_run in the last 15m.
+              runbook: docs/05-operations/runbooks/traceability-signal-ownership.md
+
+  - name: dq-validation-failures-critical
+    interval: 1m
+    input_series:
+      - series: 'bioetl_dq_validation_failures_total{pipeline="chembl",stage="silver",severity="hard_fail"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BioETLDQValidationFailuresCritical
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              pipeline: chembl
+              stage: silver
+            exp_annotations:
+              summary: Critical DQ validation failures detected
+              description: bioetl_dq_validation_failures_total increased with severity=hard_fail for pipeline=chembl stage=silver in the last 15m.
+              runbook: docs/05-operations/runbooks/pipeline-failure-dq.md
