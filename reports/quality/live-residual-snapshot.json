@@ -34,16 +34,16 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.342,
       "files": 33,
-      "total_loc": 4047,
+      "total_loc": 4050,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.426,
-      "files": 142,
-      "total_loc": 16413,
+      "helper_function_ratio": 0.425,
+      "files": 143,
+      "total_loc": 16437,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
