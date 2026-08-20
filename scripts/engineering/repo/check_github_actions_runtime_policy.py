@@ -6,10 +6,14 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
+REMOTE_ARTIFACTS_FILE = ROOT / "configs/quality/github_actions_remote_artifacts.yaml"
 
 ALLOWED_USES: dict[str, set[str]] = {
     "actions/checkout": {"de0fac2e4500dabe0009e67214ff5f5447ce83dd"},  # v6.0.2
@@ -55,6 +59,15 @@ ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
 USES_PATTERN = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s#]+)")
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 FULL_SHA256_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+SHA256_HEX_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+PIPE_TO_SHELL_PATTERN = re.compile(
+    r"(?:curl|wget)\b[^\n|]*\|\s*(?:sudo\s+)?(?:ba)?sh\b",
+    re.IGNORECASE,
+)
+REMOTE_SCRIPT_URL_PATTERN = re.compile(
+    r"https?://[^\s\"']+\.(?:sh|ps1)\b",
+    re.IGNORECASE,
+)
 
 
 def iter_yaml_files() -> list[Path]:
@@ -123,6 +136,96 @@ def _collect_uses_violations() -> list[str]:
     return violations
 
 
+def load_remote_artifacts_policy(path: Path | None = None) -> dict[str, Any]:
+    """Load repository-controlled remote executable pins."""
+    policy_path = path or REMOTE_ARTIFACTS_FILE
+    payload = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Remote artifacts policy must be a mapping: {policy_path}")
+    return payload
+
+
+def _allowed_remote_artifacts(
+    policy: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    payload = policy if policy is not None else load_remote_artifacts_policy()
+    raw_artifacts = payload.get("artifacts", [])
+    if not isinstance(raw_artifacts, list):
+        raise RuntimeError("github_actions_remote_artifacts.artifacts must be a list")
+    artifacts: list[dict[str, str]] = []
+    for entry in raw_artifacts:
+        if not isinstance(entry, dict):
+            raise RuntimeError("remote artifact entries must be mappings")
+        url = entry.get("url")
+        digest = entry.get("sha256")
+        if not isinstance(url, str) or not url:
+            raise RuntimeError("remote artifact url must be a non-empty string")
+        if not isinstance(digest, str) or not SHA256_HEX_PATTERN.fullmatch(digest):
+            raise RuntimeError(f"remote artifact sha256 must be 64 hex chars: {url}")
+        artifacts.append({"url": url, "sha256": digest.lower()})
+    return artifacts
+
+
+def _forbidden_url_substrings(policy: dict[str, Any] | None = None) -> tuple[str, ...]:
+    payload = policy if policy is not None else load_remote_artifacts_policy()
+    raw = payload.get("forbidden_url_substrings", [])
+    if not isinstance(raw, list) or not all(isinstance(item, str) for item in raw):
+        raise RuntimeError(
+            "github_actions_remote_artifacts.forbidden_url_substrings must be a list of strings"
+        )
+    return tuple(raw)
+
+
+def remote_download_violations_in_text(
+    text: str,
+    *,
+    rel_path: str,
+    policy: dict[str, Any] | None = None,
+) -> list[str]:
+    """Return integrity violations for remote executable downloads in a workflow."""
+    payload = policy if policy is not None else load_remote_artifacts_policy()
+    violations: list[str] = []
+    lowered = text.lower()
+    for needle in _forbidden_url_substrings(payload):
+        if needle.lower() in lowered:
+            violations.append(
+                f"{rel_path}: forbidden mutable installer URL substring {needle!r}"
+            )
+    if PIPE_TO_SHELL_PATTERN.search(text):
+        violations.append(
+            f"{rel_path}: pipe-to-shell remote download is forbidden; pin and checksum the artifact"
+        )
+    allowed = _allowed_remote_artifacts(payload)
+    allowed_urls = {item["url"] for item in allowed}
+    for match in REMOTE_SCRIPT_URL_PATTERN.finditer(text):
+        url = match.group(0)
+        if url not in allowed_urls:
+            violations.append(
+                f"{rel_path}: unpinned remote script download {url}; add integrity metadata"
+            )
+    for artifact in allowed:
+        if artifact["url"] not in text:
+            continue
+        if artifact["sha256"] not in lowered:
+            violations.append(
+                f"{rel_path}: remote artifact {artifact['url']} is missing pinned sha256 "
+                f"{artifact['sha256']}"
+            )
+    return violations
+
+
+def _collect_remote_download_violations() -> list[str]:
+    policy = load_remote_artifacts_policy()
+    violations: list[str] = []
+    for file_path in iter_yaml_files():
+        rel_path = file_path.relative_to(ROOT).as_posix()
+        text = file_path.read_text(encoding="utf-8")
+        violations.extend(
+            remote_download_violations_in_text(text, rel_path=rel_path, policy=policy)
+        )
+    return violations
+
+
 def _report_violations(violations: list[str]) -> int:
     if not violations:
         print("GitHub Actions runtime policy check passed.")
@@ -134,7 +237,9 @@ def _report_violations(violations: list[str]) -> int:
 
 
 def main() -> int:
-    return _report_violations(_collect_uses_violations())
+    return _report_violations(
+        [*_collect_uses_violations(), *_collect_remote_download_violations()]
+    )
 
 
 if __name__ == "__main__":

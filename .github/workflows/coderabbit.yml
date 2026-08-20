@@ -30,28 +30,26 @@ jobs:
           persist-credentials: false
 
       - name: Install CodeRabbit CLI
+        env:
+          # Pins: configs/quality/github_actions_remote_artifacts.yaml (#9156).
+          CODERABBIT_CLI_VERSION: "0.7.5"
+          CODERABBIT_CLI_SHA256: "0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1"
         run: |
           set -euo pipefail
-          # Download installer to a local path, verify content markers, then execute.
-          # Avoids curl|sh and keeps an inspectable artifact for audit (Sonar S8482).
-          install_script="${RUNNER_TEMP}/coderabbit-install.sh"
-          curl -fsSL --proto '=https' --tlsv1.2 \
-            "https://cli.coderabbit.ai/install.sh" \
-            -o "${install_script}"
-          # Fail closed on unexpected installer payload.
-          if ! grep -Eq 'coderabbit|CodeRabbit' "${install_script}"; then
-            echo "::error::Unexpected CodeRabbit install script content"
-            exit 1
-          fi
-          if sed '/^[[:space:]]*#/d' "${install_script}" \
-            | grep -Eqi 'curl .*\|\s*(ba)?sh|wget .*\|\s*(ba)?sh'; then
-            echo "::error::Install script nests a remote pipe-to-shell; refusing"
-            exit 1
-          fi
-          # Execute only after local persistence + content checks.
-          bash "${install_script}"
-          command -v coderabbit >/dev/null
-          rm -f "${install_script}"
+          archive="${RUNNER_TEMP}/coderabbit-linux-x64.zip"
+          url="https://cli.coderabbit.ai/releases/${CODERABBIT_CLI_VERSION}/coderabbit-linux-x64.zip"
+          curl -fsSL --proto '=https' --tlsv1.2 "$url" -o "${archive}"
+          echo "${CODERABBIT_CLI_SHA256}  ${archive}" | sha256sum -c -
+          extract_dir="${RUNNER_TEMP}/coderabbit-cli"
+          mkdir -p "${extract_dir}"
+          unzip -q "${archive}" -d "${extract_dir}"
+          install_dir="${HOME}/.local/bin"
+          mkdir -p "${install_dir}"
+          install -m 0755 "${extract_dir}/coderabbit" "${install_dir}/coderabbit"
+          echo "${install_dir}" >> "${GITHUB_PATH}"
+          PATH="${install_dir}:${PATH}" command -v coderabbit >/dev/null
+          PATH="${install_dir}:${PATH}" coderabbit --version
+          rm -f "${archive}"
 
       - name: Run CodeRabbit CLI review
         env:
