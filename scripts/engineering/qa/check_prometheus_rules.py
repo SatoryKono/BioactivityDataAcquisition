@@ -343,6 +343,54 @@ def list_shipped_rule_files(rules_dir: Path) -> list[Path]:
     )
 
 
+def _load_rule_payload(rules_file: Path) -> tuple[dict[object, object] | None, str]:
+    import yaml
+
+    try:
+        payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        return None, f"{rules_file.as_posix()}: YAML parse failed: {exc}"
+    if not isinstance(payload, dict):
+        return None, f"{rules_file.as_posix()}: root must be a mapping"
+    return payload, ""
+
+
+def _recording_identities(
+    *, rules_file: Path, payload: dict[object, object]
+) -> list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]]:
+    identities: list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]] = []
+    for group in payload.get("groups") or []:
+        if not isinstance(group, dict):
+            continue
+        group_name = str(group.get("name") or "?")
+        for index, rule in enumerate(group.get("rules") or []):
+            if not isinstance(rule, dict) or "record" not in rule:
+                continue
+            labels_raw = rule.get("labels") or {}
+            if not isinstance(labels_raw, dict):
+                labels_raw = {}
+            label_key = tuple(sorted((str(k), str(v)) for k, v in labels_raw.items()))
+            location = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
+            identities.append(((str(rule["record"]), label_key), location))
+    return identities
+
+
+def _duplicate_recording_identity_violations(
+    seen: dict[tuple[str, tuple[tuple[str, str], ...]], list[str]],
+) -> list[str]:
+    violations: list[str] = []
+    for (record, label_key), locations in sorted(seen.items()):
+        if len(locations) < 2:
+            continue
+        labels_fmt = ",".join(f"{key}={value}" for key, value in label_key)
+        labels_fmt = labels_fmt or "(no static labels)"
+        violations.append(
+            f"duplicate recording identity record={record!r} labels={{{labels_fmt}}} "
+            f"at: {'; '.join(locations)}"
+        )
+    return violations
+
+
 def validate_recording_rule_identity_uniqueness(
     rules_files: Sequence[Path],
 ) -> list[str]:
