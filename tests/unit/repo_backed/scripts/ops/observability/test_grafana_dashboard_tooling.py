@@ -218,10 +218,11 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
     assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
     assert "height: MAX_CAPTURE_VIEWPORT_HEIGHT" in script
     assert "dashboard.captureHeight = Math.round(desiredLayoutHeight * scale)" in script
-    assert "screenshotOptions.clip" in script
+    assert "function screenshotOptions" in script
+    assert "options.clip" in script
     assert script.index(
         "const viewportChanged = await prepareDashboardForCapture("
-    ) < script.index("await page.screenshot(screenshotOptions)")
+    ) < script.index("await page.screenshot(screenshotOptions")
 
 
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
@@ -746,8 +747,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "materializeLazyPanels" in script
     assert "settleDashboardAfterViewportChange" in script
     assert script.index("await settleDashboardAfterViewportChange") < script.index(
-        "dashboard.terminalStateValidation = await validateDashboardTerminalStates"
+        "await collectVerifiedTerminalState"
     )
+    assert "dashboard.terminalStateValidation = CONFIG.navigationOnly" in script
+    assert "await validateDashboardTerminalStates(page, dashboard, index, total)" in script
     assert "window.scrollTo" in script
     assert "chromium.launch" in script
     assert "headless: true" in script
