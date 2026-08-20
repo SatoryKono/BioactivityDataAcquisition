@@ -404,41 +404,46 @@ def validate_recording_rule_identity_uniqueness(
 
     Same metric name with **different** static labels (e.g. reason=…) is OK.
     """
-    import yaml
-
     seen: dict[tuple[str, tuple[tuple[str, str], ...]], list[str]] = {}
     for rules_file in rules_files:
-        try:
-            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError) as exc:
-            return [f"{rules_file.as_posix()}: YAML parse failed: {exc}"]
-        if not isinstance(payload, dict):
+        payload, error = _load_rule_payload(rules_file)
+        if error and "YAML parse failed" in error:
+            return [error]
+        if payload is None:
             continue
-        for group in payload.get("groups") or []:
-            if not isinstance(group, dict):
-                continue
-            group_name = str(group.get("name") or "?")
-            for index, rule in enumerate(group.get("rules") or []):
-                if not isinstance(rule, dict) or "record" not in rule:
-                    continue
-                record = str(rule["record"])
-                labels_raw = rule.get("labels") or {}
-                if not isinstance(labels_raw, dict):
-                    labels_raw = {}
-                label_key = tuple(
-                    sorted((str(k), str(v)) for k, v in labels_raw.items())
-                )
-                loc = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
-                seen.setdefault((record, label_key), []).append(loc)
+        for identity, location in _recording_identities(
+            rules_file=rules_file, payload=payload
+        ):
+            seen.setdefault(identity, []).append(location)
+    return _duplicate_recording_identity_violations(seen)
+
+
+def _rule_kind(rule: dict[object, object], index: int) -> str:
+    if "alert" in rule:
+        return f"alert={rule['alert']}"
+    if "record" in rule:
+        return f"record={rule['record']}"
+    return f"rule[{index}]"
+
+
+def _group_expr_violations(*, rules_file: Path, group: object) -> list[str]:
+    if not isinstance(group, dict):
+        return []
     violations: list[str] = []
-    for (record, label_key), locs in sorted(seen.items()):
-        if len(locs) < 2:
+    group_name = str(group.get("name") or "?")
+    for index, rule in enumerate(group.get("rules") or []):
+        if not isinstance(rule, dict):
+            violations.append(
+                f"{rules_file.as_posix()} group={group_name} "
+                f"rule[{index}]: not a mapping"
+            )
             continue
-        labels_fmt = ",".join(f"{k}={v}" for k, v in label_key) or "(no static labels)"
-        violations.append(
-            f"duplicate recording identity record={record!r} labels={{{labels_fmt}}} "
-            f"at: {'; '.join(locs)}"
-        )
+        expr = rule.get("expr")
+        if not isinstance(expr, str) or not expr.strip():
+            violations.append(
+                f"{rules_file.as_posix()} group={group_name} "
+                f"{_rule_kind(rule, index)}: missing or empty expr"
+            )
     return violations
 
 
@@ -447,41 +452,15 @@ def validate_rule_expr_presence(rules_files: Sequence[Path]) -> list[str]:
 
     Does not parse PromQL; catches missing/empty expr before promtool.
     """
-    import yaml
-
     violations: list[str] = []
     for rules_file in rules_files:
-        try:
-            payload = yaml.safe_load(rules_file.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError) as exc:
-            violations.append(f"{rules_file.as_posix()}: YAML parse failed: {exc}")
+        payload, error = _load_rule_payload(rules_file)
+        if error:
+            violations.append(error)
             continue
-        if not isinstance(payload, dict):
-            violations.append(f"{rules_file.as_posix()}: root must be a mapping")
-            continue
+        assert payload is not None
         for group in payload.get("groups") or []:
-            if not isinstance(group, dict):
-                continue
-            group_name = str(group.get("name") or "?")
-            for index, rule in enumerate(group.get("rules") or []):
-                if not isinstance(rule, dict):
-                    violations.append(
-                        f"{rules_file.as_posix()} group={group_name} "
-                        f"rule[{index}]: not a mapping"
-                    )
-                    continue
-                if "alert" in rule:
-                    kind = f"alert={rule['alert']}"
-                elif "record" in rule:
-                    kind = f"record={rule['record']}"
-                else:
-                    kind = f"rule[{index}]"
-                expr = rule.get("expr")
-                if not isinstance(expr, str) or not expr.strip():
-                    violations.append(
-                        f"{rules_file.as_posix()} group={group_name} "
-                        f"{kind}: missing or empty expr"
-                    )
+            violations.extend(_group_expr_violations(rules_file=rules_file, group=group))
     return violations
 
 
