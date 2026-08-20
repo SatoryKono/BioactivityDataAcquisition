@@ -8,16 +8,19 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Fail-closed pytest coverage for incomplete DASH-* rules (#9204)."""
+"""Fail-closed pytest coverage for incomplete DASH-* rules (#9204 / #9238)."""
 
 from __future__ import annotations
 
 import copy
+import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.integration._dashboard_requirement_coverage import (
+    assert_data_panels_name_empty_state,
     assert_first_screen_decision_contract,
     assert_forensic_rows_collapsed_and_below_fold,
     assert_grafana_optional_on_default_runtime,
@@ -32,6 +35,7 @@ from tests.integration._dashboard_requirement_coverage import (
     assert_unique_primary_cta,
     assert_verdict_mappings_and_palette_text,
     coverage_allowlist,
+    data_panel_empty_state_violations,
     first_screen_decision_violations,
     forensic_first_window_violations,
     http_empty_state_violations,
@@ -259,3 +263,65 @@ def test_dash_data_001_fails_closed_on_parser_simple_rows_table() -> None:
             "bioetl-control-plane-v1.json", dashboard
         )
         assert not violations, "\n".join(violations)
+
+
+_COVERAGE_PATH = Path("docs/03-guides/dashboards/contracts/requirement-test-coverage.yaml")
+_REQUIREMENTS_PATH = Path("docs/01-requirements/DASHBOARD_REQUIREMENTS.md")
+_DASH_ID_RE = re.compile(r"`(DASH-[A-Z]+-[0-9]{3})`")
+_HEURISTIC_KEYS = ("owner", "remainder", "retire_when")
+
+
+def test_requirement_coverage_matrix_lists_every_dash_id_and_nodeids() -> None:
+    """#9238: yaml is a named nodeid lock, not a whole-module citation."""
+    req_ids = set(_DASH_ID_RE.findall(_REQUIREMENTS_PATH.read_text(encoding="utf-8")))
+    payload = yaml.safe_load(_COVERAGE_PATH.read_text(encoding="utf-8"))
+    assert payload.get("canonical_module") == (
+        "tests/integration/test_dashboard_requirement_coverage.py"
+    )
+    rows = payload["requirements"]
+    covered = {str(row["id"]) for row in rows}
+    missing = sorted(req_ids - covered)
+    extra_ids = sorted(covered - req_ids)
+    assert not missing, f"coverage matrix missing {missing}"
+    assert not extra_ids, f"coverage matrix extra {extra_ids}"
+    for row in rows:
+        gate = str(row.get("gate") or "")
+        tests = row.get("tests") or []
+        prompt = row.get("prompt")
+        if "manual" in gate:
+            assert isinstance(prompt, str) and prompt.startswith("prompt.")
+        else:
+            assert tests, f"{row['id']} needs tests"
+        for nodeid in tests:
+            assert "::" in str(nodeid), f"{row['id']} must cite path::test_name, got {nodeid}"
+            path_str, name = str(nodeid).split("::", 1)
+            source = Path(path_str).read_text(encoding="utf-8")
+            assert f"def {name}(" in source, f"missing {nodeid}"
+        heuristic = row.get("heuristic")
+        if heuristic:
+            missing_keys = [key for key in _HEURISTIC_KEYS if not str(heuristic.get(key) or "").strip()]
+            assert not missing_keys, f"{row['id']} heuristic missing {missing_keys}"
+
+
+def test_dash_copy_001_data_panels_name_empty_state() -> None:
+    """#9237: data-bearing panels name empty / UNKNOWN / SELECT RUN."""
+    assert_data_panels_name_empty_state()
+
+
+def test_dash_copy_001_fails_closed_without_empty_state_copy() -> None:
+    dashboard = copy.deepcopy(load_dashboard(_RUNTIME))
+    panel = _panel_by_id(dashboard, 9401)
+    panel["description"] = "Pipeline status."
+    defaults = panel.setdefault("fieldConfig", {}).setdefault("defaults", {})
+    defaults["noValue"] = ""
+    violations = data_panel_empty_state_violations("bioetl-runtime.json", dashboard)
+    assert violations, "mutated runtime 9401 must fail DASH-COPY-001 empty-state copy"
+
+
+def test_requirement_coverage_module_is_wired_as_required_dashboard_check() -> None:
+    tests_workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    pre_commit = Path(".pre-commit-config.yaml").read_text(encoding="utf-8")
+    assert "tests/integration/test_dashboard_requirement_coverage.py" in tests_workflow
+    assert "check-dashboard-requirement-coverage" in pre_commit
+    assert "test_dashboard_requirement_gaps.py" not in tests_workflow
+    assert "test_dashboard_requirement_gaps.py" not in pre_commit

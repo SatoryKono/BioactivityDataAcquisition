@@ -385,14 +385,14 @@ repos:
         pass_filenames: false
         files: ^(grafana/dashboards/.*\.json|configs/quality/dashboard_query_duplicate_allowlist\.yaml|docs/03-guides/dashboards/contracts/dashboard-inventory\.yaml|docs/03-guides/dashboards/contracts/performance-budgets\.yaml|tests/integration/test_dashboard_qa_check_gates\.py|scripts/engineering/qa/report_dashboard_query_duplicates\.py|scripts/engineering/qa/check_dashboard_performance_budgets\.py|scripts/engineering/qa/report_dashboard_inventory\.py|scripts/engineering/qa/report_dashboard_promql_scope\.py)$
 
-      - id: check-dashboard-requirement-gaps
-        name: Check DASH-* requirement gap pytest gates
+      - id: check-dashboard-requirement-coverage
+        name: Check DASH-* requirement coverage pytest gates
         entry: >
           python scripts/engineering/dev/run_project_python.py -m pytest
-          tests/integration/test_dashboard_requirement_gaps.py -q --tb=short
+          tests/integration/test_dashboard_requirement_coverage.py -q --tb=short
         language: python
         pass_filenames: false
-        files: ^(grafana/dashboards/.*\.json|docker-compose\.yml|docker-compose\.monitoring\.yml|docs/01-requirements/DASHBOARD_REQUIREMENTS.md|docs/03-guides/dashboards/contracts/.*|tests/integration/test_dashboard_requirement_gaps.py)$
+        files: ^(grafana/dashboards/.*\.json|docker-compose\.yml|docker-compose\.monitoring\.yml|docs/01-requirements/DASHBOARD_REQUIREMENTS.md|docs/03-guides/dashboards/contracts/.*|tests/integration/test_dashboard_requirement_coverage.py|tests/integration/_dashboard_requirement_coverage.py)$
         stages: [pre-push]
 
       - id: ruff-scripts-advisory
