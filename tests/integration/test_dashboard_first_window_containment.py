@@ -143,14 +143,14 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     assert organize.get("excludeByName") == {
         "reasons": True,
         "reasons_truncated": True,
+        "scope_kind": True,
+        "evidence_freshness": True,
     }
     assert organize.get("indexByName") == {
         "processing_status": 0,
         "trust_status": 1,
-        "scope_kind": 2,
-        "evidence_freshness": 3,
-        "reasons_text": 4,
-        "evidence_observed_at": 5,
+        "reasons_text": 2,
+        "evidence_observed_at": 3,
     }
 
     override_properties = {
@@ -164,7 +164,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
         "wrapText": True,
     }
     assert override_properties["reasons_text"]["custom.inspect"] is True
-    assert override_properties["reasons_text"]["custom.width"] >= 280
+    assert override_properties["reasons_text"]["custom.width"] == 150
     assert override_properties["evidence_observed_at"]["custom.hidden"] is True
     assert override_properties["evidence_observed_at"]["unit"] == (
         "time:YYYY-MM-DD HH:mm"
@@ -177,19 +177,19 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     enum_fields = (
         "processing_status",
         "trust_status",
-        "scope_kind",
-        "evidence_freshness",
     )
     assert all(
         override_properties[field]["custom.cellOptions"].get("wrapText") is False
         for field in enum_fields
     )
+    assert override_properties["scope_kind"]["custom.hidden"] is True
+    assert override_properties["evidence_freshness"]["custom.hidden"] is True
     assert (
         sum(
             int(override_properties[field]["custom.width"])
             for field in (*enum_fields, "reasons_text")
         )
-        == 655
+        == 294
     )
 
 
@@ -239,14 +239,49 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
     visible = ("check", "status", "reason")
-    assert all(
-        override_properties[field]["custom.cellOptions"].get("wrapText") is False
-        for field in visible
-    )
+    assert override_properties["check"]["custom.cellOptions"].get("wrapText") is False
+    assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
+    assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["reason"]["custom.inspect"] is True
-    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 520
+    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 300
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True
+
+
+
+def test_first_window_forced_widths_fit_200pct_css_budget() -> None:
+    """#8986: custom.width sums must fit DASH-REFLOW-001 200% half-viewport CSS."""
+    layout_width = 1366 // 2
+    chrome_px = 40
+    over: list[str] = []
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for panel in select_first_window_panels(_root_panels(dashboard)):
+            if panel.get("type") != "table":
+                continue
+            grid_w = int((panel.get("gridPos") or {}).get("w") or 0)
+            budget = layout_width * grid_w // 24 - chrome_px
+            hidden: set[str] = set()
+            widths: dict[str, int] = {}
+            for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+                field = str((override.get("matcher") or {}).get("options"))
+                props = {
+                    item.get("id"): item.get("value")
+                    for item in override.get("properties") or []
+                }
+                if props.get("custom.hidden") is True:
+                    hidden.add(field)
+                if "custom.width" in props:
+                    widths[field] = int(props["custom.width"])
+            visible_sum = sum(
+                width for field, width in widths.items() if field not in hidden
+            )
+            if visible_sum > budget:
+                over.append(
+                    f"{dashboard_path.name}:{panel.get('id')} "
+                    f"w={grid_w} sum={visible_sum} budget={budget}"
+                )
+    assert not over, "first-window 200% width overflow:\n" + "\n".join(over)
 
 
 def test_row_cap_contracts_are_unique_and_owned() -> None:
