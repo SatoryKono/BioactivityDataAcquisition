@@ -48,7 +48,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.tech-debt-cycle` | `library/audit/tech-debt-cycle.md` | Cyclic technical-debt audit — register, trend, paydown, residual re-check |
 | `prompt.audit.cyclic-pack` | `library/audit/cyclic-pack.md` | Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program |
 | `prompt.audit.project.pack` | `library/audit/project/pack.md` | Full project-audit paste pack — tech-debt, tests, docs, diagrams, and the 10-domain cycle |
-| `prompt.audit.sequential-run` | `library/audit/sequential-run.md` | Sequential library/audit run — 10 cycle cards, per-card issue/fix/close gates |
+| `prompt.audit.sequential-run` | `library/audit/sequential-run.md` | Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close gates |
 | `prompt.audit.repo-tree` | `library/audit/repo-tree.md` | Repository tree and root hygiene audit against allowlist |
 | `prompt.audit.repo-tree-cycle` | `library/audit/repo-tree-cycle.md` | Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify |
 | `prompt.audit.github-actions` | `library/audit/github-actions.md` | GitHub Actions supply-chain and correctness audit |
@@ -77,7 +77,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.evidence-contract` | `fragments/evidence-contract.md` | Minimum evidence format for findings and closeout |
 | `prompt.fragment.language-ru` | `fragments/language-ru.md` | Default operator response language |
 | `prompt.fragment.audit-scale` | `fragments/audit-scale.md` | Unified surface quality score 0-3 and priority P0-P3 |
-| `prompt.fragment.finding-schema` | `fragments/finding-schema.md` | Machine-oriented finding fields for domain audits |
+| `prompt.fragment.finding-schema` | `fragments/finding-schema.md` | Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*) |
 | `prompt.fragment.unknown-params` | `fragments/unknown-params.md` | Do not invent repo parameters; prefer known BioETL SSOT |
 | `prompt.fragment.reports-output` | `fragments/reports-output.md` | Audit artifacts must land under reports/, not repo root |
 | `prompt.fragment.shell-portability` | `fragments/shell-portability.md` | Portable shell notes for BioETL Windows-first operators |
@@ -88,6 +88,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.bi-check-schema` | `fragments/bi-check-schema.md` | BI dashboard check result schema and priority mapping |
 | `prompt.fragment.grafana-audit-contract` | `fragments/grafana-audit-contract.md` | Shared evidence, severity, and release-gate contract for Grafana audits |
 | `prompt.fragment.dashboard-requirements-audit` | `fragments/dashboard-requirements-audit.md` | Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates, ontology |
+| `prompt.fragment.project-requirements-audit` | `fragments/project-requirements-audit.md` | Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue titles |
 | `prompt.fragment.generic-nine-contract` | `fragments/generic-nine-contract.md` | Shared contract for the nine-domain generic audit kit |
 
 ## All registry entries
@@ -113,6 +114,7 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.fragment.grafana-six-contract` | fragment | deprecated | `fragments/grafana-six-contract.md` |
 | `prompt.fragment.grafana-audit-contract` | fragment | active | `fragments/grafana-audit-contract.md` |
 | `prompt.fragment.dashboard-requirements-audit` | fragment | active | `fragments/dashboard-requirements-audit.md` |
+| `prompt.fragment.project-requirements-audit` | fragment | active | `fragments/project-requirements-audit.md` |
 | `prompt.fragment.generic-nine-contract` | fragment | active | `fragments/generic-nine-contract.md` |
 | `prompt.session.grok-bootstrap` | operator-paste | active | `library/session/grok-bootstrap.md` |
 | `prompt.closeout.grok` | operator-paste | active | `library/closeout/grok-closeout.md` |
