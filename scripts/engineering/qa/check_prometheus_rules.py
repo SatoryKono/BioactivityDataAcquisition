@@ -360,18 +360,26 @@ def _recording_identities(
 ) -> list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]]:
     identities: list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]] = []
     for group in payload.get("groups") or []:
-        if not isinstance(group, dict):
+        identities.extend(_group_recording_identities(rules_file, group))
+    return identities
+
+
+def _group_recording_identities(
+    rules_file: Path, group: object
+) -> list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]]:
+    if not isinstance(group, dict):
+        return []
+    identities: list[tuple[tuple[str, tuple[tuple[str, str], ...]], str]] = []
+    group_name = str(group.get("name") or "?")
+    for index, rule in enumerate(group.get("rules") or []):
+        if not isinstance(rule, dict) or "record" not in rule:
             continue
-        group_name = str(group.get("name") or "?")
-        for index, rule in enumerate(group.get("rules") or []):
-            if not isinstance(rule, dict) or "record" not in rule:
-                continue
-            labels_raw = rule.get("labels") or {}
-            if not isinstance(labels_raw, dict):
-                labels_raw = {}
-            label_key = tuple(sorted((str(k), str(v)) for k, v in labels_raw.items()))
-            location = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
-            identities.append(((str(rule["record"]), label_key), location))
+        labels_raw = rule.get("labels") or {}
+        if not isinstance(labels_raw, dict):
+            labels_raw = {}
+        label_key = tuple(sorted((str(k), str(v)) for k, v in labels_raw.items()))
+        location = f"{rules_file.as_posix()} group={group_name} rule[{index}]"
+        identities.append(((str(rule["record"]), label_key), location))
     return identities
 
 

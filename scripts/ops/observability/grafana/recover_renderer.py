@@ -340,7 +340,7 @@ def _as_check_only_report(report: RecoverReport) -> RecoverReport:
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", default=DEFAULT_PROJECT)
     parser.add_argument("--compose-file", type=Path, default=DEFAULT_COMPOSE)
@@ -351,38 +351,46 @@ def main(argv: list[str] | None = None) -> int:
         help="Do not recreate; only report renderer health",
     )
     parser.add_argument("--json", action="store_true")
-    args = parser.parse_args(argv)
+    return parser
 
+
+def _report_for_args(args: argparse.Namespace) -> RecoverReport:
     if args.check_only:
         report = check_renderer_health(
             project=args.project, compose_file=args.compose_file
         )
         # check-only with wait 0.1 may not see healthy if just starting;
         # re-evaluate from after snapshots.
-        report = _as_check_only_report(report)
-    else:
-        report = recover_renderer(
-            project=args.project,
-            compose_file=args.compose_file,
-            wait_seconds=args.wait,
-        )
+        return _as_check_only_report(report)
+    return recover_renderer(
+        project=args.project,
+        compose_file=args.compose_file,
+        wait_seconds=args.wait,
+    )
 
-    payload = asdict(report)
+
+def _print_human_report(report: RecoverReport) -> None:
+    print(f"=== {report.action} (project={report.project}) ===")
+    for message in report.messages:
+        print(f"  {message}")
+    if report.before:
+        print("  before:", report.before)
+    if report.after:
+        print("  after:", report.after)
+    if report.remediation:
+        print("  remediation:")
+        for step in report.remediation:
+            print(f"    - {step}")
+    print("OK" if report.ok else "FAIL (Grafana UI should still work)")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _build_parser().parse_args(argv)
+    report = _report_for_args(args)
     if args.json:
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        print(json.dumps(asdict(report), indent=2, sort_keys=True))
     else:
-        print(f"=== {report.action} (project={report.project}) ===")
-        for msg in report.messages:
-            print(f"  {msg}")
-        if report.before:
-            print("  before:", report.before)
-        if report.after:
-            print("  after:", report.after)
-        if report.remediation:
-            print("  remediation:")
-            for step in report.remediation:
-                print(f"    - {step}")
-        print("OK" if report.ok else "FAIL (Grafana UI should still work)")
+        _print_human_report(report)
     return 0 if report.ok else 1
 
 

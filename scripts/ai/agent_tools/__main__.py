@@ -42,7 +42,7 @@ SECRET_NAME_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:AUTH|CREDENTIAL|KEY|PASSWORD|SECRET|TOKEN)", re.IGNORECASE
 )
 SECRET_TEXT_PATTERNS: Final[tuple[re.Pattern[str], ...]] = (
-    re.compile(r"(?i)bearer\s+[A-Za-z0-9._~+/=-]+"),
+    re.compile(r"(?i)bearer\s+[A-Z0-9._~+/=-]+"),
     re.compile(
         r"(?i)(api[_-]?key|authorization|credential|password|secret|token)"
         r"\s*[:=]\s*([^\s,;]+)"

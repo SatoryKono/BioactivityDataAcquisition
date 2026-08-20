@@ -28,10 +28,24 @@ _PUBLISHED_HEADER_RE = re.compile(
     r"\A_{20,}\r?\n.*?\r?\n_{20,}\r?\n+",
     re.DOTALL,
 )
-_FRONTMATTER_RE = re.compile(r"\A---\n(?P<payload>.*?)\n---\n*", re.DOTALL)
 _METADATA_RE = re.compile(
     r"^%%\s+@(?P<key>version|date|type|level|nodes|adr)\s+(?P<value>.+)$"
 )
+
+
+def _split_frontmatter(body: str) -> tuple[str, str] | None:
+    """Split leading YAML frontmatter without a backtracking regex."""
+    opening = "---\n"
+    closing = "\n---\n"
+    if not body.startswith(opening):
+        return None
+    closing_index = body.find(closing, len(opening))
+    if closing_index < 0:
+        return None
+    remainder = body[closing_index + len(closing) :].lstrip("\n")
+    return body[len(opening) : closing_index], remainder
+
+
 _NODE_RE = re.compile(
     r"(?<![\w])([A-Za-z_][A-Za-z0-9_]*+)[ \t]*+"
     r"(?=[\[({>/])"
@@ -153,15 +167,16 @@ def convert_legacy_content(content: str) -> str | None:
     if body.startswith("%% Title:"):
         return None
 
-    match = _FRONTMATTER_RE.match(body)
-    if match is None:
+    frontmatter = _split_frontmatter(body)
+    if frontmatter is None:
         return None
-    loaded = yaml.safe_load(match.group("payload")) or {}
+    frontmatter_payload, content_body = frontmatter
+    loaded = yaml.safe_load(frontmatter_payload) or {}
     if not isinstance(loaded, Mapping):
         raise ValueError("provider diagram YAML frontmatter must be a mapping")
     payload = {str(key): value for key, value in loaded.items()}
 
-    existing, diagram_body = _split_existing_metadata(body[match.end() :])
+    existing, diagram_body = _split_existing_metadata(content_body)
     title = _single_line(payload.get("title"))
     description = _single_line(payload.get("description"))
     if not title or not description:
