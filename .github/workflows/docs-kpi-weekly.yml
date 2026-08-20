@@ -25,6 +25,9 @@ jobs:
         with:
           uv-extras: "docs"
 
+      - name: Check docs runtime-mirror and freshness drift
+        run: uv run --frozen --no-build python -m scripts.docs check-drift --runtime-mirrors --freshness
+
       - name: Generate docs KPI report
         run: |
           uv run --frozen --no-build python -m scripts.docs check-kpi \
