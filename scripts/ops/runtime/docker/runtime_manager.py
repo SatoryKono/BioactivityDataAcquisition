@@ -1487,6 +1487,97 @@ def _evaluate_up_attempt(
     return None, findings, recovered, False
 
 
+def _reseed_neo4j_if_needed(
+    *,
+    spec: StackSpec,
+    attempts: int,
+    remaining: float,
+    history: list[dict[str, Any]],
+    timing: _RecoveryTimingContext,
+) -> list[dict[str, Any]] | None:
+    """Reseed Neo4j auth when recovering that stack. Findings on reseed failure."""
+    if spec.name != "neo4j":
+        return None
+    reseed = _reseed_neo4j_auth_volume(
+        spec,
+        runner=timing.runner,
+        timeout=min(60.0, remaining),
+    )
+    history.append(
+        {
+            "attempt": attempts,
+            "phase": "neo4j_auth_reseed",
+            "returncode": None if reseed is None else reseed.returncode,
+            "elapsed_seconds": round(timing.clock() - timing.started, 3),
+        }
+    )
+    if reseed is None or reseed.returncode == 0:
+        return None
+    return [
+        {
+            "cause": "neo4j_auth_reseed_failed",
+            "attempt": attempts,
+            "stderr": _bounded(reseed.stderr, 500),
+            "remediation": (
+                "scripts/ops/runtime/docker/recover-neo4j.ps1 "
+                "or runtime_manager recover --stack neo4j"
+            ),
+        }
+    ]
+
+
+def _start_and_wait_required(
+    *,
+    spec: StackSpec,
+    attempts: int,
+    remaining: float,
+    history: list[dict[str, Any]],
+    timing: _RecoveryTimingContext,
+) -> tuple[CommandResult | None, list[dict[str, Any]] | None]:
+    """Start required+optional services, then wait on required ones.
+
+    Returns ``(result, timeout_findings)``. ``timeout_findings`` is set when
+    the deadline expires between start and wait.
+    """
+    # Phase 1: start required + optional (no --wait) so renderer can warm
+    # without gating Grafana. Phase 2: --wait only required services.
+    start_args = _compose_up_start_args(
+        spec,
+        attempts=attempts,
+        force_recreate=timing.force_recreate,
+    )
+    start_result = timing.runner(_compose(spec, *start_args), ROOT, remaining)
+    history.append(
+        {
+            "attempt": attempts,
+            "phase": "start",
+            "returncode": start_result.returncode,
+            "elapsed_seconds": round(timing.clock() - timing.started, 3),
+        }
+    )
+    if start_result.returncode != 0:
+        return start_result, None
+    remaining_after = timing.deadline - timing.clock()
+    if remaining_after <= 0:
+        return None, [{"cause": "readiness_timeout", "attempt": attempts}]
+    up_args = _compose_up_wait_args(
+        spec,
+        attempts=attempts,
+        remaining=remaining_after,
+        force_recreate=timing.force_recreate,
+    )
+    result = timing.runner(_compose(spec, *up_args), ROOT, remaining_after)
+    history.append(
+        {
+            "attempt": attempts,
+            "phase": "wait_required",
+            "returncode": result.returncode,
+            "elapsed_seconds": round(timing.clock() - timing.started, 3),
+        }
+    )
+    return result, None
+
+
 def _run_recovery_attempts(
     *,
     spec: StackSpec,
@@ -1512,71 +1603,29 @@ def _run_recovery_attempts(
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
-        if spec.name == "neo4j":
-            reseed = _reseed_neo4j_auth_volume(
-                spec,
-                runner=timing.runner,
-                timeout=min(60.0, remaining),
-            )
-            history.append(
-                {
-                    "attempt": attempts,
-                    "phase": "neo4j_auth_reseed",
-                    "returncode": None if reseed is None else reseed.returncode,
-                    "elapsed_seconds": round(timing.clock() - timing.started, 3),
-                }
-            )
-            if reseed is not None and reseed.returncode != 0:
-                findings = [
-                    {
-                        "cause": "neo4j_auth_reseed_failed",
-                        "attempt": attempts,
-                        "stderr": _bounded(reseed.stderr, 500),
-                        "remediation": (
-                            "scripts/ops/runtime/docker/recover-neo4j.ps1 "
-                            "or runtime_manager recover --stack neo4j"
-                        ),
-                    }
-                ]
-                break
-        # Phase 1: start required + optional (no --wait) so renderer can warm
-        # without gating Grafana. Phase 2: --wait only required services.
-        start_args = _compose_up_start_args(
-            spec,
+        reseed_findings = _reseed_neo4j_if_needed(
+            spec=spec,
             attempts=attempts,
-            force_recreate=timing.force_recreate,
+            remaining=remaining,
+            history=history,
+            timing=timing,
         )
-        start_result = timing.runner(_compose(spec, *start_args), ROOT, remaining)
-        history.append(
-            {
-                "attempt": attempts,
-                "phase": "start",
-                "returncode": start_result.returncode,
-                "elapsed_seconds": round(timing.clock() - timing.started, 3),
-            }
+        if reseed_findings is not None:
+            findings = reseed_findings
+            break
+        result, timeout_findings = _start_and_wait_required(
+            spec=spec,
+            attempts=attempts,
+            remaining=remaining,
+            history=history,
+            timing=timing,
         )
-        if start_result.returncode != 0:
-            result = start_result
-        else:
-            remaining = timing.deadline - timing.clock()
-            if remaining <= 0:
-                findings = [{"cause": "readiness_timeout", "attempt": attempts}]
-                break
-            up_args = _compose_up_wait_args(
-                spec,
-                attempts=attempts,
-                remaining=remaining,
-                force_recreate=timing.force_recreate,
-            )
-            result = timing.runner(_compose(spec, *up_args), ROOT, remaining)
-            history.append(
-                {
-                    "attempt": attempts,
-                    "phase": "wait_required",
-                    "returncode": result.returncode,
-                    "elapsed_seconds": round(timing.clock() - timing.started, 3),
-                }
-            )
+        if timeout_findings is not None:
+            findings = timeout_findings
+            break
+        if result is None:
+            findings = [{"cause": "readiness_timeout", "attempt": attempts}]
+            break
         maybe_snapshots, findings, recovered, succeeded = _evaluate_up_attempt(
             result=result,
             attempts=attempts,

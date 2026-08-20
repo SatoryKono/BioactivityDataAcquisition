@@ -28,9 +28,24 @@ _PUBLISHED_HEADER_RE = re.compile(
     r"\A_{20,}\r?\n.*?\r?\n_{20,}\r?\n+",
     re.DOTALL,
 )
-_METADATA_RE = re.compile(
-    r"^%%\s+@(?P<key>version|date|type|level|nodes|adr)\s+(?P<value>[^\r\n]+)$"
-)
+_METADATA_KEYS = frozenset({"version", "date", "type", "level", "nodes", "adr"})
+
+
+def _parse_metadata_comment(line: str) -> tuple[str, str] | None:
+    """Parse ``%% @key value`` without a backtracking regular expression."""
+    stripped = line.strip()
+    if not stripped.startswith("%%"):
+        return None
+    rest = stripped[2:].lstrip(" \t")
+    if not rest.startswith("@"):
+        return None
+    body = rest[1:]
+    key, separator, value = body.partition(" ")
+    if not separator:
+        key, separator, value = body.partition("\t")
+    if key not in _METADATA_KEYS or not value.strip():
+        return None
+    return key, value.strip()
 
 
 def _split_frontmatter(body: str) -> tuple[str, str] | None:
@@ -114,13 +129,14 @@ def _split_existing_metadata(text: str) -> tuple[dict[str, str], str]:
     lines = text.lstrip("\n").splitlines()
     consumed = 0
     for line in lines:
-        match = _METADATA_RE.match(line.strip())
-        if match is None:
+        parsed = _parse_metadata_comment(line)
+        if parsed is None:
             if not line.strip():
                 consumed += 1
                 continue
             break
-        metadata[match.group("key")] = match.group("value").strip()
+        key, value = parsed
+        metadata[key] = value
         consumed += 1
     return metadata, "\n".join(lines[consumed:]).lstrip("\n")
 

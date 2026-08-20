@@ -26,6 +26,7 @@ import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from typing import ClassVar
 from urllib.parse import parse_qs, urlparse
 
 DEFAULT_ROOT = Path("tests/fixtures/grafana/control_plane_validation")
@@ -36,6 +37,27 @@ ENDPOINTS = {
     "retention-compliance",
     "failure-reasons",
 }
+ALLOWED_STATES = {
+    "populated",
+    "valid_empty_or_unknown",
+    "backend_error",
+    "service_unavailable",
+    "empty_rows",
+}
+
+
+def _preload_fixtures(root: Path) -> dict[tuple[str, str], dict[str, object]]:
+    """Load allowlisted fixture JSON from constant endpoint/state names."""
+    loaded: dict[tuple[str, str], dict[str, object]] = {}
+    for endpoint in ENDPOINTS:
+        for state in ALLOWED_STATES:
+            path = root / endpoint / f"{state}.json"
+            if not path.is_file():
+                continue
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(payload, dict):
+                loaded[(endpoint, state)] = payload
+    return loaded
 
 
 def _validated_loopback_host(value: str) -> str:
@@ -55,6 +77,7 @@ def _validated_loopback_host(value: str) -> str:
 class FixtureHandler(BaseHTTPRequestHandler):
     fixture_root: Path = DEFAULT_ROOT
     default_state: str = "populated"
+    fixtures: ClassVar[dict[tuple[str, str], dict[str, object]]] = {}
 
     def log_message(self, _fmt: str, *_args: object) -> None:
         # Keep stdout free of secrets; only method + path.
@@ -74,40 +97,30 @@ class FixtureHandler(BaseHTTPRequestHandler):
             self._send(404, {"error": "unknown_endpoint"})
             return
         qs = parse_qs(parsed.query)
-        active_file = self.fixture_root / ".active_state"
         active_from_file = ""
+        active_file = self.fixture_root / ".active_state"
         if active_file.is_file():
             active_from_file = active_file.read_text(encoding="utf-8").strip()
-        allowed_states = {
-            "populated",
-            "valid_empty_or_unknown",
-            "backend_error",
-            "service_unavailable",
-            "empty_rows",
-        }
         raw_state = (
             (qs.get("fixture_state") or [None])[0]
             or os.environ.get("BIOETL_TRUST_FIXTURE_STATE")
             or active_from_file
             or self.default_state
         )
-        if raw_state not in allowed_states:
+        if raw_state not in ALLOWED_STATES:
             self._send(404, {"error": "unknown_state"})
             return
-        state = raw_state
-        from scripts.engineering.common.repo_paths import ensure_path_within_root
-
-        fixture_path = ensure_path_within_root(
-            self.fixture_root / endpoint / f"{state}.json",
-            self.fixture_root,
-        )
-        if not fixture_path.is_file():
+        fixtures = self.fixtures or _preload_fixtures(self.fixture_root)
+        if not self.fixtures:
+            FixtureHandler.fixtures = fixtures
+        payload = fixtures.get((endpoint, raw_state))
+        if payload is None:
             self._send(404, {"error": "fixture_missing"})
             return
-        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
-        http_status = 503 if state == "service_unavailable" else 200
-        if isinstance(payload.get("http_status"), int):
-            http_status = int(payload["http_status"])
+        http_status = 503 if raw_state == "service_unavailable" else 200
+        stored_status = payload.get("http_status")
+        if isinstance(stored_status, int):
+            http_status = stored_status
         self._send(http_status, payload)
 
     def _send(self, status: int, payload: dict[str, object]) -> None:
@@ -139,6 +152,7 @@ def main() -> int:
         raise SystemExit(f"fixture root missing: {args.fixture_root}")
     FixtureHandler.fixture_root = args.fixture_root
     FixtureHandler.default_state = args.default_state
+    FixtureHandler.fixtures = _preload_fixtures(args.fixture_root)
     server = ThreadingHTTPServer((args.host, args.port), FixtureHandler)
     print(
         f"serving {args.fixture_root} on http://{args.host}:{args.port} "  # NOSONAR -- loopback-only fixture contract

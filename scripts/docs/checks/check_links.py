@@ -994,11 +994,28 @@ WORKFLOW_COUNT_CLAIM_RE = re.compile(
 INVENTORY_COUNT_CLAIM_RE = re.compile(
     r"\*\*(\d+)\*\* live GitHub Actions"
 )
-INVENTORY_TRIGGER_ROW_RE = re.compile(
-    r"^\|\s*`(?P<file>[A-Za-z0-9._-]+\.yml)`\s*\|\s*`[^`]+`\s*\|\s*(?P<triggers>[^|]+)\|",
-    re.MULTILINE,
-)
+WORKFLOW_FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]+\.yml$")
 TRIGGER_TOKEN_RE = re.compile(r"`([a-z_]+)`")
+
+
+def _inventory_trigger_rows(inventory_text: str) -> dict[str, set[str]]:
+    """Parse workflow inventory table rows without a backtracking regex."""
+    documented: dict[str, set[str]] = {}
+    for raw in inventory_text.splitlines():
+        line = raw.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        file_cell = cells[0]
+        if not (file_cell.startswith("`") and file_cell.endswith("`")):
+            continue
+        filename = file_cell[1:-1]
+        if WORKFLOW_FILENAME_RE.fullmatch(filename) is None:
+            continue
+        documented[filename] = set(TRIGGER_TOKEN_RE.findall(cells[2]))
+    return documented
 
 
 def check_github_actions_workflow_inventory() -> tuple[list[str], list[str]]:
@@ -1055,11 +1072,7 @@ def check_github_actions_workflow_claim_parity() -> list[str]:
             f"{inventory_match.group(1)} workflows, live count is {live_count}"
         )
 
-    documented_triggers: dict[str, set[str]] = {}
-    for match in INVENTORY_TRIGGER_ROW_RE.finditer(inventory_text):
-        documented_triggers[match.group("file")] = set(
-            TRIGGER_TOKEN_RE.findall(match.group("triggers"))
-        )
+    documented_triggers = _inventory_trigger_rows(inventory_text)
 
     for path in live_files:
         live_triggers = _live_workflow_triggers(path)

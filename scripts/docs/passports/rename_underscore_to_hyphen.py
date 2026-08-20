@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 PASSPORT_GROUPS = ("pipelines", "workflows")
 DEFAULT_ROOT = Path(__file__).resolve().parents[3]
 PASSPORT_ROOT = Path("docs/04-reference/passports")
+_TEXT_SUFFIXES = {".md", ".py", ".yml", ".yaml", ".json", ".toml", ".txt", ".rst"}
+_SEARCH_DIRS = ("docs", ".github", "scripts", "tests", "src", "configs")
+_SEARCH_FILES = ("mkdocs.yml", "README.md", "CHANGELOG.md")
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,52 +38,35 @@ def build_plan(root: Path) -> tuple[RenamePlan, ...]:
     return tuple(plans)
 
 
+def _iter_text_files(root: Path) -> tuple[Path, ...]:
+    """Walk hardcoded repository trees. Paths are not taken from subprocess output."""
+    found: list[Path] = []
+    for dirname in _SEARCH_DIRS:
+        base = root / dirname
+        if not base.is_dir():
+            continue
+        for path in base.rglob("*"):
+            if path.is_file() and path.suffix.lower() in _TEXT_SUFFIXES:
+                found.append(path)
+    for name in _SEARCH_FILES:
+        path = root / name
+        if path.is_file():
+            found.append(path)
+    return tuple(found)
+
+
 def _files_with_references(
     root: Path,
     pairs: tuple[tuple[str, str], ...],
 ) -> tuple[Path, ...]:
     if not pairs:
         return ()
-    command = [
-        "rg",
-        "--files-with-matches",
-        "--null",
-        "--fixed-strings",
-        "--hidden",
-        "--glob",
-        "!.git/**",
-        "--glob",
-        "!docs/reports/generated/documentation-cleanup-inventory.*",
-    ]
-    for source, _ in pairs:
-        command.extend(("-e", source))
-    candidates = (
-        "docs",
-        ".github",
-        "scripts",
-        "tests",
-        "src",
-        "configs",
-        "mkdocs.yml",
-        "README.md",
-        "CHANGELOG.md",
-    )
-    command.extend(item for item in candidates if (root / item).exists())
-    result = subprocess.run(
-        command,
-        cwd=root,
-        capture_output=True,
-    )
-    if result.returncode not in {0, 1}:
-        raise subprocess.CalledProcessError(
-            result.returncode,
-            command,
-            output=result.stdout,
-            stderr=result.stderr,
-        )
-    return tuple(
-        root / item.decode("utf-8") for item in result.stdout.split(b"\0") if item
-    )
+    matches: list[Path] = []
+    for path in _iter_text_files(root):
+        text = path.read_text(encoding="utf-8")
+        if any(source in text for source, _ in pairs):
+            matches.append(path)
+    return tuple(matches)
 
 
 def _replacement_pairs(
