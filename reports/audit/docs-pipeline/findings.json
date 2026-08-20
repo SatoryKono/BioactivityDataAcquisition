@@ -1,6 +1,10 @@
 {
-  "source_run": "20260814T112947Z-audit-seq-8ab59e2395",
-  "surface_score": 0,
-  "finding_ids": ["DOCS-001", "DOCS-003"],
-  "canonical_findings": "../../audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/findings.json"
+  "source_run": "20260820T064946Z-docs-cycle-d297d3d14b",
+  "surface_score": 2,
+  "finding_ids": [
+    "DOCS-PIPE-001",
+    "DOCS-PIPE-002",
+    "DOCS-DRIFT-DOC-001"
+  ],
+  "canonical_findings": "../../audit-runs/20260820T064946Z-docs-cycle-d297d3d14b/findings.json"
 }
