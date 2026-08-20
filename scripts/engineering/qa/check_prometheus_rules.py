@@ -751,10 +751,7 @@ def _run_selected_rule_checker(
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Validate Prometheus rules and test coverage.
-
-    NOSONAR - S3776: complexity 18 exceeds 15; extraction would obscure validation orchestration logic
-    """
+    """Validate Prometheus rules and test coverage."""
     args = _build_parser().parse_args(argv)
     rules_files = _resolve_rules_files(args.rules_file)
     coverage = collect_rule_test_coverage(
@@ -766,53 +763,25 @@ def main(argv: list[str] | None = None) -> int:
         if rules_files == DEFAULT_RULES_FILES
         else []
     )
-    if args.coverage_json:
-        print(json.dumps(coverage, indent=2, sort_keys=True))
-    else:
-        print(
-            "Rule test coverage: "
-            f"alerts={coverage['tested_alerts']}/{coverage['alert_definitions']} "
-            f"(firing={coverage['firing_alerts']}, non_firing={coverage['non_firing_alerts']}), "
-            f"records={coverage['directly_tested_records']}/{coverage['record_definitions']}, "
-            "control_plane="
-            f"{len(coverage['control_plane_records']) - len(coverage['untested_control_plane_records'])}/"
-            f"{len(coverage['control_plane_records'])}"
-        )
-    if coverage_violations:
-        for violation in coverage_violations:
-            print(f"Rule coverage violation: {violation}", file=sys.stderr)
+    _print_rule_coverage(coverage, as_json=args.coverage_json)
+    if _report_violations(
+        label="Rule coverage violation", violations=coverage_violations
+    ):
         return 1
-    # Same-timestamp write conflicts (record name + static labels identity).
-    identity_files = (
-        tuple(list_shipped_rule_files(Path("grafana/prometheus-rules")))
-        if rules_files == DEFAULT_RULES_FILES
-        else rules_files
+    identity_violations, expr_violations = _structural_rule_violations(
+        rules_files=rules_files
     )
-    identity_violations = validate_recording_rule_identity_uniqueness(identity_files)
-    if identity_violations:
-        for violation in identity_violations:
-            print(f"Recording identity conflict: {violation}", file=sys.stderr)
+    if _report_violations(
+        label="Recording identity conflict", violations=identity_violations
+    ):
         return 1
-    expr_violations = validate_rule_expr_presence(identity_files)
-    if expr_violations:
-        for violation in expr_violations:
-            print(f"Rule expr violation: {violation}", file=sys.stderr)
+    if _report_violations(label="Rule expr violation", violations=expr_violations):
         return 1
     if args.expr_parity:
         parity_rc = _run_expr_parity(prometheus_url=args.prometheus_url)
         if parity_rc != 0:
             return parity_rc
-    if args.runner == "docker":
-        return _run_docker(
-            image=args.image,
-            rules_files=rules_files,
-            test_file=args.test_file,
-        )
-    return _run_local(
-        promtool=args.promtool,
-        rules_files=rules_files,
-        test_file=args.test_file,
-    )
+    return _run_selected_rule_checker(args, rules_files)
 
 
 if __name__ == "__main__":
