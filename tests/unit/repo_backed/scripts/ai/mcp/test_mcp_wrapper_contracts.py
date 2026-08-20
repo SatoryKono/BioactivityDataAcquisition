@@ -1226,7 +1226,7 @@ def test_adr_analysis_wrapper_startup_contract(
     assert result.returncode == 0, result.stderr
     captured = capture_file.read_text(encoding="utf-8").splitlines()
     assert "arg=-y" in captured
-    assert "arg=mcp-adr-analysis-server" in captured
+    assert "arg=mcp-adr-analysis-server@2.6.14" in captured
     assert "arg=--stdio" not in captured
     assert f"execution_mode={execution_mode or 'prompt-only'}" in captured
     assert "ignore_scripts=true" in captured
@@ -1370,6 +1370,6 @@ exit 0
     assert result.returncode == 0, result.stderr
     calls = capture_file.read_text(encoding="utf-8").splitlines()
     assert calls == [
-        "-y @notprolands/ast-grep-mcp --stdio --example",
-        "-y @chousyn/ast-grep-mcp --stdio --example",
+        "-y @notprolands/ast-grep-mcp@1.1.1 --stdio --example",
+        "-y @chousyn/ast-grep-mcp@0.1.1 --stdio --example",
     ]
