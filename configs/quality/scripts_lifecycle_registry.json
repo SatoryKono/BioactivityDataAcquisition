@@ -697,12 +697,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/apply_s1_c3c6_fixes.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as the bounded one-shot S1 C3-C6 remediation patcher for auditability; remove it after the corrected application-core behavior and regression coverage are durable in the canonical source tree.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/engineering/ci/_compatibility_registry.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the internal compatibility-registry loader imported by telemetry and reporting modules; keep it supporting because it has no standalone command surface.",
@@ -1186,24 +1180,6 @@
     "scripts/ops/_run_cr_arch_review_remaining.sh": {
       "decision": "shared_helper_module",
       "next_step": "Retain only as the bounded resume helper for the current CodeRabbit architecture-review campaign; remove it after the remaining-layer review is complete rather than treating it as a public active script.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/coderabbit/build_matrix.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as the documented matrix builder for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/coderabbit/normalize_findings.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as the documented normalizer for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout or consolidate it into a canonical quality command if the workflow becomes recurring.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
-    "scripts/ops/coderabbit/run_leaves.py": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Retain only as the documented sequential runner for the bounded 2026-08 CodeRabbit campaign; remove it after campaign closeout and keep its API-dependent execution outside ordinary local workflows.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
