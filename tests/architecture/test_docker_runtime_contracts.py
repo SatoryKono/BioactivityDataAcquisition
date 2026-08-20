@@ -1240,3 +1240,49 @@ def test_migration_map_and_runbook_protect_legacy_neo4j_volume() -> None:
     assert "MUST NOT use `--volumes`" in runbook
     assert "backup/restore drill" in runbook
     assert "not_applicable_no_legacy_volume" in runbook
+
+
+def _workflow_needs(job: dict[str, Any]) -> list[str]:
+    raw = job.get("needs")
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        return [raw]
+    return list(raw)
+
+
+def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
+    seen: set[str] = set()
+    stack = list(_workflow_needs(jobs[job_name]))
+    while stack:
+        current = stack.pop()
+        if current in seen or current not in jobs:
+            continue
+        seen.add(current)
+        stack.extend(_workflow_needs(jobs[current]))
+    return seen
+
+
+def test_docker_push_requires_all_validation_jobs() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    jobs = workflow["jobs"]
+    ancestors = _workflow_ancestors(jobs, "docker-push")
+
+    assert "docker-runtime-contracts" in ancestors
+    assert "docker-lint" in ancestors
+    assert "docker-compose-validate" in ancestors
+    assert "docker-build" in ancestors
+
+
+def test_docker_built_image_trivy_blocks_on_high_critical() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    built = [
+        step
+        for step in steps
+        if step.get("uses", "").startswith("aquasecurity/trivy-action@")
+        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
+    ]
+    assert len(built) == 1
+    assert str(built[0]["with"].get("exit-code")) == "1"
+    assert built[0]["with"]["severity"] == "CRITICAL,HIGH"

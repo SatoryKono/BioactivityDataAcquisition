@@ -255,3 +255,20 @@ def test_runtime_policy_requires_pinned_coderabbit_zip_digest() -> None:
 
     assert any("missing pinned sha256" in item for item in missing)
     assert pinned == []
+
+
+def test_release_publish_requires_same_sha_quality_gates() -> None:
+    release = _load_yaml(RELEASE_WORKFLOW)
+    security = _load_yaml(ROOT / ".github/workflows/security.yml")
+    jobs = release["jobs"]
+    on_field = security.get("on") or security.get(True) or {}
+
+    assert "workflow_call" in on_field
+    assert jobs["security-gate"]["uses"] == "./.github/workflows/security.yml"
+    step_runs = " ".join(str(step.get("run", "")) for step in jobs["release-tests"]["steps"])
+    assert "pytest" in step_runs
+    for publish in ("publish-testpypi", "publish-pypi"):
+        needs = jobs[publish]["needs"]
+        assert "security-gate" in needs
+        assert "release-tests" in needs
+        assert "test-install" in needs
