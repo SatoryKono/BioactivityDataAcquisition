@@ -124,7 +124,7 @@ in tracked or generated MCP configuration.
 
 ## Новые MCP сервера
 
-### deja (deja-vu v0.13.1)
+### deja (deja-vu v0.17.0)
 - **Статус:** ✅ Работает
 - **Описание:** Auto-recall настроен на root runtime contract `AGENTS.md`
 - **Настройка:** `DEJA_AUTO_RECALL_PATH` указывает на `AGENTS.md` (repo root)

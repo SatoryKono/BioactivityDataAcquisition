@@ -27,4 +27,4 @@ mcp_validate_required_token \
   "ghp_" "github_pat_" "gho_" "ghu_" "ghs_" "ghr_"
 mcp_exit_if_validate_only "github"
 
-exec npx -y @modelcontextprotocol/server-github --stdio
+exec npx -y "@modelcontextprotocol/server-github@2025.4.8" --stdio
