@@ -221,6 +221,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
+        "detail": True,
         "endpoint": True,
         "retryable": True,
         "observed_at": True,
@@ -229,7 +230,6 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         "check": 0,
         "status": 1,
         "reason": 2,
-        "detail": 3,
     }
 
     override_properties = {
@@ -238,14 +238,14 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         }
         for override in panel.get("fieldConfig", {}).get("overrides", [])
     }
-    visible = ("check", "status", "reason", "detail")
+    visible = ("check", "status", "reason")
     assert all(
         override_properties[field]["custom.cellOptions"].get("wrapText") is False
         for field in visible
     )
-    assert override_properties["detail"]["custom.inspect"] is True
-    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 655
-    for hidden in ("endpoint", "retryable", "observed_at"):
+    assert override_properties["reason"]["custom.inspect"] is True
+    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 520
+    for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True
 
 

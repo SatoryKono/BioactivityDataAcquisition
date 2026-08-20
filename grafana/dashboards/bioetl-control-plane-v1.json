@@ -473,7 +473,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 140
+                "value": 150
               },
               {
                 "id": "custom.cellOptions",
@@ -511,26 +511,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 200
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "detail"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 225
+                "value": 280
               },
               {
                 "id": "custom.cellOptions",
@@ -541,6 +522,18 @@
               },
               {
                 "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "detail"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
                 "value": true
               }
             ]
@@ -663,6 +656,7 @@
           "id": "organize",
           "options": {
             "excludeByName": {
+              "detail": true,
               "endpoint": true,
               "retryable": true,
               "observed_at": true
@@ -670,8 +664,7 @@
             "indexByName": {
               "check": 0,
               "status": 1,
-              "reason": 2,
-              "detail": 3
+              "reason": 2
             },
             "renameByName": {}
           }

@@ -748,6 +748,7 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
         if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
+        "detail": True,
         "endpoint": True,
         "retryable": True,
         "observed_at": True,
