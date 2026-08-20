@@ -15,6 +15,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
 )
 from scripts.ops.observability.grafana.serve_trust_validation_fixtures import (
     FixtureHandler,
+    _preload_fixtures,
     _validated_loopback_host,
 )
 from scripts.ops.observability.trust_validation_fixture_materialization import (
@@ -161,6 +162,7 @@ def test_fixture_server_serves_populated_and_503_states(
     del tmp_path
     FixtureHandler.fixture_root = ROOT
     FixtureHandler.default_state = "populated"
+    FixtureHandler.fixtures = _preload_fixtures(ROOT)
     handler = object.__new__(FixtureHandler)
     with mock.patch.object(FixtureHandler, "_send", autospec=True) as send:
         handler.path = (

@@ -4,13 +4,70 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.engineering.common.repo_paths import ensure_repo_path
-
 ROOT = Path(__file__).resolve().parents[2]
+_PATCH_TARGETS: dict[str, Path] = {
+    "metadata_writes": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "postrun"
+    / "_metadata_writes.py",
+    "cleanup_service": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "lifecycle"
+    / "cleanup_service.py",
+    "heartbeat": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "lifecycle"
+    / "heartbeat.py",
+    "idempotency": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "preflight"
+    / "medallion_validator_idempotency.py",
+    "preflight_import": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "preflight"
+    / "service.py",
+    "preflight_validate": ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "core"
+    / "preflight"
+    / "service.py",
+    "runner": ROOT / "src" / "bioetl" / "application" / "core" / "runner.py",
+    "metadata_writes_test": ROOT
+    / "tests"
+    / "unit"
+    / "application"
+    / "core"
+    / "test_postrun_metadata_writes.py",
+}
 
 
-def replace_once(relative: str, old: str, new: str, label: str) -> None:
-    path = ensure_repo_path(ROOT / relative, root=ROOT)
+def replace_once(relative: str | Path, old: str, new: str, label: str) -> None:
+    candidate = Path(relative)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError(f"refusing path outside {ROOT}: {candidate}")
+    path = _PATCH_TARGETS.get(label)
+    if path is None:
+        raise ValueError(f"refusing path outside {ROOT}: {candidate}")
+    expected = path.relative_to(ROOT).as_posix()
+    if candidate.as_posix().replace("\\", "/") != expected:
+        raise ValueError(f"refusing path outside {ROOT}: {candidate}")
     text = path.read_text(encoding="utf-8")
     if old not in text:
         raise SystemExit(f"{label}: target block missing in {path}")
@@ -311,10 +368,7 @@ def main() -> None:
         "runner",
     )
 
-    test_path = ensure_repo_path(
-        ROOT / "tests/unit/application/core/test_postrun_metadata_writes.py",
-        root=ROOT,
-    )
+    test_path = _PATCH_TARGETS["metadata_writes_test"]
     test_text = test_path.read_text(encoding="utf-8")
     old_test = "    storage.is_table_initialized = MagicMock(return_value=False)\n"
     new_test = (
