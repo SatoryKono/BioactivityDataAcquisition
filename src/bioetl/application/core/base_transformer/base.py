@@ -56,9 +56,7 @@ def _merge_legacy_collaborators(
                 if identity_service is None
                 else identity_service
             ),
-            pii_hasher=(
-                dependencies.pii_hasher if pii_hasher is None else pii_hasher
-            ),
+            pii_hasher=(dependencies.pii_hasher if pii_hasher is None else pii_hasher),
         )
     )
 
@@ -136,7 +134,6 @@ class BaseTransformer(
         self.entity_type = entity_type or "unknown"
         self._silver_filters = silver_filters
         self._gold_filters = gold_filters
-
 
         from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
 

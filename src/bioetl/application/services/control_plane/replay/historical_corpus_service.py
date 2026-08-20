@@ -117,7 +117,6 @@ class HistoricalReplayCorpusService:
             records=tuple(records),
         )
 
-
     def _skipped_bulk_record(
         self,
         inventory_record: HistoricalReplayCertifiabilityRecord,

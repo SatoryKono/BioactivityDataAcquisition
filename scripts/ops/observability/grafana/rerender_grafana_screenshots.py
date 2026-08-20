@@ -195,7 +195,9 @@ def _capture_id(config: RenderConfig) -> str:
     return cleaned or uuid.uuid4().hex
 
 
-def _load_json_object(path: Path, *, description: str) -> tuple[bytes, dict[str, object]]:
+def _load_json_object(
+    path: Path, *, description: str
+) -> tuple[bytes, dict[str, object]]:
     try:
         raw = path.read_bytes()
         payload = json.loads(raw.decode("utf-8"))
@@ -228,7 +230,9 @@ def _fixture_case_evidence(
     ):
         raise ValueError(f"fixture case {case!r} contract or case value is invalid")
     if fixture_payload.get("classification") != metadata.get("classification"):
-        raise ValueError(f"fixture case {case!r} classification does not match registry")
+        raise ValueError(
+            f"fixture case {case!r} classification does not match registry"
+        )
     if fixture_payload.get("http_status") != metadata.get("http_status"):
         raise ValueError(f"fixture case {case!r} HTTP status does not match registry")
     return {
