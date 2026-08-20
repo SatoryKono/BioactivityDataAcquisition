@@ -56,6 +56,19 @@ def _is_retryable_replace_error(error: OSError) -> bool:
     return bool(isinstance(errno_value, int) and errno_value in retryable_errnos)
 
 
+
+def _confined_replace_pair(temp_path: Path, target: Path) -> tuple[Path, Path]:
+    """Require temp and target to share a parent before replace()."""
+    target_resolved = target.expanduser().resolve(strict=False)
+    temp_resolved = temp_path.expanduser().resolve(strict=False)
+    if temp_resolved.parent != target_resolved.parent:
+        raise AtomicWriteError(
+            target_resolved,
+            "temp path parent does not match target parent",
+        )
+    return target_resolved, temp_resolved
+
+
 def _replace_with_retry(
     temp_path: Path,
     target: Path,
@@ -64,14 +77,7 @@ def _replace_with_retry(
     on_retry: ReplaceRetryHook | None = None,
 ) -> None:
     """Replace target path with bounded retry for transient file-lock errors."""
-    # Confinement: temp and target must share the same parent directory.
-    target_resolved = target.expanduser().resolve(strict=False)
-    temp_resolved = temp_path.expanduser().resolve(strict=False)
-    if temp_resolved.parent != target_resolved.parent:
-        raise AtomicWriteError(
-            target_resolved,
-            "temp path parent does not match target parent",
-        )
+    target_resolved, temp_resolved = _confined_replace_pair(temp_path, target)
     retry_count = 0
     while True:
         try:
