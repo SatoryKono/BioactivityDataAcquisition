@@ -216,7 +216,9 @@ def _declared_value_errors(
         errors.append(f"{prefix}: scope must be one of the declared allowed_scopes")
     scope_class = record.get("scope_class", scope)
     if scope_class not in allowed_scopes:
-        errors.append(f"{prefix}: scope_class must be one of the declared allowed_scopes")
+        errors.append(
+            f"{prefix}: scope_class must be one of the declared allowed_scopes"
+        )
     elif scope_class != scope:
         errors.append(f"{prefix}: scope_class must match scope (scope is the SSOT)")
     if record.get("evidence_source") not in allowed_evidence_sources:
@@ -229,9 +231,7 @@ def _declared_value_errors(
     return errors
 
 
-def _fixture_contract_errors(
-    *, prefix: str, record: dict[str, object]
-) -> list[str]:
+def _fixture_contract_errors(*, prefix: str, record: dict[str, object]) -> list[str]:
     errors: list[str] = []
     role = record.get("role")
     required_copy = _string_list(record.get("required_copy"))
@@ -240,7 +240,9 @@ def _fixture_contract_errors(
     elif role not in NON_DATA_ROLES and not REQUIRED_COPY_TOKENS.issubset(
         required_copy
     ):
-        errors.append(f"{prefix}: required_copy must include evidence_scope and no_data")
+        errors.append(
+            f"{prefix}: required_copy must include evidence_scope and no_data"
+        )
     elif role in ACTION_REQUIRED_ROLES and "next_action" not in required_copy:
         errors.append(f"{prefix}: role {role!r} must include next_action copy")
     if not _string_list(record.get("fixture_cases")):

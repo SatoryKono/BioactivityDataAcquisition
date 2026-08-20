@@ -367,7 +367,6 @@ def profile_categorical_column(
         return None
 
 
-
 def _categorical_top_value_row(
     row: dict[str, object],
     *,

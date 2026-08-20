@@ -526,4 +526,3 @@ def test_logical_fs_path_keeps_posix_absolute_roots() -> None:
     assert posix_root.as_posix() == "/custom/x"
     relative = _logical_fs_path(Path("relative/out"))
     assert relative == Path("relative/out")
-

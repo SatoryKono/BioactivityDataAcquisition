@@ -56,7 +56,6 @@ def _is_retryable_replace_error(error: OSError) -> bool:
     return bool(isinstance(errno_value, int) and errno_value in retryable_errnos)
 
 
-
 def _confined_replace_pair(temp_path: Path, target: Path) -> tuple[Path, Path]:
     """Require temp and target to share a parent before replace()."""
     target_resolved = target.expanduser().resolve(strict=False)
