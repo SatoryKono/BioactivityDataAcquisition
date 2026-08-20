@@ -195,9 +195,18 @@ class GoldBusinessRuleSpec:
 
 
 def _reject_inverted_numeric_range(minimum: object, maximum: object) -> None:
-    if isinstance(minimum, bool) or not isinstance(minimum, (int, float)):
+    numeric_minimum = _as_numeric_bound(minimum)
+    numeric_maximum = _as_numeric_bound(maximum)
+    if numeric_minimum is None or numeric_maximum is None:
         return
-    if isinstance(maximum, bool) or not isinstance(maximum, (int, float)):
-        return
-    if minimum > maximum:
+    if numeric_minimum > numeric_maximum:
         raise ValueError("minimum cannot exceed maximum")
+
+
+def _as_numeric_bound(value: object) -> int | float | None:
+    """Narrow a dynamic contract bound without accepting booleans as integers."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    return None

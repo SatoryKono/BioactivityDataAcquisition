@@ -17,8 +17,7 @@ from bioetl.infrastructure.control_plane.file_provider_health_evidence import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import LoggerPort, MetricsPort
-    from bioetl.domain.ports.health_check import HealthStatePort
+    from bioetl.domain.ports import HealthStatePort, LoggerPort, MetricsPort
 
 __all__ = [
     "PersistingProviderHealthMonitor",

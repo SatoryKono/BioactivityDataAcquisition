@@ -46,6 +46,13 @@ _DISPOSITION_PRIORITY: dict[DQDisposition, int] = {
 }
 
 
+def _require_dq_rule_outcome(value: object) -> DQRuleOutcome:
+    """Return a concrete DQ outcome after validating replacement output."""
+    if not isinstance(value, DQRuleOutcome):
+        raise TypeError("dataclass replacement did not preserve DQRuleOutcome")
+    return value
+
+
 def evaluate_dq_rules_for_record(
     record: JsonDict,
     dq_config: DQConfig | None,
@@ -161,14 +168,15 @@ def _apply_invalid_record_policy(
         "skip": DQDisposition.SKIP,
         "fail": DQDisposition.FAIL,
     }[dq_config.invalid_record_policy]
-    policy_outcome: DQRuleOutcome = replace(
-        outcome,
-        disposition=policy_disposition,
-        disposition_reason=(
-            f"invalid_record_policy={dq_config.invalid_record_policy}"
-        ),
+    return _require_dq_rule_outcome(
+        replace(
+            outcome,
+            disposition=policy_disposition,
+            disposition_reason=(
+                f"invalid_record_policy={dq_config.invalid_record_policy}"
+            ),
+        )
     )
-    return policy_outcome
 
 
 def _config_path(resolver: DQPolicyResolver) -> str | None:
