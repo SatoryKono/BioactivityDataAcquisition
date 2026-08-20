@@ -606,6 +606,11 @@ data/2026-07-03_20-21-59.gif
 # Grok machine-local runtime (never track root .grok/ â€” root hygiene + absolute paths)
 .grok/
 
+# Research-workflow default workspace (skill default ./ledger/). Local-only;
+# not an approved tracked root. See local_tolerated_root_dirs in
+# configs/quality/repo_structure_catalog.yaml and GitHub #9150.
+/ledger/
+
 # Local-only agent scratch (not CI source)
 _local_only_mcp/
 

@@ -281,6 +281,9 @@ Machine-readable каталог для structure hygiene хранится в
 - Hidden root directories, зарегистрированные как
   `local_tolerated_root_dirs` в structure catalog, MAY существовать в рабочем
   дереве как untracked local runtime/editor state.
+- Visible local-only roots in the same catalog (for example `ledger/` for
+  research-workflow scratch, `tmp/`, `logs/`) MAY exist untracked. They MUST
+  stay gitignored and MUST NOT be promoted to tracked project surfaces.
 - Такие каталоги не считаются approved tracked project surfaces и MUST NOT
   использоваться как justification для новых tracked roots.
 
