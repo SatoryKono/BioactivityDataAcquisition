@@ -267,7 +267,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 72
               },
               {
                 "id": "custom.cellOptions",
@@ -286,7 +286,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 72
               },
               {
                 "id": "custom.cellOptions",
@@ -304,15 +304,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 105
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -323,15 +316,8 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -347,7 +333,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 280
+                "value": 150
               },
               {
                 "id": "custom.cellOptions",
@@ -426,15 +412,15 @@
           "options": {
             "excludeByName": {
               "reasons": true,
-              "reasons_truncated": true
+              "reasons_truncated": true,
+              "scope_kind": true,
+              "evidence_freshness": true
             },
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "scope_kind": 2,
-              "evidence_freshness": 3,
-              "reasons_text": 4,
-              "evidence_observed_at": 5
+              "reasons_text": 2,
+              "evidence_observed_at": 3
             },
             "renameByName": {}
           }
@@ -473,7 +459,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 80
               },
               {
                 "id": "custom.cellOptions",
@@ -492,7 +478,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 70
               },
               {
                 "id": "custom.cellOptions",
@@ -511,13 +497,13 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 280
+                "value": 150
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               },
               {
