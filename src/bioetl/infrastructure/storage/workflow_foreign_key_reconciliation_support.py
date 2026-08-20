@@ -335,26 +335,6 @@ def record_reconciliation_metrics(
 
 
 
-def log_reconciliation_started(
-    adapter: object,
-    request: ForeignKeyReconciliationRequest,
-) -> None:
-    """Log the start of one foreign-key reconciliation request."""
-    logger = getattr(adapter, "logger", None)
-    log_reconciliation(
-        logger,
-        "info",
-        "foreign_key_reconciliation_started",
-        action=request.action,
-        source_table=request.source_table,
-        reference_table=request.reference_table,
-        source_key=request.source_key,
-        reference_key=request.reference_key,
-        workflow_run_id=request.workflow_run_id,
-        step_id=request.step_id,
-    )
-
-
 def log_reconciliation(
     logger: object, level: str, message: str, **context: object
 ) -> None:

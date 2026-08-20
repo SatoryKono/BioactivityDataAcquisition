@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal, Protocol, runtime_checkable
 
+from bioetl.domain.types import DebugExportPack, DebugExportResult
+
 __all__ = [
     "DebugExportPort",
     "ExportCatalogPort",
@@ -134,7 +136,7 @@ class ExportWriterPort(Protocol):
 class DebugExportPort(Protocol):
     """Persist deterministic debug-export audit packs."""
 
-    def write_pack(self, *, pack: object) -> object:
+    def write_pack(self, *, pack: DebugExportPack) -> DebugExportResult:
         """Persist the provided audit pack and return artifact metadata."""
         ...
 
