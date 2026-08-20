@@ -22,6 +22,7 @@ from bioetl.application.observability.control_plane_evidence.models import (
 from bioetl.domain.control_plane import (
     ControlPlaneArtifactLifecycleDecision,
     ControlPlaneArtifactLifecyclePlan,
+    ControlPlaneArtifactLifecyclePolicy,
     ControlPlaneArtifactRef,
     ControlPlaneArtifactReplayImpact,
     ControlPlaneArtifactSurface,
@@ -38,7 +39,7 @@ from bioetl.domain.lineage import (
     LineageNodeRef,
     LineageNodeType,
 )
-from bioetl.domain.ports import RawManifestInspection
+from bioetl.domain.ports import RawManifestInspection, RunLedgerPort
 from bioetl.domain.types import RunID, RunType
 from tests.helpers.control_plane import InMemoryRunLedgerStore
 
@@ -48,19 +49,35 @@ _NOW = datetime(2026, 8, 9, tzinfo=UTC)
 _RUN_ID = RunID(UUID("00000000-0000-0000-0000-000000008490"))
 
 
-def _manifest(**overrides: object) -> RunManifest:
-    values: dict[str, object] = {
-        "manifest_id": "manifest-8490",
-        "execution_fingerprint": "fingerprint-8490",
-        "schema_version": "1.0",
-        "created_at": _NOW,
-        "run_id": _RUN_ID,
-        "run_type": RunType.INCREMENTAL,
-        "pipeline_name": "chembl_activity",
-        "provider": "chembl",
-        "entity": "activity",
-        "launch_context": {"required_persistence_profile": "replay_ready"},
-        "code_provenance": RunCodeProvenance(
+def _manifest(
+    *,
+    manifest_id: str = "manifest-8490",
+    execution_fingerprint: str = "fingerprint-8490",
+    schema_version: str = "1.0",
+    created_at: datetime = _NOW,
+    run_id: RunID = _RUN_ID,
+    run_type: RunType = RunType.INCREMENTAL,
+    pipeline_name: str = "chembl_activity",
+    provider: str = "chembl",
+    entity: str = "activity",
+    launch_context: dict[str, object] | None = None,
+    code_provenance: RunCodeProvenance | None = None,
+    source_refs: tuple[RunSourceRef, ...] = (),
+) -> RunManifest:
+    return RunManifest(
+        manifest_id=manifest_id,
+        execution_fingerprint=execution_fingerprint,
+        schema_version=schema_version,
+        created_at=created_at,
+        run_id=run_id,
+        run_type=run_type,
+        pipeline_name=pipeline_name,
+        provider=provider,
+        entity=entity,
+        launch_context=launch_context
+        or {"required_persistence_profile": "replay_ready"},
+        code_provenance=code_provenance
+        or RunCodeProvenance(
             contract_ref="chembl.activity",
             contract_version="1.0.0",
             contract_schema_hash="schema-hash",
@@ -68,9 +85,8 @@ def _manifest(**overrides: object) -> RunManifest:
             rule_bundle_version="1",
             effective_config_artifact_id="effective-config-8490",
         ),
-    }
-    values.update(overrides)
-    return RunManifest(**values)  # type: ignore[arg-type]
+        source_refs=source_refs,
+    )
 
 
 def _scope(manifest: RunManifest | None = None) -> EvidenceScopeContext:
@@ -84,12 +100,39 @@ def _scope(manifest: RunManifest | None = None) -> EvidenceScopeContext:
     )
 
 
+def _payload_rows(payload: dict[str, object]) -> list[dict[str, object]]:
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        raise AssertionError("payload.rows must be a list")
+    typed_rows: list[dict[str, object]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            raise AssertionError("payload.rows items must be mappings")
+        typed_rows.append(row)
+    return typed_rows
+
+
+def _payload_mapping(payload: dict[str, object], key: str) -> dict[str, object]:
+    value = payload.get(key)
+    if not isinstance(value, dict):
+        raise AssertionError(f"payload.{key} must be a mapping")
+    return value
+
+
+def _payload_row_list(payload: dict[str, object], key: str) -> list[dict[str, object]]:
+    value = payload.get(key)
+    if not isinstance(value, list):
+        raise AssertionError(f"payload.{key} must be a list")
+    typed_rows: list[dict[str, object]] = []
+    for row in value:
+        if not isinstance(row, dict):
+            raise AssertionError(f"payload.{key} items must be mappings")
+        typed_rows.append(row)
+    return typed_rows
+
+
 def _reasons(payload: dict[str, object]) -> set[str]:
-    return {
-        str(row["reason"])
-        for row in payload["rows"]  # type: ignore[union-attr]
-        if isinstance(row, dict)
-    }
+    return {str(row["reason"]) for row in _payload_rows(payload)}
 
 
 def _unresolved_scope(
@@ -104,12 +147,20 @@ def _unresolved_scope(
     )
 
 
-def _snapshot_manifest(**overrides: object) -> RunManifest:
+def _snapshot_manifest(
+    *,
+    created_at: datetime = _NOW,
+    launch_context: dict[str, object] | None = None,
+    code_provenance: RunCodeProvenance | None = None,
+) -> RunManifest:
     snapshot = RunInputSnapshotRef(
         snapshot_id="sha256:snapshot-8493",
         content_hash="snapshot-8493",
     )
     return _manifest(
+        created_at=created_at,
+        launch_context=launch_context,
+        code_provenance=code_provenance,
         source_refs=(
             RunSourceRef(
                 provider="chembl",
@@ -118,7 +169,6 @@ def _snapshot_manifest(**overrides: object) -> RunManifest:
                 input_snapshots=(snapshot,),
             ),
         ),
-        **overrides,
     )
 
 
@@ -226,7 +276,7 @@ class _CompatibleInspector:
 
 def test_manifest_validation_ok_requires_recorded_comparison() -> None:
     payload = ControlPlaneEvidenceService(
-        manifest_inspector=_CompatibleInspector()  # type: ignore[arg-type]
+        manifest_inspector=_CompatibleInspector()
     ).manifest_validation(scope=_scope(_manifest()))
 
     assert payload["status"] == "OK"
@@ -248,11 +298,28 @@ class _LineageStore:
     def __init__(self, fragments: tuple[LineageGraphFragment, ...]) -> None:
         self.fragments = fragments
 
+    def save(self, fragment: LineageGraphFragment) -> None:
+        _ = fragment
+
+    def get(self, fragment_id: str) -> LineageGraphFragment | None:
+        _ = fragment_id
+        return None
+
+    def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
+        _ = fragment_id
+        return None
+
     def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
+        _ = manifest_id
         return list(self.fragments)
 
     def list_by_run_id(self, run_id: RunID) -> list[LineageGraphFragment]:
+        _ = run_id
         return list(self.fragments)
+
+    def list_by_node_id(self, node_id: str) -> list[LineageGraphFragment]:
+        _ = node_id
+        return []
 
 
 def test_lineage_validation_detects_directed_cycle() -> None:
@@ -280,7 +347,7 @@ def test_lineage_validation_detects_directed_cycle() -> None:
         ),
     )
     service = ControlPlaneEvidenceService(
-        lineage_store=_LineageStore((fragment,))  # type: ignore[arg-type]
+        lineage_store=_LineageStore((fragment,))
     )
 
     payload = service.lineage_validation(scope=_scope(manifest))
@@ -317,7 +384,7 @@ def test_lineage_validation_detects_conflicting_node_definitions() -> None:
         ),
     )
     service = ControlPlaneEvidenceService(
-        lineage_store=_LineageStore((fragment_b, fragment_a))  # type: ignore[arg-type]
+        lineage_store=_LineageStore((fragment_b, fragment_a))
     )
 
     payload = service.lineage_validation(scope=_scope(manifest))
@@ -343,7 +410,7 @@ def test_lineage_missing_fragments_obeys_profile_contract(
 ) -> None:
     manifest = _manifest(launch_context={"required_persistence_profile": profile})
     service = ControlPlaneEvidenceService(
-        lineage_store=_LineageStore(())  # type: ignore[arg-type]
+        lineage_store=_LineageStore(())
     )
 
     payload = service.lineage_validation(scope=_scope(manifest))
@@ -357,7 +424,23 @@ class _LifecyclePlanner:
     def __init__(self, plan: ControlPlaneArtifactLifecyclePlan) -> None:
         self.plan_result = plan
 
-    def plan(self, policy: object, *, dry_run: bool = True) -> object:
+    def plan(
+        self,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        *,
+        dry_run: bool = True,
+    ) -> ControlPlaneArtifactLifecyclePlan:
+        _ = policy, dry_run
+        return self.plan_result
+
+    def plan_for_manifest(
+        self,
+        policy: ControlPlaneArtifactLifecyclePolicy,
+        *,
+        manifest: RunManifest,
+        dry_run: bool = True,
+    ) -> ControlPlaneArtifactLifecyclePlan:
+        _ = policy, manifest, dry_run
         return self.plan_result
 
 
@@ -402,7 +485,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
         artifacts=artifacts,
     )
     service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)  # type: ignore[arg-type]
+        lifecycle_planner=_LifecyclePlanner(plan)
     )
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
@@ -411,7 +494,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
     assert "required_evidence_surfaces_present" in _reasons(payload)
     assert "snapshot_lifecycle_evidence_present" in _reasons(payload)
     assert "archive_evidence_not_recorded" in _reasons(payload)
-    assert all("path" not in row for row in payload["artifacts"])
+    assert all("path" not in row for row in _payload_row_list(payload, "artifacts"))
 
 
 def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> None:
@@ -434,7 +517,7 @@ def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> 
         ),
     )
     service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)  # type: ignore[arg-type]
+        lifecycle_planner=_LifecyclePlanner(plan)
     )
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
@@ -456,7 +539,7 @@ def test_retention_rejects_unknown_persistence_profile() -> None:
         artifacts=(),
     )
     service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)  # type: ignore[arg-type]
+        lifecycle_planner=_LifecyclePlanner(plan)
     )
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
@@ -487,7 +570,7 @@ def test_failure_reasons_expose_only_fixed_categories() -> None:
         scope=_scope(manifest)
     )
 
-    rows = payload["rows"]
+    rows = _payload_rows(payload)
     assert [row["category"] for row in rows] == list(FAILURE_REASON_CATEGORIES)
     assert {row["category"]: row["count"] for row in rows} == {
         "api": 1,
@@ -512,14 +595,14 @@ def test_failure_reasons_expose_only_fixed_categories() -> None:
 )
 def test_failure_reasons_make_unknown_state_visible_without_zero_counts(
     scope: EvidenceScopeContext,
-    ledger: object | None,
+    ledger: RunLedgerPort | None,
     expected_reason: str,
 ) -> None:
     payload = ControlPlaneEvidenceService(ledger_port=ledger).failure_reasons(
         scope=scope
-    )  # type: ignore[arg-type]
+    )
 
-    rows = payload["rows"]
+    rows = _payload_rows(payload)
     assert [row["category"] for row in rows] == list(FAILURE_REASON_CATEGORIES)
     assert {row["status"] for row in rows} == {"UNKNOWN"}
     assert {row["reason"] for row in rows} == {expected_reason}
@@ -541,13 +624,16 @@ def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() 
     assert payload["scope_kind"] == "exact_run"
     assert payload["evidence_freshness"] == "observed"
     assert payload["status"] == "UNKNOWN"
-    assert "contract_evidence_not_finalized" in payload["trust"]["reasons"]
-    assert payload["trust"]["reasons_text"]
-    assert payload["trust"]["reasons_text"] == "\n".join(
-        payload["trust"]["reasons"][:FIRST_SCREEN_TRUST_REASONS_CAP]
+    trust = _payload_mapping(payload, "trust")
+    reasons = trust["reasons"]
+    assert isinstance(reasons, list)
+    assert "contract_evidence_not_finalized" in reasons
+    assert trust["reasons_text"]
+    assert trust["reasons_text"] == "\n".join(
+        reasons[:FIRST_SCREEN_TRUST_REASONS_CAP]
     )
-    assert payload["trust"]["reasons_truncated"] is (
-        len(payload["trust"]["reasons"]) > FIRST_SCREEN_TRUST_REASONS_CAP
+    assert trust["reasons_truncated"] is (
+        len(reasons) > FIRST_SCREEN_TRUST_REASONS_CAP
     )
 
 
@@ -600,11 +686,13 @@ def test_trust_reasons_text_caps_first_screen_lines_and_flags_truncation() -> No
         resolved_via="selected_run_id",
         manifest=_manifest(),
     )
-    trust = payload["trust"]
+    trust = _payload_mapping(payload, "trust")
     assert payload["trust_status"] == "INCOMPLETE"
     assert trust["reasons"] == reasons
-    assert trust["reasons_text"] == "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP])
-    assert trust["reasons_text"].count("\n") == FIRST_SCREEN_TRUST_REASONS_CAP - 1
+    reasons_text = trust["reasons_text"]
+    assert isinstance(reasons_text, str)
+    assert reasons_text == "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP])
+    assert reasons_text.count("\n") == FIRST_SCREEN_TRUST_REASONS_CAP - 1
     assert trust["reasons_truncated"] is True
 
 
@@ -632,7 +720,7 @@ def test_trust_reasons_text_at_cap_is_not_truncated() -> None:
         manifest=_manifest(),
     )
 
-    trust = payload["trust"]
+    trust = _payload_mapping(payload, "trust")
     assert trust["reasons_text"] == "\n".join(reasons)
     assert trust["reasons_truncated"] is False
 
@@ -654,7 +742,7 @@ def test_trust_ok_has_empty_reasons_text() -> None:
         resolved_via="selected_run_id",
         manifest=_manifest(),
     )
-    trust = payload["trust"]
+    trust = _payload_mapping(payload, "trust")
     assert payload["trust_status"] == "OK"
     assert trust["reasons"] == []
     assert trust["reasons_text"] == ""
@@ -675,19 +763,30 @@ def test_retention_prefers_plan_for_manifest_over_full_plan() -> None:
             self.full_plan_calls = 0
             self.manifest_plan_calls = 0
 
-        def plan(self, policy: object, *, dry_run: bool = True) -> object:
+        def plan(
+            self,
+            policy: ControlPlaneArtifactLifecyclePolicy,
+            *,
+            dry_run: bool = True,
+        ) -> ControlPlaneArtifactLifecyclePlan:
+            _ = policy, dry_run
             self.full_plan_calls += 1
             return plan
 
         def plan_for_manifest(
-            self, policy: object, *, manifest: object, dry_run: bool = True
-        ) -> object:
+            self,
+            policy: ControlPlaneArtifactLifecyclePolicy,
+            *,
+            manifest: RunManifest,
+            dry_run: bool = True,
+        ) -> ControlPlaneArtifactLifecyclePlan:
+            _ = policy, manifest, dry_run
             self.manifest_plan_calls += 1
             return plan
 
     planner = _BoundedPlanner()
     ControlPlaneEvidenceService(
-        lifecycle_planner=planner  # type: ignore[arg-type]
+        lifecycle_planner=planner
     ).retention_compliance(scope=_scope(manifest), now=_NOW)
 
     assert planner.manifest_plan_calls == 1
