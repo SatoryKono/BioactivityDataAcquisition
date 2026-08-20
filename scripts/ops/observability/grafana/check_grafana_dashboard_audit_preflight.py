@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-# NOSONAR - S1192: *.json pattern is intentional for dashboard file discovery
 DASHBOARD_FILE_PATTERN = "*.json"
 
 import argparse
@@ -1323,6 +1322,111 @@ def _check_ops_http_datasource_live(
         )
 
 
+def _grafana_health_check(
+    *, grafana_base_url: str, timeout_seconds: float
+) -> PreflightCheck:
+    return _check_http_json(
+        name="grafana",
+        url=f"{grafana_base_url.rstrip('/')}/api/health",
+        timeout_seconds=timeout_seconds,
+    )
+
+
+def _render_auth_and_ops_checks(
+    *,
+    grafana_base_url: str,
+    grafana_username: str,
+    grafana_password: str,
+    timeout_seconds: float,
+) -> list[PreflightCheck]:
+    # Live Ops HTTP bootstrap/UID probes are opt-in with render checks
+    # (monitoring already requested). Default CI uses skip-render-checks.
+    return [
+        _check_grafana_render_auth(
+            grafana_base_url=grafana_base_url,
+            grafana_username=grafana_username,
+            grafana_password=grafana_password,
+            timeout_seconds=timeout_seconds,
+        ),
+        classify_ops_http_bootstrap(_read_grafana_bootstrap_status_live()),
+        _check_ops_http_datasource_live(
+            grafana_base_url=grafana_base_url,
+            grafana_username=grafana_username,
+            grafana_password=grafana_password,
+            timeout_seconds=timeout_seconds,
+        ),
+    ]
+
+
+def _semantic_prometheus_checks(
+    *, prometheus_base_url: str, timeout_seconds: float
+) -> list[PreflightCheck]:
+    return [
+        classify_panel_3010_terminal_contract(),
+        _check_http_json(
+            name="prometheus",
+            url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
+            timeout_seconds=timeout_seconds,
+        ),
+    ]
+
+
+def _playwright_render_checks(*, timeout_seconds: float) -> list[PreflightCheck]:
+    playwright_check = _check_playwright_runtime(timeout_seconds)
+    return [playwright_check, _check_expanded_row_capture(playwright_check)]
+
+
+def _quarantine_explorer_check(
+    *,
+    grafana_base_url: str,
+    prometheus_base_url: str,
+    app_base_url: str,
+    grafana_username: str,
+    grafana_password: str,
+    timeout_seconds: float,
+) -> PreflightCheck:
+    if not _quarantine_explorer_is_applicable():
+        return PreflightCheck(
+            name="quarantine-explorer",
+            status="not_applicable",
+            detail=(
+                "Quarantine Explorer HTTP/UI surface is retired from the "
+                "shipped dashboard portfolio; domain quarantine write/storage "
+                "remains unchanged."
+            ),
+        )
+    try:
+        resolved_app_base_url = live_audit._resolve_app_base_url(
+            live_audit.AuditConfig(
+                prometheus_base_url=prometheus_base_url.rstrip("/"),
+                app_base_url=app_base_url.rstrip("/"),
+                loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
+                tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
+                grafana_base_url=grafana_base_url.rstrip("/"),
+                grafana_username=grafana_username,
+                grafana_password=grafana_password,
+                workflow=live_audit.DEFAULT_WORKFLOW,
+                pipeline=live_audit.DEFAULT_PIPELINE,
+                run_type=live_audit.DEFAULT_RUN_TYPE,
+                run_id=live_audit.DEFAULT_RUN_ID,
+                range_hours=live_audit.DEFAULT_RANGE_HOURS,
+                output_path=live_audit.DEFAULT_OUTPUT_PATH,
+                request_timeout_seconds=timeout_seconds,
+            )
+        )
+    except Exception as exc:  # pragma: no cover - exercised by callers
+        return PreflightCheck(
+            name="quarantine-explorer",
+            status="error",
+            detail=str(exc),
+        )
+    return PreflightCheck(
+        name="quarantine-explorer",
+        status="ok",
+        detail=f"canonical health probe reachable via {resolved_app_base_url}",
+    )
+
+
 def run_checks(
     *,
     grafana_base_url: str,
@@ -1337,34 +1441,16 @@ def run_checks(
     include_semantic_checks: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
-    """Run all preflight checks for Grafana dashboard audit readiness.
-
-    NOSONAR - S3776: complexity 21 exceeds 15; extraction would obscure preflight check orchestration logic
-    """
+    """Run all preflight checks for Grafana dashboard audit readiness."""
     checks = [
-        _check_http_json(
-            name="grafana",
-            url=f"{grafana_base_url.rstrip('/')}/api/health",
+        _grafana_health_check(
+            grafana_base_url=grafana_base_url,
             timeout_seconds=timeout_seconds,
         )
     ]
-
     if include_render_checks:
-        checks.append(
-            _check_grafana_render_auth(
-                grafana_base_url=grafana_base_url,
-                grafana_username=grafana_username,
-                grafana_password=grafana_password,
-                timeout_seconds=timeout_seconds,
-            )
-        )
-        # Live Ops HTTP bootstrap/UID probes are opt-in with render checks
-        # (monitoring already requested). Default CI uses skip-render-checks.
-        checks.append(
-            classify_ops_http_bootstrap(_read_grafana_bootstrap_status_live())
-        )
-        checks.append(
-            _check_ops_http_datasource_live(
+        checks.extend(
+            _render_auth_and_ops_checks(
                 grafana_base_url=grafana_base_url,
                 grafana_username=grafana_username,
                 grafana_password=grafana_password,
@@ -1372,70 +1458,25 @@ def run_checks(
             )
         )
     if include_semantic_checks:
-        checks.append(classify_panel_3010_terminal_contract())
-        checks.append(
-            _check_http_json(
-                name="prometheus",
-                url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
+        checks.extend(
+            _semantic_prometheus_checks(
+                prometheus_base_url=prometheus_base_url,
                 timeout_seconds=timeout_seconds,
             )
         )
     if include_render_checks:
-        playwright_check = _check_playwright_runtime(timeout_seconds)
-        checks.extend([playwright_check, _check_expanded_row_capture(playwright_check)])
-
+        checks.extend(_playwright_render_checks(timeout_seconds=timeout_seconds))
     if include_semantic_checks:
-        if not _quarantine_explorer_is_applicable():
-            checks.append(
-                PreflightCheck(
-                    name="quarantine-explorer",
-                    status="not_applicable",
-                    detail=(
-                        "Quarantine Explorer HTTP/UI surface is retired from the "
-                        "shipped dashboard portfolio; domain quarantine write/storage "
-                        "remains unchanged."
-                    ),
-                )
+        checks.append(
+            _quarantine_explorer_check(
+                grafana_base_url=grafana_base_url,
+                prometheus_base_url=prometheus_base_url,
+                app_base_url=app_base_url,
+                grafana_username=grafana_username,
+                grafana_password=grafana_password,
+                timeout_seconds=timeout_seconds,
             )
-        else:
-            try:
-                resolved_app_base_url = live_audit._resolve_app_base_url(
-                    live_audit.AuditConfig(
-                        prometheus_base_url=prometheus_base_url.rstrip("/"),
-                        app_base_url=app_base_url.rstrip("/"),
-                        loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
-                        tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
-                        grafana_base_url=grafana_base_url.rstrip("/"),
-                        grafana_username=grafana_username,
-                        grafana_password=grafana_password,
-                        workflow=live_audit.DEFAULT_WORKFLOW,
-                        pipeline=live_audit.DEFAULT_PIPELINE,
-                        run_type=live_audit.DEFAULT_RUN_TYPE,
-                        run_id=live_audit.DEFAULT_RUN_ID,
-                        range_hours=live_audit.DEFAULT_RANGE_HOURS,
-                        output_path=live_audit.DEFAULT_OUTPUT_PATH,
-                        request_timeout_seconds=timeout_seconds,
-                    )
-                )
-                checks.append(
-                    PreflightCheck(
-                        name="quarantine-explorer",
-                        status="ok",
-                        detail=(
-                            "canonical health probe reachable via "
-                            f"{resolved_app_base_url}"
-                        ),
-                    )
-                )
-            except Exception as exc:  # pragma: no cover - exercised by callers
-                checks.append(
-                    PreflightCheck(
-                        name="quarantine-explorer",
-                        status="error",
-                        detail=str(exc),
-                    )
-                )
-
+        )
     if include_screenshot_check:
         checks.append(
             _check_screenshot_artifacts(

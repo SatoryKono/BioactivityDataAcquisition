@@ -500,11 +500,7 @@ def _render_failure_message(
     return f"{prefix}. {_render_failure_hint(config)}"
 
 
-def _parse_args(argv: list[str] | None) -> RenderConfig:
-    """Parse command-line arguments for Grafana screenshot rendering.
-
-    NOSONAR - S3776: complexity 23 exceeds 15; extraction would obscure configuration logic
-    """
+def _build_render_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Render shipped Grafana dashboards into reproducible local screenshots "
@@ -652,32 +648,55 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
             "optional datasource availability."
         ),
     )
-    args = parser.parse_args(argv)
-    variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
+    return parser
+
+
+def _resolve_render_fixture_state(
+    args: argparse.Namespace, parser: argparse.ArgumentParser
+) -> tuple[Path | None, dict[str, object] | None, str]:
     fixture_manifest = (
         args.fixture_manifest.resolve() if args.fixture_manifest is not None else None
     )
     fixture_case = str(getattr(args, "fixture_case", "") or "").strip()
     try:
-        if fixture_case:
-            if fixture_manifest is None:
-                parser.error("--fixture-case requires --fixture-manifest")
-            from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import (
-                fixture_case_evidence,
-                load_v2_case,
-            )
-
-            fixture_state = fixture_case_evidence(
-                load_v2_case(fixture_manifest, fixture_case)
-            )
-        else:
-            fixture_state = (
-                _fixture_state_evidence_from_path(fixture_manifest)
-                if fixture_manifest is not None
-                else None
-            )
+        fixture_state = _load_render_fixture_state(
+            fixture_manifest=fixture_manifest,
+            fixture_case=fixture_case,
+            parser=parser,
+        )
     except ValueError as exc:
         parser.error(str(exc))
+    return fixture_manifest, fixture_state, fixture_case
+
+
+def _load_render_fixture_state(
+    *,
+    fixture_manifest: Path | None,
+    fixture_case: str,
+    parser: argparse.ArgumentParser,
+) -> dict[str, object] | None:
+    if fixture_case:
+        if fixture_manifest is None:
+            parser.error("--fixture-case requires --fixture-manifest")
+        from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import (
+            fixture_case_evidence,
+            load_v2_case,
+        )
+
+        return fixture_case_evidence(load_v2_case(fixture_manifest, fixture_case))
+    if fixture_manifest is None:
+        return None
+    return _fixture_state_evidence_from_path(fixture_manifest)
+
+
+def _parse_args(argv: list[str] | None) -> RenderConfig:
+    """Parse command-line arguments for Grafana screenshot rendering."""
+    parser = _build_render_parser()
+    args = parser.parse_args(argv)
+    variables = _deduplicate_dashboard_variables(args.variables, parser=parser)
+    fixture_manifest, fixture_state, fixture_case = _resolve_render_fixture_state(
+        args, parser
+    )
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
         username=args.username,
