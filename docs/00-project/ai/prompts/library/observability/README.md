@@ -76,6 +76,9 @@ Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
 - `prompt.observability.dashboard-first-window-noscroll` — implement
   `DASH-FIT-004`: убрать внутренний scroll first-window `text`/`stat`/`table`
   на семи UID без overflow-clip и без роста `first_screen_max_panels`.
+- `prompt.observability.dashboard-data-duplication` — по каждому UID 0–6:
+  данные каждой панели, таксономия дублей внутри дашборда, план исключения
+  без сноса `DASH-FIT-003` / `DASH-FIT-005`.
 - `prompt.observability.group-scalar-density-audit` — re-measure scalar
   information density per panel group vs first screen (`DASH-DENSITY-002`,
   REQUIREMENTS §5.4) and rank groups that must be made denser. Static (no
