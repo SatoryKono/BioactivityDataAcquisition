@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from bioetl.application.services._historical_claim_reason import (
+from bioetl.application.services.control_plane._historical_claim_reason import (
     historical_universe_claim_reason,
 )
 

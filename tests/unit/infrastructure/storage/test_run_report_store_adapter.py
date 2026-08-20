@@ -18,7 +18,7 @@ def test_adapter_satisfies_port_and_round_trips_text(tmp_path: Path) -> None:
     adapter = FileRunReportStoreAdapter()
     assert isinstance(adapter, RunReportStorePort)
     target = tmp_path / "nested" / "report.json"
-    adapter.mkdir(target.parent)
+    adapter.mkdir(str(target.parent))
     payload = '{"ok": true}' + chr(10)
-    adapter.write_text(target, payload)
-    assert adapter.read_text(target) == payload
+    adapter.write_text(str(target), payload)
+    assert adapter.read_text(str(target)) == payload

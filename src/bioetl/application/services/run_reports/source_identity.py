@@ -46,7 +46,6 @@ _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 
-
 @dataclass(frozen=True)
 class RuntimeSourceIdentityResolutionResult:
     """One precedence-bound identity resolution without secret-bearing data."""

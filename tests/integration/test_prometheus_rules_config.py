@@ -54,7 +54,6 @@ _PUSHED_SNAPSHOT_COUNTERS = frozenset(
     }
 )
 
-
 def _load_rules() -> dict:
     payload = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Coroutine, Mapping
-from datetime import UTC, datetime
 from typing import Any
 
 FORENSIC_ENDPOINT_CONCURRENCY = 4
@@ -44,7 +43,7 @@ def forensic_unavailable_table_payload(
     observed_at: str | None = None,
 ) -> dict[str, object]:
     """Extend the forensic error contract with one Infinity table row."""
-    stamp = observed_at or datetime.now(UTC).isoformat()
+    stamp = observed_at if observed_at is not None else "unavailable"
     payload = forensic_unavailable_payload(endpoint=endpoint, reason=reason)
     payload["observed_at"] = stamp
     payload["rows"] = [
