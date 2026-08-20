@@ -154,7 +154,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "workflow-run-reports" in description
     assert target.get("root_selector") == "items"
     assert target.get("url") == (
-        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
+        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=2"
     )
     status_override = next(
         item
