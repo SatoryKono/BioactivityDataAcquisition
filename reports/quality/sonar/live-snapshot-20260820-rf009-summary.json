@@ -1,98 +1,63 @@
 {
   "schema_version": 2,
-  "date": "20260820",
-  "label": "snr-rf-009-live-closeout",
-  "policy": {
-    "accounting_query": "statuses=OPEN",
-    "technical_debt_budget_growth": "forbidden",
-    "bulk_suppression": "forbidden",
-    "scanner_ci_restored": false
-  },
-  "exported_at": "2026-08-20T19:20:06.927818+00:00",
-  "analysis_date": "2026-08-20T19:13:29+0000",
-  "revision": "718266639c14fc2400922828a26b10a18e48da38",
-  "origin_main_sha": "2d8ce58af56e9da4690f5b3e886f84dd806375ab",
-  "revision_matches_origin_main": false,
-  "total": 7,
-  "unique_keys": 7,
-  "affected_paths": 6,
-  "missing_paths": [],
+  "exported_at": "2026-08-20T22:14:24.646788+00:00",
+  "host": "https://sonarcloud.io",
+  "project": "SatoryKono_BioactivityDataAcquisition",
+  "organization": "satorykono",
+  "accounting_query": "statuses=OPEN",
+  "analysis_date": "2026-08-20T22:07:23+0000",
+  "revision": "ec0d516b8cd2691b36c0dae9e84c0ab46c85db84",
+  "origin_main_sha": "ec0d516b8cd2691b36c0dae9e84c0ab46c85db84",
+  "revision_matches_origin_main": true,
+  "total": 0,
+  "unique_keys": 0,
   "measures": {
     "reliability_rating": "1.0",
-    "code_smells": "3",
-    "security_issues": "{\"total\":4,\"HIGH\":0,\"MEDIUM\":0,\"LOW\":0,\"INFO\":0,\"BLOCKER\":4}",
-    "security_rating": "5.0",
-    "maintainability_issues": "{\"total\":1,\"HIGH\":1,\"MEDIUM\":0,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}",
+    "code_smells": "0",
+    "security_issues": "{\"total\":0,\"HIGH\":0,\"MEDIUM\":0,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}",
+    "security_rating": "1.0",
+    "maintainability_issues": "{\"total\":0,\"HIGH\":0,\"MEDIUM\":0,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}",
     "security_hotspots": "0",
-    "sqale_index": "54",
-    "sqale_rating": "1.0",
+    "sqale_index": "0",
     "bugs": "0",
-    "alert_status": "ERROR",
-    "new_violations": "7",
-    "ncloc": "942835",
-    "vulnerabilities": "4",
-    "reliability_issues": "{\"total\":2,\"HIGH\":0,\"MEDIUM\":2,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}"
+    "alert_status": "OK",
+    "new_violations": null,
+    "ncloc": "945432",
+    "vulnerabilities": "0",
+    "reliability_issues": "{\"total\":0,\"HIGH\":0,\"MEDIUM\":0,\"LOW\":0,\"INFO\":0,\"BLOCKER\":0}"
   },
-  "quality_gate_status": "ERROR",
+  "quality_gate_status": "OK",
   "ratings": {
     "reliability": "A",
-    "security": "E",
-    "maintainability": "A"
+    "security": "A",
+    "maintainability": ""
   },
-  "by_type": {
-    "CODE_SMELL": 3,
-    "VULNERABILITY": 4
-  },
-  "by_severity": {
-    "CRITICAL": 1,
-    "MAJOR": 2,
-    "BLOCKER": 4
-  },
-  "by_rule": [
-    [
-      "pythonsecurity:S2083",
-      3
-    ],
-    [
-      "python:S8786",
-      2
-    ],
-    [
-      "python:S3776",
-      1
-    ],
-    [
-      "pythonsecurity:S5131",
-      1
-    ]
-  ],
+  "by_type": {},
+  "by_severity": {},
+  "by_rule": [],
   "indexing": {
-    "open_total": 7,
-    "resolved_false_total": 7,
+    "open_total": 0,
+    "resolved_false_total": 0,
     "discrepancy": 0
   },
   "acceptance": {
-    "open_zero": false,
+    "open_zero": true,
     "bugs_zero": true,
-    "vulnerabilities_zero": false,
-    "code_smells_zero": false,
-    "quality_gate_ok": false,
-    "security_rating_a": false,
+    "vulnerabilities_zero": true,
+    "code_smells_zero": true,
+    "quality_gate_ok": true,
+    "security_rating_a": true,
     "reliability_rating_a": true,
-    "revision_matches_origin_main": false,
+    "revision_matches_origin_main": true,
     "no_indexing_discrepancy": true
   },
   "baseline_compare": {
     "baseline_open": 308,
     "baseline_paths": 152,
     "baseline_effort_hours": 64.6,
-    "net_open": -301
+    "net_open": -308
   },
-  "related_github_issues": {
-    "parent": 9059,
-    "rf009": 9068,
-    "rf008": 9067
-  },
+  "label": "snr-rf-009-zero-open",
   "reports": {
     "full": "reports/quality/sonar/live-issues-20260820-rf009-full.json",
     "summary": "reports/quality/sonar/live-snapshot-20260820-rf009-summary.json"
