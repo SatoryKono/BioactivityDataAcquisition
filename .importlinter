@@ -4,7 +4,7 @@ include_external_packages = False
 cache_dir = /tmp/bioetl-importlinter-cache
 
 # Hexagonal Architecture Layer Contracts
-# See CLAUDE.md §2.1 for the import matrix
+# See docs/00-project/RULES.md §1 for the import matrix
 
 [importlinter:contract:domain-independence]
 name = Domain layer must not import from other layers
@@ -54,7 +54,7 @@ forbidden_modules =
     bioetl.infrastructure
 allow_indirect_imports = True
 
-# Dependency Injection Constraints (CLAUDE.md §6.3.2)
+# Dependency Injection Constraints (docs/00-project/RULES.md §1)
 # Application layer must not directly instantiate infrastructure classes
 
 [importlinter:contract:no-direct-instantiation-in-application]

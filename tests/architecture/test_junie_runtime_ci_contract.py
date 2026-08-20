@@ -75,3 +75,12 @@ def test_junie_dashboard_routing_uses_active_observability_skills() -> None:
     for identifier in semantics["forbidden_identifiers"]:
         assert identifier not in runtime
         assert identifier not in guidelines
+
+
+def test_junie_guidelines_include_environment_configuration() -> None:
+    """AGENTS.md and Junie guidelines must share the .env token contract (#9120)."""
+    agents = Path("AGENTS.md").read_text(encoding="utf-8")
+    guidelines = JUNIE_GUIDELINES_PATH.read_text(encoding="utf-8")
+    for content in (agents, guidelines):
+        assert "## Environment Configuration" in content
+        assert "MUST use tokens and parameters from the repository root" in content

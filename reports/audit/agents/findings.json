@@ -1,205 +1,104 @@
-[
-  {
-    "id": "AUD-001",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "runtime-mirror",
-    "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md:27",
-    "observation": "The published dashboard skill mirror differed from its canonical .codex skill and failed the enforced mirror gate.",
-    "method": "bash scripts/ai/codex/check_skills_mirror.sh --check",
-    "evidence": [
-      {
-        "path": "docs/00-project/ai/skills/local/observability-dashboard/SKILL.md",
-        "line": 27,
-        "command": "bash scripts/ai/codex/check_skills_mirror.sh --check",
-        "observation": "Baseline output: Docs skill mirror mismatch: observability-dashboard/SKILL.md. Post-fix output: AI governance surfaces checked successfully."
-      }
-    ],
-    "expected": "The docs mirror is generated from the canonical runtime skill and the mirror check exits zero.",
-    "actual": "The baseline mirror omitted the dashboard release gate and Run Explorer troubleshooting content present in the canonical skill.",
-    "impact": "Operators could follow stale validation guidance, and the required governance gate failed.",
-    "root_cause": "The docs skill mirror had not been refreshed after the canonical runtime skill changed.",
-    "remediation": "Refresh the docs skill mirror with the governance synchronizer and keep the existing mirror gate required.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "bash scripts/ai/codex/check_skills_mirror.sh --check",
-      "bash scripts/ai/junie/check_junie_mirror.sh --check"
-    ],
-    "automation": "scripts/ai/codex/check_skills_mirror.sh --check",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9006"
-  },
-  {
-    "id": "AUD-002",
-    "priority": "P2",
-    "severity": "Medium",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "runtime-governance",
-    "path": "scripts/ai/sync/governance.py:31",
-    "observation": "The governance normalizer contradicted the architecture contract for CODEX-RUNTIME canonical links, while the runtime doctor did not report normalization drift.",
-    "method": "python -m scripts.ai.sync.governance --root . --only all --check; pytest tests/architecture/test_ai_runtime_governance_links.py -q",
-    "evidence": [
-      {
-        "path": "scripts/ai/sync/governance.py",
-        "line": 31,
-        "command": "pytest tests/architecture/test_ai_runtime_governance_links.py -q",
-        "observation": "The normalized result lacked RULES, requirements, ADR, memory, and post-change tokens required by the architecture test."
-      },
-      {
-        "path": "scripts/ai/codex/doctor.py",
-        "line": 40,
-        "command": "python scripts/ai/codex/doctor.py --json",
-        "observation": "Post-fix doctor output is {ok: true, findings: []} and now includes normalization findings."
-      }
-    ],
-    "expected": "All governance normalizers preserve file-specific required tokens, and the runtime doctor fails on pending normalization.",
-    "actual": "A common two-link block was previously imposed on CODEX-RUNTIME even though that surface requires seven canonical links.",
-    "impact": "Running the advertised synchronizer could create architecture drift while its own checks appeared green.",
-    "root_cause": "The normalizer used one canonical-source template for every agent file and was not wired into the doctor.",
-    "remediation": "Use a CODEX-RUNTIME-specific canonical block and include check-only normalization findings in doctor static diagnostics.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.ai.sync.governance --root . --only all --check",
-      "python scripts/ai/codex/doctor.py --json",
-      "pytest tests/architecture/test_ai_runtime_governance_links.py -q"
-    ],
-    "automation": "doctor static diagnostics plus architecture test",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9007"
-  },
-  {
-    "id": "AUD-003",
-    "priority": "P0",
-    "severity": "Critical",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "launcher-security",
-    "path": "scripts/ai/vibe/launch.sh:103",
-    "observation": "The Bash Vibe launcher printed the complete operator prompt, and both launchers recommended a pipe-to-shell installer.",
-    "method": "git show origin/main:scripts/ai/vibe/launch.sh; git show origin/main:scripts/ai/vibe/launch.ps1; static unsafe-pattern scan",
-    "evidence": [
-      {
-        "path": "scripts/ai/vibe/launch.sh",
-        "line": 103,
-        "command": "git show origin/main:scripts/ai/vibe/launch.sh | nl -ba",
-        "observation": "Baseline line 103 was log_info \"Prompt: $*\"; baseline line 82 recommended curl ... | bash."
-      },
-      {
-        "path": "scripts/ai/vibe/launch.ps1",
-        "line": 53,
-        "command": "git show origin/main:scripts/ai/vibe/launch.ps1 | nl -ba",
-        "observation": "Baseline PowerShell guidance wrapped curl ... | bash in WSL."
-      },
-      {
-        "path": "scripts/ai/codex/native_runtime_contract.py",
-        "line": 59,
-        "command": "pytest tests/architecture/test_codex_native_runtime.py -q",
-        "observation": "Post-fix contract scans both launchers for full-prompt logging and pipe-to-shell guidance."
-      }
-    ],
-    "expected": "Launchers never write prompt content to stdout and never recommend executing an unverified download through a shell.",
-    "actual": "The baseline launcher exposed the full prompt to terminal logs and offered unsafe installation guidance.",
-    "impact": "Prompts can contain sensitive task data; logs may persist or be collected, and pipe-to-shell guidance creates supply-chain execution risk.",
-    "root_cause": "Launcher diagnostics logged user payload content and had no automated safety contract for operator-facing install text.",
-    "remediation": "Log prompt length only, retain pip/pipx install guidance, and enforce forbidden patterns in the native runtime contract.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "shellcheck scripts/ai/vibe/launch.sh",
-      "bash -n scripts/ai/vibe/launch.sh",
-      "pytest tests/architecture/test_codex_native_runtime.py -q",
-      "python scripts/ai/codex/doctor.py --json"
-    ],
-    "automation": "scripts/ai/codex/native_runtime_contract.py::validate_ai_launcher_safety",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9004"
-  },
-  {
-    "id": "AUD-004",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "open",
-    "category": "memory-retention",
-    "path": "src/memory/episodic/tasks/bioactivitydataacquisition/88fe79558f4fe2f9/agent-codex-native-7507/366d7dd55149d812/codex-native-7507-20260804/summary.md:13",
-    "observation": "The memory retention check reports 13 expired episodic records and sets policy_violation=true.",
-    "method": "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-    "evidence": [
-      {
-        "path": "src/memory/episodic/tasks/bioactivitydataacquisition/88fe79558f4fe2f9/agent-codex-native-7507/366d7dd55149d812/codex-native-7507-20260804/summary.md",
-        "line": 13,
-        "command": "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-        "observation": "candidate_count=13, active_count=275, density_excess=0, invalid_metadata=[], policy_violation=true, exit 1."
-      }
-    ],
-    "expected": "Expired episodic records are pruned by an authorized retention workflow and prune --check exits zero.",
-    "actual": "Thirteen records exceeded ttl_days=14; no records were removed during the audit.",
-    "impact": "Expired working memory remains searchable and the retention policy gate stays red.",
-    "root_cause": "Scheduled or operator-authorized pruning had not removed expired episodic records by the audit timestamp.",
-    "remediation": "Review the 13-candidate dry-run, then run the authorized prune apply workflow and re-run validation.",
-    "effort": "S",
-    "dependencies": ["explicit authorization for destructive retention apply"],
-    "validation": [
-      "PYTHONPATH=src python -m memory.tooling.prune --check --json",
-      "PYTHONPATH=src python -m memory.tooling.workflow smoke"
-    ],
-    "automation": "memory.tooling.prune retention gate; apply remains explicitly authorized",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9005"
-  },
-  {
-    "id": "AUD-005",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 1.0,
-    "status": "PROVEN",
-    "lifecycle_status": "remediated_pending_merge",
-    "category": "generated-prompt-links",
-    "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cyclic-pack.md:78",
-    "observation": "Generated full-paste project prompts copied source-relative links without rebasing and failed the documentation link gate with 12 broken links.",
-    "method": "PYTHONPATH=src python -m scripts.docs check-links --links --specs --configs",
-    "evidence": [
-      {
-        "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cyclic-pack.md",
-        "line": 78,
-        "command": "python -m scripts.ai.prompts project-full-links --check",
-        "observation": "Baseline detected link drift in audit-cyclic-pack.md and audit-sequential-run.md; sync rebased 12 links."
-      },
-      {
-        "path": "scripts/ai/prompts/project_full.py",
-        "line": 48,
-        "command": "python -m scripts.ai.prompts check",
-        "observation": "Post-fix project_full_link_drift=0 and prompt check exits zero."
-      }
-    ],
-    "expected": "Generated prompt links resolve from the generated output directory, and prompt checks detect skipped rebasing.",
-    "actual": "Eleven cycle links in audit-cyclic-pack.md and one in audit-sequential-run.md resolved only beside their source cards.",
-    "impact": "The required docs link gate failed and operators following full-paste prompts reached missing pages.",
-    "root_cause": "The render workflow preserved Markdown link text while moving the body two directories deeper.",
-    "remediation": "Add deterministic source-aware link rebasing, expose check/sync CLI modes, and include drift in the prompt gate.",
-    "effort": "S",
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.ai.prompts project-full-links --check",
-      "python -m scripts.ai.prompts check",
-      "PYTHONPATH=src python -m scripts.docs check-links --links --specs --configs"
-    ],
-    "automation": "scripts.ai.prompts project-full-links --check plus prompts check",
-    "automated_fix_possible": true,
-    "issue_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9008"
-  }
-]
+{
+  "findings": [
+    {
+      "id": "AGENT-SYNC-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "agent_scripts",
+      "github_issue": 9119,
+      "iteration_resolved": 1,
+      "evidence": [
+        {
+          "path": "scripts/ai/sync/governance.py",
+          "line": 818,
+          "command": "python -c inspect argparse",
+          "observation": "Bare CLI defaulted check_only=False and wrote .codex/agents/*.md"
+        },
+        {
+          "path": "scripts/ai/sync/cursor.py",
+          "line": 216,
+          "observation": "if not args.check and not args.deploy: args.deploy = True"
+        },
+        {
+          "path": "scripts/ai/sync/windsurf.py",
+          "line": 284,
+          "observation": "deploy_local = not args.no_deploy and not args.check"
+        }
+      ],
+      "expected": "Destructive/write AI sync CLIs default to check/dry-run",
+      "actual": "governance/cursor/windsurf mutated by default",
+      "impact": "Accidental rewrite of canonical .codex/agents and local IDE rule trees",
+      "root_cause": "Write flags were opt-in inverted versus check_junie_mirror/runtime_skills",
+      "remediation": "Default to --check; require --apply/--deploy for writes",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "pytest tests/unit/scripts/test_sync_ai_governance.py tests/unit/scripts/test_sync_cursor_rules.py -q"
+      ],
+      "automated_fix_possible": true
+    },
+    {
+      "id": "AGENT-JUNIE-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "runtime_instructions",
+      "github_issue": 9120,
+      "iteration_resolved": 1,
+      "evidence": [
+        {
+          "path": ".junie/guidelines.md",
+          "line": 35,
+          "observation": "Required AI Context was followed by Response Language; AGENTS.md Environment Configuration was absent"
+        }
+      ],
+      "expected": "guidelines.md lock-step with AGENTS.md including .env token contract",
+      "actual": "Junie root contract omitted Environment Configuration",
+      "impact": "Junie sessions may not load tokens from repository .env",
+      "root_cause": "Equal-peer root contracts drifted on env section",
+      "remediation": "Copy Environment Configuration into .junie/guidelines.md and ratchet in architecture tests",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "pytest tests/architecture/test_junie_runtime_ci_contract.py -q"
+      ],
+      "automated_fix_possible": true
+    },
+    {
+      "id": "AGENT-MEM-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "memory_tooling",
+      "github_issue": 9121,
+      "iteration_resolved": 1,
+      "evidence": [
+        {
+          "path": "scripts/memory/run_workflow.sh",
+          "line": 13,
+          "observation": "Python discovery skipped .venv-win/Scripts/python.exe"
+        }
+      ],
+      "expected": "Windows helper prefers .venv-win per AGENTS.md / CODEX-RUNTIME.md",
+      "actual": ".venv/bin then .venv/Scripts then system python",
+      "impact": "Windows Git Bash agents using the helper can miss the canonical venv",
+      "root_cause": "Helper predated .venv-win contract",
+      "remediation": "Prefer .venv-win/Scripts/python.exe when executable",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "pytest tests/architecture/test_ai_memory_program_contracts.py -q"
+      ],
+      "automated_fix_possible": true
+    }
+  ],
+  "run_id": "20260820T071500Z-agents-memory-cycle-c22e7b01",
+  "sha": "c22e7b01b3"
+}
