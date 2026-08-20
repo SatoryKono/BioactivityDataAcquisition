@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-17'
+  Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -55,13 +55,14 @@ Deprecated framing (do not use):
 ## Architecture scanner census
 
 Three architecture scanners count different populations. They are not interchangeable
-and a numeric gap is not a layer violation.
+and a numeric gap is not a layer violation. Re-measure with the live commands before
+copying these integers forward.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Every `src/bioetl/**/*.py` module (currently 2427), including packages that have no hexagonal layer tag |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Modules with a resolvable hexagonal layer + group (currently 2425). The two-module gap vs coverage is packages outside `domain/application/infrastructure/composition/interfaces` |
-| import-linter | `lint-imports` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2377 files). Excludes some stubs / non-imported modules |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2436). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. Live tree currently has 2449 `.py` files; the 13-file gap is uninventoried source, not a layer violation |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2447). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). Includes the 13 source files not yet in the coverage inventory, so the map sits 11 modules above the inventory (13 new minus 2 unlayered) |
+| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2397 files). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently
 `application_services_control_plane` fan-in 2/2) is a tracked residual, not a
