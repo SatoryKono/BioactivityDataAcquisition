@@ -707,7 +707,7 @@ def test_operator_critical_tables_expose_full_values() -> None:
     expected_panels = {
         "bioetl-dq-v2.json": (9102,),
         "bioetl-incident-v1.json": (2010, 2002, 2003, 2004, 2005),
-        "bioetl-run-explorer-v1.json": (9402,),
+        "bioetl-run-explorer-v1.json": (3022,),
     }
 
     for dashboard_name, panel_ids in expected_panels.items():
@@ -1016,7 +1016,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert any("var-run_id=${__value.raw}" in url for url in first_links)
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
     assert any("var-run_id=${__value.raw}" in url for url in last_links)
-    identity = _panel(explorer, 9402)
+    identity = _panel(explorer, 3022)
     assert str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     ).startswith("SELECT RUN")

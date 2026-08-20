@@ -220,8 +220,8 @@ def test_compact_selected_run_summary_uses_shared_projection() -> None:
         ):
             missing.append(f"{name}:{panel_id} missing view=summary")
         blob = json.dumps(panel)
-        if "viewPanel=9402" not in blob:
-            missing.append(f"{name}:{panel_id} missing D6 viewPanel=9402")
+        if "viewPanel=3022" not in blob:
+            missing.append(f"{name}:{panel_id} missing D6 viewPanel=3022")
         if "from=${__data.fields.from_ms}" not in blob:
             missing.append(f"{name}:{panel_id} missing Set range from_ms")
         no_value = str(

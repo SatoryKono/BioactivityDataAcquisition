@@ -73,7 +73,7 @@ Windows: `.\.venv-win\Scripts\python.exe`. Чужой dirty WIP — worktree.
 ## Очередь
 
 1. **Babysit `#8987`** — CI, rebase на `origin/main`, не force-push.
-2. **R-D** — только если Inspect 3010/9402/3023 всё ещё показывает
+2. **R-D** — только если Inspect 3010/3022/3023 всё ещё показывает
    plugin/request drift после R-A/R-B/R-C. Bounded validator, без
    infrastructure import из interfaces. LOC/CC не расти.
 3. **R-F** — не здесь; карточка `prompt.observability.dashboard-v5.audit-rf`.
@@ -93,7 +93,7 @@ no-growth).
 - `tests/integration/test_run_explorer_request_fixtures.py` (если есть в дереве)
 - `tests/integration/test_grafana_selector_contract.py`
 - `tests/integration/test_dashboard_operator_readability.py`
-- first-screen: `noValue` 3010/9402 без `$`
+- first-screen: `noValue` 3010/3022/3023 без `$`
 
 После правок `tests/**` — обновить
 `configs/quality/test_telemetry_baseline.yaml` `source_tree_sha256`.

@@ -86,7 +86,7 @@ do-not-remove. Затем следующий UID.
 | 3 | `bioetl-provider-health-v2` | `9101` Monitor Fleet Severity |
 | 4 | `bioetl-dq-v2` | `9401` Monitor Current DQ Status |
 | 5 | `bioetl-incident-v1` | `2010` Inspect Ranked Suspects |
-| 6 | `bioetl-run-explorer-v1` | `9402` Inspect Run Identity (`3010` = empty-selection utility) |
+| 6 | `bioetl-run-explorer-v1` | `3010` Inspect Recent Runs (last 4); identity/accounting are collapsed `3022`/`3023` |
 
 ## Метод на каждый UID
 
