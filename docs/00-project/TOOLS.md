@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -63,7 +63,9 @@ build / lock-frozen production paths may use different flags (`--frozen`,
 uv run python -m scripts.docs verify
 uv run python -m scripts.docs check-links --links --specs --configs
 uv run python -m scripts.docs check-drift --ports --classes
+uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
 uv run python -m scripts.docs check-docstrings --summary
+uv run python -m scripts.docs passports check
 uv run python -m scripts.docs build-site --strict
 ```
 
