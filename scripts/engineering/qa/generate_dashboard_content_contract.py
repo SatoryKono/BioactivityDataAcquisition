@@ -151,7 +151,9 @@ def _scope(title: str, panel: dict[str, object]) -> str:
     return "time_range"
 
 
-def _empty_state_class(panel: dict[str, object], role: str, evidence_source: str) -> str:
+def _empty_state_class(
+    panel: dict[str, object], role: str, evidence_source: str
+) -> str:
     if role in _NON_DATA_ROLES:
         return "unsupported"
     if evidence_source == "ops_http":

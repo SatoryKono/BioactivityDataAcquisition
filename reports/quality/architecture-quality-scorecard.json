@@ -175,9 +175,10 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane"
+      "application_services_control_plane",
+      "composition_factories_pipeline"
     ],
-    "families_at_budget_count": 1,
+    "families_at_budget_count": 2,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -240,7 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "6feef0f5973a2f6ee1f82c08a72da9af24404a4a595d966071fd7602eda2f103",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "d508285912e98ec078a255730527fa1f087627836b58bd2bb6df5e2fa52a8049"
+      "source_tree_sha256": "d958a33fb5ef34a7abbefd4405a3b7c411c4796e3bf20597d77a88d6310e1e57"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

@@ -30,7 +30,9 @@ def _compact(value: object) -> str:
         values = value.get("values")
         if operator and values is not None:
             return f"{operator} ({_compact(values)})"
-        return ", ".join(f"{key}={_compact(item)}" for key, item in sorted(value.items()))
+        return ", ".join(
+            f"{key}={_compact(item)}" for key, item in sorted(value.items())
+        )
     return str(value)
 
 
@@ -107,7 +109,9 @@ def _source_details(
         "subcellular_fraction",
         "target_protein_classification",
     }
-    source_kind = "derived" if provider == "chembl" and entity in derived_entities else "http_api"
+    source_kind = (
+        "derived" if provider == "chembl" and entity in derived_entities else "http_api"
+    )
     endpoint_template: str | None = str(base_url) if base_url else None
     source_collection = entity
     if provider == "chembl" and entity != "target_protein_classification":
@@ -125,9 +129,11 @@ def _field_selection_sentence(business_fields: list[object]) -> str:
         if len(business_fields) > len(field_sample)
         else "."
     )
-    return "В business-проекцию входят " + ", ".join(
-        f"`{field}`" for field in field_sample
-    ) + suffix
+    return (
+        "В business-проекцию входят "
+        + ", ".join(f"`{field}`" for field in field_sample)
+        + suffix
+    )
 
 
 def build_ordinary_projection(
@@ -156,7 +162,8 @@ def build_ordinary_projection(
             "name": field,
             "source_object": entity,
             "target_group": "business",
-            "required": field in _list(
+            "required": field
+            in _list(
                 _mapping(configured_filters.get("silver_filters")).get(
                     "required_fields"
                 )

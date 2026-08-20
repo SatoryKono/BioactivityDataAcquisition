@@ -598,9 +598,7 @@ def _append_diagnostics(
         lines.append("- No blocking diagnostics.")
 
 
-def _append_manual_context(
-    lines: list[str], manual: dict[str, object]
-) -> None:
+def _append_manual_context(lines: list[str], manual: dict[str, object]) -> None:
     if not manual:
         return
     lines.extend(["", "## Owner-approved context", ""])
@@ -819,9 +817,7 @@ def _render_pipeline_markdown(facts: JsonObject, manual: dict[str, object]) -> s
         lines, silver=silver, gold=gold, contract_label=contract_label
     )
     _append_commands_and_diagrams(lines, facts)
-    _append_pipeline_tail(
-        lines, facts=facts, manual=manual, diagnostics=diagnostics
-    )
+    _append_pipeline_tail(lines, facts=facts, manual=manual, diagnostics=diagnostics)
     return "\n".join(lines)
 
 
@@ -834,9 +830,7 @@ def _unit_projection(
 ) -> tuple[dict[Path, bytes], dict[str, object], int]:
     facts = _facts(unit, revision)
     errors = [
-        item
-        for item in facts.get("diagnostics", [])
-        if item.get("severity") == "error"
+        item for item in facts.get("diagnostics", []) if item.get("severity") == "error"
     ]
     group = "workflows" if unit.kind == "workflow" else "pipelines"
     manual = load_manual_sidecar(sidecar_root / group / f"{unit.unit_id}.yaml")

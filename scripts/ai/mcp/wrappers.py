@@ -53,7 +53,11 @@ def _ordered_catalog_entries(
         if not isinstance(raw_entry, dict):
             raise ValueError(f"MCP server entry must be an object: {server_name}")
         raw_order = raw_entry.get("wrapper_order")
-        if not isinstance(raw_order, int) or isinstance(raw_order, bool) or raw_order < 1:
+        if (
+            not isinstance(raw_order, int)
+            or isinstance(raw_order, bool)
+            or raw_order < 1
+        ):
             raise ValueError(
                 f"MCP server {server_name!r} has invalid wrapper_order: {raw_order!r}"
             )

@@ -29,7 +29,9 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
 from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
-from bioetl.composition.factories.pipeline._preflight_health_monitor import build_preflight_health_monitor
+from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+    build_preflight_health_monitor,
+)
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     RunnerConstructorPayload,

@@ -73,7 +73,9 @@ class DashboardContext:
         object.__setattr__(self, "run_id", normalize_run_id(self.run_id))
 
 
-def _pipeline_value(*, source_uid: str, template: bool, context: DashboardContext | None) -> str:
+def _pipeline_value(
+    *, source_uid: str, template: bool, context: DashboardContext | None
+) -> str:
     if template:
         if source_uid == "bioetl-provider-health-v2":
             return "$pipeline_context"

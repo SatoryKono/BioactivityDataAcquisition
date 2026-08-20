@@ -145,6 +145,7 @@ from scripts.docs.matrix.normalization_matrix_catalog import (
     yaml,
 )
 
+
 @cache
 def _composite_gold_contract_properties(
     pipeline_name: str,
@@ -1488,7 +1489,6 @@ def _dq_coverage(
     return coverage
 
 
-
 # Row construction is isolated from policy discovery and KPI reporting.
 from scripts.docs.matrix.normalization_matrix_builder import (
     _entity_config_paths,
@@ -1521,6 +1521,7 @@ from scripts.docs.matrix.normalization_matrix_builder import (
     _composite_field_matrix_rows,
     _composite_pipeline_inputs,
 )
+
 
 def build_entity_profile_coverage_kpi(
     rows: list[dict[str, str]] | None = None,
@@ -1803,7 +1804,6 @@ def _update_non_meta_profile_semantics(
         stats.set_like_ok += 1
         return
     stats.set_like_regressions.append(_normalizer_regression(location, rule))
-
 
 
 from scripts.docs.matrix.normalization_matrix_report import (

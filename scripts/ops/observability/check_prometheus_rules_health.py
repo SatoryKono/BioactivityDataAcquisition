@@ -255,8 +255,7 @@ def _provider_status_expr_issues(name: str, live_exprs: tuple[str, ...]) -> list
     issues: list[str] = []
     if NAN_FALLBACK_NEEDLE not in joined:
         issues.append(
-            f"{name}: live expr missing finite UNKNOWN fallback "
-            f"{NAN_FALLBACK_NEEDLE!r}"
+            f"{name}: live expr missing finite UNKNOWN fallback {NAN_FALLBACK_NEEDLE!r}"
         )
     if NAN_DIVISION_NEEDLE in joined:
         issues.append(

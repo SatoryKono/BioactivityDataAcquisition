@@ -46,13 +46,13 @@
       "status": "pass"
     },
     {
-      "current": "d508285912e98ec078a255730527fa1f087627836b58bd2bb6df5e2fa52a8049",
+      "current": "d958a33fb5ef34a7abbefd4405a3b7c411c4796e3bf20597d77a88d6310e1e57",
       "limit": "d508285912e98ec078a255730527fa1f087627836b58bd2bb6df5e2fa52a8049",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -417,14 +417,16 @@
     {
       "current": {
         "artifacts": [
-          "adr_enforcement_matrix"
+          "hotspot_family_baseline",
+          "module_coverage_inventory",
+          "remote_main_baseline"
         ],
-        "count": 1
+        "count": 3
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: hotspot_family_baseline, module_coverage_inventory, remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
       "status": "fail"
     }
@@ -451,28 +453,29 @@
   ],
   "schema_version": 1,
   "stale_artifacts": {
-    "adr_enforcement_matrix": true,
+    "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": false,
-    "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "hotspot_family_baseline": true,
+    "module_coverage_inventory": true,
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 44,
+    "fail": 2,
+    "pass": 43,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.41,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 1,
+    "fail_count": 2,
     "failing_gates": [
+      "module_coverage_source_tree_hash_current",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 44,
+    "pass_count": 43,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
