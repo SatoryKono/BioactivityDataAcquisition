@@ -366,6 +366,16 @@ repos:
         files: ^(grafana/dashboards/.*\.json|grafana/provisioning/.*|docker-compose\.monitoring\.yml|tests/integration/test_dashboard_operator_readability\.py|docs/03-guides/dashboards/design-system\.md)$
         stages: [pre-push]
 
+      - id: check-dashboard-qa-check-gates
+        name: Check dashboard PromQL duplicate, performance, inventory, and scope gates
+        entry: >
+          python scripts/engineering/dev/run_project_python.py -m pytest
+          tests/integration/test_dashboard_qa_check_gates.py -q --tb=short
+        language: python
+        pass_filenames: false
+        files: ^(grafana/dashboards/.*\.json|configs/quality/dashboard_query_duplicate_allowlist\.yaml|docs/03-guides/dashboards/contracts/dashboard-inventory\.yaml|docs/03-guides/dashboards/contracts/performance-budgets\.yaml|tests/integration/test_dashboard_qa_check_gates\.py|scripts/engineering/qa/report_dashboard_query_duplicates\.py|scripts/engineering/qa/check_dashboard_performance_budgets\.py|scripts/engineering/qa/report_dashboard_inventory\.py|scripts/engineering/qa/report_dashboard_promql_scope\.py)$
+        stages: [pre-push]
+
       - id: ruff-scripts-advisory
         name: Ruff advisory scan for scripts backlog
         entry: python scripts/engineering/dev/run_project_python.py -m ruff check scripts --exit-zero
