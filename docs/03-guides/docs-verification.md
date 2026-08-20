@@ -226,6 +226,11 @@ Documentation changes trigger the `docs.yml` workflow which:
 - Validates link integrity, config parity, and architecture drift
 - Regenerates generated documentation artifacts when needed
 
+Calendar enforcement (independent of docs-path PRs) is
+`.github/workflows/docs-kpi-weekly.yml`: it runs
+`python -m scripts.docs check-drift --runtime-mirrors --freshness`
+and then `python -m scripts.docs check-kpi`.
+
 ### Future Enhancement
 
 If PR preview functionality is desired, consider:
