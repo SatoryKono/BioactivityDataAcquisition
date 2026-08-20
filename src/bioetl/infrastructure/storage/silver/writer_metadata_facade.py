@@ -112,16 +112,17 @@ class SilverWriterMetadataFacade:
             if column
             not in {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
         }
-        normalized_records = (
-            frame.to_dicts() if isinstance(records, pl.DataFrame) else records
-        )
+        # We only need column names for schema drift detection, not materialized records
+        record_keys = frame.columns if isinstance(records, pl.DataFrame) else (list(records[0].keys()) if records else [])
+        schema_drift_records = [{k: None for k in record_keys}] if record_keys else []
+
         return BatchDQMetrics(
             total_records=valid_records + quarantined_count,
             valid_records=valid_records,
             error_records=quarantined_count,
             column_stats=column_stats,
             schema_drift=await self._detect_schema_drift(
-                table_name, normalized_records
+                table_name, schema_drift_records
             ),
             validation_errors=tuple(validation_errors or ()),
         )
