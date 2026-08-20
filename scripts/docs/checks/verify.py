@@ -60,6 +60,8 @@ def main(argv: list[str] | None = None) -> int:
                     "scripts.docs.checks.check_drift",
                     "--ports",
                     "--classes",
+                    "--runtime-mirrors",
+                    "--freshness",
                 ],
             )
         )

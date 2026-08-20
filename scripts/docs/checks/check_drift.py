@@ -9,7 +9,7 @@ exist in the codebase.  Catches common drift scenarios:
   3. Module paths moved but docs still point to old locations
   4. Provider/entity lists changed but reference docs are stale
   5. Factory/registry changes not reflected in composition docs
-  6. Active runtime docs mirrors drift from canonical `.gemini/agents/` sources
+  6. Active runtime docs mirrors drift from canonical `.codex/` / `.junie/` sources
   7. Freshness/version markers in active docs disagree with canonical runtime docs
 
 Usage:
