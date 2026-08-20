@@ -441,6 +441,7 @@ def test_github_actions_workflow_inventory_matches_live_repo() -> None:
 
     assert missing_in_doc == []
     assert extra_in_doc == []
+    assert module.check_github_actions_workflow_claim_parity() == []
 
 
 def test_workflow_inventory_keeps_scheduled_only_workflows_out_of_pr_push_section() -> (

@@ -132,9 +132,38 @@ jobs:
           which bioetl
           bioetl --version || echo "Version command not implemented"
 
+  security-gate:
+    name: Same-SHA security scans
+    uses: ./.github/workflows/security.yml
+
+  release-tests:
+    name: Same-SHA release tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.13"
+          uv-extras: "dev"
+
+      - name: Smoke tests
+        run: uv run --frozen --no-build pytest tests/smoke/ -m "not memory" -q --tb=line
+
+      - name: Architecture supply-chain gates
+        run: >
+          uv run --frozen --no-build pytest -q --tb=line
+          tests/architecture/test_github_actions_runtime_policy.py
+          tests/architecture/test_docker_runtime_contracts.py
+
   publish-testpypi:
     name: Publish to TestPyPI
-    needs: [build, test-install]
+    needs: [build, test-install, security-gate, release-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Only publish on release events or manual non-dry-run
@@ -160,7 +189,7 @@ jobs:
 
   publish-pypi:
     name: Publish to PyPI
-    needs: [build, test-install, publish-testpypi]
+    needs: [build, test-install, publish-testpypi, security-gate, release-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Only publish on release events

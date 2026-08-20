@@ -987,6 +987,20 @@ def check_chembl_provider_overview() -> tuple[list[str], list[str]]:
     return sorted(expected - listed), sorted(listed - expected)
 
 
+GITHUB_POLICY_DOC = DOCS_DIR / "00-project" / "governance" / "05-github-policy.md"
+WORKFLOW_COUNT_CLAIM_RE = re.compile(
+    r"BioETL uses \*\*(\d+) GitHub Actions workflows\*\*"
+)
+INVENTORY_COUNT_CLAIM_RE = re.compile(
+    r"\*\*(\d+)\*\* live GitHub Actions"
+)
+INVENTORY_TRIGGER_ROW_RE = re.compile(
+    r"^\|\s*`(?P<file>[A-Za-z0-9._-]+\.yml)`\s*\|\s*`[^`]+`\s*\|\s*(?P<triggers>[^|]+)\|",
+    re.MULTILINE,
+)
+TRIGGER_TOKEN_RE = re.compile(r"`([a-z_]+)`")
+
+
 def check_github_actions_workflow_inventory() -> tuple[list[str], list[str]]:
     if not WORKFLOW_INVENTORY_DOC.exists() or not GITHUB_WORKFLOWS_DIR.exists():
         return [], []
@@ -999,6 +1013,65 @@ def check_github_actions_workflow_inventory() -> tuple[list[str], list[str]]:
     live = {path.name for path in GITHUB_WORKFLOWS_DIR.glob("*.yml")}
 
     return sorted(live - documented), sorted(documented - live)
+
+
+def _live_workflow_triggers(path: Path) -> set[str]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    on_field = payload.get("on", payload.get(True))
+    if on_field is None:
+        return set()
+    if isinstance(on_field, str):
+        return {on_field}
+    if isinstance(on_field, list):
+        return {str(item) for item in on_field}
+    if isinstance(on_field, dict):
+        return {str(key) for key in on_field}
+    return set()
+
+
+def check_github_actions_workflow_claim_parity() -> list[str]:
+    """Compare published count/trigger claims with executable workflow YAML."""
+    errors: list[str] = []
+    live_files = sorted(GITHUB_WORKFLOWS_DIR.glob("*.yml"))
+    live_count = len(live_files)
+    inventory_text = WORKFLOW_INVENTORY_DOC.read_text(encoding="utf-8", errors="replace")
+    policy_text = GITHUB_POLICY_DOC.read_text(encoding="utf-8", errors="replace")
+
+    policy_match = WORKFLOW_COUNT_CLAIM_RE.search(policy_text)
+    if policy_match is None:
+        errors.append("docs/00-project/governance/05-github-policy.md missing workflow count claim")
+    elif int(policy_match.group(1)) != live_count:
+        errors.append(
+            "docs/00-project/governance/05-github-policy.md claims "
+            f"{policy_match.group(1)} workflows, live count is {live_count}"
+        )
+
+    inventory_match = INVENTORY_COUNT_CLAIM_RE.search(inventory_text)
+    if inventory_match is None:
+        errors.append("docs/04-reference/github-actions-workflows.md missing live workflow count")
+    elif int(inventory_match.group(1)) != live_count:
+        errors.append(
+            "docs/04-reference/github-actions-workflows.md claims "
+            f"{inventory_match.group(1)} workflows, live count is {live_count}"
+        )
+
+    documented_triggers: dict[str, set[str]] = {}
+    for match in INVENTORY_TRIGGER_ROW_RE.finditer(inventory_text):
+        documented_triggers[match.group("file")] = set(
+            TRIGGER_TOKEN_RE.findall(match.group("triggers"))
+        )
+
+    for path in live_files:
+        live_triggers = _live_workflow_triggers(path)
+        documented = documented_triggers.get(path.name)
+        if documented is None:
+            continue
+        if documented != live_triggers:
+            errors.append(
+                f"{path.name}: inventory triggers {sorted(documented)} != "
+                f"executable {sorted(live_triggers)}"
+            )
+    return errors
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -1199,7 +1272,8 @@ def _run_contracts_index_check() -> int:
 
 def _run_workflow_inventory_check() -> int:
     missing_in_doc, extra_in_doc = check_github_actions_workflow_inventory()
-    if not (missing_in_doc or extra_in_doc):
+    claim_errors = check_github_actions_workflow_claim_parity()
+    if not (missing_in_doc or extra_in_doc or claim_errors):
         print(
             "Workflow inventory: OK (published workflow doc matches .github/workflows)"
         )
@@ -1214,7 +1288,11 @@ def _run_workflow_inventory_check() -> int:
         print("  Documented but missing on disk:")
         for item in extra_in_doc:
             print(f"    - {item}")
-    return len(missing_in_doc) + len(extra_in_doc)
+    if claim_errors:
+        print("  Trigger/count claim mismatches:")
+        for item in claim_errors:
+            print(f"    - {item}")
+    return len(missing_in_doc) + len(extra_in_doc) + len(claim_errors)
 
 
 def _run_provider_overview_check() -> int:
