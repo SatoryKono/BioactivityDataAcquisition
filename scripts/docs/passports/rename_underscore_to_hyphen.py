@@ -134,12 +134,18 @@ def _materialize_repo_file(root: Path, relative_posix: str) -> Path:
     return materialized
 
 
-_REFERENCE_RELATIVES = (
-    "mkdocs.yml",
-    "README.md",
-    "CHANGELOG.md",
-    "docs/04-reference/passports/index.md",
-)
+def _rewrite_constant_file(path: Path, pairs: tuple[tuple[str, str], ...]) -> bool:
+    """Replace path tokens in one constant file. Returns True when the file changed."""
+    if not path.is_file():
+        return False
+    current = path.read_text(encoding="utf-8")
+    rewritten = current
+    for source, target in pairs:
+        rewritten = rewritten.replace(source, target)
+    if rewritten == current:
+        return False
+    path.write_text(rewritten, encoding="utf-8")
+    return True
 
 
 def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
@@ -148,16 +154,12 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
     for plan in plans:
         plan.source.rename(plan.target)
     updated_paths: list[Path] = []
-    for relative in _REFERENCE_RELATIVES:
-        path = _materialize_repo_file(root, relative)
-        if not path.is_file():
-            continue
-        current = path.read_text(encoding="utf-8")
-        rewritten = current
-        for source, target in pairs:
-            rewritten = rewritten.replace(source, target)
-        if rewritten != current:
-            path.write_text(rewritten, encoding="utf-8")
+    mkdocs = root / "mkdocs.yml"
+    readme = root / "README.md"
+    changelog = root / "CHANGELOG.md"
+    index = root / "docs" / "04-reference" / "passports" / "index.md"
+    for path in (mkdocs, readme, changelog, index):
+        if _rewrite_constant_file(path, pairs):
             updated_paths.append(path)
     return tuple(updated_paths)
 
