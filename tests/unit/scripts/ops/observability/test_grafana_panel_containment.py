@@ -76,6 +76,53 @@ console.log("ok");
     assert output == "ok"
 
 
+def test_pick_best_scroller_prefers_overflow_auto_child() -> None:
+    """#9250: panel-content 110/110 must not hide a nested overflow:auto 191/94."""
+    output = _node_eval(
+        """
+const {
+  pickBestScrollerCandidate,
+  evaluatePanelContainment,
+  isScrollableOverflow,
+} = require(process.argv[1]);
+const panelContent = {
+  selector: "panel-content",
+  clientHeight: 110,
+  scrollHeight: 110,
+  clientWidth: 1032,
+  scrollWidth: 1032,
+};
+const innerAuto = {
+  selector: "overflow:auto/auto",
+  clientHeight: 94,
+  scrollHeight: 191,
+  clientWidth: 1016,
+  scrollWidth: 1016,
+};
+const picked = pickBestScrollerCandidate([panelContent, innerAuto]);
+if (picked.selector !== "overflow:auto/auto") {
+  throw new Error(JSON.stringify(picked));
+}
+if (!isScrollableOverflow("auto") || isScrollableOverflow("hidden")) {
+  throw new Error("overflow keyword map");
+}
+const measured = evaluatePanelContainment({
+  uid: "bioetl-run-explorer-v1",
+  id: 1,
+  title: "Understand Run Scope",
+  type: "text",
+  gridPos: { x: 0, y: 4, w: 24, h: 4 },
+  ...innerAuto,
+});
+if (measured.status !== "error" || !measured.reasons.includes("vertical-overflow")) {
+  throw new Error(JSON.stringify(measured));
+}
+console.log("ok");
+"""
+    )
+    assert output == "ok"
+
+
 def test_evaluate_panel_containment_fails_closed_on_overflow() -> None:
     output = _node_eval(
         """
