@@ -215,11 +215,11 @@ dashboards:
     panel_count: 14
     key_panels:
       - id: 3022
-        title: Inspect Full Run Identity
+        title: Inspect Run Identity
         type: table
         description: HTTP identity hub in collapsed Selected Run Details; run_id never a Prometheus label
       - id: 3023
-        title: Inspect Full Processed Records
+        title: Inspect Processed Records
         type: table
         description: Bronze/Silver/Gold accounting hub via Ops HTTP (collapsed row)
       - id: 3010
