@@ -362,6 +362,68 @@ def test_live_project_origin_and_foreign_port_are_gate_errors(tmp_path: Path) ->
     assert not preflight._is_discouraged_bind_source("/home/user/repo", ("/mnt/e",))
 
 
+def test_windows_and_wsl_spellings_of_same_compose_file_are_not_origin_drift() -> None:
+    """Docker Desktop WSL config path of this checkout is not PROJECT_ORIGIN."""
+    preflight = _load_preflight()
+    root = Path(r"E:\github\BioactivityDataAcquisition")
+    contract = {
+        "stacks": {
+            "neo4j": {
+                "compose_file": "docker-compose.neo4j.yml",
+                "project_name": "bioetl-neo4j",
+            }
+        },
+        "path_policy": {},
+    }
+    rows = [
+        {
+            "Name": "bioetl-neo4j",
+            "ConfigFiles": (
+                r"E:\github\BioactivityDataAcquisition\docker-compose.neo4j.yml,"
+                "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml"
+            ),
+        }
+    ]
+
+    findings = preflight._project_origin_findings(root, rows, contract)
+
+    assert findings == []
+
+
+def test_foreign_clone_compose_file_is_still_project_origin() -> None:
+    preflight = _load_preflight()
+    root = Path(r"E:\github\BioactivityDataAcquisition")
+    contract = {
+        "stacks": {
+            "neo4j": {
+                "compose_file": "docker-compose.neo4j.yml",
+                "project_name": "bioetl-neo4j",
+            }
+        },
+        "path_policy": {},
+    }
+    rows = [
+        {
+            "Name": "bioetl-neo4j",
+            "ConfigFiles": (
+                "/mnt/e/g-drive/05_ai/github/bioactivitydataacquisition2/"
+                "docker-compose.neo4j.yml"
+            ),
+        }
+    ]
+
+    findings = preflight._project_origin_findings(root, rows, contract)
+
+    assert any(finding.code == "PROJECT_ORIGIN" for finding in findings)
+    unexpected = next(
+        finding
+        for finding in findings
+        if finding.code == "PROJECT_ORIGIN"
+        and "unexpected config path" in finding.message
+    )
+    assert unexpected.severity == "error"
+
+
 def test_transient_issue_worktree_compose_is_gate_error(tmp_path: Path) -> None:
     preflight = _load_preflight()
     contract = {
