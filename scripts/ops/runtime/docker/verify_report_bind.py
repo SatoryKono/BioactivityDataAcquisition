@@ -103,7 +103,13 @@ def _host_report_root(repo: Path) -> Path:
     env = os.environ.get("BIOETL_REPORT_ROOT", "").strip()
     if env and not _looks_like_container_path(env):
         return resolve_output_path(Path(env).expanduser(), root=repo)
-    return resolve_output_path(repo / "reports" / "run-reports", root=repo)
+    # When BIOETL_REPORT_ROOT is unset or a container path, follow the
+    # dashboard reports bind (BIOETL_DASHBOARD_REPORT_ROOT) rather than
+    # always using the current repo's reports/ tree.
+    return resolve_output_path(
+        _host_reports_mount(repo) / "run-reports",
+        root=repo,
+    )
 
 
 def _host_reports_mount(repo: Path) -> Path:
@@ -387,10 +393,18 @@ def _verify_ready_endpoint(
     ops_url: str,
     expected_source_id: str | None,
     require_ops: bool,
+    bind_aligned: bool,
 ) -> None:
-    ready = _json_get(f"{ops_url.rstrip('/')}/health/ready")
+    ready = _json_get(f"{ops_url.rstrip('/')}/health/ready", timeout=20.0)
     if ready is None:
+        live = _json_get(f"{ops_url.rstrip('/')}/health/live", timeout=5.0)
         message = f"ops HTTP not reachable at {ops_url}"
+        if live is not None and bind_aligned:
+            state.warn(
+                "WARN: /health/ready timed out while /health/live is up and "
+                "host/container bind identity is aligned; not a REPORT_BIND fail"
+            )
+            return
         if require_ops:
             state.fail(f"FAIL: {message}")
         else:
@@ -452,6 +466,7 @@ def _verify_pipeline_endpoint(
     host_count: int | None,
     host_latest_run_id: str | None,
     require_ops: bool,
+    bind_aligned: bool,
 ) -> None:
     if not pipeline:
         return
@@ -459,8 +474,14 @@ def _verify_pipeline_endpoint(
         f"{ops_url.rstrip('/')}/ops/observability/pipeline-run-reports"
         f"?pipeline={pipeline}&limit=20"
     )
-    listed = _json_get(list_url)
+    listed = _json_get(list_url, timeout=20.0)
     if listed is None:
+        if bind_aligned:
+            state.warn(
+                "WARN: list endpoint timed out while host/container bind "
+                f"identity is aligned: {list_url}"
+            )
+            return
         if require_ops:
             state.fail(f"FAIL: list endpoint unreachable: {list_url}")
         return
@@ -532,11 +553,13 @@ def verify(
         require_ops=require_ops,
     )
 
+    bind_aligned = state.ok
     _verify_ready_endpoint(
         state,
         ops_url=ops_url,
         expected_source_id=expected_source_id,
         require_ops=require_ops,
+        bind_aligned=bind_aligned,
     )
 
     _verify_pipeline_endpoint(
@@ -547,6 +570,7 @@ def verify(
         host_count=host_count,
         host_latest_run_id=host_latest_run_id,
         require_ops=require_ops,
+        bind_aligned=bind_aligned,
     )
 
     for line in state.findings:

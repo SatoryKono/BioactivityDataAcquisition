@@ -1007,8 +1007,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     main_health = " ".join(map(str, main["services"]["bioetl"]["healthcheck"]["test"]))
     renderer_health = monitoring["services"]["renderer"]["healthcheck"]["test"]
 
-    assert "/health/ready" in main_health
-    assert "/health/live" not in main_health
+    assert "/health/live" in main_health
+    assert "/health/ready" not in main_health
     # Opt-in monitoring is Prom/Grafana/renderer only (Loki/Promtail/Tempo removed).
     assert "loki" not in monitoring["services"]
     assert "promtail" not in monitoring["services"]
@@ -1046,7 +1046,14 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     )
     assert "uv==0.11.26" in operations_dockerfile
     assert "sys.exit(0)" not in dockerfile
-    assert "/health/ready" in dockerfile
+    assert "/health/live" in dockerfile
+    healthcheck_blob = "\n".join(
+        line
+        for line in dockerfile.splitlines()
+        if "HEALTHCHECK" in line or "health/" in line
+    )
+    assert "/health/live" in healthcheck_blob
+    assert "/health/ready" not in healthcheck_blob
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
@@ -1058,7 +1065,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "quarantine serve" not in bioetl_command
     assert bioetl_service["ports"] == ["127.0.0.1:8000:8000"]
     bioetl_health = " ".join(map(str, bioetl_service["healthcheck"]["test"]))
-    assert "127.0.0.1:8000/health/ready" in bioetl_health
+    assert "127.0.0.1:8000/health/live" in bioetl_health
     assert "8081" not in bioetl_health
 
 

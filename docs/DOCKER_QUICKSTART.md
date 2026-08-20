@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: repo-only
 Owner: BioETL Team
-Last verified: '2026-08-13'
+Last verified: '2026-08-20'
 
 ______________________________________________________________________
 
@@ -27,6 +27,15 @@ Docker — optional local adjunct. Канонический runtime: Python/venv
 | `main` (`bioetl-main`) | **Yes** (if Docker used) | Health/metrics endpoint only (`:8000`) |
 | `neo4j` | Optional helper | Graph store |
 | `monitoring` (`bioetl-monitoring`) | **No** — opt-in only | Prometheus, Pushgateway, Grafana, renderer |
+
+**Canonical checkout:** start stacks only from one repository tree via
+`runtime_manager` (this checkout). Do **not** `docker compose up` from a second
+clone, worktree, or `/tmp/bioetl-issues*`. Global names (`bioetl`,
+`bioetl-neo4j`, `bioetl-grafana`) are stolen by whichever tree ran compose last.
+Deleting an extra clone is optional hygiene; it is not the code fix.
+`runtime_manager status` is `ok: false` when live Compose config is a foreign
+repository identity. Same-checkout Windows `E:/…` vs Docker Desktop `/mnt/e/…`
+is not origin drift.
 
 **Removed from shipping Docker surface:** Loki, Promtail, Tempo, Quarantine Explorer
 HTTP UI (`quarantine serve` / Infinity datasource / Silver Reject Explorer dashboard).
@@ -186,7 +195,11 @@ python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeou
 python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 ```
 
-Readiness: `http://127.0.0.1:8000/health/ready`
+Docker healthcheck (container `healthy`): `http://127.0.0.1:8000/health/live`.
+That probe is liveness only. Operator readiness remains
+`http://127.0.0.1:8000/health/ready` and includes `checks.report_root` plus
+diagnostic `current_metrics` (durable success vs scrape). Do not use ready as
+the Compose healthcheck — scrape reconciliation can exceed the 8s probe.
 
 Readiness includes `checks.report_root` with two independent checks:
 
@@ -234,6 +247,19 @@ runtime root → process environment → repository env loader → container
 environment → container label. Diagnostics classify the independently checked
 layout marker and identity as `missing`, `invalid`, `foreign`, or `aligned`;
 an invalid higher-precedence candidate is never replaced by a lower one.
+
+## Neo4j stack (optional)
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py start --stack neo4j --timeout 240
+python scripts/ops/runtime/docker/runtime_manager.py status --stack neo4j
+```
+
+`start` / `recover` re-seed Neo4j auth files on the existing
+`bioetl-neo4j_neo4j_data` volume so `NEO4J_AUTH` matches the current process
+password. Databases are kept. `NEO4J_AUTH` alone cannot rotate an already
+initialized system DB. Operator fallback:
+`scripts/ops/runtime/docker/recover-neo4j.ps1`.
 
 ## Monitoring stack (opt-in only)
 
