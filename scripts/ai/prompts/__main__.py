@@ -133,6 +133,31 @@ def cmd_show(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
+def _resolve_render_output(raw_output: str) -> Path | None:
+    output = Path(raw_output)
+    if not output.is_absolute():
+        output = REPO_ROOT / output
+    resolved = output.expanduser().resolve()
+    if Path(raw_output).expanduser().is_absolute():
+        return resolved
+    try:
+        resolved.relative_to((REPO_ROOT / "reports").resolve())
+    except ValueError:
+        return None
+    return resolved
+
+
+def _write_render_output(output: Path, text: str) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    encoding = "utf-8-sig" if sys.platform == "win32" else "utf-8"
+    output.write_text(text, encoding=encoding)
+    try:
+        shown = output.relative_to(REPO_ROOT)
+    except ValueError:
+        shown = output
+    print(f"wrote {shown}", file=sys.stderr)
+
+
 def cmd_render(args: argparse.Namespace) -> int:
     try:
         params = _parse_params(args.param)
@@ -141,29 +166,15 @@ def cmd_render(args: argparse.Namespace) -> int:
         print(str(exc), file=sys.stderr)
         return EXIT_USAGE if isinstance(exc, KeyError) else EXIT_CHECK
     if args.output:
-        out = Path(args.output)
-        if not out.is_absolute():
-            out = REPO_ROOT / out
-        reports_root = (REPO_ROOT / "reports").resolve()
-        resolved = out.expanduser().resolve()
-        try:
-            resolved.relative_to(reports_root)
-        except ValueError:
-            if not Path(args.output).expanduser().is_absolute():
-                print(
-                    "refusing relative path outside reports/: "
-                    "use --output reports/... or an absolute path",
-                    file=sys.stderr,
-                )
-                return EXIT_USAGE
-        resolved.parent.mkdir(parents=True, exist_ok=True)
-        encoding = "utf-8-sig" if sys.platform == "win32" else "utf-8"
-        resolved.write_text(text, encoding=encoding)
-        try:
-            shown = resolved.relative_to(REPO_ROOT)
-        except ValueError:
-            shown = resolved
-        print(f"wrote {shown}", file=sys.stderr)
+        resolved = _resolve_render_output(args.output)
+        if resolved is None:
+            print(
+                "refusing relative path outside reports/: "
+                "use --output reports/... or an absolute path",
+                file=sys.stderr,
+            )
+            return EXIT_USAGE
+        _write_render_output(resolved, text)
         if not args.stdout:
             return EXIT_OK
     _write_stdout(text)

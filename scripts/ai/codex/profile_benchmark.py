@@ -155,7 +155,7 @@ def _matches(actual: Any, expected: Any) -> bool:
         if len(expected) == 1:
             return actual.strip().casefold() == expected.casefold()
         return _tokens(expected) <= _tokens(actual)
-    return _normalize(actual) == _normalize(expected)
+    return bool(_normalize(actual) == _normalize(expected))
 
 
 def _render_prompt(task: Task) -> str:
@@ -209,6 +209,25 @@ def _agent_payload(text: str) -> dict[str, Any] | None:
     return parsed if isinstance(parsed, dict) else None
 
 
+def _completed_agent_response(event: dict[str, Any]) -> dict[str, Any] | None:
+    if event.get("type") != "item.completed":
+        return None
+    item = event.get("item")
+    if not isinstance(item, dict) or item.get("type") != "agent_message":
+        return None
+    message = item.get("text")
+    return _agent_payload(message) if isinstance(message, str) else None
+
+
+def _completed_turn_usage(event: dict[str, Any]) -> dict[str, int] | None:
+    raw_usage = event.get("usage")
+    if event.get("type") != "turn.completed" or not isinstance(raw_usage, dict):
+        return None
+    return {
+        key: int(value) for key, value in raw_usage.items() if isinstance(value, int)
+    }
+
+
 def parse_jsonl(stdout: str) -> tuple[dict[str, Any] | None, dict[str, int]]:
     response: dict[str, Any] | None = None
     usage: dict[str, int] = {}
@@ -217,20 +236,12 @@ def parse_jsonl(stdout: str) -> tuple[dict[str, Any] | None, dict[str, int]]:
             event = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if event.get("type") == "item.completed":
-            item = event.get("item")
-            if isinstance(item, dict) and item.get("type") == "agent_message":
-                text = item.get("text")
-                if isinstance(text, str):
-                    response = _agent_payload(text)
-        if event.get("type") == "turn.completed" and isinstance(
-            event.get("usage"), dict
-        ):
-            usage = {
-                key: int(value)
-                for key, value in event["usage"].items()
-                if isinstance(value, int)
-            }
+        completed_response = _completed_agent_response(event)
+        if completed_response is not None:
+            response = completed_response
+        completed_usage = _completed_turn_usage(event)
+        if completed_usage is not None:
+            usage = completed_usage
     return response, usage
 
 

@@ -19,7 +19,7 @@ CLASS_ENUM = frozenset(
     {"operator-paste", "campaign", "fragment", "mirror", "historical", "index"}
 )
 ID_PATTERN = re.compile(r"^prompt\.[a-z0-9]+(\.[a-z0-9-]+)+$")
-FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
+FRONTMATTER_DELIMITER = "---"
 
 # Mandatory guardrail fragments for operator-paste (basename match)
 MANDATORY_GUARDRAILS = frozenset(
@@ -97,14 +97,29 @@ def load_registry(path: Path | None = None) -> list[RegistryEntry]:
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
-    match = FRONTMATTER_RE.match(text)
-    if not match:
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != FRONTMATTER_DELIMITER:
         return {}, text
-    meta = yaml.safe_load(match.group(1)) or {}
+    closing_index = next(
+        (
+            index
+            for index, line in enumerate(lines[1:], start=1)
+            if line.strip() == FRONTMATTER_DELIMITER
+        ),
+        None,
+    )
+    if closing_index is None:
+        return {}, text
+    meta = yaml.safe_load("".join(lines[1:closing_index])) or {}
     if not isinstance(meta, dict):
         raise ValueError("frontmatter must be a YAML mapping")
-    body = text[match.end() :]
+    body = "".join(lines[closing_index + 1 :])
     return meta, body
+
+
+def _optional_text(meta: dict[str, Any], key: str) -> str | None:
+    value = meta.get(key)
+    return str(value) if value else None
 
 
 def load_card(path: Path) -> PromptCard:
@@ -125,11 +140,9 @@ def load_card(path: Path) -> PromptCard:
         anti_patterns=[str(x) for x in (meta.get("anti_patterns") or [])],
         tags=[str(x) for x in (meta.get("tags") or [])],
         summary=str(meta.get("summary") or ""),
-        supersedes=str(meta["supersedes"]) if meta.get("supersedes") else None,
-        successor=str(meta["successor"]) if meta.get("successor") else None,
-        waive_guardrails=(
-            str(meta["waive_guardrails"]) if meta.get("waive_guardrails") else None
-        ),
+        supersedes=_optional_text(meta, "supersedes"),
+        successor=_optional_text(meta, "successor"),
+        waive_guardrails=_optional_text(meta, "waive_guardrails"),
         max_body_lines=(
             int(meta["max_body_lines"])
             if meta.get("max_body_lines") is not None

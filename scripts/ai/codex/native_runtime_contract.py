@@ -8,6 +8,7 @@ import dataclasses
 import re
 import tomllib
 from pathlib import Path
+from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -283,9 +284,8 @@ def validate_project_config(repo_root: Path = REPO_ROOT) -> list[Finding]:
     return findings
 
 
-def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
+def _agent_inventory_findings(agent_dir: Path) -> list[Finding]:
     findings: list[Finding] = []
-    agent_dir = repo_root / ".codex/agents"
     actual = {path.stem for path in agent_dir.glob("py-*.toml")}
     expected = set(AGENT_NAMES)
     for missing in sorted(expected - actual):
@@ -304,72 +304,104 @@ def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
                 str(agent_dir),
             )
         )
+    return findings
+
+
+def _load_agent_descriptor(path: Path) -> tuple[dict[str, Any] | None, list[Finding]]:
+    try:
+        return tomllib.loads(path.read_text(encoding="utf-8")), []
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        return None, [Finding("agent.invalid", str(exc), str(path))]
+
+
+def _agent_field_findings(
+    agent_name: str, path: Path, data: dict[str, Any]
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for key in ("name", "description", "developer_instructions"):
+        if not isinstance(data.get(key), str) or not data[key].strip():
+            findings.append(
+                Finding(
+                    "agent.field",
+                    f"required non-empty string is missing: {key}",
+                    str(path),
+                )
+            )
+    if data.get("name") != agent_name:
+        findings.append(
+            Finding("agent.name", f"name must equal {agent_name!r}", str(path))
+        )
+    if "model" in data:
+        findings.append(
+            Finding(
+                "agent.model",
+                "project descriptors must inherit the parent model",
+                str(path),
+            )
+        )
+    expected_sandbox = (
+        "read-only" if agent_name in READ_ONLY_AGENTS else "workspace-write"
+    )
+    if data.get("sandbox_mode") != expected_sandbox:
+        findings.append(
+            Finding(
+                "agent.sandbox",
+                f"sandbox_mode must equal {expected_sandbox!r}",
+                str(path),
+            )
+        )
+    return findings
+
+
+def _agent_instruction_findings(
+    repo_root: Path, agent_name: str, path: Path, instructions: object
+) -> list[Finding]:
+    text = instructions if isinstance(instructions, str) else ""
+    findings: list[Finding] = []
+    required_refs = (
+        "AGENTS.md",
+        f".codex/agents/{agent_name}.md",
+        f".codex/skills/{agent_name}/SKILL.md",
+        f"docs/00-project/ai/memory/memory-{agent_name}.md",
+    )
+    for reference in required_refs:
+        if reference not in text:
+            findings.append(
+                Finding(
+                    "agent.instructions",
+                    f"developer_instructions must reference {reference}",
+                    str(path),
+                )
+            )
+        elif not (repo_root / reference).is_file():
+            findings.append(
+                Finding(
+                    "agent.reference",
+                    f"referenced owner surface is missing: {reference}",
+                    str(path),
+                )
+            )
+    return findings
+
+
+def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
+    agent_dir = repo_root / ".codex/agents"
+    findings = _agent_inventory_findings(agent_dir)
 
     for agent_name in AGENT_NAMES:
         path = agent_dir / f"{agent_name}.toml"
         if not path.is_file():
             continue
-        try:
-            data = tomllib.loads(path.read_text(encoding="utf-8"))
-        except (OSError, tomllib.TOMLDecodeError) as exc:
-            findings.append(Finding("agent.invalid", str(exc), str(path)))
+        data, load_findings = _load_agent_descriptor(path)
+        findings.extend(load_findings)
+        if data is None:
             continue
-        for key in ("name", "description", "developer_instructions"):
-            if not isinstance(data.get(key), str) or not data[key].strip():
-                findings.append(
-                    Finding(
-                        "agent.field",
-                        f"required non-empty string is missing: {key}",
-                        str(path),
-                    )
-                )
-        if data.get("name") != agent_name:
-            findings.append(
-                Finding("agent.name", f"name must equal {agent_name!r}", str(path))
+        findings.extend(_agent_field_findings(agent_name, path, data))
+        findings.extend(
+            _agent_instruction_findings(
+                repo_root, agent_name, path, data.get("developer_instructions")
             )
-        if "model" in data:
-            findings.append(
-                Finding(
-                    "agent.model",
-                    "project descriptors must inherit the parent model",
-                    str(path),
-                )
-            )
-        expected_sandbox = (
-            "read-only" if agent_name in READ_ONLY_AGENTS else "workspace-write"
         )
-        if data.get("sandbox_mode") != expected_sandbox:
-            findings.append(
-                Finding(
-                    "agent.sandbox",
-                    f"sandbox_mode must equal {expected_sandbox!r}",
-                    str(path),
-                )
-            )
-        instructions = data.get("developer_instructions", "")
-        required_refs = (
-            "AGENTS.md",
-            f".codex/agents/{agent_name}.md",
-            f".codex/skills/{agent_name}/SKILL.md",
-            f"docs/00-project/ai/memory/memory-{agent_name}.md",
-        )
-        for reference in required_refs:
-            if reference not in instructions:
-                findings.append(
-                    Finding(
-                        "agent.instructions",
-                        f"developer_instructions must reference {reference}",
-                        str(path),
-                    )
-                )
-            elif not (repo_root / reference).is_file():
-                findings.append(
-                    Finding(
-                        "agent.reference",
-                        f"referenced owner surface is missing: {reference}",
-                        str(path),
-                    )
-                )
     return findings
 
 
