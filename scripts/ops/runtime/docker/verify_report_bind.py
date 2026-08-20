@@ -29,6 +29,7 @@ import sys
 import urllib.error
 import urllib.request
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -245,6 +246,245 @@ def _expected_runtime_environment(repo: Path) -> dict[str, str]:
     return runtime_preflight.dashboard_source_environment(repo, payload)
 
 
+@dataclass(slots=True)
+class _VerificationState:
+    ok: bool = True
+    findings: list[str] = field(default_factory=list)
+
+    def fail(self, message: str) -> None:
+        self.ok = False
+        self.findings.append(message)
+
+    def warn(self, message: str) -> None:
+        self.findings.append(message)
+
+
+def _verify_host_source(
+    state: _VerificationState,
+    *,
+    host_mount: Path,
+    host_root: Path,
+    expected_source_id: str | None,
+) -> None:
+    marker_path = host_mount / REPORT_ROOT_MARKER_NAME
+    if not marker_path.is_file():
+        state.fail(
+            f"FAIL: host marker missing at {marker_path} "
+            f"(expected token {REPORT_ROOT_MARKER_VALUE!r})"
+        )
+    elif marker_path.read_text(encoding="utf-8").strip() != REPORT_ROOT_MARKER_VALUE:
+        token = marker_path.read_text(encoding="utf-8").strip()
+        state.fail(f"FAIL: host marker token mismatch at {marker_path}: {token!r}")
+    else:
+        print(f"OK: host marker {marker_path}")
+
+    host_check = inspect_report_root_marker(report_root=host_root)
+    print(f"host_marker_check={json.dumps(host_check, sort_keys=True)}")
+    if host_check.get("status") != "healthy":
+        state.fail(f"FAIL: {host_check.get('message')}")
+    source_check = inspect_report_root_source_identity(
+        report_root=host_root, expected_source_id=expected_source_id
+    )
+    print(f"host_source_check={json.dumps(source_check, sort_keys=True)}")
+    if source_check.get("source_identity_status") != "healthy":
+        state.fail(
+            "FAIL: "
+            + str(source_check.get("source_identity_message") or "source mismatch")
+        )
+
+
+def _host_pipeline_summary(
+    state: _VerificationState,
+    *,
+    pipeline: str | None,
+    host_root: Path,
+) -> tuple[int | None, str | None]:
+    if not pipeline:
+        return None, None
+    entries = list_pipeline_reports(pipeline_name=pipeline, limit=100, root=host_root)
+    count = len(entries)
+    latest_run_id = entries[0].run_id if entries else None
+    print(f"host_pipeline_count pipeline={pipeline!r} count={count}")
+    print(f"host_latest_run_id={latest_run_id!r}")
+    if count == 0:
+        state.warn(f"WARN: no host pipeline reports for {pipeline!r} under {host_root}")
+    return count, latest_run_id
+
+
+def _verify_container_mount(
+    state: _VerificationState,
+    *,
+    container: str,
+    mounts: list[dict[str, Any]] | None,
+    host_mount: Path,
+) -> None:
+    if mounts is None:
+        state.warn(
+            f"WARN: could not inspect container {container!r}; "
+            "skip bind-source comparison"
+        )
+        return
+    source = _mount_source_for_target(mounts, DEFAULT_MOUNT_TARGET)
+    print(f"container_mount target={DEFAULT_MOUNT_TARGET} source={source!r}")
+    if source is None:
+        state.fail(
+            f"FAIL: container {container!r} has no bind at {DEFAULT_MOUNT_TARGET}"
+        )
+        return
+    if not _paths_equivalent(source, host_mount):
+        state.fail(
+            f"FAIL: bind mismatch — container source={source!r} "
+            f"expected host_reports_mount={host_mount}"
+        )
+        state.warn(
+            "Remediation: from the canonical checkout run "
+            "`python scripts/ops/runtime/docker/runtime_manager.py start "
+            "--stack main` (or recreate bioetl with "
+            "BIOETL_DASHBOARD_REPORT_ROOT pointing at this reports/)."
+        )
+        return
+    print("OK: container bind source matches host reports mount")
+
+
+def _verify_container_identity(
+    state: _VerificationState,
+    *,
+    container: str,
+    resolution: RuntimeSourceIdentityResolutionResult | None,
+    expected_source_id: str | None,
+    require_ops: bool,
+) -> None:
+    actual = resolution.value if resolution is not None else None
+    print(
+        "container_source_identity="
+        + json.dumps(resolution.as_dict() if resolution else None, sort_keys=True)
+    )
+    comparison = compare_runtime_source_identity(
+        expected=expected_source_id, actual=actual
+    )
+    if resolution is None or not resolution.is_resolved:
+        message = f"could not inspect managed source identity for {container!r}"
+        if require_ops:
+            state.fail(f"FAIL: {message}")
+        else:
+            state.warn(f"WARN: {message}")
+        return
+    if comparison.state != IDENTITY_STATE_ALIGNED or not resolution.is_consistent:
+        state.fail(
+            "FAIL: container source identity mismatch — "
+            f"state={comparison.state!r} actual={actual!r} "
+            f"expected={expected_source_id!r} conflicts={resolution.conflicts!r}"
+        )
+
+
+def _verify_ready_endpoint(
+    state: _VerificationState,
+    *,
+    ops_url: str,
+    expected_source_id: str | None,
+    require_ops: bool,
+) -> None:
+    ready = _json_get(f"{ops_url.rstrip('/')}/health/ready")
+    if ready is None:
+        message = f"ops HTTP not reachable at {ops_url}"
+        if require_ops:
+            state.fail(f"FAIL: {message}")
+        else:
+            state.warn(f"WARN: {message}")
+        return
+    report_check = ready.get("checks", {}).get("report_root")
+    print(f"ops_ready_status={ready.get('status')!r}")
+    print(f"ops_report_root_check={json.dumps(report_check, sort_keys=True)}")
+    if isinstance(report_check, Mapping) and report_check.get("status") != "healthy":
+        state.fail(
+            "FAIL: /health/ready report_root check is not healthy "
+            f"({report_check.get('message') or report_check.get('marker')})"
+        )
+    if ready.get("status") == "unhealthy":
+        state.fail("FAIL: /health/ready status=unhealthy")
+    if (
+        not isinstance(report_check, Mapping)
+        or report_check.get("source_identity_status") != "healthy"
+    ):
+        state.fail("FAIL: /health/ready source identity is not healthy")
+    elif report_check.get("source_identity_state") not in {
+        None,
+        IDENTITY_STATE_ALIGNED,
+    }:
+        state.fail("FAIL: /health/ready source identity is not aligned")
+    elif report_check.get("source_identity_actual") != expected_source_id:
+        state.fail("FAIL: /health/ready source identity differs from host")
+
+
+def _latest_ops_run_id(items: object) -> str | None:
+    if not isinstance(items, list) or not items or not isinstance(items[0], Mapping):
+        return None
+    run_id = items[0].get("run_id")
+    return str(run_id) if run_id else None
+
+
+def _verify_ops_list_source_identity(
+    state: _VerificationState,
+    listed: Mapping[str, Any],
+    expected_source_id: str | None,
+) -> None:
+    if listed.get("source_identity_status") != "healthy":
+        state.fail(
+            "FAIL: ops list source_identity_status="
+            f"{listed.get('source_identity_status')!r}"
+        )
+    elif listed.get("source_identity_state") not in {None, IDENTITY_STATE_ALIGNED}:
+        state.fail("FAIL: ops list source identity is not aligned")
+    elif listed.get("source_identity_actual") != expected_source_id:
+        state.fail("FAIL: ops list source identity differs from host")
+
+
+def _verify_pipeline_endpoint(
+    state: _VerificationState,
+    *,
+    ops_url: str,
+    pipeline: str | None,
+    expected_source_id: str | None,
+    host_count: int | None,
+    host_latest_run_id: str | None,
+    require_ops: bool,
+) -> None:
+    if not pipeline:
+        return
+    list_url = (
+        f"{ops_url.rstrip('/')}/ops/observability/pipeline-run-reports"
+        f"?pipeline={pipeline}&limit=20"
+    )
+    listed = _json_get(list_url)
+    if listed is None:
+        if require_ops:
+            state.fail(f"FAIL: list endpoint unreachable: {list_url}")
+        return
+    ops_count = int(listed.get("count") or 0)
+    print(
+        f"ops_pipeline_count pipeline={pipeline!r} count={ops_count} "
+        f"report_root={listed.get('report_root')!r} "
+        f"marker_status={listed.get('marker_status')!r}"
+    )
+    if listed.get("marker_status") and listed.get("marker_status") != "healthy":
+        state.fail(f"FAIL: ops list marker_status={listed.get('marker_status')!r}")
+    _verify_ops_list_source_identity(state, listed, expected_source_id)
+    if host_count is not None and host_count > 0 and ops_count == 0:
+        state.fail(
+            f"FAIL: host has {host_count} report(s) for {pipeline!r} "
+            "but ops HTTP returns count=0 — classic bind mismatch"
+        )
+    elif host_count is not None and ops_count > 0:
+        print("OK: ops HTTP sees pipeline reports")
+    ops_latest_run_id = _latest_ops_run_id(listed.get("items"))
+    print(f"ops_latest_run_id={ops_latest_run_id!r}")
+    if host_latest_run_id != ops_latest_run_id:
+        state.fail(
+            "FAIL: newest run mismatch — "
+            f"host={host_latest_run_id!r} ops={ops_latest_run_id!r}"
+        )
+
+
 def verify(
     *,
     repo: Path,
@@ -257,233 +497,58 @@ def verify(
     host_root = _host_report_root(repo)
     expected_environment = _expected_runtime_environment(repo)
     expected_source_id = expected_environment.get("BIOETL_RUNTIME_SOURCE_ID")
-    findings: list[str] = []
-    ok = True
+    state = _VerificationState()
 
     print(f"repo_root={repo}")
     print(f"host_reports_mount={host_mount}")
     print(f"host_report_root={host_root}")
 
-    marker_path = host_mount / REPORT_ROOT_MARKER_NAME
-    if not marker_path.is_file():
-        ok = False
-        findings.append(
-            f"FAIL: host marker missing at {marker_path} "
-            f"(expected token {REPORT_ROOT_MARKER_VALUE!r})"
-        )
-    else:
-        token = marker_path.read_text(encoding="utf-8").strip()
-        if token != REPORT_ROOT_MARKER_VALUE:
-            ok = False
-            findings.append(
-                f"FAIL: host marker token mismatch at {marker_path}: {token!r}"
-            )
-        else:
-            print(f"OK: host marker {marker_path}")
-
-    host_check = inspect_report_root_marker(report_root=host_root)
-    print(f"host_marker_check={json.dumps(host_check, sort_keys=True)}")
-    if host_check.get("status") != "healthy":
-        ok = False
-        findings.append(f"FAIL: {host_check.get('message')}")
-
-    host_source_check = inspect_report_root_source_identity(
-        report_root=host_root,
+    _verify_host_source(
+        state,
+        host_mount=host_mount,
+        host_root=host_root,
         expected_source_id=expected_source_id,
     )
-    print(f"host_source_check={json.dumps(host_source_check, sort_keys=True)}")
-    if host_source_check.get("source_identity_status") != "healthy":
-        ok = False
-        findings.append(
-            "FAIL: "
-            + str(host_source_check.get("source_identity_message") or "source mismatch")
-        )
-
-    host_count: int | None = None
-    if pipeline:
-        entries = list_pipeline_reports(
-            pipeline_name=pipeline,
-            limit=100,
-            root=host_root,
-        )
-        host_count = len(entries)
-        host_latest_run_id = entries[0].run_id if entries else None
-        print(f"host_pipeline_count pipeline={pipeline!r} count={host_count}")
-        print(f"host_latest_run_id={host_latest_run_id!r}")
-        if host_count == 0:
-            findings.append(
-                f"WARN: no host pipeline reports for {pipeline!r} under {host_root}"
-            )
+    host_count, host_latest_run_id = _host_pipeline_summary(
+        state, pipeline=pipeline, host_root=host_root
+    )
 
     mounts = _docker_inspect_mounts(container)
     container_resolution = _coerce_container_source_resolution(
         _docker_inspect_source_identity(container)
     )
-    container_source_id = (
-        container_resolution.value if container_resolution is not None else None
+    _verify_container_mount(
+        state, container=container, mounts=mounts, host_mount=host_mount
     )
-    if mounts is None:
-        findings.append(
-            f"WARN: could not inspect container {container!r}; "
-            "skip bind-source comparison"
-        )
-    else:
-        source = _mount_source_for_target(mounts, DEFAULT_MOUNT_TARGET)
-        print(f"container_mount target={DEFAULT_MOUNT_TARGET} source={source!r}")
-        if source is None:
-            ok = False
-            findings.append(
-                f"FAIL: container {container!r} has no bind at {DEFAULT_MOUNT_TARGET}"
-            )
-        elif not _paths_equivalent(source, host_mount):
-            ok = False
-            findings.append(
-                f"FAIL: bind mismatch — container source={source!r} "
-                f"expected host_reports_mount={host_mount}"
-            )
-            findings.append(
-                "Remediation: from the canonical checkout run "
-                "`python scripts/ops/runtime/docker/runtime_manager.py start "
-                "--stack main` (or recreate bioetl with "
-                "BIOETL_DASHBOARD_REPORT_ROOT pointing at this reports/)."
-            )
-        else:
-            print("OK: container bind source matches host reports mount")
-    print(
-        "container_source_identity="
-        + json.dumps(
-            container_resolution.as_dict() if container_resolution else None,
-            sort_keys=True,
-        )
+    _verify_container_identity(
+        state,
+        container=container,
+        resolution=container_resolution,
+        expected_source_id=expected_source_id,
+        require_ops=require_ops,
     )
-    container_comparison = compare_runtime_source_identity(
-        expected=expected_source_id,
-        actual=container_source_id,
+
+    _verify_ready_endpoint(
+        state,
+        ops_url=ops_url,
+        expected_source_id=expected_source_id,
+        require_ops=require_ops,
     )
-    if container_resolution is None or not container_resolution.is_resolved:
-        message = f"could not inspect managed source identity for {container!r}"
-        if require_ops:
-            ok = False
-            findings.append(f"FAIL: {message}")
-        else:
-            findings.append(f"WARN: {message}")
-    elif (
-        container_comparison.state != IDENTITY_STATE_ALIGNED
-        or not container_resolution.is_consistent
-    ):
-        ok = False
-        findings.append(
-            "FAIL: container source identity mismatch — "
-            f"state={container_comparison.state!r} "
-            f"actual={container_source_id!r} expected={expected_source_id!r} "
-            f"conflicts={container_resolution.conflicts!r}"
-        )
 
-    ready = _json_get(f"{ops_url.rstrip('/')}/health/ready")
-    if ready is None:
-        if require_ops:
-            ok = False
-            findings.append(f"FAIL: ops HTTP not reachable at {ops_url}")
-        else:
-            findings.append(f"WARN: ops HTTP not reachable at {ops_url}")
-    else:
-        report_check = ready.get("checks", {}).get("report_root")
-        print(f"ops_ready_status={ready.get('status')!r}")
-        print(f"ops_report_root_check={json.dumps(report_check, sort_keys=True)}")
-        if (
-            isinstance(report_check, Mapping)
-            and report_check.get("status") != "healthy"
-        ):
-            ok = False
-            findings.append(
-                "FAIL: /health/ready report_root check is not healthy "
-                f"({report_check.get('message') or report_check.get('marker')})"
-            )
-        if ready.get("status") == "unhealthy":
-            ok = False
-            findings.append("FAIL: /health/ready status=unhealthy")
-        if (
-            not isinstance(report_check, Mapping)
-            or report_check.get("source_identity_status") != "healthy"
-        ):
-            ok = False
-            findings.append("FAIL: /health/ready source identity is not healthy")
-        elif report_check.get("source_identity_state") not in {
-            None,
-            IDENTITY_STATE_ALIGNED,
-        }:
-            ok = False
-            findings.append("FAIL: /health/ready source identity is not aligned")
-        elif report_check.get("source_identity_actual") != expected_source_id:
-            ok = False
-            findings.append("FAIL: /health/ready source identity differs from host")
+    _verify_pipeline_endpoint(
+        state,
+        ops_url=ops_url,
+        pipeline=pipeline,
+        expected_source_id=expected_source_id,
+        host_count=host_count,
+        host_latest_run_id=host_latest_run_id,
+        require_ops=require_ops,
+    )
 
-    if pipeline:
-        list_url = (
-            f"{ops_url.rstrip('/')}/ops/observability/pipeline-run-reports"
-            f"?pipeline={pipeline}&limit=20"
-        )
-        listed = _json_get(list_url)
-        if listed is None:
-            if require_ops:
-                ok = False
-                findings.append(f"FAIL: list endpoint unreachable: {list_url}")
-        else:
-            ops_count = int(listed.get("count") or 0)
-            print(
-                f"ops_pipeline_count pipeline={pipeline!r} count={ops_count} "
-                f"report_root={listed.get('report_root')!r} "
-                f"marker_status={listed.get('marker_status')!r}"
-            )
-            if listed.get("marker_status") and listed.get("marker_status") != "healthy":
-                ok = False
-                findings.append(
-                    f"FAIL: ops list marker_status={listed.get('marker_status')!r}"
-                )
-            if listed.get("source_identity_status") != "healthy":
-                ok = False
-                findings.append(
-                    "FAIL: ops list source_identity_status="
-                    f"{listed.get('source_identity_status')!r}"
-                )
-            elif listed.get("source_identity_state") not in {
-                None,
-                IDENTITY_STATE_ALIGNED,
-            }:
-                ok = False
-                findings.append("FAIL: ops list source identity is not aligned")
-            elif listed.get("source_identity_actual") != expected_source_id:
-                ok = False
-                findings.append("FAIL: ops list source identity differs from host")
-            if host_count is not None and host_count > 0 and ops_count == 0:
-                ok = False
-                findings.append(
-                    f"FAIL: host has {host_count} report(s) for {pipeline!r} "
-                    f"but ops HTTP returns count=0 — classic bind mismatch"
-                )
-            elif host_count is not None and ops_count > 0:
-                print("OK: ops HTTP sees pipeline reports")
-            ops_items = listed.get("items")
-            ops_latest_run_id = (
-                str(ops_items[0].get("run_id"))
-                if isinstance(ops_items, list)
-                and ops_items
-                and isinstance(ops_items[0], Mapping)
-                and ops_items[0].get("run_id")
-                else None
-            )
-            print(f"ops_latest_run_id={ops_latest_run_id!r}")
-            if host_latest_run_id != ops_latest_run_id:
-                ok = False
-                findings.append(
-                    "FAIL: newest run mismatch — "
-                    f"host={host_latest_run_id!r} ops={ops_latest_run_id!r}"
-                )
-
-    for line in findings:
+    for line in state.findings:
         print(line)
 
-    if ok:
+    if state.ok:
         print("RESULT: report bind verification passed")
         return 0
     print("RESULT: report bind verification FAILED")
