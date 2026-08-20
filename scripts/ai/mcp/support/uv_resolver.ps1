@@ -28,6 +28,54 @@ function Get-BioetlProxyEnvironmentSnapshot {
     return , $snapshot
 }
 
+function Copy-BioetlDictionaryEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($key in @($Snapshot.Keys)) {
+        $Map[[string]$key] = $Snapshot[$key]
+    }
+}
+
+function Copy-BioetlEnumerableEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($item in $Snapshot) {
+        if ($null -eq $item) {
+            continue
+        }
+        $itemProps = $item.PSObject.Properties
+        if ($null -ne $itemProps['Key'] -and $null -ne $itemProps['Value']) {
+            $Map[[string]$item.Key] = $item.Value
+        }
+        elseif ($null -ne $itemProps['Name'] -and $null -ne $itemProps['Value']) {
+            $Map[[string]$item.Name] = $item.Value
+        }
+    }
+}
+
+function Copy-BioetlObjectEnvironmentMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Snapshot,
+
+        [Parameter(Mandatory = $true)]
+        $Map
+    )
+    foreach ($prop in $Snapshot.PSObject.Properties) {
+        $Map[[string]$prop.Name] = $prop.Value
+    }
+}
+
 function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
     param(
         [Parameter(Mandatory = $true)]
@@ -40,33 +88,17 @@ function ConvertTo-BioetlCaseSensitiveEnvironmentMap {
         [System.StringComparer]::Ordinal
     )
     if ($Snapshot -is [System.Collections.IDictionary]) {
-        foreach ($key in @($Snapshot.Keys)) {
-            $map[[string]$key] = $Snapshot[$key]
-        }
+        Copy-BioetlDictionaryEnvironmentMap -Snapshot $Snapshot -Map $map
     }
     elseif (
         $null -ne $Snapshot -and
         $Snapshot -is [System.Collections.IEnumerable] -and
         -not ($Snapshot -is [string])
     ) {
-        # KeyValuePair[] / DictionaryEntry[] from accidental IDictionary unwrap.
-        foreach ($item in $Snapshot) {
-            if ($null -eq $item) {
-                continue
-            }
-            $itemProps = $item.PSObject.Properties
-            if ($null -ne $itemProps['Key'] -and $null -ne $itemProps['Value']) {
-                $map[[string]$item.Key] = $item.Value
-            }
-            elseif ($null -ne $itemProps['Name'] -and $null -ne $itemProps['Value']) {
-                $map[[string]$item.Name] = $item.Value
-            }
-        }
+        Copy-BioetlEnumerableEnvironmentMap -Snapshot $Snapshot -Map $map
     }
     elseif ($null -ne $Snapshot) {
-        foreach ($prop in $Snapshot.PSObject.Properties) {
-            $map[[string]$prop.Name] = $prop.Value
-        }
+        Copy-BioetlObjectEnvironmentMap -Snapshot $Snapshot -Map $map
     }
     return , $map
 }

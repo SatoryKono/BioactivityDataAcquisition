@@ -927,6 +927,36 @@ _DAEMON_UNAVAILABLE_PREFLIGHT_CODES = frozenset(
 )
 
 
+def _preflight_finding_stack(finding: Mapping[str, Any]) -> str | None:
+    evidence = finding.get("evidence")
+    if not isinstance(evidence, Mapping):
+        return None
+    raw_stack = evidence.get("stack")
+    if isinstance(raw_stack, str) and raw_stack.strip():
+        return raw_stack.strip()
+    owner = evidence.get("actual_owner")
+    if isinstance(owner, str) and "/" in owner:
+        return owner.split("/", 1)[0]
+    return None
+
+
+def _preflight_error_is_recoverable(
+    finding: Mapping[str, Any], *, stack: str | None
+) -> bool:
+    code = str(finding.get("code") or "")
+    finding_stack = _preflight_finding_stack(finding)
+    if (
+        stack
+        and finding_stack
+        and finding_stack != stack
+        and code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES
+    ):
+        return True
+    if code in _RECOVERABLE_PREFLIGHT_CODES:
+        return True
+    return code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES and finding_stack is None
+
+
 def _preflight_errors_are_recoverable(
     preflight_path: Path, *, stack: str | None = None
 ) -> bool:
@@ -936,8 +966,6 @@ def _preflight_errors_are_recoverable(
     producer bind/identity drift (fixed by absolute bind env + recreate).
     Cross-stack PROJECT_ORIGIN / MOUNT_ORIGIN / port inventory noise does not
     block starting the selected stack.
-
-    NOSONAR - S3776: complexity 29 exceeds 15; extraction would obscure error classification logic
     """
     try:
         payload = json.loads(preflight_path.read_text(encoding="utf-8"))
@@ -951,33 +979,9 @@ def _preflight_errors_are_recoverable(
         for finding in findings
         if isinstance(finding, Mapping) and finding.get("severity") == "error"
     ]
-    if not errors:
-        return True
-    for finding in errors:
-        code = str(finding.get("code") or "")
-        evidence = finding.get("evidence") if isinstance(finding, Mapping) else None
-        finding_stack: str | None = None
-        if isinstance(evidence, Mapping):
-            raw_stack = evidence.get("stack")
-            if isinstance(raw_stack, str) and raw_stack.strip():
-                finding_stack = raw_stack.strip()
-            else:
-                owner = evidence.get("actual_owner")
-                if isinstance(owner, str) and "/" in owner:
-                    finding_stack = owner.split("/", 1)[0]
-        if (
-            stack
-            and finding_stack
-            and finding_stack != stack
-            and code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES
-        ):
-            continue
-        if code in _RECOVERABLE_PREFLIGHT_CODES:
-            continue
-        if code in _CROSS_STACK_IGNORABLE_PREFLIGHT_CODES and finding_stack is None:
-            continue
-        return False
-    return True
+    return all(
+        _preflight_error_is_recoverable(finding, stack=stack) for finding in errors
+    )
 
 
 def _read_preflight_findings(preflight_path: Path) -> list[Mapping[str, Any]]:
@@ -1972,6 +1976,210 @@ def _print_lifecycle_failure_summary(
     print(json.dumps(_redact(summary), sort_keys=True))
 
 
+def _ensure_networks_action(
+    args: argparse.Namespace,
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    runner: Runner,
+) -> int:
+    report_path = report_dir / "docker-runtime-all-networks.json"
+    ok, findings = ensure_shared_networks(
+        spec,
+        contract_path,
+        report_path,
+        runner=runner,
+        timeout=min(args.timeout, 30.0),
+        all_networks=True,
+    )
+    print(
+        json.dumps(
+            {
+                "ok": ok,
+                "action": "ensure-networks",
+                "stack": "all",
+                "report": str(report_path),
+                "findings": findings,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0 if ok else 3
+
+
+def _recover_renderer_action(
+    args: argparse.Namespace, *, spec: StackSpec, report_dir: Path
+) -> int:
+    if spec.name != "monitoring":
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "action": "recover-renderer",
+                    "error": "recover-renderer requires --stack monitoring",
+                },
+                sort_keys=True,
+            )
+        )
+        return 2
+    try:
+        from scripts.ops.observability.grafana import recover_renderer as rr
+    except ImportError as exc:
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "action": "recover-renderer",
+                    "error": f"import recover_renderer failed: {exc}",
+                },
+                sort_keys=True,
+            )
+        )
+        return 2
+    report = rr.recover_renderer(
+        project=spec.project,
+        compose_file=spec.compose_file,
+        wait_seconds=min(args.timeout, 180.0),
+    )
+    payload = asdict(report)
+    output = report_dir / "docker-runtime-recover-renderer.json"
+    write_report(output, payload)
+    print(
+        json.dumps(
+            {**payload, "report": str(output), "action": "recover-renderer"},
+            sort_keys=True,
+            default=str,
+        )
+    )
+    return 0 if report.ok else 1
+
+
+def _start_or_recover_action(
+    args: argparse.Namespace,
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    runner: Runner,
+) -> int:
+    if spec.name == "main":
+        blocked = _reject_transient_origin(
+            contract_path=contract_path,
+            root=ROOT,
+            allow=bool(getattr(args, "allow_transient_origin", False)),
+        )
+        if blocked is not None:
+            print(json.dumps(blocked, sort_keys=True))
+            return 2
+    _materialize_report_source_identity(spec=spec, contract_path=contract_path)
+    result = start_or_recover(
+        spec,
+        contract_path,
+        report_dir,
+        recover=args.action == "recover",
+        runner=runner,
+        timeout=args.timeout,
+        max_attempts=max(1, min(args.max_attempts, 3)),
+        poll_interval=max(0.1, args.poll_interval),
+        stabilization_seconds=max(0.0, args.stabilization_seconds),
+    )
+    if result != 0:
+        _print_lifecycle_failure_summary(
+            action=args.action, spec=spec, report_dir=report_dir
+        )
+    return result
+
+
+def _diagnose_action(
+    args: argparse.Namespace,
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    runner: Runner,
+) -> int:
+    payload = diagnose(
+        spec,
+        contract_path,
+        report_dir / f"docker-diagnostic-{spec.name}.json",
+        runner=runner,
+        timeout=min(args.timeout, 30.0),
+    )
+    print(
+        json.dumps(
+            {
+                "ok": not payload["findings"],
+                "primary_cause": payload["primary_cause"],
+            }
+        )
+    )
+    return 0 if not payload["findings"] else 1
+
+
+def _status_action(
+    args: argparse.Namespace,
+    *,
+    spec: StackSpec,
+    contract_path: Path,
+    report_dir: Path,
+    runner: Runner,
+) -> int:
+    preflight_path = report_dir / f"docker-runtime-{spec.name}-preflight.json"
+    preflight = _preflight(
+        contract_path,
+        preflight_path,
+        spec.name,
+        runner=runner,
+        timeout=min(args.timeout, 60.0),
+    )
+    snapshots, _ = collect_snapshots(spec, runner=runner, timeout=args.timeout)
+    findings = readiness_findings(spec, snapshots)
+    findings.extend(_status_origin_findings(preflight_path, preflight, spec))
+    if spec.name == "monitoring":
+        grafana_running = any(
+            snapshot.state == "running"
+            and str(snapshot.service) in {"grafana", "bioetl-grafana"}
+            for snapshot in snapshots
+        )
+        bootstrap_payload, readable = _load_grafana_bootstrap_status(
+            runner, timeout=min(args.timeout, 10.0)
+        )
+        findings.extend(
+            _status_grafana_bootstrap_findings(
+                bootstrap_payload,
+                readable=readable,
+                grafana_running=grafana_running,
+            )
+        )
+    if (
+        spec.name == "main"
+        and _post_start_report_bind_gate(spec=spec, report_dir=report_dir) != 0
+    ):
+        findings.append(
+            {
+                "cause": "report_bind_mismatch",
+                "code": "REPORT_BIND",
+                "message": (
+                    "Host/ops report-root bind verification failed; "
+                    "Inspect Recent Runs would stay empty."
+                ),
+            }
+        )
+    print(
+        json.dumps(
+            {
+                "ok": not findings,
+                "stack": spec.name,
+                "services": [asdict(snapshot) for snapshot in snapshots],
+                "findings": findings,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0 if not findings else 1
+
+
 def _dispatch_action(
     args: argparse.Namespace,
     *,
@@ -1991,101 +2199,23 @@ def _dispatch_action(
         )
         return result.returncode
     if args.action == "ensure-networks":
-        # Full reinstall guarantee: ensure every contracted shared network
-        # (bioetl-monitoring + bioetl-runtime), not only the selected stack.
-        report_path = report_dir / "docker-runtime-all-networks.json"
-        ok, findings = ensure_shared_networks(
-            spec,
-            contract_path,
-            report_path,
-            runner=runner,
-            timeout=min(args.timeout, 30.0),
-            all_networks=True,
-        )
-        print(
-            json.dumps(
-                {
-                    "ok": ok,
-                    "action": "ensure-networks",
-                    "stack": "all",
-                    "report": str(report_path),
-                    "findings": findings,
-                },
-                sort_keys=True,
-            )
-        )
-        return 0 if ok else 3
-    if args.action == "recover-renderer":
-        # Tertiary failure mode: renderer OOM/flap without Grafana recovery path.
-        if spec.name != "monitoring":
-            print(
-                json.dumps(
-                    {
-                        "ok": False,
-                        "action": "recover-renderer",
-                        "error": "recover-renderer requires --stack monitoring",
-                    },
-                    sort_keys=True,
-                )
-            )
-            return 2
-        try:
-            from scripts.ops.observability.grafana import recover_renderer as rr
-        except ImportError as exc:
-            print(
-                json.dumps(
-                    {
-                        "ok": False,
-                        "action": "recover-renderer",
-                        "error": f"import recover_renderer failed: {exc}",
-                    },
-                    sort_keys=True,
-                )
-            )
-            return 2
-        report = rr.recover_renderer(
-            project=spec.project,
-            compose_file=spec.compose_file,
-            wait_seconds=min(args.timeout, 180.0),
-        )
-        payload = asdict(report)
-        out_path = report_dir / "docker-runtime-recover-renderer.json"
-        write_report(out_path, payload)
-        payload = {**payload, "report": str(out_path), "action": "recover-renderer"}
-        print(json.dumps(payload, sort_keys=True, default=str))
-        return 0 if report.ok else 1
-    if args.action in {"start", "recover"}:
-        if spec.name == "main":
-            blocked = _reject_transient_origin(
-                contract_path=contract_path,
-                root=ROOT,
-                allow=bool(getattr(args, "allow_transient_origin", False)),
-            )
-            if blocked is not None:
-                print(json.dumps(blocked, sort_keys=True))
-                return 2
-        _materialize_report_source_identity(
+        return _ensure_networks_action(
+            args,
             spec=spec,
             contract_path=contract_path,
-        )
-        result = start_or_recover(
-            spec,
-            contract_path,
-            report_dir,
-            recover=args.action == "recover",
+            report_dir=report_dir,
             runner=runner,
-            timeout=args.timeout,
-            max_attempts=max(1, min(args.max_attempts, 3)),
-            poll_interval=max(0.1, args.poll_interval),
-            stabilization_seconds=max(0.0, args.stabilization_seconds),
         )
-        if result != 0:
-            _print_lifecycle_failure_summary(
-                action=args.action,
-                spec=spec,
-                report_dir=report_dir,
-            )
-        return result
+    if args.action == "recover-renderer":
+        return _recover_renderer_action(args, spec=spec, report_dir=report_dir)
+    if args.action in {"start", "recover"}:
+        return _start_or_recover_action(
+            args,
+            spec=spec,
+            contract_path=contract_path,
+            report_dir=report_dir,
+            runner=runner,
+        )
     if args.action == "stop":
         return runner(
             _compose(spec, "down", "--remove-orphans"), ROOT, args.timeout
@@ -2100,78 +2230,21 @@ def _dispatch_action(
         sys.stderr.write(result.stderr)
         return result.returncode
     if args.action == "diagnose":
-        payload = diagnose(
-            spec,
-            contract_path,
-            report_dir / f"docker-diagnostic-{spec.name}.json",
+        return _diagnose_action(
+            args,
+            spec=spec,
+            contract_path=contract_path,
+            report_dir=report_dir,
             runner=runner,
-            timeout=min(args.timeout, 30.0),
         )
-        print(
-            json.dumps(
-                {
-                    "ok": not payload["findings"],
-                    "primary_cause": payload["primary_cause"],
-                }
-            )
-        )
-        return 0 if not payload["findings"] else 1
     if args.action == "status":
-        preflight_path = report_dir / f"docker-runtime-{spec.name}-preflight.json"
-        preflight = _preflight(
-            contract_path,
-            preflight_path,
-            spec.name,
+        return _status_action(
+            args,
+            spec=spec,
+            contract_path=contract_path,
+            report_dir=report_dir,
             runner=runner,
-            timeout=min(args.timeout, 60.0),
         )
-        snapshots, _ = collect_snapshots(spec, runner=runner, timeout=args.timeout)
-        findings = readiness_findings(spec, snapshots)
-        findings.extend(_status_origin_findings(preflight_path, preflight, spec))
-        if spec.name == "monitoring":
-            grafana_running = any(
-                snapshot.state == "running"
-                and str(snapshot.service) in {"grafana", "bioetl-grafana"}
-                for snapshot in snapshots
-            )
-            bootstrap_payload, bootstrap_readable = _load_grafana_bootstrap_status(
-                runner, timeout=min(args.timeout, 10.0)
-            )
-            findings.extend(
-                _status_grafana_bootstrap_findings(
-                    bootstrap_payload,
-                    readable=bootstrap_readable,
-                    grafana_running=grafana_running,
-                )
-            )
-        if spec.name == "main":
-            bind_rc = _post_start_report_bind_gate(
-                spec=spec,
-                report_dir=report_dir,
-            )
-            if bind_rc != 0:
-                findings.append(
-                    {
-                        "cause": "report_bind_mismatch",
-                        "code": "REPORT_BIND",
-                        "message": (
-                            "Host/ops report-root bind verification failed; "
-                            "Inspect Recent Runs would stay empty."
-                        ),
-                    }
-                )
-        print(
-            json.dumps(
-                {
-                    "ok": not findings,
-                    "stack": spec.name,
-                    "services": [asdict(snapshot) for snapshot in snapshots],
-                    "findings": findings,
-                },
-                sort_keys=True,
-            )
-        )
-        return 0 if not findings else 1
     if args.confirm_destructive != "CLEAN":
         print("clean requires --confirm-destructive CLEAN", file=sys.stderr)
         return 2

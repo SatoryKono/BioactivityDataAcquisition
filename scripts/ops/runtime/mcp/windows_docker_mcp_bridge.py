@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import cast
+from typing import IO, Any, cast
 
 _SERVER_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
 _POWERSHELL_EXE = "powershell.exe"
@@ -145,6 +145,29 @@ def _windows_backend_command(
     )
 
 
+def _relay_connection(
+    client_socket: socket.socket,
+    relay_stdin: IO[Any],
+    relay_stdout: IO[Any],
+) -> None:
+    client_fd = client_socket.fileno()
+    relay_fd = relay_stdout.fileno()
+    while True:
+        readable, _, _ = select.select([client_fd, relay_fd], [], [], 30)
+        for source_fd in readable:
+            if source_fd == client_fd:
+                data = client_socket.recv(65536)
+            else:
+                data = relay_stdout.read(65536)
+            if not data:
+                return
+            if source_fd == client_fd:
+                relay_stdin.write(data)
+                relay_stdin.flush()
+            else:
+                client_socket.sendall(data)
+
+
 class _ForwardHandler(socketserver.BaseRequestHandler):
     remote_port = 0
     relay_script = ""
@@ -176,23 +199,7 @@ class _ForwardHandler(socketserver.BaseRequestHandler):
         assert relay.stdout is not None
         client_socket = cast(socket.socket, self.request)
         try:
-            sockets = [client_socket, relay.stdout]
-            while True:
-                readable, _, _ = select.select(sockets, [], [], 30)
-                if not readable:
-                    continue
-                for source in readable:
-                    if source is client_socket:
-                        data = client_socket.recv(65536)
-                    else:
-                        data = relay.stdout.read(65536)
-                    if not data:
-                        return
-                    if source is client_socket:
-                        relay.stdin.write(data)
-                        relay.stdin.flush()
-                    else:
-                        client_socket.sendall(data)
+            _relay_connection(client_socket, relay.stdin, relay.stdout)
         finally:
             relay.terminate()
 
@@ -244,11 +251,13 @@ def main() -> int:
         _wait_for_port(args.remote_port, args.startup_timeout)
         _ForwardHandler.remote_port = args.remote_port
         _ForwardHandler.relay_script = _as_windows_path(relay_script)
-        with _ForwardServer(("127.0.0.1", args.local_port), _ForwardHandler) as server:
-            server.timeout = 1
+        with _ForwardServer(
+            ("127.0.0.1", args.local_port), _ForwardHandler
+        ) as forward_server:
+            forward_server.timeout = 1
             next_backend_probe = time.monotonic() + 10
             while not stopped.is_set():
-                server.handle_request()
+                forward_server.handle_request()
                 # Windows npm can leave its node server detached after the
                 # PowerShell wrapper exits. Keep the relay alive while the
                 # backend listener remains healthy, but notice a later exit.
