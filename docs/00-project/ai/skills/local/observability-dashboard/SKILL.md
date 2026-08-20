@@ -35,9 +35,13 @@ description: "Edit, render, validate, or debug BioETL Grafana dashboards and the
    when shipped behaviour changes. Any change under `grafana/dashboards/`
    MUST run
    `pytest tests/integration/test_dashboard_operator_readability.py`
-   (copy roles, `YYYY-MM-DD HH:MM` clock, first-window no-scroll). This is
-   also the CI Tests → Dashboard semantic release policy gate and the
-   `check-dashboard-operator-readability` pre-push hook.
+   (copy roles, `YYYY-MM-DD HH:MM` clock, first-window no-scroll) **and**
+   `pytest tests/integration/test_dashboard_first_window_noscroll.py`
+   (DASH-FIT-004 on every first-window panel). The no-scroll gate is
+   required on code, test, and documentation changes via
+   `.github/workflows/dashboard-first-window-noscroll.yml` (not
+   path-filtered), the Tests semantic release policy job, and the
+   `check-dashboard-first-window-noscroll` pre-push hook.
 
 ## Debug empty Run Explorer index
 

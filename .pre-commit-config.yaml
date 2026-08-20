@@ -366,6 +366,16 @@ repos:
         files: ^(grafana/dashboards/.*\.json|grafana/provisioning/.*|docker-compose\.monitoring\.yml|tests/integration/test_dashboard_operator_readability\.py|docs/03-guides/dashboards/design-system\.md)$
         stages: [pre-push]
 
+      - id: check-dashboard-first-window-noscroll
+        name: Check first-window panels have no internal scroll (DASH-FIT-004)
+        entry: >
+          python scripts/engineering/dev/run_project_python.py -m pytest
+          tests/integration/test_dashboard_first_window_noscroll.py -q --tb=short
+        language: python
+        pass_filenames: false
+        files: ^(src/|tests/|docs/|grafana/|scripts/|\.github/)
+        stages: [pre-push]
+
       - id: check-dashboard-qa-check-gates
         name: Check dashboard PromQL duplicate, performance, inventory, and scope gates
         entry: >
