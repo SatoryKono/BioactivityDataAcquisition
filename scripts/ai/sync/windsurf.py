@@ -267,12 +267,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Verify tracked mirror and local deploy are in sync",
+        help="Verify tracked mirror and local deploy are in sync (default)",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write tracked mirror and local .windsurf/ deploy",
     )
     parser.add_argument(
         "--no-deploy",
         action="store_true",
-        help="Update tracked mirror only; skip .windsurf/ deploy",
+        help="With --apply, update tracked mirror only; skip .windsurf/ deploy",
     )
     parser.add_argument(
         "--json",
@@ -280,8 +285,13 @@ def main(argv: list[str] | None = None) -> int:
         help="Emit machine-readable summary",
     )
     args = parser.parse_args(argv)
+    if args.check and args.apply:
+        print("Use either --check or --apply, not both.", file=sys.stderr)
+        return 2
+    if not args.check and not args.apply:
+        args.check = True
 
-    deploy_local = not args.no_deploy and not args.check
+    deploy_local = bool(args.apply) and not args.no_deploy and not args.check
     rule_issues = sync_rules(
         root=args.root,
         deploy_local=deploy_local,

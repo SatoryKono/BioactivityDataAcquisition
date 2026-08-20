@@ -778,7 +778,17 @@ def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=_repo_root())
-    parser.add_argument("--check", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--check",
+        action="store_true",
+        help="Read-only validation (default).",
+    )
+    mode.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write normalized/sync changes. Default is check-only.",
+    )
     parser.add_argument(
         "--only",
         choices=(
@@ -792,6 +802,7 @@ def main(argv: list[str] | None = None) -> int:
         default="all",
     )
     args = parser.parse_args(argv)
+    check_only = not args.apply
 
     runners = {
         "codex-agents": normalize_codex_agents,
@@ -804,7 +815,7 @@ def main(argv: list[str] | None = None) -> int:
 
     issues: list[str] = []
     for key in selected:
-        issues.extend(runners[key](args.root, check_only=args.check))
+        issues.extend(runners[key](args.root, check_only=check_only))
 
     if issues:
         for issue in issues:
