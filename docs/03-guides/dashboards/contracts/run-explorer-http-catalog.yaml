@@ -40,22 +40,15 @@ panels:
     root_selector: items
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
-  - id: 3021
-    title: Inspect Recent Runs (last 20)
-    endpoint: pipeline_run_reports
-    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=20
-    root_selector: items
-    no_value_tokens: [VALID EMPTY]
-    copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]
   - id: 3022
-    title: Inspect Full Run Identity
+    title: Inspect Run Identity
     endpoint: identity_table
     url: /ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
     root_selector: rows
     no_value_tokens: [SELECT RUN, VALID EMPTY]
     copy_tokens: []
   - id: 3023
-    title: Inspect Full Processed Records
+    title: Inspect Processed Records
     endpoint: processed_records
     url: /ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}
     root_selector: rows
@@ -82,11 +75,25 @@ panels:
     root_selector: reconciliation
     no_value_tokens: [VALID EMPTY, QUERY ERROR]
     copy_tokens: []
+  - id: 3016
+    title: Inspect Layer Accounting
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: layers
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
   - id: 3013
     title: Inspect Run Artifacts
     endpoint: pipeline_run_report
     url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
     root_selector: artifacts
+    no_value_tokens: [VALID EMPTY, QUERY ERROR]
+    copy_tokens: []
+  - id: 3014
+    title: Inspect Timings & Failure
+    endpoint: pipeline_run_report
+    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+    root_selector: failure
     no_value_tokens: [VALID EMPTY, QUERY ERROR]
     copy_tokens: []
   - id: 3020
