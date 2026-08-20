@@ -42,28 +42,33 @@ function statusColor(status) {
   }
 }
 
+function tableKeys(rows) {
+  if (rows.length > 0) {
+    return Object.keys(rows[0]);
+  }
+  return ["check", "status", "reason", "detail"];
+}
+
+function tableCell(key, value) {
+  const text = value === null || value === undefined ? "null" : String(value);
+  const color = key === "status" ? statusColor(text) : "#CCCCDC";
+  return `<td style="color:${color}">${escapeHtml(text)}</td>`;
+}
+
+function tableBody(rows, keys) {
+  if (rows.length === 0) {
+    return `<tr><td colspan="${keys.length}" style="color:#8E8E8E;font-style:italic">No rows (Infinity noValue path)</td></tr>`;
+  }
+  return rows
+    .map((row) => `<tr>${keys.map((key) => tableCell(key, row[key])).join("")}</tr>`)
+    .join("");
+}
+
 function tableHtml(title, panelId, state, httpStatus, payload) {
   const rows = Array.isArray(payload.rows) ? payload.rows : [];
-  const keys = rows.length
-    ? Object.keys(rows[0])
-    : ["check", "status", "reason", "detail"];
+  const keys = tableKeys(rows);
   const head = keys.map((k) => `<th>${k}</th>`).join("");
-  const body = rows.length
-    ? rows
-        .map((row) => {
-          const tds = keys
-            .map((k) => {
-              const v = row[k];
-              const text = v === null || v === undefined ? "null" : String(v);
-              const color =
-                k === "status" ? statusColor(text) : "#CCCCDC";
-              return `<td style="color:${color}">${escapeHtml(text)}</td>`;
-            })
-            .join("");
-          return `<tr>${tds}</tr>`;
-        })
-        .join("")
-    : `<tr><td colspan="${keys.length}" style="color:#8E8E8E;font-style:italic">No rows (Infinity noValue path)</td></tr>`;
+  const body = tableBody(rows, keys);
 
   return `<!doctype html>
 <html><head><meta charset="utf-8"/>

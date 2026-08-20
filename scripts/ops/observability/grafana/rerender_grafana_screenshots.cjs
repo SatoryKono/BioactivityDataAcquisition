@@ -453,19 +453,24 @@ function selectFirstWindowPanels(panels, firstWindowY = FIRST_WINDOW_Y) {
   );
 }
 
-function summarizeFirstWindowPanel(panel) {
-  const grid = panel.gridPos && typeof panel.gridPos === "object" ? panel.gridPos : {};
+function panelDisplayTitle(panel) {
   const pluginOptions =
     panel.options && typeof panel.options === "object" ? panel.options : {};
-  const displayTitle =
+  const authored =
     typeof pluginOptions.bioetlDisplayTitle === "string"
       ? pluginOptions.bioetlDisplayTitle.trim()
       : "";
+  if (authored) {
+    return authored;
+  }
+  return typeof panel.title === "string" ? panel.title.trim() : "";
+}
+
+function summarizeFirstWindowPanel(panel) {
+  const grid = panel.gridPos && typeof panel.gridPos === "object" ? panel.gridPos : {};
   return {
     id: panel.id,
-    title:
-      displayTitle ||
-      (typeof panel.title === "string" ? panel.title.trim() : ""),
+    title: panelDisplayTitle(panel),
     type: typeof panel.type === "string" ? panel.type : "unknown",
     gridPos: {
       x: Number.isInteger(grid.x) ? grid.x : 0,
@@ -644,29 +649,26 @@ function validateContainmentManifest(payload) {
   for (const [index, panel] of payload.panels.entries()) {
     reasons.push(...containmentPanelSchemaReasons(panel, index, required));
   }
-  if (
-    Number.isInteger(payload.overflowCount) &&
-    payload.overflowCount !==
-      payload.panels.filter((panel) => panel && panel.status !== "ok").length
-  ) {
+  if (_overflowCountMismatched(payload)) {
     reasons.push("overflow-count-mismatch");
   }
   return { status: reasons.length > 0 ? "error" : "ok", reasons };
 }
 
+function _overflowCountMismatched(payload) {
+  if (!Number.isInteger(payload.overflowCount)) {
+    return false;
+  }
+  const actual = payload.panels.filter((panel) => panel && panel.status !== "ok")
+    .length;
+  return payload.overflowCount !== actual;
+}
+
 function summarizeRequiredPanel(panel) {
   if (!Number.isInteger(panel.id)) return null;
-  const pluginOptions =
-    panel.options && typeof panel.options === "object" ? panel.options : {};
-  const displayTitle =
-    typeof pluginOptions.bioetlDisplayTitle === "string"
-      ? pluginOptions.bioetlDisplayTitle.trim()
-      : "";
   return {
     id: panel.id,
-    title:
-      displayTitle ||
-      (typeof panel.title === "string" ? panel.title.trim() : ""),
+    title: panelDisplayTitle(panel),
     type: typeof panel.type === "string" ? panel.type : "unknown",
     gridPos: summarizeFirstWindowPanel(panel).gridPos,
   };
@@ -951,8 +953,7 @@ async function detectActualTheme(page) {
   });
 }
 
-async function collectPanelTerminalStates(page, dashboard) {
-  const states = await page.evaluate(({ requiredPanels }) => {
+function panelTerminalStatesFromDom({ requiredPanels }) {
     const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
     const headerIdentityText = (header) =>
       normalize(
@@ -1119,7 +1120,12 @@ async function collectPanelTerminalStates(page, dashboard) {
           : false,
       };
     });
-  }, { requiredPanels: dashboard.requiredPanels });
+}
+
+async function collectPanelTerminalStates(page, dashboard) {
+  const states = await page.evaluate(panelTerminalStatesFromDom, {
+    requiredPanels: dashboard.requiredPanels,
+  });
 
   const classifiedStates = states.map((state) => {
     const classification = classifyPanelTerminalEvidence(state);
@@ -1642,8 +1648,7 @@ async function collectPanelContainment(page, dashboard) {
   });
 }
 
-async function collectNavigationValidation(page) {
-  return page.evaluate(() => {
+function navigationValidationFromDom() {
     const panel =
       document.querySelector('[data-panelid="1000"]') ||
       document.querySelector('[data-viz-panel-key="panel-1000"]') ||
@@ -1728,17 +1733,19 @@ async function collectNavigationValidation(page) {
           : "error",
       ...evidence,
     };
-  });
 }
 
-async function collectTypographyValidation(page, dashboard) {
-  return page.evaluate(({
+async function collectNavigationValidation(page) {
+  return page.evaluate(navigationValidationFromDom);
+}
+
+function typographyValidationFromDom({
     requiredPanels,
     minAuthoredBodyPx,
     minAuthoredTitlePx,
     minGrafanaBodyPx,
     minGrafanaTitlePx,
-  }) => {
+  }) {
     const round = (value) => Math.round(value * 100) / 100;
     const visible = (element) => {
       if (element?.nodeType !== Node.ELEMENT_NODE) return false;
@@ -1905,7 +1912,10 @@ async function collectTypographyValidation(page, dashboard) {
       panels,
       violations,
     };
-  }, {
+}
+
+async function collectTypographyValidation(page, dashboard) {
+  return page.evaluate(typographyValidationFromDom, {
     requiredPanels: dashboard.requiredPanels,
     minAuthoredBodyPx: MIN_AUTHORED_BODY_FONT_PX,
     minAuthoredTitlePx: MIN_AUTHORED_TITLE_FONT_PX,
