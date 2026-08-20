@@ -170,3 +170,29 @@ def test_replay_critical_gates_cannot_be_suppressed(gate_path: Path) -> None:
         "isolate its runtime filesystem instead of adding skip/skipif/xfail"
     )
     assert "replay_runtime_root" in source
+
+
+def _unconditional_skip_marker_paths() -> list[str]:
+    """Return unit/architecture files that use bare @pytest.mark.skip(."""
+    offenders: list[str] = []
+    for root_name in ("unit", "architecture"):
+        for path in sorted((ROOT / "tests" / root_name).rglob("*.py")):
+            if path.name == "test_test_skip_inventory.py":
+                continue
+            source = path.read_text(encoding="utf-8")
+            if "@pytest.mark.skip(" not in source:
+                continue
+            # skipif is a different token; strip it before looking for skip(
+            if "@pytest.mark.skip(" in source.replace("@pytest.mark.skipif(", ""):
+                offenders.append(path.relative_to(ROOT).as_posix())
+    return offenders
+
+
+def test_unit_and_architecture_forbid_unconditional_skip_marker() -> None:
+    """Unit/architecture must not hide tests with bare @pytest.mark.skip (#9130)."""
+    offenders = _unconditional_skip_marker_paths()
+    assert not offenders, (
+        "Unconditional @pytest.mark.skip is not inventoried for unit/architecture. "
+        "Use skipif with a reason, or move the skip into the reviewed contract/"
+        "integration census:\n" + "\n".join(offenders)
+    )
