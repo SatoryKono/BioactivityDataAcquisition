@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import re
 from dataclasses import dataclass
 from pathlib import Path
+
+_SAFE_RELATIVE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./-]*$")
 
 PASSPORT_GROUPS = ("pipelines", "workflows")
 DEFAULT_ROOT = Path(__file__).resolve().parents[3]
@@ -119,22 +122,34 @@ def referenced_files(
     return tuple(matches)
 
 
+def _materialize_repo_file(root: Path, relative_posix: str) -> Path:
+    """Rebuild a repo file path from a sanitized relative POSIX string."""
+    if not _SAFE_RELATIVE.fullmatch(relative_posix) or ".." in relative_posix.split("/"):
+        raise ValueError(f"refusing path outside {root}: {relative_posix}")
+    materialized = root.joinpath(*relative_posix.split("/"))
+    resolved_root = root.resolve()
+    resolved = materialized.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise ValueError(f"refusing path outside {root}: {relative_posix}")
+    return materialized
+
+
 def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
     """Rename passports and update every tracked textual reference."""
     pairs = _replacement_pairs(root, plans)
     references = referenced_files(root, plans)
     for plan in plans:
         plan.source.rename(plan.target)
-    from scripts.engineering.common.repo_paths import ensure_path_within_root
 
     for path in references:
-        path = ensure_path_within_root(path, root)
-        text = path.read_text(encoding="utf-8")
-        updated = text
+        relative = path.relative_to(root).as_posix()
+        safe = _materialize_repo_file(root, relative)
+        current = safe.read_text(encoding="utf-8")
+        updated = current
         for source, target in pairs:
             updated = updated.replace(source, target)
-        if updated != text:
-            path.write_text(updated, encoding="utf-8")
+        if updated != current:
+            safe.write_text(updated, encoding="utf-8")
     return references
 
 
