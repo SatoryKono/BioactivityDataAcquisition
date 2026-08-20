@@ -77,7 +77,7 @@ def test_check_registry_ok() -> None:
 def test_audit_sequential_run_is_registered() -> None:
     entry = find_entry(load_registry(), "prompt.audit.sequential-run")
     card = load_card(entry.absolute_path)
-    assert card.version.startswith("1.0")
+    assert card.version.startswith("1.1")
     assert "prompt.audit.cycle.docs" in card.body
     assert "ISSUE GATE" in card.body
     assert "CLOSEOUT GATE" in card.body
