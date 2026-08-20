@@ -1065,6 +1065,7 @@
           "links": []
         },
         {
+
           "id": 3013,
           "type": "table",
           "title": "Inspect Run Artifacts",
@@ -1074,6 +1075,7 @@
             "w": 24,
             "x": 0,
             "y": 54
+
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1270,6 +1272,7 @@
             }
           ],
           "links": []
+
         }
       ],
       "description": ""
