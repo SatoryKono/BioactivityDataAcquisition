@@ -142,6 +142,13 @@ entries:
     tags: [guardrail, observability, grafana, dashboard, audit, requirements]
     summary: Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates, ontology
 
+  - id: prompt.fragment.project-requirements-audit
+    path: fragments/project-requirements-audit.md
+    status: active
+    class: fragment
+    tags: [guardrail, audit, requirements, cycle]
+    summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue titles
+
   - id: prompt.fragment.generic-nine-contract
     path: fragments/generic-nine-contract.md
     status: active
@@ -189,7 +196,8 @@ entries:
     path: library/audit/coderabbit-project-cycle.md
     status: active
     class: operator-paste
-    tags: [audit, cycle, coderabbit, project, exhaustive, plan, implement, operator]
+    tags:
+      [audit, cycle, coderabbit, project, exhaustive, plan, implement, operator]
     summary: Exhaustive cyclic project audit with CodeRabbit dual-pass — matrix, plan, fix, re-CR
 
   - id: prompt.audit.role-auditor
@@ -245,7 +253,17 @@ entries:
     path: library/architecture/architecture-cycle.md
     status: active
     class: operator-paste
-    tags: [architecture, audit, cycle, scorecard, hexagonal, plan, implement, operator]
+    tags:
+      [
+        architecture,
+        audit,
+        cycle,
+        scorecard,
+        hexagonal,
+        plan,
+        implement,
+        operator,
+      ]
     summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves
 
   - id: prompt.observability.dashboard-panel-audit
@@ -266,7 +284,20 @@ entries:
     path: library/observability/dashboard-audit-cycle.md
     status: active
     class: operator-paste
-    tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
+    tags:
+      [
+        observability,
+        dashboard,
+        grafana,
+        audit,
+        cycle,
+        density,
+        typography,
+        color,
+        layout,
+        render,
+        operator,
+      ]
     summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%)
 
   - id: prompt.observability.sequential-run
@@ -280,7 +311,16 @@ entries:
     path: library/observability/dashboard-operator-playbook.md
     status: active
     class: operator-paste
-    tags: [observability, dashboard, grafana, operator, playbook, scenario, verification]
+    tags:
+      [
+        observability,
+        dashboard,
+        grafana,
+        operator,
+        playbook,
+        scenario,
+        verification,
+      ]
     summary: Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices
 
   - id: prompt.observability.dashboard-v5.pack
@@ -322,35 +362,76 @@ entries:
     path: library/observability/grafana-audit/visual.md
     status: active
     class: operator-paste
-    tags: [observability, grafana, dashboard, audit, accessibility, wcag, visual, operator]
+    tags:
+      [
+        observability,
+        grafana,
+        dashboard,
+        audit,
+        accessibility,
+        wcag,
+        visual,
+        operator,
+      ]
     summary: Grafana visual audit for palette, contrast, typography, and status encoding
 
   - id: prompt.observability.grafana-audit.layout
     path: library/observability/grafana-audit/layout.md
     status: active
     class: operator-paste
-    tags: [observability, grafana, dashboard, audit, layout, navigation, operator]
+    tags:
+      [observability, grafana, dashboard, audit, layout, navigation, operator]
     summary: Grafana layout audit for hierarchy, first viewport, variables, and drill-down
 
   - id: prompt.observability.grafana-audit.data-integrity
     path: library/observability/grafana-audit/data-integrity.md
     status: active
     class: operator-paste
-    tags: [observability, grafana, dashboard, audit, data, lineage, integrity, operator]
+    tags:
+      [
+        observability,
+        grafana,
+        dashboard,
+        audit,
+        data,
+        lineage,
+        integrity,
+        operator,
+      ]
     summary: Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation
 
   - id: prompt.observability.grafana-audit.regression
     path: library/observability/grafana-audit/regression.md
     status: active
     class: operator-paste
-    tags: [observability, grafana, dashboard, audit, regression, acceptance, release, operator]
+    tags:
+      [
+        observability,
+        grafana,
+        dashboard,
+        audit,
+        regression,
+        acceptance,
+        release,
+        operator,
+      ]
     summary: Grafana baseline-to-candidate regression acceptance and release gate
 
   - id: prompt.observability.dashboard-first-window-noscroll
     path: library/observability/dashboard-first-window-noscroll.md
     status: active
     class: operator-paste
-    tags: [observability, dashboard, grafana, first-window, scroll, containment, implement, operator]
+    tags:
+      [
+        observability,
+        dashboard,
+        grafana,
+        first-window,
+        scroll,
+        containment,
+        implement,
+        operator,
+      ]
     summary: Implement DASH-FIT-004 — no internal scroll on first-window text/stat/table panels across the seven UIDs
 
   # --- generic nine-prompt audit kit (2026-08-11 07:12 BST) ---
@@ -578,7 +659,8 @@ entries:
     path: library/audit/cycle/telemetry.md
     status: active
     class: operator-paste
-    tags: [audit, observability, telemetry, metrics, prometheus, cycle, operator]
+    tags:
+      [audit, observability, telemetry, metrics, prometheus, cycle, operator]
     summary: Cyclic audit of observability instrumentation and dashboard data feed
 
   - id: prompt.audit.cycle.dashboards
