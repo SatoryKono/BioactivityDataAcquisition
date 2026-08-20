@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.dashboards
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -42,6 +42,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - grafana/dashboards
   - docs/03-guides/dashboards/design-system.md
   - docs/03-guides/dashboards/verdict-ontology.md
@@ -50,6 +52,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/observability/bi-dashboard-acceptance.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Inventing panels not in shipped JSON
   - Data FAIL from a screenshot alone
   - Aesthetic-only defects without task/readability/risk
@@ -104,6 +107,7 @@ Default **`N=10`**, **`MODE=full`**, **`DEPTH=full`**, **`MONITORING=false`**,
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Shipped JSON: `grafana/dashboards/`
 - Design: `docs/03-guides/dashboards/design-system.md`
 - Verdicts: `docs/03-guides/dashboards/verdict-ontology.md`
@@ -127,7 +131,7 @@ Default **`N=10`**, **`MODE=full`**, **`DEPTH=full`**, **`MONITORING=false`**,
 | **A Inventory** | Table `dashboard \| uid \| panel_count \| datasources \| notes`. Baseline SHA. |
 | **B Contours** | Run each contour in `CONTOURS` (below). Evidence-first. |
 | **C Normalize** | `checks.json` (bi-check-schema) + `findings.json` (PROVEN only). `surface_score` 0–3. Dedupe by panel-cluster / root-cause. |
-| **D Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN. Title `[dashboard][P#] one checkable outcome`. Cap MAX_ISSUES. |
+| **D Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id` (`DASH-*` or `REQ-DASH-*`). Title `[<uid>][<id>][P#]`. Cap MAX_ISSUES. |
 | **E Fix** | WORK_BRANCH; minimal dashboard JSON / query / script fixes; re-check **affected** panels only. |
 | **F Validate** | Re-render/re-check the fixed set. PR if ALLOW_PUSH. Delta: resolved / unchanged / regressed / new. |
 

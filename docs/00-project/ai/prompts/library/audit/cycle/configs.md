@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.configs
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,6 +27,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -34,6 +35,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/RULES.md
   - configs/README.md
   - configs/_schema/pipeline.json
@@ -42,6 +45,7 @@ related_ssot:
   - .codex/agents/py-config-bot.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Weakening schema validation so invalid input passes
   - Reintroducing retired aliases as canonical fields
   - Putting secrets or ${ENV_VAR} interpolation in tracked provider YAML
@@ -95,6 +99,7 @@ Settings precedence: explicit init/CLI > process ENV > repository-root `.env`
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Policy: `configs/README.md`
 - Quality / debt: `configs/quality/debt_scorecard.yaml` (read-only budgets)
 - Compose / Docker are **optional** (ADR-010). Do not require Redis or
@@ -119,7 +124,7 @@ Settings precedence: explicit init/CLI > process ENV > repository-root `.env`
 | **B Schema / compatibility** | Validate against `configs/_schema`. Confirm retired aliases stay retired (`source.batch_size`, source `health_check`/`retry`, `merge.column_groups_file`, etc.). Composite entity files still carry `pipeline`, `schema`, `quality`, `filters`, `contracts`. |
 | **C Secrets / env** | No secret values and no `${ENV_VAR}` in tracked provider YAML. `.env` is read-only; do not create/edit/delete it. Document env **names** only. |
 | **D Budgets / quality** | Compare `configs/quality/**` thresholds, exemptions, hotspot caps to the preflight snapshot. Any increase → `REJECTED_POLICY`. |
-| **E Issues / Fix** | Smallest schema-valid change in the **owner** file. Refresh generated artifacts only through the canonical generator. Preserve deterministic ordering and merge precedence. |
+| **E Issues / Fix** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[configs][<REQ-id>][P#]`. Smallest schema-valid owner-file change. Canonical generator only. |
 | **F Validate** | Focused config/schema tests. Re-check touched schemas. Delta: resolved / unchanged / regressed / new. Record debt effect `improved` \| `unchanged` \| `worsened`. |
 
 ## Focus checklist (each cycle)

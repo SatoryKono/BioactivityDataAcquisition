@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.telemetry
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -28,6 +28,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -35,6 +36,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/RULES.md
   - docs/04-reference/observability/metrics-catalog.md
   - docs/03-guides/dashboards/metrics-readiness-matrix.md
@@ -43,6 +46,7 @@ related_ssot:
   - .codex/skills/observability-prometheus/SKILL.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Inventing Prometheus series so a panel looks full
   - Starting docker-compose.monitoring.yml without MONITORING=true
   - Putting run_id in Prometheus labels
@@ -88,6 +92,7 @@ Default **`N=10`**, **`MODE=full`**, **`MONITORING=false`**, все **`ALLOW_*=t
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - ADR-017 / ADR-019 / ADR-022 (NoOp tracing); RULES §3.2
 - Catalog: `docs/04-reference/observability/metrics-catalog.md`
 - Inventory: `python -m scripts.engineering.qa report-observability-metric-inventory --json`
@@ -116,7 +121,7 @@ Default **`N=10`**, **`MODE=full`**, **`MONITORING=false`**, все **`ALLOW_*=t
 | **B Coverage matrix** | Table `panel \| query \| metric/rule \| labels \| ready? \| blocker`. Expected Empty ≠ missing series. HTTP control-plane sources are valid when the readiness matrix says so. |
 | **C Instrumentation** | Ports vs adapters (ADR-017/019). NoOp tracing path (ADR-022). Histogram / counter / gauge misuse. Retired hyphenated names / alias drift. |
 | **D Cardinality / rules** | Label explosion. `promtool` + repo rule tests when available. Empty vs zero are different alerting states. |
-| **E Issues / Fix** | Fix the **owner** surface (code, rule, or catalog). Do not edit dashboard JSON “to look full” without series evidence. No new `run_id` labels. |
+| **E Issues / Fix** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[telemetry][<REQ-id>][P#]`. Fix owner surface (code/rule/catalog). No invented series; no `run_id` labels. |
 | **F Validate** | Re-run inventory / rule tests on the touched set. Delta: resolved / unchanged / regressed / new. |
 
 ## Focus checklist (each cycle)

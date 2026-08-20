@@ -1,24 +1,24 @@
 ---
 id: prompt.audit.cycle.tests
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
 runtimes: [grok, codex, any]
 params:
-  - N = `10`
-  - SCOPE = `tests/ configs/quality/ pyproject.toml` 
-  - MODE = `full`
-  - LANGUAGE = `ru` 
-  - LANE = `full`
-  - AUDIT_MODE = `full`
-  - ALLOW_ISSUE_WRITE = `true` 
-  - ALLOW_PUSH = `true` 
-  - ALLOW_MERGE = `true` 
-  - ALLOW_CLOSE  = `true` 
-  - MAX_ISSUES_PER_ITERATION = `10`
-  - BASE_BRANCH = `main`
-  - REPO = `SatoryKono/BioactivityDataAcquisition` 
+  - N
+  - SCOPE
+  - MODE
+  - LANGUAGE
+  - LANE
+  - AUDIT_MODE
+  - ALLOW_ISSUE_WRITE
+  - ALLOW_PUSH
+  - ALLOW_MERGE
+  - ALLOW_CLOSE
+  - MAX_ISSUES_PER_ITERATION
+  - BASE_BRANCH
+  - REPO 
 includes:
   - fragments/read-order.md
   - fragments/git-safety.md
@@ -28,6 +28,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -35,12 +36,15 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md
   - docs/00-project/ai/prompts/library/audit/tests-system.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - configs/quality/test_matrix.yaml
   - reports/quality/test-governance-current.json
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Empty form cycles
   - Full-suite first feedback without LANE/SCOPE budget
   - Raising skip/xfail/debt budgets to greenwash
@@ -83,6 +87,7 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`**. Пустые ц�
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Mental model: `docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md`
 - Matrix: `configs/quality/test_matrix.yaml`
 - Snapshot: `reports/quality/test-governance-current.json`
@@ -105,7 +110,7 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`**. Пустые ц�
 | **A Inventory** | pytest/CI lanes, markers, skip/xfail/quarantine, isolation, required checks. Classify unit / integration / contract / e2e / smoke / architecture / security. Map what actually blocks merge. |
 | **B Risk gaps** | Critical product paths → tests. Note negative/auth/schema gaps. Optional bounded LANE run for evidence only — not a full suite by default. |
 | **C Flaky / disabled** | Suspected flaky: re-run **N** times; record N and outcomes. Quarantine/skip must have owner or tracked issue. Retries are not a fix. |
-| **D Plan / Issues** | P0→P3; acceptance + validation command per item. Create if ALLOW_ISSUE_WRITE + PROVEN. No budget raises. |
+| **D Plan / Issues** | P0→P3; acceptance + validation command. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[tests][<REQ-id>][P#]`. No budget raises. |
 | **E Fix** | Minimal diff. Focused tests for behavior change. No new skips/xfail as “fix”. |
 | **F Validate** | Same LANE/SCOPE re-check. If ALLOW_PUSH → PR + required checks. No admin bypass. Delta: resolved / unchanged / regressed / new. |
 

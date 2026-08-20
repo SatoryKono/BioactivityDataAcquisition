@@ -1,6 +1,6 @@
 ---
 id: prompt.fragment.finding-schema
-version: 1.1.0
+version: 1.2.0
 status: active
 class: fragment
 owner: BioETL Team
@@ -14,6 +14,7 @@ Each finding **must** include:
 | Field | Rule |
 | --- | --- |
 | `id` | Stable short id (e.g. `DOCS-012`) |
+| `requirement_id` | Existing `REQ-*` from REQUIREMENTS.md / traceability CSV, or `DASH-*` for presentation, or `GAP` |
 | `path` | Existing file; prefer `path:line` or line range |
 | `observation` | One factual claim |
 | `method` | Command, test, or inspection method |
@@ -44,6 +45,7 @@ Recommended object shape:
 ```json
 {
   "id": "AREA-001",
+  "requirement_id": "REQ-ARCH-001",
   "priority": "P1",
   "severity": "High",
   "confidence": "high",

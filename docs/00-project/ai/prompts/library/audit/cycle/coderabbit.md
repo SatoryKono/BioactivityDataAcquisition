@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.coderabbit
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -33,6 +33,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -41,6 +42,8 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/RULES.md
   - docs/03-guides/coderabbit-audit-playbook.md
   - docs/03-guides/development/coderabbit-local-reviews.md
@@ -51,6 +54,7 @@ related_ssot:
   - reports/quality/debt-governance-gates.json
   - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Treating CodeRabbit as SSOT over code/ADR/gates
   - Opening issues from CR text without agent PROVEN
   - Single CLI scope over ~300 files without a split
@@ -161,7 +165,7 @@ Split any leaf with ≥ MAX_FILES_PER_SCOPE files.
 | **D Cross-gates** | import-linter / architecture subset / debt gates. CR cannot override a green gate without evidence. |
 | **E Normalize** | `findings.json`; domain tags; dedupe vs open GH issues. |
 | **F Plan** | `plan.json` waves ≤ MAX_WAVES; P0→P1; debt ↓ or flat only. |
-| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN. One issue per root-cause. |
+| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[coderabbit][<REQ-id>][P#]`. One issue per root-cause. |
 | **H Implement** | WORK_BRANCH; minimal diffs; no drive-by; no budget raises. |
 | **I PR + CR re-pass** | If ALLOW_PUSH: PR; wait CR App + required checks; agent disposition of residual CR. |
 | **J Post** | resolved \| unchanged \| regressed \| new; re-CR fixed scopes. |

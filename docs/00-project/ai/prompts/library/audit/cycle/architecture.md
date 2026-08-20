@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.architecture
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -32,6 +32,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -40,6 +41,8 @@ related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/architecture-index.md
   - docs/02-architecture/decisions
   - reports/quality/architecture-quality-scorecard.json
@@ -48,6 +51,7 @@ related_ssot:
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Drive-by refactors outside SCOPE
   - Raising debt budgets to pass review
   - Findings without path-level evidence
@@ -102,6 +106,7 @@ Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**,
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Hexagonal / layers: `RULES.md` §1; ADR-005, ADR-048
 - Medallion: ADR-002; DQ ADR-027 / ADR-045
 - Local-only default: ADR-010
@@ -149,7 +154,7 @@ Cap at 1 if any P0 open; at 2 if any P1 open. Tag findings `category=<id>`.
 | **D ADR drift** | ADR/diagram claim → path. Differential vs `origin/BASE_BRANCH` if set. |
 | **E Findings** | PROVEN-only `findings.json`; map to categories; P0–P3. |
 | **F Plan** | `plan.json` waves ≤ MAX_WAVES. Each wave: goal, category_ids, files, risk, test plan, debt effect (↓ or flat), acceptance, rollback. |
-| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN. One issue per root-cause. |
+| **G Issues** | Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[architecture][<REQ-id>][P#]`. One issue per root-cause. |
 | **H Implement** | WORK_BRANCH; minimal diffs; no drive-by; no mass layer moves without a migration plan. |
 | **I Validate** | import-linter / architecture subset; re-score touched categories; PR if ALLOW_PUSH. |
 | **J Post** | resolved \| unchanged \| regressed \| new. Score delta table. |

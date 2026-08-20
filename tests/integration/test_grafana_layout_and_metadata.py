@@ -127,6 +127,41 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
     assert not overlaps, "Runtime top-fold text panels overlap:\n" + "\n".join(overlaps)
 
 
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_root_panels_including_rows_do_not_overlap(dashboard_path: Path) -> None:
+    """DASH-LAYOUT-001: root data panels and collapsed row headers must not share cells."""
+    dashboard = load_dashboard(dashboard_path)
+    _assert_panels_stay_in_grid_without_overlap(
+        list(dashboard.get("panels") or []),
+        context=f"{dashboard_path.name} root layout",
+    )
+
+
+def test_runtime_detect_row_stays_below_first_window_tables() -> None:
+    """#9172: row 252 must sit at or below y=16 and remain collapsed."""
+    dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    detect_row = next(
+        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 252),
+        None,
+    )
+    assert detect_row is not None
+    assert detect_row.get("collapsed") is True
+    assert int((detect_row.get("gridPos") or {}).get("y", -1)) >= 16
+    blockers = next(
+        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 9101),
+        None,
+    )
+    coverage = next(
+        (panel for panel in dashboard.get("panels", []) if panel.get("id") == 9102),
+        None,
+    )
+    assert blockers is not None and coverage is not None
+    _assert_panels_stay_in_grid_without_overlap(
+        [blockers, coverage, detect_row],
+        context="Runtime first-window tables vs Detect row",
+    )
+
+
 def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
     """Runtime detail guidance stays under the collapsed Detect row group."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
