@@ -76,7 +76,7 @@ docs/00-project/ai/prompts/
 | `prompt.audit.cycle.tech-debt` | [library/audit/cycle/tech-debt.md](library/audit/cycle/tech-debt.md) | Cyclic **tech-debt** |
 | `prompt.audit.cycle.architecture` | [library/audit/cycle/architecture.md](library/audit/cycle/architecture.md) | Cyclic **architecture** (10 categories) |
 | `prompt.audit.cycle.telemetry` | [library/audit/cycle/telemetry.md](library/audit/cycle/telemetry.md) | Cyclic **observability / dashboard feed** |
-| `prompt.audit.cycle.dashboards` | [library/audit/cycle/dashboards.md](library/audit/cycle/dashboards.md) | Cyclic **dashboard render/design** |
+| `prompt.audit.cycle.dashboards` | [library/audit/cycle/dashboards.md](library/audit/cycle/dashboards.md) | Cyclic **dashboard** audit (`DASHBOARD_REQUIREMENTS.md`) |
 | `prompt.audit.cycle.coderabbit` | [library/audit/cycle/coderabbit.md](library/audit/cycle/coderabbit.md) | Cyclic **full project + CodeRabbit** |
 | `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
 | `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
