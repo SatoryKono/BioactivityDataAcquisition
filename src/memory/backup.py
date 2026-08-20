@@ -207,6 +207,7 @@ def create_backup(
             os.replace(staging, bundle_path)  # noqa: PTH105 - atomic publish
         except FileExistsError:
             verify_backup(bundle_path)
+            return BackupResult(bundle_path, root_digest, len(manifest["files"]), False)
     finally:
         if staging.exists():
             shutil.rmtree(staging)

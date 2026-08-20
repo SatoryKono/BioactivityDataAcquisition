@@ -90,3 +90,11 @@ def test_canonical_json_rejects_numpy_arrays() -> None:
     numpy = pytest.importorskip("numpy")
     with pytest.raises(TypeError, match="requires JSON-compatible values"):
         serialize_json_canonical(numpy.array([1.0, math.nan]))
+
+
+def test_hash_scalar_collapses_near_zero_without_equality() -> None:
+    tiny = normalize_hash_scalar_for_policy(1e-16, datetime_policy="v2_datetime_utc")
+    assert tiny == 0.0
+    kept = normalize_hash_scalar_for_policy(1e-9, datetime_policy="v2_datetime_utc")
+    assert kept != 0.0
+
