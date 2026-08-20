@@ -79,15 +79,11 @@ def test_provider_health_evidence_store_returns_none_on_settings_error() -> None
 
 def test_health_api_rehydrate_export_delegates_to_preflight_wiring() -> None:
     from bioetl.composition import health_api
+    from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+        rehydrate_provider_health_gauges as impl,
+    )
 
-    metrics = MagicMock(name="MetricsPort")
-    with patch(
-        "bioetl.composition.factories.pipeline._preflight_health_monitor."
-        "rehydrate_provider_health_gauges",
-        return_value=2,
-    ) as impl:
-        result = health_api.rehydrate_provider_health_gauges(metrics)
+    health_api.__dict__.pop("rehydrate_provider_health_gauges", None)
 
-    assert result == 2
-    impl.assert_called_once_with(metrics)
+    assert health_api.rehydrate_provider_health_gauges is impl
     assert "rehydrate_provider_health_gauges" in health_api.__all__
