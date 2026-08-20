@@ -22,7 +22,7 @@ from bioetl.application.services.run_reports.paths import (
     report_root_marker_path,
     resolve_report_root,
 )
-from bioetl.domain.ports.storage.run_report_store import RunReportStorePort
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.models import PipelineRunReport, WorkflowRunReport
 
 __all__ = (
@@ -52,6 +52,13 @@ class RunReportWriteResult:
     json_path: Path
     markdown_path: Path
     latest_path: Path | None = None
+
+
+def _require_pipeline_run_report(value: object) -> PipelineRunReport:
+    """Return a concrete pipeline report after validating replacement output."""
+    if not isinstance(value, PipelineRunReport):
+        raise TypeError("dataclass replacement did not preserve PipelineRunReport")
+    return value
 
 
 def configure_run_report_store(store: RunReportStorePort | None) -> None:
@@ -124,11 +131,11 @@ def write_json(
 
 
 def _with_self_artifacts(
-    artifacts: tuple[dict[str, Any], ...],
+    artifacts: tuple[dict[str, Any], ...],  # Any: artifact payload
     *,
     json_path: Path,
     markdown_path: Path,
-) -> tuple[dict[str, Any], ...]:
+) -> tuple[dict[str, Any], ...]:  # Any: dynamic artifact payload
     kinds = {str(item.get("kind")) for item in artifacts}
     items = list(artifacts)
     if (
@@ -154,7 +161,7 @@ def _with_self_artifacts(
 def _write_latest_pointer(
     *,
     owner_dir: Path,
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: latest pointer payload
     store: RunReportStorePort,
 ) -> Path:
     latest_path = owner_dir / "_latest.json"
@@ -181,13 +188,15 @@ def write_pipeline_run_report(
     writer.mkdir(out_dir)
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
-    enriched: PipelineRunReport = replace(
-        report,
-        artifacts=_with_self_artifacts(
-            report.artifacts,
-            json_path=json_path,
-            markdown_path=md_path,
-        ),
+    enriched = _require_pipeline_run_report(
+        replace(
+            report,
+            artifacts=_with_self_artifacts(
+                report.artifacts,
+                json_path=json_path,
+                markdown_path=md_path,
+            ),
+        )
     )
     write_json(json_path, enriched.to_dict(), store=writer)
     _atomic_write_text(

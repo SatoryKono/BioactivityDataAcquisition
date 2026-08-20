@@ -101,58 +101,52 @@ def _probe(name: str, entry: dict[str, Any], timeout: float) -> dict[str, Any]:
     }
 
 
-def _probe_status(result: dict[str, Any]) -> str:
-    if result["ready"]:
+def _probe_status(*, ready: bool, required: bool) -> str:
+    if ready:
         return "OK"
-    return "FAIL" if result["required"] else "WARN"
+    return "FAIL" if required else "WARN"
 
 
-def _completed_probe_results(
-    done: set[concurrent.futures.Future[dict[str, Any]]], required: set[str]
-) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
-    for future in done:
-        result = future.result()
-        result["required"] = result["server"] in required
-        result["status"] = _probe_status(result)
-        results.append(result)
-    return results
+def _completed_probe_result(
+    future: concurrent.futures.Future[dict[str, Any]],
+    required: set[str],
+) -> dict[str, Any]:
+    result = future.result()
+    is_required = result["server"] in required
+    result["required"] = is_required
+    result["status"] = _probe_status(
+        ready=bool(result["ready"]),
+        required=is_required,
+    )
+    return result
 
 
-def _timed_out_probe_results(
-    pending: set[concurrent.futures.Future[dict[str, Any]]],
-    futures: dict[concurrent.futures.Future[dict[str, Any]], str],
+def _timed_out_probe_result(
+    name: str,
     catalog: dict[str, Any],
     required: set[str],
     overall_timeout: float,
-) -> list[dict[str, Any]]:
-    results: list[dict[str, Any]] = []
-    for future in pending:
-        name = futures[future]
-        future.cancel()
-        required_server = name in required
-        results.append(
-            {
-                "server": name,
-                "url": f"http://127.0.0.1:{catalog[name]['port']}"
-                f"{catalog[name].get('path') or '/mcp'}",
-                "port_open": False,
-                "ping_ok": False,
-                "ready": False,
-                "detail": f"overall timeout after {overall_timeout:.1f}s",
-                "elapsed_ms": round(overall_timeout * 1000),
-                "required": required_server,
-                "status": "FAIL" if required_server else "WARN",
-            }
-        )
-    return results
+) -> dict[str, Any]:
+    is_required = name in required
+    entry = catalog[name]
+    return {
+        "server": name,
+        "url": f"http://127.0.0.1:{entry['port']}{entry.get('path') or '/mcp'}",
+        "port_open": False,
+        "ping_ok": False,
+        "ready": False,
+        "detail": f"overall timeout after {overall_timeout:.1f}s",
+        "elapsed_ms": round(overall_timeout * 1000),
+        "required": is_required,
+        "status": _probe_status(ready=False, required=is_required),
+    }
 
 
-def _run_mcp_probes(
-    *,
+def _run_profile_probes(
+    catalog: dict[str, Any],
     selected_local: list[str],
     required: set[str],
-    catalog: dict[str, Any],
+    *,
     timeout: float,
     overall_timeout: float,
 ) -> list[dict[str, Any]]:
@@ -164,43 +158,42 @@ def _run_mcp_probes(
         for name in selected_local
     }
     done, pending = concurrent.futures.wait(futures, timeout=overall_timeout)
-    results = _completed_probe_results(done, required)
-    results.extend(
-        _timed_out_probe_results(pending, futures, catalog, required, overall_timeout)
-    )
+    results = [_completed_probe_result(future, required) for future in done]
+    for future in pending:
+        name = futures[future]
+        future.cancel()
+        results.append(
+            _timed_out_probe_result(name, catalog, required, overall_timeout)
+        )
     pool.shutdown(wait=False, cancel_futures=True)
     return sorted(results, key=lambda item: item["server"])
 
 
-def _mcp_probe_payload(
-    *,
+def _mcp_payload(
     profile: str,
     plan: dict[str, Any],
     results: list[dict[str, Any]],
 ) -> dict[str, Any]:
     failed = sum(item["status"] == "FAIL" for item in results)
     warned = sum(item["status"] == "WARN" for item in results)
+    migration_hint = None
+    if profile not in DAILY_PROFILES:
+        migration_hint = (
+            "For daily readiness, select the stable/shared profile; "
+            "this diagnostic does not rewrite persisted state."
+        )
     return {
         "checked_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "profile": profile,
         "failed": failed,
         "warned": warned,
         "remote_or_external_skipped": _as_str_list(plan.get("remote_or_external")),
-        "migration_hint": (
-            None
-            if profile in DAILY_PROFILES
-            else "For daily readiness, select the stable/shared profile; "
-            "this diagnostic does not rewrite persisted state."
-        ),
+        "migration_hint": migration_hint,
         "results": results,
     }
 
 
-def _write_mcp_probe_payload(
-    repo_root: Path, output_path: Path | None, payload: dict[str, Any]
-) -> None:
-    if output_path is None:
-        return
+def _write_mcp_payload(repo_root: Path, output_path: Path, payload: dict[str, Any]) -> None:
     output = _governed_report_path(repo_root, output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
@@ -208,12 +201,10 @@ def _write_mcp_probe_payload(
     temporary.replace(output)
 
 
-def _print_mcp_probe_payload(
-    *,
+def _print_mcp_payload(
     profile: str,
     required: set[str],
     selected_local: list[str],
-    plan: dict[str, Any],
     payload: dict[str, Any],
 ) -> None:
     print(
@@ -228,12 +219,11 @@ def _print_mcp_probe_payload(
             f"[{item['status']}] {item['server']} {scope} "
             f"{item['url']} — {item['detail']}"
         )
-    skipped = _as_str_list(plan.get("remote_or_external"))
-    for name in skipped:
+    for name in payload["remote_or_external_skipped"]:
         print(f"[SKIP] {name} remote/auth-managed; inspect with 'codex mcp list'")
     print(
         f"Summary: failed={payload['failed']} warned={payload['warned']} "
-        f"skipped={len(skipped)}"
+        f"skipped={len(payload['remote_or_external_skipped'])}"
     )
 
 
@@ -253,26 +243,21 @@ def run_mcp(
     )
     required = set(_as_str_list(plan.get("required_local")))
     selected_local = sorted(required | set(_as_str_list(plan.get("optional_local"))))
-    results = _run_mcp_probes(
-        selected_local=selected_local,
-        required=required,
-        catalog=catalog,
+    results = _run_profile_probes(
+        catalog,
+        selected_local,
+        required,
         timeout=timeout,
         overall_timeout=overall_timeout,
     )
-    payload = _mcp_probe_payload(profile=profile, plan=plan, results=results)
-    _write_mcp_probe_payload(repo_root, output_path, payload)
+    payload = _mcp_payload(profile, plan, results)
+    if output_path is not None:
+        _write_mcp_payload(repo_root, output_path, payload)
 
     if output_json:
         print(json.dumps(payload, indent=2))
     else:
-        _print_mcp_probe_payload(
-            profile=profile,
-            required=required,
-            selected_local=selected_local,
-            plan=plan,
-            payload=payload,
-        )
+        _print_mcp_payload(profile, required, selected_local, payload)
     return 1 if payload["failed"] else 0
 
 

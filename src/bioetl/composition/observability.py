@@ -18,10 +18,10 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Protocol, cast
 
+from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
-    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
     from bioetl.domain.ports import DQMonitorPort
 
 
@@ -148,6 +148,13 @@ class _LoggerBindableObservability(Protocol):
     logger: object
 
 
+def _require_runner_inputs(value: object) -> RunnerInputs:
+    """Return concrete runner inputs after validating replacement output."""
+    if not isinstance(value, RunnerInputs):
+        raise TypeError("dataclass replacement did not preserve RunnerInputs")
+    return value
+
+
 def bind_manifest_logger_context(
     inputs: RunnerInputs,
     manifest_id: str,
@@ -163,11 +170,12 @@ def bind_manifest_logger_context(
     if not isinstance(rebound_observability, ObservabilityBundle):
         return inputs
     try:
-        rebound_inputs: RunnerInputs = replace(
-            inputs,
-            observability=rebound_observability,
+        return _require_runner_inputs(
+            replace(
+                inputs,
+                observability=rebound_observability,
+            )
         )
-        return rebound_inputs
     except (TypeError, AttributeError):
         return inputs
 

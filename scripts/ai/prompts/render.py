@@ -18,7 +18,7 @@ from scripts.ai.prompts.registry import (
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 PARAM_TABLE_DEFAULT_RE = re.compile(
-    r"^\|\s*`([A-Z][A-Z0-9_]*)`\s*\|\s*([^|\r\n]*)\s*\|"
+    r"^\s*\|\s*`([A-Z][A-Z0-9_]*)`\s*\|\s*([^|\r\n]*)\|"
 )
 
 

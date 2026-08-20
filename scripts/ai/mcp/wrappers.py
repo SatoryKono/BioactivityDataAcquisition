@@ -53,11 +53,7 @@ def _ordered_catalog_entries(
         if not isinstance(raw_entry, dict):
             raise ValueError(f"MCP server entry must be an object: {server_name}")
         raw_order = raw_entry.get("wrapper_order")
-        if (
-            not isinstance(raw_order, int)
-            or isinstance(raw_order, bool)
-            or raw_order < 1
-        ):
+        if not isinstance(raw_order, int) or isinstance(raw_order, bool) or raw_order < 1:
             raise ValueError(
                 f"MCP server {server_name!r} has invalid wrapper_order: {raw_order!r}"
             )
@@ -66,10 +62,10 @@ def _ordered_catalog_entries(
 
 
 def _validated_wrapper_spec(
-    *,
     wrapper_order: int,
     server_name: str,
     entry: dict[str, object],
+    *,
     wrapper_owners: dict[str, str],
     wrapper_orders: dict[int, str],
 ) -> WrapperSpec:
@@ -112,9 +108,9 @@ def load_wrapper_specs(catalog_path: Path = CATALOG_PATH) -> dict[str, WrapperSp
     wrapper_orders: dict[int, str] = {}
     for wrapper_order, server_name, entry in _ordered_catalog_entries(servers):
         specs[server_name] = _validated_wrapper_spec(
-            wrapper_order=wrapper_order,
-            server_name=server_name,
-            entry=entry,
+            wrapper_order,
+            server_name,
+            entry,
             wrapper_owners=wrapper_owners,
             wrapper_orders=wrapper_orders,
         )

@@ -8,7 +8,6 @@ import dataclasses
 import re
 import tomllib
 from pathlib import Path
-from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -285,48 +284,49 @@ def validate_project_config(repo_root: Path = REPO_ROOT) -> list[Finding]:
 
 
 def _agent_inventory_findings(agent_dir: Path) -> list[Finding]:
-    findings: list[Finding] = []
     actual = {path.stem for path in agent_dir.glob("py-*.toml")}
     expected = set(AGENT_NAMES)
-    for missing in sorted(expected - actual):
-        findings.append(
+    return [
+        *(
             Finding(
                 "agent.missing",
-                f"native descriptor is missing: {missing}",
+                f"native descriptor is missing: {name}",
                 str(agent_dir),
             )
-        )
-    for extra in sorted(actual - expected):
-        findings.append(
+            for name in sorted(expected - actual)
+        ),
+        *(
             Finding(
                 "agent.unexpected",
-                f"unexpected native descriptor: {extra}",
+                f"unexpected native descriptor: {name}",
                 str(agent_dir),
             )
-        )
-    return findings
+            for name in sorted(actual - expected)
+        ),
+    ]
 
 
-def _load_agent_descriptor(path: Path) -> tuple[dict[str, Any] | None, list[Finding]]:
+def _load_agent_descriptor(path: Path) -> tuple[dict[str, object] | None, Finding | None]:
     try:
-        return tomllib.loads(path.read_text(encoding="utf-8")), []
+        return tomllib.loads(path.read_text(encoding="utf-8")), None
     except (OSError, tomllib.TOMLDecodeError) as exc:
-        return None, [Finding("agent.invalid", str(exc), str(path))]
+        return None, Finding("agent.invalid", str(exc), str(path))
 
 
-def _agent_field_findings(
-    agent_name: str, path: Path, data: dict[str, Any]
+def _agent_descriptor_field_findings(
+    agent_name: str,
+    path: Path,
+    data: dict[str, object],
 ) -> list[Finding]:
-    findings: list[Finding] = []
-    for key in ("name", "description", "developer_instructions"):
-        if not isinstance(data.get(key), str) or not data[key].strip():
-            findings.append(
-                Finding(
-                    "agent.field",
-                    f"required non-empty string is missing: {key}",
-                    str(path),
-                )
-            )
+    findings = [
+        Finding(
+            "agent.field",
+            f"required non-empty string is missing: {key}",
+            str(path),
+        )
+        for key in ("name", "description", "developer_instructions")
+        if not isinstance(data.get(key), str) or not str(data[key]).strip()
+    ]
     if data.get("name") != agent_name:
         findings.append(
             Finding("agent.name", f"name must equal {agent_name!r}", str(path))
@@ -354,18 +354,20 @@ def _agent_field_findings(
 
 
 def _agent_instruction_findings(
-    repo_root: Path, agent_name: str, path: Path, instructions: object
+    repo_root: Path,
+    agent_name: str,
+    path: Path,
+    instructions: str,
 ) -> list[Finding]:
-    text = instructions if isinstance(instructions, str) else ""
-    findings: list[Finding] = []
     required_refs = (
         "AGENTS.md",
         f".codex/agents/{agent_name}.md",
         f".codex/skills/{agent_name}/SKILL.md",
         f"docs/00-project/ai/memory/memory-{agent_name}.md",
     )
+    findings: list[Finding] = []
     for reference in required_refs:
-        if reference not in text:
+        if reference not in instructions:
             findings.append(
                 Finding(
                     "agent.instructions",
@@ -387,19 +389,23 @@ def _agent_instruction_findings(
 def validate_agents(repo_root: Path = REPO_ROOT) -> list[Finding]:
     agent_dir = repo_root / ".codex/agents"
     findings = _agent_inventory_findings(agent_dir)
-
     for agent_name in AGENT_NAMES:
         path = agent_dir / f"{agent_name}.toml"
         if not path.is_file():
             continue
-        data, load_findings = _load_agent_descriptor(path)
-        findings.extend(load_findings)
-        if data is None:
+        data, load_finding = _load_agent_descriptor(path)
+        if load_finding is not None:
+            findings.append(load_finding)
             continue
-        findings.extend(_agent_field_findings(agent_name, path, data))
+        assert data is not None
+        findings.extend(_agent_descriptor_field_findings(agent_name, path, data))
+        instructions = data.get("developer_instructions", "")
         findings.extend(
             _agent_instruction_findings(
-                repo_root, agent_name, path, data.get("developer_instructions")
+                repo_root,
+                agent_name,
+                path,
+                instructions if isinstance(instructions, str) else "",
             )
         )
     return findings

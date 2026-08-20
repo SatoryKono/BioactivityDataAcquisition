@@ -133,21 +133,24 @@ def cmd_show(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
-def _resolve_render_output(raw_output: str) -> Path | None:
-    output = Path(raw_output)
-    if not output.is_absolute():
-        output = REPO_ROOT / output
-    resolved = output.expanduser().resolve()
-    if Path(raw_output).expanduser().is_absolute():
-        return resolved
-    try:
-        resolved.relative_to((REPO_ROOT / "reports").resolve())
-    except ValueError:
-        return None
+def _resolve_render_output(raw_output: str) -> Path:
+    """Resolve a render target while confining relative paths to reports/."""
+    requested = Path(raw_output).expanduser()
+    output = requested if requested.is_absolute() else REPO_ROOT / requested
+    resolved = output.resolve()
+    reports_root = (REPO_ROOT / "reports").resolve()
+    if not requested.is_absolute():
+        try:
+            resolved.relative_to(reports_root)
+        except ValueError as exc:
+            raise ValueError(
+                "refusing relative path outside reports/: "
+                "use --output reports/... or an absolute path"
+            ) from exc
     return resolved
 
 
-def _write_render_output(output: Path, text: str) -> None:
+def _write_render_output(text: str, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     encoding = "utf-8-sig" if sys.platform == "win32" else "utf-8"
     output.write_text(text, encoding=encoding)
@@ -166,15 +169,12 @@ def cmd_render(args: argparse.Namespace) -> int:
         print(str(exc), file=sys.stderr)
         return EXIT_USAGE if isinstance(exc, KeyError) else EXIT_CHECK
     if args.output:
-        resolved = _resolve_render_output(args.output)
-        if resolved is None:
-            print(
-                "refusing relative path outside reports/: "
-                "use --output reports/... or an absolute path",
-                file=sys.stderr,
-            )
+        try:
+            resolved = _resolve_render_output(args.output)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
             return EXIT_USAGE
-        _write_render_output(resolved, text)
+        _write_render_output(text, resolved)
         if not args.stdout:
             return EXIT_OK
     _write_stdout(text)

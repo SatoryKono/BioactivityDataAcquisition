@@ -67,9 +67,11 @@ hardening_targets:
     cpu_limit_required: true
     pids_limit_required: true
   logging:
-    driver: json-file
-    max_size: 10m
-    max_files: 3
+    allowed_drivers:
+      - local
+      - json-file
+    max_size_required: true
+    max_files_required: true
   readiness:
     real_service_probe_required: true
     running_state_is_not_ready: true

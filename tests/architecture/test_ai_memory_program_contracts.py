@@ -35,3 +35,12 @@ def test_shared_mcp_memory_requires_explicit_write_enablement() -> None:
     assert "'off'" in powershell_wrapper
     assert "read-write" in bash_wrapper
     assert "read-write" in powershell_wrapper
+
+
+def test_memory_workflow_helper_prefers_windows_venv() -> None:
+    """run_workflow.sh must discover .venv-win on native Windows (#9121)."""
+    script = Path("scripts/memory/run_workflow.sh").read_text(encoding="utf-8")
+    assert ".venv-win/Scripts/python.exe" in script
+    win = script.index(".venv-win/Scripts/python.exe")
+    posix = script.index(".venv/bin/python")
+    assert win < posix

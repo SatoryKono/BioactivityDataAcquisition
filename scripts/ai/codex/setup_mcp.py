@@ -29,9 +29,9 @@ MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 MCP_JSON_FILENAME = "mcp.json"
 DOT_MCP_JSON_FILENAME = ".mcp.json"
-DEVIN_MCP_CONFIG_FILENAME = "mcp_config.json"
 CODEX_DIRNAME = ".codex"
 DEVIN_DIRNAME = ".devin"
+DEVIN_MCP_CONFIG_FILENAME = "mcp_config.json"
 CACHE_DIR_NAME = ".cache"
 CODEX_RUNTIME_CACHE_DIR_NAME = "bioetl-mcp"
 DEEPWIKI_API_KEY_ENV_VAR = "DEEPWIKI_API_KEY"
@@ -957,109 +957,6 @@ def _run_codex_validation(workspace_root: Path) -> None:
     print("codex mcp list succeeded.")
 
 
-def _run_codex_only_mode(
-    args: argparse.Namespace,
-    parser: argparse.ArgumentParser,
-    workspace_root: Path,
-) -> int | None:
-    if not args.codex_only:
-        return None
-    if args.check or args.check_local or args.qodo_only or args.persist_local_profile:
-        parser.error(
-            "--codex-only cannot be combined with --check, --check-local, "
-            "--qodo-only, or --persist-local-profile"
-        )
-    if args.skip_codex or args.skip_codex_config:
-        parser.error("--codex-only cannot be combined with Codex skip flags")
-    _write_codex_config(
-        workspace_root,
-        profile=args.profile,
-        transport_mode=args.transport_mode,
-    )
-    print("Updated the private Codex user MCP managed block.")
-    if not args.skip_codex_validation:
-        _run_codex_validation(workspace_root)
-    return 0
-
-
-def _run_local_check_mode(
-    args: argparse.Namespace,
-    raw_argv: Sequence[str],
-    parser: argparse.ArgumentParser,
-    output_root: Path,
-    workspace_root: Path,
-) -> int | None:
-    if not args.check_local:
-        return None
-    if args.qodo_only or args.persist_local_profile:
-        parser.error(
-            "--check-local cannot be combined with --qodo-only or "
-            "--persist-local-profile"
-        )
-    profile, transport_mode = _resolve_local_check_selection(
-        output_root,
-        profile=args.profile,
-        transport_mode=args.transport_mode,
-        profile_explicit=_cli_option_was_provided(raw_argv, "--profile"),
-        transport_explicit=_cli_option_was_provided(raw_argv, "--transport-mode"),
-    )
-    return _check_local_profile_projections(
-        output_root,
-        workspace_root,
-        profile=profile,
-        transport_mode=transport_mode,
-    )
-
-
-def _write_requested_configs(
-    args: argparse.Namespace, output_root: Path, workspace_root: Path
-) -> int:
-    written_paths = _write_configs(
-        output_root,
-        workspace_root,
-        qodo_only=args.qodo_only,
-        profile=args.profile,
-        transport_mode=args.transport_mode,
-    )
-    if not args.qodo_only and args.persist_local_profile:
-        profile_state_path = _write_local_profile_state(
-            output_root,
-            profile=args.profile,
-            transport_mode=args.transport_mode,
-        )
-        print(f"Wrote {profile_state_path}")
-    _print_written_mcp_paths(written_paths, qodo_only=args.qodo_only)
-    _write_optional_side_configs(args, output_root, workspace_root)
-    if not args.skip_codex and not args.skip_codex_validation:
-        _run_codex_validation(workspace_root)
-    return 0
-
-
-def _dispatch_setup_mcp(
-    args: argparse.Namespace,
-    raw_argv: Sequence[str],
-    parser: argparse.ArgumentParser,
-) -> int:
-    _apply_setup_mcp_flag_shortcuts(args)
-    output_root = args.root.absolute()
-    workspace_root = args.workspace_root.absolute()
-    if args.check and args.check_local:
-        parser.error("--check and --check-local are mutually exclusive")
-    codex_only_status = _run_codex_only_mode(args, parser, workspace_root)
-    if codex_only_status is not None:
-        return codex_only_status
-    if args.check:
-        return _check_tracked_portable_projections(
-            output_root, workspace_root, qodo_only=args.qodo_only
-        )
-    local_check_status = _run_local_check_mode(
-        args, raw_argv, parser, output_root, workspace_root
-    )
-    if local_check_status is not None:
-        return local_check_status
-    return _write_requested_configs(args, output_root, workspace_root)
-
-
 def main(argv: Sequence[str] | None = None) -> int:
     raw_argv = list(argv) if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1175,7 +1072,120 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(raw_argv)
-    return _dispatch_setup_mcp(args, raw_argv, parser)
+    _apply_setup_mcp_flag_shortcuts(args)
+    output_root = args.root.absolute()
+    workspace_root = args.workspace_root.absolute()
+    return _dispatch_setup_mcp(args, raw_argv, parser, output_root, workspace_root)
+
+
+def _run_codex_only_mode(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    workspace_root: Path,
+) -> int | None:
+    if not args.codex_only:
+        return None
+    if args.check or args.check_local or args.qodo_only or args.persist_local_profile:
+        parser.error(
+            "--codex-only cannot be combined with --check, --check-local, "
+            "--qodo-only, or --persist-local-profile"
+        )
+    if args.skip_codex or args.skip_codex_config:
+        parser.error("--codex-only cannot be combined with Codex skip flags")
+    _write_codex_config(
+        workspace_root,
+        profile=args.profile,
+        transport_mode=args.transport_mode,
+    )
+    print("Updated the private Codex user MCP managed block.")
+    if not args.skip_codex_validation:
+        _run_codex_validation(workspace_root)
+    return 0
+
+
+def _run_local_check_mode(
+    args: argparse.Namespace,
+    raw_argv: Sequence[str],
+    parser: argparse.ArgumentParser,
+    output_root: Path,
+    workspace_root: Path,
+) -> int | None:
+    if not args.check_local:
+        return None
+    if args.qodo_only or args.persist_local_profile:
+        parser.error(
+            "--check-local cannot be combined with --qodo-only or "
+            "--persist-local-profile"
+        )
+    profile, transport_mode = _resolve_local_check_selection(
+        output_root,
+        profile=args.profile,
+        transport_mode=args.transport_mode,
+        profile_explicit=_cli_option_was_provided(raw_argv, "--profile"),
+        transport_explicit=_cli_option_was_provided(raw_argv, "--transport-mode"),
+    )
+    return _check_local_profile_projections(
+        output_root,
+        workspace_root,
+        profile=profile,
+        transport_mode=transport_mode,
+    )
+
+
+def _write_requested_configs(
+    args: argparse.Namespace,
+    output_root: Path,
+    workspace_root: Path,
+) -> int:
+    written_paths = _write_configs(
+        output_root,
+        workspace_root,
+        qodo_only=args.qodo_only,
+        profile=args.profile,
+        transport_mode=args.transport_mode,
+    )
+    if not args.qodo_only and args.persist_local_profile:
+        profile_state_path = _write_local_profile_state(
+            output_root,
+            profile=args.profile,
+            transport_mode=args.transport_mode,
+        )
+        print(f"Wrote {profile_state_path}")
+    _print_written_mcp_paths(written_paths, qodo_only=args.qodo_only)
+    _write_optional_side_configs(args, output_root, workspace_root)
+    if not args.skip_codex and not args.skip_codex_validation:
+        _run_codex_validation(workspace_root)
+    return 0
+
+
+def _dispatch_setup_mcp(
+    args: argparse.Namespace,
+    raw_argv: Sequence[str],
+    parser: argparse.ArgumentParser,
+    output_root: Path,
+    workspace_root: Path,
+) -> int:
+    if args.check and args.check_local:
+        parser.error("--check and --check-local are mutually exclusive")
+    result = _run_codex_only_mode(args, parser, workspace_root)
+    if result is not None:
+        return result
+    if args.check:
+        return _check_tracked_portable_projections(
+            output_root,
+            workspace_root,
+            qodo_only=args.qodo_only,
+        )
+    result = _run_local_check_mode(
+        args,
+        raw_argv,
+        parser,
+        output_root,
+        workspace_root,
+    )
+    if result is not None:
+        return result
+    return _write_requested_configs(args, output_root, workspace_root)
 
 
 def _apply_setup_mcp_flag_shortcuts(args: argparse.Namespace) -> None:
@@ -1266,7 +1276,10 @@ def _render_devin_mcp_payload(workspace_root: Path) -> dict[str, Any]:
 
 
 def _portable_projection_mismatch(
-    output_root: Path, relative: Path, expected_text: str
+    output_root: Path,
+    relative: Path,
+    expected_text: str,
+    expected_names: set[str],
 ) -> str | None:
     path = output_root / relative
     if not path.is_file():
@@ -1275,46 +1288,47 @@ def _portable_projection_mismatch(
     if actual == expected_text:
         return None
     actual_obj = json.loads(actual) if actual.strip() else {}
-    expected_obj = json.loads(expected_text)
-    actual_servers = actual_obj.get("mcpServers") or {}
-    expected_servers = expected_obj.get("mcpServers") or {}
-    actual_names = set(actual_servers)
-    expected_names = set(expected_servers)
-    details = [
-        f"stale: {relative.as_posix()}",
-        f"bytes actual={len(actual)} expected={len(expected_text)}",
-    ]
+    actual_names = set(actual_obj.get("mcpServers") or {})
     only_actual = sorted(actual_names - expected_names)
     only_expected = sorted(expected_names - actual_names)
     shared_drift = sorted(
         name
         for name in actual_names & expected_names
-        if actual_servers.get(name) != expected_servers.get(name)
+        if (actual_obj.get("mcpServers") or {}).get(name)
+        != json.loads(expected_text)["mcpServers"].get(name)
     )
-    if only_actual:
-        details.append(f"only_in_file={only_actual[:8]}")
-    if only_expected:
-        details.append(f"only_in_canonical={only_expected[:8]}")
-    if shared_drift:
-        details.append(f"server_drift={shared_drift[:12]}")
+    details = [
+        f"stale: {relative.as_posix()}",
+        f"bytes actual={len(actual)} expected={len(expected_text)}",
+    ]
+    for label, values, limit in (
+        ("only_in_file", only_actual, 8),
+        ("only_in_canonical", only_expected, 8),
+        ("server_drift", shared_drift, 12),
+    ):
+        if values:
+            details.append(f"{label}={values[:limit]}")
     return "; ".join(details)
 
 
 def _devin_projection_mismatches(
-    output_root: Path, workspace_root: Path
+    output_root: Path,
+    workspace_root: Path,
 ) -> tuple[list[str], Path, Path]:
     mismatches: list[str] = []
     devin_relative = Path(DEVIN_DIRNAME) / DEVIN_MCP_CONFIG_FILENAME
-    devin_path = output_root / devin_relative
-    expected = (
+    expected_text = (
         json.dumps(
-            _render_devin_mcp_payload(workspace_root), indent=2, ensure_ascii=True
+            _render_devin_mcp_payload(workspace_root),
+            indent=2,
+            ensure_ascii=True,
         )
         + "\n"
     )
+    devin_path = output_root / devin_relative
     if not devin_path.is_file():
         mismatches.append(f"missing: {devin_relative.as_posix()}")
-    elif devin_path.read_text(encoding="utf-8") != expected:
+    elif devin_path.read_text(encoding="utf-8") != expected_text:
         mismatches.append(
             f"stale: {devin_relative.as_posix()}; dedicated Devin MCP projection drift"
         )
@@ -1323,39 +1337,40 @@ def _devin_projection_mismatches(
     settings_path = output_root / settings_relative
     if not settings_path.is_file():
         mismatches.append(f"missing: {settings_relative.as_posix()}")
-        return mismatches, settings_relative, devin_relative
+        return mismatches, devin_relative, settings_relative
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
-    unsupported = sorted(
+    unsupported_keys = sorted(
         set(settings) - {"version", "permissions", "read_config_from", "hooks"}
     )
-    if unsupported:
-        mismatches.append(f"unsupported Devin project config keys: {unsupported}")
+    if unsupported_keys:
+        mismatches.append(f"unsupported Devin project config keys: {unsupported_keys}")
     if "mcpServers" in settings:
         mismatches.append("legacy Devin mcpServers must live in .devin/mcp_config.json")
-    return mismatches, settings_relative, devin_relative
+    return mismatches, devin_relative, settings_relative
 
 
 def _report_portable_projection_result(
-    mismatches: list[str], relative_paths: tuple[Path, ...], settings: Path, mcp: Path
+    mismatches: list[str],
+    relative_paths: tuple[Path, ...],
+    devin_relative: Path,
+    settings_relative: Path,
 ) -> int:
-    if not mismatches:
+    if mismatches:
+        print("[setup_mcp --check] FAIL: tracked portable MCP projections are stale")
+        for item in mismatches:
+            print(f"  - {item}")
         print(
-            "[setup_mcp --check] ok: tracked portable MCP projections match "
-            "canonical full/stdio/posix render"
+            "Recovery: re-run Generate: MCP tracked manifests "
+            "(scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings)"
         )
-        for relative in relative_paths:
-            print(f"  ok {relative.as_posix()}")
-        print(f"  ok {settings.as_posix()}")
-        print(f"  ok {mcp.as_posix()}")
-        return 0
-    print("[setup_mcp --check] FAIL: tracked portable MCP projections are stale")
-    for item in mismatches:
-        print(f"  - {item}")
+        return 1
     print(
-        "Recovery: re-run Generate: MCP tracked manifests "
-        "(scripts/ai/codex/setup_mcp.py --skip-codex --skip-gemini-settings)"
+        "[setup_mcp --check] ok: tracked portable MCP projections match "
+        "canonical full/stdio/posix render"
     )
-    return 1
+    for relative in (*relative_paths, settings_relative, devin_relative):
+        print(f"  ok {relative.as_posix()}")
+    return 0
 
 
 def _check_tracked_portable_projections(
@@ -1382,22 +1397,29 @@ def _check_tracked_portable_projections(
         Path("scripts") / "ai" / DOT_MCP_JSON_FILENAME,
         Path(".zed") / MCP_JSON_FILENAME,
     )
+    expected_names = set(json.loads(expected_text)["mcpServers"])
     mismatches = [
         mismatch
         for relative in relative_paths
         if (
             mismatch := _portable_projection_mismatch(
-                output_root, relative, expected_text
+                output_root,
+                relative,
+                expected_text,
+                expected_names,
             )
         )
         is not None
     ]
-    devin_mismatches, settings_relative, devin_relative = _devin_projection_mismatches(
-        output_root, workspace_root
+    devin_mismatches, devin_relative, settings_relative = (
+        _devin_projection_mismatches(output_root, workspace_root)
     )
     mismatches.extend(devin_mismatches)
     return _report_portable_projection_result(
-        mismatches, relative_paths, settings_relative, devin_relative
+        mismatches,
+        relative_paths,
+        devin_relative,
+        settings_relative,
     )
 
 
@@ -1485,7 +1507,9 @@ def _check_local_surfaces(
     checked: list[Path] = []
     for relative, key, expected in surfaces:
         actual, load_error = _read_local_server_mapping(
-            output_root / relative, relative=relative, key=key
+            output_root / relative,
+            relative=relative,
+            key=key,
         )
         if load_error is not None:
             mismatches.append(load_error)
@@ -1493,7 +1517,9 @@ def _check_local_surfaces(
         assert actual is not None
         checked.append(relative)
         mismatch = _local_surface_mismatch(
-            relative=relative, actual=actual, expected=expected
+            relative=relative,
+            actual=actual,
+            expected=expected,
         )
         if mismatch is not None:
             mismatches.append(mismatch)
@@ -1502,8 +1528,7 @@ def _check_local_surfaces(
 
 def _check_optional_gemini_surface(
     output_root: Path,
-    *,
-    expected: dict[str, Any],
+    gemini_expected: dict[str, Any],
     managed_names: set[str],
 ) -> tuple[str | None, Path | None]:
     relative = Path(".gemini/settings.json")
@@ -1511,26 +1536,31 @@ def _check_optional_gemini_surface(
     if not path.exists():
         return None, None
     actual, load_error = _read_local_server_mapping(
-        path, relative=relative, key="mcpServers"
+        path,
+        relative=relative,
+        key="mcpServers",
     )
     if load_error is not None:
         return load_error, None
     assert actual is not None
-    return (
-        _local_surface_mismatch(
-            relative=relative,
-            actual=actual,
-            expected=expected,
-            gemini=True,
-            managed_names=managed_names,
-        ),
-        relative,
+    mismatch = _local_surface_mismatch(
+        relative=relative,
+        actual=actual,
+        expected=gemini_expected,
+        gemini=True,
+        managed_names=managed_names,
     )
+    return mismatch, relative
 
 
 def _report_local_profile_result(
-    mismatches: list[str], checked: list[Path], selection: str
+    *,
+    profile: str,
+    transport_mode: str,
+    mismatches: list[str],
+    checked: list[Path],
 ) -> int:
+    selection = f"{profile}/{transport_mode}"
     if not mismatches:
         print(f"[setup_mcp --check-local] ok: local MCP projections match {selection}")
         for relative in checked:
@@ -1582,7 +1612,7 @@ def _check_local_profile_projections(
     ) | set(REMOVED_MCP_SERVER_NAMES)
 
     surfaces = (
-        (Path(".codex/settings.json"), "mcpServers", codex_expected),
+        (Path(CODEX_DIRNAME) / "settings.json", "mcpServers", codex_expected),
         (Path(".vscode/mcp.json"), "servers", portable_expected),
         (Path(".cursor/mcp.json"), "mcpServers", portable_expected),
         (Path(".qodo/mcp.json"), "mcpServers", portable_expected),
@@ -1590,15 +1620,18 @@ def _check_local_profile_projections(
     mismatches, checked = _check_local_surfaces(output_root, surfaces)
     gemini_mismatch, gemini_relative = _check_optional_gemini_surface(
         output_root,
-        expected=gemini_expected,
-        managed_names=managed_gemini_names,
+        gemini_expected,
+        managed_gemini_names,
     )
     if gemini_mismatch is not None:
         mismatches.append(gemini_mismatch)
     if gemini_relative is not None:
         checked.append(gemini_relative)
     return _report_local_profile_result(
-        mismatches, checked, f"{profile}/{transport_mode}"
+        profile=profile,
+        transport_mode=transport_mode,
+        mismatches=mismatches,
+        checked=checked,
     )
 
 
