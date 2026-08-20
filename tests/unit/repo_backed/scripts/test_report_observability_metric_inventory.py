@@ -1945,7 +1945,6 @@ def test_main_can_fail_fast_when_runtime_cardinality_review_degrades(
     assert review_path.exists()
 
 
-
 def test_main_builds_cardinality_review_before_writing_evidence(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1990,7 +1989,9 @@ def test_main_builds_cardinality_review_before_writing_evidence(
         "rules_mentions": {},
         "alias_emitters": {},
     }
-    monkeypatch.setattr(inventory, "collect_metric_inventory", lambda _repo_root: fake_report)
+    monkeypatch.setattr(
+        inventory, "collect_metric_inventory", lambda _repo_root: fake_report
+    )
 
     def fake_build(*_args: object, **_kwargs: object) -> dict[str, object]:
         order.append("build_review")
@@ -2008,7 +2009,9 @@ def test_main_builds_cardinality_review_before_writing_evidence(
     def fake_write_evidence(*_args: object, **_kwargs: object) -> None:
         order.append("write_evidence")
 
-    monkeypatch.setattr(inventory, "_build_runtime_cardinality_review_summary", fake_build)
+    monkeypatch.setattr(
+        inventory, "_build_runtime_cardinality_review_summary", fake_build
+    )
     monkeypatch.setattr(cli, "_write_evidence_report", fake_write_evidence)
 
     evidence_path = tmp_path / "evidence.json"
