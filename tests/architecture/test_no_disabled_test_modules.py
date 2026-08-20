@@ -23,8 +23,7 @@ pytestmark = pytest.mark.architecture
 
 def _disabled_test_modules() -> list[str]:
     return sorted(
-        path.relative_to(ROOT).as_posix()
-        for path in TESTS_ROOT.rglob("*.disabled")
+        path.relative_to(ROOT).as_posix() for path in TESTS_ROOT.rglob("*.disabled")
     )
 
 
@@ -34,6 +33,5 @@ def test_no_tracked_disabled_test_modules() -> None:
     assert not offenders, (
         "Tracked *.disabled test modules bypass pytest collection and the "
         "reviewed skip inventory. Remove them or convert to a governed "
-        "@pytest.mark.skip/skipif in a collected .py module:\n"
-        + "\n".join(offenders)
+        "@pytest.mark.skip/skipif in a collected .py module:\n" + "\n".join(offenders)
     )

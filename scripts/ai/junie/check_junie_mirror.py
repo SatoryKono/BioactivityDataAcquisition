@@ -88,7 +88,9 @@ def check_agents(contract: JsonObject, issues: list[str]) -> None:
     codex_dir = REPO_ROOT / CODEX_DIRNAME / "agents"
     junie_dir = REPO_ROOT / JUNIE_DIRNAME / "agents"
     exclude = set(scope.get("exclude_filenames", []))
-    codex_files = {p.name for p in codex_dir.glob(PROFILE_GLOB) if p.name not in exclude}
+    codex_files = {
+        p.name for p in codex_dir.glob(PROFILE_GLOB) if p.name not in exclude
+    }
     junie_files = {p.name for p in junie_dir.glob(PROFILE_GLOB)}
     missing_in_junie = sorted(codex_files - junie_files)
     extra_in_junie = sorted(junie_files - codex_files)

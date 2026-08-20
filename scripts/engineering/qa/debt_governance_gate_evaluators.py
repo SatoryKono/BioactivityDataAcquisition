@@ -46,7 +46,9 @@ except Exception:  # pragma: no cover
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
-DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
+DEFAULT_JSON_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.json"
+)
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
 RELEASE_REVIEW_MAX_AGE_DAYS = 21
 DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"

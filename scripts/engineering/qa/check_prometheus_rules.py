@@ -698,6 +698,58 @@ def _run_expr_parity(*, prometheus_url: str) -> int:
     return 0 if report.ok else 1
 
 
+def _print_rule_coverage(coverage: RuleTestCoverage, *, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(coverage, indent=2, sort_keys=True))
+        return
+    tested_control_plane = len(coverage["control_plane_records"]) - len(
+        coverage["untested_control_plane_records"]
+    )
+    print(
+        "Rule test coverage: "
+        f"alerts={coverage['tested_alerts']}/{coverage['alert_definitions']} "
+        f"(firing={coverage['firing_alerts']}, non_firing={coverage['non_firing_alerts']}), "
+        f"records={coverage['directly_tested_records']}/{coverage['record_definitions']}, "
+        f"control_plane={tested_control_plane}/{len(coverage['control_plane_records'])}"
+    )
+
+
+def _report_violations(*, label: str, violations: Sequence[str]) -> bool:
+    for violation in violations:
+        print(f"{label}: {violation}", file=sys.stderr)
+    return bool(violations)
+
+
+def _structural_rule_violations(
+    *, rules_files: tuple[Path, ...]
+) -> tuple[list[str], list[str]]:
+    identity_files = (
+        tuple(list_shipped_rule_files(Path("grafana/prometheus-rules")))
+        if rules_files == DEFAULT_RULES_FILES
+        else rules_files
+    )
+    return (
+        validate_recording_rule_identity_uniqueness(identity_files),
+        validate_rule_expr_presence(identity_files),
+    )
+
+
+def _run_selected_rule_checker(
+    args: argparse.Namespace, rules_files: tuple[Path, ...]
+) -> int:
+    if args.runner == "docker":
+        return _run_docker(
+            image=args.image,
+            rules_files=rules_files,
+            test_file=args.test_file,
+        )
+    return _run_local(
+        promtool=args.promtool,
+        rules_files=rules_files,
+        test_file=args.test_file,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     """Validate Prometheus rules and test coverage.
 
