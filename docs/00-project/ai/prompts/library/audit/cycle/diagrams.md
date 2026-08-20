@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.diagrams
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,6 +27,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -34,11 +35,14 @@ includes:
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/02-architecture
   - scripts/diagrams
   - docs/00-project/ai/prompts/library/audit/diagrams.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Preferring pretty PNG over accurate text-as-code
   - Unpinned npx -y in production CI
   - Huge code-level diagrams of the entire monorepo
@@ -77,6 +81,7 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`**. Пустые ц�
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Lint / governance: ADR-040; DOC-GOV-02 (`**/png/**` is a render artifact, not SSOT)
 - Entry: `python -m scripts.diagrams` (`lint`, `lint-budget`, `checks`,
   `check-artifacts`, `check-visual-smoke`, `check-svg-text`)
@@ -100,7 +105,7 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`**. Пустые ц�
 | **B Lint / budget** | Run `python -m scripts.diagrams lint` and `lint-budget`. Record gate result. Flag unpinned `npx -y` in CI/render scripts. |
 | **C Render smoke** | Pinned project tooling only. `checks` / `check-artifacts` / `check-visual-smoke` as available. If generated images are tracked: clean render + `git diff` only when policy requires; else temp output. |
 | **D Accuracy** | Each claim on a diagram → path in code/ADR/config. Orphan nodes, stale edges, secrets/internal endpoints that must not be published. A pretty but wrong diagram scores worse than a minimal accurate one. |
-| **E Issues / Fix** | Dedupe (`diagrams`, `docs`). Create if ALLOW_ISSUE_WRITE + PROVEN. Fix source `.mmd` and project fixers (`fix-operators`, ELK, SVG fallbacks). Do not commit large binary churn without policy. |
+| **E Issues / Fix** | Dedupe. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[diagrams][<REQ-id>][P#]`. Fix `.mmd` / project fixers. No unpolicy binary churn. |
 | **F Validate** | Re-lint / re-check-artifacts on touched set. Delta: resolved / unchanged / regressed / new. |
 
 `MODE=audit` stops after D. `audit+issues` after issue payload. `full` through F.

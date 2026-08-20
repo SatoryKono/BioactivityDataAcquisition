@@ -1,6 +1,6 @@
 ---
 id: prompt.audit.cycle.tech-debt
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,6 +27,7 @@ includes:
   - fragments/language-ru.md
   - fragments/audit-scale.md
   - fragments/finding-schema.md
+  - fragments/project-requirements-audit.md
   - fragments/unknown-params.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
@@ -35,12 +36,15 @@ related_ssot:
   - AGENTS.md
   - docs/00-project/RULES.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability/requirements-traceability-crosswalk.csv
   - docs/00-project/governance/08-debt-ownership-playbook.md
   - docs/00-project/ai/prompts/library/audit/tech-debt.md
   - docs/00-project/ai/prompts/library/audit/orchestrator.md
   - configs/quality/debt_scorecard.yaml
   - reports/quality/debt-governance-gates.json
 anti_patterns:
+  - Inventing REQ-* IDs not in REQUIREMENTS.md / the traceability CSV
   - Raising debt/quality budgets or exemptions
   - Priority by TODO count instead of blast radius
   - Treating every style nit as technical debt
@@ -80,6 +84,7 @@ Default **`N=10`**, **`MODE=full`**, все **`ALLOW_*=true`**. Пустые ц�
 
 ## BioETL anchors
 
+- Requirements: `docs/01-requirements/REQUIREMENTS.md` + traceability CSV; PROVEN findings need `requirement_id`
 - Ownership: `docs/00-project/governance/08-debt-ownership-playbook.md`
 - Scorecard: `configs/quality/debt_scorecard.yaml`
 - Gates: `reports/quality/debt-governance-gates.json`
@@ -104,7 +109,7 @@ unless they hide correctness or blast radius.
 | --- | --- |
 | **A Register** | Collect TODO/FIXME/HACK, suppressions, shims, disabled gates, oversized modules, import cycles. Cross-check debt-governance gates + residual snapshot **trend** (no higher limits). |
 | **B Risk order** | Blast radius: P0 security/data → P3 local cleanup. Each item: owner suggestion, tests protecting the refactor, paydown step that **reduces or holds** residual. |
-| **C Issues** | Dedupe (`tech-debt`, `quality`). Create only if ALLOW_ISSUE_WRITE + PROVEN. One cluster per root-cause. |
+| **C Issues** | Dedupe. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[tech-debt][<REQ-id>][P#]`. One cluster per root-cause. |
 | **D Paydown** | Pay down only. Never raise budgets/exemptions/hotspot caps. Refresh inventories only via project scripts. |
 | **E Validate** | Re-run debt/residual gates when project commands exist. Architecture residual non-growth must still pass. |
 | **F Post** | Residual delta table: before/after for touched families. List rejected “raise budget” ideas as `REJECTED_POLICY`. |
