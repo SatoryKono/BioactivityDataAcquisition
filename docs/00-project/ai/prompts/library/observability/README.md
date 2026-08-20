@@ -79,6 +79,11 @@ Do not reopen `#8944`–`#8948`. Default `MONITORING=false`.
 - `prompt.observability.dashboard-data-duplication` — по каждому UID 0–6:
   данные каждой панели, таксономия дублей внутри дашборда, план исключения
   без сноса `DASH-FIT-003` / `DASH-FIT-005`.
+- `prompt.observability.dashboard-manual-validation` — focused/manual
+  step for DASH-* rules that static pytest cannot prove (reflow, computed
+  type, live FIT, render states). Default `MONITORING=false` → live rows
+  are `Not Verifiable`, not defects. **Not** a second grafana-six pass;
+  do not reopen `#8986`.
 - `prompt.observability.group-scalar-density-audit` — re-measure scalar
   information density per panel group vs first screen (`DASH-DENSITY-002`,
   REQUIREMENTS §5.4) and rank groups that must be made denser. Static (no

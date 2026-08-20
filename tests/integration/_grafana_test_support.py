@@ -506,6 +506,15 @@ def _assert_standard_variable_contract(
     assert run_type_var is not None, (
         f"Dashboard {dashboard_path.name} must define 'run_type' variable"
     )
+    if dashboard_path.name == "bioetl-run-explorer-v1.json":
+        assert run_type_var.get("datasource") == "BioETL Ops HTTP", (
+            f"{dashboard_path.name} 'run_type' must use the control-plane catalog"
+        )
+        infinity = (run_type_var.get("query") or {}).get("infinityQuery") or {}
+        run_type_url = str(infinity.get("url", ""))
+        assert "/ops/control-plane/filter-options" in run_type_url
+        assert "dimension=run_type" in run_type_url
+        return
     run_type_query = run_type_var.get("query", {})
     run_type_query_text = (
         run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""

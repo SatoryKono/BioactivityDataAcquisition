@@ -331,6 +331,14 @@ entries:
       [observability, dashboard, grafana, duplication, panels, audit, operator]
     summary: Sequential per-dashboard panel data audit — intra-dashboard duplicates and exclusion plan without breaking FIT
 
+  - id: prompt.observability.dashboard-manual-validation
+    path: library/observability/dashboard-manual-validation.md
+    status: active
+    class: operator-paste
+    tags:
+      [observability, dashboard, grafana, audit, manual, validation, operator]
+    summary: Manual validation of DASH-* rules that static pytest cannot prove — reflow, computed type, live FIT, render states; theme and zoom Dark/Light 100%/200%
+
   - id: prompt.observability.dashboard-v5.pack
     path: library/observability/dashboard-v5/pack.md
     status: active

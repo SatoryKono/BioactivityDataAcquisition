@@ -16,7 +16,7 @@
     "run_type": "backfill",
     "workflow": "chembl_baseline"
   },
-  "title": "Inspect Full Processed Records",
+  "title": "Inspect Processed Records",
   "url": "/ops/observability/processed-records?pipeline=chembl_assay&run_type=backfill&run_id=00000000-0000-4000-8000-000000000942",
   "url_template": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
 }

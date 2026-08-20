@@ -72,7 +72,7 @@ dashboards:
     answer_panel_ids:
       - 3010
     next_action_tokens:
-      - Choose a row
+      - Click a Run cell
     basis_tokens:
       - SELECTED RUN
       - VALID EMPTY

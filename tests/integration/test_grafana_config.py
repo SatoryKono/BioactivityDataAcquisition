@@ -1387,10 +1387,6 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
         "bioetl-runtime.json": {2541: ("html", 3)},
         "bioetl-provider-health-v2.json": {9400: ("html", 4)},
         "bioetl-incident-v1.json": {2007: ("html", 4)},
-        "bioetl-run-explorer-v1.json": {
-            3014: ("html", 4),
-            3016: ("html", 3),
-        },
     }
     for filename, expected in panel_specs.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / filename)
@@ -1423,11 +1419,14 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     run_panels = {
         int(panel["id"]): panel for panel in get_dashboard_panels(run_explorer)
     }
-    assert "Layer accounting" in run_panels[3016]["options"]["content"]
-    # #7248 simplified CTA copy while keeping the no-scroll compact HTML contract.
-    assert "Timings" in run_panels[3014]["options"]["content"]
-    assert "failure" in run_panels[3014]["options"]["content"].lower()
+    assert run_panels[3016]["type"] == "table"
+    assert run_panels[3016]["title"] == "Inspect Layer Accounting"
+    assert run_panels[3014]["type"] == "table"
+    assert run_panels[3014]["title"] == "Inspect Timings & Failure"
     assert 9403 not in run_panels
+    assert 3021 not in run_panels
+    assert 3001 not in run_panels
+    assert run_panels[3022]["title"] == "Inspect Run Identity"
     assert run_panels[3023]["title"] == "Inspect Processed Records"
 
 

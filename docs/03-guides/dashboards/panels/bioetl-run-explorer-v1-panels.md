@@ -5,24 +5,24 @@
 
 ## Overview
 
-Run-centric workspace. First paint is the last-4 browse index (Ops HTTP
-performance budget). Identity and processed-records accounting live with the
-other `pipeline_run_report_v1` slices under a collapsed progressive-disclosure
-row. `run_id` is never a Prometheus label.
+Run-centric workspace. First paint is the last-4 browse index (`3010`) only
+(Ops HTTP performance budget). Identity (`3022`) and processed-records
+accounting (`3023`) live with the other `pipeline_run_report_v1` slices under a
+collapsed progressive-disclosure row. Older runs are selected from the
+control-plane Run ID catalog. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
 ### 2. Understand Run Scope
 - **Type:** Text
-- **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, and where full artifact paths lead.
+- **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, artifact Open/Copy, and the Trust handoff.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 5. Inspect Recent Runs (last 4)
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 4 pipeline-run reports for the selected pipeline. The Run
-  column data link writes `var-run_id` and `var-pipeline` from the row (Grafana
-  does not bind a table highlight by itself). The complete last-20 browser
-  lives in Selected Run Details.
+  column data link writes `var-run_id` and `var-pipeline` and opens Inspect
+  Run Identity (`viewPanel=3022`). Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** Compact first-screen index. Identity (`3022`) and processed
   records (`3023`) stay collapsed under Selected Run Details.
@@ -50,8 +50,9 @@ row. `run_id` is never a Prometheus label.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
-- **Purpose:** Progressive disclosure for funnel, reasons, reconciliation,
-  layer accounting, artifacts, timings, and next-step CTA.
+- **Purpose:** Progressive disclosure for identity, processed-records
+  accounting, funnel, reasons, reconciliation, layer accounting, artifacts,
+  and timings/failure.
 - **Data sources:** Nested panels below (expand row to load).
 
 Nested titles (must match JSON):
@@ -73,48 +74,41 @@ Nested titles (must match JSON):
 - **Presentation:** Six canonical rows in stable silver→gold order; `value`
   column labeled **Value** (not Count) with color-text for status tokens
   (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
-  Panel links: Processed Records + Trust.
+  Panel links: Processed Records (`3023`) + Trust.
 
 ### 10. Inspect Layer Accounting
-- **Type:** Text
-- **Purpose:** Points operators at Processed Records / report `layers` rollup.
-- **Data sources:** Static operator copy + Ops HTTP report shape.
+- **Type:** Table (`id=3016`)
+- **Purpose:** `pipeline_run_report_v1.layers` rollup (bronze/silver/gold counts
+  including quarantined/dedup/excluded). Distinct from Processed Records.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `layers`
 
 ### 11. Inspect Run Artifacts
 - **Type:** Table
-- **Purpose:** Artifact refs (report paths, exports) for exact run.
+- **Purpose:** Artifact refs (report paths, exports) for exact run. Scan cells
+  stay short; Open/Copy uses the `ref` field.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts`
 
 ### 12. Inspect Timings & Failure
-- **Type:** Text
-- **Purpose:** Documents optional stage_timings/failure blocks (PARTIAL when absent; not waterfall).
-- **Data sources:** Static operator copy pointing at pipeline-run-report.
-
-### 13. Continue Run Investigation
-- **Type:** Text
-- **Purpose:** Next-step CTA after browse or selection: expand Selected Run
-  Details for identity and processed records, then open Trust for
-  recovery/replay safety. Run Explorer is evidence-only.
-- **Data sources:** Static operator copy.
+- **Type:** Table (`id=3014`)
+- **Purpose:** Optional `failure` and `stage_timings` blocks. Empty means not
+  recorded — not zero duration and not proof of success.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `failure` + `stage_timings`
 
 ## Additional shipped panels
-### 16. Inspect Recent Runs (last 20)
-
-Shipped in `bioetl-run-explorer-v1.json`.
-### 17. Inspect Full Run Identity
+### 17. Inspect Run Identity
 - **Type:** Table (`id=3022`)
 - **Purpose:** Run/manifest identity for the selected run (collapsed Selected
-  Run Details). Before a concrete selection the returned rows request an exact
-  Run ID; after selection an empty section is `VALID EMPTY`, while
-  datasource/backend failure renders as `QUERY ERROR`. This is the only
-  identity table on Run Explorer (the compact first-window teaser was removed
-  as a same-row subset).
-- **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
-### 18. Inspect Full Processed Records
+  Run Details), including status, time bounds, duration, and tracking_coverage.
+  Before a concrete selection the returned rows request an exact Run ID; after
+  selection an empty section is `VALID EMPTY`, while datasource/backend failure
+  renders as `QUERY ERROR`. This is the only identity table on Run Explorer.
+- **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` plus
+  `/ops/observability/pipeline-run-report` → `identity_rows` (not Prometheus).
+### 18. Inspect Processed Records
 - **Type:** Table (`id=3023`)
 - **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
   accounting for the selected run (collapsed Selected Run Details). Recorded
-  zero, `VALID EMPTY`, and `QUERY ERROR` are distinct operator states. This is
-  the only processed-records table on Run Explorer (the compact first-row
-  teaser was removed as a same-row subset).
+  zero, `VALID EMPTY`, and `QUERY ERROR` are distinct operator states. Exact
+  layer counts also exist on `pipeline_run_report_v1.layers`. This is the only
+  processed-records table on Run Explorer.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
