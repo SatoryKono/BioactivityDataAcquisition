@@ -230,6 +230,16 @@ routes:
     notes: Dashboard navigation contract mirrors the machine-readable navigation
       links contract and shipped Grafana navigation bus.
 
+  - id: dashboard-dux7-live-residual-protocol-archived
+    generator: historical DUX audit protocol (archived, issue #8632)
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/03-guides/dashboards/archive/audit-protocols/dux7-live-residual-protocol.md
+    notes:
+      Archived DUX7 live residual protocol retained as a generated-classified
+      historical artifact; not operator guidance.
+
   - id: api-reference-generated-docs
     generator: docs API reference generation workflow
     output_kind: curated_generated_docs
