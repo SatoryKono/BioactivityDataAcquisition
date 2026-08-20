@@ -1736,7 +1736,7 @@
           ],
           "title": "Inspect Exhausted Retries",
           "type": "table",
-          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Do not put full UUIDs into Prometheus labels. Selected-range evidence: retries exhausted by provider and operation in the active Grafana range. Non-zero rows identify where retry budgets were consumed, not raw provider-health enum state TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: snapshot table of exhausted retries over $__range; the interval trend is Track Exhausted Retries (109)."
         },
         {
           "datasource": {
@@ -1819,7 +1819,7 @@
           ],
           "title": "Track Exhausted Retries",
           "type": "timeseries",
-          "description": "TIME RANGE · Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Selected-range evidence: retry exhaustion trend by provider and operation over the active Grafana interval. Rising non-zero series point to persistent retry-budget pressure TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: $__interval trend of exhausted retries; the snapshot table is Inspect Exhausted Retries (108).",
           "maxDataPoints": 400,
           "interval": "1m"
         },
@@ -1902,7 +1902,7 @@
           ],
           "title": "Inspect Health-Check Latency p95",
           "type": "gauge",
-          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY."
+          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot gauge of health-check p95; the interval trend is Track Health-Check Latency p95 (1)."
         },
         {
           "datasource": {
@@ -2708,7 +2708,7 @@
           ],
           "title": "Track Health-Check Latency p95",
           "type": "timeseries",
-          "description": "TIME RANGE · Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Selected-range evidence: p95 provider health-check latency over the active Grafana interval. Current provider severity is owned by the GLOBAL Provider Severity Matrix TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: $__interval trend of health-check p95; the range snapshot is Inspect Health-Check Latency p95 (102).",
           "maxDataPoints": 400,
           "interval": "1m"
         },

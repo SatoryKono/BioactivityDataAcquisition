@@ -1427,6 +1427,8 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     # #7248 simplified CTA copy while keeping the no-scroll compact HTML contract.
     assert "Timings" in run_panels[3014]["options"]["content"]
     assert "failure" in run_panels[3014]["options"]["content"].lower()
+    assert 9403 not in run_panels
+    assert run_panels[3023]["title"] == "Inspect Processed Records"
 
 
 def test_control_plane_dashboard_links_are_scoped() -> None:

@@ -24,7 +24,7 @@ patterns by stable panel id ranges and titles across boards.
 | `suspect_table` | Provider causes / Runtime blockers | table | Ranked suspects |
 | `event_timeline` | Incident workspace | table/timeseries | Alert/event range |
 | `run_identity` | 9402 / Run Explorer | table HTTP | Ops HTTP identity — not Prom labels |
-| `processed_records` | 9403 / Run Explorer | table HTTP | Bronze/Silver/Gold accounting |
+| `processed_records` | 9403 (shared) / 3023 (Run Explorer) | table HTTP | Bronze/Silver/Gold accounting |
 
 ## Query ownership
 

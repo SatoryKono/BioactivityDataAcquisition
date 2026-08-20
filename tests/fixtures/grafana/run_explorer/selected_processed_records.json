@@ -6,7 +6,7 @@
     "QUERY ERROR"
   ],
   "method": "GET",
-  "panel_id": 9403,
+  "panel_id": 3023,
   "response_state": "ok",
   "root_selector": "rows",
   "scenario": "selected_processed_records",

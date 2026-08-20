@@ -5,9 +5,10 @@
 
 ## Overview
 
-Run-centric workspace. First paint is identity + processed records only (Ops HTTP
-performance budget). Deeper `pipeline_run_report_v1` sections live under a
-collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
+Run-centric workspace. First paint is browse last-4 plus identity (`3010` +
+`9402`) only (Ops HTTP performance budget). Processed-records accounting and
+deeper `pipeline_run_report_v1` sections live under a collapsed
+progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ## Key Panels
 
@@ -17,19 +18,19 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 3. Inspect Run Identity
-- **Type:** Table
+- **Type:** Table (`id=9402`)
 - **Purpose:** Run/manifest identity for selected scope (first paint). Before a
   concrete selection the returned rows request an exact Run ID; after selection
   an empty section is `VALID EMPTY`, while datasource/backend failure renders
-  as `QUERY ERROR`.
+  as `QUERY ERROR`. Full identity rows remain in Selected Run Details (`3022`).
 - **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` (not Prometheus).
 
 ### 4. Inspect Processed Records
-- **Type:** Table
+- **Type:** Table (`id=3023`)
 - **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage
-  accounting (first paint); the panel owns 14/24 grid columns so labels and
-  values remain readable. Recorded zero, `VALID EMPTY`, and `QUERY ERROR` are
-  distinct operator states.
+  accounting inside collapsed Selected Run Details. Exact layer counts also
+  exist on `pipeline_run_report_v1.layers`. Recorded zero, `VALID EMPTY`, and
+  `QUERY ERROR` are distinct operator states.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/processed-records` (not Prometheus).
 
 ### 5. Inspect Recent Runs (last 4)
@@ -39,8 +40,8 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
   does not bind a table highlight by itself). The complete last-20 browser
   lives in Selected Run Details.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** Compact index; Inspect Run Identity / Processed Records stay on
-  the first screen (`y<=13`). Selected-run forensics stay collapsed.
+- **Layout:** Compact index; Inspect Run Identity stays on the first screen.
+  Selected-run forensics stay collapsed.
 - **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
   not embed `$pipeline` — Grafana does not interpolate `noValue`) when
   Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
@@ -65,8 +66,9 @@ collapsed progressive-disclosure row. `run_id` is never a Prometheus label.
 
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
-- **Purpose:** Progressive disclosure for funnel, reasons, reconciliation,
-  layer accounting, artifacts, timings, and next-step CTA.
+- **Purpose:** Progressive disclosure for last-20 browse, full identity,
+  processed-records accounting, funnel, reasons, reconciliation, layer
+  accounting, artifacts, timings, and next-step CTA.
 - **Data sources:** Nested panels below (expand row to load).
 
 Nested titles (must match JSON):
@@ -88,7 +90,7 @@ Nested titles (must match JSON):
 - **Presentation:** Six canonical rows in stable silver→gold order; `value`
   column labeled **Value** (not Count) with color-text for status tokens
   (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
-  Panel links: Processed Records + Trust.
+  Panel links: Processed Records (`3023`) + Trust.
 
 ### 10. Inspect Layer Accounting
 - **Type:** Text
@@ -117,8 +119,5 @@ Nested titles (must match JSON):
 
 Shipped in `bioetl-run-explorer-v1.json`.
 ### 17. Inspect Full Run Identity
-
-Shipped in `bioetl-run-explorer-v1.json`.
-### 18. Inspect Full Processed Records
 
 Shipped in `bioetl-run-explorer-v1.json`.
