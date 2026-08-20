@@ -278,6 +278,62 @@ def resolve_stack(contract_path: Path, stack_name: str) -> StackSpec:
     )
 
 
+_NEO4J_DATA_VOLUME = "bioetl-neo4j_neo4j_data"
+_NEO4J_AUTH_CLEAR = (
+    "rm -f /data/dbms/auth /data/dbms/auth.ini /data/databases/store_lock"
+)
+
+
+def _reseed_neo4j_auth_volume(
+    spec: StackSpec,
+    *,
+    runner: Runner,
+    timeout: float,
+) -> CommandResult | None:
+    """Clear Neo4j auth files on an existing volume so NEO4J_AUTH can re-seed.
+
+    ``NEO4J_AUTH`` is ignored after the first start of a populated system DB.
+    Databases stay on the named volume. Returns None when the volume is absent
+    (first start). Caller must stop the neo4j container first.
+    """
+    if spec.name != "neo4j":
+        return None
+    image = str(spec.expected_images.get("neo4j") or "").strip()
+    if not image:
+        return CommandResult(
+            ["docker", "run", "--rm", "neo4j"],
+            1,
+            stderr="neo4j image is not declared on the compose stack",
+        )
+    inspect = runner(
+        ["docker", "volume", "inspect", _NEO4J_DATA_VOLUME],
+        ROOT,
+        min(max(0.1, timeout), 15.0),
+    )
+    if inspect.returncode != 0:
+        return None
+    runner(_compose(spec, "stop", "--timeout", "30"), ROOT, min(max(1.0, timeout), 45.0))
+    runner(_compose(spec, "rm", "-f"), ROOT, min(max(1.0, timeout), 20.0))
+    return runner(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--user",
+            "0",
+            "-v",
+            f"{_NEO4J_DATA_VOLUME}:/data",
+            "--entrypoint",
+            "bash",
+            image,
+            "-c",
+            _NEO4J_AUTH_CLEAR,
+        ],
+        ROOT,
+        min(max(1.0, timeout), 60.0),
+    )
+
+
 def _compose(spec: StackSpec, *args: str) -> list[str]:
     return [
         "docker",
@@ -1456,6 +1512,33 @@ def _run_recovery_attempts(
         if remaining <= 0:
             findings = [{"cause": "readiness_timeout", "attempt": attempts}]
             break
+        if spec.name == "neo4j":
+            reseed = _reseed_neo4j_auth_volume(
+                spec,
+                runner=timing.runner,
+                timeout=min(60.0, remaining),
+            )
+            history.append(
+                {
+                    "attempt": attempts,
+                    "phase": "neo4j_auth_reseed",
+                    "returncode": None if reseed is None else reseed.returncode,
+                    "elapsed_seconds": round(timing.clock() - timing.started, 3),
+                }
+            )
+            if reseed is not None and reseed.returncode != 0:
+                findings = [
+                    {
+                        "cause": "neo4j_auth_reseed_failed",
+                        "attempt": attempts,
+                        "stderr": _bounded(reseed.stderr, 500),
+                        "remediation": (
+                            "scripts/ops/runtime/docker/recover-neo4j.ps1 "
+                            "or runtime_manager recover --stack neo4j"
+                        ),
+                    }
+                ]
+                break
         # Phase 1: start required + optional (no --wait) so renderer can warm
         # without gating Grafana. Phase 2: --wait only required services.
         start_args = _compose_up_start_args(
