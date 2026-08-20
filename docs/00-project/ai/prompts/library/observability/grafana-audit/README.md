@@ -4,7 +4,7 @@ Version: 1.0.0
 Status: active
 Class: internal (repo-only index; not a paste card)
 Owner: BioETL Team
-Last verified: '2026-08-13'
+Last verified: '2026-08-20'
 Source basis: operator-supplied Grafana audit brief dated 2026-08-13
 
 ______________________________________________________________________
@@ -23,7 +23,8 @@ evidence pack and scope are already fixed.
 | 4 | `prompt.observability.grafana-audit.data-integrity` | complete lineage, exact queries, invariants and reconciliation |
 | 5 | `prompt.observability.grafana-audit.regression` | baseline/candidate retest and release decision |
 
-All cards include `fragments/grafana-audit-contract.md`. The master may route
+All cards include `fragments/grafana-audit-contract.md` and
+`fragments/dashboard-requirements-audit.md`. The master may route
 to cards 2–4, but it remains a complete standalone prompt. Regression runs only
 after a candidate change exists.
 

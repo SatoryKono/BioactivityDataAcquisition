@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.dashboard-panel-audit
-version: 1.2.0
+version: 1.3.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -26,16 +26,20 @@ includes:
   - fragments/language-ru.md
   - fragments/finding-schema.md
   - fragments/audit-scale.md
+  - fragments/dashboard-requirements-audit.md
   - fragments/reports-output.md
 related_ssot:
   - AGENTS.md
   - docs/00-project/NORMATIVE_SOURCES.md
+  - docs/01-requirements/DASHBOARD_REQUIREMENTS.md
   - .codex/skills/observability-dashboard/SKILL.md
   - grafana/dashboards
 anti_patterns:
   - CYCLE_COUNT=5 with mandatory empty cycles
   - Inventing panels not present in shipped JSON
+  - Inventing DASH-* IDs already in DASHBOARD_REQUIREMENTS.md
   - Starting monitoring stack without operator approval
+  - Treating MONITORING=false live gaps as panel defects
   - Full RULES/ADR dump in the paste
   - One GitHub issue per cosmetic nit when same root cause
   - Replacing this card with full WCAG/BI acceptance matrix
@@ -71,42 +75,45 @@ reports.
 | `AUDIT_MODE` | `full` \| `differential` |
 | `REQUIRE_GH_TRACKING` | `false` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | `true` (start stack **only** if UI required and operator sets `true`) |
+| `MONITORING` | `false` (start stack **only** if UI required and operator sets `true`) |
 
 ## Phase 1 — Inventory
 
-- List shipped dashboards under `grafana/dashboards/` that exist in this checkout
-- Table: `dashboard | uid/title | panel_count | datasources | notes`
+- Confirm the seven UIDs + answer-panel map (fragment / REQUIREMENTS §7.1)
+- Table: `uid | panel_id | y | band | type | datasource | notes`
+- Run fragment §8 static gates (inventory, visual-semantics, geometry, FIT)
 
 ## Phase 2 — Render and evaluate every panel
 
 For **each** panel in SCOPE:
 
-- dashboard, panel title/id, type, datasource
+- dashboard, panel title/id, type, datasource, band (`first_window`/`first_load`/`below`/`row`)
 - exact query/target from JSON
-- render/check result (script and/or Grafana UI if monitoring started)
+- render/check result (script and/or Grafana UI if `MONITORING=true`)
 - status: `OK` | `Expected Empty` | `Defect` | `Not Verifiable`
+- `requirement_id` (`DASH-*`) or `GAP`
 - if defect, class:
   - `Backend defect`
   - `Dashboard query defect`
   - `Grafana/UI rendering defect`
   - `Operational datasource availability`
 
-No finding without proof. If monitoring unavailable → `Not Verifiable` + exact blocker.
+No finding without proof. If monitoring unavailable → `Not Verifiable` + exact
+blocker (not a dashboard defect).
 
-Also note browser/UX defects when UI is available: `bad data`, `query error`,
-`panel error`, unexpected empty, clipped text, broken grid/height, unnecessary
-scroll inside panels, and **sparse single-value stats** (large `stat`/`gauge`
-area for one value → low scalar density, `DASH-DENSITY-002`). For systematic
-contrast/layout/data acceptance checks, run or hand off to
+Also note when UI is available: `bad data`, `query error`, `panel error`,
+unexpected empty, clipped text, broken grid/height, **in-panel** first-window
+scroll (`DASH-FIT-004`, not page scroll), and sparse single-value stats
+(`DASH-DENSITY-002`). Hand off systematic contrast/layout/data to
 `bi-dashboard-acceptance`.
 
 ## Phase 3 — GitHub tracking
 
-- Search open issues **before** create (no duplicates)
-- One issue per root cause / panel-cluster
-- Body: dashboard, panel ids, status, evidence, acceptance criteria
-- Table: `finding | issue# | state`
+- Search open **and closed** issues + open PRs before create
+- One issue per `uid+requirement_id+root_cause`
+- Title: `[<uid>][<DASH-id>][P#] one checkable outcome`
+- Body: dashboard, panel ids, status, evidence, acceptance
+- Table: `finding | requirement_id | issue# | state`
 
 ## Phase 4 — Remediation
 

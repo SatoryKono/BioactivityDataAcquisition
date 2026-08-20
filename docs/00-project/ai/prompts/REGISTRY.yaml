@@ -135,6 +135,13 @@ entries:
     tags: [guardrail, observability, grafana, dashboard, audit]
     summary: Shared evidence, severity, and release-gate contract for Grafana audits
 
+  - id: prompt.fragment.dashboard-requirements-audit
+    path: fragments/dashboard-requirements-audit.md
+    status: active
+    class: fragment
+    tags: [guardrail, observability, grafana, dashboard, audit, requirements]
+    summary: Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates, ontology
+
   - id: prompt.fragment.generic-nine-contract
     path: fragments/generic-nine-contract.md
     status: active
@@ -246,7 +253,7 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, operator]
-    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.1)
+    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.3)
 
   - id: prompt.observability.bi-dashboard-acceptance
     path: library/observability/bi-dashboard-acceptance.md
@@ -260,7 +267,7 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, audit, cycle, density, typography, color, layout, render, operator]
-    summary: Exhaustive cyclic Grafana audit (v2.0) of every panel, viewport, theme, zoom (Tier-1 100% / Tier-2 200%), density, typography, color, scroll, whitespace, data, and render contract
+    summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%)
 
   - id: prompt.observability.sequential-run
     path: library/observability/sequential-run.md
@@ -579,7 +586,7 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, render, design, cycle, operator]
-    summary: Cyclic render and design audit of dashboards and individual panels
+    summary: Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates
 
   - id: prompt.audit.cycle.coderabbit
     path: library/audit/cycle/coderabbit.md

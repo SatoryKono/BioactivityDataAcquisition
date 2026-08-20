@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.sequential-run
-version: 1.1.0
+version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -27,6 +27,7 @@ includes:
   - fragments/language-ru.md
   - fragments/finding-schema.md
   - fragments/audit-scale.md
+  - fragments/dashboard-requirements-audit.md
   - fragments/reports-output.md
 related_ssot:
   - AGENTS.md
@@ -63,7 +64,7 @@ max_body_lines: 280
 | `WORK_BRANCH` | `fix/observability-seq-<shortsha>` (never main) |
 | `SCOPE` | `grafana/dashboards` |
 | `LANGUAGE` | `ru` |
-| `MONITORING` | `true` |
+| `MONITORING` | `false` |
 | `ALLOW_ISSUE_WRITE` | `true` |
 | `ALLOW_PUSH` | `true` |
 | `ALLOW_MERGE` | `false` |
@@ -100,9 +101,9 @@ MODE: implement. Не commit/push в `main`. Чужой dirty WIP — worktree.
 | `grafana-six.data` | `grafana-audit.data-integrity` |
 | `grafana-six.reverify` | `grafana-audit.regression` |
 
-Пересечения (исполнять, дедупить `dashboard+panel_id+root_cause`):
-master vs specialists; BI-V/L/D vs grafana-audit; cycle не повторяет
-`render,visual,layout,data`.
+Пересечения (исполнять, дедупить `uid+panel_id+requirement_id+root_cause`):
+master vs specialists; BI-V/L/D vs grafana-audit; cycle (step 7) не повторяет
+`render,visual,layout,data` — только `density-area,density-scalar,fill,pipeline,fit`.
 
 ## Уроки прогона 2026-08-14 (обязательны)
 
@@ -145,17 +146,22 @@ F. В ledger обязателен исход шага, даже `issues=0`.
 | 4 | `grafana-audit.data-integrity` | live query только при `MONITORING=true` |
 | 5 | `bi-dashboard-acceptance` | `DEPTH=detailed` если `MONITORING=false` |
 | 6 | `dashboard-panel-audit` | native 3–5; `CYCLE_COUNT=1` |
-| 7 | `dashboard-audit-cycle` | `N=1`, `CONTOURS=density,fill,pipeline` |
+| 7 | `dashboard-audit-cycle` | `N=1`, `CONTOURS=density-area,density-scalar,fill,pipeline,fit` |
 | 8 | `grafana-audit.regression` | только если есть candidate ≠ BASE |
 | 9 | Final sweep | все issue# из ledger |
 
-Статические гейты (step 0/7, не вместо карточек):
+Статические гейты (step 0/7, не вместо карточек). Полный список — fragment
+§8 / REQUIREMENTS §8. Minimum:
 
 ```text
 python -m scripts.engineering.qa report-dashboard-inventory --check --json
 python -m scripts.engineering.qa check-dashboard-visual-semantics
 python -m scripts.engineering.qa check-dashboard-performance-budgets
+python -m scripts.engineering.qa report-dashboard-scalar-density --check
 ```
+
+`check-dashboard-visual-semantics` PASS ≠ нет visual-дефектов.
+Не запускать `prompt.audit.cycle.dashboards` вторым полным проходом на том же SHA.
 
 ## Артефакты
 
@@ -170,20 +176,24 @@ python -m scripts.engineering.qa check-dashboard-performance-budgets
 - нет открытых issues **этого** прогона без BLOCKED
 - нет commit в main, нет правок `.env`
 
-## Appendix — DASH-AUTO (предложения, ещё не SSOT)
+## Appendix — DASH-AUTO (proposals; not SSOT)
 
-Не выдавать за действующий `DASH-*`. На шагах 2/3/4/7 отметить
-PASS/FAIL/GAP, если проверка дешёвая из JSON.
+Do **not** invent IDs that already exist. Prefer REQUIREMENTS IDs:
+
+| Proposal | Prefer SSOT |
+| --- | --- |
+| `DASH-AUTO-003` (action-verb title) | `DASH-COPY-003` |
+| `DASH-AUTO-004` (description) | `DASH-COPY-002` |
+| `DASH-AUTO-005` (no `$__range` on Monitor*) | `DASH-COPY-004` |
+| `DASH-AUTO-007` (unique panel id) | `DASH-META-002` |
+
+Remaining proposals (still not SSOT) — cheap JSON checks on steps 2/3/4/7:
 
 | ID | Check (JSON) |
 | --- | --- |
 | `DASH-AUTO-001` | includeAll PromQL var → `allValue` is `.*`, not `$__all`/null |
 | `DASH-AUTO-002` | table `defaults.cellOptions` ≠ `color-background` (override-only) |
-| `DASH-AUTO-003` | data-bearing title starts with Monitor/Inspect/Track/Compare/Review/Navigate/Understand/Start |
-| `DASH-AUTO-004` | data-bearing panel has non-empty `description` |
-| `DASH-AUTO-005` | first-window current-status expr must not contain `$__range` |
 | `DASH-AUTO-006` | range/track panel has `$__range` or range wording |
-| `DASH-AUTO-007` | panel `id` unique per dashboard |
 | `DASH-AUTO-008` | `gridPos`: `w>0`, `h>0`, `x>=0`, `x+w<=24`, no top-level overlap |
 | `DASH-AUTO-009` | no unexplained top-level `y` gap > 1 |
 | `DASH-AUTO-010` | no placeholder titles (`Panel Title`, `TODO`, empty) |

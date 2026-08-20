@@ -1,6 +1,6 @@
 ---
 id: prompt.observability.group-scalar-density-audit
-version: 1.0.0
+version: 1.1.0
 status: active
 class: operator-paste
 owner: BioETL Team
@@ -21,6 +21,7 @@ includes:
   - fragments/language-ru.md
   - fragments/finding-schema.md
   - fragments/bi-check-schema.md
+  - fragments/dashboard-requirements-audit.md
   - fragments/reports-output.md
   - fragments/shell-portability.md
 related_ssot:
@@ -59,6 +60,8 @@ dashboard and identify the groups that must be made denser than the first screen
 scalar panels with `gridPos.y < 18` (`FIRST_WINDOW_Y`).
 
 Skill: **observability-dashboard**. Static metric — **no monitoring/render** needed.
+This card is the `density-scalar` method for `prompt.audit.cycle.dashboards`
+and observability-seq step 7.
 
 ## Params
 
