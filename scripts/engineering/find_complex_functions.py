@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Find functions with high cognitive complexity in scripts directory."""
 
+from __future__ import annotations
+
 import ast
 from pathlib import Path
 
@@ -11,10 +13,9 @@ def calculate_cognitive_complexity(node: ast.AST) -> int:
     nesting_level = 0
 
     for child in ast.walk(node):
-        if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
-            complexity += 1 + nesting_level
-            nesting_level += 1
-        elif isinstance(child, ast.ExceptHandler):
+        if isinstance(
+            child, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler)
+        ):
             complexity += 1 + nesting_level
             nesting_level += 1
         elif isinstance(child, (ast.BoolOp, ast.Compare)):

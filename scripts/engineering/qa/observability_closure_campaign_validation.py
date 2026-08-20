@@ -1,11 +1,26 @@
 """Validation and evidence-scoring seam for observability closure campaigns."""
 
-# ruff: noqa: F403, F405
-
 from __future__ import annotations
 
-from scripts.engineering.qa.run_observability_closure_campaign import *
-from scripts.engineering.qa.run_observability_closure_campaign import _sha256_file
+import hashlib
+import json
+import re
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+from scripts.engineering.qa.run_observability_closure_campaign import (
+    CANONICAL_EVIDENCE_ASSEMBLER,
+    CHEMBL_PIPELINES,
+    EVIDENCE_RAW_KIND_REQUIREMENTS,
+    EVIDENCE_SUMMARY_REQUIREMENTS,
+    OBSERVABILITY_CLOSURE_CAMPAIGN_REPORT,
+    REQUIRED_EXTERNAL_EVIDENCE,
+    TERMINAL_EVENTS,
+    AttemptEvidence,
+    PhaseEvidence,
+    _sha256_file,
+)
 
 
 def _parse_generated_at(value: object) -> bool:

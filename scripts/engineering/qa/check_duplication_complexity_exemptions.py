@@ -6,7 +6,7 @@ from __future__ import annotations
 import ast
 import re
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import yaml
@@ -41,41 +41,48 @@ def _load_registry() -> dict[str, object]:
     return payload
 
 
+def _entry_metadata_errors(
+    entry: dict[str, object],
+    *,
+    label: str,
+    today: date,
+    seen: set[tuple[str, tuple[str, ...]]],
+) -> list[str]:
+    errors: list[str] = []
+    raw_scopes = entry.get("scopes")
+    scopes = (
+        tuple(sorted(str(scope) for scope in raw_scopes))
+        if isinstance(raw_scopes, list)
+        else ()
+    )
+    key = (str(entry.get("path") or entry.get("name")), scopes)
+    if key in seen:
+        errors.append(f"duplicate {label} registry row: {key[0]} scopes={list(scopes)}")
+    seen.add(key)
+    if not str(entry.get("owner", "")).strip().startswith("@bioetl-"):
+        errors.append(f"{label} {key[0]} missing @bioetl-* owner")
+    if not str(entry.get("removal_step", "")).strip():
+        errors.append(f"{label} {key[0]} missing removal_step")
+    if not str(entry.get("rationale", "")).strip():
+        errors.append(f"{label} {key[0]} missing rationale")
+    expiry = str(entry.get("expiry", "")).strip()
+    try:
+        expiry_date = datetime.fromisoformat(expiry).date()
+    except ValueError:
+        return [*errors, f"{label} {key[0]} has invalid expiry {expiry!r}"]
+    if expiry_date < today:
+        errors.append(f"{label} {key[0]} expiry is stale: {expiry}")
+    return errors
+
+
 def _validate_metadata(entries: list[dict[str, object]], *, label: str) -> list[str]:
     errors: list[str] = []
     today = datetime.now(UTC).date()
     seen: set[tuple[str, tuple[str, ...]]] = set()
     for entry in entries:
-        raw_scopes = entry.get("scopes")
-        scopes = (
-            tuple(sorted(str(scope) for scope in raw_scopes))
-            if isinstance(raw_scopes, list)
-            else ()
+        errors.extend(
+            _entry_metadata_errors(entry, label=label, today=today, seen=seen)
         )
-        key = (str(entry.get("path") or entry.get("name")), scopes)
-        if key in seen:
-            errors.append(
-                f"duplicate {label} registry row: {key[0]} scopes={list(scopes)}"
-            )
-        seen.add(key)
-
-        owner = str(entry.get("owner", "")).strip()
-        expiry = str(entry.get("expiry", "")).strip()
-        removal_step = str(entry.get("removal_step", "")).strip()
-        rationale = str(entry.get("rationale", "")).strip()
-        if not owner.startswith("@bioetl-"):
-            errors.append(f"{label} {key[0]} missing @bioetl-* owner")
-        if not removal_step:
-            errors.append(f"{label} {key[0]} missing removal_step")
-        if not rationale:
-            errors.append(f"{label} {key[0]} missing rationale")
-        try:
-            expiry_date = datetime.fromisoformat(expiry).date()
-        except ValueError:
-            errors.append(f"{label} {key[0]} has invalid expiry {expiry!r}")
-            continue
-        if expiry_date < today:
-            errors.append(f"{label} {key[0]} expiry is stale: {expiry}")
     return errors
 
 
