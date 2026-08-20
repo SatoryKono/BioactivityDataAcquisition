@@ -1333,12 +1333,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
-    "scripts/ops/observability/grafana/qa_context.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the canonical observability QA-context loader imported by dashboard tooling and tests; keep it supporting unless it becomes a governed standalone entrypoint.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-11-17"
-    },
     "scripts/ops/observability/grafana/dashboard_context_links.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper.",

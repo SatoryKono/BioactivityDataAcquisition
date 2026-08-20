@@ -55,7 +55,7 @@ else:
 
 ensure_repo_imports(include_src=True)
 
-from bioetl.application.composite.checkpoint import (  # noqa: F401
+from bioetl.application.composite.checkpoint import (
     create_expected_checkpoint_context,
     merge_expected_anchors,
 )
@@ -811,6 +811,32 @@ def _default_non_chembl_classification(
     return semantic_category
 
 
+def _raw_sidecar_field(
+    classification: dict[str, str],
+    semantic_policy: Any | None,
+    publication_policy: Any | None,
+) -> str:
+    configured = classification.get("raw_sidecar", "")
+    if configured:
+        return configured
+    if semantic_policy is not None and semantic_policy.raw_sidecar_field:
+        return str(semantic_policy.raw_sidecar_field)
+    if publication_policy is not None and publication_policy.raw_sidecar_field:
+        return str(publication_policy.raw_sidecar_field)
+    return ""
+
+
+def _canonical_sidecar_field(
+    classification: dict[str, str], semantic_policy: Any | None
+) -> str:
+    configured = classification.get("canonical_sidecar", "")
+    if configured:
+        return configured
+    if semantic_policy is None:
+        return ""
+    return str(semantic_policy.canonical_sidecar_field or "")
+
+
 def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
     metadata = {
         "classification": "",
@@ -863,18 +889,11 @@ def _non_chembl_row_metadata(row: dict[str, str]) -> dict[str, str]:
         entity=entity,
         field_name=field_name,
     )
-    metadata["raw_sidecar"] = classification.get("raw_sidecar", "")
-    if not metadata["raw_sidecar"]:
-        if semantic_policy is not None and semantic_policy.raw_sidecar_field:
-            metadata["raw_sidecar"] = semantic_policy.raw_sidecar_field
-        elif publication_policy is not None and publication_policy.raw_sidecar_field:
-            metadata["raw_sidecar"] = publication_policy.raw_sidecar_field
-        else:
-            metadata["raw_sidecar"] = ""
-    metadata["canonical_sidecar"] = classification.get("canonical_sidecar", "") or (
-        (semantic_policy.canonical_sidecar_field or "")
-        if semantic_policy is not None
-        else ""
+    metadata["raw_sidecar"] = _raw_sidecar_field(
+        classification, semantic_policy, publication_policy
+    )
+    metadata["canonical_sidecar"] = _canonical_sidecar_field(
+        classification, semantic_policy
     )
     metadata["composite_usage"] = classification.get("composite_usage", "")
     metadata["observed_source"] = classification.get("observed_source", "") or (

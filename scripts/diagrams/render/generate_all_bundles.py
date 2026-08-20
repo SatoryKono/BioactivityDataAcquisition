@@ -317,6 +317,59 @@ def format_title(meta: dict[str, object]) -> str:
     return stem.replace("-", " ").title()
 
 
+def _append_description_context(
+    parts: list[str],
+    *,
+    level: str,
+    view_type: str,
+    parent: str,
+    covers: str,
+    components: str,
+) -> None:
+    if level:
+        parts.append(f" и служит ориентиром на уровне детализации «{level}»")
+    parts.append(".")
+    if view_type:
+        parts.append(f" Тип представления: {view_type}.")
+    if parent:
+        parts.append(f" Родительская диаграмма: `{parent}`.")
+    if covers:
+        parts.append(
+            f" В комментариях исходника зафиксирован фокус диаграммы: {covers}."
+        )
+    elif components:
+        parts.append(f" Основные компоненты: {components}.")
+
+
+def _append_description_density(
+    parts: list[str], *, display_nodes: str, edge_count: int
+) -> None:
+    if display_nodes == "0":
+        return
+    density_parts = [f"Схема имеет плотность порядка {display_nodes} узлов"]
+    if edge_count > 0:
+        density_parts.append(f" и {edge_count} связей")
+    density_parts.append(
+        "; её удобно использовать как обзорный архитектурный срез для "
+        "проверки влияния изменений, согласования интерфейсов и подготовки "
+        "рефакторинга, но не как исчерпывающий каталог текущей кодовой "
+        "поверхности."
+    )
+    parts.append(" " + "".join(density_parts))
+
+
+def _append_description_examples(
+    parts: list[str], *, subgraph_names: list[str], node_names: list[str]
+) -> None:
+    if subgraph_names:
+        parts.append(f" Ключевые блоки/подграфы: {', '.join(subgraph_names[:6])}.")
+    if node_names:
+        parts.append(
+            " Показательные узлы для быстрого чтения: "
+            f"{', '.join(node_names[:6])}."
+        )
+
+
 def build_description(meta: dict[str, object], collection: str) -> str:
     """Build a rich description matching class-diagrams quality."""
     title = format_title(meta)
@@ -360,48 +413,20 @@ def build_description(meta: dict[str, object], collection: str) -> str:
     parts.append(
         f"Диаграмма «{title}» {phrase}. Она представлена в формате {type_label}"
     )
-    if level:
-        parts.append(f" и служит ориентиром на уровне детализации «{level}»")
-    parts.append(".")
-
-    # View-specific context
-    if view_type:
-        parts.append(f" Тип представления: {view_type}.")
-    if parent:
-        parts.append(f" Родительская диаграмма: `{parent}`.")
-
-    # Focus
-    if covers:
-        parts.append(
-            f" В комментариях исходника зафиксирован фокус диаграммы: {covers}."
-        )
-    elif components:
-        parts.append(f" Основные компоненты: {components}.")
-
-    # Density
-    if display_nodes != "0":
-        density_parts = [f"Схема имеет плотность порядка {display_nodes} узлов"]
-        if edge_count > 0:
-            density_parts.append(f" и {edge_count} связей")
-        density_parts.append(
-            "; её удобно использовать как обзорный архитектурный срез для "
-            "проверки влияния изменений, согласования интерфейсов и подготовки "
-            "рефакторинга, но не как исчерпывающий каталог текущей кодовой "
-            "поверхности."
-        )
-        parts.append(" " + "".join(density_parts))
-
-    # Key subgraphs
-    if subgraph_names:
-        display_subgraphs = subgraph_names[:6]
-        parts.append(f" Ключевые блоки/подграфы: {', '.join(display_subgraphs)}.")
-
-    # Key nodes
-    if node_names:
-        display_nodes_list = node_names[:6]
-        parts.append(
-            f" Показательные узлы для быстрого чтения: {', '.join(display_nodes_list)}."
-        )
+    _append_description_context(
+        parts,
+        level=level,
+        view_type=view_type,
+        parent=parent,
+        covers=covers,
+        components=components,
+    )
+    _append_description_density(
+        parts, display_nodes=display_nodes, edge_count=edge_count
+    )
+    _append_description_examples(
+        parts, subgraph_names=subgraph_names, node_names=node_names
+    )
 
     # Reference / decomposition note
     if reference:
