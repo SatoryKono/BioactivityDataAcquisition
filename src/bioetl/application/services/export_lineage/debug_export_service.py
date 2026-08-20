@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
 
-from bioetl.domain.ports import DebugExportPort
 from bioetl.domain.types import DebugExportPack, DebugExportResult, RunID
 
 if TYPE_CHECKING:
@@ -75,7 +74,16 @@ class DebugExportCollectorBuilderProtocol(Protocol):
         ...
 
 
-DebugExportWriterProtocol = DebugExportPort
+class DebugExportWriterProtocol(Protocol):
+    """Writer contract allowing synchronous or asynchronous debug persistence."""
+
+    def write_pack(
+        self,
+        *,
+        pack: DebugExportPack,
+    ) -> DebugExportResult | Awaitable[DebugExportResult]:
+        """Persist a debug export pack and return its artifact metadata."""
+        ...
 
 
 class DebugExportService(DebugExportServiceRecordingMixin):
