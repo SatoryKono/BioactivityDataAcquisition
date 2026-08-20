@@ -457,7 +457,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 194
-      total_loc: 23384
+      total_loc: 23381
       files_ge_250_loc: 0
       helper_function_ratio: 0.374
       max_internal_fan_in: 6
@@ -514,8 +514,8 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 33
-      total_loc: 4045
-      files_ge_250_loc: 1
+      total_loc: 4047
+      files_ge_250_loc: 2
       helper_function_ratio: 0.342
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
@@ -541,7 +541,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 142
-      total_loc: 16414
+      total_loc: 16413
       files_ge_250_loc: 0
       helper_function_ratio: 0.426
       max_internal_fan_in: 2

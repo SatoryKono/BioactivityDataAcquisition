@@ -66,4 +66,7 @@ def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
     )
     urls = urls_for_context(context)
     assert "64927" not in "".join(urls.values())
-    assert all("var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url for url in urls.values())
+    assert all(
+        "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
+        for url in urls.values()
+    )

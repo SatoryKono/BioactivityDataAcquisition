@@ -102,6 +102,7 @@ def validate_pipeline_publication(
         *_empty_section_errors(markdown),
     ]
 
+
 _MERGE_STRATEGIES = {"left_outer", "inner", "outer", "right_outer"}
 _CONFLICT_RULES = {"seed_priority", "explicit_rules"}
 

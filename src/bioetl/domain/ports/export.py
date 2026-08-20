@@ -139,4 +139,3 @@ class DebugExportPort(Protocol):
     def write_pack(self, *, pack: DebugExportPack) -> DebugExportResult:
         """Persist the provided audit pack and return artifact metadata."""
         ...
-

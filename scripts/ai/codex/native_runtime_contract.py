@@ -306,7 +306,9 @@ def _agent_inventory_findings(agent_dir: Path) -> list[Finding]:
     ]
 
 
-def _load_agent_descriptor(path: Path) -> tuple[dict[str, object] | None, Finding | None]:
+def _load_agent_descriptor(
+    path: Path,
+) -> tuple[dict[str, object] | None, Finding | None]:
     try:
         return tomllib.loads(path.read_text(encoding="utf-8")), None
     except (OSError, tomllib.TOMLDecodeError) as exc:

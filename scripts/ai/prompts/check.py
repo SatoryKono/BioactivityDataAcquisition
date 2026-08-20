@@ -222,7 +222,9 @@ def _active_hygiene_card(entry: RegistryEntry) -> PromptCard | None:
     return load_card(entry.absolute_path)
 
 
-def _check_card_size(report: CheckReport, entry: RegistryEntry, card: PromptCard) -> None:
+def _check_card_size(
+    report: CheckReport, entry: RegistryEntry, card: PromptCard
+) -> None:
     lines = body_line_count(card.body)
     max_lines = card.max_body_lines
     if max_lines is None:
@@ -261,7 +263,9 @@ def _check_card_guardrails(
         )
 
 
-def _check_card_ssot(report: CheckReport, entry: RegistryEntry, card: PromptCard) -> None:
+def _check_card_ssot(
+    report: CheckReport, entry: RegistryEntry, card: PromptCard
+) -> None:
     if card.class_ == "operator-paste" and not card.related_ssot:
         report.add_error(
             "ssot_empty",
