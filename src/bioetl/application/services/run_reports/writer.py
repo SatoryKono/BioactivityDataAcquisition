@@ -124,11 +124,11 @@ def write_json(
 
 
 def _with_self_artifacts(
-    artifacts: tuple[dict[str, Any], ...],
+    artifacts: tuple[dict[str, Any], ...],  # Any: artifact payload
     *,
     json_path: Path,
     markdown_path: Path,
-) -> tuple[dict[str, Any], ...]:
+) -> tuple[dict[str, Any], ...]:  # Any: dynamic artifact payload
     kinds = {str(item.get("kind")) for item in artifacts}
     items = list(artifacts)
     if (
@@ -154,7 +154,7 @@ def _with_self_artifacts(
 def _write_latest_pointer(
     *,
     owner_dir: Path,
-    payload: dict[str, Any],
+    payload: dict[str, Any],  # Any: latest pointer payload
     store: RunReportStorePort,
 ) -> Path:
     latest_path = owner_dir / "_latest.json"
