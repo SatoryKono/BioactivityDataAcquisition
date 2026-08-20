@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 import sys
-from datetime import datetime, date
+from datetime import date, datetime
 from pathlib import Path
 from typing import TypedDict
 
@@ -72,6 +72,53 @@ def check_script(script_path: Path) -> SunsetCheckResult:
     }
 
 
+def _report_script_result(
+    script: Path,
+    result: SunsetCheckResult,
+) -> tuple[bool, bool]:
+    if result["issues"]:
+        print(f"❌ {script.name}:")
+        for issue in result["issues"]:
+            print(f"   - {issue}")
+        if result["sunset_date"]:
+            print(f"   SUNSET_DATE: {result['sunset_date']}")
+        return True, False
+
+    print(f"✅ {script.name}: SUNSET_DATE {result['sunset_date']}")
+    if not result["sunset_date"]:
+        return False, False
+    sunset_date = datetime.strptime(result["sunset_date"], "%Y-%m-%d").date()
+    days_until_sunset = (sunset_date - date.today()).days
+    if days_until_sunset > 30:
+        return False, False
+    print(f"   ⚠️  Expiring in {days_until_sunset} days")
+    return False, True
+
+
+def _report_summary(
+    all_issues: list[SunsetCheckResult],
+    expiring_scripts: list[str],
+) -> int:
+    print()
+    print("=" * 60)
+    if all_issues:
+        print(f"❌ Found {len(all_issues)} scripts with issues")
+        print()
+        print("Action required:")
+        print("- Add SUNSET_DATE headers to missing scripts")
+        print("- Remove or archive expired scripts")
+        print("- Update scripts inventory")
+        return 1
+
+    print("✅ All scripts have valid SUNSET_DATE headers")
+    if expiring_scripts:
+        print()
+        print("⚠️  Scripts expiring soon:")
+        for script_name in expiring_scripts:
+            print(f"   - {script_name}")
+    return 0
+
+
 def main() -> int:
     """Validate all oneoff migration scripts."""
     if not ONEOFF_DIR.exists():
@@ -91,48 +138,13 @@ def main() -> int:
 
     for script in scripts:
         result = check_script(script)
-
-        if result["issues"]:
+        has_issues, expires_soon = _report_script_result(script, result)
+        if has_issues:
             all_issues.append(result)
-            print(f"❌ {script.name}:")
-            for issue in result["issues"]:
-                print(f"   - {issue}")
-            if result["sunset_date"]:
-                print(f"   SUNSET_DATE: {result['sunset_date']}")
-        else:
-            print(f"✅ {script.name}: SUNSET_DATE {result['sunset_date']}")
+        if expires_soon:
+            expired_scripts.append(script.name)
 
-            # Check if expiring soon (within 30 days)
-            if result["sunset_date"]:
-                sunset_date = datetime.strptime(
-                    result["sunset_date"], "%Y-%m-%d"
-                ).date()
-                days_until_sunset = (sunset_date - date.today()).days
-                if days_until_sunset <= 30:
-                    print(f"   ⚠️  Expiring in {days_until_sunset} days")
-                    expired_scripts.append(script.name)
-
-    print()
-    print("=" * 60)
-
-    if all_issues:
-        print(f"❌ Found {len(all_issues)} scripts with issues")
-        print()
-        print("Action required:")
-        print("- Add SUNSET_DATE headers to missing scripts")
-        print("- Remove or archive expired scripts")
-        print("- Update scripts inventory")
-        return 1
-    else:
-        print("✅ All scripts have valid SUNSET_DATE headers")
-
-        if expired_scripts:
-            print()
-            print("⚠️  Scripts expiring soon:")
-            for script_name in expired_scripts:
-                print(f"   - {script_name}")
-
-        return 0
+    return _report_summary(all_issues, expired_scripts)
 
 
 if __name__ == "__main__":

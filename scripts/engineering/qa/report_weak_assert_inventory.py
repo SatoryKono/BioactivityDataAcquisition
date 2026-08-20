@@ -34,7 +34,6 @@ def _calls_raises(node: ast.AST) -> bool:
 
 
 def _has_assert(node: ast.AST) -> bool:
-    # NOSONAR - S3776: complexity 25 exceeds 15; extraction would obscure AST walk logic
     for child in ast.walk(node):
         if isinstance(child, (ast.Assert, ast.Raise)):
             return True
@@ -48,6 +47,30 @@ def _owner_bucket(rel: str) -> str:
     return parts[0] if parts else "unknown"
 
 
+def _test_functions(node: ast.AST) -> list[ast.FunctionDef | ast.AsyncFunctionDef]:
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return [node] if _is_test_function(node) else []
+    if not isinstance(node, ast.ClassDef):
+        return []
+    return [
+        item
+        for item in node.body
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and _is_test_function(item)
+    ]
+
+
+def _weak_assert_finding(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, *, relative_path: str
+) -> dict[str, Any]:
+    return {
+        "path": relative_path,
+        "name": function.name,
+        "lineno": function.lineno,
+        "owner_bucket": _owner_bucket(relative_path),
+    }
+
+
 def scan_tree(root: Path) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     for path in sorted(root.rglob("test_*.py")):
@@ -58,25 +81,11 @@ def scan_tree(root: Path) -> list[dict[str, Any]]:
             continue
         rel = path.relative_to(REPO_ROOT).as_posix()
         for node in tree.body:
-            candidates: list[ast.AST] = []
-            if _is_test_function(node):
-                candidates.append(node)
-            elif isinstance(node, ast.ClassDef):
-                for item in node.body:
-                    if _is_test_function(item):
-                        candidates.append(item)
-            for fn in candidates:
-                assert isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef))
-                if _has_assert(fn):
-                    continue
-                findings.append(
-                    {
-                        "path": rel,
-                        "name": fn.name,
-                        "lineno": fn.lineno,
-                        "owner_bucket": _owner_bucket(rel),
-                    }
-                )
+            findings.extend(
+                _weak_assert_finding(function, relative_path=rel)
+                for function in _test_functions(node)
+                if not _has_assert(function)
+            )
     return findings
 
 

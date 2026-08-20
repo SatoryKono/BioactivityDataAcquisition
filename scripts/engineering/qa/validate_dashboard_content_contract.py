@@ -187,6 +187,96 @@ def _is_navigation_bus_panel(key: tuple[str, str], panel: dict[str, object]) -> 
     )
 
 
+def _declared_value_errors(
+    *,
+    prefix: str,
+    key: tuple[str, str],
+    record: dict[str, object],
+    dashboard_panel: dict[str, object],
+    expected_title: str,
+    allowed_roles: set[str],
+    allowed_scopes: set[str],
+    allowed_evidence_sources: set[str],
+    allowed_states: set[str],
+) -> list[str]:
+    errors: list[str] = []
+    role = record.get("role")
+    navigation_bus = _is_navigation_bus_panel(key, dashboard_panel)
+    if record.get("title") != expected_title and not navigation_bus:
+        errors.append(f"{prefix}: title does not match dashboard JSON")
+    if role not in allowed_roles:
+        errors.append(f"{prefix}: role must be one of the declared allowed_roles")
+    if navigation_bus and role != "navigation":
+        errors.append(f"{prefix}: navigation bus must declare navigation role")
+    tier = record.get("tier")
+    if not isinstance(tier, int) or tier not in {1, 2, 3, 4}:
+        errors.append(f"{prefix}: tier must be an integer from 1 to 4")
+    scope = record.get("scope")
+    if scope not in allowed_scopes:
+        errors.append(f"{prefix}: scope must be one of the declared allowed_scopes")
+    scope_class = record.get("scope_class", scope)
+    if scope_class not in allowed_scopes:
+        errors.append(f"{prefix}: scope_class must be one of the declared allowed_scopes")
+    elif scope_class != scope:
+        errors.append(f"{prefix}: scope_class must match scope (scope is the SSOT)")
+    if record.get("evidence_source") not in allowed_evidence_sources:
+        errors.append(
+            f"{prefix}: evidence_source must be one of the declared allowed_evidence_sources"
+        )
+    state_model = _string_list(record.get("state_model"))
+    if not state_model or not set(state_model).issubset(allowed_states):
+        errors.append(f"{prefix}: state_model must be a non-empty declared state list")
+    return errors
+
+
+def _fixture_contract_errors(
+    *, prefix: str, record: dict[str, object]
+) -> list[str]:
+    errors: list[str] = []
+    role = record.get("role")
+    required_copy = _string_list(record.get("required_copy"))
+    if not required_copy:
+        errors.append(f"{prefix}: required_copy must be a non-empty list")
+    elif role not in NON_DATA_ROLES and not REQUIRED_COPY_TOKENS.issubset(
+        required_copy
+    ):
+        errors.append(f"{prefix}: required_copy must include evidence_scope and no_data")
+    elif role in ACTION_REQUIRED_ROLES and "next_action" not in required_copy:
+        errors.append(f"{prefix}: role {role!r} must include next_action copy")
+    if not _string_list(record.get("fixture_cases")):
+        errors.append(f"{prefix}: fixture_cases must be a non-empty list")
+    if not _string_list(record.get("render_profiles")):
+        errors.append(f"{prefix}: render_profiles must be a non-empty list")
+    if role in {"identity_table", "accounting_table"} and not _string_list(
+        record.get("required_columns")
+    ):
+        errors.append(f"{prefix}: table role requires required_columns")
+    return errors
+
+
+def _empty_state_errors(*, prefix: str, record: dict[str, object]) -> list[str]:
+    role = record.get("role")
+    evidence_source = record.get("evidence_source")
+    empty_state_class = record.get("empty_state_class")
+    if role in NON_DATA_ROLES:
+        if empty_state_class in {None, "unsupported"}:
+            return []
+        return [
+            f"{prefix}: non-data role empty_state_class must be unsupported or omitted"
+        ]
+    errors: list[str] = []
+    if empty_state_class not in ALLOWED_EMPTY_STATE_CLASSES:
+        errors.append(
+            f"{prefix}: empty_state_class must be one of "
+            f"{sorted(ALLOWED_EMPTY_STATE_CLASSES)}"
+        )
+    if record.get("scope") == "selected_run" and evidence_source != "ops_http":
+        errors.append(
+            f"{prefix}: data-bearing selected_run must use evidence_source=ops_http"
+        )
+    return errors
+
+
 def _validate_panel_record(
     *,
     key: tuple[str, str],
@@ -200,76 +290,19 @@ def _validate_panel_record(
 ) -> list[str]:
     uid, panel_id = key
     prefix = f"panel-content-contract.yaml:{uid}:{panel_id}"
-    errors: list[str] = []
-    role = record.get("role")
-    if record.get("title") != expected_title and not _is_navigation_bus_panel(
-        key, dashboard_panel
-    ):
-        errors.append(f"{prefix}: title does not match dashboard JSON")
-    if role not in allowed_roles:
-        errors.append(f"{prefix}: role must be one of the declared allowed_roles")
-    if _is_navigation_bus_panel(key, dashboard_panel) and role != "navigation":
-        errors.append(f"{prefix}: navigation bus must declare navigation role")
-    tier = record.get("tier")
-    if not isinstance(tier, int) or tier not in {1, 2, 3, 4}:
-        errors.append(f"{prefix}: tier must be an integer from 1 to 4")
-    scope = record.get("scope")
-    if scope not in allowed_scopes:
-        errors.append(f"{prefix}: scope must be one of the declared allowed_scopes")
-    scope_class = record.get("scope_class", scope)
-    if scope_class not in allowed_scopes:
-        errors.append(
-            f"{prefix}: scope_class must be one of the declared allowed_scopes"
-        )
-    elif scope_class != scope:
-        errors.append(f"{prefix}: scope_class must match scope (scope is the SSOT)")
-    evidence_source = record.get("evidence_source")
-    if evidence_source not in allowed_evidence_sources:
-        errors.append(
-            f"{prefix}: evidence_source must be one of the declared allowed_evidence_sources"
-        )
-    state_model = _string_list(record.get("state_model"))
-    if not state_model or not set(state_model).issubset(allowed_states):
-        errors.append(f"{prefix}: state_model must be a non-empty declared state list")
-    required_copy = _string_list(record.get("required_copy"))
-    if not required_copy:
-        errors.append(f"{prefix}: required_copy must be a non-empty list")
-    elif role not in NON_DATA_ROLES and not REQUIRED_COPY_TOKENS.issubset(
-        required_copy
-    ):
-        errors.append(
-            f"{prefix}: required_copy must include evidence_scope and no_data"
-        )
-    elif role in ACTION_REQUIRED_ROLES and "next_action" not in required_copy:
-        errors.append(f"{prefix}: role {role!r} must include next_action copy")
-    fixture_cases = _string_list(record.get("fixture_cases"))
-    if not fixture_cases:
-        errors.append(f"{prefix}: fixture_cases must be a non-empty list")
-    render_profiles = _string_list(record.get("render_profiles"))
-    if not render_profiles:
-        errors.append(f"{prefix}: render_profiles must be a non-empty list")
-    if role in {"identity_table", "accounting_table"}:
-        required_columns = _string_list(record.get("required_columns"))
-        if not required_columns:
-            errors.append(f"{prefix}: table role requires required_columns")
-    empty_state_class = record.get("empty_state_class")
-    if role not in NON_DATA_ROLES:
-        if empty_state_class not in ALLOWED_EMPTY_STATE_CLASSES:
-            errors.append(
-                f"{prefix}: empty_state_class must be one of "
-                f"{sorted(ALLOWED_EMPTY_STATE_CLASSES)}"
-            )
-        if (
-            record.get("scope") == "selected_run"
-            and evidence_source != "ops_http"
-        ):
-            errors.append(
-                f"{prefix}: data-bearing selected_run must use evidence_source=ops_http"
-            )
-    elif empty_state_class not in {None, "unsupported"}:
-        errors.append(
-            f"{prefix}: non-data role empty_state_class must be unsupported or omitted"
-        )
+    errors = _declared_value_errors(
+        prefix=prefix,
+        key=key,
+        record=record,
+        dashboard_panel=dashboard_panel,
+        expected_title=expected_title,
+        allowed_roles=allowed_roles,
+        allowed_scopes=allowed_scopes,
+        allowed_evidence_sources=allowed_evidence_sources,
+        allowed_states=allowed_states,
+    )
+    errors.extend(_fixture_contract_errors(prefix=prefix, record=record))
+    errors.extend(_empty_state_errors(prefix=prefix, record=record))
     return errors
 
 

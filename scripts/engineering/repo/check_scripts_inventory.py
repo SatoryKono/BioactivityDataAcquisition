@@ -99,6 +99,7 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 _SCRIPTS_PREFIX = "scripts/"
+PACKAGE_INIT_FILENAME = "__init__.py"
 SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = (_SCRIPTS_PREFIX,)
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"scripts/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
@@ -120,7 +121,7 @@ RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
 )
 ABSOLUTE_SCRIPT_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     # Absolute first-party imports of inventoried script packages.
-    r"^[ \t]*from[ \t]+scripts(?:\.[A-Za-z0-9_]+){0,32}[ \t]+import[ \t]+",
+    r"^[ \t]*from[ \t]+scripts(?:\.\w+){0,32}[ \t]+import[ \t]+",
     re.MULTILINE,
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
@@ -266,7 +267,7 @@ def _iter_script_files_in_base(base: Path) -> list[Path]:
                 continue
             if (
                 file_path.suffix not in SCRIPT_EXTENSIONS
-                or file_path.name == "__init__.py"
+                or file_path.name == PACKAGE_INIT_FILENAME
             ):
                 continue
             scripts.append(file_path)
@@ -507,7 +508,7 @@ def _relative_import_candidate_paths(
     candidate_base = Path(*base_parts, *module_parts)
     return (
         candidate_base.with_suffix(".py").as_posix(),
-        (candidate_base / "__init__.py").as_posix(),
+        (candidate_base / PACKAGE_INIT_FILENAME).as_posix(),
     )
 
 
@@ -550,16 +551,9 @@ def _absolute_script_import_hits_for_node(
     script_set: set[str],
 ) -> list[tuple[str, RefEvidence]]:
     """Resolve absolute ``scripts.*`` / ``src.tools.*`` imports to inventory paths."""
-    if node.level != 0 or not node.module:
+    if node.level != 0 or not node.module or not _is_script_module(node.module):
         return []
     module = node.module
-    if not (
-        module == "scripts"
-        or module.startswith("scripts.")
-        or module == "src.tools"
-        or module.startswith("src.tools.")
-    ):
-        return []
     raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
     evidence = _make_ref_evidence(
         rel=rel,
@@ -567,27 +561,32 @@ def _absolute_script_import_hits_for_node(
         raw_line=raw_line,
         source_group=source_group,
     )
-    discovered: list[tuple[str, RefEvidence]] = []
     candidate_module = Path(*module.split("."))
-    module_candidates = (
-        candidate_module.with_suffix(".py").as_posix(),
-        (candidate_module / "__init__.py").as_posix(),
+    candidates = list(_module_file_candidates(candidate_module))
+    candidates.extend(
+        candidate
+        for alias in node.names
+        if alias.name != "*"
+        for candidate in _module_file_candidates(candidate_module / alias.name)
     )
-    for candidate_path in module_candidates:
-        if candidate_path in script_set and candidate_path != rel:
-            discovered.append((candidate_path, evidence))
-    # Also resolve imported leaf names as nested modules when present.
-    for alias in node.names:
-        if alias.name == "*":
-            continue
-        leaf = candidate_module / alias.name
-        for candidate_path in (
-            leaf.with_suffix(".py").as_posix(),
-            (leaf / "__init__.py").as_posix(),
-        ):
-            if candidate_path in script_set and candidate_path != rel:
-                discovered.append((candidate_path, evidence))
-    return discovered
+    return [
+        (candidate, evidence)
+        for candidate in candidates
+        if candidate in script_set and candidate != rel
+    ]
+
+
+def _is_script_module(module: str) -> bool:
+    return module in {"scripts", "src.tools"} or module.startswith(
+        ("scripts.", "src.tools.")
+    )
+
+
+def _module_file_candidates(module_path: Path) -> tuple[str, str]:
+    return (
+        module_path.with_suffix(".py").as_posix(),
+        (module_path / PACKAGE_INIT_FILENAME).as_posix(),
+    )
 
 
 def _discover_relative_import_refs(

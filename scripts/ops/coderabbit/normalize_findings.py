@@ -97,9 +97,10 @@ def raw_findings() -> list[dict[str, Any]]:
     return findings
 
 
-def main() -> None:
-    overrides = load_overrides()
-    original_findings = raw_findings()
+def _split_findings(
+    original_findings: list[dict[str, Any]],
+    overrides: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     for finding in original_findings:
         override = overrides.get(str(finding["fingerprint"]), {})
@@ -114,21 +115,50 @@ def main() -> None:
             )
         )
         findings.append(finding)
-        for index, raw_problem in enumerate(split_problems, 1):
-            if not isinstance(raw_problem, dict):
-                continue
-            problem = dict(finding)
-            problem.update(raw_problem)
-            problem["id"] = f"{finding['id']}-S{index}"
-            problem["origin_id"] = finding["id"]
-            problem["derived"] = True
-            problem["fingerprint"] = fingerprint(
-                str(problem["path"]), str(problem["claim"])
-            )
-            findings.append(problem)
+        findings.extend(
+            _derived_problem(finding, raw_problem, index)
+            for index, raw_problem in enumerate(split_problems, 1)
+            if isinstance(raw_problem, dict)
+        )
+    return findings
+
+
+def _derived_problem(
+    finding: dict[str, Any],
+    raw_problem: dict[str, Any],
+    index: int,
+) -> dict[str, Any]:
+    problem = dict(finding)
+    problem.update(raw_problem)
+    problem["id"] = f"{finding['id']}-S{index}"
+    problem["origin_id"] = finding["id"]
+    problem["derived"] = True
+    problem["fingerprint"] = fingerprint(str(problem["path"]), str(problem["claim"]))
+    return problem
+
+
+def _apply_override(finding: dict[str, Any], override: dict[str, Any]) -> None:
+    for key in (
+        "status",
+        "severity",
+        "confidence",
+        "fix_class",
+        "triage_reason",
+        "evidence",
+        "gh_issue",
+        "gh_url",
+        "prior_issue",
+    ):
+        if key in override:
+            finding[key] = override[key]
+
+
+def _deduplicate_findings(
+    findings: list[dict[str, Any]],
+    overrides: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
     canonical: dict[str, str] = {}
     dedupe: dict[str, dict[str, Any]] = {}
-
     for finding in findings:
         fp = str(finding["fingerprint"])
         if fp in canonical:
@@ -144,22 +174,15 @@ def main() -> None:
             "duplicates": [],
             "gh_issue": None,
         }
-        override = overrides.get(fp, {})
-        for key in (
-            "status",
-            "severity",
-            "confidence",
-            "fix_class",
-            "triage_reason",
-            "evidence",
-            "gh_issue",
-            "gh_url",
-            "prior_issue",
-        ):
-            if key in override:
-                finding[key] = override[key]
+        _apply_override(finding, overrides.get(fp, {}))
         dedupe[fp]["gh_issue"] = finding.get("gh_issue")
+    return dedupe
 
+
+def _write_machine_ledgers(
+    findings: list[dict[str, Any]],
+    dedupe: dict[str, dict[str, Any]],
+) -> None:
     with (OUT / "FINDINGS.jsonl").open("w", encoding="utf-8") as stream:
         for finding in findings:
             stream.write(json.dumps(finding, ensure_ascii=False) + "\n")
@@ -167,15 +190,21 @@ def main() -> None:
         json.dumps(dedupe, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
 
-    raw_counts = Counter(str(item["severity"]) for item in original_findings)
-    accepted = [item for item in findings if item.get("status") == "confirm"]
-    accepted_counts = Counter(str(item["severity"]) for item in accepted)
-    finding_lines = [
+
+def _findings_markdown(
+    findings: list[dict[str, Any]],
+    *,
+    original_count: int,
+    raw_counts: Counter[str],
+    accepted_counts: Counter[str],
+    accepted_count: int,
+) -> str:
+    lines = [
         f"# FINDINGS — CR-FULL {CAMPAIGN_DATE}",
         "",
-        f"- Raw findings: **{len(original_findings)}**",
+        f"- Raw findings: **{original_count}**",
         f"- Normalized problem records: **{len(findings)}**",
-        f"- Accepted problems: **{len(accepted)}**",
+        f"- Accepted problems: **{accepted_count}**",
         f"- Raw severity: `{dict(sorted(raw_counts.items()))}`",
         f"- Accepted severity: `{dict(sorted(accepted_counts.items()))}`",
         "",
@@ -185,13 +214,15 @@ def main() -> None:
     for item in findings:
         issue = item.get("gh_issue") or ""
         claim = str(item["claim"]).replace("|", "\\|")
-        finding_lines.append(
+        lines.append(
             f"| `{item['id']}` | {item['wave']} | `{item['leaf']}` | {item['severity']} | "
             f"{item['status']} | `{item['path']}` | `{item['fingerprint']}` | {issue} | {claim} |"
         )
-    (OUT / "FINDINGS.md").write_text("\n".join(finding_lines) + "\n", encoding="utf-8")
+    return "\n".join(lines) + "\n"
 
-    triage_lines = [
+
+def _triage_markdown(findings: list[dict[str, Any]]) -> str:
+    lines = [
         f"# TRIAGE — CR-FULL {CAMPAIGN_DATE}",
         "",
         "Code/config/contracts and executable gates outrank CodeRabbit output.",
@@ -200,14 +231,18 @@ def main() -> None:
         "|---|---|---|---|---|",
     ]
     for item in findings:
-        reason = str(item.get("triage_reason", "pending ground-truth reconciliation"))
+        reason = str(
+            item.get("triage_reason", "pending ground-truth reconciliation")
+        ).replace("|", "\\|")
         evidence = str(item.get("evidence", "")).replace("|", "\\|")
-        triage_lines.append(
+        lines.append(
             f"| `{item['id']}` | {item['status']} | {item['severity']} | "
-            f"{reason.replace('|', '\\|')} | {evidence} |"
+            f"{reason} | {evidence} |"
         )
-    (OUT / "TRIAGE.md").write_text("\n".join(triage_lines) + "\n", encoding="utf-8")
+    return "\n".join(lines) + "\n"
 
+
+def _write_issue_outputs(accepted: list[dict[str, Any]]) -> list[dict[str, Any]]:
     issue_rows = [item for item in accepted if item.get("gh_issue")]
     issue_map = {
         str(item["id"]): {
@@ -221,20 +256,44 @@ def main() -> None:
     (OUT / "ISSUES_MAP.json").write_text(
         json.dumps(issue_map, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
-    issue_lines = [
+    lines = [
         f"# Issues created or linked — CR-FULL {CAMPAIGN_DATE}",
         "",
         "| finding_id | severity | issue | path |",
         "|---|---|---:|---|",
     ]
     for item in issue_rows:
-        issue_lines.append(
+        lines.append(
             f"| `{item['id']}` | {item['severity']} | "
             f"[#{item['gh_issue']}]({item.get('gh_url', '')}) | `{item['path']}` |"
         )
-    (OUT / "ISSUES_CREATED.md").write_text(
-        "\n".join(issue_lines) + "\n", encoding="utf-8"
+    (OUT / "ISSUES_CREATED.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return issue_rows
+
+
+def main() -> None:
+    overrides = load_overrides()
+    original_findings = raw_findings()
+    findings = _split_findings(original_findings, overrides)
+    dedupe = _deduplicate_findings(findings, overrides)
+
+    _write_machine_ledgers(findings, dedupe)
+
+    raw_counts = Counter(str(item["severity"]) for item in original_findings)
+    accepted = [item for item in findings if item.get("status") == "confirm"]
+    accepted_counts = Counter(str(item["severity"]) for item in accepted)
+    (OUT / "FINDINGS.md").write_text(
+        _findings_markdown(
+            findings,
+            original_count=len(original_findings),
+            raw_counts=raw_counts,
+            accepted_counts=accepted_counts,
+            accepted_count=len(accepted),
+        ),
+        encoding="utf-8",
     )
+    (OUT / "TRIAGE.md").write_text(_triage_markdown(findings), encoding="utf-8")
+    issue_rows = _write_issue_outputs(accepted)
 
     print(
         json.dumps(

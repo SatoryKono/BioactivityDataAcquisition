@@ -47,69 +47,79 @@ REPLACEMENTS: list[tuple[str, str]] = [
 ]
 
 
+def _module_docstring_end(lines: list[str], start: int) -> int:
+    if start >= len(lines):
+        return start
+    stripped = lines[start].lstrip()
+    if not stripped.startswith(('"""', "'''")):
+        return start
+    quote = '"""' if stripped.startswith('"""') else "'''"
+    if lines[start].count(quote) >= 2 and lines[start].strip() != quote:
+        return start + 1
+    index = start + 1
+    while index < len(lines) and quote not in lines[index]:
+        index += 1
+    return min(index + 1, len(lines))
+
+
+def _skip_blank_lines(lines: list[str], start: int) -> int:
+    index = start
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    return index
+
+
 def _skip_module_header(lines: list[str]) -> int:
     """Skip shebang, encoding, module docstring, and blank lines at top."""
-    i = 0
-    n = len(lines)
-    if i < n and lines[i].startswith("#!"):
-        i += 1
-    if i < n and re.match(r"^#.*coding[:=]", lines[i]):
-        i += 1
-    # module docstring
-    if i < n and (
-        lines[i].lstrip().startswith('"""') or lines[i].lstrip().startswith("'''")
-    ):
-        quote = '"""' if '"""' in lines[i] else "'''"
-        if lines[i].count(quote) >= 2 and lines[i].strip() != quote:
-            i += 1
-        else:
-            i += 1
-            while i < n and quote not in lines[i]:
-                i += 1
-            if i < n:
-                i += 1
-    while i < n and lines[i].strip() == "":
-        i += 1
-    return i
+    index = 0
+    if index < len(lines) and lines[index].startswith("#!"):
+        index += 1
+    if index < len(lines) and re.match(r"^#.*coding[:=]", lines[index]):
+        index += 1
+    index = _module_docstring_end(lines, index)
+    return _skip_blank_lines(lines, index)
+
+
+def _multiline_import_end(lines: list[str], start: int) -> int:
+    if "(" not in lines[start] or ")" in lines[start]:
+        return start + 1
+    index = start + 1
+    while index < len(lines) and ")" not in lines[index]:
+        index += 1
+    return min(index + 1, len(lines))
+
+
+def _next_nonblank_line(lines: list[str], start: int) -> int:
+    index = start
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    return index
 
 
 def _import_block_end(lines: list[str]) -> int:
     """Return index after future + import block (after module header)."""
-    i = _skip_module_header(lines)
-    n = len(lines)
-    last_end = i
-    # future must come first among imports
-    while i < n:
-        line = lines[i]
+    index = _skip_module_header(lines)
+    last_end = index
+    while index < len(lines):
+        line = lines[index]
         stripped = line.strip()
         if stripped.startswith("from __future__"):
-            last_end = i + 1
-            i += 1
+            last_end = index + 1
+            index += 1
             continue
         if stripped.startswith(("import ", "from ")):
-            if "(" in line and ")" not in line:
-                j = i + 1
-                while j < n and ")" not in lines[j]:
-                    j += 1
-                last_end = min(j + 1, n)
-                i = last_end
-                continue
-            last_end = i + 1
-            i += 1
+            last_end = _multiline_import_end(lines, index)
+            index = last_end
             continue
         if stripped == "" or stripped.startswith("#"):
             # allow blank/comments only while still in import region
             # peek ahead: if next non-empty is import, continue
-            k = i + 1
-            while k < n and lines[k].strip() == "":
-                k += 1
-            if k < n and (
-                lines[k].strip().startswith(("import ", "from "))
-                or lines[k].strip().startswith("#")
+            next_line = _next_nonblank_line(lines, index + 1)
+            if next_line < len(lines) and (
+                lines[next_line].strip().startswith(("import ", "from ", "#"))
             ):
-                i = k
+                index = next_line
                 continue
-            break
         break
     return last_end
 

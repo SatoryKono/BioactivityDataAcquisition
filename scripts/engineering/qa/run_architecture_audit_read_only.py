@@ -17,6 +17,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 GIT_STATUS_TIMEOUT_SECONDS = 120
 QA_MODULE = "scripts.engineering.qa"
+IMPORT_LINTER_CONFIG = ".importlinter"
 
 MUTATION_GUARD_PATHS = (
     ".github",
@@ -67,12 +68,12 @@ def _timeout_stream_text(value: object) -> str:
 def _lint_imports_command(repo_root: Path) -> tuple[str, ...]:
     venv_candidate = repo_root / ".venv" / "bin" / "lint-imports"
     if venv_candidate.exists():
-        return (str(venv_candidate), "--config", ".importlinter")
+        return (str(venv_candidate), "--config", IMPORT_LINTER_CONFIG)
     active_venv_candidate = Path(sys.executable).with_name("lint-imports")
     if active_venv_candidate.exists():
-        return (str(active_venv_candidate), "--config", ".importlinter")
+        return (str(active_venv_candidate), "--config", IMPORT_LINTER_CONFIG)
     discovered = shutil.which("lint-imports") or "lint-imports"
-    return (discovered, "--config", ".importlinter")
+    return (discovered, "--config", IMPORT_LINTER_CONFIG)
 
 
 def architecture_audit_checks(

@@ -471,7 +471,12 @@ def build_payload(
     }
 
 
-if __name__ == "__main__":
-    from scripts.engineering.qa.debt_governance_gate_report import main
+def main(argv: list[str] | None = None) -> int:  # noqa: D401
+    """Compatibility entrypoint for `python -m scripts.engineering.qa report-debt-governance-gates`."""
+    from scripts.engineering.qa.debt_governance_gate_report import main as _gate_main
 
+    return _gate_main(argv)
+
+
+if __name__ == "__main__":
     raise SystemExit(main())

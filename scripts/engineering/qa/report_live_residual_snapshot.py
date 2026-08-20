@@ -16,6 +16,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -107,12 +109,9 @@ def _module_coverage_residuals() -> dict[str, int]:
     }
 
 
-def _closeout_program_residuals() -> dict[str, int]:
-    """Residual counts for closeout-freeze fold program (#7464 / #6891)."""
+def _closeout_test_metrics(closeout_files: list[Path]) -> tuple[int, int, int]:
     import re
 
-    arch = ROOT / "tests" / "architecture"
-    closeout_files = sorted(arch.glob("test_tech_debt*closeout*.py"))
     closeout_test_functions = 0
     closeout_loc = 0
     live_residual_helper_files = 0
@@ -126,63 +125,76 @@ def _closeout_program_residuals() -> dict[str, int]:
             or "LIVE_RESIDUAL" in text
         ):
             live_residual_helper_files += 1
-    retained_count = 0
-    facade_path = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
-    if facade_path.is_file():
-        try:
-            import yaml
+    return closeout_test_functions, closeout_loc, live_residual_helper_files
 
-            facade = yaml.safe_load(facade_path.read_text(encoding="utf-8"))
-            if isinstance(facade, dict):
-                retained = facade.get("retained_entrypoints") or []
-                if isinstance(retained, list):
-                    retained_count = len(retained)
-        except Exception:
-            retained_count = 0
-    zero_ref = 0
+
+def _retained_entrypoint_count() -> int:
+    facade_path = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    if not facade_path.is_file():
+        return 0
+    try:
+        facade = yaml.safe_load(facade_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError):
+        return 0
+    retained = facade.get("retained_entrypoints") if isinstance(facade, dict) else None
+    return len(retained) if isinstance(retained, list) else 0
+
+
+def _zero_reference_supporting_script_count() -> int:
     manifest_path = ROOT / "configs" / "quality" / "scripts_inventory_manifest.json"
-    if manifest_path.is_file():
-        try:
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            scripts = manifest.get("scripts") or []
-            if isinstance(scripts, list):
-                zero_ref = sum(
-                    1
-                    for row in scripts
-                    if isinstance(row, dict)
-                    and row.get("status") == "supporting"
-                    and int(row.get("reference_count") or 0) == 0
-                )
-        except Exception:
-            zero_ref = 0
-    fold_into_generic = 0
+    if not manifest_path.is_file():
+        return 0
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        scripts = manifest.get("scripts") if isinstance(manifest, dict) else None
+        if not isinstance(scripts, list):
+            return 0
+        return sum(
+            1
+            for row in scripts
+            if isinstance(row, dict)
+            and row.get("status") == "supporting"
+            and int(row.get("reference_count") or 0) == 0
+        )
+    except (OSError, UnicodeError, ValueError, TypeError, json.JSONDecodeError):
+        return 0
+
+
+def _fold_into_generic_count() -> int:
     inventory_path = (
         ROOT / "configs" / "quality" / "architecture_closeout_inventory.yaml"
     )
-    if inventory_path.is_file():
-        try:
-            import yaml
+    if not inventory_path.is_file():
+        return 0
+    try:
+        inventory = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError):
+        return 0
+    entries = inventory.get("entries") if isinstance(inventory, dict) else None
+    if not isinstance(entries, list):
+        return 0
+    return sum(
+        1
+        for row in entries
+        if isinstance(row, dict) and row.get("classification") == "fold_into_generic"
+    )
 
-            inventory = yaml.safe_load(inventory_path.read_text(encoding="utf-8"))
-            if isinstance(inventory, dict):
-                entries = inventory.get("entries") or []
-                if isinstance(entries, list):
-                    fold_into_generic = sum(
-                        1
-                        for row in entries
-                        if isinstance(row, dict)
-                        and row.get("classification") == "fold_into_generic"
-                    )
-        except Exception:
-            fold_into_generic = 0
+
+def _closeout_program_residuals() -> dict[str, int]:
+    """Residual counts for closeout-freeze fold program (#7464 / #6891)."""
+    arch = ROOT / "tests" / "architecture"
+    closeout_files = sorted(arch.glob("test_tech_debt*closeout*.py"))
+    test_functions, closeout_loc, helper_files = _closeout_test_metrics(closeout_files)
     return {
         "tech_debt_closeout_test_file_count": len(closeout_files),
-        "tech_debt_closeout_test_function_count": closeout_test_functions,
+        "tech_debt_closeout_test_function_count": test_functions,
         "tech_debt_closeout_test_loc": closeout_loc,
-        "closeout_files_using_live_residual_helpers": live_residual_helper_files,
-        "fold_into_generic_inventory_count": fold_into_generic,
-        "retained_public_entrypoint_count": retained_count,
-        "zero_reference_supporting_script_count": zero_ref,
+        "closeout_files_using_live_residual_helpers": helper_files,
+        "fold_into_generic_inventory_count": _fold_into_generic_count(),
+        "retained_public_entrypoint_count": _retained_entrypoint_count(),
+        "zero_reference_supporting_script_count": (
+            _zero_reference_supporting_script_count()
+        ),
     }
 
 
