@@ -193,6 +193,62 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     )
 
 
+def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
+    """#9195: first-window retention table must fit w=12 without horizontal overflow."""
+    dashboard_path = next(
+        path
+        for path in get_dashboard_files()
+        if path.name == "bioetl-control-plane-v1.json"
+    )
+    dashboard = load_dashboard(dashboard_path)
+    panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
+
+    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 12, "y": 8}
+    assert panel.get("options", {}).get("cellHeight") == "sm"
+    defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
+    assert defaults.get("inspect") is True
+    assert defaults.get("cellOptions", {}).get("wrapText") is not True
+
+    limit = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "limit"
+    )
+    assert limit.get("options", {}).get("limitField") == 5
+    organize = next(
+        transform
+        for transform in panel.get("transformations", [])
+        if transform.get("id") == "organize"
+    ).get("options", {})
+    assert organize.get("excludeByName") == {
+        "endpoint": True,
+        "retryable": True,
+        "observed_at": True,
+    }
+    assert organize.get("indexByName") == {
+        "check": 0,
+        "status": 1,
+        "reason": 2,
+        "detail": 3,
+    }
+
+    override_properties = {
+        override.get("matcher", {}).get("options"): {
+            prop.get("id"): prop.get("value") for prop in override.get("properties", [])
+        }
+        for override in panel.get("fieldConfig", {}).get("overrides", [])
+    }
+    visible = ("check", "status", "reason", "detail")
+    assert all(
+        override_properties[field]["custom.cellOptions"].get("wrapText") is False
+        for field in visible
+    )
+    assert override_properties["detail"]["custom.inspect"] is True
+    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 655
+    for hidden in ("endpoint", "retryable", "observed_at"):
+        assert override_properties[hidden]["custom.hidden"] is True
+
+
 def test_row_cap_contracts_are_unique_and_owned() -> None:
     seen: set[tuple[str, int]] = set()
     for item in first_window_summary_tables():
