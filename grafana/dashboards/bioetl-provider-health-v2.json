@@ -603,9 +603,32 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Value"
             },
             "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -679,6 +702,18 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "source_state"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
           }
         ]
       },
@@ -725,13 +760,16 @@
           "options": {
             "excludeByName": {
               "Time": true,
-              "__name__": true
+              "__name__": true,
+              "source_state": true,
+              "job": true,
+              "instance": true,
+              "endpoint": true
             },
             "indexByName": {
               "provider": 0,
               "reason": 1,
-              "source_state": 2,
-              "Value": 3
+              "Value": 2
             },
             "renameByName": {
               "Value": "Status",
