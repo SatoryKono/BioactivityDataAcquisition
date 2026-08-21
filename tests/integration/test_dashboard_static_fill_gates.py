@@ -250,7 +250,7 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
             f"{path.name}:id=1000 must use w=24, got {grid.get('w')}"
         )
         assert grid.get("h") == 4, (
-            f"{path.name}:id=1000 must use h=4 for title + wrapped bus, "
+            f"{path.name}:id=1000 must use h=4 for title + reflow-safe bus, "
             f"got {grid.get('h')}"
         )
         options = buses[0].get("options") or {}
@@ -262,6 +262,12 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert 'data-bioetl-panel-title="Navigate Dashboards"' in content
         assert "font-size:19px" in content
         assert "font-size:16px" in content
+        assert "flex-wrap:nowrap" in content
+        assert "flex:1 1 0" in content
+        assert "min-width:0" in content
+        assert "overflow-wrap:anywhere" in content
+        assert "flex-wrap:wrap" not in content
+        assert "overflow:hidden" not in content
 
 
 def test_static_fill_helpers_fail_closed() -> None:
