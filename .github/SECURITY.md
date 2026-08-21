@@ -38,11 +38,12 @@ All secrets MUST follow the naming convention:
 BIOETL_{PROVIDER}_{KEY}
 ```
 
-Examples:
+Examples (names wired in `configs/providers/*.yaml` / `.env.example`):
 
-- `BIOETL_CHEMBL_API_KEY`
-- `BIOETL_PUBCHEM_API_KEY`
 - `BIOETL_UNIPROT_API_KEY`
+- `BIOETL_OPENALEX_API_KEY`
+- `BIOETL_PUBMED_API_KEY`
+- `BIOETL_SEMANTICSCHOLAR_API_KEY`
 
 ### Security Requirements
 
@@ -59,7 +60,7 @@ Examples:
 import os
 
 # CORRECT: Load from environment
-api_key = os.environ.get("BIOETL_CHEMBL_API_KEY")
+api_key = os.environ.get("BIOETL_UNIPROT_API_KEY")
 
 # INCORRECT: Hardcoded value
 api_key = "sk-EXAMPLE_DO_NOT_USE"  # NEVER do this
@@ -184,7 +185,7 @@ httpx.get(url, verify=False)
 
 ```python
 # ✅ Environment variables
-api_key = os.environ["BIOETL_CHEMBL_API_KEY"]
+api_key = os.environ["BIOETL_UNIPROT_API_KEY"]
 
 # ✅ Parameterized queries
 query = "SELECT * FROM compounds WHERE id = ?"
@@ -198,4 +199,4 @@ httpx.get(url)  # verify=True by default
 
 ______________________________________________________________________
 
-*Last updated: 2026-06-25*
+*Last updated: 2026-08-21*

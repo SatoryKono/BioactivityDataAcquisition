@@ -252,7 +252,10 @@ pip install -e ".[dev,tests,tracing,docs]"
 
    **Environment Variables:**
 
-   > **Note:** This table shows commonly used environment variables. For a complete reference of all BIOETL_* environment variables, see [Environment Variables Reference](docs/04-reference/environment-variables.md).
+   > **Note:** This table shows commonly used environment variables. Additional
+   > provider/runtime keys are listed in
+   > [Environment Variables Reference](docs/04-reference/environment-variables.md)
+   > (partial published list) and `.env.example`.
 
    | Variable                                   | Description                                                 | Default                   |
    | ------------------------------------------ | ----------------------------------------------------------- | ------------------------- |
