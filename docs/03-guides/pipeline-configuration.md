@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-30'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -965,14 +965,11 @@ BioETL автоматически генерирует детальную док
 ### Регенерация документации
 
 ```bash
-# Регенерировать все пайплайны
-python scripts/diagrams/render/generate_pipeline_dataflows.py
+# Регенерировать конкретный пайплайн (канонический entrypoint)
+python -m scripts.diagrams generate-dataflows --pipeline chembl_activity
 
-# Регенерировать конкретный пайплайн
-python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity
-
-# Проверить на drift без регенерации
-python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift
+# Проверить committed artifacts на drift без записи
+python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
 ```
 
 ### CI Integration
@@ -980,9 +977,12 @@ python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift
 Pipeline dataflow documentation интегрирована в CI для предотвращения drift:
 
 ```yaml
-# Пример CI check
-- name: Check pipeline dataflow drift
-  run: python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift
+# Live check in .github/workflows/docs.yml
+- name: Check generated pipeline dataflow drift
+  run: |
+    uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \
+      --pipeline chembl_activity \
+      --check
 ```
 
 Если изменения конфигурации повлияли на dataflow без соответствующего обновления документации, CI упадёт, обеспечивая синхронизацию.
