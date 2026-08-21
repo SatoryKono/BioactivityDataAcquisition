@@ -244,7 +244,7 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.35;padding:2px 8px;white-space:normal\"><strong>First action:</strong> Act on Current DQ Status and Threshold/Reasons. Open Run Explorer only for a selected run.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">First action: act on Current DQ Status.</div>",
         "mode": "html"
       },
       "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. If blocked/quarantine/rejects > 0, use accounting with denominators in the Run/Range lanes. Selected-run forensics stay in Run Explorer; resume stays on Trust Review First Recovery Action. Range cards are SLA/freshness context only, not peer severity. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
