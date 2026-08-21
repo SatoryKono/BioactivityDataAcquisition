@@ -15,7 +15,7 @@
     "run_type": "backfill",
     "workflow": "chembl_baseline"
   },
-  "title": "Inspect Recent Runs (last 4)",
-  "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=4",
-  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
+  "title": "Inspect Recent Runs (last 10)",
+  "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=10",
+  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
 }
