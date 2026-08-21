@@ -80,4 +80,5 @@ jobs:
           tests/unit/scripts/repo/test_cleanup_root_local_clutter.py
           tests/architecture/test_root_hygiene_workflow.py
           tests/architecture/test_root_hygiene_review_registry.py
+          tests/architecture/test_env_example_reference_policy.py
           -q
