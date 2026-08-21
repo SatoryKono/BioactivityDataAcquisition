@@ -32,7 +32,8 @@ make lint         # ruff + mypy
 make run-local    # сэмпловый pipeline-run (chembl_activity, limit=10)
 
 # После изменений
-make lint && make test && git add . && git commit
+make lint && make test && git add <touched-paths> && git commit
+# Never `git add .`. Never commit to main; use fix/<slug>.
 ```
 
 **Главное правило:** Читай `docs/00-project/RULES.md` → Планируй → Делай → Проверяй → Документируй

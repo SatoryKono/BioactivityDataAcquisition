@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P0/P1
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-03-30'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -39,15 +39,20 @@ ______________________________________________________________________
 - **Recovery Steps**:
   1. **Stop Pipelines**: Halt all pipelines that write to the affected tables to prevent further corruption.
   1. **Identify Blast Radius**: Determine which tables and partitions are affected.
-  1. **Use Time Travel (Delta Lake)**: If the issue was recent (within 7 days), use Delta Lake's time travel to revert the table to a previous version or timestamp.
-     ```sql
-     -- Example: Revert a table to a specific version
-     RESTORE TABLE schema.table-name TO VERSION AS OF <version-number>;
+  1. **Inspect Time Travel (read-only)**: If the issue was recent (within the
+     VACUUM retention window, default 7 days), inspect a previous Delta version
+     with the local delta-rs/Polars path. BioETL does **not** ship Spark SQL
+     `RESTORE TABLE`.
+     ```python
+     import polars as pl
 
-     -- Example: Revert to a timestamp
-     RESTORE TABLE schema.table-name TO TIMESTAMP AS OF 'YYYY-MM-DD HH:MI:SS';
+     # Historical snapshot (read-only). Example Silver path:
+     df = pl.read_delta("data/output/silver/chembl/activity", version=5)
      ```
-  1. **Full Rebuild from Bronze**: If time travel is not an option, the most reliable method is to rebuild from the Bronze layer.
+     Runtime helper: `bioetl.infrastructure.storage.support.retention_time_travel.load_time_travel_table`.
+     VACUUM policy: [vacuum-procedures.md](vacuum-procedures.md).
+  1. **Full Rebuild from Bronze**: The supported write-path recovery is rebuild
+     from Bronze. Time-travel reads do not mutate Silver/Gold.
      - Delete the corrupted data from the Silver/Gold tables.
      - Run the pipeline with the `--run-type rebuild` flag. This will re-process all data from Bronze.
      ```bash
