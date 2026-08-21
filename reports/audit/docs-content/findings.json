@@ -1,7 +1,154 @@
 {
   "findings": [
     {
-      "id": "DOCS-WF-INV-001",
+      "id": "DOCS-005",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "content",
+      "issue": 9320,
+      "post": "resolved_on_branch",
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/publication-validation-runbook.md",
+          "line": 77,
+          "command": "rg -n \"config (show|validate) --pipeline\" docs/05-operations/runbooks/publication-validation-runbook.md",
+          "observation": "Pre-fix: bioetl config show/validate --pipeline <pipeline>"
+        },
+        {
+          "path": "src/bioetl/interfaces/cli/commands/config.py",
+          "line": 90,
+          "observation": "Both commands take positional @typed_click_argument(\"pipeline\")"
+        }
+      ],
+      "expected": "bioetl config show <pipeline> / bioetl config validate <pipeline>",
+      "actual": "Invented --pipeline flags on a P1 runbook",
+      "impact": "Operator cannot inspect/validate config during publication recovery",
+      "root_cause": "Runbook drifted from Click positional argument",
+      "remediation": "Replace with positional PIPELINE; refresh Last verified",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"config (show|validate) --pipeline\" docs/05-operations/runbooks/publication-validation-runbook.md",
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "automated_fix_possible": false
+    },
+    {
+      "id": "DOCS-006",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "content",
+      "issue": 9318,
+      "post": "resolved_on_branch",
+      "evidence": [
+        {
+          "path": "docs/03-guides/github-quick-reference.md",
+          "line": 41,
+          "command": "rg -n \"git add \\\\\\.\" docs/03-guides/github-quick-reference.md",
+          "observation": "Pre-fix daily commit example used git add ."
+        }
+      ],
+      "expected": "Scoped git add after status/path review",
+      "actual": "Blanket git add . in published GitHub cheat-sheet",
+      "impact": "Contributors can stage .env, machine-local files, and foreign WIP",
+      "root_cause": "Operator cheat-sheet copied a convenience add",
+      "remediation": "Replace with git status + git add path/to/changed-file",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"^git add \\\\\\.\" docs/03-guides/github-quick-reference.md"
+      ],
+      "automated_fix_possible": false
+    },
+    {
+      "id": "DOCS-007",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "content",
+      "issue": 9321,
+      "post": "resolved_on_branch",
+      "evidence": [
+        {
+          "path": "docs/00-project/index.md",
+          "line": 111,
+          "observation": "Pre-fix ChEMBL row omitted Assay Parameters and Target Protein Classification"
+        },
+        {
+          "path": "configs/entities/chembl/assay_parameters.yaml",
+          "observation": "Live entity config exists"
+        },
+        {
+          "path": "docs/04-reference/pipeline-catalog.md",
+          "line": 42,
+          "observation": "Catalog counts ChEMBL 15 including both missing entities"
+        }
+      ],
+      "expected": "Hub ChEMBL list matches 15 configs/entities/chembl/*.yaml",
+      "actual": "Hub omitted two production ChEMBL entities",
+      "impact": "Docs hub IA hides two live pipelines",
+      "root_cause": "Hub table not resynced after entity catalog growth",
+      "remediation": "Align hub row with README/catalog",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"Assay Parameters|Target Protein Classification\" docs/00-project/index.md"
+      ],
+      "automated_fix_possible": false
+    },
+    {
+      "id": "DOCS-008",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.94,
+      "status": "PROVEN",
+      "category": "pipeline",
+      "issue": 9322,
+      "post": "resolved_on_branch",
+      "evidence": [
+        {
+          "path": "scripts/docs/README.md",
+          "line": 77,
+          "observation": "Pre-fix Trigger claimed CI gate (architecture.yml) for check-drift and check-docstrings"
+        },
+        {
+          "path": ".github/workflows/architecture.yml",
+          "command": "rg check-drift|check-docstrings .github/workflows/architecture.yml",
+          "observation": "No matches"
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 218,
+          "observation": "python -m scripts.docs verify runs both checks"
+        }
+      ],
+      "expected": "README maps commands to docs.yml verify / docs-kpi-weekly.yml",
+      "actual": "False architecture.yml CI mapping",
+      "impact": "Operators debug the wrong workflow when docs gates fail",
+      "root_cause": "scripts/docs README Trigger column stale vs current CI layout",
+      "remediation": "Point Trigger at docs.yml verify and weekly KPI workflow",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n architecture.yml scripts/docs/README.md"
+      ],
+      "automated_fix_possible": false
+    },
+    {
+      "id": "DOCS-009",
       "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
@@ -9,37 +156,36 @@
       "confidence_score": 0.95,
       "status": "PROVEN",
       "category": "content",
-      "github_issue": 9265,
-      "iteration_status": "fixed_pending_pr",
+      "issue": 9319,
+      "post": "resolved_on_branch",
       "evidence": [
         {
-          "path": "docs/04-reference/github-actions-workflows.md",
-          "line": 18,
-          "command": "python -m scripts.docs check-links",
-          "observation": "Before fix: missing dashboard-first-window-noscroll.yml; count claim 41 vs live 42. After fix: check-links --workflow-inventory PASS; full check-links PASS."
+          "path": "docs/03-guides/pipeline-configuration.md",
+          "line": 975,
+          "observation": "Pre-fix documented python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
         },
         {
-          "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 89,
-          "command": "python -m scripts.docs check-links",
-          "observation": "Policy claimed 41 GitHub Actions workflows; live glob is 42."
+          "path": "scripts/diagrams/render/generate_pipeline_dataflows.py",
+          "line": 108,
+          "observation": "Argparse flag is --check, not --check-drift"
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 125,
+          "observation": "CI uses python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
         }
       ],
-      "expected": "Published inventory lists every live .github/workflows/*.yml and count equals live glob.",
-      "actual": "Catalog omitted dashboard-first-window-noscroll.yml; count 41 vs 42.",
-      "impact": "docs.yml validate-mkdocs unflagged check-links fails on the next docs-path PR; operators treat a stale 41-file catalog as current.",
-      "root_cause": "New PR/push workflow added without updating the published inventory; docs.yml path filters omit .github/workflows/**.",
-      "remediation": "Sync inventory/count (#9265). Follow-up: trigger docs.yml on workflow YAML changes (#9266).",
+      "expected": "python -m scripts.diagrams generate-dataflows [--pipeline chembl_activity] [--check]",
+      "actual": "Invented --check-drift plus raw script path",
+      "impact": "Contributors copy a flag argparse rejects and miss the CI entrypoint",
+      "root_cause": "Guide not updated when dispatcher/flag were renamed",
+      "remediation": "Document packaged generate-dataflows --check",
       "effort": "S",
-      "dependencies": [
-        "#9266"
-      ],
+      "dependencies": [],
       "validation": [
-        "python -m scripts.docs check-links --workflow-inventory",
-        "python -m scripts.docs check-links",
-        "pytest tests/architecture/test_check_doc_links_guardrails.py::test_github_actions_workflow_inventory_matches_live_repo -q"
+        "rg -n \"check-drift|generate_pipeline_dataflows.py\" docs/03-guides/pipeline-configuration.md"
       ],
-      "automated_fix_possible": true
+      "automated_fix_possible": false
     }
   ]
 }
