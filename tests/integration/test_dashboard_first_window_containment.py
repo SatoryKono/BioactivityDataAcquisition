@@ -324,3 +324,51 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
             if token not in blob:
                 missing.append(f"{dashboard_name} missing {token}")
     assert not missing, "first-window scope banners:\n" + "\n".join(missing)
+
+
+def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
+    """#9251: First Action and Domain Status stay in-slot with a two-row cap."""
+    dashboard_path = next(
+        path
+        for path in get_dashboard_files()
+        if path.name == "bioetl-overview-v2.json"
+    )
+    dashboard = load_dashboard(dashboard_path)
+    by_id = {item.get("id"): item for item in _root_panels(dashboard)}
+    fleet = by_id[214]
+    action = by_id[215]
+    domain = by_id[9002]
+
+    assert fleet.get("title") == "Monitor Fleet Health"
+    assert fleet.get("type") == "stat"
+    assert fleet.get("gridPos") == {"h": 4, "w": 8, "x": 0, "y": 12}
+
+    assert action.get("title") == "Review First Action"
+    assert action.get("type") == "table"
+    assert action.get("gridPos") == {"h": 6, "w": 8, "x": 8, "y": 12}
+    assert action.get("options", {}).get("cellHeight") == "sm"
+    defaults = action.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
+    assert defaults.get("cellOptions", {}).get("wrapText") is not True
+    assert panel_declared_row_cap(action) == 2
+    assert int(action["gridPos"]["y"]) + int(action["gridPos"]["h"]) <= FIRST_WINDOW_Y
+
+    assert domain.get("title") == "Review Domain Status"
+    assert domain.get("type") == "table"
+    assert domain.get("gridPos") == {"h": 6, "w": 8, "x": 16, "y": 12}
+    assert domain.get("options", {}).get("cellHeight") == "sm"
+    assert panel_declared_row_cap(domain) == 2
+    assert int(domain["gridPos"]["y"]) + int(domain["gridPos"]["h"]) <= FIRST_WINDOW_Y
+
+    for panel in (action, domain):
+        expr = str((panel.get("targets") or [{}])[0].get("expr") or "")
+        assert "topk(2," in expr
+        limit = next(
+            item
+            for item in panel.get("transformations") or []
+            if item.get("id") == "limit"
+        )
+        assert limit.get("options", {}).get("limitField") == 2
+        blob = str(panel)
+        assert "overflow:hidden" not in blob.replace(" ", "").lower()
+        assert "overflow:auto" not in blob.replace(" ", "").lower()
+        assert "overflow:scroll" not in blob.replace(" ", "").lower()
