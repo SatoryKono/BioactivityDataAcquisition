@@ -250,7 +250,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "targets": [
         {
@@ -801,7 +801,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "orange"
+                  "color": "gray"
                 }
               }
             }
@@ -848,7 +848,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": false
       },
       "pluginVersion": "10.4.0",
