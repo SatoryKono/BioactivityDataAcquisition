@@ -525,9 +525,22 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == ["new"]
 
 
+
+def _require_symlink_privilege(tmp_path: Path) -> None:
+    probe = tmp_path / "_symlink_probe_src"
+    probe.write_text("x", encoding="utf-8")
+    try:
+        (tmp_path / "_symlink_probe").symlink_to(probe)
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows symlink privilege is not granted")
+        raise
+
+
 def test_remove_tree_unlinks_symlinks_without_traversing_targets(
     tmp_path: Path,
 ) -> None:
+    _require_symlink_privilege(tmp_path)
     external = tmp_path / "external"
     external.mkdir()
     external_file = external / "keep.txt"
