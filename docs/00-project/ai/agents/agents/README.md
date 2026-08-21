@@ -20,9 +20,11 @@ Consolidated agent registry for published docs navigation.
 ## Surface Note
 
 - This page is a **published mirror index**, not a canonical runtime registry.
-- Claude runtime source of truth remains in its runtime-specific agent registry.
-- Codex keeps its own runtime-specific orchestration and related agent context
-  under `.codex/agents/`.
+- `.claude/**` is not an active runtime source until a local checkout proves
+  otherwise (`AGENTS.md`). Do not treat Claude mirrors as live SSOT.
+- Equal-peer runtime trees: `.codex/agents/**` and `.junie/agents/**`
+  (parity via `scripts/ai/junie/check_junie_mirror.sh`). Devin uses
+  `.devin/agents/**`.
 - Use this catalog for discoverability; verify live runtime behavior in the
   relevant runtime tree before treating any profile note as authoritative.
 
@@ -30,8 +32,9 @@ Consolidated agent registry for published docs navigation.
 
 `docs/00-project/ai/agents/agents/**` is a published/internal mirror surface.
 It must not define runtime behavior independently from tracked runtime trees
-such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
-mirror when behavior or contributor guidance changes.
+such as `.codex/agents/**` and `.junie/agents/**`. Edit the active runtime
+profile first, then refresh this mirror when behavior or contributor guidance
+changes.
 
 ## BioETL Core (6 active Codex runtime agents)
 

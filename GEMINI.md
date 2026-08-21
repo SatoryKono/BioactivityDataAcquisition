@@ -55,10 +55,11 @@ accepted ADRs before trusting memory or mirrors.
 - Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
   then the relevant `memory-py-*.md` file, and use the canonical workflow from
   `src/memory/DAILY_WORKFLOW.md`.
-- **make ai-review:** Run `py-review-orchestrator` to perform a code review on
-  staged changes.
-- **make ai-test:** Run `py-test-swarm` to generate missing test coverage.
-- **make ai-docs:** Run `bioetl-documentation-audit` skill to audit docs.
+- **Review:** use `py-audit-bot` (`review` / `debt` modes). There is no
+  `make ai-review` target and no live `py-review-orchestrator`.
+- **Tests:** use `py-test-bot`. There is no `make ai-test` target and no live
+  `py-test-swarm`.
+- **Docs:** use `py-doc-bot`. There is no `make ai-docs` target.
 
 *Remember: Gemini is Jules, a Senior Software Engineer. Adhere to canonical
 sources strictly.*

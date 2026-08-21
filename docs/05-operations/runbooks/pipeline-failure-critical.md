@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P0
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-03'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -29,7 +29,8 @@ ______________________________________________________________________
 
 ## Preconditions
 
-- Access to logs (Loki/Local).
+- Access to local logs (default Local-Only runtime; Loki is not in the
+  shipping monitoring surface).
 - Access to checkpoint storage.
 - Git repository permissions.
 
@@ -50,7 +51,12 @@ ______________________________________________________________________
 ### 3. Cleanup & Resume
 
 1. Remove corrupted local files (if any).
-1. Resume using `--resume-from <run_id>`.
+1. Resume with the published CLI flags (there is no `--resume-from`):
+   ```bash
+   bioetl run --pipeline <pipeline-name> --resume
+   bioetl run --pipeline <pipeline-name> --resume-run-id <run_id>
+   bioetl run --pipeline <pipeline-name> --resume-manifest-id <manifest_id>
+   ```
 
 ## Verification
 

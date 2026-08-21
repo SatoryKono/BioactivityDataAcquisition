@@ -52,7 +52,9 @@ identity to repository, commit, branch, worktree, task, and source references.
 - `.codex/skills/**` is the sole project-local skill discovery and behavioral
   source.
 - Validate these surfaces with
-  `python3 scripts/ai/codex/doctor.py static --no-write`.
+  `python -m` is not used here; on Windows use
+  `.\.venv-win\Scripts\python.exe scripts/ai/codex/doctor.py static --no-write`,
+  elsewhere `python scripts/ai/codex/doctor.py static --no-write`.
 
 ## Common Task Routing
 
