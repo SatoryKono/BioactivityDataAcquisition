@@ -91,6 +91,11 @@
           "includeVars": false,
           "asDropdown": false,
           "tags": []
+        },
+        {
+          "title": "Check BioETL Ops HTTP health",
+          "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+          "targetBlank": true
         }
       ]
     },
