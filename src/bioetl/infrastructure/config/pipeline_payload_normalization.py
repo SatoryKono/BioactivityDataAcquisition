@@ -32,9 +32,11 @@ _FORBIDDEN_PIPELINE_SOURCE_PROVIDER_PAGINATION_KEYS: tuple[str, ...] = (
 )
 
 _FORBIDDEN_PIPELINE_SOURCE_TRANSPORT_KEYS: tuple[str, ...] = (
+    "api_key",
     "circuit_breaker",
     "rate_limit",
 )
+_ENTITY_PIPELINE_SOURCE_KEYS: frozenset[str] = frozenset({"email", "fields", "api"})
 
 
 @dataclass(frozen=True)
@@ -193,9 +195,24 @@ def load_source_section(
                 "Pipeline source overrides must not redefine provider transport "
                 f"settings via {joined}. Provider transport is owned by "
                 "configs/providers/<provider>.yaml; use pipeline.page_size_override "
-                "for page-size overrides."
+                "for page-size overrides. Credentials use api_key_env / Settings, "
+                "not pipeline.source.api_key."
             )
-    config["source"] = config_merge(base_source, entity_source)
+        unknown_keys = sorted(
+            key for key in entity_source if key not in _ENTITY_PIPELINE_SOURCE_KEYS
+        )
+        if unknown_keys:
+            joined = ", ".join(f"source.{key}" for key in unknown_keys)
+            raise ValueError(
+                "Pipeline source may only declare email, fields, and api; "
+                f"unsupported keys: {joined}."
+            )
+    else:
+        entity_source = {}
+    merged = config_merge(base_source, entity_source)
+    config["source"] = {
+        key: merged[key] for key in _ENTITY_PIPELINE_SOURCE_KEYS if key in merged
+    }
 
 
 def normalize_pipeline_payload(

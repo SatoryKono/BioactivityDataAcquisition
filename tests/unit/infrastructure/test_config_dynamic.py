@@ -769,7 +769,8 @@ def test_load_source_section_reuses_canonical_source_loader(
 
     _load_source_section(config, config_path)
 
-    assert config["source"]["provider_config"]["provider"] == "chembl"
+    assert config["source"] == {}
+    assert "provider_config" not in config["source"]
 
 
 @pytest.mark.parametrize(

@@ -58,14 +58,13 @@ def _resolve_pubmed_request_profile(
     settings: ProviderSettingsProtocol,
     pipeline_config: PipelineYamlConfig,
 ) -> PubMedRequestProfile:
-    """Resolve PubMed email + API key using pipeline override precedence."""
-    configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
+    """Resolve PubMed email from pipeline and API key from typed Settings."""
     settings_api_key = (
         settings.pubmed_api_key.get_secret_value() if settings.pubmed_api_key else None
     )
     return PubMedRequestProfile(
         email=_resolve_biblio_contact_email(settings, pipeline_config),
-        api_key=configured_api_key or settings_api_key,
+        api_key=settings_api_key,
     )
 
 
@@ -88,15 +87,14 @@ def _resolve_openalex_request_profile(
     *,
     batch_size: int,
 ) -> OpenAlexRequestProfile:
-    """Resolve OpenAlex API key, legacy mailto, and batch size."""
-    configured_api_key = _normalize_optional_override(pipeline_config.source.api_key)
+    """Resolve OpenAlex API key from Settings, legacy mailto, and batch size."""
     settings_api_key = (
         settings.openalex_api_key.get_secret_value()
         if settings.openalex_api_key
         else None
     )
     return OpenAlexRequestProfile(
-        api_key=configured_api_key or settings_api_key,
+        api_key=settings_api_key,
         mailto=_resolve_biblio_contact_email(settings, pipeline_config),
         batch_size=batch_size,
     )

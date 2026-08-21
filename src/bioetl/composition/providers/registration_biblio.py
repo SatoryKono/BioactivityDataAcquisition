@@ -92,15 +92,11 @@ def _create_pubmed_data_source(
 
     PubMed requires an email address and optionally an API key for higher rate
     limits (10 req/sec with key vs 3 req/sec without). The API key is resolved
-    with the following priority:
+    only from ``settings.pubmed_api_key`` (``BIOETL_PUBMED_API_KEY`` /
+    ``provider_config.api_key_env``). ``pipeline.source.api_key`` is rejected.
 
-    1. ``pipeline_config.source.api_key`` -- per-pipeline override (highest).
-    2. ``settings.pubmed_api_key`` -- application-wide setting from
-       ``BIOETL_PUBMED_API_KEY`` env var (fallback).
-    3. ``None`` -- unauthenticated access with lower rate limits.
-
-    Email follows a similar resolution: ``pipeline_config.source.email`` takes
-    precedence over ``settings.default_email``.
+    Email may still come from ``pipeline_config.source.email``, falling back to
+    ``settings.default_email``.
     """
     profile = _resolve_pubmed_request_profile(settings, pipeline_config)
 
