@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.0
+Version: 1.2.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-20'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -86,7 +86,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **41 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+BioETL uses **42 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
 
 ### 2.1 Core Quality Workflows
 
