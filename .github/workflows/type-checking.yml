@@ -51,13 +51,13 @@ jobs:
           } 2>&1 | tee reports/ci/dependency-preflight.log
 
       - name: Upload dependency preflight diagnostics
-        if: always()
+        if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: type-checking-dependency-preflight
           path: reports/ci/dependency-preflight.log
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3
 
       - name: Publish dependency preflight summary
         if: always()
@@ -210,10 +210,11 @@ jobs:
 
       - name: Upload type checking reports
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-        if: always()
+        if: ${{ failure() && !cancelled() }}
         with:
           name: type-checking-reports
           path: |
-            reports/
+            reports/mypy_strict.log
+            reports/mypy_strict.exit_code
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 3

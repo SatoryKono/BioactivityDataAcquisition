@@ -179,13 +179,19 @@ jobs:
             --timeout-seconds 120
 
       - name: Upload reports
-        if: always()
+        if: ${{ failure() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: duplication-complexity-reports
-          path: reports
+          path: |
+            reports/radon_cc.txt
+            reports/radon_cc.json
+            reports/high_complexity.txt
+            reports/jscpd/jscpd-report.json
+            reports/quality/hotspot-duplication-baseline.json
+            reports/quality/hotspot-duplication-baseline.md
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 3
 
   constructor-args-check:
     name: Constructor Arguments Check

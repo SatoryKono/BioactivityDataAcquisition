@@ -208,6 +208,7 @@ jobs:
         with:
           name: docs-link-check-report
           path: reports/docs-link-check-report.json
+          retention-days: 7
 
       - name: Run docs-config parity gate
         run: >-
@@ -331,6 +332,7 @@ jobs:
             docs/02-architecture/diagrams/architecture/svg/*chembl-pipeline-activity*.svg
             docs/02-architecture/diagrams/architecture/png/*chembl-pipeline-activity*.png
             docs/02-architecture/diagrams/architecture/svg/INDEX.md
+          retention-days: 7
             docs/02-architecture/diagrams/architecture/png/INDEX.md
 
   validate-mermaid:
@@ -366,11 +368,12 @@ jobs:
           fi
 
       - name: Upload diagram lint report
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: diagram-lint-report
           path: /tmp/diagram-lint.json
+          retention-days: 7
 
   render-diagrams:
     needs: [detect-diagram-changes, validate-mermaid]
@@ -433,6 +436,7 @@ jobs:
           name: diagrams-svg
           path: |
             docs/**/svg/*.svg
+          retention-days: 7
 
       - name: Upload PNG artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -440,6 +444,7 @@ jobs:
           name: diagrams-png
           path: |
             docs/**/png/*.png
+          retention-days: 7
 
       - name: Upload diagram quality report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -449,6 +454,7 @@ jobs:
             reports/diagrams/diagram-quality-report.json
             reports/diagrams/diagram-quality-report.md
             reports/diagrams/diagram-visual-smoke.json
+          retention-days: 7
 
       - name: Publish diagram quality summary
         if: always()

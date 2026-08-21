@@ -81,4 +81,4 @@ jobs:
             reports/performance/hotspot-degradation.json
             reports/performance/hotspot-degradation.md
           if-no-files-found: warn
-          retention-days: 90
+          retention-days: 30
