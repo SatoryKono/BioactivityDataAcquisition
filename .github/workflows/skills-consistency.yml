@@ -134,11 +134,12 @@ jobs:
           --report reports/ai/runtime-skill-drift.json
 
       - name: Upload drift report
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: runtime-skill-drift
           path: reports/ai/runtime-skill-drift.json
+          retention-days: 3
 
   approved-runtime-skill-sync:
     if: github.event_name == 'workflow_dispatch' && inputs.approve_runtime_sync
@@ -165,6 +166,7 @@ jobs:
           path: |
             reports/ai/runtime-skill-sync.json
             runtime-skill-sync.patch
+          retention-days: 3
 
   verify-codex-junie-runtime-parity:
     runs-on: ubuntu-latest
