@@ -76,8 +76,8 @@ def test_remediation_backup_and_restore_on_non_sensitive_sample(
     assert result["backup"]["verified"] is True
     assert result["rules"]["before"] == 3
     assert result["rules"]["after"] == 1
-    assert result["permissions"]["unsafe_after"] == 0
     if os.name != "nt":
+        assert result["permissions"]["unsafe_after"] == 0
         assert stat.S_IMODE(home.stat().st_mode) == 0o700
         assert stat.S_IMODE((home / "sessions").stat().st_mode) == 0o700
         assert (

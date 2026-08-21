@@ -771,7 +771,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python313*uvx.exe' }\n"
+            "$LiteralPath -like '*Python313*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python313\\Scripts\\uvx.exe",
@@ -779,7 +779,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python312*uvx.exe' }\n"
+            "$LiteralPath -like '*Python312*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python312\\Scripts\\uvx.exe",
@@ -787,7 +787,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python311*uvx.exe' }\n"
+            "$LiteralPath -like '*Python311*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python311\\Scripts\\uvx.exe",
