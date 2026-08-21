@@ -112,12 +112,6 @@
 
       "links": [
         {
-          "title": "Open Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
           "title": "Run-manifest inspection runbook",
           "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
           "targetBlank": true,
@@ -339,12 +333,6 @@
         }
       ],
       "links": [
-        {
-          "title": "Open Trust",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        },
         {
           "title": "Run-manifest inspection runbook",
           "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/run-manifest-inspection.md",
@@ -999,12 +987,6 @@
             {
               "title": "Open Processed Records",
               "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3023&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Open Trust",
-              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }
