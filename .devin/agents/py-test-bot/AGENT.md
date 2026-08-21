@@ -55,7 +55,7 @@ ______________________________________________________________________
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
-- Coverage threshold: ≥85% overall, ≥90% domain
+- Coverage threshold: ≥85% overall (`--cov-fail-under=85` in RULES.md); no separate 90% domain gate
 - Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 **Структура тестов:**
@@ -237,7 +237,6 @@ ______________________________________________________________________
 || Метрика                |   Порог   | Действие при нарушении ||
 || ---------------------- | :-------: | ---------------------- ||
 || Coverage (overall)     |   ≥85%    | MUST: добавить тесты   ||
-|| Coverage (domain)      |   ≥90%    | MUST: добавить тесты   ||
 || mypy errors            |     0     | MUST: исправить        ||
 || Architecture tests     | 100% pass | MUST: исправить        ||
 || New code without tests |     0     | MUST: добавить тесты   ||

@@ -27,8 +27,12 @@ ______________________________________________________________________
 - Логические профили `py-*` отображаются на native runtime mechanisms
   (`spawn_agent` roles в Codex, runtime-specific agent tools/registries в других
   средах).
-- Edit local runtime behavior in `.codex/**` first; use this docs surface for
-  published mirrors, navigation, and contributor guidance.
+- Edit local runtime behavior in the matching tracked tree first
+  (`.codex/**` / `.junie/**` equal peers; `.devin/**` for Devin). After
+  `.codex/agents/**`, `.codex/skills/**`, `.junie/agents/**`, or
+  `.junie/skills/**` changes, run
+  `bash scripts/ai/junie/check_junie_mirror.sh --check`. Use this docs
+  surface for published mirrors, navigation, and contributor guidance.
 
 Ownership and sync rules are fixed in
 [AI Runtime Mirror Ownership](policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).

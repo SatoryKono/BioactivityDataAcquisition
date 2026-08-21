@@ -7,6 +7,7 @@ function Remove-McpExitedContainers {
         [string]$ImageMatch
     )
     $ErrorActionPreference = 'SilentlyContinue'
+    $dryRun = $env:BIOETL_MCP_PRUNE_DRY_RUN -eq '1'
     $rows = docker ps -aq --filter 'status=exited' 2>$null
     if (-not $rows) { return }
     foreach ($id in $rows) {
@@ -17,6 +18,10 @@ function Remove-McpExitedContainers {
         $image = [string]$parts[1]
         if ($name -eq 'bioetl' -or $name -eq 'bioetl-neo4j' -or $name.StartsWith('bioetl-')) { continue }
         if ($image -notlike "*$ImageMatch*") { continue }
+        if ($dryRun) {
+            Write-Error "dry-run: would docker rm -f $id name=$name image=$image"
+            continue
+        }
         docker rm -f $id 2>$null | Out-Null
     }
 }
