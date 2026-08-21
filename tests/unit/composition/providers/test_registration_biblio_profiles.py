@@ -66,6 +66,7 @@ def test_resolve_pubmed_request_profile_uses_pipeline_email_and_settings_api_key
     assert result.api_key == "settings-key"
 
 
+
 def test_resolve_pubmed_request_profile_ignores_pipeline_source_api_key() -> None:
     """REQ-SECRET-001: credentials stay on Settings, not pipeline.source.api_key."""
     settings = MagicMock()
