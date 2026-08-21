@@ -227,10 +227,18 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
 
     for dashboard_name, panel_expectations in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+
+        def _operator_title(panel: dict) -> str:
+            title = str(panel.get("title") or "").strip()
+            if title:
+                return title
+            options = panel.get("options") or {}
+            return str(options.get("bioetlDisplayTitle") or "").strip()
+
         panels = {
-            panel.get("title"): panel
+            _operator_title(panel): panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
+            if _operator_title(panel)
         }
         for panel_title, expected_metric in panel_expectations.items():
             panel = panels.get(panel_title)
@@ -553,10 +561,18 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
 
     for dashboard_name, panel_expectations in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+
+        def _operator_title(panel: dict) -> str:
+            title = str(panel.get("title") or "").strip()
+            if title:
+                return title
+            options = panel.get("options") or {}
+            return str(options.get("bioetlDisplayTitle") or "").strip()
+
         panels = {
-            panel.get("title"): panel
+            _operator_title(panel): panel
             for panel in get_dashboard_panels(dashboard)
-            if panel.get("title")
+            if _operator_title(panel)
         }
         for panel_title, spec in panel_expectations.items():
             panel = panels.get(panel_title)
