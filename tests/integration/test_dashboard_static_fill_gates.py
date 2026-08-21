@@ -260,8 +260,8 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert options.get("bioetlDisplayTitle") == "Navigate Dashboards"
         content = str(options.get("content", ""))
         assert 'data-bioetl-panel-title="Navigate Dashboards"' in content
+        assert "font-size:19px" in content
         assert "font-size:16px" in content
-        assert "font-size:13px" in content
 
 
 def test_static_fill_helpers_fail_closed() -> None:
