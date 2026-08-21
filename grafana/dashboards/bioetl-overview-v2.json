@@ -870,6 +870,12 @@
               "pipeline": "Pipeline"
             }
           }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 2
+          }
         }
       ],
       "description": "TIME RANGE · CURRENT · Open Action on the top row first — routes are ranked by urgency (RUNTIME > CP > GOLD > DQ > PROV > WF > MON). MON/NR means keep watching when Fleet Health is OK.  Scope: current fleet/status verdict for selected pipeline, workflow, and time range; not a per-run_id metric. NO_ROUTE/no_route appears only when the selected scope has no route series (absent(route)*no_route); it is not a healthy empty and does not mean the dashboard selector widget is blank. Gold lifecycle blocked / DQ issue here is CURRENT fleet routing, not a verdict for the selected run_id. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
@@ -1164,7 +1170,10 @@
             "excludeByName": {
               "Time": true,
               "input_order": true,
-              "__name__": true
+              "__name__": true,
+              "pipeline": true,
+              "run_type": true,
+              "bioetl_l0_input_status_selected": true
             },
             "indexByName": {
               "input": 0,
@@ -1179,6 +1188,12 @@
               "Value #B": "Series B",
               "Value #C": "Series C"
             }
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 2
           }
         }
       ],
