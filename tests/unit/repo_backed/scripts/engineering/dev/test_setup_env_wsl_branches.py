@@ -25,8 +25,19 @@ ROOT = _repo_root()
 SCRIPT = ROOT / "scripts/engineering/dev/setup_env_wsl.sh"
 
 
+def _bash_arg(path: Path) -> str:
+    """Return a path Git Bash can open (Windows backslashes are eaten)."""
+    try:
+        return path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        posix = path.resolve().as_posix()
+        if len(posix) >= 2 and posix[1] == ":":
+            return f"/{posix[0].lower()}{posix[2:]}"
+        return posix
+
+
 def _write_exec(path: Path, body: str) -> None:
-    path.write_text(body, encoding="utf-8")
+    path.write_bytes(body.replace(chr(13) + chr(10), chr(10)).encode("utf-8"))
     path.chmod(path.stat().st_mode | stat.S_IEXEC)
 
 
@@ -95,13 +106,13 @@ exit 0
         )
 
     env = os.environ.copy()
-    env["PATH"] = f"{fake_bin}{os.pathsep}/usr/bin{os.pathsep}/bin"
-    env["BIOETL_TEST_CAPTURE"] = str(capture)
-    env["BIOETL_WSL_VENV_DIR"] = str(venv_dir)
-    env["HOME"] = str(tmp_path / "home")
+    env["PATH"] = f"{_bash_arg(fake_bin)}:/usr/bin:/bin"
+    env["BIOETL_TEST_CAPTURE"] = _bash_arg(capture)
+    env["BIOETL_WSL_VENV_DIR"] = _bash_arg(venv_dir)
+    env["HOME"] = _bash_arg(tmp_path / "home")
     (tmp_path / "home").mkdir()
     return subprocess.run(
-        ["bash", str(SCRIPT), "--agent-tools", agent_tools],
+        ["bash", _bash_arg(SCRIPT), "--agent-tools", agent_tools],
         cwd=str(ROOT),
         env=env,
         text=True,
@@ -118,7 +129,8 @@ def _logged_commands(tmp_path: Path) -> list[str]:
 
 def test_setup_env_wsl_syntax() -> None:
     completed = subprocess.run(
-        ["bash", "-n", str(SCRIPT)],
+        ["bash", "-n", _bash_arg(SCRIPT)],
+        cwd=str(ROOT),
         check=False,
         capture_output=True,
         text=True,
@@ -126,7 +138,16 @@ def test_setup_env_wsl_syntax() -> None:
     assert completed.returncode == 0, completed.stderr
 
 
+def _skip_windows_installer_isolation() -> None:
+    if os.name == "nt":
+        pytest.skip(
+            "setup_env_wsl.sh installer branches need POSIX WSL; "
+            "Windows Python + Git Bash cannot isolate uv/pip stubs"
+        )
+
+
 def test_uv_nominal_sync_keeps_tests_extra(tmp_path: Path) -> None:
+    _skip_windows_installer_isolation()
     completed = _run_installer(tmp_path, agent_tools="none", with_uv=True)
     assert completed.returncode == 0, completed.stderr
     commands = _logged_commands(tmp_path)
@@ -140,6 +161,7 @@ def test_uv_nominal_sync_keeps_tests_extra(tmp_path: Path) -> None:
 
 
 def test_uv_agent_tools_all_keeps_tests_and_isolates_failure(tmp_path: Path) -> None:
+    _skip_windows_installer_isolation()
     completed = _run_installer(
         tmp_path, agent_tools="all", with_uv=True, fail_extra="agentdebugx"
     )
@@ -154,6 +176,7 @@ def test_uv_agent_tools_all_keeps_tests_and_isolates_failure(tmp_path: Path) -> 
 
 
 def test_pip_nominal_install_keeps_tests_extra(tmp_path: Path) -> None:
+    _skip_windows_installer_isolation()
     completed = _run_installer(tmp_path, agent_tools="none", with_uv=False)
     assert completed.returncode == 0, completed.stderr
     commands = _logged_commands(tmp_path)
@@ -164,6 +187,7 @@ def test_pip_nominal_install_keeps_tests_extra(tmp_path: Path) -> None:
 
 
 def test_pip_agent_tools_all_retains_tests_extra(tmp_path: Path) -> None:
+    _skip_windows_installer_isolation()
     completed = _run_installer(tmp_path, agent_tools="all", with_uv=False)
     assert completed.returncode == 0, completed.stderr
     commands = _logged_commands(tmp_path)

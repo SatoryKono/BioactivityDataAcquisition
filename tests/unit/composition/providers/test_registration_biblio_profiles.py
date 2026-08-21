@@ -49,7 +49,7 @@ def _pipeline_config(*, email: str = "", api_key: str = "") -> SimpleNamespace:
     return SimpleNamespace(source=SimpleNamespace(email=email, api_key=api_key))
 
 
-def test_resolve_pubmed_request_profile_prefers_pipeline_overrides() -> None:
+def test_resolve_pubmed_request_profile_uses_settings_api_key() -> None:
     settings = MagicMock()
     settings.default_email = "default@example.org"
     settings.pubmed_api_key = MagicMock()
@@ -61,7 +61,7 @@ def test_resolve_pubmed_request_profile_prefers_pipeline_overrides() -> None:
     )
 
     assert result.email == "pipeline@example.org"
-    assert result.api_key == "pipeline-key"
+    assert result.api_key == "settings-key"
 
 
 def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch() -> (
@@ -80,7 +80,7 @@ def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch(
     assert result.batch_size == 55
 
 
-def test_resolve_openalex_request_profile_prefers_pipeline_api_key() -> None:
+def test_resolve_openalex_request_profile_uses_settings_api_key() -> None:
     settings = MagicMock()
     settings.default_email = "default@example.org"
     settings.openalex_api_key = MagicMock()
@@ -96,7 +96,7 @@ def test_resolve_openalex_request_profile_prefers_pipeline_api_key() -> None:
         batch_size=50,
     )
 
-    assert result.api_key == pipeline_token
+    assert result.api_key == "settings-openalex-key"
     assert result.mailto == "pipeline@example.org"
     assert result.batch_size == 50
 
