@@ -1,4 +1,81 @@
-{
-  "source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
-  "surface_score": 2
-}
+[
+  {
+    "id": "TEST-GOV-002",
+    "requirement_id": "REQ-GOV-012",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.95,
+    "status": "PROVEN",
+    "category": "test-governance-snapshot-drift",
+    "path": "reports/quality/test-governance-current.json",
+    "observation": "Committed test-governance-current.json on origin/main@27105f8536 diverges from the live collector: total_test_functions 24901 vs 24907; source_tree_sha256 d8edf4a8… vs 503fe445…. Companion flaky-test-burndown-review.json is stale (total_tests_analyzed 24899, fingerprint 1e7e6403…).",
+    "method": "python -m scripts.engineering.qa.report_test_governance_audit --check; pytest tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector",
+    "expected": "Committed snapshot equals live collector; skip/xfail/debt budgets unchanged.",
+    "actual": "On clean origin/main worktree: --check exit 1; architecture guard FAILED. After refresh on fix/audit-tests-cycle@88de1a6c82: --check exit 0 twice; focused architecture tests passed.",
+    "impact": "Governance currentness gate is red; not a product-logic defect.",
+    "root_cause": "Committed JSON snapshot not regenerated after a 6-test delta.",
+    "remediation": "Canonical refresh via refresh_test_governance_baseline and report-flaky-test-burndown-review. Do not hand-edit JSON. Do not raise budgets.",
+    "effort": "S",
+    "automation": "tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector",
+    "automated_fix_possible": true,
+    "dependencies": [
+      "#9325",
+      "#9327"
+    ],
+    "validation": [
+      "python -m scripts.engineering.qa.report_test_governance_audit --check",
+      "python -m scripts.engineering.qa report-flaky-test-burndown-review --check"
+    ],
+    "evidence": [
+      {
+        "path": "reports/quality/test-governance-current.json",
+        "line": 2296,
+        "command": "python -m scripts.engineering.qa.report_test_governance_audit --check",
+        "observation": "committed 24901 / d8edf4a8… vs live 24907 / 503fe445…"
+      }
+    ],
+    "github_issue": 9325,
+    "github_pr": 9327,
+    "post_status": "resolved_on_branch"
+  },
+  {
+    "id": "TEST-SYS-012",
+    "requirement_id": "REQ-TEST-005",
+    "priority": "P1",
+    "severity": "High",
+    "confidence": "high",
+    "confidence_score": 0.9,
+    "status": "PROVEN",
+    "category": "ci-lfs-quota",
+    "path": ".github/workflows/tests.yml",
+    "observation": "vcr-preflight and governance-preflight still fail-closed on git lfs pull when GitHub LFS quota is exhausted. #9040 remains open.",
+    "method": "Inspect tests.yml:136-387; GitHub issue #9040.",
+    "expected": "git lfs pull succeeds; VCR/governance checks produce evidence.",
+    "actual": "Issue #9040 still open. Fail-closed at tests.yml:158 and :380.",
+    "impact": "Required VCR-bound and governance checks can stay red for infrastructure reasons.",
+    "root_cause": "GitHub LFS storage/bandwidth quota, not a pytest defect.",
+    "remediation": "Restore GitHub LFS data pack; rerun vcr-preflight and governance-preflight.",
+    "effort": "S",
+    "automation": "existing fail-closed jobs vcr-preflight and governance-preflight",
+    "automated_fix_possible": false,
+    "dependencies": [
+      "#9040"
+    ],
+    "validation": [
+      "git lfs pull succeeds on GitHub-hosted runner",
+      "vcr-preflight and governance-preflight pass on a current SHA"
+    ],
+    "evidence": [
+      {
+        "path": ".github/workflows/tests.yml",
+        "line": 158,
+        "command": "gh issue view 9040",
+        "observation": "Issue #9040 open; LFS fail-closed still present"
+      }
+    ],
+    "github_issue": 9040,
+    "github_pr": null,
+    "post_status": "unchanged"
+  }
+]
