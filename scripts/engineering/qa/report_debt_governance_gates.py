@@ -270,6 +270,10 @@ from scripts.engineering.qa.debt_governance_gate_evaluators import (
     _in_test_mode,
     _collect_stale_artifacts,
 )
+from scripts.engineering.qa.debt_governance_gate_report import (
+    _check_artifacts,
+    render_markdown,
+)
 
 
 def _gate_status_counts(gates: list[Gate]) -> dict[str, int]:

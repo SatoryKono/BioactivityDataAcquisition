@@ -33,11 +33,12 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
+from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types import HealthStatus
+from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 from bioetl.interfaces.http import (
     _health_server_observability_routing as observability_routing,
 )
@@ -640,8 +641,11 @@ async def test_routing_support_checkpoint_freshness_branches(
     assert host.sent[-1][2]["evidence_source"] == "checkpoint_port_missing"
 
     host._checkpoint_port = object()
-    scope = SimpleNamespace(
+    scope = _IdentityScope(
         requested_pipeline="chembl_activity",
+        selected_pipelines=("chembl_activity",),
+        selected_run_types=(),
+        selected_run_id=None,
         resolved_manifest=None,
         resolved_via="selected_run_id",
     )
@@ -689,9 +693,12 @@ async def test_routing_support_checkpoint_freshness_branches(
         assert host.sent[-1][1] == 200
         assert host.sent[-1][2]["evidence_source"] == expected_source
 
-    resolved_scope = SimpleNamespace(
+    resolved_scope = _IdentityScope(
         requested_pipeline="ignored",
-        resolved_manifest=SimpleNamespace(pipeline_name="pubchem_compound"),
+        selected_pipelines=("ignored",),
+        selected_run_types=(),
+        selected_run_id=None,
+        resolved_manifest=RunManifest(pipeline_name="pubchem_compound"),
         resolved_via="latest_manifest",
     )
     assert checkpoint_freshness._resolved_scope_pipeline(scope) == "chembl_activity"
@@ -739,8 +746,11 @@ async def test_checkpoint_freshness_timeouts_fail_closed_unknown(
     monkeypatch.setattr(
         checkpoint_freshness,
         "resolve_control_plane_identity_scope",
-        lambda *_args, **_kwargs: SimpleNamespace(
+        lambda *_args, **_kwargs: _IdentityScope(
             requested_pipeline="chembl_activity",
+            selected_pipelines=("chembl_activity",),
+            selected_run_types=(),
+            selected_run_id=None,
             resolved_manifest=None,
             resolved_via="selected_run_id",
         ),
@@ -1080,7 +1090,18 @@ async def test_pipeline_run_report_route_returns_versioned_payload(
         query={"pipeline": "chembl_activity", "run_id": "run-1"},
     )
 
-    assert host.sent[-1] == ("payload", 200, payload)
+    assert host.sent[-1] == (
+        "payload",
+        200,
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "identity": {},
+            "layers": [],
+            "failure": [],
+            "stage_timings": [],
+            "identity_rows": [],
+        },
+    )
 
 
 @pytest.mark.asyncio

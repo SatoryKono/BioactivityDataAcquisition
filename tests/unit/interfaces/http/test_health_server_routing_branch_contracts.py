@@ -240,6 +240,10 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
             "reasons_top_n": [],
             "reconciliation": [],
             "artifacts": [],
+            "layers": [],
+            "failure": [],
+            "stage_timings": [],
+            "identity_rows": [],
             "schema_version": "pipeline_run_report_v1",
         },
     )

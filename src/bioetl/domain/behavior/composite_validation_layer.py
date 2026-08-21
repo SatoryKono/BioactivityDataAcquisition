@@ -240,6 +240,9 @@ class CompositeValidator:
     ) -> ValidationIssue:
         return _create_issue(code, severity, message, details, location)
 
+    def _is_valid_field_priorities(self, priorities: JsonDict) -> bool:
+        return _is_valid_field_priorities(priorities)
+
     def _validate_aggregation_config(
         self,
         config: JsonDict | object,
