@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2448`
-- Internal import edges (raw): `7667`
+- Internal import edges (raw): `7668`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `323`
@@ -24,7 +24,7 @@ flowchart LR
     application -->|1538 OK| application
     application -->|978 OK| domain
     composition -->|162 OK| application
-    composition -->|677 OK| composition
+    composition -->|678 OK| composition
     composition -->|282 OK| domain
     composition -->|243 OK| infrastructure
     domain -->|1259 OK| domain
@@ -43,7 +43,7 @@ flowchart LR
 | `application`    | `application`    |    1538 | allowed |
 | `application`    | `domain`         |     978 | allowed |
 | `composition`    | `application`    |     162 | allowed |
-| `composition`    | `composition`    |     677 | allowed |
+| `composition`    | `composition`    |     678 | allowed |
 | `composition`    | `domain`         |     282 | allowed |
 | `composition`    | `infrastructure` |     243 | allowed |
 | `domain`         | `domain`         |    1259 | allowed |
