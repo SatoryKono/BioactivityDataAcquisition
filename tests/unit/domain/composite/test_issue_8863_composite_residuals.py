@@ -20,6 +20,8 @@ from bioetl.domain.composite.config_composite_decoder import (
     _parse_field_priorities,
 )
 from bioetl.domain.composite.config_composite_section_decoders import (
+    _enricher_field_pairings,
+    _field_comparison_specs,
     build_cross_validation_config,
     build_execution_config,
     build_lineage_config,
@@ -40,6 +42,8 @@ def test_optional_column_groups_preserve_empty_sequence_and_reject_false() -> No
     assert _optional_column_groups(()) == ()
     with pytest.raises(ValueError, match="must be a list"):
         _optional_column_groups(False)
+    with pytest.raises(ValueError, match="must be a list"):
+        _optional_column_groups({})
 
 
 @pytest.mark.parametrize(
@@ -58,6 +62,8 @@ def test_composite_boolean_decoders_fail_closed_on_string_false(
 ) -> None:
     with pytest.raises(ValueError, match="must be a boolean"):
         builder({field: "false"})
+    restored = builder({field: False})
+    assert getattr(restored, field) is False
 
 
 def test_quoted_literal_cannot_hide_nested_operator() -> None:
@@ -76,6 +82,10 @@ def test_present_malformed_optional_section_is_not_silently_dropped() -> None:
             "execution",
             build_execution_config,
         )
+    with pytest.raises(ValueError, match="dq must be a dictionary"):
+        _attach_optional_section(kwargs, {"dq": None}, "dq", lambda value: value)
+    _attach_optional_section(kwargs, {}, "dq", lambda value: value)
+    assert kwargs == {}
 
 
 @pytest.mark.parametrize(
@@ -127,6 +137,10 @@ def test_cross_validation_decoder_uses_strict_numeric_parsers() -> None:
         build_cross_validation_config({"warning_threshold": 1.5})
     with pytest.raises(ValueError, match="fuzzy_threshold must be a number"):
         build_cross_validation_config({"fuzzy_threshold": object()})
+    with pytest.raises(ValueError, match="cross_validation.enabled"):
+        build_cross_validation_config({"enabled": "false"})
+    with pytest.raises(ValueError, match="warning_threshold"):
+        build_cross_validation_config({"warning_threshold": "1"})
 
     restored = build_cross_validation_config(
         {"enabled": None, "warning_threshold": None, "fuzzy_threshold": "0.75"}
@@ -134,6 +148,24 @@ def test_cross_validation_decoder_uses_strict_numeric_parsers() -> None:
     assert restored.enabled is True
     assert restored.warning_threshold == 1
     assert restored.fuzzy_threshold == pytest.approx(0.75)
+    typed = build_cross_validation_config(
+        {
+            "enabled": False,
+            "warning_threshold": 1,
+            "error_threshold": 2,
+            "quarantine_threshold": 3,
+            "fuzzy_threshold": 0.7,
+            "numeric_tolerance": 0.2,
+        }
+    )
+    assert typed.enabled is False
+    assert typed.quarantine_threshold == 3
+    assert typed.numeric_tolerance == pytest.approx(0.2)
+
+
+def test_composite_optional_sections_normalize_to_empty_tuples() -> None:
+    assert _field_comparison_specs(None, path="fields") == ()
+    assert _enricher_field_pairings(None) == ()
 
 
 def test_merge_result_rejects_enrichment_when_no_records_were_merged() -> None:

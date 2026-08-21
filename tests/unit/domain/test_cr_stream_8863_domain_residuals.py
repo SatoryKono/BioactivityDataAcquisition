@@ -52,16 +52,6 @@ from bioetl.domain.composite.aggregation import (
 from bioetl.domain.composite.aggregation_filters import (
     _validate_aggregation_filter_condition,
 )
-from bioetl.domain.composite.config_composite_decoder import (
-    _attach_optional_section,
-    _optional_column_groups,
-    _parse_field_priorities,
-)
-from bioetl.domain.composite.config_composite_section_decoders import (
-    build_cross_validation_config,
-    build_execution_config,
-    build_lineage_config,
-)
 from bioetl.domain.composite.result_merge import MergeResult
 from bioetl.domain.config.table import IdempotencyContract, TableConfig
 from bioetl.domain.contracts.gold._chembl_target_lookup_schemas import (
@@ -283,43 +273,10 @@ def test_invalid_fallback_schema_descriptors_do_not_become_field_names() -> None
     assert fields == {"valid", "explicit"}
 
 
-def test_field_priorities_reject_non_string_members_and_column_groups_fail_closed() -> (
-    None
-):
-    with pytest.raises(ValueError, match="must contain non-empty strings"):
-        _parse_field_priorities({"title": ["pubmed", 1]})
-    with pytest.raises(ValueError, match="must be a list"):
-        _optional_column_groups({})
-    assert _optional_column_groups(()) == ()
-
-
-def test_lineage_and_execution_boolean_fields_do_not_use_truthiness() -> None:
-    with pytest.raises(ValueError, match="lineage.track_field_sources"):
-        build_lineage_config({"track_field_sources": "false"})
-    with pytest.raises(ValueError, match="execution.checkpoint_enabled"):
-        build_execution_config({"checkpoint_enabled": "false"})
-    assert (
-        build_lineage_config({"track_field_sources": False}).track_field_sources
-        is False
-    )
-    assert (
-        build_execution_config({"checkpoint_enabled": False}).checkpoint_enabled
-        is False
-    )
-
-
 def test_quoted_literal_cannot_hide_nested_comparison() -> None:
     with pytest.raises(ValueError, match="additional operators"):
         _validate_aggregation_filter_condition("status == 'foo' == 'bar'")
     _validate_aggregation_filter_condition("status == 'foo'")
-
-
-def test_present_malformed_optional_composite_section_is_rejected() -> None:
-    kwargs: dict[str, object] = {}
-    with pytest.raises(ValueError, match="dq must be a dictionary"):
-        _attach_optional_section(kwargs, {"dq": None}, "dq", lambda value: value)
-    _attach_optional_section(kwargs, {}, "dq", lambda value: value)
-    assert kwargs == {}
 
 
 def test_aggregation_null_filter__rejects_trailing_text() -> None:
@@ -352,27 +309,6 @@ def test_aggregation_rejects_duplicate_effective_output_fields() -> None:
                 ),
             ),
         )
-
-
-def test_cross_validation_decoder_uses_typed_parsers() -> None:
-    with pytest.raises(ValueError, match="cross_validation.enabled"):
-        build_cross_validation_config({"enabled": "false"})
-    with pytest.raises(ValueError, match="warning_threshold"):
-        build_cross_validation_config({"warning_threshold": "1"})
-
-    config = build_cross_validation_config(
-        {
-            "enabled": False,
-            "warning_threshold": 1,
-            "error_threshold": 2,
-            "quarantine_threshold": 3,
-            "fuzzy_threshold": 0.7,
-            "numeric_tolerance": 0.2,
-        }
-    )
-    assert config.enabled is False
-    assert config.quarantine_threshold == 3
-    assert config.numeric_tolerance == pytest.approx(0.2)
 
 
 def test_enriched_records_cannot_exceed_zero_merged_records() -> None:

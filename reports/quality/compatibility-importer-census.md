@@ -27,9 +27,9 @@
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | 0 | 1 |
 | `src/bioetl/interfaces/cli/commands/health.py` | 0 | 0 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | 0 | 2 |
-| `src/bioetl/interfaces/cli/commands/quarantine.py` | 0 | 1 |
+| `src/bioetl/interfaces/cli/commands/quarantine.py` | 0 | 2 |
 | `src/bioetl/composition/entrypoints.py` | 0 | 4 |
-| `src/bioetl/composition/health_api.py` | 0 | 2 |
+| `src/bioetl/composition/health_api.py` | 0 | 3 |
 | `src/bioetl/composition/maintenance_api.py` | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | 0 | 7 |
 | `src/bioetl/domain/composite/config.py` | 0 | 40 |
@@ -44,9 +44,9 @@
 | `src/bioetl/interfaces/cli/commands/run_composite.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 1 |
 | `src/bioetl/interfaces/cli/commands/health.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 0 |
 | `src/bioetl/interfaces/cli/commands/diagnostics.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
-| `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 1 |
+| `src/bioetl/interfaces/cli/commands/quarantine.py` | `bioetl.interfaces.cli.commands` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 4 |
-| `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 2 |
+| `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 3 |
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 2 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | yes | yes | 0 | 7 |
 | `src/bioetl/domain/composite/config.py` | `bioetl.domain.composite` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | no | yes | 0 | 40 |
@@ -57,7 +57,7 @@
 | Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |
 | --- | ---: | ---: | --- | --- | --- |
 | `src/bioetl/composition/entrypoints.py` | 13 | 13 | load_pipeline_config, start_metrics_server | none | none |
-| `src/bioetl/composition/health_api.py` | 7 | 6 | get_runtime_settings | none | none |
+| `src/bioetl/composition/health_api.py` | 7 | 7 | get_runtime_settings | none | none |
 | `src/bioetl/composition/maintenance_api.py` | 4 | 4 | archive_table, get_lifecycle_service, preview_cleanup, vacuum_table | none | none |
 | `src/bioetl/infrastructure/config/__init__.py` | 18 | 5 | none | none | none |
 
@@ -66,7 +66,7 @@
 | Path | Owner | Usage classification | Surface classification | src importers | test importers | Public exports |
 | --- | --- | --- | --- | ---: | ---: | ---: |
 | `src/bioetl/composition/entrypoints.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 4 | 13 |
-| `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 2 | 7 |
+| `src/bioetl/composition/health_api.py` | `bioetl.composition` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 3 | 7 |
 | `src/bioetl/composition/maintenance_api.py` | `bioetl.composition` | `stable_public_api_with_reviewed_first_party_usage` | `external-facing` | 0 | 2 | 4 |
 | `src/bioetl/infrastructure/config/__init__.py` | `bioetl.infrastructure.config` | `stable_public_api_zero_first_party_src` | `external-facing` | 0 | 7 | 18 |
 

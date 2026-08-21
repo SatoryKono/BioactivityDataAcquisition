@@ -49,7 +49,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "HealthServerDependencies",
-    "HealthServerDependenciesProtocol",
     "get_health_server_dependencies",
     "get_health_service",
     "get_quarantine_port",

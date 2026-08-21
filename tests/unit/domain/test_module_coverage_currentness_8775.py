@@ -48,10 +48,6 @@ from bioetl.domain.behavior.validation_helpers import (
     aggregation_field_name,
     aggregation_group_key,
 )
-from bioetl.domain.composite.config_composite_section_decoders import (
-    _enricher_field_pairings,
-    _field_comparison_specs,
-)
 from bioetl.domain.composite.aggregation import _coerce_text_tuple
 from bioetl.domain.config.dq import DQReportConfig
 from bioetl.domain.config.validation_rules import FieldValidation
@@ -192,11 +188,6 @@ def test_schema_metadata_normalizes_neutral_inspection() -> None:
 
 def test_schema_metadata_handles_missing_schema_surface() -> None:
     assert schema_metadata_extractor.extract_schema_metadata(None).columns == []
-
-
-def test_composite_optional_sections_normalize_to_empty_tuples() -> None:
-    assert _field_comparison_specs(None, path="fields") == ()
-    assert _enricher_field_pairings(None) == ()
 
 
 def test_dq_and_validation_rule_invalid_values_are_rejected() -> None:

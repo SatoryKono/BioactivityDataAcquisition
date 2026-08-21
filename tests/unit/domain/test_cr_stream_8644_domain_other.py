@@ -20,7 +20,6 @@ from bioetl.domain.composite import (
     MergeConfig,
     MergeStrategy,
 )
-from bioetl.domain.composite.config_parsing import require_float
 from bioetl.domain.composite.result_enrichment import EnrichmentResult, EnrichmentStatus
 from bioetl.domain.composite.result_merge import MergeResult
 from bioetl.domain.composite.result_seed_dependency import (
@@ -96,32 +95,11 @@ def test_merge_result_rejects_non_finite_duration() -> None:
         MergeResult(records_merged=1, duration_seconds=math.inf)
 
 
-def test_section_decoders_fail_closed_on_malformed_entries() -> None:
-    from bioetl.domain.composite.config_composite_section_decoders import (
-        build_cross_validation_config,
-        build_lineage_config,
-    )
-
-    with pytest.raises(ValueError, match="enricher_pairings"):
-        build_cross_validation_config({"enricher_pairings": "not-a-list"})
-    with pytest.raises(ValueError, match="must be a dictionary"):
-        build_cross_validation_config({"enricher_pairings": ["bad"]})
-    with pytest.raises(ValueError, match="provider_lookup_fields"):
-        build_lineage_config({"provider_lookup_fields": {"chembl": "not-a-mapping"}})
-
-
 def test_dependency_timeout_rejects_non_finite_timeout_seconds() -> None:
     with pytest.raises(ValueError, match="timeout_seconds"):
         DependencyResult.timeout(pipeline_name="dep", timeout_seconds=math.nan)
     with pytest.raises(ValueError, match="timeout_seconds"):
         DependencyResult.timeout(pipeline_name="dep", timeout_seconds=-1.0)
-
-
-def test_require_float_rejects_non_finite() -> None:
-    with pytest.raises(ValueError, match="finite"):
-        require_float(math.nan, "x")
-    with pytest.raises(ValueError, match="finite"):
-        require_float(math.inf, "x")
 
 
 def test_layer_column_config_freezes_rename_fields() -> None:
