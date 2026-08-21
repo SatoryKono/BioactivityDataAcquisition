@@ -15,10 +15,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: dashboard-render-host
+  cancel-in-progress: false
+
 jobs:
   dashboard-render-release:
     name: Semantic + render occurrence
     runs-on: [self-hosted, bioetl-observability]
+    environment: observability-render-host
     timeout-minutes: 120
     steps:
       - name: Checkout exact revision

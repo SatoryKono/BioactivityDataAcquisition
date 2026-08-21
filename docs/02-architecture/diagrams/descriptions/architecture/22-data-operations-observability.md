@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -17,10 +17,10 @@ ______________________________________________________________________
 
 ## Описание
 
-Диаграмма Data Operations Observability показывает, как logs, metrics, tracing и control-plane signals остаются коррелированными без high-cardinality metric labels, и использует нотацию flowchart. Она нужна для проверки observability contract между runtime producers, application observability ports, infrastructure adapters и monitoring/diagnosis surface. В исходном файле прямо зафиксирован контекст: how logs, metrics, tracing, and control-plane signals stay correlated without high-cardinality metric labels. Ключевые подграфы: Runtime event producers, Application observability contracts, Infrastructure observability, Published signals, Monitoring and diagnosis. Показательные узлы: PipelineObserver, LoggerPort, MetricsPort, TracingPort, UnifiedLogger / structlog, Prometheus scrape. Через них можно сверять low-cardinality policy, run-level correlation anchors и точку стыка между runtime events и operational drill-down tooling.
+Диаграмма Data Operations Observability показывает, как logs, metrics, tracing и control-plane signals остаются коррелированными без high-cardinality metric labels, и использует нотацию flowchart. Она нужна для проверки observability contract между runtime producers, application observability ports, infrastructure adapters и monitoring/diagnosis surface. В исходном файле прямо зафиксирован контекст: how logs, metrics, tracing, and control-plane signals stay correlated without high-cardinality metric labels. Ключевые подграфы: Runtime event producers, Application observability contracts, Infrastructure observability, Published signals, Monitoring and diagnosis. Показательные узлы: PipelineObserver, LoggerPort, MetricsPort, TracingPort, UnifiedLogger / structlog, Prometheus scrape, optional Grafana metrics, log files/CLI, OTLP/console traces. Метрики могут идти в optional Grafana; логи — в files/CLI; traces — в OTLP/console. Loki/Tempo не являются runtime sink. Через них можно сверять low-cardinality policy, run-level correlation anchors и точку стыка между runtime events и operational drill-down tooling.
 
 ## Метаданные
 
 - Тип: `flowchart`
 - Уровень: `System / Runtime`
-- Дата метаданных: `2026-03-28`
+- Дата метаданных: `2026-08-21`
