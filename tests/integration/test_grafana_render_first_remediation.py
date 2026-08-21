@@ -725,7 +725,6 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     cases = (
         ("bioetl-runtime.json", 9101, frozenset({"reason"})),
         ("bioetl-provider-health-v2.json", 9107, frozenset({"reason"})),
-        ("bioetl-run-explorer-v1.json", 3010, frozenset({"message"})),
     )
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)

@@ -34,9 +34,9 @@ endpoints:
 
 panels:
   - id: 3010
-    title: Inspect Recent Runs (last 4)
+    title: Inspect Recent Runs (last 10)
     endpoint: pipeline_run_reports
-    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4
+    url: /ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10
     root_selector: items
     no_value_tokens: [VALID EMPTY]
     copy_tokens: [TREE_MISSING, LAYOUT_UNHEALTHY]

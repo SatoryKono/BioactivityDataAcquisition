@@ -5,7 +5,7 @@
 
 ## Overview
 
-Run-centric workspace. First paint is the last-4 browse index (`3010`) only
+Run-centric workspace. First paint is the last-10 browse index (`3010`) only
 (Ops HTTP performance budget). Identity (`3022`) and processed-records
 accounting (`3023`) live with the other `pipeline_run_report_v1` slices under a
 collapsed progressive-disclosure row. Older runs are selected from the
@@ -18,9 +18,9 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 - **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, artifact Open/Copy, and the Trust handoff.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 5. Inspect Recent Runs (last 4)
+### 5. Inspect Recent Runs (last 10)
 - **Type:** Table (compact first-screen index)
-- **Purpose:** Last 4 pipeline-run reports for the selected pipeline. The Run
+- **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The Run
   column data link writes `var-run_id` and `var-pipeline` and opens Inspect
   Run Identity (`viewPanel=3022`). Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`

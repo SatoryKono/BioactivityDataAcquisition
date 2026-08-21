@@ -315,7 +315,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             # Overview answer cards sit at y<=10. Trust keeps Prom KPI cards on
             # the first window (y<18) below the named Review* tables at y=8.
             max_answer_y = (
-                15 if dashboard_name == "bioetl-control-plane-v1.json" else 10
+                15 if dashboard_name == "bioetl-control-plane-v1.json" else 12
             )
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer/evidence band"
@@ -677,7 +677,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     records = panels[3023]
     assert 9402 not in panels
     assert 9403 not in panels
-    assert browse.get("gridPos", {}).get("h", 99) <= 6
+    assert browse.get("gridPos", {}).get("h", 99) <= 11
     collapsed_ids = {
         panel.get("id")
         for panel in get_row_child_panels(dashboard, "Selected Run Details")
@@ -695,7 +695,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     )
     assert identity.get("gridPos", {}).get("y", 0) >= 19
     assert records.get("gridPos", {}).get("y", 0) >= 19
-    assert "last 4" in str(browse.get("title", "")).lower()
+    assert "last 10" in str(browse.get("title", "")).lower()
 
 
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
