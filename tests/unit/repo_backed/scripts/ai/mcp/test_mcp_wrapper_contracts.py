@@ -771,7 +771,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python313*uvx.exe' }\n"
+            "$LiteralPath -like '*Python313*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python313\\Scripts\\uvx.exe",
@@ -779,7 +779,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python312*uvx.exe' }\n"
+            "$LiteralPath -like '*Python312*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python312\\Scripts\\uvx.exe",
@@ -787,7 +787,7 @@ printf '%s\n' "$NO_PROXY" "$no_proxy" "${{HTTP_PROXY-unset}}" \
         (
             "function Get-Command { param($Name, $ErrorAction) $null }\n"
             "function Test-Path { param($LiteralPath, $Path, $ErrorAction) "
-            "$LiteralPath -like '*Python311*uvx.exe' }\n"
+            "$LiteralPath -like '*Python311*Scripts*uvx.exe' }\n"
             "function Resolve-Path { param($LiteralPath) "
             "[pscustomobject]@{Path=$LiteralPath} }",
             "Python311\\Scripts\\uvx.exe",
@@ -1346,11 +1346,7 @@ def test_ast_grep_normal_launch_preserves_primary_and_fallback_dispatch(
     fake_bin.mkdir()
     fake_npx = fake_bin / "npx"
     capture_file = tmp_path / "ast-grep-args.txt"
-    fake_npx.write_bytes(
-        bytes.fromhex(
-            "23212f7573722f62696e2f656e7620626173680a736574202d65750a7072696e7466202725735c6e272022242a22203e3e22247b42494f45544c5f544553545f434150545552453a3f7d220a6966205b5b2022242a22203d3d202a22406e6f7470726f6c616e64732f6173742d677265702d6d6370222a205d5d3b207468656e0a2020657869742031370a66690a6578697420300a"
-        )
-    )
+    fake_npx.write_bytes(bytes.fromhex('23212f7573722f62696e2f656e7620626173680a736574202d65750a7072696e7466202725735c6e272022242a22203e3e22247b42494f45544c5f544553545f434150545552453a3f7d220a6966205b5b2022242a22203d3d202a22406e6f7470726f6c616e64732f6173742d677265702d6d6370222a205d5d3b207468656e0a2020657869742031370a66690a6578697420300a'))
     fake_npx.chmod(0o755)
     env = _clean_env(
         PATH=f"{fake_bin}:/usr/bin:/bin",
