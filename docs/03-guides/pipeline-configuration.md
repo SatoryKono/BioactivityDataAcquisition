@@ -966,13 +966,13 @@ BioETL автоматически генерирует детальную док
 
 ```bash
 # Регенерировать все пайплайны
-python scripts/diagrams/render/generate_pipeline_dataflows.py
+python -m scripts.diagrams generate-dataflows
 
 # Регенерировать конкретный пайплайн
-python scripts/diagrams/render/generate_pipeline_dataflows.py --pipeline chembl_activity
+python -m scripts.diagrams generate-dataflows --pipeline chembl_activity
 
 # Проверить на drift без регенерации
-python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift
+python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
 ```
 
 ### CI Integration
@@ -982,7 +982,7 @@ Pipeline dataflow documentation интегрирована в CI для пред
 ```yaml
 # Пример CI check
 - name: Check pipeline dataflow drift
-  run: python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift
+  run: python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check
 ```
 
 Если изменения конфигурации повлияли на dataflow без соответствующего обновления документации, CI упадёт, обеспечивая синхронизацию.
