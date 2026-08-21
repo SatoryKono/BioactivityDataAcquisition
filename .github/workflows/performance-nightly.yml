@@ -36,7 +36,7 @@ jobs:
             --junitxml=reports/performance/hotspot-budgets.xml
 
       - name: Build hotspot degradation report
-        if: always()
+        if: ${{ always() && !cancelled() }}
         run: |
           mkdir -p reports/performance
           if [ -f reports/performance/hotspot-observations.jsonl ]; then

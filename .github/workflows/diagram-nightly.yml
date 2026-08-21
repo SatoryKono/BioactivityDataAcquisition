@@ -159,7 +159,7 @@ jobs:
           retention-days: 14
 
       - name: Publish nightly summary
-        if: always()
+        if: ${{ always() && !cancelled() }}
         run: |
           if [ -f reports/diagrams/diagram-nightly-phase2.md ]; then
             cat reports/diagrams/diagram-nightly-phase2.md >> "$GITHUB_STEP_SUMMARY"
