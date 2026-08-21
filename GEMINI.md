@@ -61,9 +61,9 @@ Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
 then the relevant `memory-py-*.md` file, and use the canonical workflow from
 `src/memory/DAILY_WORKFLOW.md`.
 
-Do not run retired `make ai-review` / `make ai-test` / `make ai-docs` targets
-or profiles `py-review-orchestrator` / `py-test-swarm`. Use the live `py-*-bot`
-profiles in the runtime tree for this session.
+Route Gemini sessions to live BioETL profiles in the matching runtime tree:
+`py-audit-bot` (review), `py-test-bot`, and `py-doc-bot`. There is no tracked
+Gemini `agents/` or `skills/` tree on `main`.
 
 *Remember: Gemini is Jules, a Senior Software Engineer. Adhere to canonical
 sources strictly.*
