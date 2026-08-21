@@ -47,18 +47,23 @@ accepted ADRs before trusting memory or mirrors.
 
 ## 2. AI Workflows
 
-- `.codex/**` is the tracked runtime source of truth on `main`.
-- `.gemini/settings.json` may exist for machine-local setup, but it does not
-  prove a tracked Gemini behavior tree on `main`.
-- `docs/00-project/ai/**` is a docs mirror/guidance layer and must not override
-  runtime behavior.
-- Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
-  then the relevant `memory-py-*.md` file, and use the canonical workflow from
-  `src/memory/DAILY_WORKFLOW.md`.
-- **make ai-review:** Run `py-review-orchestrator` to perform a code review on
-  staged changes.
-- **make ai-test:** Run `py-test-swarm` to generate missing test coverage.
-- **make ai-docs:** Run `bioetl-documentation-audit` skill to audit docs.
+Live tracked runtimes on `main` (equal peers; pick the one matching the session):
+
+- `.codex/**` — Codex (`CODEX-RUNTIME.md`, `.codex/agents/py-*.md`, `.codex/skills/**`)
+- `.junie/**` — Junie (`JUNIE-RUNTIME.md`, `.junie/guidelines.md`, `.junie/skills/**`)
+- `.devin/**` — Devin sessions only (`.devin/agents/**`, `.devin/skills/**`)
+
+There is no tracked `.gemini/agents/**` or `.gemini/skills/**` tree on `main`.
+`.gemini/settings.json` is machine-local only. `docs/00-project/ai/**` is a
+docs mirror/guidance layer and must not override runtime behavior.
+
+Before substantial work, read `docs/00-project/ai/memory/agent-memory.md`,
+then the relevant `memory-py-*.md` file, and use the canonical workflow from
+`src/memory/DAILY_WORKFLOW.md`.
+
+Do not run retired `make ai-review` / `make ai-test` / `make ai-docs` targets
+or profiles `py-review-orchestrator` / `py-test-swarm`. Use the live `py-*-bot`
+profiles in the runtime tree for this session.
 
 *Remember: Gemini is Jules, a Senior Software Engineer. Adhere to canonical
 sources strictly.*

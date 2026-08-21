@@ -2,10 +2,10 @@
 %% Shows how logs, metrics, tracing, and control-plane signals stay correlated without high-cardinality metric labels.
 
 %% @version 1.0.0
-%% @date    2026-03-28
+%% @date    2026-08-21
 %% @type    flowchart
 %% @level   System / Runtime
-%% @nodes   18
+%% @nodes   20
 %% @reference  Complements 09-observability-stack, 20-data-traceability-runtime, and observability.md
 
 %%{init: {
@@ -49,7 +49,9 @@ flowchart LR
 
     subgraph Ops["Monitoring and diagnosis"]
         PROM["Prometheus scrape"]:::iface
-        GRAF["Grafana / alerts / runbooks"]:::iface
+        GRAF["optional Grafana metrics / alerts"]:::iface
+        FILES["Log files / CLI"]:::iface
+        OTLP["OTLP / console traces"]:::iface
         CLI["run-manifest + lineage inspection"]:::iface
     end
 
@@ -65,8 +67,8 @@ flowchart LR
     CORR -.->|"run-level drill-down"| CLI
 
     METRICS --> PROM --> GRAF
-    LOGS --> GRAF
-    TRACES --> GRAF
+    LOGS --> FILES
+    TRACES --> OTLP
 
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
@@ -78,4 +80,4 @@ flowchart LR
     class LOGP,METP,TRCP port
     class ULOG,PMET,OTR infra
     class CORR,LOGS,METRICS,TRACES artifact
-    class PROM,GRAF,CLI iface
+    class PROM,GRAF,FILES,OTLP,CLI iface

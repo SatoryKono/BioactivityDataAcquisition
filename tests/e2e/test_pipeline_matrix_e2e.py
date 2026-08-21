@@ -535,6 +535,15 @@ async def test_pipeline_matrix_smoke(
                 )
             )
         if not _is_vcr_recording_enabled() and _is_vcr_mismatch_error(exc):
+            if pipeline_case.pipeline_name in CRITICAL_SMOKE_PIPELINES:
+                pytest.fail(
+                    _build_e2e_fail_reason(
+                        "CODE_REGRESSION",
+                        pipeline_name=pipeline_case.pipeline_name,
+                        detail=f"VCR cassette mismatch in playback: {exc}",
+                    ),
+                    pytrace=False,
+                )
             pytest.skip(
                 build_e2e_skip_reason(
                     "INFRA_FLAKY_CASSETTE_MISMATCH",
