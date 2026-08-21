@@ -37,6 +37,17 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
     assert "'grafana/README.md'" in workflow
 
 
+def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
+    """Workflow YAML changes must trigger inventory parity (#9266)."""
+    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+    push_block, rest = workflow.split("pull_request:", maxsplit=1)
+    pr_block = rest.split("jobs:", maxsplit=1)[0]
+    for block_name, block in (("push", push_block), ("pull_request", pr_block)):
+        assert "'.github/workflows/**'" in block, (
+            f"{block_name} path filters must include .github/workflows/**"
+        )
+
+
 def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
