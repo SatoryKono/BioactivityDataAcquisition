@@ -272,7 +272,7 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.4\"><strong>Next action:</strong> open the worst row in <strong>Monitor Fleet Severity</strong>, then confirm <strong>Monitor Telemetry Presence</strong>. Full triage sequence is in this panel description.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">Next action: open the worst Fleet Severity row.</div>",
         "mode": "html"
       },
       "links": [
