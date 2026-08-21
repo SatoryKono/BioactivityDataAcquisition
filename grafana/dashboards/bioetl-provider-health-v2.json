@@ -777,7 +777,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK. Fail-closed UNKNOWN when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. Alias PRESENT\neqOK.",
+      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK. Fail-closed UNKNOWN when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy. Alias PRESENT≠OK.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1868,7 +1868,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 12,
             "x": 0,
             "y": 47
@@ -2281,7 +2281,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 12,
             "x": 12,
             "y": 57
@@ -2377,7 +2377,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 12,
             "x": 0,
             "y": 62
@@ -2742,7 +2742,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
+            "h": 3,
             "w": 12,
             "x": 0,
             "y": 74
@@ -2811,7 +2811,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 12,
             "x": 12,
             "y": 74
@@ -2890,7 +2890,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 12,
             "x": 0,
             "y": 80
@@ -2965,7 +2965,7 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 12,
             "x": 0,
             "y": 85

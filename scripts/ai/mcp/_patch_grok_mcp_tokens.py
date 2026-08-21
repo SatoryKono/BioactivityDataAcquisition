@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 from pathlib import Path
 
@@ -66,11 +67,22 @@ def wire_ref(text: str) -> str:
     return new_text if n else text
 
 
-def main() -> None:
-    paths = [
-        Path(".grok/config.toml"),
-        Path.home() / ".grok" / "config.toml",
-    ]
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write patched configs. Default is check-only.",
+    )
+    parser.add_argument(
+        "--include-home",
+        action="store_true",
+        help="Also consider Path.home() / .grok / config.toml (requires --apply to write).",
+    )
+    args = parser.parse_args(argv)
+    paths = [Path(".grok/config.toml")]
+    if args.include_home:
+        paths.append(Path.home() / ".grok" / "config.toml")
     for path in paths:
         if not path.is_file():
             print("missing", path)
@@ -78,11 +90,15 @@ def main() -> None:
         original = path.read_text(encoding="utf-8")
         updated = bump_timeouts(wire_ref(original))
         if updated != original:
-            path.write_text(updated, encoding="utf-8", newline="\n")
-            print("updated", path)
+            if args.apply:
+                path.write_text(updated, encoding="utf-8", newline="\n")
+                print("updated", path)
+            else:
+                print("would-update", path)
         else:
             print("unchanged", path)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

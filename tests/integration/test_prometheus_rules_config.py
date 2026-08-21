@@ -1992,10 +1992,7 @@ def test_recording_and_alert_rules_forbid_run_id_promql_filter() -> None:
             name = str(rule.get("record") or rule.get("alert") or "?")
             if "run_id=" in expr:
                 offenders.append(name)
-            labels = str(rule.get("labels") or {})
-            annotations = str(rule.get("annotations") or {})
-            if "run_id" in labels or "run_id" in annotations:
+            if "run_id" in f"{rule.get('labels')}{rule.get('annotations')}":
                 offenders.append(f"{name}:labels")
-    assert not offenders, "PromQL/recording-rule run_id= is forbidden:\n" + "\n".join(
-        offenders
-    )
+    msg = "PromQL/recording-rule run_id= is forbidden:\n" + "\n".join(offenders)
+    assert not offenders, msg
