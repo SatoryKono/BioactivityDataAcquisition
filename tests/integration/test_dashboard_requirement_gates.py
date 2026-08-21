@@ -141,8 +141,10 @@ def _panel_links(panel: dict[str, object]) -> list[dict[str, object]]:
 def _panel_copy(panel: dict[str, object]) -> str:
     options = panel.get("options")
     content = ""
+    display_title = ""
     if isinstance(options, dict):
         content = str(options.get("content") or "")
+        display_title = str(options.get("bioetlDisplayTitle") or "")
     no_value = str(
         ((panel.get("fieldConfig") or {}).get("defaults") or {}).get("noValue") or ""
     )
@@ -150,6 +152,7 @@ def _panel_copy(panel: dict[str, object]) -> str:
     return " ".join(
         (
             str(panel.get("title") or ""),
+            display_title,
             str(panel.get("description") or ""),
             content,
             no_value,
