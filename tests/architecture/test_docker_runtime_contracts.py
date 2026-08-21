@@ -1045,6 +1045,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         not in dockerfile
     )
     assert "uv==0.11.26" in operations_dockerfile
+    setup_uv = (ROOT / ".github/actions/setup-python-uv/action.yml").read_text(
+        encoding="utf-8"
+    )
+    assert 'version: "0.11.26"' in setup_uv
     assert "sys.exit(0)" not in dockerfile
     assert "/health/live" in dockerfile
     healthcheck_blob = "\n".join(
