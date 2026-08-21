@@ -46,15 +46,45 @@ def test_main_never_prints_configuration_content(
     )
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(Path, "home", lambda: tmp_path / "missing-home")
+    original = config_path.read_text(encoding="utf-8")
 
-    main()
+    main([])
 
     output = capsys.readouterr().out
-    # Path separators differ on Windows; match status markers only.
-    assert "updated" in output
-    assert "config.toml" in output
+    assert "would-update" in output
+    assert "updated" not in output
+    assert config_path.read_text(encoding="utf-8") == original
     assert secret_marker not in output
     assert "[mcp_servers.ref]" not in output
+
+    main(["--apply"])
+
+    apply_output = capsys.readouterr().out
+    assert "updated" in apply_output
+    assert "config.toml" in apply_output
+    assert secret_marker not in apply_output
+    assert config_path.read_text(encoding="utf-8") != original
+
+
+def test_main_does_not_touch_home_config_without_include_home(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repo_dir = tmp_path / "repo"
+    repo_dir.mkdir()
+    home_dir = tmp_path / "home"
+    home_config = home_dir / ".grok" / "config.toml"
+    home_config.parent.mkdir(parents=True)
+    home_config.write_text("startup_timeout_sec = 60\n", encoding="utf-8")
+    monkeypatch.chdir(repo_dir)
+    monkeypatch.setattr(Path, "home", lambda: home_dir)
+
+    main(["--apply"])
+
+    output = capsys.readouterr().out
+    assert "missing" in output
+    assert home_config.read_text(encoding="utf-8") == "startup_timeout_sec = 60\n"
 
 
 class TestBumpTimeouts:

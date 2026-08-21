@@ -72,6 +72,16 @@ def _seed_skills_mirror_fixture(root: Path) -> None:
     assert sync_ai_governance.sync_skill_mirrors(root, check_only=False) == []
 
 
+def test_compare_trees_treats_crlf_and_lf_as_equal(tmp_path: Path) -> None:
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    expected.mkdir()
+    actual.mkdir()
+    (expected / "SKILL.md").write_bytes(b"hello\r\nworld\r\n")
+    (actual / "SKILL.md").write_bytes(b"hello\nworld\n")
+    assert sync_ai_governance._compare_trees(expected, actual) == []
+
+
 def test_normalize_codex_agents_strips_mirror_header(tmp_path: Path) -> None:
     agents = tmp_path / ".codex" / "agents"
     agents.mkdir(parents=True)

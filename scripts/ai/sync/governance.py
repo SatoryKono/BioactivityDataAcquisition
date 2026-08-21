@@ -66,8 +66,15 @@ def _repo_root() -> Path:
 def _atomic_write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(content, encoding="utf-8")
+    tmp.write_text(content, encoding="utf-8", newline="\n")
     os.replace(tmp, path)
+
+
+def _text_bytes_for_compare(path: Path) -> bytes:
+    data = path.read_bytes()
+    if b"\0" in data:
+        return data
+    return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 def _strip_mirror_header(text: str) -> str:
@@ -769,7 +776,8 @@ def _compare_trees(expected: Path, actual: Path) -> list[str]:
     issues.extend(
         f"Docs skill mirror mismatch: {relative}"
         for relative in sorted(expected_files & actual_files)
-        if (expected / relative).read_bytes() != (actual / relative).read_bytes()
+        if _text_bytes_for_compare(expected / relative)
+        != _text_bytes_for_compare(actual / relative)
     )
     return issues
 

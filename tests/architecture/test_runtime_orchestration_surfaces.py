@@ -53,3 +53,21 @@ def test_devin_py_bot_skills_point_team_orchestration_at_devin_runtime() -> None
             f"{relative_path} must point Team orchestration at "
             ".devin/agents/ORCHESTRATION.md via ../../agents/ORCHESTRATION.md"
         )
+
+
+def test_devin_py_test_bot_does_not_invent_domain_coverage_gate() -> None:
+    """#9293: Devin py-test-bot follows RULES ≥85% overall, not a 90% domain MUST."""
+    text = Path(".devin/agents/py-test-bot/AGENT.md").read_text(encoding="utf-8")
+    assert "≥90% domain" not in text
+    assert "Coverage (domain)" not in text
+    assert "≥85%" in text
+
+
+def test_mcp_docker_prune_ps1_supports_dry_run() -> None:
+    """#9296: PowerShell MCP prune honors BIOETL_MCP_PRUNE_DRY_RUN; bash stays apply-opt-in."""
+    sh = Path("scripts/ai/mcp/support/mcp_docker_prune.sh").read_text(encoding="utf-8")
+    ps1 = Path("scripts/ai/mcp/support/mcp_docker_prune.ps1").read_text(encoding="utf-8")
+    assert "MCP_DOCKER_PRUNE_APPLY" in sh
+    assert "BIOETL_MCP_PRUNE_DRY_RUN" in ps1
+    assert "dry-run: would docker rm -f" in ps1
+    assert "docker rm -f" in sh
