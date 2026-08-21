@@ -1,10 +1,45 @@
 {
-  "source_run": "20260820T064946Z-docs-cycle-d297d3d14b",
-  "surface_score": 2,
-  "finding_ids": [
-    "DOCS-FRESH-001",
-    "DOCS-README-001",
-    "DOCS-ARCH-CENSUS-001"
-  ],
-  "canonical_findings": "../../audit-runs/20260820T064946Z-docs-cycle-d297d3d14b/findings.json"
+  "findings": [
+    {
+      "id": "DOCS-WF-INV-001",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "content",
+      "github_issue": 9265,
+      "iteration_status": "fixed_pending_pr",
+      "evidence": [
+        {
+          "path": "docs/04-reference/github-actions-workflows.md",
+          "line": 18,
+          "command": "python -m scripts.docs check-links",
+          "observation": "Before fix: missing dashboard-first-window-noscroll.yml; count claim 41 vs live 42. After fix: check-links --workflow-inventory PASS; full check-links PASS."
+        },
+        {
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 89,
+          "command": "python -m scripts.docs check-links",
+          "observation": "Policy claimed 41 GitHub Actions workflows; live glob is 42."
+        }
+      ],
+      "expected": "Published inventory lists every live .github/workflows/*.yml and count equals live glob.",
+      "actual": "Catalog omitted dashboard-first-window-noscroll.yml; count 41 vs 42.",
+      "impact": "docs.yml validate-mkdocs unflagged check-links fails on the next docs-path PR; operators treat a stale 41-file catalog as current.",
+      "root_cause": "New PR/push workflow added without updating the published inventory; docs.yml path filters omit .github/workflows/**.",
+      "remediation": "Sync inventory/count (#9265). Follow-up: trigger docs.yml on workflow YAML changes (#9266).",
+      "effort": "S",
+      "dependencies": [
+        "#9266"
+      ],
+      "validation": [
+        "python -m scripts.docs check-links --workflow-inventory",
+        "python -m scripts.docs check-links",
+        "pytest tests/architecture/test_check_doc_links_guardrails.py::test_github_actions_workflow_inventory_matches_live_repo -q"
+      ],
+      "automated_fix_possible": true
+    }
+  ]
 }

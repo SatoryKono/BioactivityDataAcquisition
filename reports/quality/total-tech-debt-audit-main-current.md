@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `916c5952cb124b8a0767634c25597ba7a3f92b6c`
+Audited commit SHA: `c6138906b2c8c33af1e6901dac569e8ef761718d`
 
-Evidence surface SHA-256: `af69b5fd7075c8442e1552eb98b51731375356d4b9c33890efe55745716d0339`
+Evidence surface SHA-256: `7fa1bc992fcb424da478daabd6cbbc0da730f5dad7b9aee0bd5c0be3018a9d36`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "916c5952cb124b8a0767634c25597ba7a3f92b6c",
-  "evidence_surface_sha256": "af69b5fd7075c8442e1552eb98b51731375356d4b9c33890efe55745716d0339",
+  "audited_commit_sha": "c6138906b2c8c33af1e6901dac569e8ef761718d",
+  "evidence_surface_sha256": "7fa1bc992fcb424da478daabd6cbbc0da730f5dad7b9aee0bd5c0be3018a9d36",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Tech-debt cycle 20260821T072000Z-debt-cycle-916c5952cb — re-pin evidence after inventory `source_tree_sha256` drift (`ac624cad` → `30ee6c2d`); no budget growth. Closes validator drift tracked by #9261. Residual live-collector scorecard/ADR regen remains #9258.
+Refresh reason: Re-pin after #9264 (ruff I001 + ADR/scorecard regen) on origin/main `c6138906b2`; no budget growth. Closes #9261.
 
 ## Executive summary
 
