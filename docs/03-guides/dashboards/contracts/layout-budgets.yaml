@@ -244,4 +244,19 @@ allowlists:
         timeseries (h=4) with the legend hidden.
       retire_when: DQ score trend moves out of the compact evidence strip
   # DASH-DENSITY-002 governed exceptions keyed by (dashboard, row id).
-  scalar_density: []
+  scalar_density:
+    - dashboard: bioetl-provider-health-v2.json
+      id: 91
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Selected Provider Details row (h=1) is a below-fold forensic
+        expander, not a first-screen scalar group. Density cannot exceed the
+        first-screen floor without adding first-window panels.
+      retire_when: selected-provider diagnostics move into first-window scalar cards
+    - dashboard: bioetl-provider-health-v2.json
+      id: 9404
+      owner: "@bioetl-observability"
+      rationale: >-
+        Collapsed Range & Debug Evidence row (h=1) is below-fold forensic
+        evidence, not a first-screen scalar group.
+      retire_when: range/debug evidence is represented by first-window scalar cards
