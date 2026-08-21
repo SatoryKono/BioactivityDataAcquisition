@@ -24,7 +24,7 @@ def test_rehydrate_provider_health_gauges_uses_composition_seam() -> None:
     deps = SimpleNamespace(metrics=MagicMock(name="MetricsPort"))
 
     with patch(
-        "bioetl.composition.health_api.rehydrate_provider_health_gauges",
+        "bioetl.composition.health_service_access.rehydrate_provider_health_gauges",
         return_value=1,
     ) as rehydrate:
         observability._rehydrate_provider_health_gauges(deps)
@@ -36,7 +36,7 @@ def test_rehydrate_provider_health_gauges_swallows_runtime_errors() -> None:
     deps = SimpleNamespace(metrics=MagicMock(name="MetricsPort"))
 
     with patch(
-        "bioetl.composition.health_api.rehydrate_provider_health_gauges",
+        "bioetl.composition.health_service_access.rehydrate_provider_health_gauges",
         side_effect=RuntimeError("store unavailable"),
     ):
         observability._rehydrate_provider_health_gauges(deps)

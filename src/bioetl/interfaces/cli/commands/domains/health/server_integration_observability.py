@@ -167,7 +167,7 @@ class _ProviderHealthDeps(Protocol):
 
 
 def _rehydrate_provider_health_gauges(deps: _ProviderHealthDeps) -> None:
-    from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+    from bioetl.composition.health_service_access import (
         rehydrate_provider_health_gauges,
     )
 
