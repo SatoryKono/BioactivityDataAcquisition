@@ -292,7 +292,9 @@ def test_row_cap_contracts_are_unique_and_owned() -> None:
         seen.add(key)
         assert str(item["owner"]).startswith("@")
         assert item["bind"] in {"topk", "limit", "filter"}
-        assert 1 <= int(item["max_rows"]) <= 5
+        max_rows = int(item["max_rows"])
+        cap = 10 if int(item["id"]) == 3010 else 5
+        assert 1 <= max_rows <= cap
 
 
 def test_first_window_scope_banners_name_current_range_and_selected_run() -> None:

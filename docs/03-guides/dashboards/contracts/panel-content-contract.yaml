@@ -4102,7 +4102,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '3010':
-        title: Inspect Recent Runs (last 4)
+        title: Inspect Recent Runs (last 10)
         role: forensic_table
         tier: 1
         scope: selected_run
