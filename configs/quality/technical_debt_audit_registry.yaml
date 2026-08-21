@@ -1,9 +1,22 @@
 version: 1
-current_audit_id: total-tech-debt-main-2026-07-27-r1
+current_audit_id: total-tech-debt-main-2026-08-20-r1
 audits:
-  - id: total-tech-debt-main-2026-07-27-r1
+  - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
+    audited_commit_sha: 343a6b349bf2d69815fdb5312e4196135750a04f
+    evidence_surface_sha256: 272f74e9245220a0072f3e867994490a9cfd33d93852c1ecb0edfa9511e9e130
+    evidence_paths:
+      - configs/quality/constructor_waivers.yaml
+      - reports/quality/architecture-quality-scorecard.json
+      - reports/quality/contract-coverage-matrix.json
+      - reports/quality/debt-governance-gates.json
+      - reports/quality/module-coverage-inventory.json
+    reviewed_on: "2026-08-20"
+    linked_issue: "#9253"
+  - id: total-tech-debt-main-2026-07-27-r1
+    status: superseded
+    report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-27-r1.md
     audited_commit_sha: 592bf60b74adf0a643a744ce3b7fc1b0c5a36c23
     evidence_surface_sha256: 1c47c43ef1022e77adeceee461e3d29f0db48fed6d114746f7c497cd55d9e15b
     evidence_paths:
@@ -14,6 +27,8 @@ audits:
       - reports/quality/module-coverage-inventory.json
     reviewed_on: "2026-08-19"
     linked_issue: "#8415"
+    superseded_by: total-tech-debt-main-2026-08-20-r1
+    superseded_on: "2026-08-20"
   - id: total-tech-debt-main-2026-07-27
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-27.md

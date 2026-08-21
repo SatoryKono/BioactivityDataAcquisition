@@ -2,23 +2,23 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-20
+Audit date: 2026-08-19
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `343a6b349bf2d69815fdb5312e4196135750a04f`
+Audited commit SHA: `592bf60b74adf0a643a744ce3b7fc1b0c5a36c23`
 
-Evidence surface SHA-256: `272f74e9245220a0072f3e867994490a9cfd33d93852c1ecb0edfa9511e9e130`
+Evidence surface SHA-256: `1c47c43ef1022e77adeceee461e3d29f0db48fed6d114746f7c497cd55d9e15b`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
-  "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "343a6b349bf2d69815fdb5312e4196135750a04f",
-  "evidence_surface_sha256": "272f74e9245220a0072f3e867994490a9cfd33d93852c1ecb0edfa9511e9e130",
+  "audit_id": "total-tech-debt-main-2026-07-27-r1",
+  "audited_commit_sha": "592bf60b74adf0a643a744ce3b7fc1b0c5a36c23",
+  "evidence_surface_sha256": "1c47c43ef1022e77adeceee461e3d29f0db48fed6d114746f7c497cd55d9e15b",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,11 +29,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1552,
+    "fully_covered_module_count": 1547,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 3,
     "partially_covered_module_count": 881,
-    "source_module_count": 2436,
+    "source_module_count": 2431,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Tech-debt cycle 20260820T235333Z-debt-cycle-343a6b349b — re-pin evidence to origin/main after inventory/scorecard/gates refresh; no budget growth. Closes validator drift tracked by #9253.
+Refresh reason: Tech-debt cycle 20260819T075405Z — re-pin evidence after inventory/scorecard/gates refresh; no budget growth.
 
 ## Executive summary
 
@@ -55,13 +55,13 @@ Refresh reason: Tech-debt cycle 20260820T235333Z-debt-cycle-343a6b349b — re-pi
 1. Release status: **debt-governance gates passing**.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2436**
-   - fully_covered: **1552**
+   - source_module_count: **2431**
+   - fully_covered: **1547**
    - partially_covered: **881**
    - no_executable_lines: **3**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2436 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2431 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
