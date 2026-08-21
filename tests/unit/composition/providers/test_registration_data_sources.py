@@ -404,7 +404,6 @@ class TestPlaceholderResolution:
 
         pipeline_config = MagicMock()
         pipeline_config.source.email = "${BIOETL_PUBMED_EMAIL}"
-        pipeline_config.source.api_key = "${BIOETL_PUBMED_API_KEY}"
 
         with patch.dict("os.environ", {}, clear=True):
             _create_pubmed_data_source(
@@ -423,7 +422,7 @@ class TestPubMedCreatorContracts:
     """Covers PubMed-specific creator precedence and passthrough contracts."""
 
     @patch(_BIBLIO_HTTP_DS)
-    def test_pubmed_creator_prefers_pipeline_email_and_api_key_over_settings(
+    def test_pubmed_creator_prefers_pipeline_email_and_settings_api_key(
         self,
         mock_create_http_ds: MagicMock,
     ) -> None:
@@ -436,7 +435,6 @@ class TestPubMedCreatorContracts:
 
         pipeline_config = MagicMock()
         pipeline_config.source.email = "pipeline@example.org"
-        pipeline_config.source.api_key = "pipeline-key"
 
         _create_pubmed_data_source(
             settings=settings,
@@ -446,7 +444,7 @@ class TestPubMedCreatorContracts:
 
         call_kwargs = mock_create_http_ds.call_args.kwargs
         assert call_kwargs["extra_kwargs"]["email"] == "pipeline@example.org"
-        assert call_kwargs["extra_kwargs"]["api_key"] == "pipeline-key"
+        assert call_kwargs["extra_kwargs"]["api_key"] == "settings-key"
 
     @patch(_BIBLIO_HTTP_DS)
     def test_pubmed_creator_forwards_filter_metrics_and_pipeline_name(

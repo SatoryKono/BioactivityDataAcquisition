@@ -20,6 +20,9 @@ retired forms, removal dates, and permanent rationales are governed by
 `configs/quality/config_compatibility_registry.yaml`.
 
 - pipeline `page_size_override`: canonical pipeline-level pagination override
+- pipeline `source.api_key`: rejected; credentials use `api_key_env` / Settings
+- pipeline `source.batch_size`, `rate_limit`, `circuit_breaker`, `provider_config`:
+  rejected entity transport overrides (ADR-057)
 - source `provider_config.batch_size/page_size/max_url_length/cursor_pagination`:
   retired source provider pagination aliases
 - source `batch_size`: retired source root alias

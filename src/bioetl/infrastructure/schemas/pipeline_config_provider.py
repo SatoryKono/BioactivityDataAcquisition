@@ -9,7 +9,6 @@ from bioetl.infrastructure.schemas.source_config import (
     ClientYamlConfig,
     ProviderConfigYaml,
     RateLimitYamlConfig,
-    SourceCircuitBreakerYamlConfig,
 )
 
 __all__ = [
@@ -41,17 +40,15 @@ ProviderSourceConfig = ProviderConfigYaml
 
 
 class SourceConfig(BaseModel):
-    """Configuration for the data source."""
+    """Entity-level pipeline source request data.
+
+    Provider HTTP transport (``rate_limit``, ``circuit_breaker``,
+    ``provider_config``) is owned by ``configs/providers/*.yaml``. Credentials
+    resolve through typed Settings / ``api_key_env``, never ``api_key``.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     email: str | None = None
-    api_key: str | None = None
     fields: list[dict[str, str]] = Field(default_factory=list)
     api: ApiConfig = Field(default_factory=ApiConfig)
-    batch_size: int = Field(default=100, ge=1, le=5000)
-    rate_limit: RateLimitSourceConfig = Field(default_factory=RateLimitSourceConfig)
-    circuit_breaker: SourceCircuitBreakerYamlConfig = Field(
-        default_factory=SourceCircuitBreakerYamlConfig
-    )
-    provider_config: ProviderSourceConfig = Field(default_factory=ProviderSourceConfig)
