@@ -110,16 +110,12 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     )
     assert coverage_summary["uncovered_module_count"] == 0
     assert coverage_summary["unmeasured_module_count"] == 0
-    # Skip source_tree_sha256 check for local development with uncommitted changes
-    # assert (
-    #     coverage["source_tree_sha256"]
-    #     == closeout["metrics"]["source_tree_sha256"]["current"]
-    # )
-    # Skip scorecard source_tree_sha256 check for local development with uncommitted changes
-    # assert (
-    #     scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
-    #     == coverage["source_tree_sha256"]
-    # )
+    # Historical closeout pin stays SHA-bound to the 5933/5944 campaign.
+    # Live scorecard must still track the current coverage inventory hash.
+    assert (
+        scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
+        == coverage["source_tree_sha256"]
+    )
     # Score may ratchet upward as coupling/debt categories improve; never regress.
     assert scorecard["integral_score"] >= 8.92
     assert (
