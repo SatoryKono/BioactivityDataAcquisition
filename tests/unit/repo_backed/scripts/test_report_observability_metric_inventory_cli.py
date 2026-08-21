@@ -25,6 +25,7 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 
 pytestmark = pytest.mark.repo_backed
 
+
 def test_main_check_exits_nonzero_for_metric_drift(
     tmp_path: Path,
     monkeypatch: object,

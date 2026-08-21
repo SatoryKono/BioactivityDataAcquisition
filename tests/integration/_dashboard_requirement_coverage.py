@@ -271,8 +271,10 @@ def panel_is_ops_http(panel: dict[str, Any], target: dict[str, Any]) -> bool:
 
 def uses_synthetic_zero(expr: str) -> bool:
     lowered = expr.lower()
-    return "vector(0)" in lowered or "* 0 + 0" in lowered or "*0+0" in lowered.replace(
-        " ", ""
+    return (
+        "vector(0)" in lowered
+        or "* 0 + 0" in lowered
+        or "*0+0" in lowered.replace(" ", "")
     )
 
 
@@ -399,7 +401,9 @@ def assert_shipped_json_is_read_only() -> None:
     )
 
 
-def ops_http_path_violations(dashboard_name: str, dashboard: dict[str, Any]) -> list[str]:
+def ops_http_path_violations(
+    dashboard_name: str, dashboard: dict[str, Any]
+) -> list[str]:
     violations: list[str] = []
     for panel in get_dashboard_panels(dashboard):
         for target in panel.get("targets") or []:
@@ -410,9 +414,7 @@ def ops_http_path_violations(dashboard_name: str, dashboard: dict[str, Any]) -> 
                 violations.append(f"{dashboard_name}:id={panel.get('id')} missing url")
                 continue
             if not _ops_path_allowed(url):
-                violations.append(
-                    f"{dashboard_name}:id={panel.get('id')} url={url}"
-                )
+                violations.append(f"{dashboard_name}:id={panel.get('id')} url={url}")
     return violations
 
 
@@ -681,7 +683,9 @@ def palette_violations(dashboard_name: str, dashboard: dict[str, Any]) -> list[s
             continue
         mapping_blob = " ".join(mapping_texts(panel)).upper()
         description = str(panel.get("description") or "").upper()
-        missing_map = [token for token in ("OK", "UNKNOWN") if token not in mapping_blob]
+        missing_map = [
+            token for token in ("OK", "UNKNOWN") if token not in mapping_blob
+        ]
         missing_copy = [token for token in _PALETTE_TOKENS if token not in description]
         panel_id = panel.get("id")
         if (dashboard_name, panel_id) in gates and "INCOMPLETE" not in description:
@@ -745,7 +749,8 @@ def cta_violations(dashboard_name: str, dashboard: dict[str, Any]) -> list[str]:
         key = (dashboard_name, panel_id if isinstance(panel_id, int) else -1)
         if not dashboard_uids and not any(
             "runbook" in str(link.get("title") or "").lower()
-            or "github.com/SatoryKono/BioactivityDataAcquisition" in str(link.get("url") or "")
+            or "github.com/SatoryKono/BioactivityDataAcquisition"
+            in str(link.get("url") or "")
             for link in links
         ):
             if key not in no_cta:

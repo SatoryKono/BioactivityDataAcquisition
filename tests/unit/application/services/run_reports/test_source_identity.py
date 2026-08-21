@@ -117,15 +117,13 @@ def test_normalize_runtime_path_windows_and_wsl_compose_file_are_equal(
     path: str,
     root: str,
 ) -> None:
-    canonical = (
-        "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml"
-    )
+    canonical = "/mnt/e/github/bioactivitydataacquisition/docker-compose.neo4j.yml"
     assert normalize_runtime_path(path, root=root) == canonical
 
 
 def test_normalize_runtime_path_foreign_clone_stays_distinct() -> None:
     canonical = r"E:\github\BioactivityDataAcquisition"
-    foreign = r"E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
+    foreign = r"E:\other-clone\BioactivityDataAcquisition2"
     assert normalize_runtime_path(
         "docker-compose.yml",
         root=canonical,

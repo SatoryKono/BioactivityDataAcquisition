@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "4a7b7b9b4f31cfa7468e6498c59555532f3b055053ff985c8a7ebc63c2397c6b",
+      "blob_sha256": "7fa33aa0b62e3b7a2e920cf1250cd8c480eff803d05a6fdeb5d9b4658e106bdb",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true,
         "integral_score": 9.41,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "9a808e8cf2cde5ec4a9f9b782c5592574ab7274b22cd80bb694021b4f4882f53",
+      "blob_sha256": "e7c7025961ee362262de208507c8550b72052287b989c106b43040b95e394984",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "6feef0f5973a2f6ee1f82c08a72da9af24404a4a595d966071fd7602eda2f103",
         "schema_version": 1,
         "snapshot_date": "2026-08-17",
-        "source_module_count": 2436,
-        "source_tree_sha256": "9612c1e43f83714c6bdd2d389edcb81506ddc4333a16cf0ab70ce528b0824436",
+        "source_module_count": 2437,
+        "source_tree_sha256": "5b1d38f03b5c59b9858f8a75b59a275716ab82f317a25ba209839c6210a5df23",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "796e8391d02fb8047fce2d341338e3a9907f9593",
+      "source_revision": "f129a4b19794dca95b249625de3dc07337695885",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "b1e24a573c5778b45fbbaee1cc55d2b3a585025cd9c3a6350546bb50ecc43ad7",
+  "baseline_artifact_fingerprint": "5d13837d086ac077d3288af86ca3e2ae18907e233784ee6be4544c08815208c0",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "796e8391d02fb8047fce2d341338e3a9907f9593",
+  "local_tracking_ref_sha": "f129a4b19794dca95b249625de3dc07337695885",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "796e8391d02fb8047fce2d341338e3a9907f9593",
+  "remote_main_sha": "f129a4b19794dca95b249625de3dc07337695885",
   "schema_version": 1
 }

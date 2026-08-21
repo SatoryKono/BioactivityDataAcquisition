@@ -1430,7 +1430,6 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     assert run_panels[3023]["title"] == "Inspect Processed Records"
 
 
-
 def test_control_plane_dashboard_links_are_scoped() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     links = {

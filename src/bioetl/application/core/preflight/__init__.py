@@ -1,4 +1,5 @@
 """Preflight validation subpackage."""
+
 from __future__ import annotations
 
 from bioetl.application.core.preflight.service import *  # noqa: F403

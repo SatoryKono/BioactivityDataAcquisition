@@ -153,19 +153,19 @@
       "runtime_checkable": true
     },
     {
-      "line": 81,
+      "line": 82,
       "name": "ExportCatalogPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
     },
     {
-      "line": 105,
+      "line": 106,
       "name": "ExportWriterPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true
     },
     {
-      "line": 136,
+      "line": 137,
       "name": "DebugExportPort",
       "path": "src/bioetl/domain/ports/export.py",
       "runtime_checkable": true

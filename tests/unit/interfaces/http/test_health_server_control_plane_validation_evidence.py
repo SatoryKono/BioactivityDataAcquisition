@@ -201,7 +201,8 @@ async def test_checkpoint_parse_failure_has_stable_reason_without_raw_error() ->
         assert status == 200
         assert payload["status"] == "ERROR"
         assert any(
-            row.get("reason") == "checkpoint_parse_error" for row in _payload_rows(payload)
+            row.get("reason") == "checkpoint_parse_error"
+            for row in _payload_rows(payload)
         )
         assert "raw corrupt checkpoint secret" not in str(payload)
     finally:

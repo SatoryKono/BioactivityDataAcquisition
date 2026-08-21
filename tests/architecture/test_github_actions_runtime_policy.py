@@ -225,7 +225,9 @@ def test_coderabbit_installer_guard_ignores_documentation_comments() -> None:
 
     assert "cli.coderabbit.ai/install.sh" not in workflow
     assert "sha256sum -c" in workflow
-    assert "0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1" in workflow
+    assert (
+        "0b47cb4de75188c0184f290d8d6818a793a9528e8f79cf660c6a65f225b045c1" in workflow
+    )
     assert "CODERABBIT_CLI_VERSION" in workflow
     assert "coderabbit-linux-x64.zip" in workflow
 
@@ -265,7 +267,9 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
 
     assert "workflow_call" in on_field
     assert jobs["security-gate"]["uses"] == "./.github/workflows/security.yml"
-    step_runs = " ".join(str(step.get("run", "")) for step in jobs["release-tests"]["steps"])
+    step_runs = " ".join(
+        str(step.get("run", "")) for step in jobs["release-tests"]["steps"]
+    )
     assert "pytest" in step_runs
     for publish in ("publish-testpypi", "publish-pypi"):
         needs = jobs[publish]["needs"]

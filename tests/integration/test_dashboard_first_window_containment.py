@@ -243,10 +243,11 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
     assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["reason"]["custom.inspect"] is True
-    assert sum(int(override_properties[field]["custom.width"]) for field in visible) == 300
+    assert (
+        sum(int(override_properties[field]["custom.width"]) for field in visible) == 300
+    )
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True
-
 
 
 def test_first_window_forced_widths_fit_200pct_css_budget() -> None:

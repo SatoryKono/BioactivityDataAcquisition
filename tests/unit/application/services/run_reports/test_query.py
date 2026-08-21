@@ -525,7 +525,6 @@ def test_workflow_prune_removes_recursive_duplicate_candidate_once(
     assert [entry.run_id for entry in list_workflow_reports(root=tmp_path)] == ["new"]
 
 
-
 def _require_symlink_privilege(tmp_path: Path) -> None:
     probe = tmp_path / "_symlink_probe_src"
     probe.write_text("x", encoding="utf-8")

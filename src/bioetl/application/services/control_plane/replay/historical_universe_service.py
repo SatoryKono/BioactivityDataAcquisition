@@ -212,7 +212,7 @@ class HistoricalReplayUniverseService:
         ]
 
 
-# Public aliases keep the exported control-plane surface stable while allowing
-# the internal record/snapshot names to stay descriptive.
+# Public aliases keep the exported control-plane surface stable.
+# Internal record/snapshot type names stay descriptive.
 HistoricalReplayUniverseInventory = HistoricalReplayUniverseInventorySnapshot
 HistoricalReplayUniverseClosureReport = HistoricalReplayUniverseClosureReportRecord

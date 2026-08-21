@@ -102,7 +102,7 @@ def test_ensure_safe_cli_argv_accepts_windows_paths() -> None:
     ]
 
 
-def test_ensure_safe_cli_argv_rejects_metacharacters() -> None:
+def test_ensure_safe_cli_argv_rejects_command_chaining_metacharacters() -> None:
     from scripts.engineering.common.repo_paths import ensure_safe_cli_argv
 
     with pytest.raises(ValueError, match="shell metacharacters"):

@@ -2,7 +2,7 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Runtime Metrics: 163** (excluding aliases; derived from
+**Runtime Metrics: 170** (excluding aliases; derived from
 `REGISTERED_PROMETHEUS_METRIC_NAMES`)
 **Governed Recording/Current-State Metrics: 41**
 
@@ -13,10 +13,10 @@ Canonical reconciliation command:
 
 - [Adapter Metrics](#adapter-metrics) - 17 metrics
 - [Core Metrics](#core-metrics) - 45 metrics
-- [Health Metrics](#health-metrics) - 11 metrics
+- [Health Metrics](#health-metrics) - 13 metrics
 - [Pipeline Checkpoint Metrics](#pipeline-checkpoint-metrics) - 7 metrics
 - [Pipeline Composite Metrics](#pipeline-composite-metrics) - 1 metric
-- [Pipeline Control Plane Metrics](#pipeline-control-plane-metrics) - 11 metrics
+- [Pipeline Control Plane Metrics](#pipeline-control-plane-metrics) - 16 metrics
 - [Pipeline Lifecycle Metrics](#pipeline-lifecycle-metrics) - 8 metrics
 - [Pipeline Lineage Metrics](#pipeline-lineage-metrics) - 3 metrics
 - [Pipeline Memory Metrics](#pipeline-memory-metrics) - 4 metrics
@@ -126,6 +126,8 @@ Canonical reconciliation command:
 | `bioetl_probe_mode_fallback_total` | Counter | pipeline, component, reason | Total probe-mode fallbacks that downgraded data-source health to degraded |
 | `bioetl_health_check_latency_seconds` | Histogram | provider | Health check latency in seconds |
 | `bioetl_health_check_mode_latency_seconds` | Histogram | provider, mode | Health check latency in seconds by health-check mode |
+| `bioetl_provider_health_observed_timestamp_seconds` | Gauge | provider | Unix timestamp of the latest observed provider-health sample |
+| `bioetl_provider_observed_universe` | Gauge | provider | Presence gauge for the currently observed provider-health universe |
 
 ---
 
@@ -172,6 +174,11 @@ Canonical reconciliation command:
 | `bioetl_control_plane_lifecycle_deleted_total` | Counter | surface, replay_impact | Total control-plane lifecycle artifacts deleted by retention application |
 | `bioetl_control_plane_lifecycle_delete_candidates` | Gauge | - | Current number of control-plane lifecycle delete candidates in the latest plan |
 | `bioetl_control_plane_lifecycle_apply_total` | Counter | dry_run | Total control-plane lifecycle plan apply attempts by dry-run policy |
+| `bioetl_control_plane_checkpoint_present` | Gauge | pipeline | Presence gauge for a persisted control-plane checkpoint |
+| `bioetl_control_plane_integrity_pair_present` | Gauge | pipeline | Presence gauge for a consistent manifest/ledger integrity pair |
+| `bioetl_control_plane_last_observed_timestamp_seconds` | Gauge | pipeline | Unix timestamp of the latest observed control-plane evidence |
+| `bioetl_control_plane_ledger_present` | Gauge | pipeline | Presence gauge for a persisted control-plane run ledger |
+| `bioetl_control_plane_manifest_present` | Gauge | pipeline | Presence gauge for a persisted control-plane run manifest |
 
 ---
 
@@ -402,7 +409,7 @@ separate from actual `record:` outputs and direct runtime collector families.
 
 ## Summary
 
-- **Runtime Metrics**: 163 (excluding aliases; canonical registry-backed count)
+- **Runtime Metrics**: 170 (excluding aliases; canonical registry-backed count)
 - **Governed Recording/Current-State Metrics**: 41
 - **Total Categories**: 15
 - **Metric Types Distribution**:
