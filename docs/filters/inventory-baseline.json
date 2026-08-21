@@ -1736,7 +1736,7 @@
       "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
-      "first_line": 794,
+      "first_line": 800,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1835,7 +1835,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 1828,
+      "first_line": 1907,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1846,7 +1846,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 3,
-      "first_line": 751,
+      "first_line": 757,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1890,7 +1890,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
       "occurrence_count": 1,
-      "first_line": 174,
+      "first_line": 183,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1912,7 +1912,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 890,
+      "first_line": 896,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
@@ -1923,7 +1923,7 @@
       "symbol": "should_write_silver",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 159,
+      "first_line": 168,
       "role": "Legacy Silver write decision helper",
       "migration_relevance": "Any active semantic use of should_write_silver must be explicit in this inventory.",
       "notes": ""
@@ -2033,7 +2033,7 @@
       "symbol": "_silver_filters.should_include",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 167,
+      "first_line": 176,
       "role": "Runtime Silver include predicate",
       "migration_relevance": "Predicate sites are migration-sensitive and must not add semantic Silver gating.",
       "notes": ""
@@ -2055,7 +2055,7 @@
       "symbol": "silver_filter_compatibility_mode",
       "path": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
       "occurrence_count": 4,
-      "first_line": 38,
+      "first_line": 45,
       "role": "Execution identity compatibility mode",
       "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
       "notes": ""
@@ -2154,7 +2154,7 @@
       "symbol": "source_profile",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 1,
-      "first_line": 2388,
+      "first_line": 2020,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2264,7 +2264,7 @@
       "symbol": "extraction_params",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 4,
-      "first_line": 2038,
+      "first_line": 1670,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
@@ -2275,7 +2275,7 @@
       "symbol": "extraction_params",
       "path": "scripts/docs/matrix/generate_pipeline_normalization_matrix.py",
       "occurrence_count": 5,
-      "first_line": 1054,
+      "first_line": 1074,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""

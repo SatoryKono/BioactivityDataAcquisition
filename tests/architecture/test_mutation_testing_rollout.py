@@ -30,6 +30,7 @@ def _parse_mutation_workflow_thresholds(workflow: str) -> dict[str, float]:
         for match in _MUTATION_THRESHOLD_RE.finditer(workflow)
     }
 
+
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
     WORKFLOWS_DIR,
@@ -96,7 +97,9 @@ class TestMutationTestingRollout:
         assert mutation.get("ci_gate_mode") == "partial"
 
         workflow_thresholds = _parse_mutation_workflow_thresholds(workflow)
-        assert workflow_thresholds["domain"] == mutation["targets"]["domain"]["min_score"]
+        assert (
+            workflow_thresholds["domain"] == mutation["targets"]["domain"]["min_score"]
+        )
         assert (
             workflow_thresholds["application-control-plane"]
             == mutation["targets"]["application_control_plane"]["min_score"]

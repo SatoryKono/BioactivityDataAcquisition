@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `c6138906b2c8c33af1e6901dac569e8ef761718d`
+Audited commit SHA: `599ae4d927c064370f35901b67363ffb0b2650d7`
 
-Evidence surface SHA-256: `7fa1bc992fcb424da478daabd6cbbc0da730f5dad7b9aee0bd5c0be3018a9d36`
+Evidence surface SHA-256: `59f59d24824c5be8fdb8c5504901e6ab58ff043d9182c9b048c21f6d330886a1`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "c6138906b2c8c33af1e6901dac569e8ef761718d",
-  "evidence_surface_sha256": "7fa1bc992fcb424da478daabd6cbbc0da730f5dad7b9aee0bd5c0be3018a9d36",
+  "audited_commit_sha": "599ae4d927c064370f35901b67363ffb0b2650d7",
+  "evidence_surface_sha256": "59f59d24824c5be8fdb8c5504901e6ab58ff043d9182c9b048c21f6d330886a1",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -32,8 +32,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "fully_covered_module_count": 1552,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 3,
-    "partially_covered_module_count": 881,
-    "source_module_count": 2436,
+    "partially_covered_module_count": 882,
+    "source_module_count": 2437,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin after #9264 (ruff I001 + ADR/scorecard regen) on origin/main `c6138906b2`; no budget growth. Closes #9261.
+Refresh reason: Re-pin after architecture residual paydown on origin/main `599ae4d927`; evidence hash refreshed; no budget growth.
 
 ## Executive summary
 
@@ -55,13 +55,13 @@ Refresh reason: Re-pin after #9264 (ruff I001 + ADR/scorecard regen) on origin/m
 1. Release status: **debt-governance gates passing**.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2436**
+   - source_module_count: **2437**
    - fully_covered: **1552**
-   - partially_covered: **881**
+   - partially_covered: **882**
    - no_executable_lines: **3**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2436 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2437 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

@@ -1,4 +1,5 @@
 """Canonical grouping for batch-transformer runtime helpers."""
+
 from __future__ import annotations
 # ruff: noqa: I001
 
