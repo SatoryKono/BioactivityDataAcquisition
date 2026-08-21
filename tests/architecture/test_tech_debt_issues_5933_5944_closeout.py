@@ -115,11 +115,10 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     #     coverage["source_tree_sha256"]
     #     == closeout["metrics"]["source_tree_sha256"]["current"]
     # )
-    # Skip scorecard source_tree_sha256 check for local development with uncommitted changes
-    # assert (
-    #     scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
-    #     == coverage["source_tree_sha256"]
-    # )
+    assert (
+        scorecard["source_artifacts"]["module_coverage_inventory"]["source_tree_sha256"]
+        == coverage["source_tree_sha256"]
+    )
     # Score may ratchet upward as coupling/debt categories improve; never regress.
     assert scorecard["integral_score"] >= 8.92
     assert (
