@@ -1,6 +1,9 @@
 # Environment Variables Reference
 
-This document provides a consolidated reference for all BIOETL_* environment variables used across the BioETL project.
+This document is a **partial** published reference for commonly used
+`BIOETL_*` environment variables. It is not an exhaustive dump of every
+runtime key. For the onboarding table and additional pipeline/DQ/quarantine
+variables, see [README.md](../../README.md#installation) and `.env.example`.
 
 ## Core Configuration
 
@@ -12,10 +15,10 @@ This document provides a consolidated reference for all BIOETL_* environment var
 
 ## Provider API Keys
 
-### ChEMBL
+### UniProt
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `BIOETL_CHEMBL_API_KEY` | ChEMBL API key for authenticated access | No (polite pool available) |
+| `BIOETL_UNIPROT_API_KEY` | Optional UniProt API key (higher rate limits) | No (public access by default) |
 
 ### OpenAlex
 | Variable | Description | Required |
