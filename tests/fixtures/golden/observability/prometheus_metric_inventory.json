@@ -41,6 +41,8 @@
       ],
       "gauges": [
         "bioetl_provider_health_status",
+        "bioetl_provider_observed_universe",
+        "bioetl_provider_health_observed_timestamp_seconds",
         "bioetl_adapter_fallback_hit_rate",
         "bioetl_rate_limiter_tokens_available"
       ],
@@ -106,6 +108,11 @@
       "gauges": [
         "bioetl_memory_pressure_state",
         "bioetl_control_plane_lifecycle_delete_candidates",
+        "bioetl_control_plane_manifest_present",
+        "bioetl_control_plane_ledger_present",
+        "bioetl_control_plane_integrity_pair_present",
+        "bioetl_control_plane_checkpoint_present",
+        "bioetl_control_plane_last_observed_timestamp_seconds",
         "bioetl_observability_runtime_status",
         "bioetl_pipeline_stage_expected",
         "bioetl_stage_backlog_records",
