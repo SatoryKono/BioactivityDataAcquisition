@@ -1,7 +1,7 @@
 version: 1
-current_audit_id: total-tech-debt-main-2026-07-27-r1
+current_audit_id: total-tech-debt-main-2026-08-20-r1
 audits:
-  - id: total-tech-debt-main-2026-07-27-r1
+  - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
     audited_commit_sha: a739c347eb0a8ce101392ac09c808ab8d2ae9e93
