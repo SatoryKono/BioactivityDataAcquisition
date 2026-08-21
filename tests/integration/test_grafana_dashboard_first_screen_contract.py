@@ -547,19 +547,29 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
                     "range",
                 ),
                 "max_y": 23,
+                "panel_id": 9002,
             },
         },
     }
 
     for dashboard_name, panel_expectations in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
-        panels = {
+        panels_by_title = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
+        panels_by_id = {
+            panel.get("id"): panel
+            for panel in get_dashboard_panels(dashboard)
+            if panel.get("id") is not None
+        }
         for panel_title, spec in panel_expectations.items():
-            panel = panels.get(panel_title)
+            panel = (
+                panels_by_id.get(spec["panel_id"])
+                if spec.get("panel_id") is not None
+                else panels_by_title.get(panel_title)
+            )
             assert panel is not None, (
                 f"{dashboard_name} missing first-screen guidance panel {panel_title!r}"
             )
