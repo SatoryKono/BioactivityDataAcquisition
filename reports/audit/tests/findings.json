@@ -1,4 +1,1 @@
-{
-  "source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
-  "surface_score": 2
-}
+[{"id":"TEST-GOV-002","requirement_id":"REQ-GOV-012","status":"PROVEN","issue":9325,"note":"existing concurrent issue, not re-created"},{"id":"TEST-SYS-012","requirement_id":"REQ-TEST-005","status":"PROVEN","issue":9040,"note":"BLOCKED Git LFS quota"}]

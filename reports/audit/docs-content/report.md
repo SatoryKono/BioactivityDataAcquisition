@@ -1,10 +1,5 @@
-# Docs content audit
+# Docs content audit — 20260821T112959Z-audit-seq-27105f85
 
-Source run: `20260821T082249Z-docs-cycle-9c56e1edbb`.
+surface_score: **2** (acceptable). Core onboarding/README/links hold; architecture-index census is already #9316.
 
-`surface_score=2`. Core onboarding, README commands, relative links, KPI hard
-limits, and freshness hold. Material remaining gap after this cycle is CI
-path-filter coverage for workflow inventory (#9266). Content inventory drift
-(#9265) is fixed in `fix/audit-docs-cycle`.
-
-Canonical evidence: `reports/audit-runs/20260821T082249Z-docs-cycle-9c56e1edbb/`.
+No new PROVEN findings. See `reports/audit-runs/20260821T112959Z-audit-seq-27105f85/step-01-docs/`.
