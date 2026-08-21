@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-20'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -61,9 +61,11 @@ copying these integers forward.
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
 | Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2450). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2447). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
-| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2397 files). Excludes stubs / non-imported modules |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2448). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
+| import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2398 files). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently
-`application_services_control_plane` fan-in 2/2) is a tracked residual, not a
-budget-growth event. Do not raise the fan-in cap; keep new internal imports flat.
+`application_services_control_plane` fan-in 2/2 and
+`composition_factories_pipeline` `files_ge_250_loc` 2/2) is a tracked residual,
+not a budget-growth event. Do not raise the fan-in or loc caps; keep new
+internal imports and oversized files flat.
