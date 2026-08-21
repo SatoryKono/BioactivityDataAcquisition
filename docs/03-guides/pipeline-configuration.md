@@ -965,7 +965,10 @@ BioETL автоматически генерирует детальную док
 ### Регенерация документации
 
 ```bash
-# Регенерировать конкретный пайплайн (канонический entrypoint)
+# Регенерировать все пайплайны
+python -m scripts.diagrams generate-dataflows
+
+# Регенерировать конкретный пайплайн
 python -m scripts.diagrams generate-dataflows --pipeline chembl_activity
 
 # Проверить committed artifacts на drift без записи
