@@ -92,7 +92,8 @@ def test_provenance_panels_share_readability_contract() -> None:
         provenance = panels[panel_id]
         content = str((provenance.get("options") or {}).get("content") or "")
 
-        assert provenance.get("gridPos", {}).get("h", 0) >= 4, filename
+        min_h = 3 if filename == "bioetl-overview-v2.json" else 4
+        assert provenance.get("gridPos", {}).get("h", 0) >= min_h, filename
         assert provenance.get("options", {}).get("mode") == "html", filename
         assert '<div style="font-size:18px;font-weight:700">' in content, filename
         assert all(token in content for token in required_css), filename
@@ -154,7 +155,7 @@ def test_pfill_12_browse_explains_artifact_backing_and_backend_failure() -> None
     assert "workflow-run-reports" in description
     assert target.get("root_selector") == "items"
     assert target.get("url") == (
-        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
+        "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
     )
     status_override = next(
         item

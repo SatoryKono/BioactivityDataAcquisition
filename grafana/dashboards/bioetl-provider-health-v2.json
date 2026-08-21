@@ -110,14 +110,14 @@
       "title": "Understand Evidence Scope",
       "gridPos": {
         "h": 4,
-        "w": 10,
+        "w": 16,
         "x": 0,
         "y": 4
       },
-      "description": "Provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy.",
+      "description": "Provider health is determined from provider telemetry. Fleet panels cover all providers; selected-provider panels use `$provider`. Pipeline, workflow, run type, run ID, identity, and processed-record data are supporting context and do not determine provider health. Missing current-status telemetry means UNKNOWN, not healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider} · adapter=${adapter} · pipeline_context=${pipeline_context}.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>Scope:</b> <b>GLOBAL</b> = fleet severity/freshness · <b>SELECTED PROVIDER</b> = provider status</div><div><b>UNKNOWN freshness</b> = missing Runtime telemetry — inspect scrape target<div><span>Run coverage:</span> Chip IN RANGE / OUT OF RANGE / UNKNOWN on Selected Run Summary. Set range to run when OUT OF RANGE. Do not treat CURRENT Prometheus as that UUID.</div><div><span>Effective refresh:</span> 60s · timezone: browser</div><div><span>Effective filters:</span> provider=<code style='font-size:16px'>${provider}</code> · adapter=<code style='font-size:16px'>${adapter}</code> · pipeline_context=<code style='font-size:16px'>${pipeline_context}</code></div></div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which provider is degraded, and why?</div><div><b>GLOBAL</b> = fleet severity/freshness. <b>SELECTED PROVIDER</b> = provider status. UNKNOWN freshness = missing Runtime telemetry — inspect scrape target.</div></div></div>"
       },
       "links": []
     },
@@ -127,8 +127,8 @@
       "title": "Monitor Selected Provider",
       "gridPos": {
         "h": 4,
-        "w": 14,
-        "x": 10,
+        "w": 8,
+        "x": 16,
         "y": 4
       },
       "datasource": {

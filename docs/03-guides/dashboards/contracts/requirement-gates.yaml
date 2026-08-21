@@ -56,7 +56,7 @@ first_window_inspect_tables:
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: "@bioetl-observability"
-    rationale: DASH-FIT-003 browse index (last 4); identity/accounting stay collapsed.
+    rationale: DASH-FIT-003 browse index (last 10); identity/accounting stay collapsed.
     retire_when: browse index moves behind a collapsed row
 
 # DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.

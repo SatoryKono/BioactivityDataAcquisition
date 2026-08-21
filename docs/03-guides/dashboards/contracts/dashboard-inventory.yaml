@@ -223,7 +223,7 @@ dashboards:
         type: table
         description: Bronze/Silver/Gold accounting hub via Ops HTTP (collapsed row)
       - id: 3010
-        title: Inspect Recent Runs (last 4)
+        title: Inspect Recent Runs (last 10)
         type: table
         description: pipeline-run-reports first-screen index; VALID EMPTY vs TREE_MISSING bind gap
       - id: 3020
