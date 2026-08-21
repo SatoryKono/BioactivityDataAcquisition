@@ -1340,6 +1340,11 @@
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
               "links": [
                 {
+                  "title": "Check BioETL Ops HTTP health",
+                  "url": "/api/datasources/proxy/uid/bioetl-ops-http/health/live",
+                  "targetBlank": true
+                },
+                {
                   "title": "Set range to run",
                   "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
                   "targetBlank": false,
