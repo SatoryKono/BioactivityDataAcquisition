@@ -13,11 +13,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-import json
 import subprocess
 import sys
 from types import SimpleNamespace
-from urllib.error import URLError
 
 import pytest
 
