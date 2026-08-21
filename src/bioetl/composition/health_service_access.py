@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from bioetl.composition._resource_management import (
         QuarantineRuntimeServiceProtocol as _QuarantineRuntimeServiceProtocol,
     )
+    from bioetl.domain.ports import MetricsPort
 
     HealthServerDependencies = _HealthServerDependencies
     HealthServerDependenciesProtocol = _HealthServerDependencies
@@ -30,6 +31,7 @@ __all__ = [
     "get_health_service",
     "get_quarantine_runtime_service",
     "get_quarantine_service",
+    "rehydrate_provider_health_gauges",
 ]
 
 
@@ -70,3 +72,12 @@ def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineServic
     if data_root is None:
         return _impl()
     return _impl(data_root=data_root)
+
+
+def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
+    """Publish CURRENT provider-health gauges through one composition owner seam."""
+    from bioetl.composition.factories.pipeline._preflight_health_monitor import (
+        rehydrate_provider_health_gauges as _impl,
+    )
+
+    return _impl(metrics)
