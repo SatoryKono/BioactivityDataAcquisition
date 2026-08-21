@@ -53,6 +53,7 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/**'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -99,6 +100,7 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/**'
 
 jobs:
   docs-governance:

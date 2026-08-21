@@ -1,10 +1,37 @@
 {
-  "source_run": "20260820T064946Z-docs-cycle-d297d3d14b",
-  "surface_score": 2,
-  "finding_ids": [
-    "DOCS-PIPE-001",
-    "DOCS-PIPE-002",
-    "DOCS-DRIFT-DOC-001"
-  ],
-  "canonical_findings": "../../audit-runs/20260820T064946Z-docs-cycle-d297d3d14b/findings.json"
+  "findings": [
+    {
+      "id": "DOCS-PIPE-003",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "pipeline",
+      "github_issue": 9266,
+      "iteration_status": "open_out_of_scope",
+      "evidence": [
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 10,
+          "command": "inspect docs.yml on.push.paths / on.pull_request.paths",
+          "observation": "Path filters include docs/**, scripts/docs/**, mkdocs.yml, and .github/workflows/docs.yml, but not .github/workflows/**. Adding dashboard-first-window-noscroll.yml did not run inventory parity."
+        }
+      ],
+      "expected": "A scheduled or path-triggered job fails when the published workflow inventory diverges from live YAML.",
+      "actual": "Inventory parity runs only on docs-path PRs.",
+      "impact": "Recurring catalog drift between docs PRs (same class as closed #9114 before freshness was scheduled).",
+      "root_cause": "docs.yml path filters omit workflow YAML glob.",
+      "remediation": "Add .github/workflows/** to docs.yml path filters. Out of this cycle file SCOPE (README.md docs/).",
+      "effort": "S",
+      "dependencies": [
+        "#9265"
+      ],
+      "validation": [
+        "rg -n github/workflows .github/workflows/docs.yml"
+      ],
+      "automated_fix_possible": true
+    }
+  ]
 }

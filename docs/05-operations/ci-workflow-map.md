@@ -1,17 +1,17 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
-Last verified: '2026-07-28'
+Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
 # CI / GitHub Actions Workflow Map
 
 Curated map of `.github/workflows/*` (DOC-GOV-06 / #6886).
-**Count at verification:** 38 workflow files.
+**Count at verification:** 42 workflow files.
 YAML self-description remains authoritative for triggers/secrets; this page is
 the human index.
 
@@ -27,6 +27,7 @@ the human index.
 | --- | --- | --- |
 | `architecture.yml` | Architecture Metrics | Architecture debt gates, scorecard, hotspots |
 | `architecture-docs-nightly.yml` | Architecture Docs Nightly | Nightly architecture/doc sync checks |
+| `branch-hygiene.yml` | Branch Hygiene | PR branch-name policy and periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | ChemblBaseline Smoke | ChEMBL baseline smoke lane |
 | `coderabbit.yml` | CodeRabbit | Automated review integration |
 | `commit-lint.yml` | Commit Lint | Conventional commit message lint |
@@ -34,6 +35,7 @@ the human index.
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
 | `contract-governance-fast-check.yml` | Contract Governance Fast Check | Fast contract surface check |
 | `contract-tests.yml` | Monthly Contract Tests | Scheduled deep contract tests |
+| `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence on self-hosted `[self-hosted, bioetl-observability]`; `workflow_dispatch` only — see isolation notes in `docs/04-reference/github-actions-workflows.md` |
 | `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct) |
@@ -43,6 +45,8 @@ the human index.
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
 | `import-linter.yml` | Lint and Architecture Gates | import-linter + layer architecture |
 | `labeler.yml` | Labeler | PR auto-labeling |
+| `memory-freshness.yml` | Memory freshness | Repository memory freshness and contract checks |
+| `memory-retention.yml` | Memory Retention Policy | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | Mutation Testing | Mutation testing campaign |
 | `nightly-replay-parity.yml` | nightly-replay-parity | Replay/determinism parity |
 | `performance-nightly.yml` | Performance Nightly | Performance benchmarks |

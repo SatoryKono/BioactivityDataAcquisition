@@ -1,7 +1,12 @@
 # Docs pipeline audit
 
-Source run: `20260820T064946Z-docs-cycle-d297d3d14b`.
+Source run: `20260821T082249Z-docs-cycle-9c56e1edbb`.
 
-`surface_score=2`. `check-links`, `check-kpi`, and `check-drift --ports --classes` were green. `check-drift --runtime-mirrors --freshness` failed until SUMMARY.md was refreshed. `python -m scripts.docs verify` now includes those flags (#9115). Residual: freshness is still not on a scheduled workflow (#9114). Exit 0 on verify-slice is not claimed as semantic completeness of the whole docs corpus.
+`surface_score=2`. `check-links` (after content fix), `check-kpi`, and
+`check-drift --ports --classes --runtime-mirrors --freshness` are green.
+`python -m scripts.docs verify` includes unflagged `check-links` and
+`--runtime-mirrors --freshness`. Residual: `docs.yml` path filters omit
+`.github/workflows/**` (#9266). MkDocs strict build not executed in this
+Windows `.venv-win` (no `mkdocs` extra).
 
-Canonical evidence: `reports/audit-runs/20260820T064946Z-docs-cycle-d297d3d14b/`.
+Canonical evidence: `reports/audit-runs/20260821T082249Z-docs-cycle-9c56e1edbb/`.

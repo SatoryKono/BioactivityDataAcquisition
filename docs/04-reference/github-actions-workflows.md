@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-20'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **41** live GitHub Actions
+This page is the canonical published inventory of the **42** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -48,6 +48,7 @@ Use it when you need to answer:
 | `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `push`, `pull_request` | Blocks checked-in `.pyc` and similar compiled artifacts |
 | `consolidation-gates.yml` | `consolidation-gates` | `push`, `pull_request`, `workflow_dispatch` | Merge-campaign quality/architecture gate |
 | `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `push`, `pull_request` | Fast contract-registry and schema governance checks |
+| `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push`, `pull_request` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `docs.yml` | `Docs & Diagrams` | `push`, `pull_request` | Docs governance, MkDocs validation, Mermaid validation, diagram drift |
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `push`, `pull_request` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Blocking and nightly E2E matrix smoke lanes |
@@ -105,6 +106,7 @@ Use it when you need to answer:
 | --- | --- |
 | Main PR validation/test matrix | `tests.yml` |
 | Docs, MkDocs, Mermaid, diagram drift | `docs.yml` |
+| Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |
 | Security scans | `security.yml` |
 | Nightly replay / determinism parity | `nightly-replay-parity.yml` |
