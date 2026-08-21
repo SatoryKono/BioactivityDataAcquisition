@@ -37,6 +37,13 @@ first_screen_shell_panels:
       Next-step rail; native title omitted so h=2 does not scroll. Instruction
       copy, not a data-bearing or nav panel.
     retire_when: rail is merged into panel 9400 or moved to y >= first_window_y
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9002
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=2 Start Provider Triage fits DASH-FIT-004.
+      Growing h=3 would push Monitor Telemetry Presence (9104) past VIEWPORT_ROWS.
+    retire_when: the CTA can use h=3 without folding 9104 past row 18
 
 min_height:
   root:
