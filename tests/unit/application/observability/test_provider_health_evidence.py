@@ -29,13 +29,16 @@ def _provider_health_infra():
     )
 
 
-
 def _gauge_names(metrics: RecordingMetrics) -> list[str]:
     return [call.name for call in metrics.calls if call.kind == "gauge"]
 
 
 def test_persist_and_rehydrate_fresh_status(tmp_path: Path) -> None:
-    FileProviderHealthEvidenceStore, ProviderHealthEvidenceRecord, rehydrate_provider_health_evidence = _provider_health_infra()
+    (
+        FileProviderHealthEvidenceStore,
+        ProviderHealthEvidenceRecord,
+        rehydrate_provider_health_evidence,
+    ) = _provider_health_infra()
     store = FileProviderHealthEvidenceStore(base_path=tmp_path)
     now = datetime(2026, 8, 19, 12, 0, tzinfo=UTC)
     store.persist(
@@ -56,7 +59,11 @@ def test_persist_and_rehydrate_fresh_status(tmp_path: Path) -> None:
 
 
 def test_stale_evidence_does_not_publish_health_status(tmp_path: Path) -> None:
-    FileProviderHealthEvidenceStore, ProviderHealthEvidenceRecord, rehydrate_provider_health_evidence = _provider_health_infra()
+    (
+        FileProviderHealthEvidenceStore,
+        ProviderHealthEvidenceRecord,
+        rehydrate_provider_health_evidence,
+    ) = _provider_health_infra()
     store = FileProviderHealthEvidenceStore(base_path=tmp_path)
     observed = datetime(2026, 8, 19, 12, 0, tzinfo=UTC)
     store.persist(
@@ -88,7 +95,11 @@ def test_persisting_monitor_writes_compact_evidence(tmp_path: Path) -> None:
 
     inner = MagicMock()
     inner.update_from_health_check_result.return_value = HealthStatus.HEALTHY
-    FileProviderHealthEvidenceStore, ProviderHealthEvidenceRecord, rehydrate_provider_health_evidence = _provider_health_infra()
+    (
+        FileProviderHealthEvidenceStore,
+        ProviderHealthEvidenceRecord,
+        rehydrate_provider_health_evidence,
+    ) = _provider_health_infra()
     store = FileProviderHealthEvidenceStore(base_path=tmp_path)
     from bioetl.infrastructure.time import SystemClock
 

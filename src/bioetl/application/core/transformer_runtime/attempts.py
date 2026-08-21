@@ -1,4 +1,5 @@
 """Canonical submodule for batch-transformer per-record attempts."""
+
 from __future__ import annotations
 # ruff: noqa: I001
 

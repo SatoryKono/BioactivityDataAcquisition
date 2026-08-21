@@ -203,11 +203,12 @@ def _table_shape_pipeline_run_report(
         else []
     )
     coverage = payload.get("tracking_coverage")
-    if coverage not in (None, ""):
-        if not any(row["parameter"] == "tracking_coverage" for row in identity_rows):
-            identity_rows.append(
-                {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
-            )
+    if coverage not in (None, "") and not any(
+        row["parameter"] == "tracking_coverage" for row in identity_rows
+    ):
+        identity_rows.append(
+            {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
+        )
     shaped["identity_rows"] = identity_rows
     return shaped
 

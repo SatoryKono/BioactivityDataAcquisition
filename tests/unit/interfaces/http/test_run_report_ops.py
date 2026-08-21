@@ -284,7 +284,9 @@ def test_table_shape_pipeline_run_report_layers_failure_identity() -> None:
     assert shaped["failure"][0]["parameter"] == "error_type"
     assert shaped["stage_timings"] == [{"parameter": "extract", "value": "1.5"}]
     assert {"parameter": "status", "value": "failed"} in shaped["identity_rows"]
-    assert {"parameter": "tracking_coverage", "value": "full"} in shaped["identity_rows"]
+    assert {"parameter": "tracking_coverage", "value": "full"} in shaped[
+        "identity_rows"
+    ]
 
 
 def test_not_found_pipeline_run_report_shell_for_grafana() -> None:

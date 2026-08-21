@@ -178,12 +178,7 @@ def _provider_entity_version(
     requested_pipeline: str,
     values: dict[str, object | None],
 ) -> str | None:
-    """Return provider.entity [version] when known.
-
-    Do **not** fall back to the pipeline selector: that made ID panels show
-    ``Provider.Entity [Version] = chembl_activity`` when the manifest was
-    unresolved, which reads as a fill bug rather than "not available".
-    """
+    """Return provider.entity [version] when known; never use the pipeline selector."""
     _ = requested_pipeline
     scope = _text(values.get("provider_entity"))
     if not scope:
@@ -405,19 +400,14 @@ def _gap_count(value: object | None) -> int:
 
 
 def _identity_row(
-    parameter: str,
-    value: object | None,
-    *,
-    unavailable: str,
+    parameter: str, value: object | None, *, unavailable: str
 ) -> dict[str, str]:
     return {"parameter": parameter, "value": _display(value, unavailable=unavailable)}
 
 
 def _display(value: object | None, *, unavailable: str) -> str:
-    if value is None:
-        return unavailable
-    text = str(value).strip()
-    return text or unavailable
+    text = _text(value)
+    return unavailable if text is None else text
 
 
 def _text(value: object | None) -> str | None:

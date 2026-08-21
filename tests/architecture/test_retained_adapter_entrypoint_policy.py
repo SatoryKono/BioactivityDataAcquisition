@@ -145,8 +145,9 @@ def _iter_python_file_mentions_fallback(
     module_paths: frozenset[str],
 ) -> list[str]:
     violations: list[str] = []
+    allowed_resolved = {path.resolve() for path in allowed_files}
     for py_file in search_root.rglob("*.py"):
-        if py_file in allowed_files or "__pycache__" in py_file.parts:
+        if py_file.resolve() in allowed_resolved or "__pycache__" in py_file.parts:
             continue
         rel_path = py_file.relative_to(ROOT).as_posix()
         with py_file.open(encoding="utf-8") as handle:
@@ -173,6 +174,11 @@ def _iter_module_mentions(
 
     violations: list[str] = []
     allowed_paths = {path.resolve() for path in allowed_files}
+    scan_root = search_root.resolve()
+    repo_root = ROOT.resolve()
+    scan_target = (
+        "." if scan_root == repo_root else scan_root.relative_to(repo_root).as_posix()
+    )
     for module_path in sorted(module_paths):
         result = subprocess.run(
             [
@@ -181,8 +187,10 @@ def _iter_module_mentions(
                 "-F",
                 "--glob",
                 "*.py",
+                "--path-separator",
+                "/",
                 module_path,
-                str(search_root),
+                scan_target,
             ],
             cwd=ROOT,
             capture_output=True,
@@ -195,7 +203,10 @@ def _iter_module_mentions(
             )
         for row in result.stdout.splitlines():
             path_str, lineno, _line = row.split(":", 2)
-            py_file = Path(path_str).resolve()
+            parsed = Path(path_str)
+            py_file = (
+                parsed.resolve() if parsed.is_absolute() else (ROOT / parsed).resolve()
+            )
             if py_file in allowed_paths or "__pycache__" in py_file.parts:
                 continue
             rel_path = py_file.relative_to(ROOT).as_posix()
