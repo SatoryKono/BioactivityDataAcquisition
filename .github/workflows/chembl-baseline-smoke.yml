@@ -98,7 +98,7 @@ jobs:
             --junitxml=reports/junit/chembl-baseline-cli-runner-${{ matrix.python-version }}.xml
 
       - name: Upload ChemblBaseline CLI + runner artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: chembl-baseline-cli-runner-${{ matrix.python-version }}
@@ -107,7 +107,7 @@ jobs:
           retention-days: 14
 
       - name: Publish ChemblBaseline CLI + runner summary
-        if: always()
+        if: ${{ always() && !cancelled() }}
         run: |
           {
             echo "## ChemblBaseline CLI + runner smoke (py${{ matrix.python-version }})"
@@ -138,7 +138,7 @@ jobs:
             --junitxml=reports/junit/chembl-baseline-reconciliation.xml
 
       - name: Upload ChemblBaseline reconciliation artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: chembl-baseline-reconciliation

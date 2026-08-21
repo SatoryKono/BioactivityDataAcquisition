@@ -62,7 +62,7 @@ jobs:
           diff -u reports/nightly-replay/checksums/determinism-run1.sha256 reports/nightly-replay/checksums/determinism-run2.sha256 > reports/nightly-replay/checksums/determinism-replay-diff.txt
 
       - name: Upload replay parity artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: nightly-replay-parity
