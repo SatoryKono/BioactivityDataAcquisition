@@ -134,10 +134,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
+        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 1,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -224,23 +225,24 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/unit/composition/factories/pipeline/test_preflight_health_monitor.py",
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
-        "HealthServerDependenciesProtocol",
         "get_health_server_dependencies",
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "public_export_count": 7,
       "duplicate_public_exports": [],
@@ -251,7 +253,8 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -580,10 +583,11 @@
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
+        "tests/unit/interfaces/cli/commands/test_cr_8957_cli_residuals.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 1,
+      "test_importer_count": 2,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -670,23 +674,24 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/unit/composition/factories/pipeline/test_preflight_health_monitor.py",
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_health_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 2,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
-        "HealthServerDependenciesProtocol",
         "get_health_server_dependencies",
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "public_export_count": 7,
       "duplicate_public_exports": [],
@@ -697,7 +702,8 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -987,12 +993,12 @@
       "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
-        "HealthServerDependenciesProtocol",
         "get_health_server_dependencies",
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "public_export_count": 7,
       "duplicate_public_exports": [],
@@ -1003,7 +1009,8 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -1027,7 +1034,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 2
+      "test_importer_count": 3
     },
     {
       "path": "src/bioetl/composition/maintenance_api.py",
@@ -1207,12 +1214,12 @@
       "max_public_exports": 7,
       "public_exports": [
         "HealthServerDependencies",
-        "HealthServerDependenciesProtocol",
         "get_health_server_dependencies",
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "public_export_count": 7,
       "duplicate_public_exports": [],
@@ -1223,7 +1230,8 @@
         "get_health_service",
         "get_quarantine_port",
         "get_quarantine_runtime_service",
-        "get_quarantine_service"
+        "get_quarantine_service",
+        "rehydrate_provider_health_gauges"
       ],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
@@ -1247,7 +1255,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 2
+      "test_importer_count": 3
     },
     {
       "path": "src/bioetl/composition/maintenance_api.py",
