@@ -2022,6 +2022,8 @@
         "configs/quality/generated_artifact_routing.yaml",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/observability/dashboard-full-cycle.md",
+        "docs/00-project/ai/prompts/library/observability/dashboard-manual-validation.md",
         "docs/00-project/rules-summary.md",
         "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
         "docs/01-requirements/REQUIREMENTS.md",
