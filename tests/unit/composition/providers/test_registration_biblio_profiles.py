@@ -45,11 +45,11 @@ from bioetl.composition.providers._registration_biblio_profiles import (
 pytestmark = pytest.mark.unit
 
 
-def _pipeline_config(*, email: str = "", api_key: str = "") -> SimpleNamespace:
-    return SimpleNamespace(source=SimpleNamespace(email=email, api_key=api_key))
+def _pipeline_config(*, email: str = "") -> SimpleNamespace:
+    return SimpleNamespace(source=SimpleNamespace(email=email))
 
 
-def test_resolve_pubmed_request_profile_prefers_pipeline_overrides() -> None:
+def test_resolve_pubmed_request_profile_uses_pipeline_email_and_settings_api_key() -> None:
     settings = MagicMock()
     settings.default_email = "default@example.org"
     settings.pubmed_api_key = MagicMock()
@@ -57,11 +57,28 @@ def test_resolve_pubmed_request_profile_prefers_pipeline_overrides() -> None:
 
     result = _resolve_pubmed_request_profile(
         settings,
-        _pipeline_config(email="pipeline@example.org", api_key="pipeline-key"),
+        _pipeline_config(email="pipeline@example.org"),
     )
 
     assert result.email == "pipeline@example.org"
-    assert result.api_key == "pipeline-key"
+    assert result.api_key == "settings-key"
+
+
+def test_resolve_pubmed_request_profile_ignores_pipeline_source_api_key() -> None:
+    """REQ-SECRET-001: credentials stay on Settings, not pipeline.source.api_key."""
+    settings = MagicMock()
+    settings.default_email = "default@example.org"
+    settings.pubmed_api_key = MagicMock()
+    settings.pubmed_api_key.get_secret_value.return_value = "settings-key"
+
+    pipeline = SimpleNamespace(
+        source=SimpleNamespace(email="pipeline@example.org", api_key="pipeline-key"),
+    )
+
+    result = _resolve_pubmed_request_profile(settings, pipeline)
+
+    assert result.email == "pipeline@example.org"
+    assert result.api_key == "settings-key"
 
 
 def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch() -> (
@@ -80,23 +97,40 @@ def test_resolve_mailto_batch_profile_uses_settings_fallback_and_provider_batch(
     assert result.batch_size == 55
 
 
-def test_resolve_openalex_request_profile_prefers_pipeline_api_key() -> None:
+def test_resolve_openalex_request_profile_uses_settings_api_key() -> None:
     settings = MagicMock()
     settings.default_email = "default@example.org"
     settings.openalex_api_key = MagicMock()
     settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
-    pipeline_token = "test-token"
 
     result = _resolve_openalex_request_profile(
         settings,
-        _pipeline_config(
-            email="pipeline@example.org",
-            api_key=pipeline_token,
-        ),
+        _pipeline_config(email="pipeline@example.org"),
         batch_size=50,
     )
 
-    assert result.api_key == pipeline_token
+    assert result.api_key == "settings-openalex-key"
+    assert result.mailto == "pipeline@example.org"
+    assert result.batch_size == 50
+
+
+def test_resolve_openalex_request_profile_ignores_pipeline_source_api_key() -> None:
+    """REQ-SECRET-001: OpenAlex key stays on Settings, not pipeline.source.api_key."""
+    settings = MagicMock()
+    settings.default_email = "default@example.org"
+    settings.openalex_api_key = MagicMock()
+    settings.openalex_api_key.get_secret_value.return_value = "settings-openalex-key"
+    pipeline = SimpleNamespace(
+        source=SimpleNamespace(email="pipeline@example.org", api_key="test-token"),
+    )
+
+    result = _resolve_openalex_request_profile(
+        settings,
+        pipeline,
+        batch_size=50,
+    )
+
+    assert result.api_key == "settings-openalex-key"
     assert result.mailto == "pipeline@example.org"
     assert result.batch_size == 50
 
