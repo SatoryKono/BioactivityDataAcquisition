@@ -574,9 +574,6 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
             for panel in get_dashboard_panels(dashboard)
             if _operator_title(panel)
         }
-            for panel in get_dashboard_panels(dashboard)
-            if _operator_title(panel)
-        }
         panels_by_id = {
             panel.get("id"): panel
             for panel in get_dashboard_panels(dashboard)

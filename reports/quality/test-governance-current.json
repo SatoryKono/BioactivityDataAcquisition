@@ -1266,12 +1266,7 @@
   "intentional_no_exception_contract": 86,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [
-    {
-      "error": "unexpected indent (tests/integration/test_grafana_dashboard_first_screen_contract.py, line 577)",
-      "path": "tests/integration/test_grafana_dashboard_first_screen_contract.py"
-    }
-  ],
+  "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2240,12 +2235,7 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "unexpected indent (tests/integration/test_grafana_dashboard_first_screen_contract.py, line 577)",
-        "path": "tests/integration/test_grafana_dashboard_first_screen_contract.py"
-      }
-    ],
+    "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2303,12 +2293,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2360,
-    "total_test_functions": 24885,
+    "total_test_functions": 24904,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "376e36e8269a337cd0df16ad078211ab4d47d900dc4466eed85d440d018ae0f6",
+  "source_tree_sha256": "b20a4b40e1e8caecd3f1aa20ac65c31dc091e9e0695ec8738fd5dd9b48fb8c11",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 102,
@@ -2369,7 +2359,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2360,
-  "total_test_functions": 24885,
+  "total_test_functions": 24904,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
