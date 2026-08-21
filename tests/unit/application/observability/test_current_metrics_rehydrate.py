@@ -154,18 +154,28 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
         status="success",
         provider="chembl",
     )
+    from prometheus_client import REGISTRY, generate_latest
+
     from bioetl.infrastructure.observability.health_metrics_exposition import (
         build_health_server_metrics_exposition,
     )
     from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
+    def _health_check_samples(body: str) -> list[str]:
+        return [
+            line
+            for line in body.splitlines()
+            if line.startswith("bioetl_health_check_success_total{")
+        ]
+
+    before_health = _health_check_samples(generate_latest(REGISTRY).decode("utf-8"))
     result = rehydrate_current_pipeline_run_metrics(PrometheusMetrics(), root=tmp_path)
     assert result.error is None
     assert result.pipeline_runs_seeded == 1
     body = build_health_server_metrics_exposition()
     assert "bioetl_provider_observed_universe" in body
     assert 'provider="chembl"' in body
-    assert "bioetl_health_check_success_total{" not in body
+    assert _health_check_samples(body) == before_health
 
 
 def test_reconciliation_aligned_when_labeled_sample_present(tmp_path: Path) -> None:
