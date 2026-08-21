@@ -1,412 +1,81 @@
 {
-  "domain_id": "agents-runtime",
-  "prompt_id": "prompt.audit.agents-runtime",
-  "audit_mode": "full",
-  "base": "main",
-  "repo": "SatoryKono/BioactivityDataAcquisition",
-  "generated_at": "2026-08-21T08:38:49Z",
+  "run_id": "20260820-agents-memory-cycle-c22e7b01b3",
+  "prompt_id": "prompt.audit.cycle.agents-memory",
+  "base": "origin/main@c22e7b01b3",
+  "generated_at_utc": "2026-08-20T07:15:00Z",
+  "contours": ["runtime", "scripts", "memory"],
   "surface_score": 2,
-  "surface_score_legend": "0=unacceptable, 1=weak, 2=acceptable, 3=good",
-  "p0_p1_count": 1,
-  "proven_count": 10,
-  "checks_count": 16,
-  "skipped_checks": [
-    "bash scripts/ai/junie/check_junie_mirror.sh --check (no shell in this agent)",
-    "python scripts/ai/codex/doctor.py static --no-write",
-    "bash scripts/ops/support/skills/check_skills_mirror.sh --check",
-    "python -m scripts.ai.sync.runtime_skills --mode check",
-    "python -m memory.tooling.workflow pre-task / post-task"
-  ],
   "findings": [
     {
-      "id": "AGENTS-001",
-      "requirement_id": "REQ-DOC-001",
+      "id": "AGENTS-MEM-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "instruction-conflict",
-      "path": "GEMINI.md:58-61",
-      "observation": "Корневой GEMINI.md маршрутизирует Gemini-сессию на retired идентификаторы py-review-orchestrator / py-test-swarm / bioetl-documentation-audit и на несуществующие make-цели ai-review / ai-test / ai-docs.",
-      "method": "read_file GEMINI.md; grep Makefile for ^ai-review:|^ai-test:|^ai-docs:; grep py-review-orchestrator/py-test-swarm in AGENTS.md and junie-mirror-contract forbidden_identifiers",
-      "expected": "Gemini routing указывает на живые профили py-audit-bot / py-test-bot / py-doc-bot и существующие make-цели (lint/test/devin-*). Forbidden identifiers не используются как активный маршрут.",
-      "actual": "GEMINI.md:58-61 предписывает make ai-review/ai-test/ai-docs; Makefile не содержит этих целей. Имена py-review-orchestrator и py-test-swarm запрещены в scripts/ai/junie/junie-mirror-contract.json runtime_semantics.forbidden_identifiers.",
-      "impact": "Gemini-агент выполняет несуществующие команды и ищет удалённые роли вместо py-audit-bot/py-test-bot.",
-      "root_cause": "Корневой Gemini routing не синхронизирован с консолидацией ролей (review/debt/swarm → режимы py-audit-bot/py-test-bot).",
-      "remediation": "Заменить блок GEMINI.md §2 на живые маршруты: review → py-audit-bot (review), tests → py-test-bot, docs → py-doc-bot; убрать make ai-*; явно назвать .junie/** equal peer.",
-      "effort": "S",
-      "automation": "CI grep/test that GEMINI.md and AGENTS.md do not recommend forbidden identifiers or missing Makefile targets",
-      "automated_fix_possible": true,
+      "category": "scripts/determinism",
       "evidence": [
-        {
-          "path": "GEMINI.md",
-          "line": 58,
-          "command": "grep Makefile ai-review/ai-test/ai-docs",
-          "observation": "make ai-review/ai-test/ai-docs отсутствуют; цели install/lint/test/devin-* есть"
-        },
-        {
-          "path": "scripts/ai/junie/junie-mirror-contract.json",
-          "line": 63,
-          "command": "read_file junie-mirror-contract.json runtime_semantics.forbidden_identifiers",
-          "observation": "py-review-orchestrator и py-test-swarm в forbidden_identifiers"
-        }
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.sh", "line": 38, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh", "observation": "npx -y \"@vshulcz/deja-vu@0.17.0\" mcp"},
+        {"path": "scripts/ai/mcp/mcp_deja_wrapper.ps1", "line": 23, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.ps1", "observation": "& npx -y \"@vshulcz/deja-vu@0.15.7\" mcp"},
+        {"path": "docs/00-project/ai/mcp-governance.md", "line": 127, "command": "rg -n 'deja' docs/00-project/ai/mcp-governance.md", "observation": "### deja (deja-vu v0.13.1)"}
       ],
+      "expected": "Single canonical deja-vu version across sh wrapper, ps1 wrapper, and governance doc.",
+      "actual": "Three divergent versions: 0.17.0 (Linux/WSL), 0.15.7 (Windows), 0.13.1 (doc).",
+      "impact": "Non-deterministic MCP memory runtime depending on OS entry point; governance doc drift.",
+      "root_cause": "Independent per-OS/per-doc version updates without a single source of truth.",
+      "remediation": "Choose one canonical version; sync both wrappers and mcp-governance.md.",
+      "effort": "S",
       "dependencies": [],
-      "validation": [
-        "grep -n 'py-review-orchestrator\\|py-test-swarm\\|make ai-review' GEMINI.md → empty",
-        "grep Makefile for live targets referenced by GEMINI.md"
-      ]
+      "validation": ["rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh scripts/ai/mcp/mcp_deja_wrapper.ps1", "rg -n 'deja' docs/00-project/ai/mcp-governance.md"],
+      "automated_fix_possible": true,
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9134"
     },
     {
-      "id": "AGENTS-002",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P1",
-      "severity": "High",
-      "confidence": "high",
-      "confidence_score": 0.93,
-      "status": "PROVEN",
-      "category": "runtime-ssot-drift",
-      "path": ".devin/skills/py-audit-bot/SKILL.md:18",
-      "observation": "Шесть Devin wrapper SKILL.md указывают Team orchestration на .codex/agents/ORCHESTRATION.md (v4.3) вместо .devin/agents/ORCHESTRATION.md.",
-      "method": "grep 'Team orchestration:' under .devin/skills/**/SKILL.md; read .devin/agents/ORCHESTRATION.md and AGENTS.md Devin guardrail",
-      "expected": "Devin-specific behavior starts in .devin/agents/** and .devin/skills/** and MUST NOT be silently replaced by a Codex-only profile (AGENTS.md).",
-      "actual": "py-audit-bot, py-test-bot, py-config-bot, py-debug-bot, py-doc-bot, py-plan-bot SKILL.md все цитируют `.codex/agents/ORCHESTRATION.md` (v4.3). Codex ORCHESTRATION.md не несёт метки v4.3 (Last verified: 2026-08-07). Workflow-секция тех же файлов относит артефакты к `../../agents/ORCHESTRATION.md` (Devin).",
-      "impact": "Devin-сессия, вошедшая через skill, может следовать Codex spawn_agent/routing вместо run_subagent и .devin/agents/*/AGENT.md.",
-      "root_cause": "Допустимый SKILL.md variant в skills-mirror-contract не покрывает запрет подменять Devin orchestration Codex-файлом.",
-      "remediation": "Во всех шести `.devin/skills/py-*/SKILL.md` заменить Team orchestration на `.devin/agents/ORCHESTRATION.md` и удалить stale `(v4.3)`. Добавить контрактную проверку, что Devin SKILL.md не ссылается на `.codex/agents/ORCHESTRATION.md` как на primary orchestration.",
-      "effort": "S",
-      "automation": "scripts/ai/codex/check_skills_mirror.sh or a Devin-specific assertion in tests/unit/scripts/test_runtime_skill_sync.py",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": ".devin/skills/py-audit-bot/SKILL.md",
-          "line": 18,
-          "command": "grep Team orchestration: .devin/skills",
-          "observation": "6 hits, all point to .codex/agents/ORCHESTRATION.md (v4.3)"
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 109,
-          "command": "read_file AGENTS.md Guardrails",
-          "observation": "Devin sources MUST NOT be silently replaced by a Codex-only profile"
-        }
-      ],
-      "dependencies": [],
-      "validation": [
-        "grep -n 'codex/agents/ORCHESTRATION' .devin/skills --glob SKILL.md → empty for Team orchestration line",
-        "bash scripts/ops/support/skills/check_skills_mirror.sh --check"
-      ]
-    },
-    {
-      "id": "AGENTS-003",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.92,
-      "status": "PROVEN",
-      "category": "instruction-conflict",
-      "path": ".devin/agents/py-test-bot/AGENT.md:58",
-      "observation": "Devin py-test-bot задаёт Coverage threshold ≥85% overall и ≥90% domain; канон RULES — ≥85% overall без отдельного обязательного 90% domain gate.",
-      "method": "read_file .devin/agents/py-test-bot/AGENT.md; grep RULES.md and docs/00-project/ai/rules/windsurf/rules/03-testing.md for coverage",
-      "expected": "Пороги покрытия совпадают с RULES.md (§ testing: ≥85% line coverage, --cov-fail-under=85). Нет выдуманного 90% domain gate.",
-      "actual": "AGENT.md:58 `Coverage threshold: ≥85% overall, ≥90% domain`. Windsurf/Cursor rule 03-testing.md: 'No separate mandatory 90% domain gate in current RULES'. RULES.md цель покрытия ≥85%.",
-      "impact": "Devin test-бот может отклонять валидный ≥85% результат или требовать несуществующий domain gate.",
-      "root_cause": "Hardcoded threshold в Devin profile не сверяется с RULES/coverage-configuration.",
-      "remediation": "Удалить `≥90% domain` из `.devin/agents/py-test-bot/AGENT.md`; сослаться на RULES.md / docs/03-guides/coverage-configuration.md (≥85% overall).",
-      "effort": "S",
-      "automation": "architecture/docs test that agent profiles do not invent coverage gates absent from RULES.md",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": ".devin/agents/py-test-bot/AGENT.md",
-          "line": 58,
-          "command": "read_file",
-          "observation": "≥85% overall, ≥90% domain"
-        },
-        {
-          "path": "docs/00-project/ai/rules/windsurf/rules/03-testing.md",
-          "line": 61,
-          "command": "read_file",
-          "observation": "Minimum 85% overall; no separate mandatory 90% domain gate"
-        }
-      ],
-      "dependencies": [],
-      "validation": [
-        "grep '90% domain' .devin/agents/py-test-bot/AGENT.md → empty",
-        "confirm RULES.md still documents ≥85% / --cov-fail-under=85"
-      ]
-    },
-    {
-      "id": "AGENTS-004",
-      "requirement_id": "REQ-DOC-001",
+      "id": "AGENTS-MEM-002",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "docs-mirror-drift",
-      "path": "docs/00-project/ai/README.md:35-56",
-      "observation": "AI docs entrypoint (Last verified 2026-03-29) объявляет только `.codex/**` runtime SSOT и в Reading Priority не включает equal-peer `.junie/**` / `.devin/**`.",
-      "method": "read_file docs/00-project/ai/README.md vs AGENTS.md Canonical Precedence and AI_RUNTIME_MIRROR_OWNERSHIP.md",
-      "expected": "Docs mirrors не противоречат runtime ownership: .codex/** и .junie/** — equal peers; .devin/** каноничен для Devin.",
-      "actual": "Ownership: '`.codex/**` is the runtime source of truth for Codex behavior' без Junie. Reading Priority пункт 1: только `.codex/agents/`, `.codex/skills/`. AGENTS.md и ownership policy фиксируют Junie equal peer и Devin tree.",
-      "impact": "Контрибьютор/агент, начавший с docs/00-project/ai/README.md, правит только Codex и ломает Junie parity.",
-      "root_cause": "Зеркало не обновлялось после введения Junie equal-peer (last verified 2026-03-29).",
-      "remediation": "Обновить Ownership/Reading Priority: equal peers `.codex/**` + `.junie/**`, Devin `.devin/agents|skills`, docs mirrors не SSOT. Сдвинуть Last verified.",
-      "effort": "S",
-      "automation": "python -m scripts.docs check-drift --runtime-mirrors --freshness",
-      "automated_fix_possible": true,
+      "category": "scripts/supply-chain",
       "evidence": [
-        {
-          "path": "docs/00-project/ai/README.md",
-          "line": 35,
-          "command": "read_file",
-          "observation": "Codex-only SSOT; Last verified 2026-03-29"
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 10,
-          "command": "read_file Canonical Precedence",
-          "observation": "equal peers CODEX-RUNTIME and JUNIE-RUNTIME plus Devin"
-        }
+        {"path": "scripts/ai/mcp/github-mcp-wrapper.sh", "line": 30, "command": "rg -o 'npx -y .*' scripts/ai/mcp/github-mcp-wrapper.sh", "observation": "npx -y @modelcontextprotocol/server-github --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "observation": "npx -y mcp-adr-analysis-server (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_github_actions_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_github_actions_wrapper.sh", "observation": "npx -y github-actions-mcp --stdio (no version pin)"},
+        {"path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "line": 17, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "observation": "npx -y @notprolands/ast-grep-mcp / @chousyn/ast-grep-mcp (no version pin)"}
       ],
-      "dependencies": [],
-      "validation": [
-        "docs/00-project/ai/README.md mentions .junie/** as equal peer",
-        "python -m scripts.docs check-drift --runtime-mirrors --freshness"
-      ]
-    },
-    {
-      "id": "AGENTS-005",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "instruction-conflict",
-      "path": "docs/00-project/ai/agents/agents/README.md:23",
-      "observation": "Published agent catalog утверждает, что Claude runtime source of truth остаётся в runtime-specific registry, тогда как AGENTS.md считает `.claude/**` неактивным.",
-      "method": "read_file docs/00-project/ai/agents/agents/README.md; read_file AGENTS.md Guardrails",
-      "expected": "Mirrors не описывают tracked Claude runtime, которого нет на main.",
-      "actual": "Строка 23: 'Claude runtime source of truth remains in its runtime-specific agent registry.' AGENTS.md:119-121: `.claude/**` is not an active runtime source ... treated as unavailable.",
-      "impact": "Агент может искать/править несуществующий `.claude/**` как SSOT.",
-      "root_cause": "Устаревшая формулировка после миграции Claude → Codex/Junie/Devin.",
-      "remediation": "Заменить предложение на: Claude guide — docs/00-project/ai/agents/guides/CLAUDE.md (compatibility); `.claude/**` не active runtime на main.",
-      "effort": "S",
-      "automation": "docs freshness / forbidden '.claude/** is SSOT' grep",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/agents/README.md",
-          "line": 23,
-          "command": "read_file",
-          "observation": "Claude runtime source of truth remains..."
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 119,
-          "command": "read_file",
-          "observation": ".claude/** is not an active runtime source"
-        }
-      ],
-      "dependencies": [],
-      "validation": [
-        "grep -n 'Claude runtime source of truth' docs/00-project/ai/agents/agents/README.md → empty"
-      ]
-    },
-    {
-      "id": "AGENTS-006",
-      "requirement_id": "REQ-GOV-010",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.88,
-      "status": "PROVEN",
-      "category": "unsafe-instruction",
-      "path": "docs/00-project/ai/agents/guides/AGENT.md:35",
-      "observation": "TL;DR гайда AGENT.md предписывает `make lint && make test && git add . && git commit` — массовый stage без review.",
-      "method": "read_file docs/00-project/ai/agents/guides/AGENT.md; grep 'git add .' in docs/00-project/ai",
-      "expected": "Agent guides не требуют `git add .`; staging только согласованных путей. CLAUDE.md всё ещё ссылается на AGENT.md как «детальные инструкции».",
-      "actual": "Строка 35 содержит `git add . && git commit`. Других живых AI-guide вхождений `git add .` в docs/00-project/ai нет (кроме archive).",
-      "impact": "Агент может закоммитить посторонние/секретные/local clutter файлы, нарушив RH5/RH6 и env guardrail.",
-      "root_cause": "Legacy TL;DR не согласован с git-safety fragment и AGENTS.md.",
-      "remediation": "Заменить на `make lint && make test` и явное `git add <touched-paths>` только после review; запретить `git add .`.",
-      "effort": "S",
-      "automation": "grep CI for 'git add .' in active AI guides",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 35,
-          "command": "read_file",
-          "observation": "make lint && make test && git add . && git commit"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
-          "line": 79,
-          "command": "read_file",
-          "observation": "AGENT.md listed as detailed agent instructions"
-        }
-      ],
-      "dependencies": [],
-      "validation": [
-        "grep -n 'git add \\.' docs/00-project/ai/agents/guides/AGENT.md → empty"
-      ]
-    },
-    {
-      "id": "AGENTS-007",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.86,
-      "status": "PROVEN",
-      "category": "destructive-script",
-      "path": "scripts/ai/mcp/support/mcp_docker_prune.sh:14",
-      "observation": "MCP prune helper выполняет `docker rm -f` по exited-контейнерам без dry-run и без fail-closed confirmation.",
-      "method": "read_file scripts/ai/mcp/support/mcp_docker_prune.sh and mcp_docker_prune.ps1; grep rm -rf / docker rm in scripts/ai",
-      "expected": "Destructive ops имеют dry-run, не-zero на ошибке, и не глотают сбой (`|| true`).",
-      "actual": "`docker rm -f \"${id}\" >/dev/null 2>&1 || true` для image-match exited containers; bioetl-* пропускаются. PowerShell twin: docker rm -f без dry-run, ErrorAction SilentlyContinue.",
-      "impact": "Запуск MCP wrapper может удалить чужие exited контейнеры с совпавшим image substring на shared Docker host.",
-      "root_cause": "Cleanup helper оптимизирован для stdio MCP restart, без operator dry-run.",
-      "remediation": "Добавить BIOETL_MCP_PRUNE_DRY_RUN=1 default-off explicit enable, логировать name/image перед rm, не глотать rm failure; либо требовать opt-in flag.",
+      "expected": "All MCP wrappers pin explicit versions (as context7@3.2.4, filesystem@2026.1.14, neo4j-server@0.2.0 do).",
+      "actual": "Mixed policy: several wrappers use bare `npx -y <pkg>` resolving to latest.",
+      "impact": "Non-reproducible MCP runtime; silent supply-chain upgrade risk. Local runtime (not production CI) => P2.",
+      "root_cause": "Inconsistent pin policy across MCP wrappers.",
+      "remediation": "Pin listed packages to verified versions in both .sh and .ps1.",
       "effort": "M",
-      "automation": "unit test of prune helper with mocked docker; dry-run path",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "scripts/ai/mcp/support/mcp_docker_prune.sh",
-          "line": 14,
-          "command": "read_file",
-          "observation": "docker rm -f ... || true"
-        },
-        {
-          "path": "scripts/ai/mcp/support/mcp_docker_prune.ps1",
-          "line": 20,
-          "command": "read_file",
-          "observation": "docker rm -f $id with SilentlyContinue"
-        }
-      ],
       "dependencies": [],
-      "validation": [
-        "helper supports dry-run and does not use || true on rm",
-        "default path does not delete containers"
-      ]
-    },
-    {
-      "id": "AGENTS-008",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "destructive-script",
-      "path": "scripts/ai/mcp/_patch_grok_mcp_tokens.py:69-82",
-      "observation": "Скрипт безусловно пишет `.grok/config.toml` в репозитории и `$HOME/.grok/config.toml` без --dry-run и без явного списка путей.",
-      "method": "read_file scripts/ai/mcp/_patch_grok_mcp_tokens.py; grep callers",
-      "expected": "Write-capable helper: CLI paths, --dry-run, no silent home-directory mutation.",
-      "actual": "main() итерирует Path('.grok/config.toml') и Path.home()/'.grok'/'config.toml' и path.write_text при diff. Не вызывается из CI workflows (только tests + docs inventory).",
-      "impact": "Случайный запуск патчит пользовательский Grok config вне репозитория.",
-      "root_cause": "Local patch utility без CLI/dry-run (известные CodeRabbit residual, не закрыты).",
-      "remediation": "Добавить argv paths + --dry-run; по умолчанию не писать $HOME; atomic write.",
-      "effort": "S",
-      "automation": "tests/unit/scripts/ai/mcp/test_patch_grok_mcp_tokens.py extend for CLI/dry-run",
+      "validation": ["for f in scripts/ai/mcp/*.sh scripts/ai/mcp/*.ps1; do rg -o 'npx -y [^\"']*' \"$f\"; done"],
       "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "scripts/ai/mcp/_patch_grok_mcp_tokens.py",
-          "line": 71,
-          "command": "read_file",
-          "observation": "paths include Path.home() / '.grok' / 'config.toml'; write_text on change"
-        }
-      ],
-      "dependencies": [],
-      "validation": [
-        "python -m scripts.ai.mcp._patch_grok_mcp_tokens --dry-run does not write",
-        "default invocation does not touch $HOME"
-      ]
+      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9135"
     },
     {
-      "id": "AGENTS-009",
-      "requirement_id": "GAP",
+      "id": "AGENTS-MEM-003",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.84,
-      "status": "PROVEN",
-      "category": "command-matrix",
-      "path": ".codex/agents/CODEX-RUNTIME.md:55",
-      "observation": "Native discovery validation задана как `python3 scripts/ai/codex/doctor.py static --no-write` без Windows `.venv-win` overlay, который требуют AGENTS.md/agent-memory.",
-      "method": "read_file CODEX-RUNTIME.md Native Project Discovery; read_file docs/00-project/ai/memory/agent-memory.md Platform-specific Python",
-      "expected": "Команды runtime map portable: Windows `.\\.venv-win\\Scripts\\python.exe`, POSIX python3/.venv.",
-      "actual": "CODEX-RUNTIME.md:55 только `python3 ...`. agent-memory.md:73-76 MUST use .venv-win on native Windows.",
-      "impact": "Windows Codex-агент может запустить doctor вне project venv или не найти python3.",
-      "root_cause": "Runtime map написан под POSIX CI (skills-consistency.yml uses python3).",
-      "remediation": "Добавить одну строку: Windows `.\\.venv-win\\Scripts\\python.exe scripts/ai/codex/doctor.py static --no-write`.",
-      "effort": "S",
-      "automation": "n/a (docs); optional doctor.py shebang note",
-      "automated_fix_possible": true,
+      "confidence_score": 0.8,
+      "status": "NOT_PROVEN",
+      "category": "memory/tooling",
       "evidence": [
-        {
-          "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 55,
-          "command": "read_file",
-          "observation": "python3 scripts/ai/codex/doctor.py static --no-write"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 73,
-          "command": "read_file",
-          "observation": "Windows agents MUST use .venv-win"
-        }
+        {"path": "src/memory/storage.py", "line": 15, "command": "PYTHONPATH=src python3 -m memory.tooling.workflow smoke", "observation": "ModuleNotFoundError: No module named 'psutil' at import time"},
+        {"path": "pyproject.toml", "line": 83, "command": "rg -n 'psutil' pyproject.toml", "observation": "psutil>=5.9 IS declared as a dependency"}
       ],
+      "expected": "memory workflow smoke runs in a properly provisioned env.",
+      "actual": "Smoke failed only because the ad-hoc system python3 lacked psutil; psutil is declared in pyproject.toml, so this is an environment provisioning gap, not a code defect.",
+      "impact": "None on product; audit-env limitation. Memory smoke NOT validated this iteration.",
+      "root_cause": "Audit ran with unprovisioned system interpreter (no project venv on this host).",
+      "remediation": "Re-run smoke inside project venv (.venv-win on Windows) to confirm memory tooling.",
+      "effort": "S",
       "dependencies": [],
-      "validation": [
-        "CODEX-RUNTIME.md documents .venv-win for native Windows doctor.py"
-      ]
-    },
-    {
-      "id": "AGENTS-010",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.87,
-      "status": "PROVEN",
-      "category": "docs-mirror-drift",
-      "path": "docs/00-project/ai/agents/README.md:15-31",
-      "observation": "Agent catalog mirror (Last verified 2026-04-04) велит править runtime только в `.codex/**` first и не требует Junie parity check.",
-      "method": "read_file docs/00-project/ai/agents/README.md vs POST_CHANGE_VALIDATION / AGENTS.md mirror parity",
-      "expected": "После правки `.codex/agents|skills` или `.junie/agents|skills` — `bash scripts/ai/junie/check_junie_mirror.sh --check`.",
-      "actual": "Строки 30-31: 'Edit local runtime behavior in `.codex/**` first'. Junie упомянут только как 'Junie/Devin peers' в таблице core agents, без parity command.",
-      "impact": "Docs-first contributor обновляет Codex и оставляет Junie drift.",
-      "root_cause": "Mirror last verified 2026-04-04, до equal-peer enforcement.",
-      "remediation": "Добавить equal-peer + `check_junie_mirror.sh --check`; обновить Last verified.",
-      "effort": "S",
-      "automation": "python -m scripts.docs check-drift --runtime-mirrors --freshness",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/README.md",
-          "line": 15,
-          "command": "read_file",
-          "observation": "Docs mirror (2026-04-04); edit .codex first"
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 84,
-          "command": "read_file",
-          "observation": "Runtime mirror parity check required after .codex/.junie changes"
-        }
-      ],
-      "dependencies": ["AGENTS-004"],
-      "validation": [
-        "docs/00-project/ai/agents/README.md cites check_junie_mirror.sh"
-      ]
+      "validation": [".\\.venv-win\\Scripts\\python.exe -m memory.tooling.workflow smoke"],
+      "automated_fix_possible": false
     }
   ]
 }
