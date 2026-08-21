@@ -4673,8 +4673,8 @@
       "formula": "",
       "kind": "http",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 4)",
-      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4",
+      "panel_title": "Inspect Recent Runs (last 10)",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10",
       "query_tokens": [
         "/ops/observability/pipeline-run-reports",
         "pipeline",
