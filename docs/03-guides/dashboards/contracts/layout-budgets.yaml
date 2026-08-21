@@ -121,12 +121,12 @@ first_window_summary_tables:
     bind: limit
   - dashboard: bioetl-overview-v2.json
     id: 215
-    max_rows: 4
+    max_rows: 2
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-overview-v2.json
     id: 9002
-    max_rows: 4
+    max_rows: 2
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-runtime.json
@@ -151,7 +151,7 @@ first_window_summary_tables:
     bind: topk
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
-    max_rows: 4
+    max_rows: 2
     owner: "@bioetl-observability"
     bind: limit
   - dashboard: bioetl-control-plane-v1.json
@@ -207,7 +207,7 @@ answer_panels:
       title: Inspect Ranked Suspects
   bioetl-run-explorer-v1.json:
     - id: 3010
-      title: Inspect Recent Runs (last 4)
+      title: Inspect Recent Runs (last 2)
 
 trust_gate_panels:
   - dashboard: bioetl-control-plane-v1.json

@@ -695,7 +695,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     )
     assert identity.get("gridPos", {}).get("y", 0) >= 19
     assert records.get("gridPos", {}).get("y", 0) >= 19
-    assert "last 4" in str(browse.get("title", "")).lower()
+    assert "last 2" in str(browse.get("title", "")).lower()
 
 
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
