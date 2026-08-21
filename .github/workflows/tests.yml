@@ -68,13 +68,13 @@ jobs:
           } 2>&1 | tee reports/ci/dependency-preflight.log
 
       - name: Upload dependency preflight diagnostics
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: dependency-preflight
           path: reports/ci/dependency-preflight.log
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3
 
       - name: Publish dependency preflight summary
         if: always()
@@ -124,14 +124,14 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload smoke coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-smoke
           path: reports/coverage/.coverage.smoke
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   vcr-preflight:
     needs: dependency-preflight
@@ -241,12 +241,12 @@ jobs:
 
       - name: Upload control-plane completeness artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-        if: always()
+        if: ${{ always() && !cancelled() }}
         with:
           name: control-plane-completeness
           path: reports/e2e/control-plane-completeness.xml
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 3
 
   # Blocking offline-confidence lane that also contributes a coverage shard.
   # Live provider contracts stay in the scheduled contract-tests workflow and
@@ -292,23 +292,23 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload contract confidence telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-contract-confidence
           path: reports/test-telemetry/junit-contract-confidence.xml
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 3
 
       - name: Upload contract confidence coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-contract-confidence
           path: reports/coverage/.coverage.contract-confidence
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   flaky-telemetry:
     runs-on: ubuntu-latest
@@ -348,7 +348,7 @@ jobs:
             --empirical-json-out reports/test-telemetry/flaky-test-empirical.json
 
       - name: Upload empirical flaky telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: flaky-test-empirical
@@ -356,7 +356,7 @@ jobs:
             reports/test-telemetry/flaky-test-empirical.json
             reports/test-telemetry/flaky-runs/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 7
 
   governance-preflight:
     needs: dependency-preflight
@@ -536,7 +536,7 @@ jobs:
         # always(): keep evidence when the gate fails; do not dual-fail solely because
         # junit/json were not materialised (#7519 / CI-C1-007). The gate step
         # above remains the blocking status signal.
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: dashboard-semantic-policy
@@ -544,6 +544,7 @@ jobs:
             reports/observability/ci/dashboard-semantic-policy.xml
             reports/observability/runtime_cardinality_review_pr.json
           if-no-files-found: warn
+          retention-days: 7
 
       - name: Prometheus rules syntax + promtool test vectors
         run: uv run --frozen --no-build python -m scripts.engineering.qa check-prometheus-rules --runner docker
@@ -709,13 +710,13 @@ jobs:
             --junitxml=reports/test-telemetry/junit-track-d.xml
 
       - name: Upload Track D telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-track-d
           path: reports/test-telemetry/junit-track-d.xml
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 3
 
   dq-consistency-gate:
     runs-on: ubuntu-latest
@@ -780,22 +781,24 @@ jobs:
             --fail-on-degraded-live-review
 
       - name: Upload quality metrics artifact
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: ci-quality-metrics
           path: reports/quality/ci-quality-metrics.json
+          retention-days: 7
 
       - name: Upload Silver/Gold filter parity artifact
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: silver-gold-filter-parity-report
           path: reports/quality/silver-gold-filter-parity-report.json
           if-no-files-found: warn
+          retention-days: 7
 
       - name: Upload observability review artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: observability-runtime-cardinality-review
@@ -803,6 +806,7 @@ jobs:
             reports/observability/runtime_cardinality_inventory.json
             reports/observability/runtime_cardinality_review.json
           if-no-files-found: warn
+          retention-days: 7
 
   # Fast tests run first for quick feedback
   test-fast:
@@ -838,13 +842,13 @@ jobs:
             --junitxml=reports/test-telemetry/junit-fast.xml
 
       - name: Upload fast test telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-fast
           path: reports/test-telemetry/junit-fast.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
   # Checked-in repository contracts are unit-owned but intentionally serial.
   repo-backed-unit:
@@ -886,23 +890,23 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload repo-backed unit telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-repo-backed-unit
           path: reports/test-telemetry/junit-repo-backed-unit.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload repo-backed unit coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-repo-backed-unit
           path: reports/coverage/.coverage.repo-backed-unit
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   # Tooling/script unit tests (passport projector, ops scripts). Single canonical lane (#8327/#8328).
   unit-scripts-tooling:
@@ -945,23 +949,23 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload unit-scripts-tooling telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-unit-scripts-tooling
           path: reports/test-telemetry/junit-unit-scripts-tooling.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload unit scripts tooling coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-unit-scripts-tooling
           path: reports/coverage/.coverage.unit-scripts-tooling
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   # Serial filesystem-contract lane (test_matrix unit-filesystem-contracts).
   # Classified modules are auto-marked fs_contract in tests/conftest.py and must
@@ -1005,23 +1009,23 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload unit-filesystem-contracts telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-unit-filesystem-contracts
           path: reports/test-telemetry/junit-unit-filesystem-contracts.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload unit filesystem-contracts coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-unit-filesystem-contracts
           path: reports/coverage/.coverage.unit-filesystem-contracts
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   # Serial subprocess-backed unit helpers outside unit-scripts-tooling.
   # Excluded from test-matrix xdist; scripts path remains owned by unit-scripts-tooling.
@@ -1066,23 +1070,23 @@ jobs:
           exit "$TEST_EXIT"
 
       - name: Upload unit-subprocess-backed telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-unit-subprocess-backed
           path: reports/test-telemetry/junit-unit-subprocess-backed.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
       - name: Upload unit subprocess-backed coverage shard
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-unit-subprocess-backed
           path: reports/coverage/.coverage.unit-subprocess-backed
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
   # Full test matrix runs in parallel for comprehensive coverage
   test-matrix:
@@ -1147,23 +1151,23 @@ jobs:
           exit $TEST_EXIT
 
       - name: Upload coverage shard (${{ matrix.test-group.name }} on Python 3.13)
-        if: always() && matrix.python-version == '3.13'
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: coverage-data-${{ matrix.test-group.name }}
           path: reports/coverage/.coverage.${{ matrix.test-group.name }}
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
 
       - name: Upload test telemetry (${{ matrix.test-group.name }} on Python 3.13)
-        if: always() && matrix.python-version == '3.13'
+        if: ${{ always() && !cancelled() && matrix.python-version == '3.13' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-${{ matrix.test-group.name }}
           path: reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
   memory-tests:
     runs-on: ubuntu-latest
@@ -1192,13 +1196,13 @@ jobs:
             --junitxml=reports/test-telemetry/junit-memory.xml
 
       - name: Upload memory test telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-telemetry-memory
           path: reports/test-telemetry/junit-memory.xml
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 3
 
   performance-budgets:
     runs-on: ubuntu-latest
@@ -1265,7 +1269,7 @@ jobs:
 
       - name: Upload performance budget report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-        if: always()
+        if: ${{ always() && !cancelled() }}
         with:
           name: performance-hotspot-budgets
           path: |
@@ -1275,7 +1279,7 @@ jobs:
             reports/performance/hotspot-degradation.md
             tests/performance/hotspot_budgets.json
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 7
 
   # Final coverage verification (combine shard coverage + serial-only pass)
   coverage-verify:
@@ -1366,14 +1370,14 @@ jobs:
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-        if: always()
+        if: ${{ always() && !cancelled() }}
         with:
           name: coverage-report
           path: |
             reports/coverage/coverage.xml
             reports/quality/module-coverage-inventory.json
             reports/quality/module-coverage-inventory.candidate.json
-          retention-days: 30
+          retention-days: 7
 
   # Keep candidate production independently green and SHA-bound. This required
   # gate fails closed when the committed inventory has not consumed it yet.
@@ -1663,7 +1667,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload slow-test telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-duration-telemetry
@@ -1671,16 +1675,16 @@ jobs:
             reports/test-telemetry/slowest-tests.md
             reports/test-telemetry/slowest-tests.json
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 7
 
       - name: Upload test-health telemetry
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: test-health-telemetry
           path: reports/quality/test-runs/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 7
 
   proof-or-stop-advisory:
     name: Proof-or-Stop advisory closeout
@@ -1890,13 +1894,13 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Proof-or-Stop bundle
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: proof-or-stop-${{ github.run_id }}-${{ github.run_attempt }}
           path: reports/quality/proof-or-stop/${{ env.PROOF_OR_STOP_RUN_ID }}/
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 14
 
       - name: Apply staged Proof-or-Stop enforcement
         if: always()
