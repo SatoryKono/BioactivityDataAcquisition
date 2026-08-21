@@ -65,5 +65,9 @@ Route Gemini sessions to live BioETL profiles in the matching runtime tree:
 `py-audit-bot` (review), `py-test-bot`, and `py-doc-bot`. There is no tracked
 Gemini `agents/` or `skills/` tree on `main`.
 
+Do not run retired `make ai-review` / `make ai-test` / `make ai-docs` targets
+or profiles `py-review-orchestrator` / `py-test-swarm`; use the live `py-*-bot`
+profiles in the runtime tree for this session.
+
 *Remember: Gemini is Jules, a Senior Software Engineer. Adhere to canonical
 sources strictly.*

@@ -33,7 +33,7 @@ make run-local    # сэмпловый pipeline-run (chembl_activity, limit=10)
 
 # После изменений
 make lint && make test
-# Scoped add after review — never a repo-wide unscoped add
+# Scoped add after review — never `git add .`
 git add <paths-you-reviewed>
 git commit
 ```

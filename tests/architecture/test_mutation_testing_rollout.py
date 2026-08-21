@@ -30,7 +30,6 @@ def _parse_mutation_workflow_thresholds(workflow: str) -> dict[str, float]:
         for match in _MUTATION_THRESHOLD_RE.finditer(workflow)
     }
 
-
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
     WORKFLOWS_DIR,
