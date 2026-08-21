@@ -198,7 +198,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-provider-health-v2.json | 9403 | Inspect Processed Records |
 | bioetl-run-explorer-v1.json | 1000 | Navigate Dashboards |
 | bioetl-run-explorer-v1.json | 1 | Understand Run Scope |
-| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 4) |
+| bioetl-run-explorer-v1.json | 3010 | Inspect Recent Runs (last 10) |
 | bioetl-run-explorer-v1.json | 3099 | Selected Run Details |
 | bioetl-run-explorer-v1.json | 3022 | Inspect Run Identity |
 | bioetl-run-explorer-v1.json | 3023 | Inspect Processed Records |

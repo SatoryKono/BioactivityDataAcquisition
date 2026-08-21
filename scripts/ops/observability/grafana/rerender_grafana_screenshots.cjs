@@ -24,6 +24,48 @@ const PANEL_CONTENT_SCROLLER_SELECTORS = Object.freeze([
   '[data-testid$="panel content"]',
   ".panel-content",
 ]);
+const OVERFLOW_SCROLL_KEYWORDS = Object.freeze(["auto", "scroll", "overlay"]);
+
+function scrollerDelta(measurement) {
+  const source =
+    measurement && typeof measurement === "object" && measurement.element
+      ? measurement.element
+      : measurement;
+  if (!source || typeof source !== "object") {
+    return Number.NEGATIVE_INFINITY;
+  }
+  const scrollHeight = Number(source.scrollHeight);
+  const clientHeight = Number(source.clientHeight);
+  const scrollWidth = Number(source.scrollWidth);
+  const clientWidth = Number(source.clientWidth);
+  const vertical =
+    Number.isFinite(scrollHeight) && Number.isFinite(clientHeight)
+      ? scrollHeight - clientHeight
+      : 0;
+  const horizontal =
+    Number.isFinite(scrollWidth) && Number.isFinite(clientWidth)
+      ? scrollWidth - clientWidth
+      : 0;
+  return Math.max(vertical, horizontal);
+}
+
+function pickBestScrollerCandidate(candidates) {
+  const list = Array.isArray(candidates) ? candidates : [];
+  let best = list[0] || null;
+  let bestDelta = Number.NEGATIVE_INFINITY;
+  for (const candidate of list) {
+    const delta = scrollerDelta(candidate);
+    if (delta > bestDelta) {
+      best = candidate;
+      bestDelta = delta;
+    }
+  }
+  return best;
+}
+
+function isScrollableOverflow(overflowValue) {
+  return OVERFLOW_SCROLL_KEYWORDS.includes(String(overflowValue || "").toLowerCase());
+}
 
 function zoomScale(zoomPercent) {
   return zoomPercent / 100;
@@ -1592,6 +1634,25 @@ async function collectPanelContainment(page, dashboard) {
         if (visible(content)) {
           candidates.push({ element: content, selector: "panel-content" });
         }
+        const visit = (element) => {
+          if (!(element instanceof Element)) return;
+          if (visible(element)) {
+            const style = getComputedStyle(element);
+            const overflowY = String(style.overflowY || "").toLowerCase();
+            const overflowX = String(style.overflowX || "").toLowerCase();
+            if (
+              ["auto", "scroll", "overlay"].includes(overflowY) ||
+              ["auto", "scroll", "overlay"].includes(overflowX)
+            ) {
+              candidates.push({
+                element,
+                selector: `overflow:${overflowY}/${overflowX}`,
+              });
+            }
+          }
+          for (const child of element.children) visit(child);
+        };
+        visit(container);
         let best = { element: content, selector: "panel-content", delta: -1 };
         for (const candidate of candidates) {
           const delta = Math.max(
@@ -2249,13 +2310,18 @@ module.exports = {
   evaluateContainmentResults,
   evaluatePanelContainment,
   isFirstWindowPanel,
+  isScrollableOverflow,
   layoutViewportForZoom,
   physicalViewportFromLayout,
+  pickBestScrollerCandidate,
   pngEvidence,
+  scrollerDelta,
   selectFirstWindowPanels,
   summarizeFirstWindowPanel,
   validateContainmentManifest,
   CONTAINMENT_TOLERANCE_PX,
   FIRST_WINDOW_CONTAINMENT_TYPES,
   FIRST_WINDOW_Y,
+  OVERFLOW_SCROLL_KEYWORDS,
+  PANEL_CONTENT_SCROLLER_SELECTORS,
 };
