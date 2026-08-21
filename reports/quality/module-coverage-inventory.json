@@ -49165,12 +49165,24 @@
         "unmeasured_module_count": 0
       }
     },
+<<<<<<< HEAD
     "source_module_count": 2450,
+||||||| 9889aaff50
+    "source_module_count": 2436,
+=======
+    "source_module_count": 2437,
+>>>>>>> fix/nine-audit-issues-9275-9291
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1558,
       "no_executable_lines": 3,
+<<<<<<< HEAD
       "partially_covered": 889,
+||||||| 9889aaff50
+      "partially_covered": 881,
+=======
+      "partially_covered": 882,
+>>>>>>> fix/nine-audit-issues-9275-9291
       "uncovered": 0,
       "unmeasured": 0
     },
