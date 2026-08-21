@@ -2,6 +2,8 @@
 
 Source run: `20260821T071538Z-configs-cycle-a739c347eb`.
 
-`surface_score=1` (WARN). Live YAML/hierarchy/secrets-in-files/budgets hold.
-Schema still advertises `pipeline.source.api_key` (#9260) and retired
-SourceConfig transport fields (#9259).
+`surface_score=0` (PASS on PR-head). Live YAML/hierarchy/secrets-in-files/budgets hold.
+`pipeline.json` `$defs.SourceConfig` is `email` / `fields` / `api` only.
+CFG-SCHEMA-APIKEY-001 (#9260) and CFG-SCHEMA-SOURCE-001 (#9259) are remediated
+on `fix/audit-cycle-configs` (PR #9263). Residual CFG-DOCKER-NET-DOCS-001 remains
+out of SCOPE (docs).
