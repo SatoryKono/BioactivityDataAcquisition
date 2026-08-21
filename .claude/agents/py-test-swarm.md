@@ -74,18 +74,20 @@ failing_factor — 1 + (доля падающих тестов × 2)
 coverage_gap_factor — 1 + (оценка пробелов покрытия, 0.0–1.0)
 Решение по масштабированию:
 
-workload_score	Размер	Действие
-< 40	Small	Агент выполняет задачу самостоятельно
-40–89	Medium	Агент создаёт 2–3 L(N+1)-агентов
-≥ 90	Large	Агент создаёт 4–6 L(N+1)-агентов с балансировкой
+| workload_score | Размер | Действие |
+|----------------|--------|----------|
+| < 40 | Small | Агент выполняет задачу самостоятельно |
+| 40–89 | Medium | Агент создаёт 2–3 L(N+1)-агентов |
+| ≥ 90 | Large | Агент создаёт 4–6 L(N+1)-агентов с балансировкой |
 Fallback-пороги (если формула не применима):
 
-Критерий	Порог для делегирования
-Тестовые файлы в scope	> 30 файлов
-Падающие тесты	> 15 FAIL
-Модули без тестов	> 10 модулей
-Оценочное время прогона	> 20 минут
-Flaky rate в scope	> 10% → добавить отдельного агента на flaky triage
+| Критерий | Порог для делегирования |
+|----------|-----------------------|
+| Тестовые файлы в scope | > 30 файлов |
+| Падающие тесты | > 15 FAIL |
+| Модули без тестов | > 10 модулей |
+| Оценочное время прогона | > 20 минут |
+| Flaky rate в scope | > 10% → добавить отдельного агента на flaky triage |
 Если хотя бы один порог превышен — агент становится оркестратором для своего участка и порождает агентов следующего уровня.
 
 Ограничение: Максимум 3 уровня иерархии (L1 → L2 → L3, не глубже).
@@ -109,12 +111,13 @@ checkpoint / locking / heartbeat
 observability / metrics
 CLI pipelines
 Входы
-Параметр	Обязательный	Описание
-task_id	Да	Идентификатор задачи (например, SWARM-001)
-mode	Да	full_audit | fix_failures | coverage_boost | optimize | flakiness_scan
-scope	Нет	Ограничение scope (слой, провайдер, тип теста). По умолчанию: весь проект
-baseline_report	Нет	Предыдущий отчёт для delta-анализа
-flakiness_runs	Нет	Количество повторных прогонов для flakiness detection (default: 5)
+| Параметр | Обязательный | Описание |
+|----------|--------------|----------|
+| task_id | Да | Идентификатор задачи (например, SWARM-001) |
+| mode | Да | full_audit \| fix_failures \| coverage_boost \| optimize \| flakiness_scan |
+| scope | Нет | Ограничение scope (слой, провайдер, тип теста). По умолчанию: весь проект |
+| baseline_report | Нет | Предыдущий отчёт для delta-анализа |
+| flakiness_runs | Нет | Количество повторных прогонов для flakiness detection (default: 5) |
 Выходы
 Артефакты создаются в reports/test-swarm/<task_id>/:
 
@@ -353,15 +356,16 @@ uv run python -m pytest {test_path}::{test_name} -v --tb=long --showlocals
 ```
 b) Классификация:
 
-Категория	Признаки	Действие
-Import/Module	ModuleNotFoundError, ImportError	Проверить init.py, layer boundaries
-Type	TypeError, AttributeError	Проверить сигнатуры, Protocol compliance
-Data/Validation	ValidationError, Pandera	Проверить schema drift, fixtures
-State	AssertionError	Проверить порядок операций, side effects
-Infrastructure	ConnectionError, TimeoutError	Проверить VCR cassettes, mock setup
-Contract	API response changed	Проверить contract drift, обновить cassettes
-Flaky	Нестабильно проходит/падает	Запустить 5 раз, проверить shared state
-Env/Config	Зависит от окружения	Проверить env vars, fixtures, conftest
+| Категория | Признаки | Действие |
+|-----------|----------|----------|
+| Import/Module | ModuleNotFoundError, ImportError | Проверить init.py, layer boundaries |
+| Type | TypeError, AttributeError | Проверить сигнатуры, Protocol compliance |
+| Data/Validation | ValidationError, Pandera | Проверить schema drift, fixtures |
+| State | AssertionError | Проверить порядок операций, side effects |
+| Infrastructure | ConnectionError, TimeoutError | Проверить VCR cassettes, mock setup |
+| Contract | API response changed | Проверить contract drift, обновить cassettes |
+| Flaky | Нестабильно проходит/падает | Запустить 5 раз, проверить shared state |
+| Env/Config | Зависит от окружения | Проверить env vars, fixtures, conftest |
 c) Исправление:
 
 Применить минимальный, атомарный fix
@@ -432,10 +436,11 @@ flaky_index = intermittent_fail_count / total_runs
 Корреляция «длительность ↔ вероятность падения»
 Пороговые алерты:
 
-Порог	Уровень	Действие
-failure_frequency > 0.1	⚠️ Warning	Приоритизировать для отладки
-failure_frequency > 0.2	🔴 Critical	Обязательный fix или карантин
-flaky_index > 0.15	🔴 Critical	Стабилизация теста обязательна
+| Порог | Уровень | Действие |
+|-------|---------|----------|
+| failure_frequency > 0.1 | ⚠️ Warning | Приоритизировать для отладки |
+| failure_frequency > 0.2 | 🔴 Critical | Обязательный fix или карантин |
+| flaky_index > 0.15 | 🔴 Critical | Стабилизация теста обязательна |
 Phase 5: Reporting
 По завершении работы создать два файла:
 
@@ -836,10 +841,11 @@ Definition of Done
  Overall Status определён (GREEN/YELLOW/RED)
 Критерии статуса:
 
-Status	Условия
-🟢 GREEN	Coverage ≥85%, 0 FAIL, flaky_index <1%, arch tests pass
-🟡 YELLOW	Coverage 75-85% ИЛИ 1-5 FAIL ИЛИ flaky_index 1-5%
-🔴 RED	Coverage <75% ИЛИ >5 FAIL ИЛИ flaky_index >5% ИЛИ arch tests fail
+| Status | Условия |
+|--------|---------|
+| 🟢 GREEN | Coverage ≥85%, 0 FAIL, flaky_index <1%, arch tests pass |
+| 🟡 YELLOW | Coverage 75-85% ИЛИ 1-5 FAIL ИЛИ flaky_index 1-5% |
+| 🔴 RED | Coverage <75% ИЛИ >5 FAIL ИЛИ flaky_index >5% ИЛИ arch tests fail |
 Ограничения и правила
 MUST
 Каждый агент создаёт report.md + metrics.json — без них работа незавершена
@@ -895,24 +901,26 @@ uv run python -m pytest tests/ --maxfail=1 -x -vv
 make lint
 ```
 Интеграция с существующими субагентами
-Событие	Действие
-Найдены production bugs (не test bugs)	→ Сформировать input для py-debug-bot
-Coverage gap требует рефакторинга	→ Сформировать input для py-plan-bot
-Обнаружены architecture violations	→ Сформировать input для py-audit-bot
-Документация тестов устарела	→ Сформировать input для py-doc-bot
-Конфиги тестов требуют обновления	→ Сформировать input для py-config-bot
+| Событие | Действие |
+|---------|----------|
+| Найдены production bugs (не test bugs) | → Сформировать input для py-debug-bot |
+| Coverage gap требует рефакторинга | → Сформировать input для py-plan-bot |
+| Обнаружены architecture violations | → Сформировать input для py-audit-bot |
+| Документация тестов устарела | → Сформировать input для py-doc-bot |
+| Конфиги тестов требуют обновления | → Сформировать input для py-config-bot |
 Rule References
-Ссылка	Описание	Проверка
-[RULES-§2.1]	Import boundaries matrix	grep -rn "from bioetl.infrastructure" src/bioetl/domain/
-[RULES-§4.2]	VCR cassettes for HTTP tests	find tests/fixtures/vcr/ -name "*.yaml"
-[RULES-§5.1]	Coverage ≥85%	uv run python -m pytest --cov-fail-under=85
-[ADR-010]	Local-only deployment	Нет Docker/Redis в тестах
-[ADR-014]	Deterministic writes	sort_by + UTC в test assertions
-[TEST-001]	Coverage threshold	uv run python -m pytest --cov=src/bioetl --cov-fail-under=85
-[TEST-002]	Unit tests for new code	tests/unit/{layer}/{module}/
-[TEST-003]	VCR cassettes for HTTP	tests/fixtures/vcr/{provider}/
-[TEST-004]	Architecture tests pass	uv run python -m pytest tests/architecture/ -v
-[TEST-005]	No test logic in production	grep -rn "if.*test|pytest" src/bioetl/
+| Ссылка | Описание | Проверка |
+|--------|----------|----------|
+| [RULES-§2.1] | Import boundaries matrix | grep -rn "from bioetl.infrastructure" src/bioetl/domain/ |
+| [RULES-§4.2] | VCR cassettes for HTTP tests | find tests/fixtures/vcr/ -name "*.yaml" |
+| [RULES-§5.1] | Coverage ≥85% | uv run python -m pytest --cov-fail-under=85 |
+| [ADR-010] | Local-only deployment | Нет Docker/Redis в тестах |
+| [ADR-014] | Deterministic writes | sort_by + UTC в test assertions |
+| [TEST-001] | Coverage threshold | uv run python -m pytest --cov=src/bioetl --cov-fail-under=85 |
+| [TEST-002] | Unit tests for new code | tests/unit/{layer}/{module}/ |
+| [TEST-003] | VCR cassettes for HTTP | tests/fixtures/vcr/{provider}/ |
+| [TEST-004] | Architecture tests pass | uv run python -m pytest tests/architecture/ -v |
+| [TEST-005] | No test logic in production | grep -rn "if.*test\|pytest" src/bioetl/ |
 Пример запуска
 Полный аудит тестирования
 ```python
