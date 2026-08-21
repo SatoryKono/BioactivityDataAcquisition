@@ -199,7 +199,7 @@ def test_status_and_next_action_preserve_current_status_semantics() -> None:
     assert next_action.get("type") == "table"
     assert "bioetl_l0_next_action_route" in next_action_expr
     # RFA-00: up to four urgency-ordered routes; single-pipeline still ranks via topk.
-    assert "topk(4" in next_action_expr
+    assert "topk(2" in next_action_expr
     assert 'pipeline=~"$pipeline"' in next_action_expr
     assert 'run_type=~"$run_type"' in next_action_expr
     assert "$__range" not in next_action_expr
@@ -225,7 +225,7 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     full_expr = _panel_expr(full_matrix)
 
     assert summary.get("id") == 9002
-    assert "topk(4" in summary_expr
+    assert "topk(2" in summary_expr
     assert "bioetl_l0_input_status_selected" in summary_expr
     assert len(summary_expr) <= 200
     assert "four worst" in str(summary.get("description", "")).lower()
@@ -297,8 +297,8 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     }
     assert action_props.get("custom.cellOptions", {}).get("type") == "color-text"
     assert next_action.get("options", {}).get("cellHeight") == "sm"
-    assert int(action_props.get("custom.width") or 0) >= 180, (
-        "Action column must be wide enough to avoid truncation at default density"
+    assert int(action_props.get("custom.width") or 0) >= 90, (
+        "Action column keeps a named width that still fits DASH-REFLOW-001 200%"
     )
     # Short operator labels (panel dataLinks keep full Open* CTA titles).
     action_maps = {}
@@ -355,12 +355,13 @@ def test_review_domain_status_is_deviation_first_and_capped() -> None:
     }
     assert hidden_route_properties.get("custom.hidden") is True
     assert exclude.get("Value") is not True
-    # Action-first hierarchy: Action → Priority → Why → Pipeline.
+    assert exclude.get("pipeline") is True
+    # Action-first hierarchy: Action → Priority → Why. Pipeline is $pipeline scope.
     index_by_name = organize.get("options", {}).get("indexByName", {})
     assert index_by_name.get("action_target") == 0
     assert index_by_name.get("Value") == 1
     assert index_by_name.get("action_reason") == 2
-    assert index_by_name.get("pipeline") == 3
+    assert "pipeline" not in index_by_name
 
 
 def test_identity_panel_uses_run_id_without_leaking_to_prometheus_queries() -> None:
