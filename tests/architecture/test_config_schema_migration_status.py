@@ -72,26 +72,13 @@ def test_pipeline_schema_does_not_advertise_filter_batch_size() -> None:
 
 
 def test_pipeline_source_schema_does_not_advertise_source_pagination_aliases() -> None:
-    """Pipeline JSON schema must not expose direct source pagination override keys."""
+    """Entity pipeline schema must not embed provider transport models."""
     schema = _load_schema("pipeline.json")
     defs = schema.get("$defs")
     assert isinstance(defs, dict), "pipeline.json must contain $defs section"
-
-    provider_source = defs.get("ProviderConfigYaml")
-    assert isinstance(provider_source, dict), (
-        "pipeline.json missing ProviderConfigYaml definition"
-    )
-
-    properties = provider_source.get("properties")
-    assert isinstance(properties, dict), (
-        "ProviderConfigYaml must define properties in pipeline.json"
-    )
-
-    forbidden = {"batch_size", "page_size", "max_url_length"}
-    present = sorted(forbidden.intersection(properties))
-    assert not present, (
-        "pipeline.json still advertises direct source pagination override keys "
-        f"inside ProviderConfigYaml: {present}"
+    assert "ProviderConfigYaml" not in defs, (
+        "pipeline.json must not embed ProviderConfigYaml; provider transport "
+        "belongs in source.json / configs/providers"
     )
 
 
@@ -129,6 +116,36 @@ def test_source_schema_does_not_advertise_retired_root_batch_size() -> None:
     assert "batch_size" not in properties, (
         "source.json still advertises retired source.batch_size"
     )
+
+
+def test_pipeline_source_schema_does_not_advertise_secrets_or_transport() -> None:
+    """Entity pipeline.source must not advertise secrets or provider transport."""
+    schema = _load_schema("pipeline.json")
+    defs = schema.get("$defs")
+    assert isinstance(defs, dict), "pipeline.json must contain $defs section"
+
+    source_cfg = defs.get("SourceConfig")
+    assert isinstance(source_cfg, dict), "pipeline.json missing SourceConfig"
+
+    properties = source_cfg.get("properties")
+    assert isinstance(properties, dict), "SourceConfig must define properties"
+
+    forbidden = {
+        "api_key",
+        "batch_size",
+        "rate_limit",
+        "circuit_breaker",
+        "provider_config",
+    }
+    present = sorted(forbidden.intersection(properties))
+    assert not present, (
+        "pipeline.json SourceConfig still advertises forbidden entity source "
+        f"fields: {present}"
+    )
+    for required in ("email", "fields", "api"):
+        assert required in properties, (
+            f"pipeline.json SourceConfig must keep entity request field {required}"
+        )
 
 
 def test_composite_schema_does_not_advertise_retired_column_groups_file() -> None:
@@ -176,6 +193,13 @@ def test_configs_readme_tracks_current_legacy_status_policy() -> None:
     assert "pipeline `page_size_override`" in readme, (
         "configs/README.md must describe pipeline.page_size_override as the "
         "canonical pipeline-level pagination override"
+    )
+    assert "pipeline `source.api_key`" in readme, (
+        "configs/README.md must describe pipeline.source.api_key as rejected"
+    )
+    assert "pipeline `source.batch_size`" in readme, (
+        "configs/README.md must describe pipeline.source transport overrides "
+        "as rejected"
     )
 
 

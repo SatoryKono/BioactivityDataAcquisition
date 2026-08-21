@@ -61,6 +61,7 @@ def test_collect_forbidden_pipeline_source_overrides_composes_helpers() -> None:
         mod._collect_forbidden_pipeline_source_overrides(
             {
                 "batch_size": 10,
+                "api_key": "not-a-real-secret",
                 "rate_limit": {"rps": 1},
                 "circuit_breaker": {"enabled": True},
                 "batch": {"size": 5},
@@ -70,6 +71,7 @@ def test_collect_forbidden_pipeline_source_overrides_composes_helpers() -> None:
     )
     assert "source.batch" in forbidden
     assert "source.batch_size" in forbidden
+    assert "source.api_key" in forbidden
     assert "source.rate_limit" in forbidden
     assert "source.circuit_breaker" in forbidden
     assert "source.provider_config" in forbidden
@@ -80,9 +82,18 @@ def test_collect_forbidden_pipeline_source_overrides_allows_clean_entity_source(
     None
 ):
     assert (
-        mod._collect_forbidden_pipeline_source_overrides({"parameters": {"limit": 10}})
+        mod._collect_forbidden_pipeline_source_overrides(
+            {"api": {"from_db": "ChEMBL"}, "email": "ops@example.org"}
+        )
         == []
     )
+
+
+def test_collect_forbidden_pipeline_source_overrides_rejects_api_key() -> None:
+    forbidden = mod._collect_forbidden_pipeline_source_overrides(
+        {"api_key": "not-a-real-secret"}
+    )
+    assert "source.api_key" in forbidden
 
 
 def test_load_source_section_rejects_forbidden_transport_overrides(
@@ -115,13 +126,13 @@ def test_load_source_section_rejects_forbidden_transport_overrides(
         mod.load_source_section(config, config_path)
 
 
-def test_load_source_section_merges_when_entity_source_is_clean(
+def test_load_source_section_rejects_api_key(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class _FakeSource:
         def model_dump(self, *, exclude_none: bool = True) -> dict[str, object]:
-            return {"source": {"base_url": "https://example.test", "timeout": 30}}
+            return {"source": {"provider_config": {"base_url": "https://example.test"}}}
 
     monkeypatch.setattr(
         mod,
@@ -135,10 +146,42 @@ def test_load_source_section_merges_when_entity_source_is_clean(
 
     config: dict[str, object] = {
         "provider": "chembl",
-        "source": {"parameters": {"limit": 5}},
+        "source": {"api_key": "not-a-real-secret"},
+    }
+    with pytest.raises(ValueError, match="api_key"):
+        mod.load_source_section(config, config_path)
+
+
+def test_load_source_section_keeps_entity_request_data_without_provider_transport(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _FakeSource:
+        def model_dump(self, *, exclude_none: bool = True) -> dict[str, object]:
+            return {
+                "source": {
+                    "provider_config": {"base_url": "https://example.test"},
+                    "rate_limit": {"requests_per_second": 1.0},
+                }
+            }
+
+    monkeypatch.setattr(
+        mod,
+        "load_source_config_from_root",
+        lambda provider, configs_root=None: _FakeSource(),
+    )
+
+    config_path = tmp_path / "configs" / "entities" / "chembl" / "activity.yaml"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text("pipeline: {}\n", encoding="utf-8")
+
+    config: dict[str, object] = {
+        "provider": "chembl",
+        "source": {"api": {"from_db": "ChEMBL", "to_db": "UniProtKB"}},
     }
     mod.load_source_section(config, config_path)
     source = config["source"]
     assert isinstance(source, dict)
-    assert source["base_url"] == "https://example.test"
-    assert source["parameters"] == {"limit": 5}
+    assert source == {"api": {"from_db": "ChEMBL", "to_db": "UniProtKB"}}
+    assert "provider_config" not in source
+    assert "rate_limit" not in source
