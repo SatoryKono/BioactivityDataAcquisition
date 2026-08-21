@@ -76,10 +76,10 @@ FILE_BY_UID = {
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
 NAV_HEIGHT = 4
-NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px"
+NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1.15;margin:0 4px 0"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;"
-    "border-radius:3px;font-weight:600;line-height:1.25"
+    "box-sizing:border-box;flex:1 1 110px;text-align:center;padding:1px 6px;"
+    "border-radius:3px;font-weight:600;line-height:1.2"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -94,8 +94,8 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
-    "padding:2px 6px;overflow:visible;white-space:normal;font-size:16px"
+    "display:flex;gap:4px;flex-wrap:wrap;align-items:center;"
+    "padding:0 4px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
 
@@ -149,14 +149,7 @@ def render_html(*, current_uid: str) -> str:
         f'<div class="bioetl-nav" role="navigation" '
         f'aria-label="BioETL dashboards" style="{CONTAINER_STYLE}">',
     ]
-    for item in primary:
-        parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
-    # Force second row for adjunct workspaces (readability at 1024px).
-    parts.append(
-        '<span style="flex:1 1 100%;height:0;overflow:hidden;margin:0;padding:0;'
-        'border:0" aria-hidden="true"></span>'
-    )
-    for item in adjunct:
+    for item in primary + adjunct:
         parts.append(_chip_html(item, current_uid=current_uid, source_uid=current_uid))
     parts.append("</div>")
     return "".join(parts)
