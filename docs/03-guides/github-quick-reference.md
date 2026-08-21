@@ -39,7 +39,7 @@ make lint && make test
 
 ```bash
 git status
-git add path/to/changed-file
+git add path/to/reviewed/file
 git commit -m "feat(scope): description"
 git push -u origin HEAD
 gh pr create

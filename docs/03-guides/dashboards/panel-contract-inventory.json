@@ -4453,19 +4453,19 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+      "formula": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
       "kind": "promql",
       "panel_id": 9104,
       "panel_title": "Monitor Telemetry Presence",
-      "query": "max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+      "query": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
       "query_tokens": [
-        "bioetl_provider_health_status"
+        "bioetl_provider_current_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
       "thresholds": [
         {
-          "color": "blue",
+          "color": "green",
           "value": null
         },
         {

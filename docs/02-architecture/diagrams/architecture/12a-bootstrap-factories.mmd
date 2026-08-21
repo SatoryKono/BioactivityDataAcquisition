@@ -2,7 +2,7 @@
 %% Focuses on current entrypoint/bootstrap surfaces, registries, provider wiring, and canonical factory seams.
 
 %% @version 1.3.0
-%% @date    2026-03-24
+%% @date    2026-08-21
 %% @type    flowchart
 %% @level   System / Component
 %% @view    bootstrap-factories
@@ -31,7 +31,7 @@ graph TB
         DSF["DataSourceFactory"]:::size-sm
         PF["GenericPipelineFactory / RunnerFactory"]:::size-sm
         SF["StorageFactory"]:::size-sm
-        CH["Composite helpers<br/>RunnerFactoryBuilderService +<br/>CompositeSupportServicesFactory"]:::size-sm
+        CH["Composite helpers<br/>RunnerFactoryBuilder +<br/>CompositeSupportServicesFactory"]:::size-sm
     end
 
     ENTRY --> BOOT
