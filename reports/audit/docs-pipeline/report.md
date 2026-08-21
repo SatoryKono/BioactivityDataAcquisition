@@ -1,12 +1,5 @@
-# Docs pipeline audit
+# Docs pipeline audit — 20260821T112959Z-audit-seq-27105f85
 
-Source run: `20260821T082249Z-docs-cycle-9c56e1edbb`.
+surface_score: **3** (good). `scripts.docs verify` + KPI reproducible. Cleanup-inventory `--check` is green on a tree without extra gitignored `docs/reports/**` files.
 
-`surface_score=2`. `check-links` (after content fix), `check-kpi`, and
-`check-drift --ports --classes --runtime-mirrors --freshness` are green.
-`python -m scripts.docs verify` includes unflagged `check-links` and
-`--runtime-mirrors --freshness`. Residual: `docs.yml` path filters omit
-`.github/workflows/**` (#9266). MkDocs strict build not executed in this
-Windows `.venv-win` (no `mkdocs` extra).
-
-Canonical evidence: `reports/audit-runs/20260821T082249Z-docs-cycle-9c56e1edbb/`.
+No new PROVEN findings.

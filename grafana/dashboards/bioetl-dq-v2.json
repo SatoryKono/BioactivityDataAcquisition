@@ -238,7 +238,7 @@
       "type": "text",
       "title": "Start DQ Triage",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 8
@@ -331,7 +331,7 @@
         "h": 4,
         "w": 16,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "id": 9101,
       "options": {
@@ -373,7 +373,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
       "id": 9405,
       "panels": [
@@ -1064,7 +1064,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 16
       },
       "id": 9404,
       "panels": [
@@ -1723,7 +1723,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 17
       },
       "id": 220,
       "title": "Selected Range · Reject Evidence",
@@ -2290,7 +2290,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 18
       },
       "id": 221,
       "title": "Selected Range · Validation Diagnostics",

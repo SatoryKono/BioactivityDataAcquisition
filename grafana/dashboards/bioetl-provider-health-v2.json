@@ -250,7 +250,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "targets": [
         {
@@ -263,7 +263,7 @@
     {
       "id": 9002,
       "type": "text",
-      "title": "Start Provider Triage",
+      "title": "",
       "description": "Primary action: open the worst Monitor Fleet Severity row, then confirm Monitor Telemetry Presence. Continue with Inspect Non-OK Providers and Inspect Top Provider Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood. Full fleet/non-OK/cause tables remain in Inspect Full Fleet Evidence.",
       "gridPos": {
         "h": 2,
@@ -272,6 +272,7 @@
         "y": 8
       },
       "options": {
+        "bioetlDisplayTitle": "Start Provider Triage",
         "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">Next action: open the worst Fleet Severity row.</div>",
         "mode": "html"
       },
@@ -801,7 +802,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "orange"
+                  "color": "gray"
                 }
               }
             }
@@ -848,7 +849,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "value",
         "wideLayout": false
       },
       "pluginVersion": "10.4.0",

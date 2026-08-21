@@ -1,3 +1,1 @@
-# Tests audit
-
-surface_score=2. Source `20260820T081148Z-tests-cycle-16c9a2b6e6`.
+surface_score: 2. #9325 and #9040 remain. See E:\github\BioactivityDataAcquisition\reports\audit-runs\20260821T112959Z-audit-seq-27105f85/step-05-tests/
