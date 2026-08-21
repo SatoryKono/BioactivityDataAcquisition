@@ -1,6 +1,14 @@
 {
+  "domain_id": "docs-content",
+  "prompt_id": "prompt.audit.docs-content",
+  "surface_score": 2,
+  "score_mapping": "domain-card-0-3-control-maturity",
+  "audit_date": "2026-08-21",
+  "scope": "README.md docs/ (content/IA/links/commands; not pipeline tooling)",
+  "blocked": false,
   "findings": [
     {
+<<<<<<< HEAD
       "id": "DOCS-005",
       "requirement_id": "REQ-DOC-001",
       "priority": "P1",
@@ -152,19 +160,67 @@
       "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
+||||||| b48ac65c98
+      "id": "DOCS-WF-INV-001",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+=======
+      "id": "DOCS-001",
+      "requirement_id": "REQ-BACKFILL-*",
+      "priority": "P1",
+      "severity": "High",
+>>>>>>> master20260821-3
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
+<<<<<<< HEAD
       "category": "content",
       "issue": 9319,
       "post": "resolved_on_branch",
+||||||| b48ac65c98
+      "category": "content",
+      "github_issue": 9265,
+      "iteration_status": "fixed_pending_pr",
+=======
+      "category": "docs-code-drift",
+      "path": "docs/05-operations/runbooks/pipeline-failure-critical.md:53",
+      "observation": "P0 critical-failure runbook instructs resume via --resume-from <run_id>, a flag that does not exist on bioetl run.",
+      "method": "grep --resume-from in docs vs src/bioetl/interfaces/cli; read CLI run options in docs/04-reference/cli.md and command_entrypoint.py",
+      "expected": "P0 recovery steps use published CLI: bioetl run --pipeline <name> --resume or --resume-run-id <run_id>.",
+      "actual": "pipeline-failure-critical.md:53 says Resume using `--resume-from <run_id>`. CLI grep in src/bioetl/interfaces/cli/**/*.py: no matches. Published flags are --resume, --resume-run-id, --resume-manifest-id.",
+      "impact": "Operator following the P0 runbook cannot resume; incident recovery stalls or invents flags.",
+      "root_cause": "Runbook last verified 2026-04-03; CLI resume selectors evolved (ADR-046) without this page.",
+      "remediation": "Replace --resume-from with --resume / --resume-run-id; align verification with bioetl run-manifest show; drop Loki precondition; set Last verified to audit date.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n resume-from docs/05-operations/runbooks/pipeline-failure-critical.md",
+        "rg -n resume-from src/bioetl/interfaces/cli"
+      ],
+      "automation": "CI docs drift or runbook command grep against click options",
+      "automated_fix_possible": true,
+>>>>>>> master20260821-3
       "evidence": [
         {
+<<<<<<< HEAD
           "path": "docs/03-guides/pipeline-configuration.md",
           "line": 975,
           "observation": "Pre-fix documented python scripts/diagrams/render/generate_pipeline_dataflows.py --check-drift"
+||||||| b48ac65c98
+          "path": "docs/04-reference/github-actions-workflows.md",
+          "line": 18,
+          "command": "python -m scripts.docs check-links",
+          "observation": "Before fix: missing dashboard-first-window-noscroll.yml; count claim 41 vs live 42. After fix: check-links --workflow-inventory PASS; full check-links PASS."
+=======
+          "path": "docs/05-operations/runbooks/pipeline-failure-critical.md",
+          "line": 53,
+          "command": "read_file + grep resume-from",
+          "observation": "Resume using `--resume-from <run_id>`."
+>>>>>>> master20260821-3
         },
         {
+<<<<<<< HEAD
           "path": "scripts/diagrams/render/generate_pipeline_dataflows.py",
           "line": 108,
           "observation": "Argparse flag is --check, not --check-drift"
@@ -173,7 +229,19 @@
           "path": ".github/workflows/docs.yml",
           "line": 125,
           "observation": "CI uses python -m scripts.diagrams generate-dataflows --pipeline chembl_activity --check"
+||||||| b48ac65c98
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 89,
+          "command": "python -m scripts.docs check-links",
+          "observation": "Policy claimed 41 GitHub Actions workflows; live glob is 42."
+=======
+          "path": "src/bioetl/interfaces/cli/commands/domains/run/command_entrypoint.py",
+          "line": 44,
+          "command": "grep --resume",
+          "observation": "Published flags: --resume, --resume-run-id, --resume-manifest-id."
+>>>>>>> master20260821-3
         }
+<<<<<<< HEAD
       ],
       "expected": "python -m scripts.diagrams generate-dataflows [--pipeline chembl_activity] [--check]",
       "actual": "Invented --check-drift plus raw script path",
@@ -181,11 +249,517 @@
       "root_cause": "Guide not updated when dispatcher/flag were renamed",
       "remediation": "Document packaged generate-dataflows --check",
       "effort": "S",
+||||||| b48ac65c98
+      ],
+      "expected": "Published inventory lists every live .github/workflows/*.yml and count equals live glob.",
+      "actual": "Catalog omitted dashboard-first-window-noscroll.yml; count 41 vs 42.",
+      "impact": "docs.yml validate-mkdocs unflagged check-links fails on the next docs-path PR; operators treat a stale 41-file catalog as current.",
+      "root_cause": "New PR/push workflow added without updating the published inventory; docs.yml path filters omit .github/workflows/**.",
+      "remediation": "Sync inventory/count (#9265). Follow-up: trigger docs.yml on workflow YAML changes (#9266).",
+      "effort": "S",
+      "dependencies": [
+        "#9266"
+      ],
+=======
+      ]
+    },
+    {
+      "id": "DOCS-002",
+      "requirement_id": "REQ-DELTA-*",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "docs-code-drift",
+      "path": "docs/05-operations/runbooks/data-recovery.md:43-48",
+      "observation": "P0/P1 data-recovery runbook uses Spark SQL RESTORE TABLE; BioETL storage is deltalake (delta-rs) with rebuild via bioetl run --run-type rebuild.",
+      "method": "read data-recovery.md; grep RESTORE TABLE in src/; read retention_time_travel.py and vacuum CLI",
+      "expected": "DR steps use local Delta time-travel API or documented rebuild: bioetl run --pipeline <name> --run-type rebuild.",
+      "actual": "Only occurrence of RESTORE TABLE is in data-recovery.md. Runtime helper load_time_travel_table reads snapshots via deltalake.DeltaTable; no Spark SQL CLI. Rebuild command in the same file is correct.",
+      "impact": "Operators may attempt Spark SQL against a local delta-rs table and fail or delay P0/P1 recovery.",
+      "root_cause": "Generic Delta Lake SQL copied into a local-only runbook; last verified 2026-03-30.",
+      "remediation": "Replace SQL block with delta-rs/Python time-travel or delete it and keep rebuild-from-Bronze as the supported path; cite vacuum-procedures.md for VACUUM.",
+      "effort": "M",
+>>>>>>> master20260821-3
       "dependencies": [],
       "validation": [
+<<<<<<< HEAD
         "rg -n \"check-drift|generate_pipeline_dataflows.py\" docs/03-guides/pipeline-configuration.md"
+||||||| b48ac65c98
+        "python -m scripts.docs check-links --workflow-inventory",
+        "python -m scripts.docs check-links",
+        "pytest tests/architecture/test_check_doc_links_guardrails.py::test_github_actions_workflow_inventory_matches_live_repo -q"
+=======
+        "rg -n 'RESTORE TABLE' docs/ src/",
+        "read src/bioetl/infrastructure/storage/support/retention_time_travel.py"
+>>>>>>> master20260821-3
       ],
+<<<<<<< HEAD
       "automated_fix_possible": false
+||||||| b48ac65c98
+      "automated_fix_possible": true
+=======
+      "automation": "n/a (procedure text); optional runbook-command linter",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/data-recovery.md",
+          "line": 45,
+          "command": "read_file",
+          "observation": "RESTORE TABLE schema.table-name TO VERSION AS OF <version-number>;"
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/support/retention_time_travel.py",
+          "line": 9,
+          "command": "read_file",
+          "observation": "from deltalake import DeltaTable; read-only snapshot helper, not Spark SQL restore."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-003",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "completeness",
+      "path": "docs/04-reference/environment-variables.md:15-18",
+      "observation": "Published env-var reference claims completeness but documents non-existent BIOETL_CHEMBL_API_KEY and omits BIOETL_UNIPROT_API_KEY plus most README BIOETL_* vars.",
+      "method": "compare environment-variables.md to README env table, .env.example, configs/providers/*.yaml api_key_env",
+      "expected": "Complete reference lists only keys that exist in code/config and includes UniProt and README core/pipeline/DQ/quarantine vars or explicitly scopes itself as partial.",
+      "actual": "ChEMBL section lists BIOETL_CHEMBL_API_KEY. Provider api_key_env present for uniprot, semanticscholar, pubmed, openalex only. UniProt missing from this reference. README documents pipeline/DQ/PII/quarantine vars not listed here.",
+      "impact": "Contributors set unused keys; miss UniProt optional key; README and reference contradict.",
+      "root_cause": "Reference not generated from configs/providers or .env.example.",
+      "remediation": "Rebuild the page from configs/providers/*.yaml + README table; delete BIOETL_CHEMBL_API_KEY; add BIOETL_UNIPROT_API_KEY.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg api_key_env configs/providers",
+        "rg BIOETL_CHEMBL_API_KEY src configs .env.example"
+      ],
+      "automation": "Generate env-var table from configs/providers + settings model",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/04-reference/environment-variables.md",
+          "line": 18,
+          "command": "read_file",
+          "observation": "`BIOETL_CHEMBL_API_KEY` documented as optional ChEMBL key."
+        },
+        {
+          "path": "configs/providers/uniprot.yaml",
+          "line": 8,
+          "command": "grep api_key_env",
+          "observation": "Real key BIOETL_UNIPROT_API_KEY is not in the reference page."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-004",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "docs-code-drift",
+      "path": ".github/SECURITY.md:43-45",
+      "observation": "Security policy examples list BIOETL_CHEMBL_API_KEY and BIOETL_PUBCHEM_API_KEY; those names are not wired in configs/providers or .env.example.",
+      "method": "read SECURITY.md Secret Management; grep keys in src/, configs/, .env.example",
+      "expected": "Examples match real BIOETL_{PROVIDER}_{KEY} names used by adapters.",
+      "actual": "Examples: BIOETL_CHEMBL_API_KEY, BIOETL_PUBCHEM_API_KEY, BIOETL_UNIPROT_API_KEY. Only UniProt exists in configs/providers and .env.example. RULES.md uses PUBCHEM key only as a naming-format example.",
+      "impact": "Security onboarding invents credentials that the runtime never reads.",
+      "root_cause": "Generic provider-key pattern copied as concrete examples.",
+      "remediation": "Replace examples with BIOETL_UNIPROT_API_KEY, BIOETL_PUBMED_API_KEY, BIOETL_OPENALEX_API_KEY, BIOETL_SEMANTICSCHOLAR_API_KEY.",
+      "effort": "S",
+      "dependencies": ["DOCS-003"],
+      "validation": [
+        "rg BIOETL_CHEMBL_API_KEY BIOETL_PUBCHEM_API_KEY src configs .env.example"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/SECURITY.md",
+          "line": 43,
+          "command": "read_file",
+          "observation": "Examples include BIOETL_CHEMBL_API_KEY and BIOETL_PUBCHEM_API_KEY."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-005",
+      "requirement_id": "REQ-TEST-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "reproducibility",
+      "path": ".github/CONTRIBUTING.md:12-33",
+      "observation": "Canonical contributor guide has broken markdown tables (leading double-pipe) and a Windows fallback that uses .venv instead of .venv-win with incomplete extras.",
+      "method": "read .github/CONTRIBUTING.md; compare to README Mixed Windows + WSL and getting-started.md",
+      "expected": "Valid markdown tables; Windows bootstrap .venv-win + extras matching TOOLS.md (dev,tests,tracing).",
+      "actual": "Lines 26-33 start with || Document; line 13 comments `.venv/Scripts/python.exe -m pip install -e .[dev,tests]` (unquoted extras, wrong venv name, missing tracing).",
+      "impact": "New contributors on Windows follow a non-supported venv path; Essential Reading table may not render.",
+      "root_cause": "Table syntax typo; Windows guidance not synced with setup_env_windows.ps1.",
+      "remediation": "Fix table pipes; change fallback to .\\.venv-win\\Scripts\\python.exe -m pip install -e \".[dev,tests,tracing]\"; mention setup_env_windows.ps1.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read .github/CONTRIBUTING.md lines 12-33"
+      ],
+      "automation": "markdown lint on .github/CONTRIBUTING.md",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 13,
+          "command": "read_file",
+          "observation": "Windows fallback uses .venv/Scripts not .venv-win."
+        },
+        {
+          "path": ".github/CONTRIBUTING.md",
+          "line": 26,
+          "command": "read_file",
+          "observation": "Table rows prefixed with ||."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-006",
+      "requirement_id": "REQ-OBS-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "docs-code-drift",
+      "path": "docs/05-operations/runbooks/pipeline-failure-recovery.md:54",
+      "observation": "P1 recovery runbook greps logs/ for errors; published default log path is reports/logs/bioetl.log.",
+      "method": "read pipeline-failure-recovery.md; README BIOETL_LOG_FILE default; local-storage-layout.md",
+      "expected": "Evidence commands use reports/logs/ or BIOETL_LOG_FILE.",
+      "actual": "grep -r \"error\\|ERROR\\|exception\" logs/ | tail -50. Resume commands in the same file are correct (--resume / --resume-run-id).",
+      "impact": "Triage finds no files; delays P1 recovery.",
+      "root_cause": "Legacy logs/ path; last verified 2026-04-03.",
+      "remediation": "Change grep target to reports/logs/; mention BIOETL_LOG_FILE.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg 'logs/' docs/05-operations/runbooks/pipeline-failure-recovery.md"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/pipeline-failure-recovery.md",
+          "line": 54,
+          "command": "read_file",
+          "observation": "grep ... logs/"
+        },
+        {
+          "path": "README.md",
+          "line": 284,
+          "command": "read_file",
+          "observation": "BIOETL_LOG_FILE default reports/logs/bioetl.log"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-007",
+      "requirement_id": "REQ-TEST-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.86,
+      "status": "PROVEN",
+      "category": "command-mismatch",
+      "path": "Makefile:107-109",
+      "observation": "Contributor path make lint runs mypy src/bioetl without --strict; README and CI type-checking workflow use --strict --no-incremental.",
+      "method": "read Makefile lint; README Code Quality; .github/workflows/type-checking.yml; .github/CONTRIBUTING.md make lint && make test",
+      "expected": "Documented lint command matches the CI mypy gate, or make lint is labeled as a weaker local alias.",
+      "actual": "Makefile:108 `$(RUN) mypy src/bioetl`. CI: uv run mypy --config-file pyproject.toml --strict --no-incremental src/bioetl. CONTRIBUTING tells contributors to use make lint.",
+      "impact": "Local make lint can pass while CI type-checking fails.",
+      "root_cause": "Makefile lint not synced with type-checking.yml.",
+      "remediation": "Add --config-file pyproject.toml --strict --no-incremental to make lint, or document the difference next to make lint in CONTRIBUTING/README.",
+      "effort": "S",
+      "dependencies": ["DOCS-005"],
+      "validation": [
+        "diff Makefile lint vs .github/workflows/type-checking.yml mypy invocation"
+      ],
+      "automation": "Make lint should wrap the same mypy flags as CI",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "Makefile",
+          "line": 109,
+          "command": "read_file",
+          "observation": "mypy src/bioetl without --strict"
+        },
+        {
+          "path": ".github/workflows/type-checking.yml",
+          "line": 94,
+          "command": "read_file",
+          "observation": "uv run ... mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-008",
+      "requirement_id": "REQ-OBS-*",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "stale-procedure",
+      "path": "README.md:304",
+      "observation": "README points to .env.example as the full env list; that template still recommends bioetl quarantine serve --port 8081 / Quarantine Explorer after the 2026-07-23 shipping-surface reduction.",
+      "method": "read README env note; read .env.example Grafana block; compare CHANGELOG monitoring surface reduction and README feature bullet",
+      "expected": "Env template README cites must not recommend removed default Explorer UI; default identity HTTP is bioetl health server :8000.",
+      "actual": ".env.example:35-37 comments Grafana Quarantine Explorer datasource and Recommended launcher: bioetl quarantine serve --port 8081. README:28 says Explorer removed from default shipping. quarantine serve still exists in CLI but is not the default ops path.",
+      "impact": "Operators enable a retired default monitoring coupling.",
+      "root_cause": "Env template not fully updated in monitoring-surface-reduction.",
+      "remediation": "Update README wording if template stays MCP-oriented; do not edit .env.example without explicit user approval (env-file guardrail). Preferred content: BIOETL_OPS_HTTP_URL / health server :8000.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read .env.example lines 35-37",
+        "read README.md line 28 and 304"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": ".env.example",
+          "line": 36,
+          "command": "read_file",
+          "observation": "Recommended launcher: `bioetl quarantine serve --port 8081`"
+        },
+        {
+          "path": "README.md",
+          "line": 304,
+          "command": "read_file",
+          "observation": "See `.env.example` for the full list with comments."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-009",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "editorial",
+      "path": "docs/03-guides/testing.md:1-29",
+      "observation": "Testing guide prepends a lane-classification section above the published Version/Status header; last verified 2026-06-19.",
+      "method": "read testing.md from line 1; compare D-01 header template",
+      "expected": "Published header is the first content; lane table lives under the Testing Guide heading.",
+      "actual": "Lines 1-17 are a lane table; YAML-style header starts at line 21; Last verified 2026-06-19.",
+      "impact": "Header parsers and readers miss metadata; freshness signal is stale.",
+      "root_cause": "Epic #8326/#8328 note prepended without moving the header.",
+      "remediation": "Move lane table below the title; refresh Last verified.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read docs/03-guides/testing.md lines 1-35"
+      ],
+      "automation": "docs header linter (D-01)",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 1,
+          "command": "read_file",
+          "observation": "Lane classification section appears before Version header."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-010",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "status": "PROVEN",
+      "category": "consistency",
+      "path": "docs/03-guides/getting-started.md:128",
+      "observation": "Windows manual fallback uses py -3.13 while the same page and README declare Python 3.12 as the onboarding baseline.",
+      "method": "read getting-started.md Runtime compatibility + section 2.3; pyproject.toml requires-python and classifiers",
+      "expected": "Fallback interpreter matches baseline 3.12, or text says 3.12 or 3.13.",
+      "actual": "py -3.13 -m venv .venv-win. Policy: Python runtime baseline 3.12. pyproject supports 3.12 and 3.13.",
+      "impact": "Onboarding may skip 3.12 on machines where 3.13 is not installed.",
+      "root_cause": "Windows snippet pinned to 3.13 without restating dual support.",
+      "remediation": "Use py -3.12 or py -3.12/-3.13 with a sentence that both are supported.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read docs/03-guides/getting-started.md:41-45,128"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/getting-started.md",
+          "line": 128,
+          "command": "read_file",
+          "observation": "py -3.13 -m venv .venv-win"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-011",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.82,
+      "status": "PROVEN",
+      "category": "ia-policy-drift",
+      "path": "docs/00-project/00-map.md:107-108",
+      "observation": "Navigator language policy says architecture docs are Russian; published architecture overview is English.",
+      "method": "read 00-map Language Policy; read docs/02-architecture/00-overview.md header/body",
+      "expected": "Policy matches published language, or overview is Russian.",
+      "actual": "00-map: Architecture docs | Russian | docs/02-architecture/*. 00-overview.md is English (Architecture health scores...).",
+      "impact": "Contributors cannot tell which language is required for new architecture pages.",
+      "root_cause": "Policy table not updated as architecture docs shifted to English.",
+      "remediation": "Update 00-map language policy to mixed/English-for-architecture, or mark exceptions.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read docs/00-project/00-map.md:101-109",
+        "read docs/02-architecture/00-overview.md:14-20"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/00-project/00-map.md",
+          "line": 108,
+          "command": "read_file",
+          "observation": "Architecture docs language = Russian"
+        },
+        {
+          "path": "docs/02-architecture/00-overview.md",
+          "line": 14,
+          "command": "read_file",
+          "observation": "English title Architecture Overview"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-012",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.84,
+      "status": "PROVEN",
+      "category": "ia",
+      "path": "docs/00-project/00-map.md:64",
+      "observation": "Quick Link labels workflow controls as run/status/resume/repair/force; actual CLI is workflow run/status plus --resume-last/--repair-steps/--force-steps.",
+      "method": "read 00-map Quick Links; workflows.md Commands; docs/04-reference/cli.md workflow section",
+      "expected": "Navigator labels match published command names.",
+      "actual": "Need to... Execution control commands (`run/status/resume/repair/force`) → workflows.md. Target page documents bioetl workflow run --resume-last / --repair-steps / --force-steps.",
+      "impact": "Operators search for bioetl workflow resume/repair/force subcommands that do not exist.",
+      "root_cause": "Shorthand in the navigator not updated to flag names.",
+      "remediation": "Change cell to `workflow run|status` plus resume/repair/force flags.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read docs/00-project/00-map.md:64",
+        "read docs/03-guides/workflows.md:58-66"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/00-map.md",
+          "line": 64,
+          "command": "read_file",
+          "observation": "run/status/resume/repair/force shorthand"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-013",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.8,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": "docs/02-architecture/00-overview.md:16",
+      "observation": "Architecture overview claims sync with RULES.md v6.1.7 (2026-08-05); RULES header is Version 6.1.10 (Last verified 2026-08-14).",
+      "method": "read 00-overview.md line 16; read RULES.md header",
+      "expected": "Synced-with version matches RULES.md Version header or the line is removed in favor of last-verified.",
+      "actual": "Synced with RULES.md v6.1.7 vs RULES Version: 6.1.10.",
+      "impact": "Readers treat overview as pinned to an older constitution revision.",
+      "root_cause": "Overview not re-stamped after RULES 6.1.8–6.1.10.",
+      "remediation": "Update synced-with to 6.1.10 or drop the hardcoded version and point to RULES header.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read docs/00-project/RULES.md:1-4",
+        "read docs/02-architecture/00-overview.md:16"
+      ],
+      "automation": "python -m scripts.docs check-drift --freshness",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/02-architecture/00-overview.md",
+          "line": 16,
+          "command": "read_file",
+          "observation": "Synced with RULES.md v6.1.7 (2026-08-05)"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 3,
+          "command": "read_file",
+          "observation": "Version: 6.1.10"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-014",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.87,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": "docs/05-operations/runbooks/pipeline-failure-critical.md:12",
+      "observation": "P0 runbook last verified 2026-04-03 still lists Access to logs (Loki/Local) after Loki was removed from the shipping stack on 2026-07-23.",
+      "method": "read runbook preconditions; README/CHANGELOG monitoring surface reduction; 01-monitoring-guide.md",
+      "expected": "P0 runbook preconditions match local file logs (reports/logs) and current shipping stack.",
+      "actual": "Preconditions: Access to logs (Loki/Local). Last verified 2026-04-03. CHANGELOG and monitoring-surface-reduction-2026-07-23.md remove Loki.",
+      "impact": "Incident responders look for a Loki UI that is not shipped.",
+      "root_cause": "P0 page not re-verified after monitoring reduction.",
+      "remediation": "Replace Loki/Local with reports/logs/bioetl.log; bump Last verified. Fold into DOCS-001 edit.",
+      "effort": "S",
+      "dependencies": ["DOCS-001"],
+      "validation": [
+        "read docs/05-operations/runbooks/pipeline-failure-critical.md:12,32"
+      ],
+      "automation": "freshness KPI on P0/P1 runbooks",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/pipeline-failure-critical.md",
+          "line": 32,
+          "command": "read_file",
+          "observation": "Access to logs (Loki/Local)."
+        }
+      ]
+>>>>>>> master20260821-3
     }
   ]
 }

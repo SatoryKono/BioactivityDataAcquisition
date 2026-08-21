@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [
   {
     "id": "TEST-GOV-002",
@@ -79,3 +80,463 @@
     "post_status": "unchanged"
   }
 ]
+||||||| b48ac65c98
+{
+  "source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
+  "surface_score": 2
+}
+=======
+{
+  "domain_id": "tests-system",
+  "prompt_id": "prompt.audit.tests-system",
+  "surface_score": 2,
+  "surface_score_legend": "0=unacceptable 1=weak 2=acceptable 3=good control maturity",
+  "audit_mode": "full",
+  "base": "main",
+  "scope": "tests/ pyproject.toml .github/workflows (test gates only)",
+  "p0_p1_count": 0,
+  "proven_count": 10,
+  "checks_count": 18,
+  "blocked": false,
+  "findings": [
+    {
+      "id": "TEST-001",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "e2e-retry-as-flake-heal",
+      "path": "scripts/engineering/ci/check_e2e_rerun_stability.py:182",
+      "observation": "E2E matrix 3× rerun gate treats a case as stable if it passed in any one of N runs; a 1/3 pass is not recurrent.",
+      "method": "read_file check_e2e_rerun_stability.py _recurrent_cases; read_file .github/workflows/e2e-matrix-health.yml matrix-smoke-blocking loop",
+      "expected": "Retries are diagnostic only (card anti-pattern; e2e_skip_rate_slo.yaml forbid_retries_to_heal_flakes: true). Merge gate should fail a case that failed or skipped in any rerun, or keep 3× as telemetry without healing.",
+      "actual": "if any(item.status == 'passed' for item in outcomes): continue. Workflow runs pytest 3 times with set +e and then this gate.",
+      "impact": "Intermittent e2e regressions can merge if they pass once in three cassette playbacks.",
+      "root_cause": "Stability classifier encodes pass-in-any, not pass-all.",
+      "remediation": "Change _recurrent_cases to flag any non-pass across required runs; or stop using 3× as a merge healer and fail the job on pytest_exit_code != 0 for each run.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -c \"from scripts.engineering.ci.check_e2e_rerun_stability import _recurrent_cases\"",
+        "rg \"any\\(item.status == .passed\" scripts/engineering/ci/check_e2e_rerun_stability.py"
+      ],
+      "automation": "CI e2e-matrix-health + architecture test pinning pass-all semantics",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "scripts/engineering/ci/check_e2e_rerun_stability.py",
+          "line": 182,
+          "command": "read_file",
+          "observation": "if any(item.status == \"passed\" for item in outcomes): continue"
+        },
+        {
+          "path": ".github/workflows/e2e-matrix-health.yml",
+          "line": 52,
+          "command": "read_file",
+          "observation": "for run in 1 2 3; do set +e; pytest ...; echo $? > pytest_exit_code_run${run}.txt; done"
+        },
+        {
+          "path": "configs/quality/e2e_skip_rate_slo.yaml",
+          "line": 11,
+          "command": "read_file",
+          "observation": "forbid_retries_to_heal_flakes: true"
+        }
+      ]
+    },
+    {
+      "id": "TEST-002",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "e2e-skip-budget-drift",
+      "path": ".github/workflows/e2e-matrix-health.yml:86",
+      "observation": "Blocking e2e skip-rate check allows 23.08% skips and --ignore-failures, while SLO file caps 15% and remains advisory.",
+      "method": "read_file e2e-matrix-health.yml Enforce matrix smoke skip-rate SLO; read_file configs/quality/e2e_skip_rate_slo.yaml",
+      "expected": "Blocking skip-rate ≤ documented SLO (15%) and failures counted; SLO mode blocking after baseline, or CI numbers match SSOT.",
+      "actual": "--max-skips 6 --max-skip-rate 0.2308 --ignore-failures; slo.mode=advisory max_skip_rate_percent=15.0",
+      "impact": "PR e2e-smoke can skip nearly a quarter of matrix cases and still be green; failures are ignored by the skip-rate step.",
+      "root_cause": "CI numeric budget drifted from SLO SSOT; skip-rate step is not the pytest fail gate.",
+      "remediation": "Set --max-skip-rate 0.15 (or lower), drop --ignore-failures, promote slo.mode to blocking once telemetry exists.",
+      "effort": "S",
+      "dependencies": ["TEST-001"],
+      "validation": [
+        "rg \"max-skip-rate\" .github/workflows/e2e-matrix-health.yml configs/quality/e2e_skip_rate_slo.yaml"
+      ],
+      "automation": "architecture test comparing workflow flags to e2e_skip_rate_slo.yaml",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/workflows/e2e-matrix-health.yml",
+          "line": 86,
+          "command": "read_file",
+          "observation": "check_e2e_matrix_skip_rate.py --max-skips 6 --max-skip-rate 0.2308 --ignore-failures"
+        },
+        {
+          "path": "configs/quality/e2e_skip_rate_slo.yaml",
+          "line": 23,
+          "command": "read_file",
+          "observation": "mode: advisory; max_skip_rate_percent: 15.0"
+        }
+      ]
+    },
+    {
+      "id": "TEST-003",
+      "requirement_id": "REQ-TEST-003",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "e2e-vcr-mismatch-skip",
+      "path": "tests/e2e/test_pipeline_matrix_e2e.py:537",
+      "observation": "In VCR playback, matrix smoke skips on cassette mismatch instead of failing, so stale/wrong cassettes do not block PR.",
+      "method": "read_file tests/e2e/test_pipeline_matrix_e2e.py test_pipeline_matrix_smoke exception handlers",
+      "expected": "RULES §4.2: CI pytest --vcr-record=none must fail closed when cassette does not match (no silent skip of replay miss).",
+      "actual": "except MATRIX_SKIP_ERRORS: if not recording and _is_vcr_mismatch_error: pytest.skip(INFRA_FLAKY_CASSETTE_MISMATCH). Missing cassette fails only for CRITICAL_SMOKE_PIPELINES.",
+      "impact": "Provider/entity smoke can skip on 'no match for the request' and still count toward a green e2e-smoke job (within skip budget).",
+      "root_cause": "Mismatch classified as infra_flaky skip to keep matrix green under cassette drift.",
+      "remediation": "pytest.fail for VCR mismatch in playback for smoke matrix (at least CRITICAL_SMOKE_PIPELINES, preferably all ACTIVE_PIPELINE_CASES).",
+      "effort": "S",
+      "dependencies": ["TEST-002"],
+      "validation": [
+        "rg \"INFRA_FLAKY_CASSETTE_MISMATCH\" tests/e2e/test_pipeline_matrix_e2e.py"
+      ],
+      "automation": "e2e architecture policy test forbidding skip on mismatch in playback",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
+          "line": 537,
+          "command": "read_file",
+          "observation": "pytest.skip(... INFRA_FLAKY_CASSETTE_MISMATCH) when not recording"
+        },
+        {
+          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
+          "line": 31,
+          "command": "read_file",
+          "observation": "Module docstring: Skips gracefully in playback mode when cassette is missing"
+        }
+      ]
+    },
+    {
+      "id": "TEST-004",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.96,
+      "status": "PROVEN",
+      "category": "e2e-nightly-fail-open",
+      "path": ".github/workflows/e2e-matrix-health.yml:150",
+      "observation": "Canonical e2e-nightly-full owner job does not fail the workflow on pytest failure or 100% skip rate.",
+      "method": "read_file e2e-matrix-health.yml matrix-smoke-nightly-live; compare test_matrix.yaml e2e-nightly-full owner",
+      "expected": "Named lane e2e-nightly-full is a real gate: pytest rc propagated; skip-rate < SLO; no exit 0 swallow.",
+      "actual": "set +e around pytest; check_e2e_matrix_skip_rate --max-skip-rate 1.0 --allow-unknown-labels; then exit 0.",
+      "impact": "Nightly live e2e cannot detect contract/API breakage as a red check; green schedule is fiction for this lane.",
+      "root_cause": "Job written as telemetry-only while test_matrix names it canonical owner of e2e-nightly-full.",
+      "remediation": "Propagate pytest_rc; set max-skip-rate to SLO; remove unconditional exit 0. If advisory, rename lane to telemetry and stop calling it a gate.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg \"exit 0\" .github/workflows/e2e-matrix-health.yml",
+        "rg \"e2e-nightly-full\" configs/quality/test_matrix.yaml"
+      ],
+      "automation": "architecture test on nightly job fail-closed flags",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/workflows/e2e-matrix-health.yml",
+          "line": 153,
+          "command": "read_file",
+          "observation": "set +e; VCR_RECORD_MODE=new_episodes pytest ...; echo $? > pytest_exit_code_live.txt"
+        },
+        {
+          "path": ".github/workflows/e2e-matrix-health.yml",
+          "line": 165,
+          "command": "read_file",
+          "observation": "--max-skip-rate 1.0 --allow-unknown-labels; exit 0"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 578,
+          "command": "read_file",
+          "observation": "e2e-nightly-full canonical CI owner: matrix-smoke-nightly-live"
+        }
+      ]
+    },
+    {
+      "id": "TEST-005",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "mutation-threshold-ssot-drift",
+      "path": ".github/workflows/mutation-testing.yml:47",
+      "observation": "Application mutation CI thresholds are 44.0 while ADR-042/test_matrix/ledger declare min_score 60 and enforced: true; architecture test does not pin the YAML numbers.",
+      "method": "read_file mutation-testing.yml matrix.threshold; configs/quality/test_matrix.yaml mutation_testing.targets; tests/architecture/test_mutation_testing_rollout.py",
+      "expected": "CI MUTATION_SCORE_THRESHOLD equals test_matrix min_score for enforced targets (domain 70, application slices 60) or ledger marks them staged.",
+      "actual": "workflow: application-control-plane/export-manifests/workflow-runner threshold 44.0; matrix min_score 60 enforced true; test only asserts MUTATION_SCORE_THRESHOLD string present, not equality.",
+      "impact": "Documented mutation gate is weaker in CI than SSOT; killed mutants below 60% still pass. Not a product P1, but merge integrity vs ADR-042 is diluted.",
+      "root_cause": "Workflow thresholds lowered without updating matrix/ledger; architecture contract does not compare floats.",
+      "remediation": "Set workflow threshold to 60.0 for enforced app slices, or set enforced: false / staged with explicit 44 and stop claiming 60. Extend test_mutation_testing_rollout to parse workflow thresholds.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg \"threshold:\" .github/workflows/mutation-testing.yml",
+        "rg \"min_score: 60\" configs/quality/test_matrix.yaml"
+      ],
+      "automation": "tests/architecture/test_mutation_testing_rollout.py numeric pin",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".github/workflows/mutation-testing.yml",
+          "line": 47,
+          "command": "read_file",
+          "observation": "application-control-plane threshold: \"44.0\" (also export-manifests and workflow-runner)"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 880,
+          "command": "read_file",
+          "observation": "application_control_plane min_score: 60 enforced: true"
+        },
+        {
+          "path": "tests/architecture/test_mutation_testing_rollout.py",
+          "line": 41,
+          "command": "read_file",
+          "observation": "asserts matrix min_score == 60 but only 'MUTATION_SCORE_THRESHOLD' in workflow text"
+        }
+      ]
+    },
+    {
+      "id": "TEST-006",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "critical-path-e2e-gap",
+      "path": "tests/e2e/test_pipeline_matrix_e2e.py:262",
+      "observation": "PR e2e-smoke matrix excludes all composite_* pipelines and 11 ChEMBL/UniProt entities; those paths are not in the blocking e2e_smoke marker set.",
+      "method": "read_file MATRIX_REPLAY_DEFERRED_PIPELINES; test_matrix e2e-smoke paths; entity_test_ownership",
+      "expected": "ADR-042 composition e2e MUST; entity_test_ownership composites should have a blocking e2e or an owned expiry skip.",
+      "actual": "MATRIX_REPLAY_DEFERRED_PIPELINES includes composite_activity/assay/molecule/publication/target plus chembl_cell_line, tissue, compound_record, assay_parameters, protein_class, publication_similarity, publication_term, subcellular_fraction, target_component, target_protein_classification, uniprot_idmapping. e2e-smoke CI only runs matrix smoke (active cases) + chembl_activity.",
+      "impact": "Composite merge/Gold and several ChEMBL entities can regress without PR e2e-smoke. Unit/integration exist for some, but composition e2e MUST is not PR-blocking.",
+      "root_cause": "Deferred replay set used to keep smoke runtime/cassette budget down; no expiry on the deferral frozenset.",
+      "remediation": "Promote composite_* (or one representative composite) into ACTIVE/CRITICAL smoke with cassettes, or record deferral in skip inventory with owner+expires_on.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg \"MATRIX_REPLAY_DEFERRED_PIPELINES\" tests/e2e/test_pipeline_matrix_e2e.py",
+        "rg \"e2e-smoke\" configs/quality/test_matrix.yaml"
+      ],
+      "automation": "architecture test: deferred set ⊆ skip inventory temporary_debt with expiry",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
+          "line": 262,
+          "command": "read_file",
+          "observation": "16 deferred pipeline names including all composite_*"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 552,
+          "command": "read_file",
+          "observation": "e2e-smoke paths: chembl_activity_e2e + pipeline_matrix_e2e only"
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
+          "line": 46,
+          "command": "read_file",
+          "observation": "Composition layer e2e: MUST"
+        }
+      ]
+    },
+    {
+      "id": "TEST-007",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.94,
+      "status": "PROVEN",
+      "category": "skip-inventory-coverage",
+      "path": "tests/architecture/test_test_skip_inventory.py:24",
+      "observation": "Reviewed skip census scans only tests/contract and tests/integration; e2e pytest.skip surfaces are ungoverned by owner/expiry inventory.",
+      "method": "read_file SCAN_ROOTS; grep pytest.skip in tests/e2e; read configs/quality/test_skip_inventory.yaml source_of_truth",
+      "expected": "Skip/xfail/quarantine have owner+expiry (card checklist) for all merge-relevant suites, including e2e.",
+      "actual": "SCAN_ROOTS = (contract, integration). test_skip_inventory.yaml comment: Unit and architecture suppressions are not in this census. e2e has ≥16 skip call sites (conftest + matrix + dedicated files).",
+      "impact": "E2E skips can grow without inventory ratchet; T-08 SLO stays advisory.",
+      "root_cause": "Census scoped to contract/integration by design (#5007) without e2e follow-up.",
+      "remediation": "Add tests/e2e to SCAN_ROOTS and generate reviewed rows with category/owner/lifecycle.",
+      "effort": "M",
+      "dependencies": ["TEST-002", "TEST-003"],
+      "validation": [
+        "rg \"SCAN_ROOTS\" tests/architecture/test_test_skip_inventory.py"
+      ],
+      "automation": "test_test_skip_inventory.py root expansion",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "tests/architecture/test_test_skip_inventory.py",
+          "line": 24,
+          "command": "read_file",
+          "observation": "SCAN_ROOTS = (tests/contract, tests/integration)"
+        },
+        {
+          "path": "configs/quality/test_skip_inventory.yaml",
+          "line": 9,
+          "command": "read_file",
+          "observation": "Unit and architecture suppressions are not in this census"
+        }
+      ]
+    },
+    {
+      "id": "TEST-008",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.91,
+      "status": "PROVEN",
+      "category": "benchmark-plugin-disabled",
+      "path": "pyproject.toml:212",
+      "observation": "Global addopts disable pytest-benchmark; no CI workflow passes -p benchmark, so tests/benchmarks/ skip in performance-nightly.",
+      "method": "grep -p benchmark in .github/workflows; read tests/benchmarks/conftest.py pytest_runtest_setup; read performance-nightly.yml",
+      "expected": "pyproject comment: opt in with pytest -p benchmark -p no:xdist -m benchmark for benchmark lanes.",
+      "actual": "addopts -p no:benchmark. Workflows grep for '-p benchmark' = 0 hits. tests/benchmarks/conftest.py skips all benchmark-marked tests when plugin inactive. tests/performance/hotspot_budgets.py uses own timers and still runs on PR.",
+      "impact": "pytest-benchmark suite is dead in CI; hotspot PR gate still exists. Nightly 'Run all performance benchmarks' overstates coverage.",
+      "root_cause": "Plugin disabled to avoid git describe stalls; CI never re-enables it.",
+      "remediation": "Add -p benchmark -p no:xdist to performance-nightly (and optionally performance-budgets if plugin needed). Keep default addopts as-is.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg \"-p benchmark\" .github/workflows pyproject.toml"
+      ],
+      "automation": "architecture test: performance-nightly contains -p benchmark",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "pyproject.toml",
+          "line": 212,
+          "command": "read_file",
+          "observation": "addopts includes -p no:benchmark"
+        },
+        {
+          "path": "tests/benchmarks/conftest.py",
+          "line": 80,
+          "command": "read_file",
+          "observation": "pytest_runtest_setup skips benchmark-marked tests when plugin off"
+        },
+        {
+          "path": ".github/workflows/performance-nightly.yml",
+          "line": 31,
+          "command": "read_file",
+          "observation": "pytest tests/performance/ tests/benchmarks/ -m \"benchmark or performance\" -p no:xdist without -p benchmark"
+        }
+      ]
+    },
+    {
+      "id": "TEST-009",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "local-ci-matrix-skew",
+      "path": "pyproject.toml:215",
+      "observation": "Local default pytest excludes slow; PR test-matrix runs only Python 3.13 while other Tests jobs use 3.12; no Windows job on PR.",
+      "method": "read pyproject addopts; grep python-version in tests.yml; architecture.yml windows-atomic-write-stress-nightly",
+      "expected": "Documented skew is OK if called out; product requires-python >=3.12 and classifiers 3.12+3.13. PR should not silently drop one interpreter or OS for the bulk unit matrix without a named lane.",
+      "actual": "addopts -m not benchmark and not slow. test-matrix python-version: [\"3.13\"] only. smoke/unit-fast/coverage jobs python-version 3.12. Windows lock stress is nightly architecture.yml only.",
+      "impact": "slow tests omitted from naive local pytest; 3.12 vs 3.13 split can hide version-specific unit failures; Windows FS races miss PR.",
+      "root_cause": "Lane defaults vs CI matrix evolution; Windows cost parked on nightly.",
+      "remediation": "Document in TEST_LANE that test-matrix is 3.13-only; consider one 3.12 unit shard or run test-matrix on 3.12 (SSOT requires-python). Keep Windows nightly but do not claim PR OS coverage.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg \"python-version\" .github/workflows/tests.yml",
+        "rg \"not benchmark and not slow\" pyproject.toml"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "pyproject.toml",
+          "line": 215,
+          "command": "read_file",
+          "observation": "addopts -m not benchmark and not slow"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 1088,
+          "command": "read_file",
+          "observation": "test-matrix python-version: [\"3.13\"]"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 56,
+          "command": "read_file",
+          "observation": "dependency-preflight/smoke python-version 3.12"
+        }
+      ]
+    },
+    {
+      "id": "TEST-010",
+      "requirement_id": "REQ-TEST-006",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "live-contract-skip-on-errors",
+      "path": "tests/contract/test_chembl_contract.py:157",
+      "observation": "Live provider contract tests skip on transport/5xx after retries; monthly workflow can be green without exercising the API.",
+      "method": "read_file test_chembl_contract.py _request_or_skip; test_skip_inventory live_endpoint_unavailability entries; contract-tests.yml schedule",
+      "expected": "Live contract workflow detects API change (REQ-TEST-006). Transient skip is acceptable if a zero-executed live canary fails the job.",
+      "actual": "pytest.skip on unreachable/temporary server error (ChEMBL 4 skip calls; same pattern PubMed/PubChem/OpenAlex/Crossref/UniProt). Inventory lifecycle permanent_policy. Workflow is monthly and fail-closed only on pytest failure, not on all-skipped live canaries.",
+      "impact": "Provider downtime or network isolation yields skip-pass; schema break is delayed until a reachable run.",
+      "root_cause": "Live tests prefer skip-closed over fail-closed for transients; no minimum-executed-live assertion in the workflow.",
+      "remediation": "Fail the monthly job if enforced-provider live tests collected-but-all-skipped; keep skip for individual 429/5xx otherwise.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg \"pytest.skip\" tests/contract/test_*_contract.py",
+        "rg \"BIOETL_LIVE_API_TESTS\" .github/workflows/contract-tests.yml"
+      ],
+      "automation": "junit post-step: fail if live network tests skipped == collected",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "tests/contract/test_chembl_contract.py",
+          "line": 157,
+          "command": "read_file",
+          "observation": "pytest.skip ChEMBL endpoint not reachable / temporary server error"
+        },
+        {
+          "path": "configs/quality/test_skip_inventory.yaml",
+          "line": 78,
+          "command": "read_file",
+          "observation": "test_chembl_contract.py category live_endpoint_unavailability lifecycle permanent_policy"
+        },
+        {
+          "path": ".github/workflows/contract-tests.yml",
+          "line": 10,
+          "command": "read_file",
+          "observation": "schedule cron 0 2 1 * * monthly live contracts"
+        }
+      ]
+    }
+  ]
+}
+>>>>>>> master20260821-3

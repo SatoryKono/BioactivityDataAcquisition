@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [
   {
     "id": "DIAG-STALE-001",
@@ -29,3 +30,655 @@
     "automated_fix_possible": false
   }
 ]
+||||||| b48ac65c98
+{
+  "surface": "diagrams-and-diagram-scripts",
+  "surface_score": 1,
+  "findings": [
+    {
+      "id": "DIAG-AUD-001",
+      "path": "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd:14",
+      "observation": "Provider-specific diagrams encode live authentication, pagination, retry, and storage claims that contradict current provider configuration and normative medallion rules.",
+      "method": "Manual claim-to-config/SSOT comparison plus rg across provider API integration diagrams and configs/providers/*.yaml.",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.99,
+      "status": "PROVEN",
+      "category": "accuracy",
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd",
+          "line": 14,
+          "command": "nl -ba docs/02-architecture/diagrams/providers/chembl/01-api-integration-flow.mmd",
+          "observation": "The ChEMBL flow asks whether an API key is available and offers cursor, offset, and scroll pagination; its retry decision sends 'No' to Error and 'Yes' to backoff."
+        },
+        {
+          "path": "configs/providers/chembl.yaml",
+          "line": 7,
+          "command": "nl -ba configs/providers/chembl.yaml",
+          "observation": "ChEMBL is configured as auth_type: public and pagination.strategy: offset (line 15)."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/providers/chembl/03-medallion-layer-flow.mmd",
+          "line": 21,
+          "command": "rg -n 'Bronze Delta Lake' docs/02-architecture/diagrams/providers",
+          "observation": "The ChEMBL diagram states that Bronze is written to Delta Lake."
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 232,
+          "command": "nl -ba docs/00-project/RULES.md | sed -n '230,239p'",
+          "observation": "The normative rule defines Bronze as append-only JSONL + zstd and reserves Delta Lake for Silver and Gold."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/providers/pubchem/01-api-integration-flow.mmd",
+          "line": 20,
+          "command": "rg -n 'pagination cursor' docs/02-architecture/diagrams/providers",
+          "observation": "PubChem, PubMed, Semantic Scholar, and UniProt diagrams say cursor pagination, while each corresponding config declares offset; CrossRef and OpenAlex are the two accurate cursor cases."
+        }
+      ],
+      "expected": "Every provider diagram must describe the provider's current auth, pagination, retry, and medallion storage contract, with claims traceable to config/code/SSOT.",
+      "actual": "ChEMBL contains contradictory auth, pagination, retry, and Bronze storage branches; four additional providers label offset pagination as cursor pagination.",
+      "impact": "Operators and maintainers can implement or diagnose the wrong authentication, paging, retry, or persistence behavior from a published engineering artifact.",
+      "root_cause": "Provider diagrams were cloned from a generic flow and are not guarded against provider-config or normative storage drift.",
+      "remediation": "Correct the ChEMBL API and medallion sources, replace cursor labels in the four offset-provider sources, regenerate only their SVG siblings with pinned tooling, and add a config-to-diagram contract test.",
+      "effort": "M",
+      "automation": "Add a provider diagram contract test that asserts auth_type, pagination.strategy, and Bronze storage terminology against current configs and RULES.md.",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.diagrams lint docs/02-architecture/diagrams/providers",
+        "MMDC_FORCE_DOCKER=1 python -m scripts.diagrams checks --profile pr --enforce-budget",
+        "python -m pytest tests/architecture/test_config_topology_docs_drift.py -q"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-002",
+      "path": "docs/02-architecture/diagrams/architecture/svg/24-control-plane-artifact-publication-pipeline.svg",
+      "observation": "Nine tracked SVG artifacts fail the repository's fallback-text normalization check, while the broad manifest exposes only one of those failures.",
+      "method": "python -m scripts.diagrams fix-svg-text --check; fix-foreign-object --check; fix-svg-styles --check; check-svg-text on default, extended, broad, and full corpus.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.99,
+      "status": "PROVEN",
+      "category": "render-artifacts",
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/architecture/svg/24-control-plane-artifact-publication-pipeline.svg",
+          "line": 1,
+          "command": "python -m scripts.diagrams fix-svg-text --check",
+          "observation": "Nine SVGs need 192 fallback text nodes in total: architecture 24, 26, 43-48 and views 39-medallion-invariants-full."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt",
+          "line": 47,
+          "command": "python -m scripts.diagrams check-svg-text --manifest docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt",
+          "observation": "The broad manifest fails only on architecture/24; the remaining eight failing artifacts are outside this gate."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/svg/25-effective-execution-config-resolution-and-artifact-hashing.svg",
+          "line": 1,
+          "command": "python -m scripts.diagrams fix-svg-styles --check",
+          "observation": "Twenty-three tracked SVGs still need the canonical CSS injection."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/svg/04-pipeline-execution-flow.svg",
+          "line": 1,
+          "command": "python -m scripts.diagrams harmonize-link-styles --dry-run --fail-on-errors",
+          "observation": "Twenty-five sequence SVGs would be modified by the canonical link-style postprocessor."
+        }
+      ],
+      "expected": "Tracked SVGs must be reproducible postprocessed artifacts with readable fallback text and canonical styling, and required gates must cover newly added artifacts.",
+      "actual": "Nine SVGs retain foreignObject-only text, 23 lack canonical CSS injection, 25 need link harmonization, and the broad gate catches only one of the nine text failures.",
+      "impact": "Text can disappear in non-HTML SVG consumers and artifact consistency is not enforced for recently added diagrams.",
+      "root_cause": "The corpus has outgrown the curated manifests and post-render fixers are not enforced over every tracked SVG.",
+      "remediation": "Run the supported pointwise fallback/style/link postprocessors on the named artifacts, review the text-as-code sources, and extend a required manifest or add a full-corpus normalization gate without committing PNG output.",
+      "effort": "M",
+      "automation": "Run check-svg-text and canonical style assertions against every tracked SVG in CI, or enforce source-to-SVG coverage for all new diagrams.",
+      "automated_fix_possible": true,
+      "dependencies": ["DIAG-AUD-003"],
+      "validation": [
+        "python -m scripts.diagrams fix-svg-text --check",
+        "python -m scripts.diagrams fix-svg-styles --check",
+        "python -m scripts.diagrams check-svg-text --manifest docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt",
+        "python -m scripts.diagrams check-artifacts --json"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-003",
+      "path": "scripts/diagrams/run_diagram_checks.sh:75",
+      "observation": "The supported Docker fallback creates and passes an args-only host Puppeteer config that prevents Chromium discovery inside the pinned Mermaid container.",
+      "method": "Run the official checks entry with MMDC_FORCE_DOCKER=1 on a representative class diagram; compare direct pinned docker render with and without the generated -p config.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.99,
+      "status": "PROVEN",
+      "category": "renderer-reproducibility",
+      "evidence": [
+        {
+          "path": "scripts/diagrams/run_diagram_checks.sh",
+          "line": 75,
+          "command": "nl -ba scripts/diagrams/run_diagram_checks.sh | sed -n '75,128p'",
+          "observation": "ensure_puppeteer_config writes only sandbox args when no host Chromium is found; host detection cannot discover the container's /usr/bin/chromium-browser."
+        },
+        {
+          "path": "scripts/diagrams/mmdc_wrapper.sh",
+          "line": 1,
+          "command": "MMDC_FORCE_DOCKER=1 python -m scripts.diagrams checks --profile quick --diagram docs/02-architecture/diagrams/class-diagrams/01-domain-ports.mmd",
+          "observation": "The official path exits 1 because Puppeteer cannot find Chromium in the pinned 10.6.1 container."
+        },
+        {
+          "path": "scripts/diagrams/mmdc_wrapper.sh",
+          "line": 1,
+          "command": "docker run --rm -v <repo>:/data minlag/mermaid-cli:10.6.1 -i <source> -o <temp.svg>",
+          "observation": "Direct pinned renders pass for flowchart, sequence, state, and class samples when the host args-only config is not passed."
+        }
+      ],
+      "expected": "MMDC_FORCE_DOCKER=1 must provide a fully reproducible pinned renderer usable by the official checks command.",
+      "actual": "The image works directly, but the official wrapper path overrides browser discovery with an incomplete host-generated Puppeteer config.",
+      "impact": "Contributors without the exact host mmdc cannot run the documented full pinned render gate; a full 441-source syntax render was therefore blocked in this audit.",
+      "root_cause": "Host-specific Puppeteer configuration is reused inside a container with a different executable path.",
+      "remediation": "When Docker mode is active, omit -p or generate a container-specific config with its Chromium executable; cover both host and Docker modes in tests.",
+      "effort": "S",
+      "automation": "Add a wrapper smoke test that renders one diagram with MMDC_FORCE_DOCKER=1 and the pinned local image.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "MMDC_FORCE_DOCKER=1 scripts/diagrams/mmdc_wrapper.sh --version",
+        "MMDC_FORCE_DOCKER=1 python -m scripts.diagrams checks --profile quick --diagram docs/02-architecture/diagrams/class-diagrams/01-domain-ports.mmd"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-004",
+      "path": "scripts/diagrams/fix/apply_elk_layout.py:101",
+      "observation": "The ELK fixer misclassifies valid multiline Mermaid init directives as missing ELK configuration.",
+      "method": "python -m scripts.diagrams apply-elk --dry-run plus direct evaluation of has_elk_init against an existing multiline init block.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.99,
+      "status": "PROVEN",
+      "category": "fixer-correctness",
+      "evidence": [
+        {
+          "path": "scripts/diagrams/fix/apply_elk_layout.py",
+          "line": 105,
+          "command": "nl -ba scripts/diagrams/fix/apply_elk_layout.py | sed -n '101,108p'",
+          "observation": "The predicate requires init, layout, and elk to occur on the same physical line."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd",
+          "line": 11,
+          "command": "python -m scripts.diagrams apply-elk --dry-run",
+          "observation": "A source whose multiline init already contains layout: elk is reported as needing elk_init; 17 files are false-positive modifications."
+        }
+      ],
+      "expected": "The fixer must recognize semantically equivalent one-line and multiline init directives and be idempotent in dry-run/check mode.",
+      "actual": "Multiline directives are not recognized, so 17 already-ELK diagrams are proposed for modification.",
+      "impact": "Running the advertised fixer can inject duplicate initialization directives and create unnecessary source/render churn.",
+      "root_cause": "ELK detection is line-oriented rather than directive/block-oriented.",
+      "remediation": "Parse or concatenate the complete Mermaid init directive before checking layout and elk; add one-line, multiline, and unrelated-init regression fixtures.",
+      "effort": "S",
+      "automation": "Unit-test fixer idempotence over both supported init syntaxes.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.diagrams apply-elk --dry-run",
+        "python -m pytest tests/unit/scripts/diagrams -q"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-005",
+      "path": "scripts/diagrams/fix/differentiate_linkstyle.py:25",
+      "observation": "The link-style differentiation fixer silently scans an obsolete, nonexistent diagrams/mermaid directory.",
+      "method": "Static path inspection, path existence check, and python -m scripts.diagrams differentiate-linkstyle --dry-run.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "category": "fixer-correctness",
+      "evidence": [
+        {
+          "path": "scripts/diagrams/fix/differentiate_linkstyle.py",
+          "line": 25,
+          "command": "nl -ba scripts/diagrams/fix/differentiate_linkstyle.py | sed -n '25,27p;394,404p'",
+          "observation": "MERMAID_DIR is hard-coded to docs/02-architecture/diagrams/mermaid and main globs only *.mermaid there."
+        },
+        {
+          "path": "docs/02-architecture/diagrams",
+          "line": 1,
+          "command": "python -m scripts.diagrams differentiate-linkstyle --dry-run",
+          "observation": "The command exits 0 after scanning 0 files although the active corpus contains 441 source diagrams."
+        }
+      ],
+      "expected": "The public fixer must scan the active canonical source tree recursively or fail loudly when its configured root does not exist.",
+      "actual": "It targets a removed path and reports a successful zero-file run.",
+      "impact": "Operators receive a false-success signal and link-style drift remains untouched.",
+      "root_cause": "A legacy directory layout remained embedded in the fixer after the canonical tree moved.",
+      "remediation": "Resolve the current diagrams root, recurse over supported source suffixes, reject an empty corpus, and add a CLI regression test.",
+      "effort": "S",
+      "automation": "Add a test asserting that the default corpus exists and the CLI discovers representative .mmd and .mermaid files.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.diagrams differentiate-linkstyle --dry-run",
+        "python -m pytest tests/unit/scripts/diagrams -q"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-006",
+      "path": "scripts/diagrams/render/pipeline_dataflow_ir.py:41",
+      "observation": "Generated ChEMBL dataflow drift is triggered solely by a repository-wide source date, not by a semantic change in the generator's actual inputs.",
+      "method": "python -m scripts.diagrams generate-dataflows --check; generate to audit preview; normalize old/new generated dates and compare every reported file.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "generated-artifact-reproducibility",
+      "evidence": [
+        {
+          "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
+          "line": 52,
+          "command": "nl -ba scripts/diagrams/render/pipeline_dataflow_ir.py | sed -n '41,74p'",
+          "observation": "_source_date runs git log over all configs and src/bioetl rather than the dataflow's exact inputs."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd",
+          "line": 1,
+          "command": "python -m scripts.diagrams generate-dataflows --check",
+          "observation": "The check reports 14 stale text artifacts: six diagrams, six descriptions, the IR JSON, and the pipeline passport."
+        },
+        {
+          "path": "reports/audit-runs/20260818T141321Z-diagrams-cycle-3809e140/evidence/generated-preview",
+          "line": 1,
+          "command": "Compare generated preview to tracked files after replacing 2026-08-12/2026-08-18 metadata dates",
+          "observation": "All 14 normalized files are byte-equivalent; normalized_non_date_mismatches=0."
+        }
+      ],
+      "expected": "The generated-artifact gate should change only when the generator or an input contributing to the ChEMBL dataflow changes.",
+      "actual": "Any unrelated non-merge commit under configs or src/bioetl advances the embedded date and invalidates all 14 artifacts.",
+      "impact": "CI and contributors see noisy stale-artifact failures and must create broad documentation churn unrelated to the diagram's claims.",
+      "root_cause": "Freshness metadata uses a repository-wide last-change date as generated content.",
+      "remediation": "Derive provenance from the exact config/code inputs or exclude display-only generated dates from drift equality while keeping a stable input hash.",
+      "effort": "M",
+      "automation": "Add a regression test proving an unrelated src/bioetl change does not alter generated dataflow artifacts.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.diagrams generate-dataflows --check",
+        "python -m pytest tests/unit/scripts/diagrams -q"
+      ]
+    },
+    {
+      "id": "DIAG-AUD-007",
+      "path": "docs/02-architecture/diagrams/governance/diagram-views-inventory.md:24",
+      "observation": "The published view inventory records 162 tracked Mermaid views while the current corpus and diagrams index contain 165.",
+      "method": "Count tracked docs/02-architecture/diagrams/views/*.mermaid and compare the governance inventory with diagrams-index.md.",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "category": "inventory-freshness",
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/governance/diagram-views-inventory.md",
+          "line": 24,
+          "command": "nl -ba docs/02-architecture/diagrams/governance/diagram-views-inventory.md",
+          "observation": "The baseline claims 162 files and its table omits three singleton overview views."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/views/21-idempotent-processing-guards-overview.mermaid",
+          "line": 1,
+          "command": "find docs/02-architecture/diagrams/views -maxdepth 1 -type f -name '*.mermaid'",
+          "observation": "There are 165 files; the omitted singletons are 21-idempotent-processing-guards-overview, 23-reproducible-run-contract-overview, and 24-data-runtime-quality-map-overview."
+        }
+      ],
+      "expected": "The published measured inventory must match the tracked corpus and enumerate every view family.",
+      "actual": "The baseline is lower by three and omits three architecture-derived singleton views.",
+      "impact": "Governance readers and future audit automation operate from an understated corpus size.",
+      "root_cause": "The inventory was not refreshed when three singleton views were added.",
+      "remediation": "Update the baseline to 165, add the three singleton rows, refresh the verified date, and add a count/table consistency test.",
+      "effort": "S",
+      "automation": "Validate the inventory table against tracked view filenames in the existing diagram corpus regression suite.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "python -m pytest tests/architecture/test_diagram_corpus_regression_guards.py -q",
+        "python -m scripts.docs check-links --links --specs --configs"
+      ]
+    }
+  ]
+}
+=======
+{
+  "domain_id": "diagrams",
+  "prompt_id": "prompt.audit.diagrams",
+  "generated_at": "2026-08-21T00:00:00Z",
+  "surface_score": 2,
+  "p0_p1_count": 1,
+  "proven_count": 8,
+  "blocked": false,
+  "findings": [
+    {
+      "id": "DIAG-001",
+      "requirement_id": "REQ-OBS-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "model-drift",
+      "path": "docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd:67-69",
+      "observation": "Canonical runtime observability diagram routes structured logs and traces into Grafana, which matches the retired Loki/Tempo shipping surface rather than the current metrics-only optional Grafana stack.",
+      "method": "read_file of 22-data-operations-observability.mmd; grep Loki/Tempo in diagrams; compare to current-state-diagrams.md, current-state-inventory.md (retired 2026-07-23), ADR-010, Agents.md dashboard routing.",
+      "expected": "Grafana, if shown, is optional Prometheus UI (ADR-010/ADR-053). Logs stay on UnifiedLogger/files/CLI; traces stay on OTLP/console. Loki/Tempo are not default shipping.",
+      "actual": "Lines 67-69: METRICS --> PROM --> GRAF; LOGS --> GRAF; TRACES --> GRAF. Node GRAF is labeled 'Grafana / alerts / runbooks'. @date 2026-03-28, before Loki/Tempo removal.",
+      "impact": "Operators can treat Grafana as a log/trace backend and reintroduce retired Loki/Tempo or mis-operate incidents. Wrong key observability dependency.",
+      "root_cause": "Diagram not updated after monitoring-surface reduction (2026-07-23).",
+      "remediation": "Edit 22-data-operations-observability.mmd: keep PROM-->GRAF as optional metrics; point LOGS to files/CLI and TRACES to OTLP/console. Re-render sibling SVG. Do not apply in this audit.",
+      "effort": "S",
+      "automation": "Extend visual-smoke-extended.txt with 22-*.svg; architecture narrative sync test vs current-state-diagrams.md.",
+      "automated_fix_possible": false,
+      "dependencies": ["ADR-010", "ADR-053"],
+      "validation": [
+        "grep -n 'LOGS --> GRAF\\|TRACES --> GRAF' docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd",
+        "python -m scripts.diagrams lint docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd"
+      ],
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd",
+          "line": 67,
+          "command": "read_file",
+          "observation": "METRICS --> PROM --> GRAF; LOGS --> GRAF; TRACES --> GRAF"
+        },
+        {
+          "path": "docs/02-architecture/current-state-diagrams.md",
+          "line": 41,
+          "command": "read_file",
+          "observation": "Loki, Tempo, and Quarantine Explorer UI are not part of the current default shipping surface"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-002",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "incomplete-source",
+      "path": "docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd:39",
+      "observation": "Security/PII diagram uses implicit unlabeled nodes HASHED, BW, and SW; tracked SVG renders them as literal 'HASHED'/'BW'/'SW'.",
+      "method": "read_file of 17-security-pii-audit.mmd; read_file of sibling SVG (nodes HASHED-9, BW-26, SW-27).",
+      "expected": "Every storage/PII node has an explicit labeled definition (Hashed PII, BronzeWriter, SilverWriter) matching GoldWriter style.",
+      "actual": "Line 39: RAW_PII --> HASH_FN --> HASHED with HASHED never declared. Line 71: BW & SW & GW --> AP while only GW is declared as GoldWriter. SVG labels are 'HASHED', 'BW', 'SW'.",
+      "impact": "Security/audit view is incomplete: Bronze/Silver writers appear as opaque IDs. Not a wrong hashing algorithm, but operators cannot read the storage-audit path.",
+      "root_cause": "Shorthand node IDs without label declarations; GRAPH-001 does not flag nodes that participate in edges.",
+      "remediation": "Declare HASHED['Hashed PII'], BW['BronzeWriter'], SW['SilverWriter'] inside the appropriate subgraphs; re-render SVG.",
+      "effort": "S",
+      "automation": "Optional lint: class assignments referencing undeclared labeled nodes.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "bash docs/02-architecture/diagrams/tooling/render.sh --dir docs/02-architecture/diagrams/architecture --filter '*17-security*'"
+      ],
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd",
+          "line": 71,
+          "command": "read_file",
+          "observation": "BW & SW & GW --> AP with only GW labeled"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/svg/17-security-pii-audit.svg",
+          "line": 1,
+          "command": "read_file",
+          "observation": "Rendered nodes id HASHED-9, BW-26, SW-27 with tspan text HASHED/BW/SW"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-003",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "runtime-guidance-drift",
+      "path": ".codex/skills/technical-designer-mermaid/SKILL.md:72",
+      "observation": "Active Codex and Junie mermaid skills still instruct agents to write canonical diagrams under docs/02-architecture/mmd-diagrams/, which is not the canonical root.",
+      "method": "grep mmd-diagrams in .codex/.junie skills; compare to ADR-040, diagrams/README.md, test_legacy_mmd_diagrams_tree_has_no_canonical_sources.",
+      "expected": "BioETL project mode uses docs/02-architecture/diagrams/**.mmd and views/*.mermaid; render.sh under diagrams/tooling/; manifests under diagrams/manifests/.",
+      "actual": "SKILL.md lines 72-81 and 119-121 point at mmd-diagrams/**, mmd-diagrams/render.sh, and visual-smoke-manifest.txt. Same text in .junie/skills/technical-designer-mermaid/SKILL.md (parity, both stale).",
+      "impact": "Agents can create sources in a legacy path. Architecture tests would fail if those files land, but the skill is the operator contract for this domain.",
+      "root_cause": "Incomplete mmd-diagrams -> diagrams migration in runtime skills.",
+      "remediation": "Update .codex and .junie technical-designer-mermaid SKILL.md paths; run bash scripts/ai/junie/check_junie_mirror.sh --check; sync docs/00-project/ai/skills/local mirror.",
+      "effort": "S",
+      "automation": "Corpus regression already forbids canonical sources under mmd-diagrams/; add skill-path assertion.",
+      "automated_fix_possible": true,
+      "dependencies": ["AI_RUNTIME_MIRROR_OWNERSHIP"],
+      "validation": [
+        "rg mmd-diagrams .codex/skills/technical-designer-mermaid .junie/skills/technical-designer-mermaid",
+        "bash scripts/ai/junie/check_junie_mirror.sh --check"
+      ],
+      "evidence": [
+        {
+          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
+          "line": 72,
+          "command": "read_file",
+          "observation": "Canonical source diagrams: docs/02-architecture/mmd-diagrams/**.mmd"
+        },
+        {
+          "path": ".junie/skills/technical-designer-mermaid/SKILL.md",
+          "line": 72,
+          "command": "grep",
+          "observation": "Same mmd-diagrams paths (Codex–Junie parity, both wrong)"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-004",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "ci-coverage-gap",
+      "path": ".github/workflows/docs.yml:484-487",
+      "observation": "PR source-vs-SVG drift gate and pre-commit lint globs cover architecture/foundation/class-diagrams/views only; providers, sequence, and state-machines can change without requiring sibling SVG updates.",
+      "method": "read_file docs.yml check-diagram-drift; read_file .pre-commit-config.yaml lint-diagrams files:; compare to test_source_diagrams_have_sibling_svg_artifacts (stem existence only).",
+      "expected": "Every tracked source family with sibling SVG policy is in check-diagram-drift and pre-commit files: globs.",
+      "actual": "Drift job globs: architecture/*.mmd, foundation/*.mmd, class-diagrams/*.mmd, views/*.mermaid. Pre-commit files: same plus views. Secondary: 28+5+5 sources. Architecture tests only assert matching stems, not git diff of SVG content.",
+      "impact": "Stale SVG for provider/sequence/state diagrams can merge. Nightly render does not fail git diff for those families.",
+      "root_cause": "Drift/pre-commit wired to original ADR-040 primary trees; secondary families added later (#8622) without glob update.",
+      "remediation": "Add :(glob)docs/02-architecture/diagrams/{providers/**,sequence,state-machines}/*.mmd to check-diagram-drift and matching pre-commit files: patterns. Update test_precommit_diagram_paths_cover_canonical_tree.",
+      "effort": "S",
+      "automation": "Extend test_docs_workflow_diagram_drift_uses_pr_base_ref / corpus guards.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "rg 'providers|sequence|state-machines' .github/workflows/docs.yml .pre-commit-config.yaml"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 484,
+          "command": "read_file",
+          "observation": "changed_diagrams globs omit providers/sequence/state-machines"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 238,
+          "command": "read_file",
+          "observation": "lint-diagrams files: architecture|foundation|class-diagrams only"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-005",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "generated-source-drift",
+      "path": "scripts/diagrams/render/generate_package_family_class_diagrams.py:79-83",
+      "observation": "AST-derived 90-pkg-* class diagrams have a --check mode but it is not a python -m scripts.diagrams command and is not invoked from GitHub workflows; headers remain @date 2026-03-27 (STALE-002 warn band vs 90d).",
+      "method": "read_file generator --check; grep generate_package_family in .github/workflows and tests; grep COMMAND_SPECS in scripts/diagrams/__main__.py; grep %% @date in 90-pkg-*.mmd.",
+      "expected": "Generated supplemental class diagrams are regenerated or --check gated in CI when src/bioetl/** classes change.",
+      "actual": "No workflow/test hits for generate_package_family. __main__.py COMMAND_SPECS has no package-family command. Sample 90-pkg-interfaces-http.mmd @date 2026-03-27 (~147d before 2026-08-21; ERROR_STALE_DAYS=150).",
+      "impact": "Package-family class views can silently diverge from code. Approaching STALE-001 error at 150 days.",
+      "root_cause": "Generator exists as a manual tool; not wired into public CLI or CI.",
+      "remediation": "Add CLI command and a docs/architecture CI --check step. Refresh 90-pkg-* and sibling SVG from current AST.",
+      "effort": "M",
+      "automation": "python scripts/diagrams/render/generate_package_family_class_diagrams.py --check in docs.yml or architecture tests.",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "python scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 63,
+          "command": "read_file",
+          "observation": "COMMAND_SPECS has no generate-package-family entry"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-http.mmd",
+          "line": 6,
+          "command": "grep",
+          "observation": "%% @date    2026-03-27"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-006",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.96,
+      "status": "PROVEN",
+      "category": "broken-index-link",
+      "path": "docs/02-architecture/diagrams/README.md:101-107",
+      "observation": "Canonical diagram README lists sibling png/INDEX.md files that cannot exist in git after DOC-GOV-02 PNG untrack.",
+      "method": "read_file README supplementary indexes; read_file .gitignore png rules; list_dir architecture/png (does not exist).",
+      "expected": "Publication indexes only reference tracked artifacts (svg/INDEX.md) or the render-retention policy for PNG.",
+      "actual": "README lines 101-107 list architecture/png/INDEX.md, class-diagrams/png/INDEX.md, foundation/png/INDEX.md, views/png/INDEX.md. gitignore /docs/02-architecture/diagrams/**/png/**. architecture/png directory absent.",
+      "impact": "Broken contributor links; mkdocs link severity already relaxed for rendered images, so this is hygiene not a build blocker.",
+      "root_cause": "README not fully updated when PNG baselines were untracked.",
+      "remediation": "Remove png/INDEX.md bullets; point to governance/render-retention.md.",
+      "effort": "S",
+      "automation": "scripts.docs check-links already scoped; add explicit README assertion in corpus tests.",
+      "automated_fix_possible": true,
+      "dependencies": ["DOC-GOV-02"],
+      "validation": [
+        "rg 'png/INDEX' docs/02-architecture/diagrams/README.md"
+      ],
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/README.md",
+          "line": 101,
+          "command": "read_file",
+          "observation": "architecture/png/INDEX.md listed as supplementary index"
+        },
+        {
+          "path": ".gitignore",
+          "line": 645,
+          "command": "read_file",
+          "observation": "/docs/02-architecture/diagrams/**/png/ gitignored"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-007",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "inventory-gap",
+      "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md:24-38",
+      "observation": "ADR-040 measured baseline and diagrams-index Repository Layout count only architecture/class/foundation/views (239 mmd + 165 mermaid) and omit sequence (5), state-machines (5), and providers (28).",
+      "method": "read_file ADR-040 and diagrams-index.md; list_dir secondary families; compare test_governance_docs_match_active_diagram_counts (asserts the incomplete baseline).",
+      "expected": "Governance inventory lists every tracked source family or explicitly marks secondary families as out-of-baseline with counts.",
+      "actual": "ADR-040: architecture 89, class-diagrams 94, foundation 55, template 1, views 165. diagrams-index.md same. README does document sequence/providers/state-machines separately. Test locks the incomplete ADR counts.",
+      "impact": "Operators using ADR-040 as inventory miss 38 sources and their SVG contract.",
+      "root_cause": "Secondary families added after ADR-040 baseline freeze; test encodes the freeze.",
+      "remediation": "Add a secondary-families subsection with 5+5+28 counts to ADR-040 and diagrams-index.md; extend the architecture count test without raising debt budgets.",
+      "effort": "S",
+      "automation": "test_governance_docs_match_active_diagram_counts",
+      "automated_fix_possible": true,
+      "dependencies": ["ADR-040"],
+      "validation": [
+        "python -m pytest tests/architecture/test_diagram_corpus_regression_guards.py::test_governance_docs_match_active_diagram_counts -q"
+      ],
+      "evidence": [
+        {
+          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+          "line": 24,
+          "command": "read_file",
+          "observation": "Canonical sources list omits sequence/providers/state-machines"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
+          "line": 24,
+          "command": "read_file",
+          "observation": "Repository Layout counts 89/94/55/165 only"
+        }
+      ]
+    },
+    {
+      "id": "DIAG-008",
+      "requirement_id": "REQ-OBS-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "optional-infra-label",
+      "path": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd:72",
+      "observation": "Observability stack diagrams label Prometheus + Grafana as External Systems without marking Grafana as optional local-only (ADR-010).",
+      "method": "read_file 09-observability-stack.mmd and 09b-observability-infra.mmd; compare current-state-diagrams.md C4Context which correctly says Grafana/Prometheus (optional).",
+      "expected": "External Grafana/Prometheus nodes are labeled optional, consistent with ADR-010 and current-state C4.",
+      "actual": "09 line 72 PROM['Prometheus + Grafana']; 09b line 46 same. No 'optional' qualifier. current-state-diagrams.md line 58 does label optional.",
+      "impact": "Readers of canonical architecture diagrams may assume Grafana is required to run BioETL. Default runtime remains local-only.",
+      "root_cause": "Canonical 09 family not aligned with later optional-monitoring wording.",
+      "remediation": "Rename PROM to 'Prometheus + Grafana (optional, ADR-010)' in 09 and 09b; re-render SVG.",
+      "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "dependencies": ["ADR-010", "DIAG-001"],
+      "validation": [
+        "rg 'Prometheus \\+ Grafana' docs/02-architecture/diagrams/architecture/09*.mmd"
+      ],
+      "evidence": [
+        {
+          "path": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd",
+          "line": 72,
+          "command": "read_file",
+          "observation": "PROM['Prometheus + Grafana'] in External Systems"
+        },
+        {
+          "path": "docs/02-architecture/current-state-diagrams.md",
+          "line": 58,
+          "command": "read_file",
+          "observation": "C4Context correctly labels Grafana / Prometheus (optional)"
+        }
+      ]
+    }
+  ]
+}
+>>>>>>> master20260821-3
