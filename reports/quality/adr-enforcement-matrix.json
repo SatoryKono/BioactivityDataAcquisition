@@ -2139,6 +2139,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "configs/README.md",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
