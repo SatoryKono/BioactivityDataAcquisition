@@ -38,11 +38,14 @@ make lint && make test
 ### Commit + Push + PR
 
 ```bash
-git add .
+git status
+git add path/to/changed-file
 git commit -m "feat(scope): description"
 git push -u origin HEAD
 gh pr create
 ```
+
+Do not stage the entire working tree at once: that can include `.env`, machine-local files, and unrelated WIP.
 
 ### Мониторинг PR
 

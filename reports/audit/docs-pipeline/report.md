@@ -1,5 +1,12 @@
 # Docs pipeline audit — 20260821T112959Z-audit-seq-27105f85
 
-surface_score: **3** (good). `scripts.docs verify` + KPI reproducible. Cleanup-inventory `--check` is green on a tree without extra gitignored `docs/reports/**` files.
+Source run: `20260821T113346Z-docs-cycle-78d0fc88c7`.
 
-No new PROVEN findings.
+`surface_score=2`. `check-links` (unflagged), `check-kpi`, and
+`check-drift --ports --classes --runtime-mirrors --freshness` are green.
+`docs.yml` runs `python -m scripts.docs verify` and passports check.
+PROVEN pipeline gap: `scripts/docs/README.md` mapped `check-drift` /
+`check-docstrings` to `architecture.yml` (#9322). MkDocs strict build not
+executed in this Windows `.venv-win` (no `mkdocs` extra).
+
+Canonical evidence: `reports/audit-runs/20260821T113346Z-docs-cycle-78d0fc88c7/`.
