@@ -1,4 +1,5 @@
 """Base transformer public facade."""
+
 from __future__ import annotations
 # ruff: noqa: I001
 

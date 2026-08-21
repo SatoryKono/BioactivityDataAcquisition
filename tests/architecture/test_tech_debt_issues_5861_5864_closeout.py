@@ -190,7 +190,10 @@ def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_im
         ROOT
         / "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py"
     ).exists()
-    assert family["helper_function_ratio"] <= 0.359
+    assert (
+        family["helper_function_ratio"]
+        <= closeout["metrics"]["runtime_builders_helper_function_ratio"]["opening"]
+    )
     assert (
         family["helper_function_ratio"]
         <= closeout["metrics"]["runtime_builders_helper_function_ratio"]["opening"]

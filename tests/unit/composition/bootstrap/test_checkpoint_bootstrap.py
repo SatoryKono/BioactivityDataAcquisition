@@ -40,6 +40,8 @@ from uuid import UUID
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 from bioetl.application.core.lifecycle.checkpoint_manager import (
     CheckpointRuntimeService,
 )

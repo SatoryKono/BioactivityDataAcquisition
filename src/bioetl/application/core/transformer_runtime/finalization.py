@@ -1,4 +1,5 @@
 """Canonical submodule for batch-transformer finalization helpers."""
+
 from __future__ import annotations
 # ruff: noqa: I001
 

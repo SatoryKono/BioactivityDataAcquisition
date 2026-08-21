@@ -1386,4 +1386,3 @@ def test_load_drift_allowlist_rejects_non_iso_review_dates(
         raise AssertionError(
             "runtime_cardinality_review_required must reject non-ISO review_date values"
         )
-

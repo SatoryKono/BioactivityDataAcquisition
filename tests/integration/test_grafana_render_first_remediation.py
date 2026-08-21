@@ -1013,8 +1013,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
     ).startswith("SELECT RUN")
     assert all(
-        panel.get("id") != 3021
-        for panel in _iter_panels(explorer.get("panels") or [])
+        panel.get("id") != 3021 for panel in _iter_panels(explorer.get("panels") or [])
     )
 
 

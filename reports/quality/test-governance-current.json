@@ -27,7 +27,7 @@
       "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
       "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
     ],
-    "scanned_test_count": 365,
+    "scanned_test_count": 367,
     "unreviewed_count": 0
   },
   "assertion_branch_reachability_percent": 100.0,
@@ -1252,11 +1252,11 @@
     "max_group_size": 0,
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
-      "fixture": 80,
+      "fixture": 81,
       "golden": 30,
       "vcr": 356
     },
-    "total_files": 466,
+    "total_files": 467,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1271,10 +1271,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 61,
+    "marked_test_files": 63,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 61,
+    "test_files": 63,
     "unmarked_test_files": []
   },
   "report": {
@@ -1306,7 +1306,7 @@
         "tests/unit/infrastructure/storage/test_medallion_regression_envelope.py",
         "tests/unit/infrastructure/storage/test_silver_writer_merged_mixin.py"
       ],
-      "scanned_test_count": 365,
+      "scanned_test_count": 367,
       "unreviewed_count": 0
     },
     "assertion_branch_reachability_percent": 100.0,
@@ -2222,11 +2222,11 @@
       "max_group_size": 0,
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
-        "fixture": 80,
+        "fixture": 81,
         "golden": 30,
         "vcr": 356
       },
-      "total_files": 466,
+      "total_files": 467,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2240,10 +2240,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 61,
+      "marked_test_files": 63,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 61,
+      "test_files": 63,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2252,8 +2252,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2351,
-      "test_python_file_count": 2578,
+      "test_glob_file_count": 2359,
+      "test_python_file_count": 2587,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2292,13 +2292,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2351,
-    "total_test_functions": 24824,
+    "total_test_files": 2359,
+    "total_test_functions": 24899,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "80ca0b95f9b7622374be3c599f6357bafc38438007e4cf4e1f6d7b17b32ab8fa",
+  "source_tree_sha256": "1e7e64031823876946e8154bd53ff5fb9e2fbf69b22138b78478af180ca3c74d",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 102,
@@ -2318,8 +2318,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2351,
-    "test_python_file_count": 2578,
+    "test_glob_file_count": 2359,
+    "test_python_file_count": 2587,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2358,8 +2358,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2351,
-  "total_test_functions": 24824,
+  "total_test_files": 2359,
+  "total_test_functions": 24899,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

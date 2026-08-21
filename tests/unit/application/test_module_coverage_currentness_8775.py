@@ -227,7 +227,6 @@ def test_historical_closure_models_render_residual_paths() -> None:
     )
 
 
-
 def _require_symlink_privilege(tmp_path: Path) -> None:
     probe = tmp_path / "_symlink_probe_src"
     probe.write_text("x", encoding="utf-8")
