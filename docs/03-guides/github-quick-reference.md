@@ -38,7 +38,8 @@ make lint && make test
 ### Commit + Push + PR
 
 ```bash
-git add .
+git status
+git add path/to/reviewed/file
 git commit -m "feat(scope): description"
 git push -u origin HEAD
 gh pr create
