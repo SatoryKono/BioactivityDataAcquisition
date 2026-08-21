@@ -107,7 +107,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div><div><b>CURRENT</b> = Status/active suspects. <b>SELECTED RUN</b> = exact-run proof. <b>EMPTY DOMAIN</b> = no active suspects, not a healthy-fleet verdict.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><span style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</span> CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
       },
       "links": []
     },
@@ -218,7 +218,7 @@
       "title": "Start Incident Triage",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 8
@@ -235,10 +235,10 @@
       "title": "Inspect Ranked Suspects",
       "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking capped at five active suspects. Domain and signal labels identify source; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "datasource": {
         "type": "prometheus",
