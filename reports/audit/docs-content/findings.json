@@ -1,5 +1,159 @@
 {
+  "domain_id": "docs-content",
+  "surface_score": 2,
   "findings": [
+    {
+      "id": "DOCS-001",
+      "requirement_id": "REQ-BACKFILL-*",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "content",
+      "tag": "content",
+      "path": "docs/05-operations/runbooks/pipeline-failure-critical.md:54",
+      "observation": "P0 critical-failure runbook instructed resume via --resume-from <run_id>, a flag that does not exist on bioetl run; preconditions listed Loki.",
+      "method": "read runbook; grep resume-from in CLI; read command_entrypoint.py; re-verify after patch",
+      "expected": "P0 recovery uses published CLI: --resume / --resume-run-id / --resume-manifest-id.",
+      "actual": "Pre-fix used --resume-from and Loki/Local. Post-fix: published flags + local logs.",
+      "impact": "Operator following the P0 runbook could not resume.",
+      "root_cause": "Runbook last verified 2026-04-03; CLI resume selectors evolved without this page.",
+      "remediation": "Replace --resume-from with published flags; drop Loki precondition.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n resume-from docs/05-operations/runbooks/pipeline-failure-critical.md",
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "automation": "optional runbook-command grep against click options",
+      "automated_fix_possible": true,
+      "issue": 9284,
+      "iteration_found": 1,
+      "post_status": "resolved",
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/pipeline-failure-critical.md",
+          "line": 54,
+          "command": "read_file",
+          "observation": "Resume steps list --resume / --resume-run-id / --resume-manifest-id."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-002",
+      "requirement_id": "REQ-DELTA-*",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "content",
+      "tag": "content",
+      "path": "docs/05-operations/runbooks/data-recovery.md:42-60",
+      "observation": "P0/P1 data-recovery runbook used Spark SQL RESTORE TABLE; runtime is deltalake (delta-rs) with rebuild via bioetl run --run-type rebuild.",
+      "method": "read data-recovery.md; grep RESTORE TABLE; read retention_time_travel.py",
+      "expected": "DR steps use local Delta time-travel reads or documented rebuild.",
+      "actual": "Pre-fix SQL RESTORE TABLE. Post-fix: Polars read-only snapshot + rebuild.",
+      "impact": "Operators may attempt Spark SQL against a local delta-rs table.",
+      "root_cause": "Generic Delta Lake SQL copied into a local-only runbook.",
+      "remediation": "Replace SQL with Polars/delta-rs snapshot; keep rebuild-from-Bronze.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"RESTORE TABLE\" docs/ src/",
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "issue": 9286,
+      "iteration_found": 1,
+      "post_status": "resolved",
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/data-recovery.md",
+          "line": 45,
+          "command": "read_file",
+          "observation": "Negated Spark SQL; Polars time-travel snapshot documented."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-003",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "content",
+      "tag": "content",
+      "path": "docs/04-reference/environment-variables.md:1-21",
+      "observation": "Published env-var reference claimed completeness, documented non-existent BIOETL_CHEMBL_API_KEY, and omitted BIOETL_UNIPROT_API_KEY.",
+      "method": "compare environment-variables.md to README, .env.example, configs/providers",
+      "expected": "Reference lists only wired keys or explicitly scopes itself as partial.",
+      "actual": "Post-fix: UniProt key present; ChEMBL key removed; page marked partial.",
+      "impact": "Contributors set unused keys and miss the UniProt optional key.",
+      "root_cause": "Reference not generated from configs/providers or .env.example.",
+      "remediation": "Delete BIOETL_CHEMBL_API_KEY; add BIOETL_UNIPROT_API_KEY; mark partial.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg -n BIOETL_CHEMBL_API_KEY docs/04-reference/environment-variables.md README.md",
+        "rg -n BIOETL_UNIPROT_API_KEY docs/04-reference/environment-variables.md"
+      ],
+      "automation": "Generate env-var table from configs/providers",
+      "automated_fix_possible": false,
+      "issue": 9285,
+      "iteration_found": 1,
+      "post_status": "resolved",
+      "evidence": [
+        {
+          "path": "docs/04-reference/environment-variables.md",
+          "line": 21,
+          "command": "read_file",
+          "observation": "BIOETL_UNIPROT_API_KEY listed; completeness claim removed."
+        }
+      ]
+    },
+    {
+      "id": "DOCS-004",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "content",
+      "tag": "content",
+      "path": ".github/SECURITY.md:43-45",
+      "observation": "Security policy examples list BIOETL_CHEMBL_API_KEY and BIOETL_PUBCHEM_API_KEY; those names are not wired in configs/providers.",
+      "method": "read SECURITY.md; grep keys in configs/ and .env.example",
+      "expected": "Examples match real BIOETL_{PROVIDER}_{KEY} names used by adapters.",
+      "actual": "Examples still invent ChEMBL/PubChem keys. Out of cycle file SCOPE.",
+      "impact": "Security onboarding invents credentials the runtime never reads.",
+      "root_cause": "Generic provider-key pattern copied as concrete examples.",
+      "remediation": "Replace examples with wired keys. Follow-up outside SCOPE.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"BIOETL_CHEMBL_API_KEY|BIOETL_PUBCHEM_API_KEY\" .github/SECURITY.md"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "issue": 9283,
+      "iteration_found": 1,
+      "post_status": "unchanged",
+      "out_of_scope": true,
+      "evidence": [
+        {
+          "path": ".github/SECURITY.md",
+          "line": 43,
+          "command": "read_file",
+          "observation": "CHEMBL and PUBCHEM API key names listed as examples."
+        }
+      ]
+    },
     {
       "id": "DOCS-WF-INV-001",
       "requirement_id": "REQ-DOC-001",
@@ -9,37 +163,33 @@
       "confidence_score": 0.95,
       "status": "PROVEN",
       "category": "content",
-      "github_issue": 9265,
-      "iteration_status": "fixed_pending_pr",
+      "tag": "content",
+      "path": "docs/04-reference/github-actions-workflows.md",
+      "observation": "Prior cycle: published GHA inventory lagged at 41 vs 42 live YAML files.",
+      "method": "ls .github/workflows/*.yml; python -m scripts.docs check-links",
+      "expected": "Published inventory matches live workflow files.",
+      "actual": "42 live YAML files; workflow inventory OK. Closed #9265.",
+      "impact": "None remaining on this SHA.",
+      "root_cause": "Workflow added without catalog refresh; fixed on origin/main.",
+      "remediation": "None; already on origin/main.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.docs check-links"
+      ],
+      "automation": "docs.yml validate-mkdocs",
+      "automated_fix_possible": false,
+      "issue": 9265,
+      "iteration_found": 1,
+      "post_status": "resolved",
       "evidence": [
         {
-          "path": "docs/04-reference/github-actions-workflows.md",
-          "line": 18,
-          "command": "python -m scripts.docs check-links",
-          "observation": "Before fix: missing dashboard-first-window-noscroll.yml; count claim 41 vs live 42. After fix: check-links --workflow-inventory PASS; full check-links PASS."
-        },
-        {
-          "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 89,
-          "command": "python -m scripts.docs check-links",
-          "observation": "Policy claimed 41 GitHub Actions workflows; live glob is 42."
+          "path": "docs/05-operations/ci-workflow-map.md",
+          "line": 14,
+          "command": "grep Count at verification",
+          "observation": "42 workflow files."
         }
-      ],
-      "expected": "Published inventory lists every live .github/workflows/*.yml and count equals live glob.",
-      "actual": "Catalog omitted dashboard-first-window-noscroll.yml; count 41 vs 42.",
-      "impact": "docs.yml validate-mkdocs unflagged check-links fails on the next docs-path PR; operators treat a stale 41-file catalog as current.",
-      "root_cause": "New PR/push workflow added without updating the published inventory; docs.yml path filters omit .github/workflows/**.",
-      "remediation": "Sync inventory/count (#9265). Follow-up: trigger docs.yml on workflow YAML changes (#9266).",
-      "effort": "S",
-      "dependencies": [
-        "#9266"
-      ],
-      "validation": [
-        "python -m scripts.docs check-links --workflow-inventory",
-        "python -m scripts.docs check-links",
-        "pytest tests/architecture/test_check_doc_links_guardrails.py::test_github_actions_workflow_inventory_matches_live_repo -q"
-      ],
-      "automated_fix_possible": true
+      ]
     }
   ]
 }
