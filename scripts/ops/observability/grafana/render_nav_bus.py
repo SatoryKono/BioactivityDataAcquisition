@@ -76,10 +76,10 @@ FILE_BY_UID = {
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
 NAV_HEIGHT = 4
-NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1.3;margin:0 6px 2px"
+NAV_TITLE_STYLE = "font-size:16px;font-weight:600;line-height:1.15;margin:0 4px 1px"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 120px;text-align:center;padding:2px 7px;"
-    "border-radius:3px;font-weight:600;line-height:1.25"
+    "box-sizing:border-box;flex:1 1 100px;text-align:center;padding:1px 5px;"
+    "border-radius:3px;font-weight:600;line-height:1.2"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -94,8 +94,8 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:6px;flex-wrap:wrap;align-items:center;"
-    "padding:2px 6px;overflow:visible;white-space:normal;font-size:16px"
+    "display:flex;gap:4px;flex-wrap:wrap;align-items:center;"
+    "padding:1px 4px;overflow:visible;white-space:normal;font-size:13px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
 
