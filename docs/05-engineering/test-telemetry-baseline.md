@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-18'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -27,12 +27,12 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `9336cd7e24b05a8b96f7708701df96226b739882`
-- Source run id: `32106880089`
-- Source tree sha256: `1decef94460acb66b5a22441eaab3331da3570fc7cbdb1b56dc1b8f4864555af`
+- Source branch: `fix/regression-contracts-9345-9347`
+- Source commit: `7547827fdd88937f43f7dc6a0385a00808bb075c`
+- Source run id: `32516555293`
+- Source tree sha256: `5f5fcf8304f0e02d442e2409c682dfa022a48cd625a15de560e4df1fadf6c9d5`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-18T07:19:16.305713+00:00`
+- Refreshed at (UTC): `2026-08-21T19:22:38.603863+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -50,43 +50,43 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `95.69%`
+- Actual coverage: `96.49%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
 
-- Total collected test cases: `47415`
+- Total collected test cases: `49046`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `21.344` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-unit-scripts-tooling.xml` |
-| 2 | `11.262` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-unit-scripts-tooling.xml` |
-| 3 | `10.893` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit-unit-scripts-tooling.xml` |
-| 4 | `10.71` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
-| 5 | `9.786` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
-| 6 | `8.296` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit.integration.xml` |
-| 7 | `7.021` | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name 'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set for test MCP]` | `junit-repo-backed-unit.xml` |
-| 8 | `6.988` | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_fetch_wrapper_executes_resolved_uvx` | `junit-repo-backed-unit.xml` |
-| 9 | `6.917` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
-| 10 | `6.731` | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines` | `junit.unit-other.xml` |
+| 1 | `19.294` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-unit-scripts-tooling.xml` |
+| 2 | `16.872` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `junit-unit-scripts-tooling.xml` |
+| 3 | `12.23` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit-unit-scripts-tooling.xml` |
+| 4 | `10.959` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
+| 5 | `10.45` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-unit-scripts-tooling.xml` |
+| 6 | `9.55` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.xml` |
+| 7 | `9.44` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.xml` |
+| 8 | `9.402` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_tolerates_unavailable_remote_main_baseline_builder` | `junit-unit-scripts-tooling.xml` |
+| 9 | `9.343` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
+| 10 | `7.838` | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name 'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set for test MCP]` | `junit-repo-backed-unit.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 3 | 43.499 | 21.344 |
-| 2 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts` | 2 | 14.009 | 7.021 |
-| 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 13.947 | 8.296 |
-| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.818 | 4.341 |
-| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.71 | 10.71 |
-| 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.786 | 9.786 |
-| 7 | `tests.unit.scripts.qa.test_report_normalization_fallback_inventory` | 2 | 8.207 | 4.177 |
-| 8 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 6.917 | 6.917 |
-| 9 | `tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration` | 1 | 6.731 | 6.731 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 45.264 | 16.872 |
+| 2 | `tests.unit.scripts.docs.passports.test_passport_projector` | 3 | 41.974 | 19.294 |
+| 3 | `tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts` | 2 | 12.922 | 7.838 |
+| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.316 | 4.186 |
+| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.959 | 10.959 |
+| 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.343 | 9.343 |
+| 7 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 6.977 | 6.977 |
+| 8 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 6.503 | 6.503 |
+| 9 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 10 | `tests.integration.interfaces.test_cli_run_incremental.TestCliRunTypes` | 1 | 5.596 | 5.596 |
 
 ## Refresh Procedure
 

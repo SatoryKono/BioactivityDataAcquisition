@@ -1,14 +1,14 @@
 {
-  "source_branch": "main",
-  "source_commit": "9336cd7e24b05a8b96f7708701df96226b739882",
-  "source_run_id": "32106880089",
-  "source_tree_sha256": "f77c9e5e90a1311b769f0cc24b5b0529b8c655ec0d91f6cd075efc29b4775d61",
-  "refreshed_at_utc": "2026-08-18T07:19:16.305713+00:00",
+  "source_branch": "fix/regression-contracts-9345-9347",
+  "source_commit": "7547827fdd88937f43f7dc6a0385a00808bb075c",
+  "source_run_id": "32516555293",
+  "source_tree_sha256": "5f5fcf8304f0e02d442e2409c682dfa022a48cd625a15de560e4df1fadf6c9d5",
+  "refreshed_at_utc": "2026-08-21T19:22:38.603863+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 95.69,
+  "coverage_percent": 96.49,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 95.69,
+    "actual_percent": 96.49,
     "threshold_satisfied": true
   }
 }
