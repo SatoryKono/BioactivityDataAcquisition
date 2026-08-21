@@ -4,15 +4,15 @@ audits:
   - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
-    audited_commit_sha: 343a6b349bf2d69815fdb5312e4196135750a04f
-    evidence_surface_sha256: 272f74e9245220a0072f3e867994490a9cfd33d93852c1ecb0edfa9511e9e130
+    audited_commit_sha: a739c347eb0a8ce101392ac09c808ab8d2ae9e93
+    evidence_surface_sha256: 372cbb28e0e804cb8f4efb3c1286ebfcf9073f5db2f1c1c4a0decd6de3568e6f
     evidence_paths:
       - configs/quality/constructor_waivers.yaml
       - reports/quality/architecture-quality-scorecard.json
       - reports/quality/contract-coverage-matrix.json
       - reports/quality/debt-governance-gates.json
       - reports/quality/module-coverage-inventory.json
-    reviewed_on: "2026-08-20"
+    reviewed_on: "2026-08-21"
     linked_issue: "#9253"
   - id: total-tech-debt-main-2026-07-27-r1
     status: superseded
