@@ -116,7 +116,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage} · provider_hint=${provider_hint}.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</div><div><b>CURRENT</b> = health/phase/blockers. <b>SELECTED RUN</b> = ID/accounting. <b>STAGE</b> is diagnostic context — <b>SCRAPING</b> does not mean delivery OK.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><span style=\"font-size:18px;font-weight:700\">Is the pipeline progressing, and what is blocking delivery?</span> CURRENT = health/phase/blockers. SELECTED RUN = ID. SCRAPING is not delivery OK.</div></div>"
       },
       "links": []
     },
@@ -244,14 +244,14 @@
       "title": "Start Pipeline Triage",
       "description": "States the current verdict and neutral outcome explicitly, then routes non-OK states through runtime blockers, DQ evidence, and Run Explorer. SCRAPING is telemetry confidence, not proof of delivery health. Verify coverage before trusting an empty blocker table.",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 8
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:2px 8px;line-height:1.25;font-size:16px;white-space:normal\"><strong>First action:</strong> If Pipeline Health is OK and no blocker is listed, continue monitoring. Otherwise open the highest-severity blocker.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">First action: if OK continue monitoring; else open the highest-severity blocker.</div>"
       },
       "links": [
         {
@@ -396,10 +396,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 16,
         "x": 0,
-        "y": 10
+        "y": 11
       },
       "id": 9101,
       "options": {
@@ -519,10 +519,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 8,
         "x": 16,
-        "y": 10
+        "y": 11
       },
       "id": 9102,
       "options": {

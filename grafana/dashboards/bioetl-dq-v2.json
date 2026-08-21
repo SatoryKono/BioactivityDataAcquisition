@@ -117,7 +117,7 @@
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div><div><b>CURRENT</b> = Status/reasons. <b>SELECTED RUN</b> = accounting. <b>TIME RANGE</b> = score/freshness/impact; scopes are not peers.</div></div></div>"
+        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><span style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</span> CURRENT = Status/reasons. SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
       },
       "links": []
     },
@@ -244,7 +244,7 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1.35;padding:2px 8px;white-space:normal\"><strong>First action:</strong> Act on Current DQ Status and Threshold/Reasons. Open Run Explorer only for a selected run.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">First action: act on Current DQ Status.</div>",
         "mode": "html"
       },
       "description": "Start with Current DQ Status, Threshold State, and Current Reasons. For CRIT, inspect validation, anomaly, quarantine, and reject blockers before replay. For WARN, inspect threshold and freshness evidence. If blocked/quarantine/rejects > 0, use accounting with denominators in the Run/Range lanes. Selected-run forensics stay in Run Explorer; resume stays on Trust Review First Recovery Action. Range cards are SLA/freshness context only, not peer severity. Use selected-run accounting and selected-range evidence as supporting lanes, not competing verdicts.",
