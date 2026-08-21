@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P1
   Runtime profile: Local-Only single-instance (ADR-010)
-  Last verified: '2026-07-23'
+  Last verified: '2026-08-21'
 
 ______________________________________________________________________
 
@@ -74,8 +74,8 @@ pass.
 1. Inspect the effective entity and contract configuration:
 
    ```bash
-   bioetl config show --pipeline <pipeline>
-   bioetl config validate --pipeline <pipeline>
+   bioetl config show <pipeline>
+   bioetl config validate <pipeline>
    ```
 
 1. Inspect bounded quarantine evidence without modifying payloads:
