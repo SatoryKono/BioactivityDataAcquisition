@@ -1,0 +1,109 @@
+{
+  "run_id": "20260821T1503Z-obs-seq-b38cf2d489",
+  "base_sha": "b38cf2d4897d9eabf05db982faa8bcbb1c40d494",
+  "surface_score": 2,
+  "surface_score_legend": "0 unacceptable / 1 weak / 2 acceptable / 3 good",
+  "findings": [
+    {
+      "id": "DASH-STATE-002-9104",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "visual-semantics",
+      "requirement_id": "DASH-STATE-002",
+      "dashboard": "bioetl-provider-health-v2",
+      "panel_id": 9104,
+      "panel_title": "Monitor Telemetry Presence",
+      "evidence": [
+        {
+          "path": "grafana/dashboards/bioetl-provider-health-v2.json",
+          "line": 803,
+          "command": "python -m scripts.engineering.qa check-dashboard-visual-semantics",
+          "observation": "null special mapping color=orange on origin/main; gate expects gray"
+        }
+      ],
+      "expected": "null → UNKNOWN/gray; visual-semantics exit 0",
+      "actual": "null → UNKNOWN/orange; gate exit 1 on origin/main",
+      "impact": "Missing telemetry can be read as WARN instead of UNKNOWN",
+      "root_cause": "9104 null mapping color orange; #9330 closed on PR-head, mapping not on origin/main",
+      "remediation": "Set mapping color to gray (done on WORK_BRANCH)",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa check-dashboard-visual-semantics"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9342,
+      "closeout": "BLOCKED_UNTIL_ORIGIN_MAIN"
+    },
+    {
+      "id": "DASH-TYPOGRAPHY-001-9103",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "typography",
+      "requirement_id": "DASH-TYPOGRAPHY-001",
+      "dashboard": "bioetl-dq-v2",
+      "panel_id": 9103,
+      "panel_title": "Start DQ Triage",
+      "evidence": [
+        {
+          "path": "grafana/dashboards/bioetl-dq-v2.json",
+          "line": 247,
+          "command": "pytest tests/integration/test_dashboard_presentation_requirements.py::test_authored_text_font_sizes_meet_body_floor",
+          "observation": "authored font-size:15px; MIN_BODY_FONT_PX=16.0"
+        }
+      ],
+      "expected": "authored HTML body >= 16px",
+      "actual": "15px on origin/main",
+      "impact": "First-action copy below contract floor; pytest gate red",
+      "root_cause": "inline style font-size:15px on panel 9103",
+      "remediation": "15px → 16px (done on WORK_BRANCH)",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "pytest tests/integration/test_dashboard_presentation_requirements.py::test_authored_text_font_sizes_meet_body_floor"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9343,
+      "closeout": "BLOCKED_UNTIL_ORIGIN_MAIN"
+    },
+    {
+      "id": "DASH-FIT-004-1000",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "fit",
+      "requirement_id": "DASH-FIT-004",
+      "dashboard": "shared-nav-bus",
+      "panel_id": 1000,
+      "panel_title": "Navigate Dashboards",
+      "evidence": [
+        {
+          "path": "reports/audit/dashboard-cycle/20260821T121046Z-dash-cycle-0ddd8b29540f/",
+          "command": "rerender-grafana --browser-zoom 200 (prior cycle)",
+          "observation": "Dark 200% overflowCount=1 on panel 1000 (clientHeight 126 vs scrollHeight 143) for four UIDs"
+        }
+      ],
+      "expected": "scrollHeight <= clientHeight+2 at Dark/Light × 100/200, 1366×768",
+      "actual": "Dark 200% vertical overflow 17px on Trust/Overview/Provider/Runtime nav",
+      "impact": "In-panel scroll on first-window nav at 200% zoom",
+      "root_cause": "shared nav 19px heading + 16px wrapping chips in h=4",
+      "remediation": "Tracked by existing #9340; no second issue; live 200% not re-run this seq",
+      "effort": "M",
+      "dependencies": ["#9340"],
+      "validation": [
+        "rerender-grafana --width 1366 --height 768 --theme dark --browser-zoom 200"
+      ],
+      "automated_fix_possible": false,
+      "github_issue": 9340,
+      "closeout": "BLOCKED_EXISTING_ISSUE"
+    }
+  ]
+}

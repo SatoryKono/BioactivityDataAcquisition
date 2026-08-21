@@ -1,0 +1,13 @@
+{
+  "run_id": "20260821T1503Z-obs-seq-b38cf2d489",
+  "depth": "detailed",
+  "monitoring": true,
+  "checks": [
+    {"check_id": "BI-V-SEM-01", "block": "visual", "status": "fail", "score_1_5": 2, "priority": "high", "bioetl_priority": "P1", "epistemic": "FACT", "issue": 9342},
+    {"check_id": "BI-V-TYPE-01", "block": "visual", "status": "fail", "score_1_5": 2, "priority": "high", "bioetl_priority": "P1", "epistemic": "FACT", "issue": 9343},
+    {"check_id": "BI-L-FIT-01", "block": "layout", "status": "fail", "score_1_5": 2, "priority": "high", "bioetl_priority": "P1", "epistemic": "FACT", "issue": 9340},
+    {"check_id": "BI-L-GRID-01", "block": "layout", "status": "pass", "score_1_5": 5, "priority": "low", "bioetl_priority": "P3", "epistemic": "FACT"},
+    {"check_id": "BI-D-PROM-01", "block": "data", "status": "pass", "score_1_5": 4, "priority": "low", "bioetl_priority": "P3", "epistemic": "FACT"},
+    {"check_id": "BI-D-HTTP-01", "block": "data", "status": "pass", "score_1_5": 4, "priority": "low", "bioetl_priority": "P3", "epistemic": "FACT"}
+  ]
+}

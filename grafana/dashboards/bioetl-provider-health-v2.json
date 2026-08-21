@@ -802,7 +802,7 @@
                 "match": "null",
                 "result": {
                   "text": "UNKNOWN",
-                  "color": "orange"
+                  "color": "gray"
                 }
               }
             }
