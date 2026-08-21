@@ -37,7 +37,8 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.
+  cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
 
 jobs:
   docker-runtime-contracts:
@@ -171,6 +172,9 @@ jobs:
     timeout-minutes: 10
     needs: docker-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    concurrency:
+      group: docker-ghcr-push-${{ github.ref }}
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: write

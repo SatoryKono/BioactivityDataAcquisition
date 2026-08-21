@@ -61,6 +61,7 @@ jobs:
               -q --tb=short \
               --junitxml="reports/e2e/matrix-smoke-run${run}.xml"
             echo $? > "reports/e2e/pytest_exit_code_run${run}.txt"
+            set -e
           done
 
       # e2e_smoke SSOT path (configs/quality/test_matrix.yaml): chembl_activity
@@ -83,12 +84,15 @@ jobs:
             uv run --frozen --no-build python -c \
               "from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))"
           )"
+          MAX_SKIPS="$(
+            uv run --frozen --no-build python -c \
+              "print(int(${EXPECTED_TOTAL} * 0.15))"
+          )"
           uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
             --junit reports/e2e/matrix-smoke-run3.xml \
             --expected-total "${EXPECTED_TOTAL}" \
-            --max-skips 6 \
-            --max-skip-rate 0.2308 \
-            --ignore-failures \
+            --max-skips "${MAX_SKIPS}" \
+            --max-skip-rate 0.15 \
             --markdown-out reports/e2e/matrix-smoke-summary.md
 
       - name: Enforce rerun stability gate (3x)
@@ -99,6 +103,20 @@ jobs:
             --max-recurrent-infra-flaky 0 \
             --max-recurrent-code-regression 0 \
             --markdown-out reports/e2e/matrix-rerun-stability.md
+
+      - name: Fail closed on pytest non-zero exit
+        run: |
+          fail=0
+          for run in 1 2 3; do
+            rc="$(cat "reports/e2e/pytest_exit_code_run${run}.txt")"
+            if [ "$rc" != "0" ]; then
+              echo "pytest matrix smoke run ${run} exited ${rc}"
+              fail=1
+            fi
+          done
+          if [ "$fail" != "0" ]; then
+            exit 1
+          fi
 
       - name: Upload E2E matrix health artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -158,19 +176,29 @@ jobs:
             -q --tb=short \
             --junitxml=reports/e2e/matrix-smoke-live.xml
           echo $? > reports/e2e/pytest_exit_code_live.txt
+          set -e
+          rc="$(cat reports/e2e/pytest_exit_code_live.txt)"
+          if [ "$rc" != "0" ]; then
+            echo "nightly pytest exited ${rc}"
+            exit "$rc"
+          fi
 
       - name: Build nightly health summary
         run: |
-          set +e
+          EXPECTED_TOTAL="$(
+            uv run --frozen --no-build python -c \
+              "from tests.e2e.test_pipeline_matrix_e2e import ACTIVE_PIPELINE_CASES; print(len(ACTIVE_PIPELINE_CASES))"
+          )"
+          MAX_SKIPS="$(
+            uv run --frozen --no-build python -c \
+              "print(int(${EXPECTED_TOTAL} * 0.15))"
+          )"
           uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \
             --junit reports/e2e/matrix-smoke-live.xml \
-            --expected-total-from-configs \
-            --configs-root configs/entities \
-            --max-skips 22 \
-            --max-skip-rate 1.0 \
-            --allow-unknown-labels \
+            --expected-total "${EXPECTED_TOTAL}" \
+            --max-skips "${MAX_SKIPS}" \
+            --max-skip-rate 0.15 \
             --markdown-out reports/e2e/matrix-smoke-live-summary.md
-          exit 0
 
       - name: Upload E2E nightly artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4

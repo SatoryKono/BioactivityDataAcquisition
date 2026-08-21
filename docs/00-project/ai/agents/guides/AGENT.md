@@ -32,7 +32,10 @@ make lint         # ruff + mypy
 make run-local    # сэмпловый pipeline-run (chembl_activity, limit=10)
 
 # После изменений
-make lint && make test && git add . && git commit
+make lint && make test
+# Scoped add after review — never `git add .`
+git add <paths-you-reviewed>
+git commit
 ```
 
 **Главное правило:** Читай `docs/00-project/RULES.md` → Планируй → Делай → Проверяй → Документируй

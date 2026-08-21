@@ -2,7 +2,8 @@
 """Validate E2E matrix stability across repeated smoke reruns.
 
 A matrix case is considered recurrently unstable when it does not pass
-in any rerun. Classification is deterministic:
+in every required rerun (1/N pass is not stable). Classification is
+deterministic:
 - infra_flaky: all non-pass outcomes are infra_flaky
 - code_regression: at least one non-pass outcome is code_regression/unknown
 """
@@ -179,7 +180,7 @@ def _recurrent_cases(
             report.get(name, CaseOutcome("missing", "unknown"))
             for report in run_outcomes
         ]
-        if any(item.status == "passed" for item in outcomes):
+        if all(item.status == "passed" for item in outcomes):
             continue
         classifications = [item.classification for item in outcomes]
         classification = (
