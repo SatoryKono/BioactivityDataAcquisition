@@ -303,6 +303,10 @@ def test_composite_section_decoders_fail_closed_on_invalid_nested_shapes() -> No
             }
         )
 
+    with pytest.raises(ValueError, match="enricher_pairings"):
+        build_cross_validation_config({"enricher_pairings": "not-a-list"})
+    with pytest.raises(ValueError, match="must be a dictionary"):
+        build_cross_validation_config({"enricher_pairings": ["bad"]})
     with pytest.raises(ValueError, match="must be a dictionary"):
         build_cross_validation_config(
             {

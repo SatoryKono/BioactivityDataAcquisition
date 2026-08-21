@@ -34,8 +34,11 @@ and normalize configuration values.
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
+from bioetl.domain.composite.config_parsing import require_float
 from tests.unit.domain.composite._config_internal_test_support import (
     optional_bool,
     optional_int,
@@ -304,3 +307,11 @@ class TestOptionalStrTuple:
         """Invalid list should raise ValueError."""
         with pytest.raises(ValueError, match="must contain non-empty strings"):
             optional_str_tuple(["valid", 123], "test_field")
+
+
+def test_require_float_rejects_non_finite() -> None:
+    """Split-internal require_float stays covered from the owner test package (#9335)."""
+    with pytest.raises(ValueError, match="finite"):
+        require_float(math.nan, "x")
+    with pytest.raises(ValueError, match="finite"):
+        require_float(math.inf, "x")
