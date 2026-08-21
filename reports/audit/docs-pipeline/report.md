@@ -1,12 +1,31 @@
-# Docs pipeline audit
+# Docs pipeline audit — `docs-pipeline`
 
-Source run: `20260821T082249Z-docs-cycle-9c56e1edbb`.
+| Field | Value |
+| --- | --- |
+| domain_id | `docs-pipeline` |
+| prompt_id | `prompt.audit.docs-pipeline` |
+| MODE | full |
+| LANGUAGE | ru |
+| Date | 2026-08-21 |
+| SHA | `b48ac65c98` |
+| surface_score | **3** |
+| gate | PASS (pipeline) / cycle WARN from content residual |
 
-`surface_score=2`. `check-links` (after content fix), `check-kpi`, and
-`check-drift --ports --classes --runtime-mirrors --freshness` are green.
-`python -m scripts.docs verify` includes unflagged `check-links` and
-`--runtime-mirrors --freshness`. Residual: `docs.yml` path filters omit
-`.github/workflows/**` (#9266). MkDocs strict build not executed in this
-Windows `.venv-win` (no `mkdocs` extra).
+## Executive summary
 
-Canonical evidence: `reports/audit-runs/20260821T082249Z-docs-cycle-9c56e1edbb/`.
+SoT to generator to validation to CI is intact:
+
+- Unified entry: `python -m scripts.docs <command>`
+- CI: `.github/workflows/docs.yml` jobs `docs-governance`, `validate-mkdocs`
+- Path filters include `.github/workflows/**` (#9266 closed, re-verified)
+- `check-links` full PASS including workflow inventory (42 files)
+- `check-drift --runtime-mirrors --freshness` PASS
+- `check-kpi` monitoring, no breaches
+- MkDocs local build skipped: mkdocs not in `.venv-win`; CI uses `uv-extras: docs`
+
+No new PROVEN pipeline defects on this SHA.
+
+## Skipped
+
+- `python -m scripts.docs build-site` (docs extra absent in Windows venv)
+- `docker-compose.monitoring.yml` (no dashboard/render work)

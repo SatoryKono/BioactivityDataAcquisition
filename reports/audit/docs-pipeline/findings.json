@@ -1,4 +1,6 @@
 {
+  "domain_id": "docs-pipeline",
+  "surface_score": 3,
   "findings": [
     {
       "id": "DOCS-PIPE-003",
@@ -6,32 +8,36 @@
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.9,
+      "confidence_score": 0.94,
       "status": "PROVEN",
       "category": "pipeline",
-      "github_issue": 9266,
-      "iteration_status": "open_out_of_scope",
+      "tag": "pipeline",
+      "path": ".github/workflows/docs.yml:56",
+      "observation": "Prior cycle: docs.yml path filters omitted .github/workflows/**.",
+      "method": "read docs.yml on.push/pull_request paths",
+      "expected": "Workflow YAML changes trigger docs.yml validate-mkdocs / check-links.",
+      "actual": "Both path lists include .github/workflows/**. Closed #9266.",
+      "impact": "None remaining on this SHA.",
+      "root_cause": "Path filters too narrow; fixed on origin/main.",
+      "remediation": "None; already on origin/main.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n \"github/workflows\" .github/workflows/docs.yml"
+      ],
+      "automation": "docs.yml path filters",
+      "automated_fix_possible": false,
+      "issue": 9266,
+      "iteration_found": 1,
+      "post_status": "resolved",
       "evidence": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 10,
-          "command": "inspect docs.yml on.push.paths / on.pull_request.paths",
-          "observation": "Path filters include docs/**, scripts/docs/**, mkdocs.yml, and .github/workflows/docs.yml, but not .github/workflows/**. Adding dashboard-first-window-noscroll.yml did not run inventory parity."
+          "line": 56,
+          "command": "read_file",
+          "observation": "paths include .github/workflows/**"
         }
-      ],
-      "expected": "A scheduled or path-triggered job fails when the published workflow inventory diverges from live YAML.",
-      "actual": "Inventory parity runs only on docs-path PRs.",
-      "impact": "Recurring catalog drift between docs PRs (same class as closed #9114 before freshness was scheduled).",
-      "root_cause": "docs.yml path filters omit workflow YAML glob.",
-      "remediation": "Add .github/workflows/** to docs.yml path filters. Out of this cycle file SCOPE (README.md docs/).",
-      "effort": "S",
-      "dependencies": [
-        "#9265"
-      ],
-      "validation": [
-        "rg -n github/workflows .github/workflows/docs.yml"
-      ],
-      "automated_fix_possible": true
+      ]
     }
   ]
 }
