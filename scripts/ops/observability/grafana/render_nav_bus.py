@@ -76,10 +76,10 @@ FILE_BY_UID = {
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
 NAV_HEIGHT = 4
-NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1.15;margin:0 4px 0"
+NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
-    "box-sizing:border-box;flex:1 1 110px;text-align:center;padding:1px 6px;"
-    "border-radius:3px;font-weight:600;line-height:1.2"
+    "box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;"
+    "border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere"
 )
 # Theme-safe chips: slate link surface works on dark and light Grafana themes.
 LINK_STYLE = (
@@ -94,8 +94,8 @@ CURRENT_STYLE = (
     "cursor:default;text-decoration:underline;pointer-events:none"
 )
 CONTAINER_STYLE = (
-    "display:flex;gap:4px;flex-wrap:wrap;align-items:center;"
-    "padding:0 4px;overflow:visible;white-space:normal;font-size:16px"
+    "display:flex;gap:2px;flex-wrap:nowrap;align-items:center;"
+    "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
 
@@ -139,7 +139,7 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
 
 
 def render_html(*, current_uid: str) -> str:
-    """Single bioetl-nav container; primary 0–4 then full-width break then adjunct 5–6."""
+    """Render the full seven-destination bus as one reflow-safe flex row."""
     primary = BUS[:5]
     adjunct = BUS[5:]
     parts: list[str] = [
@@ -286,8 +286,9 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
     nav["type"] = "text"
     nav["description"] = NAV_DESCRIPTION
     _expand_nav_height(nav, panels, new_height=NAV_HEIGHT)
-    # The inline 19px title plus the wrapped 16px bus require four grid units at
-    # the normative 1366px viewport. Live geometry validation guards clipping.
+    # The inline 19px title plus the single-row, internally reflowing 16px chips
+    # require four grid units at the normative 1366px viewport. Live geometry
+    # validation guards clipping at 100% and 200% browser zoom.
     # Normalize all dashboards so content containment is an executable contract.
     grid_pos = nav["gridPos"]
     if not isinstance(grid_pos, dict):
