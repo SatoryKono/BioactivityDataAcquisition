@@ -106,10 +106,8 @@
       "options": {
         "mode": "html",
         "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Which exact run should be inspected?</div><div>BROWSE is the last 10 reports in the table below. SELECTED RUN identity and counts are in <em>Selected Run Details</em> after you click a run. Open/Copy FULL PATHS are report artifacts, not triage bodies. <code style=\"font-size:16px\">pipeline=unknown</code> and <code style=\"font-size:16px\">run_id=-</code> mean pick a pipeline and a run first.</div></div></div>"
-
       },
       "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, reconciliation, and artifacts for one exact run. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
-
       "links": [
         {
           "title": "Run-manifest inspection runbook",
@@ -124,7 +122,6 @@
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
       "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and open Inspect Run Identity (viewPanel=3022). Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
-
       "gridPos": {
         "h": 10,
         "w": 24,
@@ -139,7 +136,6 @@
             "inspect": true
           },
           "noValue": "VALID EMPTY — no pipeline-run-report artifacts for the selected pipeline under reports/run-reports/pipeline/<name>/ (first screen is last 10).",
-
           "links": []
         },
         "overrides": [
@@ -283,7 +279,6 @@
           "source": "url",
           "type": "json",
           "url": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10",
-
           "url_options": {
             "data": "",
             "method": "GET"
