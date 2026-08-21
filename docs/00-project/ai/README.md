@@ -20,7 +20,8 @@ supporting internal artifacts.
 ## Surface Types
 
 - **Runtime source**: live orchestration, agent registries и runtime-specific
-  instructions живут в `.codex/agents/` и parallel runtime registries.
+  instructions живут в equal-peer `.codex/**` и `.junie/**`, plus `.devin/**`
+  for Devin sessions.
 - **Published mirrors and guides**: `docs/00-project/ai/agents/` хранит
   discoverable docs mirrors, guides и runtime-facing helper docs.
 - **Memory surface**: `docs/00-project/ai/memory/` хранит project memory entry
@@ -32,7 +33,9 @@ supporting internal artifacts.
 
 ## Ownership Contract
 
-- `.codex/**` is the runtime source of truth for Codex behavior.
+- `.codex/**` and `.junie/**` are equal-peer runtime sources of truth
+  (parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`).
+- `.devin/agents/**` and `.devin/skills/**` are the Devin runtime source.
 - No active `ai/claude/**` runtime tree is retained in the local workflow
   surface; historical Claude references should be read only as migration
   context.
@@ -46,8 +49,9 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
 При чтении AI docs используй такой приоритет:
 
-1. runtime source в `.codex/agents/`, `.codex/skills/` и related Codex runtime
-   surfaces
+1. runtime source в `.codex/agents/`, `.codex/skills/`, `.junie/agents/`,
+   `.junie/skills/` (equal peers) и `.devin/agents/**` / `.devin/skills/**`
+   for Devin sessions
 1. canonical governance docs:
    - `docs/00-project/NORMATIVE_SOURCES.md`
    - `docs/00-project/RULES.md`
