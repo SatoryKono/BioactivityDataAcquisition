@@ -102,3 +102,18 @@ def test_get_quarantine_service_delegates_to_services_owner() -> None:
 
     assert result is expected
     mock_impl.assert_called_once_with()
+
+
+def test_rehydrate_provider_health_gauges_delegates_to_preflight_owner() -> None:
+    metrics = MagicMock(name="MetricsPort")
+    owner_module = _owner_module(".factories.pipeline._preflight_health_monitor")
+
+    with patch.object(
+        owner_module,
+        "rehydrate_provider_health_gauges",
+        return_value=3,
+    ) as mock_impl:
+        result = health_service_access.rehydrate_provider_health_gauges(metrics)
+
+    assert result == 3
+    mock_impl.assert_called_once_with(metrics)
