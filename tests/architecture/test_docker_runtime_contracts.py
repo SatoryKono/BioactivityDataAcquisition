@@ -1061,6 +1061,17 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
+    assert dockerfile.count('SHELL ["/bin/bash", "-o", "pipefail", "-c"]') == 2
+    assert "python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26" in dockerfile
+    assert "useradd -r -u 999 -g bioetl bioetl" in dockerfile
+    assert "USER 999:999" in dockerfile
+    assert "USER bioetl" not in dockerfile
+    assert (
+        'CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('
+        "'http://127.0.0.1:8000/health/live', timeout=3).read()\"]"
+        in dockerfile
+    )
+    assert "CMD python -c" not in dockerfile
     # Default main surface is health/metrics only on :8000 (Quarantine Explorer UI removed).
     bioetl_service = main["services"]["bioetl"]
     assert bioetl_service["entrypoint"] == ["/bin/sh", "-c"]
