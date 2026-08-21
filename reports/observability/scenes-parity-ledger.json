@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "5e14daf4b3c9c9e18e8d135145b91294185abb84cf278d9898b7317ea9aa1654",
-    "bioetl-dq-v2": "37ae6e381cefe65c4dc574c0943758f33e5ec0ec7073c43a2fd496f4e445db1f",
-    "bioetl-incident-v1": "c60bf592a02ae906542036ff0559b788ee1c261cbbadda58bdf26f00dc01263f",
-    "bioetl-overview-v2": "f5ced43496818140d931c1a777d80b84b018b8880d543df0e302104ffcaf6b7c",
-    "bioetl-provider-health-v2": "b47346b50996fd3f517d9597ef3b151bd20f1a7ec351507d931e6bff32a4bb49",
-    "bioetl-run-explorer-v1": "a84ab342167f7b0f61cdabace2c0423c7ccddae2415825e3b1eccb491f8563c1",
-    "bioetl-runtime": "a451982a07b3c43c3c034a5e84197ea7226b2115954e1807c097147c301bfdbf"
+    "bioetl-control-plane-v1": "8a89d95ff88d2854eda68b41a6579a3872aa412fc3b39b549f1a401a3340c992",
+    "bioetl-dq-v2": "80967c28e617dac7bdde7808144e28b12ecc45796d5d1954ef46b52cf25a28e8",
+    "bioetl-incident-v1": "e7d8583448c8538e5f5c0a1edf5f6edec8ca8c2fc73947f1aa7eafbb63de73fd",
+    "bioetl-overview-v2": "b34315df3ccf30e1d85d807b15395102e658fba9e681352d0058b9f2a16bef22",
+    "bioetl-provider-health-v2": "a2856a79bfa5b7259c4a02e6bfab6ff8a9da7ba514426e7ec398e782fac154e8",
+    "bioetl-run-explorer-v1": "5d3f4138208edae8c5dc955cb89d070d176e7ba3dae1f23afb53b0ba15d46b8e",
+    "bioetl-runtime": "e05914710e0a0594a15128b36d2fac27f09400dd40facef8fc1569a7dff79e91"
   },
   "panels": [
     {
@@ -2522,7 +2522,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0"
+          "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0"
         ],
         "target_count": 1
       }
