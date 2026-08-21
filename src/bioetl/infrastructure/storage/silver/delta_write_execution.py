@@ -140,8 +140,11 @@ def _build_plain_delta_write_kwargs(
 
 
 def _ensure_delta_table_parent_dir(table_path: str) -> None:
-    """Create the parent directory for a Delta table before first write."""
-    Path(table_path).parent.mkdir(parents=True, exist_ok=True)
+    """Create the parent directory for a local Delta table before first write."""
+    normalized = str(table_path).replace("\\", "/")
+    if "://" in normalized:
+        return
+    Path(normalized).parent.mkdir(parents=True, exist_ok=True)
 
 
 def _serialize_arrow_table_for_subprocess(table: pa.Table) -> bytes:
@@ -159,8 +162,12 @@ def _write_arrow_payload_for_subprocess(*, table_path: str, table: pa.Table) -> 
     on Windows when the child has not started reading stdin yet. A temp file keeps
     the parent/child contract bounded without coupling to pipe buffer sizes.
     """
-    payload_dir = Path(normalize_delta_filesystem_path(table_path)).parent
-    payload_dir.mkdir(parents=True, exist_ok=True)
+    canonical = normalize_delta_filesystem_path(table_path)
+    if "://" in canonical.replace("\\", "/"):
+        payload_dir = Path(tempfile.gettempdir())
+    else:
+        payload_dir = Path(canonical).parent
+        payload_dir.mkdir(parents=True, exist_ok=True)
     fd, payload_path_str = tempfile.mkstemp(
         suffix=".arrow",
         prefix=".plain_delta_payload_",

@@ -227,7 +227,20 @@ def test_historical_closure_models_render_residual_paths() -> None:
     )
 
 
+
+def _require_symlink_privilege(tmp_path: Path) -> None:
+    probe = tmp_path / "_symlink_probe_src"
+    probe.write_text("x", encoding="utf-8")
+    try:
+        (tmp_path / "_symlink_probe").symlink_to(probe)
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows symlink privilege is not granted")
+        raise
+
+
 def test_report_tree_removal_unlinks_symlink(tmp_path: Path) -> None:
+    _require_symlink_privilege(tmp_path)
     target = tmp_path / "target"
     target.mkdir()
     link = tmp_path / "link"

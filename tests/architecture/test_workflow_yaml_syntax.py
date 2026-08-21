@@ -93,6 +93,9 @@ def test_every_job_has_runs_on_and_steps(
     for job_name, job_def in jobs.items():
         if not isinstance(job_def, dict):
             continue
+        # Reusable workflow jobs use `uses:` and must not declare sibling runs-on/steps.
+        if "uses" in job_def:
+            continue
         assert "runs-on" in job_def, f"{wf.name}:{job_name} missing 'runs-on'"
         assert "steps" in job_def, f"{wf.name}:{job_name} missing 'steps'"
 

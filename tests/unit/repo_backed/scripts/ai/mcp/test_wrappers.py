@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import stat
 from pathlib import Path
 
@@ -64,7 +65,8 @@ def test_generate_wrapper_shims_is_deterministic(tmp_path: Path) -> None:
     assert manifest["catalog"] == "scripts/ops/runtime/mcp/shared-servers.json"
     assert len(manifest["servers"]) == 19
     assert len(manifest["generated_files"]) == 38
-    assert (tmp_path / "context7.sh").stat().st_mode & stat.S_IXUSR
+    if os.name != "nt":
+        assert (tmp_path / "context7.sh").stat().st_mode & stat.S_IXUSR
     assert "--no-upload" not in (tmp_path / "context7.sh").read_text(encoding="utf-8")
 
 
