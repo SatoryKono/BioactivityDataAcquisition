@@ -6,6 +6,7 @@
 FROM python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134 AS builder
 
 WORKDIR /app
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Network-resilient install knobs for Docker Desktop / flaky registry paths.
 # Parallel cutover builds without these timeouts hang or fail mid-pip/uv.
@@ -27,9 +28,9 @@ RUN apt-get update \
         libffi-dev \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && python -m pip install --only-binary=:all: --no-cache-dir \
+    && python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26 \
         --index-url https://pypi.org/simple \
-        --default-timeout=180 --retries=10 uv==0.11.26 \
+        --default-timeout=180 --retries=10 \
     && uv --version
 
 # Copy package metadata and source required by setuptools/uv build resolution.
@@ -53,6 +54,7 @@ print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
 FROM python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134
 
 WORKDIR /app
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install runtime dependencies and create non-root user for security.
 # Debian security packages track moving distro revisions (no stable =version pins).
@@ -60,8 +62,8 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
-    && groupadd -r bioetl \
-    && useradd -r -g bioetl bioetl \
+    && groupadd -r -g 999 bioetl \
+    && useradd -r -u 999 -g bioetl bioetl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment from builder
@@ -81,7 +83,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Switch to non-root user
-USER bioetl
+USER 999:999
 
 # Expose metrics ports
 EXPOSE 8000 8081
@@ -91,7 +93,7 @@ ENTRYPOINT ["bioetl"]
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).read()"
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).read()"]
 
 # Default command (override via docker-compose)
 CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]
