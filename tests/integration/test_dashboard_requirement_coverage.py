@@ -86,9 +86,12 @@ def test_dash_arch_001_fails_closed_on_write_admin_url() -> None:
     defaults["links"] = links
     with pytest.raises(AssertionError, match="write/admin"):
         assert_no_write_urls("bioetl-control-plane-v1.json", dashboard)
-    assert write_url_violations(
-        "bioetl-control-plane-v1.json", load_dashboard(_CONTROL_PLANE)
-    ) == []
+    assert (
+        write_url_violations(
+            "bioetl-control-plane-v1.json", load_dashboard(_CONTROL_PLANE)
+        )
+        == []
+    )
 
 
 def test_dash_data_001_ops_http_and_recording_rules_cover_seven_uids() -> None:
@@ -107,9 +110,7 @@ def test_dash_data_001_fails_closed_on_invented_series_and_off_allowlist_url() -
     panel["targets"] = [mutated_target]
     valid = get_all_valid_metric_names()
     with pytest.raises(AssertionError, match="invented series"):
-        violations = invented_metric_violations(
-            "bioetl-runtime.json", dashboard, valid
-        )
+        violations = invented_metric_violations("bioetl-runtime.json", dashboard, valid)
         assert not violations, "\n".join(violations)
 
     http_dashboard = copy.deepcopy(load_dashboard(_CONTROL_PLANE))
@@ -183,7 +184,9 @@ def test_dash_first_001_fails_closed_when_next_action_token_drifts() -> None:
         for key in ("title", "description"):
             value = panel.get(key)
             if isinstance(value, str):
-                panel[key] = value.replace("Review First Action", "Review Something Else")
+                panel[key] = value.replace(
+                    "Review First Action", "Review Something Else"
+                )
         defaults = (panel.get("fieldConfig") or {}).get("defaults") or {}
         if isinstance(defaults, dict):
             for link in defaults.get("links") or []:
@@ -265,7 +268,9 @@ def test_dash_data_001_fails_closed_on_parser_simple_rows_table() -> None:
         assert not violations, "\n".join(violations)
 
 
-_COVERAGE_PATH = Path("docs/03-guides/dashboards/contracts/requirement-test-coverage.yaml")
+_COVERAGE_PATH = Path(
+    "docs/03-guides/dashboards/contracts/requirement-test-coverage.yaml"
+)
 _REQUIREMENTS_PATH = Path("docs/01-requirements/DASHBOARD_REQUIREMENTS.md")
 _DASH_ID_RE = re.compile(r"`(DASH-[A-Z]+-[0-9]{3})`")
 _HEURISTIC_KEYS = ("owner", "remainder", "retire_when")
@@ -293,13 +298,19 @@ def test_requirement_coverage_matrix_lists_every_dash_id_and_nodeids() -> None:
         else:
             assert tests, f"{row['id']} needs tests"
         for nodeid in tests:
-            assert "::" in str(nodeid), f"{row['id']} must cite path::test_name, got {nodeid}"
+            assert "::" in str(nodeid), (
+                f"{row['id']} must cite path::test_name, got {nodeid}"
+            )
             path_str, name = str(nodeid).split("::", 1)
             source = Path(path_str).read_text(encoding="utf-8")
             assert f"def {name}(" in source, f"missing {nodeid}"
         heuristic = row.get("heuristic")
         if heuristic:
-            missing_keys = [key for key in _HEURISTIC_KEYS if not str(heuristic.get(key) or "").strip()]
+            missing_keys = [
+                key
+                for key in _HEURISTIC_KEYS
+                if not str(heuristic.get(key) or "").strip()
+            ]
             assert not missing_keys, f"{row['id']} heuristic missing {missing_keys}"
 
 

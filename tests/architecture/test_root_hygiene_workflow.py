@@ -54,6 +54,7 @@ def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
     )
     assert "tests/architecture/test_root_hygiene_workflow.py" in workflow
     assert "tests/architecture/test_root_hygiene_review_registry.py" in workflow
+    assert "tests/architecture/test_env_example_reference_policy.py" in workflow
     assert "-q" in workflow
 
 

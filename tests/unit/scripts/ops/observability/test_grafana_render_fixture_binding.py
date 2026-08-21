@@ -53,7 +53,9 @@ def test_fixture_state_evidence_binds_validated_registry_and_fixture_hashes(
     assert isinstance(fixtures, dict)
     assert evidence["cases"] == sorted(fixtures)
     assert isinstance(evidence["sha256"], str) and len(evidence["sha256"]) == 64
-    assert fixtures["ok"]["path"].replace("\\", "/").endswith("dashboard_states/ok.json")
+    assert (
+        fixtures["ok"]["path"].replace("\\", "/").endswith("dashboard_states/ok.json")
+    )
     assert isinstance(fixtures["ok"]["sha256"], str)
 
 

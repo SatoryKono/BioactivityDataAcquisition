@@ -46,6 +46,7 @@ _DOCKER_DESKTOP_WSL_PATTERN = re.compile(
     flags=re.IGNORECASE,
 )
 
+
 @dataclass(frozen=True)
 class RuntimeSourceIdentityResolutionResult:
     """One precedence-bound identity resolution without secret-bearing data."""
@@ -402,10 +403,9 @@ def _parse_repository_env_line(raw: str, allowed: set[str]) -> tuple[str, str] |
     if not stripped or stripped.startswith("#") or "=" not in raw:
         return None
     key, value = raw.split("=", 1)
-    key = key.strip()
+    key, value = key.strip(), value.strip()
     if key not in allowed:
         return None
-    value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
         return key, value[1:-1]
     return key, _strip_repository_env_inline_comment(value)

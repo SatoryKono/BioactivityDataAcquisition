@@ -279,7 +279,7 @@ class CompositeValidator:
     def _validate_cross_validation_config(
         self, config: JsonDict, source_names: list[str]
     ) -> list[ValidationIssue]:
-        precheck_errors = self._precheck_cross_validation_config(config)
+        precheck_errors = precheck_cross_validation_config(config)
         if precheck_errors:
             return precheck_errors
         try:
@@ -299,9 +299,3 @@ class CompositeValidator:
             )
         )
         return validation_result.issues
-
-    def _precheck_cross_validation_config(
-        self,
-        config: JsonDict,
-    ) -> list[ValidationIssue]:
-        return precheck_cross_validation_config(config)

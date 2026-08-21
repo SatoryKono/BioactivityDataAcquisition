@@ -60,8 +60,8 @@ copying these integers forward.
 
 | Scanner | Artifact / command | What it counts |
 | --- | --- | --- |
-| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2436). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. Live tree currently has 2449 `.py` files; the 13-file gap is uninventoried source, not a layer violation |
-| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2447). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). Includes the 13 source files not yet in the coverage inventory, so the map sits 11 modules above the inventory (13 new minus 2 unlayered) |
+| Coverage inventory | `reports/quality/module-coverage-inventory.json` | Coverage-fact rows for `src/bioetl/**/*.py` that still exist in the tree (currently 2450). `report-module-coverage --check --allow-missing-coverage-xml` refreshes `source_tree_sha256` and drops deleted paths; it does not add rows for new modules until the coverage-verify lane rebuilds from coverage XML. |
+| Dependency map | `docs/02-architecture/generated/module-dependency-map.json` | Live modules with a resolvable hexagonal layer + group (currently 2447). Excludes package-root `bioetl` and `bioetl.__main__` (no hexagonal layer tag). |
 | import-linter | `lint-imports --no-cache` (`.importlinter`) | Importable files in the `bioetl` package graph (currently 2397 files). Excludes stubs / non-imported modules |
 
 `families_at_budget` on the architecture scorecard (currently

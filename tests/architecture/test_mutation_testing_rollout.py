@@ -12,10 +12,24 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
 import yaml
+
+
+_MUTATION_THRESHOLD_RE = re.compile(
+    r"- id: (?P<id>[\w-]+)\n(?:.*\n)*?            threshold: \"(?P<th>[0-9.]+)\"",
+)
+
+
+def _parse_mutation_workflow_thresholds(workflow: str) -> dict[str, float]:
+    return {
+        match.group("id"): float(match.group("th"))
+        for match in _MUTATION_THRESHOLD_RE.finditer(workflow)
+    }
+
 
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
@@ -81,6 +95,23 @@ class TestMutationTestingRollout:
         assert "Invalid mutmut CI/CD stats" in workflow
         assert "--paths-to-mutate=src/bioetl/application/" not in workflow
         assert mutation.get("ci_gate_mode") == "partial"
+
+        workflow_thresholds = _parse_mutation_workflow_thresholds(workflow)
+        assert (
+            workflow_thresholds["domain"] == mutation["targets"]["domain"]["min_score"]
+        )
+        assert (
+            workflow_thresholds["application-control-plane"]
+            == mutation["targets"]["application_control_plane"]["min_score"]
+        )
+        assert (
+            workflow_thresholds["application-export-manifests"]
+            == mutation["targets"]["application_export_manifests"]["min_score"]
+        )
+        assert (
+            workflow_thresholds["application-workflow-runner"]
+            == mutation["targets"]["application_workflow_runner"]["min_score"]
+        )
 
     def test_mutation_rollout_ledger_tracks_partial_application_target(self) -> None:
         matrix = load_matrix()

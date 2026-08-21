@@ -758,7 +758,16 @@ jobs:
             QUALITY_REPORT_OUTPUT="reports/quality/ci-quality-metrics.json" \
             QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"
 
-      - name: Review observability runtime cardinality evidence
+      - name: Review observability runtime cardinality evidence (static)
+        run: |
+          uv run --frozen --no-build python -m scripts.engineering.qa report-observability-metric-inventory \
+            --check \
+            --write-evidence reports/observability/runtime_cardinality_inventory.json \
+            --review-json-out reports/observability/runtime_cardinality_review.json \
+            --summary-out "$GITHUB_STEP_SUMMARY"
+
+      - name: Review observability runtime cardinality evidence (live)
+        if: github.event_name != 'pull_request'
         env:
           BIOETL_OBSERVABILITY_PROMETHEUS_URL: ${{ vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL }}
           BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN: ${{ secrets.BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN }}

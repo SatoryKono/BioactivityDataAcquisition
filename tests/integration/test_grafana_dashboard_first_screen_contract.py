@@ -698,7 +698,6 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     assert "last 10" in str(browse.get("title", "")).lower()
 
 
-
 def test_run_explorer_first_screen_empty_copy_has_no_selector_dollars() -> None:
     """Selected-run first screen must not leak `$pipeline` / `$run_id` into noValue."""
     dashboard = load_dashboard(_DASHBOARD_DIR / "bioetl-run-explorer-v1.json")

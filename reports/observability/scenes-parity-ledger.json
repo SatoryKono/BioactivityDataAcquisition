@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "62f8708d3e0ab4659ca763b8adef2170ecd0392bbcbba2a96024d25082bbdf32",
-    "bioetl-dq-v2": "1d8f8d7280c6c01840d7ef6879393df53d51419c817baa96857b4bc49190989e",
-    "bioetl-incident-v1": "017b0526cd621166c3b788a9ffaaebd13e5bc9de711a603a5bc0fa458c382702",
-    "bioetl-overview-v2": "0835fa4575dfa55dfcb4484ef40ae1be27204d80fc89d5a233df5d6d2eddf132",
-    "bioetl-provider-health-v2": "cbd1d5d9a683452a5408d1f94ef8d516a09116c7c83350cc14969689b9579194",
-    "bioetl-run-explorer-v1": "222b8a609f0e536c4429792978f8e857c185ff92e6b4496096d1537c6bfcbb41",
-    "bioetl-runtime": "eebf733014d706f3890387c708f508e1b1e8ae77a894c13da870ed1696f28dd9"
+    "bioetl-control-plane-v1": "5e14daf4b3c9c9e18e8d135145b91294185abb84cf278d9898b7317ea9aa1654",
+    "bioetl-dq-v2": "37ae6e381cefe65c4dc574c0943758f33e5ec0ec7073c43a2fd496f4e445db1f",
+    "bioetl-incident-v1": "c60bf592a02ae906542036ff0559b788ee1c261cbbadda58bdf26f00dc01263f",
+    "bioetl-overview-v2": "f5ced43496818140d931c1a777d80b84b018b8880d543df0e302104ffcaf6b7c",
+    "bioetl-provider-health-v2": "b47346b50996fd3f517d9597ef3b151bd20f1a7ec351507d931e6bff32a4bb49",
+    "bioetl-run-explorer-v1": "a84ab342167f7b0f61cdabace2c0423c7ccddae2415825e3b1eccb491f8563c1",
+    "bioetl-runtime": "a451982a07b3c43c3c034a5e84197ea7226b2115954e1807c097147c301bfdbf"
   },
   "panels": [
     {
@@ -2054,7 +2054,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(4, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))"
+          "topk(2, bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or (absent(bioetl_l0_next_action_route{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})*bioetl_l0_next_action_no_route))"
         ],
         "target_count": 1
       }
@@ -2073,7 +2073,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))"
+          "topk(2, max by (input) (bioetl_l0_input_status_selected{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}))"
         ],
         "target_count": 1
       }
@@ -3045,13 +3045,13 @@
       "empty_semantics": "preserved-from-json",
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3010,
-      "panel_title": "Inspect Recent Runs (last 4)",
+      "panel_title": "Inspect Recent Runs (last 10)",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=4"
+          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
         ],
         "target_count": 1
       }
@@ -3142,25 +3142,6 @@
       "json_fallback": "/d/bioetl-run-explorer-v1",
       "panel_id": 3015,
       "panel_title": "Inspect Reconciliation",
-      "route": "run-explorer",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-run-explorer-v1",
-      "panel_id": 3016,
-      "panel_title": "Inspect Layer Accounting",
       "route": "run-explorer",
       "source": {
         "datasource_type": null,

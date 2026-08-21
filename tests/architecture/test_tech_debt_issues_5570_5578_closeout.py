@@ -244,7 +244,7 @@ def test_issue_5574_observability_allowlist_is_reviewed_and_drift_free() -> None
 
     assert review["linked_issue"] == "#5574"
     assert reviewed_metrics == runtime_allowlist | risky_allowlist
-    assert review["summary"]["allowlisted_metric_count"] == 6
+    assert review["summary"]["allowlisted_metric_count"] == 5
     assert inventory["runtime_cardinality_review_required"] == []
     assert inventory["declared_risky_label_review_required"] == []
     assert inventory["runtime_cardinality_threshold_violations"] == []

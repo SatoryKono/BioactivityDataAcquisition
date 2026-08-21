@@ -346,9 +346,7 @@ def test_lineage_validation_detects_directed_cycle() -> None:
             LineageEdge(LineageEdgeType.PRODUCED_BY, node_b, node_a),
         ),
     )
-    service = ControlPlaneEvidenceService(
-        lineage_store=_LineageStore((fragment,))
-    )
+    service = ControlPlaneEvidenceService(lineage_store=_LineageStore((fragment,)))
 
     payload = service.lineage_validation(scope=_scope(manifest))
 
@@ -409,9 +407,7 @@ def test_lineage_missing_fragments_obeys_profile_contract(
     profile_reason: str,
 ) -> None:
     manifest = _manifest(launch_context={"required_persistence_profile": profile})
-    service = ControlPlaneEvidenceService(
-        lineage_store=_LineageStore(())
-    )
+    service = ControlPlaneEvidenceService(lineage_store=_LineageStore(()))
 
     payload = service.lineage_validation(scope=_scope(manifest))
 
@@ -484,9 +480,7 @@ def test_retention_compliance_uses_dry_run_evidence_floor() -> None:
         dry_run=True,
         artifacts=artifacts,
     )
-    service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)
-    )
+    service = ControlPlaneEvidenceService(lifecycle_planner=_LifecyclePlanner(plan))
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
 
@@ -516,9 +510,7 @@ def test_retention_compliance_reports_delete_and_evidence_floor_violations() -> 
             ),
         ),
     )
-    service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)
-    )
+    service = ControlPlaneEvidenceService(lifecycle_planner=_LifecyclePlanner(plan))
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
 
@@ -538,9 +530,7 @@ def test_retention_rejects_unknown_persistence_profile() -> None:
         dry_run=True,
         artifacts=(),
     )
-    service = ControlPlaneEvidenceService(
-        lifecycle_planner=_LifecyclePlanner(plan)
-    )
+    service = ControlPlaneEvidenceService(lifecycle_planner=_LifecyclePlanner(plan))
 
     payload = service.retention_compliance(scope=_scope(manifest), now=_NOW)
 
@@ -629,12 +619,8 @@ def test_trust_status_is_incomplete_when_processing_succeeds_without_evidence() 
     assert isinstance(reasons, list)
     assert "contract_evidence_not_finalized" in reasons
     assert trust["reasons_text"]
-    assert trust["reasons_text"] == "\n".join(
-        reasons[:FIRST_SCREEN_TRUST_REASONS_CAP]
-    )
-    assert trust["reasons_truncated"] is (
-        len(reasons) > FIRST_SCREEN_TRUST_REASONS_CAP
-    )
+    assert trust["reasons_text"] == "\n".join(reasons[:FIRST_SCREEN_TRUST_REASONS_CAP])
+    assert trust["reasons_truncated"] is (len(reasons) > FIRST_SCREEN_TRUST_REASONS_CAP)
 
 
 def test_trust_status_precedence_keeps_error_above_incomplete() -> None:
@@ -785,9 +771,9 @@ def test_retention_prefers_plan_for_manifest_over_full_plan() -> None:
             return plan
 
     planner = _BoundedPlanner()
-    ControlPlaneEvidenceService(
-        lifecycle_planner=planner
-    ).retention_compliance(scope=_scope(manifest), now=_NOW)
+    ControlPlaneEvidenceService(lifecycle_planner=planner).retention_compliance(
+        scope=_scope(manifest), now=_NOW
+    )
 
     assert planner.manifest_plan_calls == 1
     assert planner.full_plan_calls == 0

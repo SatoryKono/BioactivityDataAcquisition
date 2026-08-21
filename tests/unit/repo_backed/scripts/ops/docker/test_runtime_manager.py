@@ -550,9 +550,7 @@ def _neo4j_spec() -> runtime_manager.StackSpec:
         project="bioetl-neo4j",
         compose_file=Path("docker-compose.neo4j.yml"),
         required_services=("neo4j",),
-        expected_images={
-            "neo4j": "neo4j:5.15-community@sha256:0123456789abcdef"
-        },
+        expected_images={"neo4j": "neo4j:5.15-community@sha256:0123456789abcdef"},
     )
 
 
@@ -585,8 +583,9 @@ def test_reseed_neo4j_auth_clears_files_on_existing_volume() -> None:
     run_cmds = [cmd for cmd in seen if cmd[:2] == ["docker", "run"]]
     assert run_cmds
     assert "bioetl-neo4j_neo4j_data:/data" in run_cmds[0]
-    assert "rm -f /data/dbms/auth /data/dbms/auth.ini /data/databases/store_lock" in (
-        run_cmds[0]
+    assert (
+        "rm -f /data/dbms/auth /data/dbms/auth.ini /data/databases/store_lock"
+        in (run_cmds[0])
     )
 
 
@@ -595,9 +594,7 @@ def test_reseed_neo4j_auth_is_noop_for_other_stacks() -> None:
         raise AssertionError(f"unexpected {cmd}")
 
     assert (
-        runtime_manager._reseed_neo4j_auth_volume(
-            _spec(), runner=runner, timeout=5.0
-        )
+        runtime_manager._reseed_neo4j_auth_volume(_spec(), runner=runner, timeout=5.0)
         is None
     )
 

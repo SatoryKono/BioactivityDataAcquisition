@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -77,3 +78,40 @@ def test_readme_references_root_env_example() -> None:
 
     assert "[`.env.example`](.env.example)" in readme
     assert "configs/.env.example" not in readme
+
+
+@pytest.mark.architecture
+def test_gitignore_ignores_env_suffix_names_but_keeps_example() -> None:
+    """REQ-GOV-011: `.env.*` secret files stay un-addable; template stays tracked."""
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    assert ".env.*" in gitignore
+    example_negation_at = gitignore.find("!.env.example")
+    env_star_at = gitignore.find(".env.*")
+    assert env_star_at != -1
+    assert example_negation_at != -1
+    assert env_star_at < example_negation_at
+
+    ignored = subprocess.run(
+        ["git", "check-ignore", "-v", "--", ".env.production", ".env.development"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert ignored.returncode == 0, ignored.stderr
+    assert ".env.*" in ignored.stdout
+
+    template = subprocess.run(
+        ["git", "check-ignore", "--", ".env.example"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert template.returncode == 1, template.stdout
+
+
+@pytest.mark.architecture
+def test_dockerignore_excludes_env_suffix_names() -> None:
+    dockerignore = (ROOT / ".dockerignore").read_text(encoding="utf-8")
+    assert ".env.*" in dockerignore.splitlines()
