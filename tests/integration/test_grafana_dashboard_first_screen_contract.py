@@ -562,6 +562,7 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
 
     for dashboard_name, panel_expectations in expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
+
         def _operator_title(panel: dict) -> str:
             title = str(panel.get("title") or "").strip()
             if title:

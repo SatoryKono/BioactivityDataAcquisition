@@ -329,9 +329,7 @@ def test_first_window_scope_banners_name_current_range_and_selected_run() -> Non
 def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
     """#9251: First Action and Domain Status stay in-slot with a two-row cap."""
     dashboard_path = next(
-        path
-        for path in get_dashboard_files()
-        if path.name == "bioetl-overview-v2.json"
+        path for path in get_dashboard_files() if path.name == "bioetl-overview-v2.json"
     )
     dashboard = load_dashboard(dashboard_path)
     by_id = {item.get("id"): item for item in _root_panels(dashboard)}
