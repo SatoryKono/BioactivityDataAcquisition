@@ -65,8 +65,7 @@ def test_devin_role_skills_point_team_orchestration_at_devin_runtime() -> None:
         if "Team orchestration: `../../agents/ORCHESTRATION.md`" not in text:
             missing.append(relative)
     assert offenders == [], (
-        "Devin skills still point Team orchestration at Codex: "
-        + ", ".join(offenders)
+        "Devin skills still point Team orchestration at Codex: " + ", ".join(offenders)
     )
     assert missing == [], (
         "Devin skills missing Team orchestration path ../../agents/ORCHESTRATION.md: "
@@ -110,9 +109,9 @@ def test_agent_guide_does_not_recommend_git_add_dot() -> None:
 def test_mcp_docker_prune_ps1_supports_dry_run() -> None:
     """#9296: PowerShell MCP prune honors BIOETL_MCP_PRUNE_DRY_RUN; bash stays apply-opt-in."""
     root = Path(__file__).resolve().parents[2]
-    sh = (root / "scripts" / "ai" / "mcp" / "support" / "mcp_docker_prune.sh").read_text(
-        encoding="utf-8"
-    )
+    sh = (
+        root / "scripts" / "ai" / "mcp" / "support" / "mcp_docker_prune.sh"
+    ).read_text(encoding="utf-8")
     ps1 = (
         root / "scripts" / "ai" / "mcp" / "support" / "mcp_docker_prune.ps1"
     ).read_text(encoding="utf-8")
