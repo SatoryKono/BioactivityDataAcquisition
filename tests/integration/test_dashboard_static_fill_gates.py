@@ -262,11 +262,11 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert 'data-bioetl-panel-title="Navigate Dashboards"' in content
         assert "font-size:19px" in content
         assert "font-size:16px" in content
-        assert "flex-wrap:nowrap" in content
-        assert "flex:1 1 0" in content
+        assert "flex-wrap:wrap" in content
+        assert "flex:1 1 120px" in content
         assert "min-width:0" in content
         assert "overflow-wrap:anywhere" in content
-        assert "flex-wrap:wrap" not in content
+        assert "flex-wrap:nowrap" not in content
         assert "overflow:hidden" not in content
 
 
