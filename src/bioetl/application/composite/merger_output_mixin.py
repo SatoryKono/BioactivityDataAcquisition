@@ -41,11 +41,13 @@ class MergeOutputWriterMixin:
     def _coerce_null_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Coerce Null-typed columns to String for Delta Lake compatibility."""
         import polars as pl
+        import polars.selectors as cs
 
-        null_cols = [col for col in df.columns if df[col].dtype == pl.Null]
+        # Extract columns only to log the names without looping over dataframe columns in Python
+        null_cols = df.select(cs.by_dtype(pl.Null)).columns
         if null_cols:
             self._logger.debug("Coercing null columns to String", columns=null_cols)
-            df = df.with_columns([pl.col(col).cast(pl.String) for col in null_cols])
+            df = df.with_columns(cs.by_dtype(pl.Null).cast(pl.String))
         return df
 
     async def _write_merged_silver(
