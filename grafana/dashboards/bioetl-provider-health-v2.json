@@ -263,7 +263,7 @@
     {
       "id": 9002,
       "type": "text",
-      "title": "Start Provider Triage",
+      "title": "",
       "description": "Primary action: open the worst Monitor Fleet Severity row, then confirm Monitor Telemetry Presence. Continue with Inspect Non-OK Providers and Inspect Top Provider Causes. If fleet severity is non-OK but Top Causes is empty, treat it as an explainability gap. Use selected-provider and range panels only after the fleet-level cause is understood. Full fleet/non-OK/cause tables remain in Inspect Full Fleet Evidence.",
       "gridPos": {
         "h": 2,
