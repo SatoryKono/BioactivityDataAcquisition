@@ -5,10 +5,10 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import replace
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
@@ -147,7 +147,7 @@ def attach_workflow_run_report(
                 "execution_fingerprint": result.execution_fingerprint,
                 "status": result.status,
                 "started_at": None,
-                "completed_at": datetime.now(UTC).isoformat(),
+                "completed_at": current_utc_time().isoformat(),
                 "duration_seconds": None,
                 "resumed": result.resumed,
             },
