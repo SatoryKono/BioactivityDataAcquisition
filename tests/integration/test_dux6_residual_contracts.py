@@ -94,8 +94,7 @@ def test_provenance_panels_share_readability_contract() -> None:
 
         min_h = (
             3
-            if filename
-            in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
+            if filename in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
             else 4
         )
         assert provenance.get("gridPos", {}).get("h", 0) >= min_h, filename

@@ -188,6 +188,40 @@ def _section_param_value_rows(
     return tagged
 
 
+def _shape_object_or_list_block(
+    payload: dict[str, object],
+    shaped: dict[str, object],
+    key: str,
+    *,
+    key_order: tuple[str, ...] = (),
+) -> None:
+    """Project an object block to param/value rows; keep lists; else empty list."""
+    value = payload.get(key)
+    if isinstance(value, dict):
+        shaped[key] = _param_value_rows(value, key_order=key_order)
+        return
+    if not isinstance(value, list):
+        shaped[key] = []
+
+
+def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
+    """Build identity_rows, including tracking_coverage when not already present."""
+    identity = payload.get("identity")
+    identity_rows = (
+        _param_value_rows(identity, key_order=_IDENTITY_ROW_ORDER)
+        if isinstance(identity, dict)
+        else []
+    )
+    coverage = payload.get("tracking_coverage")
+    if coverage not in (None, "") and not any(
+        row["parameter"] == "tracking_coverage" for row in identity_rows
+    ):
+        identity_rows.append(
+            {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
+        )
+    return identity_rows
+
+
 def _table_shape_pipeline_run_report(
     payload: dict[str, object],
 ) -> dict[str, object]:
@@ -207,35 +241,12 @@ def _table_shape_pipeline_run_report(
         shaped["reconciliation"] = _param_value_rows(
             recon, key_order=_RECONCILIATION_ROW_ORDER
         )
-    layers = payload.get("layers")
-    if isinstance(layers, dict):
-        shaped["layers"] = _param_value_rows(layers, key_order=_LAYER_ROW_ORDER)
-    elif not isinstance(layers, list):
-        shaped["layers"] = []
-    failure = payload.get("failure")
-    if isinstance(failure, dict):
-        shaped["failure"] = _param_value_rows(failure, key_order=_FAILURE_ROW_ORDER)
-    elif not isinstance(failure, list):
-        shaped["failure"] = []
-    timings = payload.get("stage_timings")
-    if isinstance(timings, dict):
-        shaped["stage_timings"] = _param_value_rows(timings)
-    elif not isinstance(timings, list):
-        shaped["stage_timings"] = []
-    identity = payload.get("identity")
-    identity_rows = (
-        _param_value_rows(identity, key_order=_IDENTITY_ROW_ORDER)
-        if isinstance(identity, dict)
-        else []
+    _shape_object_or_list_block(payload, shaped, "layers", key_order=_LAYER_ROW_ORDER)
+    _shape_object_or_list_block(
+        payload, shaped, "failure", key_order=_FAILURE_ROW_ORDER
     )
-    coverage = payload.get("tracking_coverage")
-    if coverage not in (None, "") and not any(
-        row["parameter"] == "tracking_coverage" for row in identity_rows
-    ):
-        identity_rows.append(
-            {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
-        )
-    shaped["identity_rows"] = identity_rows
+    _shape_object_or_list_block(payload, shaped, "stage_timings")
+    shaped["identity_rows"] = _shape_identity_rows(payload)
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),

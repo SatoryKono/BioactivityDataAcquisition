@@ -112,8 +112,7 @@ def test_provenance_panel_readability_contract(
     assert panel["title"] == title
     min_h = (
         3
-        if filename
-        in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
+        if filename in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
         else 4
     )
     assert panel["gridPos"]["h"] >= min_h
