@@ -34,8 +34,8 @@ clone, worktree, or `/tmp/bioetl-issues*`. Global names (`bioetl`,
 `bioetl-neo4j`, `bioetl-grafana`) are stolen by whichever tree ran compose last.
 Deleting an extra clone is optional hygiene; it is not the code fix.
 `runtime_manager status` is `ok: false` when live Compose config is a foreign
-repository identity. Same-checkout Windows `E:/…` vs Docker Desktop `/mnt/e/…`
-is not origin drift.
+repository identity. Same-checkout Windows `E:/…` vs the Docker Desktop WSL
+drive mount of that path is not origin drift.
 
 **Removed from shipping Docker surface:** Loki, Promtail, Tempo, Quarantine Explorer
 HTTP UI (`quarantine serve` / Infinity datasource / Silver Reject Explorer dashboard).

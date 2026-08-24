@@ -240,6 +240,7 @@ def test_unresolved_run_id_sentinel_shell_for_grafana() -> None:
     assert shell["failure"] == []
     assert shell["stage_timings"] == []
     assert shell["identity_rows"] == []
+    assert shell["timings_and_failure"] == []
 
 
 def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
@@ -283,6 +284,15 @@ def test_table_shape_pipeline_run_report_layers_failure_identity() -> None:
     assert shaped["layers"][0] == {"parameter": "bronze_records", "value": "10"}
     assert shaped["failure"][0]["parameter"] == "error_type"
     assert shaped["stage_timings"] == [{"parameter": "extract", "value": "1.5"}]
+    assert shaped["timings_and_failure"] == [
+        {"section": "failure", "parameter": "error_type", "value": "ContractError"},
+        {"section": "failure", "parameter": "failed_stage", "value": "gold"},
+        {
+            "section": "stage_timings",
+            "parameter": "extract",
+            "value": "1.5",
+        },
+    ]
     assert {"parameter": "status", "value": "failed"} in shaped["identity_rows"]
     assert {"parameter": "tracking_coverage", "value": "full"} in shaped[
         "identity_rows"
@@ -301,23 +311,36 @@ def test_not_found_pipeline_run_report_shell_for_grafana() -> None:
     assert shell["artifacts"] == []
     assert shell["layers"] == []
     assert shell["failure"] == []
+    assert shell["stage_timings"] == []
     assert shell["identity_rows"] == []
+    assert shell["timings_and_failure"] == []
 
 
-def test_table_shape_always_exposes_identity_rows_list() -> None:
-    """Grafana 3022 root_selector=identity_rows must never JSONata-miss (#9373)."""
+def test_table_shape_always_exposes_infinity_list_keys() -> None:
+    """Missing optional blocks must stay empty arrays, not omitted keys (#9373)."""
     shaped = _table_shape_pipeline_run_report(
         {"schema_version": "pipeline_run_report_v1"}
     )
-    assert isinstance(shaped["identity_rows"], list)
-    assert shaped["identity_rows"] == []
+    for key in (
+        "failure",
+        "stage_timings",
+        "identity_rows",
+        "layers",
+        "timings_and_failure",
+    ):
+        assert key in shaped, key
+        assert shaped[key] == [], key
 
-    missing = _not_found_pipeline_run_report_shell(
-        run_id="missing-run",
-        pipeline="chembl_assay",
+    reshaped = _table_shape_pipeline_run_report(
+        _not_found_pipeline_run_report_shell(
+            run_id="missing-run",
+            pipeline="chembl_assay",
+        )
     )
-    reshaped = _table_shape_pipeline_run_report(missing)
-    assert isinstance(reshaped["identity_rows"], list)
+    assert reshaped["timings_and_failure"] == []
+    assert reshaped["failure"] == []
+    assert reshaped["stage_timings"] == []
+    assert reshaped["identity_rows"] == []
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:

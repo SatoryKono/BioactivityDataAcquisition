@@ -47,6 +47,10 @@ panels:
     root_selector: rows
     no_value_tokens: [SELECT RUN, VALID EMPTY]
     copy_tokens: []
+    extra_targets:
+      - endpoint: pipeline_run_report
+        url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
+        root_selector: identity_rows
   - id: 3023
     title: Inspect Processed Records
     endpoint: processed_records
@@ -86,7 +90,7 @@ panels:
     title: Inspect Timings & Failure
     endpoint: pipeline_run_report
     url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: failure
+    root_selector: timings_and_failure
     no_value_tokens: [VALID EMPTY, QUERY ERROR]
     copy_tokens: []
   - id: 3020
