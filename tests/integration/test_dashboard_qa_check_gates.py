@@ -10,8 +10,9 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict.
 """Fail-closed pytest wrappers for dashboard QA --check commands (#9205).
 
-These gates prove DASH-QUERY-001, DASH-PERF-001, DASH-META-001, and
-DASH-DATA-002 against shipped grafana/dashboards JSON without starting Grafana.
+These gates prove DASH-QUERY-001, DASH-PERF-001, DASH-META-001,
+DASH-DATA-002, and DASH-STATE-002/DASH-COLOR-001 against shipped
+grafana/dashboards JSON without starting Grafana.
 """
 
 from __future__ import annotations
@@ -22,6 +23,9 @@ import pytest
 
 from scripts.engineering.qa.check_dashboard_performance_budgets import (
     main as performance_budgets_main,
+)
+from scripts.engineering.qa.check_dashboard_visual_semantics import (
+    main as visual_semantics_main,
 )
 from scripts.engineering.qa.report_dashboard_inventory import (
     main as inventory_main,
@@ -55,6 +59,12 @@ def test_performance_budgets_pass_shipped_dashboards() -> None:
 def test_dashboard_inventory_check_passes_shipped_dashboards() -> None:
     """DASH-META-001: inventory UID/title/tags stay aligned with shipped JSON."""
     result = run_main_in_process(inventory_main, "--check", "--json")
+    assert_cli_succeeded(result)
+
+
+def test_visual_semantics_check_passes_shipped_dashboards() -> None:
+    """DASH-STATE-002 / DASH-COLOR-001: UNKNOWN maps to gray, not WARN orange."""
+    result = run_main_in_process(visual_semantics_main)
     assert_cli_succeeded(result)
 
 
