@@ -77,7 +77,7 @@ Pass a prompt directly:
 Run with auto-approval (full-auto):
 
 ```bash
-.\scripts\ops\codex-exec.bat "fix all TODO comments in the codebase"
+.\scripts\ops\codex-exec.bat "run technical debt audit and identify high-impact improvements"
 ```
 
 ## Usage Examples
