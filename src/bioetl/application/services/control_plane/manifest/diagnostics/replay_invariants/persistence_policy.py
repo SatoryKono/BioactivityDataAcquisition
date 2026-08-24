@@ -12,7 +12,7 @@ from bioetl.domain.control_plane.execution_context import (
 )
 
 _resolve_applied_checkpoint_compatibility_policy = (
-    checkpoint_policy._resolve_applied_checkpoint_compatibility_policy
+    checkpoint_policy.resolve_applied_checkpoint_compatibility_policy
 )
 _resolve_exact_replay_support_boundary = (
     replay_family._resolve_exact_replay_support_boundary
@@ -20,7 +20,7 @@ _resolve_exact_replay_support_boundary = (
 _resolve_replay_family_contract = replay_family._resolve_replay_family_contract
 _resolve_reproducibility_profile = replay_family._resolve_reproducibility_profile
 _resolve_requested_checkpoint_compatibility_policy = (
-    checkpoint_policy._resolve_requested_checkpoint_compatibility_policy
+    required_persistence_profile._resolve_requested_checkpoint_compatibility_policy
 )
 _resolve_required_persistence_profile = (
     required_persistence_profile._resolve_required_persistence_profile

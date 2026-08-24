@@ -5,7 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
-    _resolve_applied_checkpoint_compatibility_policy,
+    resolve_applied_checkpoint_compatibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
     _resolve_requested_checkpoint_compatibility_policy,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
@@ -68,7 +70,7 @@ def _build_resume_contract(
     profile = replay_family_context.profile
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
     required_persistence_profile = policy_assessment.required_persistence_profile
-    applied_policy = _resolve_applied_checkpoint_compatibility_policy(
+    applied_policy = resolve_applied_checkpoint_compatibility_policy(
         requested_exact_replay=requested_exact_replay,
         requested_policy=requested_policy,
         required_persistence_profile=required_persistence_profile,

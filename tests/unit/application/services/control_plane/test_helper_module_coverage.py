@@ -41,9 +41,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_c
     extract_diagnostic_context,
     update_correlation_anchor_gaps,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
-    lookup_mapping_path as checkpoint_lookup_mapping_path,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
     lookup_mapping_path,
 )
@@ -143,8 +140,34 @@ def test_diagnostic_context_ignores_manifest_created_diagnostic_event() -> None:
 def test_replay_invariant_nested_mapping_facade_delegates_lookup() -> None:
     assert lookup_mapping_path({"a": {"b": 42}}, "a", "b") == 42
     assert lookup_mapping_path({"a": object()}, "a", "b") is None
-    assert checkpoint_lookup_mapping_path is lookup_mapping_path
-    assert checkpoint_lookup_mapping_path({"a": {"b": 1}}, "a", "b") == 1
+    assert lookup_mapping_path({"a": {"b": 1}}, "a", "b") == 1
+
+
+def test_corpus_service_shares_export_tuple_without_importing_models() -> None:
+    import ast
+    from pathlib import Path
+
+    from bioetl.application.services.control_plane.replay import (
+        _historical_record_payload as payload,
+    )
+    from bioetl.application.services.control_plane.replay import (
+        historical_corpus_models as models,
+    )
+    from bioetl.application.services.control_plane.replay import (
+        historical_corpus_service as service,
+    )
+
+    assert models.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
+    assert service.CORPUS_MODEL_PUBLIC_NAMES is payload.CORPUS_MODEL_PUBLIC_NAMES
+    tree = ast.parse(Path(service.__file__).read_text(encoding="utf-8"))
+    imported_modules = [
+        node.module
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    ]
+    assert not any(
+        module.endswith("historical_corpus_models") for module in imported_modules
+    )
 
 
 def test_manifest_inspection_result_model_serializes_payload() -> None:
