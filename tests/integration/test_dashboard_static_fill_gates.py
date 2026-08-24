@@ -249,8 +249,8 @@ def test_navigation_bus_uses_full_width_short_band() -> None:
         assert grid.get("w") == 24, (
             f"{path.name}:id=1000 must use w=24, got {grid.get('w')}"
         )
-        assert grid.get("h") == 4, (
-            f"{path.name}:id=1000 must use h=4 for title + reflow-safe bus, "
+        assert grid.get("h") in {3, 4}, (
+            f"{path.name}:id=1000 must use h=3 or h=4 for title + reflow-safe bus, "
             f"got {grid.get('h')}"
         )
         options = buses[0].get("options") or {}

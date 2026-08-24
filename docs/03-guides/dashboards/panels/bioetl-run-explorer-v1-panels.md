@@ -89,7 +89,7 @@ Nested titles (must match JSON):
 - **Type:** Table (`id=3014`)
 - **Purpose:** Optional `failure` and `stage_timings` blocks. Empty means not
   recorded — not zero duration and not proof of success.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `failure` + `stage_timings`
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `timings_and_failure` (HTTP projection of optional `failure` + `stage_timings`; empty array is VALID EMPTY, not QUERY ERROR)
 
 
 ## Additional shipped panels

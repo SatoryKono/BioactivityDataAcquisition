@@ -1134,6 +1134,22 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "section"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Section"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "left"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "value"
                 },
                 "properties": [
@@ -1161,7 +1177,7 @@
               "format": "table",
               "parser": "backend",
               "refId": "A",
-              "root_selector": "failure",
+              "root_selector": "timings_and_failure",
               "source": "url",
               "type": "json",
               "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
@@ -1170,26 +1186,6 @@
                 "method": "GET"
               },
               "expr": ""
-            },
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "B",
-              "root_selector": "stage_timings",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "transformations": [
-            {
-              "id": "merge",
-              "options": {}
             }
           ],
           "links": []

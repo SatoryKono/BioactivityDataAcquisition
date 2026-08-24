@@ -778,7 +778,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; not fleet-health OK). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy.",
+      "description": "TIME RANGE · CURRENT · Telemetry presence of bioetl_provider_current_status for the selected provider (excluding synthetic test). 0=PRESENT means the current_status series exists. Alias mapping: PRESENT=OK (presence color only; PRESENT≠OK for fleet health). Fail-closed UNKNOWN/gray when the series is missing. MISSING_HEALTH_STATUS on Inspect Status Reason is INCOMPLETE/CRIT completeness, never PRESENT-healthy.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -103,6 +103,7 @@ def _empty_pipeline_run_report_shell(
         "failure": [],
         "stage_timings": [],
         "identity_rows": [],
+        "timings_and_failure": [],
         "schema_version": "pipeline_run_report_v1",
     }
 
@@ -166,40 +167,45 @@ def _param_value_rows(
     ]
 
 
-def _table_shape_pipeline_run_report(
-    payload: dict[str, object],
-) -> dict[str, object]:
-    """Normalize nested report sections for Grafana Infinity table selectors.
-
-    Object-shaped ``pipeline_run_report_v1`` blocks (reconciliation, layers,
-    failure, identity, stage_timings) become lists of {parameter, value} rows
-    so table panels do not QUERY_ERROR on a JSON object root_selector.
-
-    ``identity_rows`` is always a list (empty if identity is absent). Grafana
-    panel 3022 Infinity ``root_selector=identity_rows`` JSONata-fails when the
-    key is missing (#9373).
-    """
-    shaped = dict(payload)
-    recon = payload.get("reconciliation")
-    if isinstance(recon, dict):
-        shaped["reconciliation"] = _param_value_rows(
-            recon, key_order=_RECONCILIATION_ROW_ORDER
+def _section_param_value_rows(
+    section: str,
+    rows: object,
+) -> list[dict[str, str]]:
+    """Tag {parameter, value} rows with a stable section for panel 3014."""
+    if not isinstance(rows, list):
+        return []
+    tagged: list[dict[str, str]] = []
+    for row in rows:
+        if not isinstance(row, dict) or "parameter" not in row:
+            continue
+        tagged.append(
+            {
+                "section": section,
+                "parameter": str(row["parameter"]),
+                "value": _scalar_or_json(row.get("value")),
+            }
         )
-    layers = payload.get("layers")
-    if isinstance(layers, dict):
-        shaped["layers"] = _param_value_rows(layers, key_order=_LAYER_ROW_ORDER)
-    elif not isinstance(layers, list):
-        shaped["layers"] = []
-    failure = payload.get("failure")
-    if isinstance(failure, dict):
-        shaped["failure"] = _param_value_rows(failure, key_order=_FAILURE_ROW_ORDER)
-    elif not isinstance(failure, list):
-        shaped["failure"] = []
-    timings = payload.get("stage_timings")
-    if isinstance(timings, dict):
-        shaped["stage_timings"] = _param_value_rows(timings)
-    elif not isinstance(timings, list):
-        shaped["stage_timings"] = []
+    return tagged
+
+
+def _shape_object_or_list_block(
+    payload: dict[str, object],
+    shaped: dict[str, object],
+    key: str,
+    *,
+    key_order: tuple[str, ...] = (),
+) -> None:
+    """Project an object block to param/value rows; keep lists; else empty list."""
+    value = payload.get(key)
+    if isinstance(value, dict):
+        shaped[key] = _param_value_rows(value, key_order=key_order)
+        return
+    if not isinstance(value, list):
+        shaped[key] = []
+
+
+def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
+    """Build identity_rows, including tracking_coverage when not already present."""
     identity = payload.get("identity")
     identity_rows = (
         _param_value_rows(identity, key_order=_IDENTITY_ROW_ORDER)
@@ -213,7 +219,38 @@ def _table_shape_pipeline_run_report(
         identity_rows.append(
             {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
         )
-    shaped["identity_rows"] = identity_rows
+    return identity_rows
+
+
+def _table_shape_pipeline_run_report(
+    payload: dict[str, object],
+) -> dict[str, object]:
+    """Normalize nested report sections for Grafana Infinity table selectors.
+
+    Object-shaped ``pipeline_run_report_v1`` blocks (reconciliation, layers,
+    failure, identity, stage_timings) become lists of {parameter, value} rows
+    so table panels do not QUERY_ERROR on a JSON object root_selector.
+
+    ``failure``, ``stage_timings``, ``identity_rows``, ``layers``, and
+    ``timings_and_failure`` are always lists. Infinity JSONata ``root_selector``
+    errors when the key is missing (#9373); an empty array is VALID EMPTY.
+    """
+    shaped = dict(payload)
+    recon = payload.get("reconciliation")
+    if isinstance(recon, dict):
+        shaped["reconciliation"] = _param_value_rows(
+            recon, key_order=_RECONCILIATION_ROW_ORDER
+        )
+    _shape_object_or_list_block(payload, shaped, "layers", key_order=_LAYER_ROW_ORDER)
+    _shape_object_or_list_block(
+        payload, shaped, "failure", key_order=_FAILURE_ROW_ORDER
+    )
+    _shape_object_or_list_block(payload, shaped, "stage_timings")
+    shaped["identity_rows"] = _shape_identity_rows(payload)
+    shaped["timings_and_failure"] = [
+        *_section_param_value_rows("failure", shaped.get("failure")),
+        *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),
+    ]
     return shaped
 
 

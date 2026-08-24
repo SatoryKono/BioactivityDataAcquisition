@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
 
@@ -39,7 +40,10 @@ def test_actions_upload_artifacts_have_bounded_explicit_retention(
                 if isinstance(with_config, dict)
                 else None
             )
-            if not isinstance(retention, int) or not 1 <= retention <= _MAX_RETENTION_DAYS:
+            if (
+                not isinstance(retention, int)
+                or not 1 <= retention <= _MAX_RETENTION_DAYS
+            ):
                 violations.append(
                     f"{workflow_path.as_posix()}::{step_name}: retention-days must "
                     f"be an integer from 1 to {_MAX_RETENTION_DAYS}, got {retention!r}"
