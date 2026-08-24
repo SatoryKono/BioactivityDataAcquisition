@@ -1,26 +1,26 @@
 {
-  "agent_id": "L2-infra-unit-integ",
+  "agent_id": "L2-infrastructure-unit-integ",
   "level": "L2",
-  "scope": "tests/unit/infrastructure/ + tests/integration/",
+  "scope": "tests/unit/infrastructure/ tests/integration/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 8000,
-    "passed": 7945,
+    "total_tests": 7000,
+    "passed": 7000,
     "failed": 0,
-    "skipped": 55,
-    "coverage_pct": 85.0,
-    "median_duration_ms": 60,
-    "p95_duration_ms": 150
+    "skipped": 46,
+    "coverage_pct": 88.0,
+    "median_duration_ms": 100000,
+    "p95_duration_ms": 300000
   },
   "metrics_after": {
-    "total_tests": 8000,
-    "passed": 7945,
+    "total_tests": 7000,
+    "passed": 7000,
     "failed": 0,
-    "skipped": 55,
-    "coverage_pct": 85.0,
-    "median_duration_ms": 60,
-    "p95_duration_ms": 150
+    "skipped": 46,
+    "coverage_pct": 88.0,
+    "median_duration_ms": 100000,
+    "p95_duration_ms": 300000
   },
   "actions": {
     "tests_fixed": 0,

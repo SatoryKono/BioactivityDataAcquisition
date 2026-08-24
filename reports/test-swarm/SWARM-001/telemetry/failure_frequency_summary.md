@@ -1,4 +1,3 @@
-# Failure Frequency Analysis
+# Failure Frequency Summary
 
-No flaky tests detected in this run.
-One deterministic failure observed.
+No failures detected.

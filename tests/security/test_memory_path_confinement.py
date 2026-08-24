@@ -31,8 +31,9 @@ def test_canonicalize_confines_under_root(tmp_path: Path) -> None:
 def test_migrate_json_file_rejects_traversal(tmp_path: Path) -> None:
     victim = tmp_path / "victim.json"
     victim.write_text('{"id":"x"}\n', encoding="utf-8")
-    sneaky = Path(tmp_path, "nested", "..", "victim.json")
-    (tmp_path / "nested").mkdir(exist_ok=True)
+    nested = tmp_path / "nested"
+    nested.mkdir(exist_ok=True)
+    sneaky = nested / ".." / "victim.json"
     with pytest.raises(ValueError, match="path traversal"):
         migrate_json_file(sneaky, target_version=1)
 

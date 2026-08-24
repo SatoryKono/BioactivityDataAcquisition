@@ -1007,7 +1007,25 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert first_links
     assert any("var-run_id=${__value.raw}" in url for url in first_links)
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
-    assert any("viewPanel=3022" in url for url in first_links)
+    assert all("viewPanel=" not in url for url in first_links)
+    assert "viewPanel" not in str(first_screen.get("description") or "")
+    hidden = {
+        str((item.get("matcher") or {}).get("options"))
+        for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []
+        if isinstance(item, dict)
+        and any(
+            prop.get("id") == "custom.hidden" and prop.get("value") is True
+            for prop in item.get("properties") or []
+            if isinstance(prop, dict)
+        )
+    }
+    assert "Pipeline" in hidden
+    transforms = [
+        item.get("id")
+        for item in first_screen.get("transformations") or []
+        if isinstance(item, dict)
+    ]
+    assert "calculateField" in transforms
     identity = _panel(explorer, 3022)
     assert str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")

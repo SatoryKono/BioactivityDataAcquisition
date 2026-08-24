@@ -20,8 +20,8 @@ def test_optional_vendor_extras_are_exact_and_absent_from_core_dependencies() ->
     extras = project["optional-dependencies"]
     expected = {
         "agentdebugx": ["agentdebugx==0.3.1"],
-        "proofagent": ["proofagent-harness==0.11.0"],
-        "agent-tools": ["agentdebugx==0.3.1", "proofagent-harness==0.11.0"],
+        "proofagent": ["proofagent-harness==0.12.1"],
+        "agent-tools": ["agentdebugx==0.3.1", "proofagent-harness==0.12.1"],
     }
     assert {name: extras[name] for name in expected} == expected
     core = "\n".join(project["dependencies"]).lower()
@@ -36,9 +36,9 @@ def test_lock_contains_approved_wheel_hashes() -> None:
         "sha256:4199bd0be46e7b904da782eea02e330a00e6dd4a66fc66458259ec73bdb9b85b"
         in lock
     )
-    assert "proofagent_harness-0.11.0-py3-none-any.whl" in lock
+    assert "proofagent_harness-0.12.1-py3-none-any.whl" in lock
     assert (
-        "sha256:9cc8f86f4ab4c7e7516f4549e0aa957fd5cc018e2f26806912d2ce7e94cf48ae"
+        "sha256:6dc59be01ce4ce77b0b6baa8c341498d420fdd77eae22bc11930089be64382aa"
         in lock
     )
 
