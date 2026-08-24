@@ -43,12 +43,7 @@ def _dashboard_panel_titles(dashboard_path: Path) -> Counter[str]:
     panels = _iter_dashboard_panels(list(payload.get("panels", [])))
     titles: list[str] = []
     for panel in panels:
-        grafana_title = str(panel.get("title") or "").strip()
-        if grafana_title:
-            titles.append(grafana_title)
-            continue
-        # DASH-FIT-004 hides native Grafana chrome; operator title lives in
-        # bioetlDisplayTitle. Skip the shared nav bus (id=1000).
+        # Shared nav bus is chrome, not a documented operator panel.
         if panel.get("id") == 1000:
             continue
         display_title = panel_display_title(panel)
@@ -164,6 +159,39 @@ def test_active_dashboard_changelog_stays_current_to_shipped_surface() -> None:
     )
     for token in required_tokens:
         assert token in changelog
+
+
+def test_dashboard_panel_titles_skip_nav_and_prefer_display_title(
+    tmp_path: Path,
+) -> None:
+    payload = {
+        "panels": [
+            {
+                "id": 1000,
+                "title": "Navigate Dashboards",
+                "options": {"bioetlDisplayTitle": "Navigate Dashboards"},
+            },
+            {
+                "id": 9002,
+                "title": "",
+                "options": {"bioetlDisplayTitle": "Start Provider Triage"},
+            },
+            {
+                "id": 2,
+                "title": "Grafana Chrome",
+                "options": {"bioetlDisplayTitle": "Operator Title"},
+            },
+            {"id": 3, "title": "Native Only"},
+        ]
+    }
+    path = tmp_path / "dash.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    titles = _dashboard_panel_titles(path)
+    assert "Navigate Dashboards" not in titles
+    assert "Grafana Chrome" not in titles
+    assert titles["Start Provider Triage"] == 1
+    assert titles["Operator Title"] == 1
+    assert titles["Native Only"] == 1
 
 
 def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
