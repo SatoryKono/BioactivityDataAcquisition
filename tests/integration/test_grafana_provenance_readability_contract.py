@@ -128,9 +128,7 @@ def test_provenance_panel_readability_contract(
     assert panel["gridPos"]["h"] >= min_h
     assert panel["options"]["mode"] == "html"
     css = (
-        _REQUIRED_CSS_FIRST_WINDOW_H3
-        if filename in _FIRST_WINDOW_H3
-        else _REQUIRED_CSS
+        _REQUIRED_CSS_FIRST_WINDOW_H3 if filename in _FIRST_WINDOW_H3 else _REQUIRED_CSS
     )
     assert all(token in content for token in css)
     assert all(token in content for token in required_copy)

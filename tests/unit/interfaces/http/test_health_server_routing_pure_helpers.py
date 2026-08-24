@@ -1100,6 +1100,7 @@ async def test_pipeline_run_report_route_returns_versioned_payload(
             "failure": [],
             "stage_timings": [],
             "identity_rows": [],
+            "funnel": [],
             "timings_and_failure": [],
         },
     )
