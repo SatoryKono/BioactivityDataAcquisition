@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `599ae4d927c064370f35901b67363ffb0b2650d7`
 
-Evidence surface SHA-256: `4b12f41920edd33e967abc452f8fb27bd90c40055379d270147f3b82ba9e9e20`
+Evidence surface SHA-256: `39cbf70a7b5d62b0fd757cf2bd0c75d21abd28398508006e5816e26f6650e0df`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "599ae4d927c064370f35901b67363ffb0b2650d7",
-  "evidence_surface_sha256": "4b12f41920edd33e967abc452f8fb27bd90c40055379d270147f3b82ba9e9e20",
+  "evidence_surface_sha256": "39cbf70a7b5d62b0fd757cf2bd0c75d21abd28398508006e5816e26f6650e0df",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1558,
+    "fully_covered_module_count": 1548,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 3,
-    "partially_covered_module_count": 889,
+    "partially_covered_module_count": 899,
     "source_module_count": 2450,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -56,8 +56,8 @@ Refresh reason: Re-pin after architecture residual paydown on origin/main `599ae
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2450**
-   - fully_covered: **1558**
-   - partially_covered: **889**
+   - fully_covered: **1548**
+   - partially_covered: **899**
    - no_executable_lines: **3**
    - uncovered: **0**
    - unmeasured: **0**
