@@ -554,7 +554,33 @@ def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
         ]
     }
 
+    vector_medium = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "pip", "version": "26.1.2"},
+                        "vulnerabilities": [
+                            {
+                                "id": "PYSEC-2026-3721",
+                                "severity": [
+                                    {
+                                        "type": "CVSS_V3",
+                                        "score": (
+                                            "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N"
+                                        ),
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            }
+        ]
+    }
+
     assert policy.collect_blocking_osv_findings(medium) == []
+    assert policy.collect_blocking_osv_findings(vector_medium) == []
     assert policy.collect_blocking_osv_findings(high) == ["GHSA-high HIGH demo==1.0"]
 
 
