@@ -25,7 +25,7 @@ def _iter_upload_steps(node: object) -> Iterator[dict[str, Any]]:
             yield from _iter_upload_steps(value)
 
 
-def test_upload_artifacts_have_bounded_explicit_retention(
+def test_actions_upload_artifacts_have_bounded_explicit_retention(
     workflow_yaml_cache: dict[Path, object],
 ) -> None:
     violations: list[str] = []
@@ -73,7 +73,7 @@ def test_always_uploads_skip_cancelled_runs(
         ("type-checking.yml", "type-checking-reports"),
     ],
 )
-def test_heavy_diagnostics_are_failure_only_and_path_scoped(
+def test_actions_heavy_diagnostics_are_failure_only_and_path_scoped(
     workflow_yaml_cache: dict[Path, object],
     workflow_name: str,
     artifact_name: str,
