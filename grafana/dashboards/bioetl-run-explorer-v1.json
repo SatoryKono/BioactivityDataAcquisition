@@ -226,10 +226,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 420
-              },
-              {
                 "id": "links",
                 "value": [
                   {
