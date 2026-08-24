@@ -301,6 +301,23 @@ def test_not_found_pipeline_run_report_shell_for_grafana() -> None:
     assert shell["artifacts"] == []
     assert shell["layers"] == []
     assert shell["failure"] == []
+    assert shell["identity_rows"] == []
+
+
+def test_table_shape_always_exposes_identity_rows_list() -> None:
+    """Grafana 3022 root_selector=identity_rows must never JSONata-miss (#9373)."""
+    shaped = _table_shape_pipeline_run_report(
+        {"schema_version": "pipeline_run_report_v1"}
+    )
+    assert isinstance(shaped["identity_rows"], list)
+    assert shaped["identity_rows"] == []
+
+    missing = _not_found_pipeline_run_report_shell(
+        run_id="missing-run",
+        pipeline="chembl_assay",
+    )
+    reshaped = _table_shape_pipeline_run_report(missing)
+    assert isinstance(reshaped["identity_rows"], list)
 
 
 def test_load_requires_explicit_owner_selector(tmp_path: Path) -> None:
