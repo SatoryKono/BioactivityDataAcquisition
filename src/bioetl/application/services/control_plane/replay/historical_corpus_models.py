@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
+    CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
+)
+from bioetl.application.services.control_plane.replay._historical_record_payload import (
     HistoricalReplayRunIdentity,
     build_historical_certified_identity_payload_from_record,
 )
@@ -161,12 +164,4 @@ class HistoricalReplayBulkCertificationResult:
         }
 
 
-CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
-    "HistoricalReplayBulkCertificationRecord",
-    "HistoricalReplayBulkCertificationResult",
-    "HistoricalReplayBulkCertificationSpec",
-    "HistoricalReplayCertifiabilityInventory",
-    "HistoricalReplayCertifiabilityRecord",
-    "HistoricalReplaySnapshotCertification",
-)
 __all__ = list(CORPUS_MODEL_PUBLIC_NAMES)

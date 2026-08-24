@@ -6,6 +6,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib import import_module
 
+from bioetl.application.services.control_plane.replay._historical_record_payload import (
+    CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
+)
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
 )
@@ -39,10 +42,6 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
-
-CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = import_module(
-    "bioetl.application.services.control_plane.replay.historical_corpus_models"
-).CORPUS_MODEL_PUBLIC_NAMES
 
 
 def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, object]:
