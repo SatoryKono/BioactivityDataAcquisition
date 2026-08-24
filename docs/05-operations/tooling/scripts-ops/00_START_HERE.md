@@ -241,7 +241,7 @@ $ bash ./scripts/ai/codex/helper/verify-setup.sh
 
 ```bash
 ./scripts/ops/launchers/codex/codex-exec.sh "add type hints to all modules"
-./scripts/ops/launchers/codex/codex-exec.sh "fix all TODO comments"
+./scripts/ops/launchers/codex/codex-exec.sh "run technical debt audit and identify high-impact improvements"
 ```
 
 ## 🏗️ Architecture

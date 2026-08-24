@@ -178,7 +178,7 @@ cd e:\g-drive\05_AI\github\BioactivityDataAcquisition
 .\scripts\ops\codex.bat "analyze the ChemBL parser"
 
 # Auto-execution
-.\scripts\ops\codex-exec.bat "fix all TODO comments"
+.\scripts\ops\codex-exec.bat "run technical debt audit and identify high-impact improvements"
 ```
 
 ### From WSL (Direct)

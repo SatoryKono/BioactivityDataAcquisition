@@ -94,7 +94,7 @@ if [[ $ERRORS -eq 0 ]]; then
     echo ""
     echo "  Interactive:  ./scripts/ops/launchers/codex/codex.sh"
     echo "  With prompt:  ./scripts/ops/launchers/codex/codex.sh \"analyze the pipeline\""
-    echo "  Auto-exec:    ./scripts/ops/launchers/codex/codex-exec.sh \"fix all TODOs\""
+    echo "  Auto-exec:    ./scripts/ops/launchers/codex/codex-exec.sh \"run technical debt audit and identify high-impact improvements\""
     echo ""
 else
     echo "  ✗ Setup verification found $ERRORS issue(s)"
