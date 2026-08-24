@@ -8,7 +8,7 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `599ae4d927c064370f35901b67363ffb0b2650d7`
+Audited commit SHA: `7a6f7a8c79976a8a8a7fa86e2f4ac572f6e08d26`
 
 Evidence surface SHA-256: `39cbf70a7b5d62b0fd757cf2bd0c75d21abd28398508006e5816e26f6650e0df`
 
@@ -17,7 +17,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "599ae4d927c064370f35901b67363ffb0b2650d7",
+  "audited_commit_sha": "7a6f7a8c79976a8a8a7fa86e2f4ac572f6e08d26",
   "evidence_surface_sha256": "39cbf70a7b5d62b0fd757cf2bd0c75d21abd28398508006e5816e26f6650e0df",
   "metrics": {
     "architecture_integral_score": 9.41,
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin after architecture residual paydown on origin/main `599ae4d927`; evidence hash refreshed; no budget growth.
+Refresh reason: Re-pin to current origin/main `7a6f7a8c79` for #9337; evidence hash reverified unchanged; no budget growth.
 
 ## Executive summary
 

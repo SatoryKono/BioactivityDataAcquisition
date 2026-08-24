@@ -1090,20 +1090,7 @@
     }
   },
   "assertless_total_candidates": 102,
-  "budget_violations": [
-    {
-      "actual": 2,
-      "budget": "duplicate_test_names_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_names"
-    },
-    {
-      "actual": 4,
-      "budget": "duplicate_test_name_occurrences_max",
-      "expected_max": 0,
-      "metric": "duplicate_test_name_occurrences"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1248,43 +1235,16 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_actions_artifact_storage_policy.py:76",
-        "tests/architecture/test_github_actions_runtime_policy.py:134"
-      ],
-      "name": "test_heavy_diagnostics_are_failure_only_and_path_scoped",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_actions_artifact_storage_policy.py:28",
-        "tests/architecture/test_github_actions_runtime_policy.py:85"
-      ],
-      "name": "test_upload_artifacts_have_bounded_explicit_retention",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 2,
-    "duplicate_occurrences": 4,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 2
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 4,
-  "duplicate_test_names": 2,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -2245,43 +2205,16 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "architecture": 2
-        },
-        "locations": [
-          "tests/architecture/test_actions_artifact_storage_policy.py:76",
-          "tests/architecture/test_github_actions_runtime_policy.py:134"
-        ],
-        "name": "test_heavy_diagnostics_are_failure_only_and_path_scoped",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "architecture": 2
-        },
-        "locations": [
-          "tests/architecture/test_actions_artifact_storage_policy.py:28",
-          "tests/architecture/test_github_actions_runtime_policy.py:85"
-        ],
-        "name": "test_upload_artifacts_have_bounded_explicit_retention",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 2,
-      "duplicate_occurrences": 4,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 2
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2358,38 +2291,21 @@
       "top_level_directory_count": 15,
       "top_level_directory_count_including_pycache": 15
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/architecture/test_actions_artifact_storage_policy.py:76",
-          "tests/architecture/test_github_actions_runtime_policy.py:134"
-        ],
-        "name": "test_heavy_diagnostics_are_failure_only_and_path_scoped"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/architecture/test_actions_artifact_storage_policy.py:28",
-          "tests/architecture/test_github_actions_runtime_policy.py:85"
-        ],
-        "name": "test_upload_artifacts_have_bounded_explicit_retention"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2361,
     "total_test_functions": 24912,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "77503d0f394b8571d618e961bbc36f905d17d4eb5f06a88065390626a7a6f289",
+  "source_tree_sha256": "3769b4b2f1f54c2ff7aa3dfc019bf010b98f9da99651cd550523e72dffbe23c8",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 102,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
     "markerless_examples": [],
     "markerless_test_functions": 0,
@@ -2441,24 +2357,7 @@
     "top_level_directory_count": 15,
     "top_level_directory_count_including_pycache": 15
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/architecture/test_actions_artifact_storage_policy.py:76",
-        "tests/architecture/test_github_actions_runtime_policy.py:134"
-      ],
-      "name": "test_heavy_diagnostics_are_failure_only_and_path_scoped"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/architecture/test_actions_artifact_storage_policy.py:28",
-        "tests/architecture/test_github_actions_runtime_policy.py:85"
-      ],
-      "name": "test_upload_artifacts_have_bounded_explicit_retention"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2361,
   "total_test_functions": 24912,
   "unreviewed_assertion_bypass_count": 0,
