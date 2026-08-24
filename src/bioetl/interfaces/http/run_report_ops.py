@@ -172,7 +172,18 @@ def _run_index_item(
     }
     if kind == "workflow":
         return {"workflow": item.owner, "workflow_run_id": item.run_id, **paths}
-    return {"pipeline": item.owner, "run_id": item.run_id, **paths}
+    return {
+        "pipeline": item.owner,
+        "run_id": item.run_id,
+        "workflow_id": _index_workflow_id(item.workflow_id),
+        **paths,
+    }
+
+
+def _index_workflow_id(value: str | None) -> str:
+    """Compact workflow name for the pipeline index; empty is emdash, not VALID EMPTY."""
+    token = (value or "").strip()
+    return token if token else "—"
 
 
 def _diagnostic_index_item(
@@ -198,6 +209,7 @@ def _diagnostic_index_item(
         return row
     row["pipeline"] = owner_value
     row["run_id"] = "-"
+    row["workflow_id"] = "—"
     return row
 
 

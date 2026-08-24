@@ -161,6 +161,7 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
                     "run_id": "run1",
                     "pipeline_name": "chembl_assay",
                     "status": "success",
+                    "workflow_id": "chembl_baseline",
                 },
             }
         ),
@@ -188,6 +189,7 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
     assert "source_identity_actual" in payload
     assert payload["items"][0]["run_id"] == "run1"
     assert payload["items"][0]["selected"] == 0
+    assert payload["items"][0]["workflow_id"] == "chembl_baseline"
 
     marked = list_pipeline_run_report_payloads(
         pipeline_name="chembl_assay",
@@ -463,6 +465,7 @@ def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     assert payload["count"] == 1
     assert payload["index_state"] == "ok"
     assert payload["items"][0]["run_id"] == "run1"
+    assert payload["items"][0]["workflow_id"] == "—"
 
 
 def test_list_pipeline_run_reports_distinguishes_no_artifacts(
@@ -483,6 +486,7 @@ def test_list_pipeline_run_reports_distinguishes_no_artifacts(
             "row_kind": "diagnostic",
             "pipeline": "chembl_activity",
             "run_id": "-",
+            "workflow_id": "—",
             "status": "TREE_MISSING",
             "completed_at": None,
             "selected": 0,
@@ -624,7 +628,7 @@ def test_table_shape_funnel_and_scalar_edge_branches() -> None:
     assert json.loads(_scalar_or_json({"b": 1, "a": 2})) == {"a": 2, "b": 1}
     assert _section_param_value_rows("failure", None) == []
     assert _section_param_value_rows("failure", ["skip", {"value": "x"}]) == []
-    assert _removals_summary("not-a-list") == ""
+    assert _removals_summary("not-a-list") == "—"
     assert _removals_summary([{"count": 3}, "skip", {"outcome": "dropped"}]) == (
         "dropped"
     )
@@ -634,7 +638,7 @@ def test_table_shape_funnel_and_scalar_edge_branches() -> None:
         {"funnel": ["bronze", {"stage_id": "gold", "removals": [{"count": 1}]}]}
     )
     assert shaped[0] == "bronze"
-    assert shaped[1]["removals_summary"] == ""
+    assert shaped[1]["removals_summary"] == "—"
 
     nested = _table_shape_pipeline_run_report(
         {

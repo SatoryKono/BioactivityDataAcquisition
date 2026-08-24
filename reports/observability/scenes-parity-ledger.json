@@ -25,7 +25,7 @@
     "bioetl-incident-v1": "e7d8583448c8538e5f5c0a1edf5f6edec8ca8c2fc73947f1aa7eafbb63de73fd",
     "bioetl-overview-v2": "6214235a987f0022a36a7e9c733f40c1be60eabf2867c62646171ad89a1edd38",
     "bioetl-provider-health-v2": "e0774ddec7217fe8dc2571fb2cdc7532bfe2f720c7122c64529bff30bd7e86da",
-    "bioetl-run-explorer-v1": "b6ad7074719b7440461b9356eb57899fe4e9e47604d89c8cd3a01eb69b97a520",
+    "bioetl-run-explorer-v1": "d272efa5094631e7dbf71dcf6b745aea2cf5a6347f0a8611a749c97848c9e785",
     "bioetl-runtime": "e05914710e0a0594a15128b36d2fac27f09400dd40facef8fc1569a7dff79e91"
   },
   "panels": [
@@ -3051,7 +3051,7 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
+          "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}"
         ],
         "target_count": 1
       }
