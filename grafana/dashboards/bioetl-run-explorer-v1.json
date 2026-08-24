@@ -105,9 +105,9 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which exact run should be inspected? BROWSE last 10. Selected: $run_id. Click Run; expand SELECTED RUN details. Open/Copy paths are report artifacts, not triage bodies.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which exact run should be inspected? BROWSE last 10 on disk, not this time range. Selected: $run_id. Click Run; expand SELECTED RUN details. Open/Copy paths are report artifacts, not triage bodies.</div></div>"
       },
-      "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline. Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, reconciliation, and artifacts for one exact run. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
+      "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline (disk index, not the dashboard time picker). Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, reconciliation, and artifacts for one exact run. The time picker is for Identity coverage IN RANGE / OUT OF RANGE only. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
       "links": [
         {
           "title": "Run-manifest inspection runbook",
@@ -121,7 +121,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and var-pipeline, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline is already the selector, so it is hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and var-pipeline, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline is already the selector, so it is hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
         "h": 12,
         "w": 24,
@@ -160,6 +160,10 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           },
@@ -174,6 +178,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               },
               {
                 "id": "mappings",
@@ -235,6 +243,14 @@
                     "includeVars": false
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 300
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               }
             ]
           },
@@ -262,7 +278,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 36
+                "value": 28
               },
               {
                 "id": "custom.cellOptions",
@@ -306,7 +322,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 420
+                "value": 160
               },
               {
                 "id": "custom.inspect",
@@ -316,7 +332,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               }
             ]
@@ -829,7 +845,7 @@
           "id": 3011,
           "type": "table",
           "title": "Inspect Stage Funnel",
-          "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Selection required when no run ID is set. Valid empty means the report has no stage rows; unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Selected run: Stage counts from pipeline_run_report_v1 for the selected run. This is a stage funnel, not start/end chronology. Removals is a compact reason summary; empty stages show — (not VALID EMPTY). VALID EMPTY is only when the report has no stage rows. Selection required when no run ID is set. Unexpected empty or errors require an Ops HTTP /health/live check. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "h": 6,
             "w": 14,
@@ -855,6 +871,29 @@
                   {
                     "id": "displayName",
                     "value": "Count"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "^(removals_summary|Removals)$"
+                },
+                "properties": [
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -1096,9 +1135,9 @@
           "id": 3013,
           "type": "table",
           "title": "Inspect Run Artifacts",
-          "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. Scan-oriented cells keep paths short; use Open/Copy actions for the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Selected run: Artifact references recorded in pipeline_run_report_v1 for the selected run. The ref cell wraps so rows stay distinguishable; Copy still yields the full location. Selection required when no run ID is set. Valid empty means no artifacts were recorded; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
-            "h": 5,
+            "h": 8,
             "w": 24,
             "x": 0,
             "y": 47
@@ -1145,6 +1184,17 @@
                   {
                     "id": "custom.inspect",
                     "value": true
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 720
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
@@ -1224,7 +1274,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 52
+            "y": 55
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1307,7 +1357,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 59
       },
       "panels": [
         {
@@ -1319,7 +1369,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 56
+            "y": 59
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
