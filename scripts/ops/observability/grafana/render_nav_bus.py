@@ -300,7 +300,14 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
         "content": render_html(current_uid=current_uid),
     }
-    nav["links"] = render_links(current_uid=current_uid)
+    bus_titles = {item["title"] for item in BUS}
+    previous_links = nav.get("links") if isinstance(nav.get("links"), list) else []
+    extra_links = [
+        link
+        for link in previous_links
+        if isinstance(link, dict) and link.get("title") not in bus_titles
+    ]
+    nav["links"] = render_links(current_uid=current_uid) + extra_links
     # Drop stale transparent fields that confuse some exporters.
     nav.pop("transparent", None)
 
