@@ -1422,6 +1422,10 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     assert 3016 not in run_panels
     assert run_panels[3014]["type"] == "table"
     assert run_panels[3014]["title"] == "Inspect Timings & Failure"
+    timings_targets = run_panels[3014].get("targets") or []
+    assert len(timings_targets) == 1
+    assert timings_targets[0].get("root_selector") == "timings_and_failure"
+    assert run_panels[3014].get("transformations") in (None, [])
 
     assert 9403 not in run_panels
     assert 3021 not in run_panels

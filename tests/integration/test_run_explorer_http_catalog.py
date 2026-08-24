@@ -34,17 +34,69 @@ def _load_catalog() -> dict[str, object]:
     return payload
 
 
-def _http_target(panel: dict[str, object]) -> dict[str, object] | None:
+def _http_targets(panel: dict[str, object]) -> list[dict[str, object]]:
     targets = panel.get("targets")
-    if not isinstance(targets, list) or not targets:
-        return None
-    target = targets[0]
-    if not isinstance(target, dict):
-        return None
-    url = target.get("url")
-    if isinstance(url, str) and url.startswith("/ops/"):
-        return target
-    return None
+    if not isinstance(targets, list):
+        return []
+    http_targets: list[dict[str, object]] = []
+    for target in targets:
+        if not isinstance(target, dict) or target.get("hide") is True:
+            continue
+        url = target.get("url")
+        if isinstance(url, str) and url.startswith("/ops/"):
+            http_targets.append(target)
+    return http_targets
+
+
+def _catalog_target_specs(entry: dict[str, object]) -> list[dict[str, object]]:
+    specs = [
+        {
+            "endpoint": entry["endpoint"],
+            "url": entry["url"],
+            "root_selector": entry["root_selector"],
+        }
+    ]
+    extra = entry.get("extra_targets") or []
+    assert isinstance(extra, list)
+    for item in extra:
+        assert isinstance(item, dict)
+        specs.append(
+            {
+                "endpoint": item["endpoint"],
+                "url": item["url"],
+                "root_selector": item["root_selector"],
+            }
+        )
+    return specs
+
+
+def _assert_infinity_target(
+    *,
+    panel_id: int,
+    target: dict[str, object],
+    spec: dict[str, object],
+    endpoints: dict[str, object],
+    infinity: dict[str, object],
+) -> None:
+    assert target.get("url") == spec["url"], f"panel {panel_id} url drifted"
+    assert target.get("root_selector") == spec["root_selector"], (
+        f"panel {panel_id} root_selector drifted"
+    )
+    for key, value in infinity.items():
+        if key == "method":
+            options = target.get("url_options")
+            assert isinstance(options, dict)
+            assert options.get("method") == value
+            continue
+        assert target.get(key) == value, f"panel {panel_id} infinity {key} drifted"
+    endpoint_id = str(spec["endpoint"])
+    endpoint = endpoints[endpoint_id]
+    assert isinstance(endpoint, dict)
+    parsed = urlparse(str(spec["url"]))
+    assert parsed.path == endpoint["path"]
+    query = {key: values[0] for key, values in parse_qs(parsed.query).items()}
+    for required in endpoint["required_query"]:
+        assert required in query, f"panel {panel_id} URL missing required {required}"
 
 
 def test_run_explorer_http_catalog_matches_live_dashboard() -> None:
@@ -63,9 +115,7 @@ def test_run_explorer_http_catalog_matches_live_dashboard() -> None:
         if isinstance(panel.get("id"), int)
     }
     live_http_ids = {
-        panel_id
-        for panel_id, panel in live_panels.items()
-        if _http_target(panel) is not None
+        panel_id for panel_id, panel in live_panels.items() if _http_targets(panel)
     }
     catalog_ids = {int(entry["id"]) for entry in expected_panels}
     assert live_http_ids == catalog_ids, (
@@ -80,28 +130,21 @@ def test_run_explorer_http_catalog_matches_live_dashboard() -> None:
         assert isinstance(entry, dict)
         panel_id = int(entry["id"])
         panel = live_panels[panel_id]
-        target = _http_target(panel)
-        assert target is not None, f"panel {panel_id} lost its Ops HTTP target"
+        live_targets = _http_targets(panel)
+        specs = _catalog_target_specs(entry)
+        assert live_targets, f"panel {panel_id} lost its Ops HTTP target"
         assert panel.get("title") == entry["title"]
-        assert target.get("url") == entry["url"]
-        assert target.get("root_selector") == entry["root_selector"]
-        for key, value in infinity.items():
-            if key == "method":
-                options = target.get("url_options")
-                assert isinstance(options, dict)
-                assert options.get("method") == value
-                continue
-            assert target.get(key) == value, f"panel {panel_id} infinity {key} drifted"
-
-        endpoint_id = str(entry["endpoint"])
-        endpoint = endpoints[endpoint_id]
-        assert isinstance(endpoint, dict)
-        parsed = urlparse(str(entry["url"]))
-        assert parsed.path == endpoint["path"]
-        query = {key: values[0] for key, values in parse_qs(parsed.query).items()}
-        for required in endpoint["required_query"]:
-            assert required in query, (
-                f"panel {panel_id} URL missing required {required}"
+        assert len(live_targets) == len(specs), (
+            f"panel {panel_id} HTTP target count drifted: "
+            f"live={len(live_targets)} catalog={len(specs)}"
+        )
+        for target, spec in zip(live_targets, specs, strict=True):
+            _assert_infinity_target(
+                panel_id=panel_id,
+                target=target,
+                spec=spec,
+                endpoints=endpoints,
+                infinity=infinity,
             )
 
         no_value = str(
@@ -126,7 +169,8 @@ def test_run_explorer_duplicate_http_targets_share_endpoint_id() -> None:
     by_url: dict[str, set[str]] = {}
     for entry in panels:
         assert isinstance(entry, dict)
-        by_url.setdefault(str(entry["url"]), set()).add(str(entry["endpoint"]))
+        for spec in _catalog_target_specs(entry):
+            by_url.setdefault(str(spec["url"]), set()).add(str(spec["endpoint"]))
     drifted = {
         url: sorted(endpoint_ids)
         for url, endpoint_ids in by_url.items()

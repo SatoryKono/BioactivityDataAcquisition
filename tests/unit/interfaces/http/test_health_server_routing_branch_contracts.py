@@ -244,6 +244,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
             "failure": [],
             "stage_timings": [],
             "identity_rows": [],
+            "timings_and_failure": [],
             "schema_version": "pipeline_run_report_v1",
         },
     )
@@ -270,6 +271,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
     assert payload["status"] == "not_found"
     assert payload["run_id"] == "run-404"
     assert payload["identity_rows"] == []
+    assert payload["timings_and_failure"] == []
 
 
 @pytest.mark.asyncio

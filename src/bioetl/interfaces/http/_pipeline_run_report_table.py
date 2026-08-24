@@ -103,6 +103,7 @@ def _empty_pipeline_run_report_shell(
         "failure": [],
         "stage_timings": [],
         "identity_rows": [],
+        "timings_and_failure": [],
         "schema_version": "pipeline_run_report_v1",
     }
 
@@ -166,6 +167,27 @@ def _param_value_rows(
     ]
 
 
+def _section_param_value_rows(
+    section: str,
+    rows: object,
+) -> list[dict[str, str]]:
+    """Tag {parameter, value} rows with a stable section for panel 3014."""
+    if not isinstance(rows, list):
+        return []
+    tagged: list[dict[str, str]] = []
+    for row in rows:
+        if not isinstance(row, dict) or "parameter" not in row:
+            continue
+        tagged.append(
+            {
+                "section": section,
+                "parameter": str(row["parameter"]),
+                "value": _scalar_or_json(row.get("value")),
+            }
+        )
+    return tagged
+
+
 def _table_shape_pipeline_run_report(
     payload: dict[str, object],
 ) -> dict[str, object]:
@@ -175,9 +197,9 @@ def _table_shape_pipeline_run_report(
     failure, identity, stage_timings) become lists of {parameter, value} rows
     so table panels do not QUERY_ERROR on a JSON object root_selector.
 
-    ``identity_rows`` is always a list (empty if identity is absent). Grafana
-    panel 3022 Infinity ``root_selector=identity_rows`` JSONata-fails when the
-    key is missing (#9373).
+    ``failure``, ``stage_timings``, ``identity_rows``, ``layers``, and
+    ``timings_and_failure`` are always lists. Infinity JSONata ``root_selector``
+    errors when the key is missing (#9373); an empty array is VALID EMPTY.
     """
     shaped = dict(payload)
     recon = payload.get("reconciliation")
@@ -214,6 +236,10 @@ def _table_shape_pipeline_run_report(
             {"parameter": "tracking_coverage", "value": _scalar_or_json(coverage)}
         )
     shaped["identity_rows"] = identity_rows
+    shaped["timings_and_failure"] = [
+        *_section_param_value_rows("failure", shaped.get("failure")),
+        *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),
+    ]
     return shaped
 
 
