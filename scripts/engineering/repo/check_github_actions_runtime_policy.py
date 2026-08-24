@@ -4,12 +4,11 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from pathlib import Path
 from typing import Any
-
-import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
@@ -177,6 +176,8 @@ def _collect_uses_violations() -> list[str]:
 
 def load_remote_artifacts_policy(path: Path | None = None) -> dict[str, Any]:
     """Load repository-controlled remote executable pins."""
+    import yaml
+
     policy_path = path or REMOTE_ARTIFACTS_FILE
     payload = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
     if not isinstance(payload, dict):
@@ -278,6 +279,48 @@ def _report_violations(violations: list[str]) -> int:
 _BLOCKING_OSV_SEVERITIES = frozenset({"HIGH", "CRITICAL"})
 _CVSS_HIGH = 7.0
 _CVSS_CRITICAL = 9.0
+_CVSS_AV = {"N": 0.85, "A": 0.62, "L": 0.55, "P": 0.2}
+_CVSS_AC = {"L": 0.77, "H": 0.44}
+_CVSS_PR_UNCHANGED = {"N": 0.85, "L": 0.62, "H": 0.27}
+_CVSS_PR_CHANGED = {"N": 0.85, "L": 0.68, "H": 0.50}
+_CVSS_UI = {"N": 0.85, "R": 0.62}
+_CVSS_CIA = {"H": 0.56, "L": 0.22, "N": 0.0}
+
+
+def _cvss_roundup(value: float) -> float:
+    return math.ceil(value * 10 - 1e-9) / 10 if value > 0 else 0.0
+
+
+def _cvss_from_vector(vector: str) -> float | None:
+    if not vector.startswith("CVSS:3"):
+        return None
+    parts = dict(item.split(":", 1) for item in vector.split("/")[1:] if ":" in item)
+    try:
+        scope = parts["S"]
+        pr_map = _CVSS_PR_CHANGED if scope == "C" else _CVSS_PR_UNCHANGED
+        exploitability = (
+            8.22
+            * _CVSS_AV[parts["AV"]]
+            * _CVSS_AC[parts["AC"]]
+            * pr_map[parts["PR"]]
+            * _CVSS_UI[parts["UI"]]
+        )
+        isc = 1 - (
+            (1 - _CVSS_CIA[parts["C"]])
+            * (1 - _CVSS_CIA[parts["I"]])
+            * (1 - _CVSS_CIA[parts["A"]])
+        )
+        if scope == "U":
+            impact = 6.42 * isc
+        else:
+            impact = 7.52 * (isc - 0.029) - 3.25 * (isc - 0.02) ** 15
+    except KeyError:
+        return None
+    if impact <= 0:
+        return 0.0
+    if scope == "U":
+        return _cvss_roundup(min(exploitability + impact, 10.0))
+    return _cvss_roundup(min(1.08 * (exploitability + impact), 10.0))
 
 
 def _cvss_numeric(score: object) -> float | None:
@@ -289,7 +332,7 @@ def _cvss_numeric(score: object) -> float | None:
     try:
         return float(stripped)
     except ValueError:
-        return None
+        return _cvss_from_vector(stripped)
 
 
 def _label_from_cvss(cvss: float) -> str:
