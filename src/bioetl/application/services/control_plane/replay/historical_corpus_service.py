@@ -7,14 +7,29 @@ from dataclasses import dataclass
 from importlib import import_module
 
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
-    HistoricalReplayBulkCertificationRecord,
-    HistoricalReplayBulkCertificationResult,
-    HistoricalReplayBulkCertificationSpec,
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
+    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
-    HistoricalReplaySnapshotCertification,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplaySnapshotCertification as HistoricalReplaySnapshotCertification,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    CORPUS_MODEL_PUBLIC_NAMES,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
     bulk_spec_order_key,
@@ -42,15 +57,7 @@ def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, obje
 
 _build_diagnostics_summary = build_diagnostics_summary
 
-__all__ = [
-    "HistoricalReplayBulkCertificationRecord",
-    "HistoricalReplayBulkCertificationResult",
-    "HistoricalReplayBulkCertificationSpec",
-    "HistoricalReplayCertifiabilityInventory",
-    "HistoricalReplayCertifiabilityRecord",
-    "HistoricalReplayCorpusService",
-    "HistoricalReplaySnapshotCertification",
-]
+__all__ = ["HistoricalReplayCorpusService", *CORPUS_MODEL_PUBLIC_NAMES]
 
 
 @dataclass(slots=True)

@@ -36,6 +36,9 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
     ScoreCardRecord as ScoreCardRecord,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
+    __all__ as _SCORE_CARD_TYPE_EXPORTS,
+)
+from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
     bounded as bounded,
 )
 from bioetl.application.services.control_plane.replay.reproducibility_score_cards_types import (
@@ -46,11 +49,6 @@ from bioetl.application.services.control_plane.replay.reproducibility_score_card
 )
 
 __all__ = [
-    "PROFILE_SCORE_THRESHOLDS",
-    "JsonDict",
-    "ScoreCardRecord",
-    "bounded",
-    "string_items",
-    "supported_boundary_block_reason",
     *_CATEGORY_SCORER_EXPORTS,
+    *[name for name in _SCORE_CARD_TYPE_EXPORTS if name != "build_score_card_record"],
 ]
