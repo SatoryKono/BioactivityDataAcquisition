@@ -269,6 +269,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
     assert host.sent[-1][1] == 200
     assert payload["status"] == "not_found"
     assert payload["run_id"] == "run-404"
+    assert payload["identity_rows"] == []
 
 
 @pytest.mark.asyncio
