@@ -174,6 +174,10 @@ def _table_shape_pipeline_run_report(
     Object-shaped ``pipeline_run_report_v1`` blocks (reconciliation, layers,
     failure, identity, stage_timings) become lists of {parameter, value} rows
     so table panels do not QUERY_ERROR on a JSON object root_selector.
+
+    ``identity_rows`` is always a list (empty if identity is absent). Grafana
+    panel 3022 Infinity ``root_selector=identity_rows`` JSONata-fails when the
+    key is missing (#9373).
     """
     shaped = dict(payload)
     recon = payload.get("reconciliation")
