@@ -164,6 +164,11 @@ def test_corpus_service_shares_export_tuple_without_importing_models() -> None:
         node.module
         for node in ast.walk(tree)
         if isinstance(node, ast.ImportFrom) and node.module is not None
+    ] + [
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
     ]
     assert not any(
         module.endswith("historical_corpus_models") for module in imported_modules
