@@ -155,3 +155,57 @@ def test_resolve_requested_checkpoint_policy_still_accepts_launch_context() -> N
     manifest.launch_context = {"checkpoint_compatibility_policy": "hard_fail"}
 
     assert _resolve_requested_checkpoint_compatibility_policy(manifest) == "hard_fail"
+
+
+def test_resolve_requested_checkpoint_policy_skips_invalid_candidates() -> None:
+    manifest = _manifest()
+    manifest.launch_context = {"checkpoint_compatibility_policy": " "}
+    manifest.runtime_config = {
+        "pipeline": {"control_plane": {"checkpoint_compatibility_policy": "nope"}},
+        "control_plane": {"checkpoint_compatibility_policy": " SOFT_FAIL "},
+    }
+
+    assert _resolve_requested_checkpoint_compatibility_policy(manifest) == "soft_fail"
+
+
+def test_resolve_applied_checkpoint_policy_covers_exact_replay_and_profiles() -> None:
+    assert (
+        _resolve_applied_checkpoint_compatibility_policy(
+            requested_exact_replay=True,
+            requested_policy="observe",
+            required_persistence_profile="standard",
+        )
+        == "hard_fail"
+    )
+    assert (
+        _resolve_applied_checkpoint_compatibility_policy(
+            requested_exact_replay=False,
+            requested_policy="observe",
+            required_persistence_profile="replay_ready",
+        )
+        == "hard_fail"
+    )
+    assert (
+        _resolve_applied_checkpoint_compatibility_policy(
+            requested_exact_replay=False,
+            requested_policy="hard_fail",
+            required_persistence_profile="forensic_grade",
+        )
+        == "hard_fail"
+    )
+    assert (
+        _resolve_applied_checkpoint_compatibility_policy(
+            requested_exact_replay=False,
+            requested_policy=None,
+            required_persistence_profile="standard",
+        )
+        == "observe"
+    )
+    assert (
+        _resolve_applied_checkpoint_compatibility_policy(
+            requested_exact_replay=False,
+            requested_policy="soft_fail",
+            required_persistence_profile="standard",
+        )
+        == "soft_fail"
+    )

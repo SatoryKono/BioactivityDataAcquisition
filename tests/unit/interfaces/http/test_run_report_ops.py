@@ -44,6 +44,18 @@ from bioetl.interfaces.http._health_server_observability_routing import (
     _table_shape_pipeline_run_report,
     _unresolved_pipeline_run_report_shell,
 )
+from bioetl.interfaces.http._pipeline_run_report_table import (
+    _coverage_chip,
+    _coverage_fields,
+    _excluded_by_contract_count,
+    _funnel_gold_and_excluded,
+    _parse_grafana_ms,
+    _parse_iso_to_ms,
+    _removals_summary,
+    _scalar_or_json,
+    _section_param_value_rows,
+    _shape_funnel_rows,
+)
 from bioetl.interfaces.http.run_report_ops import (
     _normalize_list_owner,
     _safe_segment,
@@ -603,3 +615,169 @@ def test_summary_rows_unresolved_and_missing_are_not_ok() -> None:
     )
     assert missing["summary"][0]["covers_selected_run"] == "not_found"
     assert missing["status"] == "not_found"
+
+
+def test_table_shape_funnel_and_scalar_edge_branches() -> None:
+    assert _scalar_or_json(None) == ""
+    assert _scalar_or_json(True) == "true"
+    assert _scalar_or_json(False) == "false"
+    assert json.loads(_scalar_or_json({"b": 1, "a": 2})) == {"a": 2, "b": 1}
+    assert _section_param_value_rows("failure", None) == []
+    assert _section_param_value_rows("failure", ["skip", {"value": "x"}]) == []
+    assert _removals_summary("not-a-list") == ""
+    assert _removals_summary([{"count": 3}, "skip", {"outcome": "dropped"}]) == (
+        "dropped"
+    )
+    assert _removals_summary([{"reason_code": "schema", "count": None}]) == "schema"
+    assert _shape_funnel_rows({}) == []
+    shaped = _shape_funnel_rows(
+        {"funnel": ["bronze", {"stage_id": "gold", "removals": [{"count": 1}]}]}
+    )
+    assert shaped[0] == "bronze"
+    assert shaped[1]["removals_summary"] == ""
+
+    nested = _table_shape_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "identity": {"run_id": "abc", "ok": True, "meta": {"k": 1}, "empty": None},
+            "funnel": [
+                {
+                    "stage_id": "gold",
+                    "records_out": 9,
+                    "removals": [
+                        {
+                            "count": 2,
+                            "outcome": "excluded_by_contract",
+                            "reason_code": "gold_contract_schema_failure",
+                        },
+                        "skip",
+                        {"outcome": "other", "count": "n/a"},
+                    ],
+                }
+            ],
+        }
+    )
+    assert {"parameter": "ok", "value": "true"} in nested["identity_rows"]
+    assert nested["funnel"][0]["removals_summary"] == (
+        "2 gold_contract_schema_failure, n/a other"
+    )
+
+
+def test_summary_rows_coverage_window_and_funnel_helpers() -> None:
+    assert _parse_iso_to_ms("") is None
+    assert _parse_iso_to_ms("not-iso") is None
+    zulu = _parse_iso_to_ms("2026-08-10T00:00:00Z")
+    naive = _parse_iso_to_ms("2026-08-10T00:00:00")
+    assert zulu is not None and naive is not None
+    assert _parse_grafana_ms(None) is None
+    assert _parse_grafana_ms("  ") is None
+    assert _parse_grafana_ms("abc") is None
+    assert _parse_grafana_ms("1000") == 1000
+    assert _coverage_chip("yes") == "IN RANGE"
+    assert _coverage_chip("outside") == "OUT OF RANGE"
+    assert _coverage_chip("partial") == "OUT OF RANGE"
+    assert _coverage_chip("unknown") == "UNKNOWN"
+    assert _coverage_fields(
+        started_ms=None,
+        completed_ms=None,
+        grafana_from_ms=1,
+        grafana_to_ms=2,
+        status="ok",
+    ) == ("unknown", "")
+    assert _coverage_fields(
+        started_ms=10,
+        completed_ms=20,
+        grafana_from_ms=None,
+        grafana_to_ms=None,
+        status="ok",
+    ) == ("range_unspecified", "")
+    assert _coverage_fields(
+        started_ms=10,
+        completed_ms=20,
+        grafana_from_ms=0,
+        grafana_to_ms=30,
+        status="ok",
+    ) == ("yes", "0h")
+    covers, offset = _coverage_fields(
+        started_ms=10,
+        completed_ms=20,
+        grafana_from_ms=50,
+        grafana_to_ms=80,
+        status="ok",
+    )
+    assert covers == "outside"
+    assert "before window" in offset
+    covers, offset = _coverage_fields(
+        started_ms=90,
+        completed_ms=100,
+        grafana_from_ms=50,
+        grafana_to_ms=80,
+        status="ok",
+    )
+    assert covers == "outside"
+    assert "after window" in offset
+    covers, offset = _coverage_fields(
+        started_ms=10,
+        completed_ms=90,
+        grafana_from_ms=50,
+        grafana_to_ms=80,
+        status="ok",
+    )
+    assert covers == "partial"
+    assert offset == "overlaps window"
+    assert _excluded_by_contract_count("nope") == 0
+    assert _excluded_by_contract_count([{"outcome": "excluded_by_contract"}]) == 0
+    assert (
+        _excluded_by_contract_count(
+            [
+                "skip",
+                {"outcome": "other", "count": 9},
+                {"outcome": "excluded_by_contract", "count": 4},
+            ]
+        )
+        == 4
+    )
+    assert _funnel_gold_and_excluded("nope") == ("", 0)
+    gold_out, excluded = _funnel_gold_and_excluded(
+        [
+            "skip",
+            {
+                "stage_id": "silver",
+                "removals": [{"outcome": "excluded_by_contract", "count": 1}],
+            },
+            {"stage_id": "gold", "records_out": 4, "removals": []},
+        ]
+    )
+    assert gold_out == 4
+    assert excluded == 1
+
+    summary = _summary_rows_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "identity": {
+                "run_id": "run-1",
+                "status": "success",
+                "started_at": "2026-08-10T00:00:00Z",
+                "completed_at": "2026-08-10T01:00:00Z",
+            },
+            "funnel": [
+                {
+                    "stage_id": "gold",
+                    "records_out": 8,
+                    "removals": [
+                        {
+                            "count": 3,
+                            "outcome": "excluded_by_contract",
+                            "reason_code": "gold_contract_schema_failure",
+                        }
+                    ],
+                }
+            ],
+        },
+        grafana_from="1754784000000",
+        grafana_to="1754787600000",
+    )
+    row = summary["summary"][0]
+    assert row["gold_records_out"] == "8"
+    assert row["excluded_by_contract"] == "3"
+    assert row["coverage_chip"] in {"IN RANGE", "OUT OF RANGE", "UNKNOWN"}
