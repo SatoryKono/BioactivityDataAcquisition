@@ -961,6 +961,12 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-10-31"
     },
+    "scripts/engineering/qa/observability_metric_inventory_shared.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-10-31"
+    },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain as a bounded cached refresh helper for test-governance baseline artifacts while pretest guardrails and review workflows still need a dedicated warm-path entrypoint; consolidate it into the canonical report command if the caching path stops being independently useful. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",

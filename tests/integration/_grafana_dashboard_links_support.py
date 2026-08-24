@@ -22,6 +22,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     load_dashboard,
+    panel_display_title,
     require_dashboard_navigation_links,
 )
 
@@ -1005,7 +1006,7 @@ def _assert_first_action_panel_shape(
     assert panel is not None, (
         f"{source_uid} missing First Action panel with id={panel_id}"
     )
-    assert panel.get("title") == panel_title, (
+    assert panel_display_title(panel) == panel_title, (
         f"{source_uid} first action panel id={panel_id} must be titled {panel_title!r}"
     )
     links = panel.get("links")

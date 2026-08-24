@@ -92,6 +92,7 @@ absence.
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
 | 9419 | Review Lineage Validation | row | Static | First collapsed row after the first screen; named after the table it contains. | shared shell | Expand to open table 9415. This row is not Inspect Audit & Lineage Evidence. |
+| 906 | Review Recovery Action | text | Static | Chrome-hidden operator title (`bioetlDisplayTitle`); tells the operator not to replay when Trust is INCOMPLETE/UNKNOWN and points to Selected-Run Trust, Retention Compliance, then this row's lineage table. | shared shell | No thresholds; interpretive guidance only. Native Grafana title is empty for DASH-FIT-004. |
 | 9415 | Review Lineage Validation | table | BioETL Ops HTTP | Run-scoped closure, identity-consistency, cycle-detection, and persistence-profile checks. | shared shell | Stable reason codes localize broken references, conflicts, and cycles. |
 
 ### Inspect Audit & Lineage Evidence
