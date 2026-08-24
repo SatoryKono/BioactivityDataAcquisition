@@ -1,7 +1,0 @@
-# Governed OSV-Scanner ignore list. Growth requires an issue and review.
-# Keep in lockstep with pip-audit --ignore-vuln entries in
-# .github/workflows/security.yml.
-
-[[IgnoredVulns]]
-id = "CVE-2026-3219"
-reason = "Same governed ignore as pip-audit in security.yml; not a silent allow."

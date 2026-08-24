@@ -400,7 +400,19 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
         iter(policy.ALLOWED_USES["google/osv-scanner-action/osv-scanner-action"])
     )
     gitleaks_env = jobs["gitleaks"]["steps"][1]["env"]
-    osv_step = jobs["osv-scanner"]["steps"][1]
+    osv_step = next(
+        step
+        for step in jobs["osv-scanner"]["steps"]
+        if str(step.get("uses", "")).startswith(
+            "google/osv-scanner-action/osv-scanner-action@"
+        )
+    )
+    osv_gate = " ".join(
+        str(step.get("run", "")) for step in jobs["osv-scanner"]["steps"]
+    )
+    pip_audit_run = " ".join(
+        str(step.get("run", "")) for step in jobs["pip-audit"]["steps"]
+    )
 
     assert "gitleaks" in jobs
     assert "osv-scanner" in jobs
@@ -413,7 +425,12 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert f"google/osv-scanner-action/osv-scanner-action@{osv_sha}" in _step_uses(
         workflow, "osv-scanner"
     )
+    assert osv_step.get("continue-on-error") is True
     assert "--lockfile=uv.lock" in str(osv_step["with"]["scan-args"])
+    assert "--format=json" in str(osv_step["with"]["scan-args"])
+    assert "--osv-json osv-results.json" in osv_gate
+    assert "PYSEC-2026-3721" in pip_audit_run
+    assert not (ROOT / "osv-scanner.toml").exists()
 
 
 def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
@@ -498,6 +515,47 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     assert "pull_request_target" in labeler
     assert "does not checkout untrusted PR HEAD" in labeler
     assert ".github/workflows/labeler.yml" in zizmor_config
+
+
+def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
+    medium = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "pip", "version": "26.1.2"},
+                        "vulnerabilities": [
+                            {
+                                "id": "PYSEC-2026-3721",
+                                "database_specific": {"severity": "MEDIUM"},
+                                "severity": [{"score": 6.5}],
+                            }
+                        ],
+                    }
+                ]
+            }
+        ]
+    }
+    high = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "demo", "version": "1.0"},
+                        "vulnerabilities": [
+                            {
+                                "id": "GHSA-high",
+                                "database_specific": {"severity": "HIGH"},
+                            }
+                        ],
+                    }
+                ]
+            }
+        ]
+    }
+
+    assert policy.collect_blocking_osv_findings(medium) == []
+    assert policy.collect_blocking_osv_findings(high) == ["GHSA-high HIGH demo==1.0"]
 
 
 def test_security_policy_lists_canonical_supply_chain_scanners() -> None:
