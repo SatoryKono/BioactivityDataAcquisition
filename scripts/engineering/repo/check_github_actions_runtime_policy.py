@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -274,7 +275,133 @@ def _report_violations(violations: list[str]) -> int:
     return 1
 
 
-def main() -> int:
+_BLOCKING_OSV_SEVERITIES = frozenset({"HIGH", "CRITICAL"})
+_CVSS_HIGH = 7.0
+_CVSS_CRITICAL = 9.0
+
+
+def _cvss_numeric(score: object) -> float | None:
+    if isinstance(score, (int, float)):
+        return float(score)
+    if not isinstance(score, str):
+        return None
+    stripped = score.strip()
+    try:
+        return float(stripped)
+    except ValueError:
+        return None
+
+
+def _label_from_cvss(cvss: float) -> str:
+    if cvss >= _CVSS_CRITICAL:
+        return "CRITICAL"
+    if cvss >= _CVSS_HIGH:
+        return "HIGH"
+    if cvss >= 4.0:
+        return "MEDIUM"
+    if cvss > 0:
+        return "LOW"
+    return "UNKNOWN"
+
+
+def _normalize_severity_label(raw: object) -> str | None:
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    label = raw.strip().upper()
+    if label == "MODERATE":
+        return "MEDIUM"
+    if label in {"CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"}:
+        return label
+    return None
+
+
+def _vulnerability_severity(vuln: dict[str, Any]) -> str:
+    database_specific = vuln.get("database_specific")
+    if isinstance(database_specific, dict):
+        labeled = _normalize_severity_label(database_specific.get("severity"))
+        if labeled is not None:
+            return labeled
+    for item in vuln.get("severity") or []:
+        if not isinstance(item, dict):
+            continue
+        labeled = _normalize_severity_label(item.get("severity"))
+        if labeled is not None:
+            return labeled
+        cvss = _cvss_numeric(item.get("score"))
+        if cvss is not None:
+            return _label_from_cvss(cvss)
+    return "UNKNOWN"
+
+
+def collect_blocking_osv_findings(payload: dict[str, Any]) -> list[str]:
+    """Return HIGH/CRITICAL (or unknown-severity) OSV finding summaries."""
+    findings: list[str] = []
+    results = payload.get("results")
+    if not isinstance(results, list):
+        return ["OSV JSON missing results array"]
+    for result in results:
+        if not isinstance(result, dict):
+            continue
+        packages = result.get("packages")
+        if not isinstance(packages, list):
+            continue
+        for package in packages:
+            if not isinstance(package, dict):
+                continue
+            pkg_meta = package.get("package")
+            pkg_name = "unknown"
+            pkg_version = "?"
+            if isinstance(pkg_meta, dict):
+                pkg_name = str(pkg_meta.get("name") or "unknown")
+                pkg_version = str(pkg_meta.get("version") or "?")
+            vulns = package.get("vulnerabilities")
+            if not isinstance(vulns, list):
+                continue
+            for vuln in vulns:
+                if not isinstance(vuln, dict):
+                    continue
+                severity = _vulnerability_severity(vuln)
+                if severity not in _BLOCKING_OSV_SEVERITIES and severity != "UNKNOWN":
+                    continue
+                vuln_id = str(vuln.get("id") or "unknown-id")
+                findings.append(
+                    f"{vuln_id} {severity} {pkg_name}=={pkg_version}"
+                )
+    return findings
+
+
+def gate_osv_json(path: Path) -> int:
+    """Fail closed on HIGH/CRITICAL/unknown OSV findings; Medium/Low do not fail."""
+    if not path.is_file():
+        sys.stderr.write(f"OSV results file missing: {path}\n")
+        return 1
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        sys.stderr.write(f"OSV results are not valid JSON: {exc}\n")
+        return 1
+    if not isinstance(payload, dict):
+        sys.stderr.write("OSV results JSON must be an object\n")
+        return 1
+    findings = collect_blocking_osv_findings(payload)
+    if not findings:
+        print("OSV HIGH/CRITICAL gate passed.")
+        return 0
+    sys.stderr.write("OSV HIGH/CRITICAL findings:\n")
+    for finding in findings:
+        sys.stderr.write(f"- {finding}\n")
+    return 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args[:1] == ["--osv-json"]:
+        if len(args) != 2:
+            sys.stderr.write(
+                "usage: check_github_actions_runtime_policy.py --osv-json PATH\n"
+            )
+            return 2
+        return gate_osv_json(Path(args[1]))
     return _report_violations(
         [*_collect_uses_violations(), *_collect_remote_download_violations()]
     )
