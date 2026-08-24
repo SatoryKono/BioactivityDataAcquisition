@@ -161,11 +161,12 @@ class HistoricalReplayBulkCertificationResult:
         }
 
 
-__all__ = [
+CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
     "HistoricalReplayBulkCertificationSpec",
     "HistoricalReplayCertifiabilityInventory",
     "HistoricalReplayCertifiabilityRecord",
     "HistoricalReplaySnapshotCertification",
-]
+)
+__all__ = list(CORPUS_MODEL_PUBLIC_NAMES)
