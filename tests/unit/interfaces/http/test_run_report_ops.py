@@ -363,6 +363,7 @@ def test_table_shape_always_exposes_infinity_list_keys() -> None:
         "stage_timings",
         "identity_rows",
         "layers",
+        "funnel",
         "timings_and_failure",
     ):
         assert key in shaped, key

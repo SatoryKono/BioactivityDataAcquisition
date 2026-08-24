@@ -392,3 +392,14 @@ def test_record_run_finished_treats_gold_contract_exclusions_as_terminal(
         ("validation", 0.0),
         ("output", 0.0),
     ]
+
+
+def test_pipeline_runner_shares_finalize_failure_exceptions() -> None:
+    from bioetl.application.core._runner_finalize import (
+        _RUN_FAILURE_EXCEPTIONS as finalize_exceptions,
+    )
+    from bioetl.application.core.runner import (
+        _RUN_FAILURE_EXCEPTIONS as runner_exceptions,
+    )
+
+    assert runner_exceptions is finalize_exceptions
