@@ -227,6 +227,7 @@ async def handle_pipeline_run_reports_list(
     Runs must stay responsive even when retention/detail forensic slots are busy.
     """
     pipeline = host._read_optional_param(query, "pipeline")
+    selected_run_id = host._read_optional_param(query, "run_id")
     limit_raw = host._read_optional_param(query, "limit") or "20"
     try:
         limit = max(1, min(100, int(limit_raw)))
@@ -236,6 +237,7 @@ async def handle_pipeline_run_reports_list(
         list_pipeline_run_report_payloads,
         pipeline_name=pipeline,
         limit=limit,
+        selected_run_id=selected_run_id,
     )
     await host._send_payload_response(writer, 200, payload)
 

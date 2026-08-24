@@ -1020,12 +1020,15 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
         )
     }
     assert "Pipeline" in hidden
-    transforms = [
-        item.get("id")
-        for item in first_screen.get("transformations") or []
+    target_url = str((first_screen.get("targets") or [{}])[0].get("url") or "")
+    assert "run_id=${run_id}" in target_url
+    selected = [
+        item
+        for item in (first_screen.get("fieldConfig") or {}).get("overrides") or []
         if isinstance(item, dict)
+        and (item.get("matcher") or {}).get("options") == "selected"
     ]
-    assert "calculateField" in transforms
+    assert selected, "3010 must mark the selected run_id row"
     identity = _panel(explorer, 3022)
     assert str(
         identity.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
@@ -1041,10 +1044,25 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     row = next(panel for panel in explorer.get("panels", []) if panel.get("id") == 3099)
     assert row.get("type") == "row"
     assert row.get("collapsed") is True
-    nested_ids = {panel.get("id") for panel in row.get("panels") or []}
+    nested = {
+        panel.get("id"): panel
+        for panel in row.get("panels") or []
+        if isinstance(panel, dict)
+    }
+    nested_ids = set(nested)
     assert {3011, 3012, 3015, 3013, 3014, 3022, 3023} <= nested_ids
     assert 3021 not in nested_ids
     assert 3001 not in nested_ids
+    identity_grid = nested[3022].get("gridPos") or {}
+    records_grid = nested[3023].get("gridPos") or {}
+    funnel_grid = nested[3011].get("gridPos") or {}
+    reasons_grid = nested[3012].get("gridPos") or {}
+    timings_grid = nested[3014].get("gridPos") or {}
+    assert int(identity_grid.get("h") or 0) >= 14
+    assert int(records_grid.get("h") or 0) >= 14
+    assert int(funnel_grid.get("w") or 0) + int(reasons_grid.get("w") or 0) == 24
+    assert funnel_grid.get("y") == reasons_grid.get("y")
+    assert int(timings_grid.get("h") or 0) <= 4
 
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}

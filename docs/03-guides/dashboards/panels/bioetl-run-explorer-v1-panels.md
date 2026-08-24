@@ -22,9 +22,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The Run
   column data link writes `var-run_id` and `var-pipeline` and stays on this
-  dashboard so the operator can expand Selected Run Details. The Pipeline
-  column is hidden (already the selector) so the UUID stays readable. The
-  matching `$run_id` row is marked. Older runs: pick Run ID from the catalog.
+  dashboard so the operator can expand Selected Run Details (panel header
+  link). The Pipeline column is hidden (already the selector) so the UUID
+  stays readable. The matching `$run_id` row is marked via Ops HTTP
+  `selected`. Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
   `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
@@ -68,11 +69,14 @@ Nested titles (must match JSON):
 - **Type:** Table
 - **Purpose:** Stage funnel (records_in/out, balance) for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel`
+- **Presentation:** Stage first; `removals` JSON is hidden in favor of
+  `removals_summary`. Shares a row with Top Run Reasons.
 
 ### 8. Inspect Top Run Reasons
 - **Type:** Table
 - **Purpose:** Top removal/reason codes for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
+- **Presentation:** Shares a row with Stage Funnel.
 
 ### 9. Inspect Reconciliation
 - **Type:** Table (`id=3015`)
@@ -92,8 +96,9 @@ Nested titles (must match JSON):
 ### 12. Inspect Timings & Failure
 - **Type:** Table (`id=3014`)
 - **Purpose:** Optional `failure` and `stage_timings` blocks. Empty means not
-  recorded — not zero duration and not proof of success.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `failure` + `stage_timings`
+  recorded — not zero duration and not proof of success. Compact height on
+  the success path; duration lives on Inspect Run Identity.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `timings_and_failure`
 
 
 ## Additional shipped panels

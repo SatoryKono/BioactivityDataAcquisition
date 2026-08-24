@@ -145,10 +145,24 @@ def _classify_index_state(
     )
 
 
-def _run_index_item(kind: IndexKind, item: ReportIndexEntry) -> JsonDict:
+def _concrete_run_id(value: str | None) -> str | None:
+    token = (value or "").strip()
+    if token in {"", "-"}:
+        return None
+    return token
+
+
+def _run_index_item(
+    kind: IndexKind,
+    item: ReportIndexEntry,
+    *,
+    selected_run_id: str | None = None,
+) -> JsonDict:
+    selected = 1 if selected_run_id is not None and item.run_id == selected_run_id else 0
     paths = {
         "status": item.status,
         "completed_at": item.completed_at,
+        "selected": selected,
         "json_path": str(item.json_path.as_posix()),
         "markdown_path": (
             str(item.markdown_path.as_posix()) if item.markdown_path else None
@@ -171,6 +185,7 @@ def _diagnostic_index_item(
         "row_kind": "diagnostic",
         "status": _INDEX_STATE_STATUS[index_state],
         "completed_at": None,
+        "selected": 0,
         "json_path": None,
         "markdown_path": None,
         "message": message,
@@ -191,9 +206,13 @@ def _index_items(
     entries: Sequence[ReportIndexEntry],
     index_state: IndexState,
     message: str,
+    selected_run_id: str | None = None,
 ) -> list[JsonDict]:
     if entries:
-        return [_run_index_item(kind, item) for item in entries]
+        return [
+            _run_index_item(kind, item, selected_run_id=selected_run_id)
+            for item in entries
+        ]
     if index_state == "valid_empty":
         return []
     return [
@@ -212,6 +231,7 @@ def _list_report_payload(
     owner: str | None,
     entries: Sequence[ReportIndexEntry],
     root: Path,
+    selected_run_id: str | None = None,
 ) -> JsonDict:
     diagnostics = report_root_readiness_check(root=root)
     index_state, index_message = _classify_index_state(
@@ -243,6 +263,7 @@ def _list_report_payload(
             entries=entries,
             index_state=index_state,
             message=index_message,
+            selected_run_id=selected_run_id,
         ),
     }
 
@@ -252,6 +273,7 @@ def list_pipeline_run_report_payloads(
     pipeline_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
+    selected_run_id: str | None = None,
 ) -> JsonDict:
     """List recent pipeline run reports (index only, not full bodies)."""
     base = _effective_root(root)
@@ -266,6 +288,7 @@ def list_pipeline_run_report_payloads(
         owner=owner,
         entries=entries,
         root=base,
+        selected_run_id=_concrete_run_id(selected_run_id),
     )
 
 
