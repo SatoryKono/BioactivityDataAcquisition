@@ -312,7 +312,9 @@ def _reseed_neo4j_auth_volume(
     )
     if inspect.returncode != 0:
         return None
-    runner(_compose(spec, "stop", "--timeout", "30"), ROOT, min(max(1.0, timeout), 45.0))
+    runner(
+        _compose(spec, "stop", "--timeout", "30"), ROOT, min(max(1.0, timeout), 45.0)
+    )
     runner(_compose(spec, "rm", "-f"), ROOT, min(max(1.0, timeout), 20.0))
     return runner(
         [

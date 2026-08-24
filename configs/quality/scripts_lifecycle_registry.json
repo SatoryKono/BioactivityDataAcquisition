@@ -781,6 +781,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/qa/_gen_cyclic_workflows.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
     "scripts/engineering/qa/analyze_duplicate_functions.py": {
       "decision": "compatibility_wrapper",
       "next_step": "Retain only as the compatibility wrapper for the legacy AST duplicate-function analyzer under src/tools/scripts/duplicate_function_analyzer.py; remove the wrapper when documented callers move to the canonical implementation or the analyzer is retired. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1098,6 +1104,12 @@
       "next_step": "Retain as the opt-in resumable Docker stability campaign utility; keep it supporting because Docker is an ADR-010 adjunct and host-disruptive execution remains explicitly scheduled.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
+    },
+    "scripts/engineering/qa/snapshot_sonarcloud_open.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain as a bounded live SonarCloud OPEN-issue snapshot exporter; keep it supporting and do not treat it as a new active QA entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
     },
     "scripts/engineering/qa/technical_debt_audit_registry.py": {
       "decision": "shared_helper_module",

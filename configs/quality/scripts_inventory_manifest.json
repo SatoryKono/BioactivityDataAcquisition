@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-24T10:38:16.603973+00:00",
+  "generated_at": "2026-08-24T11:54:56.962601+00:00",
   "summary": {
-    "total_scripts": 596,
+    "total_scripts": 599,
     "status_counts": {
-      "active": 338,
-      "supporting": 258
+      "active": 339,
+      "supporting": 260
     },
     "reference_group_coverage": {
       "agents": 7,
@@ -13,7 +13,7 @@
       "ci": 81,
       "docs": 250,
       "other": 73,
-      "scripts": 497,
+      "scripts": 498,
       "skills": 12,
       "tests": 400
     }
@@ -4983,7 +4983,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 69,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -12141,6 +12141,18 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/_gen_cyclic_workflows.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded generator of zero-arg Grok workflow cards; keep it supporting until the workflow catalog is owned by a governed scripts.engineering.qa command."
+    },
+    {
       "path": "scripts/engineering/qa/analyze_duplicate_functions.py",
       "type": "py",
       "status": "supporting",
@@ -12369,7 +12381,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_qa_check_gates.py",
-          "line": 23,
+          "line": 24,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.check_dashboard_performance_budgets import ("
         },
@@ -12386,7 +12398,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -12399,6 +12411,12 @@
           "line": 95,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_dashboard_visual_semantics.py\","
+        },
+        {
+          "path": "tests/integration/test_dashboard_qa_check_gates.py",
+          "line": 27,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.check_dashboard_visual_semantics import ("
         }
       ]
     },
@@ -12649,7 +12667,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/docker_runtime_preflight.py",
-          "line": 915,
+          "line": 913,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import check_prometheus_rules as cpr"
         },
@@ -14193,13 +14211,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 745,
+          "line": 747,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli"
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 746,
+          "line": 748,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_cli import ("
         },
@@ -14224,7 +14242,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 11,
+          "line": 13,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         },
@@ -14249,7 +14267,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
-          "line": 16,
+          "line": 18,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         },
@@ -14313,6 +14331,45 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-10-31",
       "next_step": "Retain as the source-discovery and AST scanning implementation behind report_observability_metric_inventory.py; do not expose it as a standalone command."
+    },
+    {
+      "path": "scripts/engineering/qa/observability_metric_inventory_shared.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_cli.py",
+          "line": 21,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
+        },
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
+        },
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_runtime.py",
+          "line": 37,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
+        },
+        {
+          "path": "scripts/engineering/qa/observability_metric_inventory_scan.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
+        },
+        {
+          "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
+          "line": 45,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/reduce_architecture_debt.py",
@@ -14796,7 +14853,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_qa_check_gates.py",
-          "line": 26,
+          "line": 30,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_dashboard_inventory import ("
         },
@@ -14868,7 +14925,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_qa_check_gates.py",
-          "line": 29,
+          "line": 33,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_dashboard_promql_scope import ("
         }
@@ -14893,7 +14950,7 @@
         },
         {
           "path": "tests/integration/test_dashboard_qa_check_gates.py",
-          "line": 32,
+          "line": 36,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_dashboard_query_duplicates import ("
         },
@@ -16082,6 +16139,18 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/snapshot_sonarcloud_open.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded live SonarCloud OPEN-issue snapshot exporter; keep it supporting and do not treat it as a new active QA entrypoint."
+    },
+    {
       "path": "scripts/engineering/qa/sync_integration_vcr_policy.py",
       "type": "py",
       "status": "active",
@@ -16829,7 +16898,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 336,
+          "line": 340,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -16847,7 +16916,7 @@
         },
         {
           "path": "tests/architecture/test_github_actions_runtime_policy.py",
-          "line": 22,
+          "line": 23,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import check_github_actions_runtime_policy as policy"
         }
@@ -17805,7 +17874,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 80,
           "source_group": "docs",
-          "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments in the codebase\""
+          "text": ".\\scripts\\ops\\codex-exec.bat \"run technical debt audit and identify high-impact improvements\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
@@ -17817,7 +17886,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
           "line": 181,
           "source_group": "docs",
-          "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments\""
+          "text": ".\\scripts\\ops\\codex-exec.bat \"run technical debt audit and identify high-impact improvements\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
@@ -18397,7 +18466,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 244,
           "source_group": "docs",
-          "text": "./scripts/ops/launchers/codex/codex-exec.sh \"fix all TODO comments\""
+          "text": "./scripts/ops/launchers/codex/codex-exec.sh \"run technical debt audit and identify high-impact improvements\""
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -18707,7 +18776,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 267,
+          "line": 271,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -19497,7 +19566,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2159,
+          "line": 2161,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -20338,7 +20407,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 653,
+          "line": 655,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -20516,7 +20585,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 1522,
+          "line": 1524,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/recover-neo4j.ps1 \""
         }
@@ -20729,7 +20798,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 34,
+          "line": 36,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },

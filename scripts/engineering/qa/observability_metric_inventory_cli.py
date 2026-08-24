@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Callable
 from datetime import date
 from pathlib import Path
+from typing import cast
 
 from scripts.engineering.qa.observability_metric_inventory_report import (
     _drift_allowlist_token,
@@ -29,8 +31,14 @@ def collect_metric_inventory(repo_root: Path) -> MetricInventoryReport:
     """Bind the facade collector without a static import cycle."""
     from importlib import import_module
 
-    module = import_module("scripts.engineering.qa.report_observability_metric_inventory")
-    return module.collect_metric_inventory(repo_root)
+    module = import_module(
+        "scripts.engineering.qa.report_observability_metric_inventory"
+    )
+    collector = cast(
+        Callable[[Path], MetricInventoryReport],
+        module.collect_metric_inventory,
+    )
+    return collector(repo_root)
 
 
 def _build_runtime_cardinality_review_summary(
@@ -43,8 +51,14 @@ def _build_runtime_cardinality_review_summary(
     """Bind the facade review summary without a static import cycle."""
     from importlib import import_module
 
-    module = import_module("scripts.engineering.qa.report_observability_metric_inventory")
-    return module._build_runtime_cardinality_review_summary(
+    module = import_module(
+        "scripts.engineering.qa.report_observability_metric_inventory"
+    )
+    builder = cast(
+        Callable[..., RuntimeCardinalityReviewSummary],
+        module._build_runtime_cardinality_review_summary,
+    )
+    return builder(
         report,
         repo_root=repo_root,
         prometheus_base_url=prometheus_base_url,
