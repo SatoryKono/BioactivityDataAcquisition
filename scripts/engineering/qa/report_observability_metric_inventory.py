@@ -293,7 +293,9 @@ _query_prometheus_label_values_impl = _metric_runtime._query_prometheus_label_va
 _build_runtime_cardinality_review_summary_impl = (
     _metric_runtime._build_runtime_cardinality_review_summary
 )
-_metric_runtime.REGISTERED_PROMETHEUS_METRIC_LABELS = REGISTERED_PROMETHEUS_METRIC_LABELS
+_metric_runtime.REGISTERED_PROMETHEUS_METRIC_LABELS = (
+    REGISTERED_PROMETHEUS_METRIC_LABELS
+)
 
 
 def _query_prometheus_scalar(
