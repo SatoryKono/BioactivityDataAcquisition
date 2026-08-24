@@ -76,7 +76,17 @@ def build_historical_certified_identity_payload(
     )
 
 
+CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = (
+    "HistoricalReplayBulkCertificationRecord",
+    "HistoricalReplayBulkCertificationResult",
+    "HistoricalReplayBulkCertificationSpec",
+    "HistoricalReplayCertifiabilityInventory",
+    "HistoricalReplayCertifiabilityRecord",
+    "HistoricalReplaySnapshotCertification",
+)
+
 __all__ = [
+    "CORPUS_MODEL_PUBLIC_NAMES",
     "HistoricalReplayRunIdentity",
     "build_historical_certification_payload",
     "build_historical_certified_identity_payload",

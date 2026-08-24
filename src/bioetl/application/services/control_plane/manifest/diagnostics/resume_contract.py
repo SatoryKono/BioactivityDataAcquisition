@@ -5,8 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
-    _resolve_requested_checkpoint_compatibility_policy,
     resolve_applied_checkpoint_compatibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
+    _resolve_requested_checkpoint_compatibility_policy,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (

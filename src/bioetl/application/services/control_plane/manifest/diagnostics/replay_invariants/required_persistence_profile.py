@@ -43,4 +43,29 @@ def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
     return DEFAULT_REQUIRED_PERSISTENCE_PROFILE
 
 
-__all__ = ["_resolve_required_persistence_profile"]
+def _resolve_requested_checkpoint_compatibility_policy(
+    manifest: RunManifest,
+) -> str | None:
+    allowed = {"observe", "soft_fail", "hard_fail"}
+    launch_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
+    if isinstance(launch_policy, str):
+        normalized_launch = launch_policy.strip().lower()
+        if normalized_launch in allowed:
+            return normalized_launch
+    runtime_paths = (
+        ("pipeline", "control_plane", "checkpoint_compatibility_policy"),
+        ("control_plane", "checkpoint_compatibility_policy"),
+    )
+    for path in runtime_paths:
+        value = lookup_mapping_path(manifest.runtime_config, *path)
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in allowed:
+                return normalized
+    return None
+
+
+__all__ = [
+    "_resolve_requested_checkpoint_compatibility_policy",
+    "_resolve_required_persistence_profile",
+]
