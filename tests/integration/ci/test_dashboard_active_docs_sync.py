@@ -18,6 +18,7 @@ from pathlib import Path
 import re
 
 import pytest
+from tests.integration._grafana_test_support import panel_display_title
 
 pytestmark = pytest.mark.integration
 
@@ -40,11 +41,20 @@ def _iter_dashboard_panels(panels: list[object]) -> list[dict[str, object]]:
 def _dashboard_panel_titles(dashboard_path: Path) -> Counter[str]:
     payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
     panels = _iter_dashboard_panels(list(payload.get("panels", [])))
-    return Counter(
-        str(panel["title"]).strip()
-        for panel in panels
-        if isinstance(panel.get("title"), str) and str(panel["title"]).strip()
-    )
+    titles: list[str] = []
+    for panel in panels:
+        grafana_title = str(panel.get("title") or "").strip()
+        if grafana_title:
+            titles.append(grafana_title)
+            continue
+        # DASH-FIT-004 hides native Grafana chrome; operator title lives in
+        # bioetlDisplayTitle. Skip the shared nav bus (id=1000).
+        if panel.get("id") == 1000:
+            continue
+        display_title = panel_display_title(panel)
+        if display_title:
+            titles.append(display_title)
+    return Counter(titles)
 
 
 def _documented_panel_titles(doc_path: Path) -> Counter[str]:

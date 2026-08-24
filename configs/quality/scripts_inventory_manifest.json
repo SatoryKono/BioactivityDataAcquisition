@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-24T11:54:56.962601+00:00",
+  "generated_at": "2026-08-24T14:08:18.537350+00:00",
   "summary": {
     "total_scripts": 599,
     "status_counts": {
-      "active": 339,
-      "supporting": 260
+      "active": 338,
+      "supporting": 261
     },
     "reference_group_coverage": {
       "agents": 7,
@@ -14335,7 +14335,7 @@
     {
       "path": "scripts/engineering/qa/observability_metric_inventory_shared.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 5,
       "references": [
@@ -14369,7 +14369,11 @@
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_shared import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the shared typed report/allowlist helpers behind report_observability_metric_inventory.py; keep it supporting and do not expose it as a standalone command."
     },
     {
       "path": "scripts/engineering/qa/reduce_architecture_debt.py",
@@ -20798,7 +20802,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 36,
+          "line": 39,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
