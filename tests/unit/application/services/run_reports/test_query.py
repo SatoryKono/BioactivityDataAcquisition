@@ -593,11 +593,11 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(
     tmp_path: Path,
 ) -> None:
-    assert report_query._read_identity_meta(tmp_path) == (None, None)
+    assert report_query._read_identity_meta(tmp_path) == (None, None, None)
 
     payload_path = tmp_path / "report.json"
     payload_path.write_text("[]", encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == (None, None)
+    assert report_query._read_identity_meta(payload_path) == (None, None, None)
 
     payload_path.write_text('{"identity": "invalid"}', encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == (None, None)
+    assert report_query._read_identity_meta(payload_path) == (None, None, None)

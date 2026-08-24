@@ -25,9 +25,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
   writes `var-run_id` and `var-pipeline` and stays on this dashboard so the
   operator can expand Selected Run Details (panel header link). The Pipeline
   column is hidden (already the selector) so the UUID stays readable. The
-  matching `$run_id` row is marked via Ops HTTP `selected`. Column widths keep
-  the selected marker plus UUID inside the first-window fold. Older runs:
-  pick Run ID from the catalog.
+  matching `$run_id` row is marked via Ops HTTP `selected`. Workflow is
+  `identity.workflow_id` from that pipeline report (not the workflow-run
+  catalog). Column widths keep the selected marker, UUID, and workflow name
+  inside the first-window fold. Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
   `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity

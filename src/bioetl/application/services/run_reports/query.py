@@ -25,6 +25,7 @@ class ReportIndexEntry:
     status: str | None
     completed_at: str | None
     mtime: float
+    workflow_id: str | None = None
 
 
 def _root(root: Path | None) -> Path:
@@ -200,7 +201,7 @@ def _build_report_index_entry(
     json_path: Path,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    status, completed_at = _read_identity_meta(json_path)
+    status, completed_at, workflow_id = _read_identity_meta(json_path)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
         kind=kind,
@@ -211,6 +212,7 @@ def _build_report_index_entry(
         status=status,
         completed_at=completed_at,
         mtime=mtime,
+        workflow_id=workflow_id if kind == "pipeline" else None,
     )
 
 
@@ -365,19 +367,24 @@ def _remove_report_directories(
     return removed
 
 
-def _read_identity_meta(path: Path) -> tuple[str | None, str | None]:
+def _read_identity_meta(
+    path: Path,
+) -> tuple[str | None, str | None, str | None]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return None, None
+        return None, None, None
     identity = payload.get("identity") if isinstance(payload, dict) else None
     if not isinstance(identity, dict):
-        return None, None
+        return None, None, None
     status = identity.get("status")
     completed = identity.get("completed_at")
+    workflow_raw = identity.get("workflow_id")
+    workflow_id = str(workflow_raw).strip() if workflow_raw is not None else ""
     return (
         str(status) if status is not None else None,
         str(completed) if completed is not None else None,
+        workflow_id or None,
     )
 
 

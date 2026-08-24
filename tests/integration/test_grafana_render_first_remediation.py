@@ -1118,8 +1118,20 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
     assert _override_width(recent, "selected") == 28
-    assert _override_width(recent, "message") == 100
+    assert (_override_width(recent, "Workflow") or 0) == 120
     assert (_override_width(recent, "Run") or 0) <= 240
+    hidden = {
+        str((item.get("matcher") or {}).get("options"))
+        for item in (recent.get("fieldConfig") or {}).get("overrides") or []
+        if isinstance(item, dict)
+        and any(
+            prop.get("id") == "custom.hidden" and prop.get("value") is True
+            for prop in item.get("properties") or []
+            if isinstance(prop, dict)
+        )
+    }
+    assert "Pipeline" in hidden
+    assert "message" in hidden
     grid = recent.get("gridPos") or {}
     assert int(grid.get("h") or 0) == 12
     assert recent.get("options", {}).get("cellHeight") == "sm"
