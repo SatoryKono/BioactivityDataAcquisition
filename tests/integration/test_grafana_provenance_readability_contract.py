@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+from tests.integration._grafana_test_support import panel_base_title
 
 ROOT = Path(__file__).resolve().parents[2]
 DASHBOARDS = ROOT / "grafana" / "dashboards"
@@ -124,7 +125,7 @@ def test_provenance_panel_readability_contract(
     panel = next(item for item in dashboard["panels"] if item.get("id") == panel_id)
     content = str(panel["options"]["content"])
 
-    assert panel["title"] == title
+    assert panel_base_title(panel) == title
     min_h = 3 if filename in _FIRST_WINDOW_H3 else 4
     assert panel["gridPos"]["h"] >= min_h
     assert panel["options"]["mode"] == "html"
