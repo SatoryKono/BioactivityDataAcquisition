@@ -231,7 +231,7 @@ jobs:
           python3 scripts/diagrams/check/check_svg_text_visibility.py --manifest "$manifest_tmp"
 
       - name: Upload canary report artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: diagrams-canary-${{ matrix.label }}

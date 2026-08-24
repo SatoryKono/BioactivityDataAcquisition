@@ -332,8 +332,8 @@ jobs:
             docs/02-architecture/diagrams/architecture/svg/*chembl-pipeline-activity*.svg
             docs/02-architecture/diagrams/architecture/png/*chembl-pipeline-activity*.png
             docs/02-architecture/diagrams/architecture/svg/INDEX.md
-          retention-days: 7
             docs/02-architecture/diagrams/architecture/png/INDEX.md
+          retention-days: 7
 
   validate-mermaid:
     needs: detect-diagram-changes

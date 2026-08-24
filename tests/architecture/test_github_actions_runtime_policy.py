@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
-from typing import Any, cast
+from typing import Any, Iterator, cast
 
 import pytest
 import yaml
@@ -35,10 +35,24 @@ ALWAYS_ON_REQUIRED_CHECKS = {
     "checks-complete": ROOT / ".github" / "workflows" / "import-linter.yml",
     "root-hygiene": ROOT / ".github" / "workflows" / "root-hygiene.yml",
 }
+UPLOAD_ARTIFACT_PREFIX = "actions/upload-artifact@"
+MAX_ARTIFACT_RETENTION_DAYS = 30
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], yaml.safe_load(path.read_text(encoding="utf-8")))
+
+
+def _iter_upload_artifact_steps(node: object) -> Iterator[dict[str, Any]]:
+    if isinstance(node, dict):
+        uses = node.get("uses")
+        if isinstance(uses, str) and uses.startswith(UPLOAD_ARTIFACT_PREFIX):
+            yield node
+        for value in node.values():
+            yield from _iter_upload_artifact_steps(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _iter_upload_artifact_steps(value)
 
 
 def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
@@ -66,6 +80,74 @@ def test_runtime_policy_parses_standard_step_uses_entries() -> None:
 
 def test_repository_actions_refs_satisfy_runtime_policy() -> None:
     assert not policy._collect_uses_violations()
+
+
+def test_upload_artifacts_have_bounded_explicit_retention() -> None:
+    violations: list[str] = []
+
+    for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        for step in _iter_upload_artifact_steps(_load_yaml(workflow_path)):
+            step_name = str(step.get("name", "unnamed upload-artifact step"))
+            with_config = step.get("with")
+            retention = (
+                with_config.get("retention-days")
+                if isinstance(with_config, dict)
+                else None
+            )
+            if not isinstance(retention, int) or not (
+                1 <= retention <= MAX_ARTIFACT_RETENTION_DAYS
+            ):
+                violations.append(
+                    f"{workflow_path.name}::{step_name}: retention-days must be "
+                    f"1..{MAX_ARTIFACT_RETENTION_DAYS}, got {retention!r}"
+                )
+
+    assert not violations, "\n".join(violations)
+
+
+def test_always_upload_artifacts_skip_cancelled_runs() -> None:
+    violations: list[str] = []
+
+    for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        for step in _iter_upload_artifact_steps(_load_yaml(workflow_path)):
+            condition = step.get("if")
+            if (
+                isinstance(condition, str)
+                and "always()" in condition
+                and "!cancelled()" not in condition
+            ):
+                violations.append(
+                    f"{workflow_path.name}::{step.get('name', 'unnamed')}: "
+                    "always() upload must include !cancelled()"
+                )
+
+    assert not violations, "\n".join(violations)
+
+
+@pytest.mark.parametrize(
+    ("workflow_name", "artifact_name"),
+    [
+        ("duplication-complexity.yml", "duplication-complexity-reports"),
+        ("type-checking.yml", "type-checking-reports"),
+    ],
+)
+def test_heavy_diagnostics_are_failure_only_and_path_scoped(
+    workflow_name: str,
+    artifact_name: str,
+) -> None:
+    workflow_path = ROOT / ".github" / "workflows" / workflow_name
+    matching_steps = [
+        step
+        for step in _iter_upload_artifact_steps(_load_yaml(workflow_path))
+        if isinstance(step.get("with"), dict)
+        and step["with"].get("name") == artifact_name
+    ]
+
+    assert len(matching_steps) == 1
+    step = matching_steps[0]
+    assert "failure()" in str(step.get("if", ""))
+    assert "!cancelled()" in str(step.get("if", ""))
+    assert str(step["with"].get("path", "")).strip() not in {"reports", "reports/"}
 
 
 def test_docs_workflow_is_tracked_and_not_gitignored() -> None:

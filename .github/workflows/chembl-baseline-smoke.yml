@@ -179,7 +179,7 @@ jobs:
             --junitxml=reports/junit/chembl-baseline-architecture.xml
 
       - name: Upload ChemblBaseline architecture artifacts
-        if: always()
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: chembl-baseline-architecture
