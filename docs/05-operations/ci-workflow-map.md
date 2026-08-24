@@ -11,7 +11,7 @@ ______________________________________________________________________
 # CI / GitHub Actions Workflow Map
 
 Curated map of `.github/workflows/*` (DOC-GOV-06 / #6886).
-**Count at verification:** 42 workflow files.
+**Count at verification:** 46 workflow files.
 YAML self-description remains authoritative for triggers/secrets; this page is
 the human index.
 
@@ -30,6 +30,7 @@ the human index.
 | `branch-hygiene.yml` | Branch Hygiene | PR branch-name policy and periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | ChemblBaseline Smoke | ChEMBL baseline smoke lane |
 | `coderabbit.yml` | CodeRabbit | Automated review integration |
+| `codeql.yml` | CodeQL | Python CodeQL SAST to GitHub code scanning |
 | `commit-lint.yml` | Commit Lint | Conventional commit message lint |
 | `compiled-artifacts-block.yml` | Block Compiled Python Artifacts | Fail on committed bytecode/build junk |
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |
@@ -37,6 +38,7 @@ the human index.
 | `contract-tests.yml` | Monthly Contract Tests | Scheduled deep contract tests |
 | `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence on self-hosted `[self-hosted, bioetl-observability]`; `workflow_dispatch` only — see isolation notes in `docs/04-reference/github-actions-workflows.md` |
+| `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
 | `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct) |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, mermaid lint, render, drift |
@@ -59,13 +61,15 @@ the human index.
 | `reusable-setup.yml` | [DEPRECATED] Reusable CI setup | Deprecated reusable workflow |
 | `root-hygiene.yml` | Root Hygiene | Root allowlist / clutter gates |
 | `schema-governance.yml` | Schema Governance | Schema governance checks |
-| `security.yml` | Security Scans | Security scanning |
+| `scorecard.yml` | OpenSSF Scorecard | Weekly non-blocking OpenSSF Scorecard baseline |
+| `security.yml` | Security Scans | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `semantic-governance.yml` | Semantic Pipeline Governance | Semantic pipeline governance |
 | `skills-consistency.yml` | Skills Consistency | AI skill parity plus Codex–Junie runtime parity |
 | `stale.yml` | Stale | Stale issue/PR automation |
 | `tests.yml` | Tests | Primary unit/integration test matrix |
 | `type-checking.yml` | Type Checking (Strict) | basedpyright / type gates |
 | `vacuum.yml` | Weekly VACUUM | Storage/VACUUM maintenance job |
+| `zizmor.yml` | zizmor | High-confidence GitHub Actions YAML audit |
 | `validate-vendored-mermaid-assets.yml` | Validate vendored Mermaid assets | Vendored mermaid asset integrity |
 
 ## Docs-critical path

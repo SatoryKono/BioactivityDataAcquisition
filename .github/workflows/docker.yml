@@ -169,7 +169,7 @@ jobs:
 
   docker-push:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: docker-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     concurrency:
@@ -196,8 +196,10 @@ jobs:
       # GHCR rejects mixed-case owner segments (e.g. SatoryKono).
       - name: Compute lowercase GHCR image base
         id: ghcr
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
-          owner="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          owner="$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')"
           echo "image_base=ghcr.io/${owner}/bioactivitydataacquisition" >> "$GITHUB_OUTPUT"
 
       - name: Build and push image to GHCR
@@ -212,3 +214,14 @@ jobs:
             ${{ steps.ghcr.outputs.image_base }}:${{ github.ref_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Generate GHCR image SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
+          format: spdx-json
+          output-file: bioetl-ghcr.spdx.json
+          artifact-name: bioetl-ghcr-sbom
+          upload-artifact: true
+          upload-artifact-retention: 30
+          upload-release-assets: false

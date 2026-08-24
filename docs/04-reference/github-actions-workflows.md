@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **42** live GitHub Actions
+This page is the canonical published inventory of the **46** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -57,7 +57,10 @@ Use it when you need to answer:
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `push`, `pull_request`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `push`, `pull_request` | Generated artifacts, schema parity, schema drift |
-| `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, dependency, and Bandit scans |
+| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Python CodeQL SAST to GitHub code scanning |
+| `dependency-review.yml` | `Dependency review` | `pull_request` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
+| `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
+| `zizmor.yml` | `zizmor` | `pull_request` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | Local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
@@ -81,6 +84,7 @@ Use it when you need to answer:
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `schedule`, `workflow_dispatch` | Stale report-noise draft PR cleanup under repository hygiene policy |
 | `quality-debt-weekly.yml` | _(unnamed in YAML)_ | `schedule`, `workflow_dispatch` | Weekly quality-debt scorecard/report lane |
+| `scorecard.yml` | `OpenSSF Scorecard` | `schedule`, `workflow_dispatch`, `push` | Weekly non-blocking OpenSSF Scorecard baseline |
 | `stale.yml` | `Stale` | `schedule` | Issue/PR staleness automation |
 | `vacuum.yml` | `Weekly VACUUM` | `schedule`, `workflow_dispatch` | Scheduled Delta VACUUM maintenance |
 
@@ -109,6 +113,10 @@ Use it when you need to answer:
 | Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |
 | Security scans | `security.yml` |
+| Dependency review | `dependency-review.yml` |
+| CodeQL Python SAST | `codeql.yml` |
+| OpenSSF Scorecard | `scorecard.yml` |
+| zizmor Actions audit | `zizmor.yml` |
 | Nightly replay / determinism parity | `nightly-replay-parity.yml` |
 | Episodic-memory retention policy | `memory-retention.yml` |
 | PR branch naming and cleanup inventory | `branch-hygiene.yml` |

@@ -358,3 +358,158 @@ def test_release_publish_requires_same_sha_quality_gates() -> None:
         assert "security-gate" in needs
         assert "release-tests" in needs
         assert "test-install" in needs
+
+
+def _step_uses(workflow: dict[str, Any], job_name: str) -> list[str]:
+    jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
+    return [
+        str(step.get("uses", ""))
+        for step in jobs[job_name]["steps"]
+        if isinstance(step, dict)
+    ]
+
+
+def test_dependency_review_workflow_is_pr_scoped_and_sha_pinned() -> None:
+    workflow_path = ROOT / ".github/workflows/dependency-review.yml"
+    workflow = _load_yaml(workflow_path)
+    triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
+    pull_request = triggers["pull_request"]
+    uses = _step_uses(workflow, "dependency-review")
+    review_sha = next(iter(policy.ALLOWED_USES["actions/dependency-review-action"]))
+    checkout_sha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
+
+    assert workflow["permissions"] == {"contents": "read"}
+    assert set(triggers) == {"pull_request"}
+    assert "uv.lock" in pull_request["paths"]
+    assert "pyproject.toml" in pull_request["paths"]
+    assert f"actions/checkout@{checkout_sha}" in uses
+    assert f"actions/dependency-review-action@{review_sha}" in uses
+    review_step = next(
+        step
+        for step in workflow["jobs"]["dependency-review"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/dependency-review-action@")
+    )
+    assert review_step["with"]["fail-on-severity"] == "high"
+
+
+def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/security.yml")
+    jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
+    gitleaks_sha = next(iter(policy.ALLOWED_USES["gitleaks/gitleaks-action"]))
+    osv_sha = next(
+        iter(policy.ALLOWED_USES["google/osv-scanner-action/osv-scanner-action"])
+    )
+    gitleaks_env = jobs["gitleaks"]["steps"][1]["env"]
+    osv_step = jobs["osv-scanner"]["steps"][1]
+
+    assert "gitleaks" in jobs
+    assert "osv-scanner" in jobs
+    assert f"gitleaks/gitleaks-action@{gitleaks_sha}" in _step_uses(
+        workflow, "gitleaks"
+    )
+    assert jobs["gitleaks"]["steps"][0]["with"]["fetch-depth"] == 0
+    assert gitleaks_env["GITLEAKS_CONFIG"] == ".gitleaks.toml"
+    assert gitleaks_env["GITLEAKS_ENABLE_COMMENTS"] == "false"
+    assert f"google/osv-scanner-action/osv-scanner-action@{osv_sha}" in _step_uses(
+        workflow, "osv-scanner"
+    )
+    assert "--lockfile=uv.lock" in str(osv_step["with"]["scan-args"])
+
+
+def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/codeql.yml")
+    jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
+    init_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/init"]))
+    analyze_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/analyze"]))
+    init_step = next(
+        step
+        for step in jobs["analyze"]["steps"]
+        if str(step.get("uses", "")).startswith("github/codeql-action/init@")
+    )
+
+    assert workflow["permissions"] == {"contents": "read"}
+    assert jobs["analyze"]["permissions"] == {
+        "contents": "read",
+        "security-events": "write",
+    }
+    assert init_step["with"]["languages"] == "python"
+    assert "matrix" not in jobs["analyze"]
+    assert f"github/codeql-action/init@{init_sha}" in _step_uses(workflow, "analyze")
+    assert f"github/codeql-action/analyze@{analyze_sha}" in _step_uses(
+        workflow, "analyze"
+    )
+
+
+def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/scorecard.yml")
+    triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
+    scorecard_sha = next(iter(policy.ALLOWED_USES["ossf/scorecard-action"]))
+    jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
+
+    assert "pull_request" not in triggers
+    assert "schedule" in triggers
+    assert "workflow_dispatch" in triggers
+    assert f"ossf/scorecard-action@{scorecard_sha}" in _step_uses(workflow, "analysis")
+    upload = next(
+        step
+        for step in jobs["analysis"]["steps"]
+        if str(step.get("uses", "")).startswith("actions/upload-artifact@")
+    )
+    assert upload["with"]["retention-days"] == 30
+    assert "!cancelled()" in str(upload.get("if", ""))
+
+
+def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
+    release = _load_yaml(RELEASE_WORKFLOW)
+    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    sbom_sha = next(iter(policy.ALLOWED_USES["anchore/sbom-action"]))
+    release_uses = _step_uses(release, "build")
+    docker_uses = _step_uses(docker, "docker-push")
+    release_assets = release["jobs"]["create-github-release-assets"]
+    asset_files = str(release_assets["steps"][-1]["with"]["files"])
+
+    assert f"anchore/sbom-action@{sbom_sha}" in release_uses
+    assert f"anchore/sbom-action@{sbom_sha}" in docker_uses
+    assert "bioetl-dist-sbom" in " ".join(
+        str(step.get("with", {})) for step in release_assets["steps"]
+    )
+    assert "sbom/**" in asset_files
+
+
+def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/zizmor.yml")
+    triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
+    zizmor_sha = next(iter(policy.ALLOWED_USES["zizmorcore/zizmor-action"]))
+    zizmor_step = next(
+        step
+        for step in workflow["jobs"]["zizmor"]["steps"]
+        if str(step.get("uses", "")).startswith("zizmorcore/zizmor-action@")
+    )
+    labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
+    zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
+
+    assert set(triggers) == {"pull_request"}
+    assert ".github/workflows/**" in triggers["pull_request"]["paths"]
+    assert ".github/actions/**" in triggers["pull_request"]["paths"]
+    assert zizmor_step["uses"] == f"zizmorcore/zizmor-action@{zizmor_sha}"
+    assert zizmor_step["with"]["min-severity"] == "high"
+    assert zizmor_step["with"]["min-confidence"] == "high"
+    assert zizmor_step["with"]["version"] == "1.29.0"
+    assert "pull_request_target" in labeler
+    assert "does not checkout untrusted PR HEAD" in labeler
+    assert ".github/workflows/labeler.yml" in zizmor_config
+
+
+def test_security_policy_lists_canonical_supply_chain_scanners() -> None:
+    security_md = (ROOT / ".github/SECURITY.md").read_text(encoding="utf-8")
+
+    for needle in (
+        "Dependency review",
+        "Gitleaks",
+        "OSV-Scanner",
+        "CodeQL",
+        "OpenSSF Scorecard",
+        "Syft SBOM",
+        "zizmor",
+    ):
+        assert needle in security_md

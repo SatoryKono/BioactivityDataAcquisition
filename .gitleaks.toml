@@ -1,8 +1,9 @@
 # Gitleaks configuration for BioETL
 # See: https://github.com/gitleaks/gitleaks#configuration
 #
-# This file configures secret scanning in CI.
-# Run locally: gitleaks detect --config .gitleaks.toml
+# Enforced in CI by the gitleaks job in .github/workflows/security.yml.
+# detect-secrets remains a parallel scanner until Gitleaks is the sole git-secret gate.
+# Run locally: gitleaks detect --config .gitleaks.toml --redact
 
 title = "BioETL Gitleaks Configuration"
 

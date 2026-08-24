@@ -86,7 +86,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **42 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+BioETL uses **46 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
 
 ### 2.1 Core Quality Workflows
 
@@ -112,10 +112,14 @@ from checks that run only for matching paths.
 
 ### 2.3 Security
 
-| Workflow           | File           | Key Jobs                                                                | What It Checks                                                                    |
-| ------------------ | -------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| **Security Scans** | `security.yml` | `detect-secrets`, `pip-audit`                                           | Credential leak prevention, dependency vulnerability scanning                     |
-| **Docker Build**   | `docker.yml`   | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, Trivy image scanning (CRITICAL+HIGH), GHCR push on main |
+| Workflow               | File                     | Key Jobs                                                                | What It Checks                                                                                          |
+| ---------------------- | ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Security Scans**     | `security.yml`           | `detect-secrets`, `pip-audit`, `bandit`, `gitleaks`, `osv-scanner`      | Credential leak prevention, lockfile CVE scanning, Bandit, Gitleaks                                     |
+| **Dependency review**  | `dependency-review.yml`  | `dependency-review`                                                     | PR-time HIGH/CRITICAL vulnerable dependency block on lockfile/manifest changes                          |
+| **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python SAST uploaded to GitHub code scanning                                                            |
+| **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
+| **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
+| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, Trivy image scanning (CRITICAL+HIGH), Syft SBOM, GHCR push on main            |
 
 ### 2.4 Code Hygiene
 
