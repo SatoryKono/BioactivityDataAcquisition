@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
-    lookup_mapping_path,
-)
+from importlib import import_module
+
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 
 
-def _resolve_applied_checkpoint_compatibility_policy(
+def resolve_applied_checkpoint_compatibility_policy(
     *,
     requested_exact_replay: bool,
     requested_policy: str | None,
@@ -27,6 +26,9 @@ def _resolve_applied_checkpoint_compatibility_policy(
 def _resolve_requested_checkpoint_compatibility_policy(
     manifest: RunManifest,
 ) -> str | None:
+    lookup_mapping_path = import_module(
+        "bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping"
+    ).lookup_mapping_path
     candidates = (
         manifest.launch_context.get("checkpoint_compatibility_policy"),
         lookup_mapping_path(
@@ -50,6 +52,6 @@ def _resolve_requested_checkpoint_compatibility_policy(
 
 
 __all__ = [
-    "_resolve_applied_checkpoint_compatibility_policy",
     "_resolve_requested_checkpoint_compatibility_policy",
+    "resolve_applied_checkpoint_compatibility_policy",
 ]
