@@ -110,9 +110,10 @@ def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent()
 
     source_artifact = committed["source_artifacts"]["module_coverage_inventory"]
     assert source_artifact["path"] == "reports/quality/module-coverage-inventory.json"
-    assert source_artifact["source_tree_sha256"] == coverage_inventory[
-        "source_tree_sha256"
-    ], SCORECARD_REFRESH_HINT
+    assert (
+        source_artifact["source_tree_sha256"]
+        == coverage_inventory["source_tree_sha256"]
+    ), SCORECARD_REFRESH_HINT
     assert (
         source_artifact["coverage_xml_sha256"]
         == coverage_inventory["coverage_xml_sha256"]
