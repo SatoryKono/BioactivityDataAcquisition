@@ -26,7 +26,7 @@ BioETL integrates with the following public APIs:
 | **API Injection**              | Malformed data in API responses        | Strict schema validation at adapter level       |
 | **Data Poisoning**             | Corrupted or malicious records         | Multi-layer validation (Bronze → Silver → Gold) |
 | **Secrets Exposure**           | Credentials in logs/code/VCR cassettes | Environment variables, sanitization hooks       |
-| **Dependency Vulnerabilities** | CVEs in third-party packages           | Regular pip-audit scans, Dependabot             |
+| **Dependency Vulnerabilities** | CVEs in third-party packages           | pip-audit, OSV-Scanner, Dependency review, Dependabot |
 
 ## Secret Management
 
@@ -110,8 +110,16 @@ make security-check
 ### Automated Monitoring
 
 - **Dependabot alerts**: Enabled via `.github/dependabot.yml` (pip + GitHub Actions)
+- **Dependency review**: PR-time fail-closed scan of lockfile/manifest diffs (`.github/workflows/dependency-review.yml`, `fail-on-severity: high`)
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
+- **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning
+- **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; governed ignores in `osv-scanner.toml`
+- **Bandit**: Python anti-pattern scan in `.github/workflows/security.yml`
+- **CodeQL**: Python SAST uploaded to GitHub code scanning (`.github/workflows/codeql.yml`)
+- **OpenSSF Scorecard**: Weekly non-blocking baseline (`.github/workflows/scorecard.yml`)
+- **Syft SBOM**: SPDX artifact on GitHub Release (`release.yml`) and GHCR push (`docker.yml`)
+- **zizmor**: High-confidence GitHub Actions YAML audit on workflow/action changes (`.github/workflows/zizmor.yml`)
 - **Trivy**: Container image scanning in `.github/workflows/docker.yml` (SHA-pinned)
 - **Update policy**: Security patches applied within 72 hours
 
@@ -199,4 +207,4 @@ httpx.get(url)  # verify=True by default
 
 ______________________________________________________________________
 
-*Last updated: 2026-08-21*
+*Last updated: 2026-08-24*

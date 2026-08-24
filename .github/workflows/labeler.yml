@@ -1,5 +1,9 @@
 name: Labeler
 
+# pull_request_target is required so fork PRs can receive labels.
+# This job does not checkout untrusted PR HEAD and does not expose
+# secrets beyond GITHUB_TOKEN with pull-requests: write.
+# Documented zizmor exception: .github/zizmor.yml (dangerous-triggers).
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
