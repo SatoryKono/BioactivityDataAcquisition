@@ -21,8 +21,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 ### 5. Inspect Recent Runs (last 10)
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The Run
-  column data link writes `var-run_id` and `var-pipeline` and opens Inspect
-  Run Identity (`viewPanel=3022`). Older runs: pick Run ID from the catalog.
+  column data link writes `var-run_id` and `var-pipeline` and stays on this
+  dashboard so the operator can expand Selected Run Details. The Pipeline
+  column is hidden (already the selector) so the UUID stays readable. The
+  matching `$run_id` row is marked. Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
   `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
@@ -47,6 +49,8 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 - **Type:** Table
 - **Purpose:** Last 20 workflow-run reports for the selected workflow, with the
   same valid-empty and bind/origin failure distinctions as the pipeline index.
+  Null `completed_at` is `—` in the Completed cell; `VALID EMPTY` is only the
+  empty-table state.
 - **Data sources:** BioETL Ops HTTP
   `/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20`.
 

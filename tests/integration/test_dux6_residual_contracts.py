@@ -191,6 +191,21 @@ def test_pfill_12_workflow_browser_is_not_panel_3010() -> None:
     assert no_value.startswith("VALID EMPTY — no workflow-run-report artifacts")
     assert "selected workflow" in no_value
     assert "$workflow" not in no_value
+    completed_no_value = next(
+        (
+            str(prop.get("value") or "")
+            for item in (workflow.get("fieldConfig") or {}).get("overrides") or []
+            if isinstance(item, dict)
+            and str((item.get("matcher") or {}).get("options") or "").startswith(
+                "^(completed_at"
+            )
+            for prop in item.get("properties") or []
+            if isinstance(prop, dict) and prop.get("id") == "noValue"
+        ),
+        "",
+    )
+    assert completed_no_value == "—"
+    assert "VALID EMPTY" not in completed_no_value
     assert target.get("url") == (
         "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20"
     )
