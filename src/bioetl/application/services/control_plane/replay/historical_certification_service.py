@@ -15,6 +15,9 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_certi
     HISTORICAL_SOURCE_SNAPSHOT_CERTIFIED,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
@@ -28,9 +31,6 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplaySnapshotCertification,

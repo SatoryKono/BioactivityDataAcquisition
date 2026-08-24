@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a",
-      "limit": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a",
+      "current": "a78067e9dcbacdbccc37da09b2a1f7cb49393862132eec0f89333f1edc69dd81",
+      "limit": "a78067e9dcbacdbccc37da09b2a1f7cb49393862132eec0f89333f1edc69dd81",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2450,
-        "source_tree_sha256": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a",
+        "source_tree_sha256": "a78067e9dcbacdbccc37da09b2a1f7cb49393862132eec0f89333f1edc69dd81",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2450,
-        "source_tree_sha256": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a",
+        "source_tree_sha256": "a78067e9dcbacdbccc37da09b2a1f7cb49393862132eec0f89333f1edc69dd81",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -417,15 +417,14 @@
     {
       "current": {
         "artifacts": [
-          "hotspot_family_baseline",
           "remote_main_baseline"
         ],
-        "count": 2
+        "count": 1
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: hotspot_family_baseline, remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
       "status": "fail"
     }
@@ -456,7 +455,7 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": true,
+    "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": true
   },
