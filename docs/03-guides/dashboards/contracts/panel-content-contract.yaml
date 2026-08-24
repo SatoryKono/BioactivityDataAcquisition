@@ -3725,7 +3725,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9002':
-        title: Start Provider Triage
+        title: ''
         role: guidance
         tier: 4
         scope: global
