@@ -532,7 +532,8 @@ def _report_errors(errors: list[str]) -> int:
     return 1
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    del argv
     errors = [
         error
         for dashboard_path in sorted(DASHBOARDS_DIR.glob("*.json"))
