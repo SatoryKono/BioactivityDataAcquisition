@@ -158,7 +158,9 @@ def _run_index_item(
     *,
     selected_run_id: str | None = None,
 ) -> JsonDict:
-    selected = 1 if selected_run_id is not None and item.run_id == selected_run_id else 0
+    selected = (
+        1 if selected_run_id is not None and item.run_id == selected_run_id else 0
+    )
     paths = {
         "status": item.status,
         "completed_at": item.completed_at,

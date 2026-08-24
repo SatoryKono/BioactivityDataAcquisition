@@ -333,7 +333,13 @@ async def test_report_lists_bound_limits_and_reject_invalid_values(
         unexpected_bounded_operation,
     )
 
-    def list_pipeline(*, pipeline_name: str | None, limit: int) -> dict[str, object]:
+    def list_pipeline(
+        *,
+        pipeline_name: str | None,
+        limit: int,
+        selected_run_id: str | None = None,
+    ) -> dict[str, object]:
+        del selected_run_id
         calls.append(("pipeline", pipeline_name, limit))
         return {"items": []}
 
