@@ -1118,8 +1118,8 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
     assert _override_width(recent, "selected") == 28
-    assert _override_width(recent, "message") == 160
-    assert (_override_width(recent, "Run") or 0) <= 300
+    assert _override_width(recent, "message") == 100
+    assert (_override_width(recent, "Run") or 0) <= 240
     grid = recent.get("gridPos") or {}
     assert int(grid.get("h") or 0) == 12
     assert recent.get("options", {}).get("cellHeight") == "sm"
