@@ -92,7 +92,12 @@ def test_provenance_panels_share_readability_contract() -> None:
         provenance = panels[panel_id]
         content = str((provenance.get("options") or {}).get("content") or "")
 
-        min_h = 3 if filename == "bioetl-overview-v2.json" else 4
+        min_h = (
+            3
+            if filename
+            in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
+            else 4
+        )
         assert provenance.get("gridPos", {}).get("h", 0) >= min_h, filename
         assert provenance.get("options", {}).get("mode") == "html", filename
         assert '<div style="font-size:18px;font-weight:700">' in content, filename

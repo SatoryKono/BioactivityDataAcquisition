@@ -15,6 +15,10 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tests.integration._dashboard_layout_budgets import (
+    FIRST_WINDOW_Y,
+    panel_declared_row_cap,
+)
 from tests.integration._grafana_test_support import (
     get_row_child_panels,
     get_dashboard_files,
@@ -703,7 +707,10 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     records = panels[3023]
     assert 9402 not in panels
     assert 9403 not in panels
-    assert browse.get("gridPos", {}).get("h", 99) <= 11
+    browse_grid = browse.get("gridPos") or {}
+    assert browse_grid.get("h") == 12
+    assert int(browse_grid.get("y", 0)) + int(browse_grid.get("h", 0)) <= FIRST_WINDOW_Y
+    assert panel_declared_row_cap(browse) == 10
     collapsed_ids = {
         panel.get("id")
         for panel in get_row_child_panels(dashboard, "Selected Run Details")

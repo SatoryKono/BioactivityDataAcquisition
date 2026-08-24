@@ -24,8 +24,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
   column data link writes `var-run_id` and `var-pipeline` and opens Inspect
   Run Identity (`viewPanel=3022`). Older runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** Compact first-screen index. Identity (`3022`) and processed
-  records (`3023`) stay collapsed under Selected Run Details.
+- **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
+  `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
+  (`3022`) and processed records (`3023`) stay collapsed under Selected Run
+  Details.
 - **Empty states:** Valid empty (`noValue` starts with `VALID EMPTY` and must
   not embed `$pipeline` — Grafana does not interpolate `noValue`) when
   Ops HTTP `index_state=valid_empty` — no matching reports for this pipeline.
