@@ -74,6 +74,7 @@ _SPECS = {
         (
             "Which exact run should be inspected?",
             "BROWSE",
+            "not this time range",
             "report artifacts, not triage bodies",
         ),
     ),

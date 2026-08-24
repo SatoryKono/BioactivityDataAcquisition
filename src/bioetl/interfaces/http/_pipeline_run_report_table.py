@@ -207,7 +207,7 @@ def _shape_object_or_list_block(
 def _removals_summary(removals: object) -> str:
     """Compact funnel removals for Grafana (not raw JSON arrays)."""
     if not isinstance(removals, list) or not removals:
-        return ""
+        return "—"
     parts: list[str] = []
     for item in removals:
         if not isinstance(item, dict):
@@ -222,7 +222,7 @@ def _removals_summary(removals: object) -> str:
             parts.append(label)
             continue
         parts.append(f"{count} {label}")
-    return ", ".join(parts)
+    return ", ".join(parts) or "—"
 
 
 def _shape_funnel_rows(payload: dict[str, object]) -> object:

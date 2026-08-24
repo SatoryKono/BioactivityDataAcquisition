@@ -15,17 +15,19 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 
 ### 2. Understand Run Scope
 - **Type:** Text
-- **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, artifact Open/Copy, and the Trust handoff.
+- **Purpose:** Explain browse and selected-run modes, the HTTP-only run_id contract, artifact Open/Copy, and the Trust handoff. Browse is last 10 on disk, not the dashboard time range.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 5. Inspect Recent Runs (last 10)
 - **Type:** Table (compact first-screen index)
-- **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The Run
-  column data link writes `var-run_id` and `var-pipeline` and stays on this
-  dashboard so the operator can expand Selected Run Details (panel header
-  link). The Pipeline column is hidden (already the selector) so the UUID
-  stays readable. The matching `$run_id` row is marked via Ops HTTP
-  `selected`. Older runs: pick Run ID from the catalog.
+- **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The
+  dashboard time picker does not filter this table. The Run column data link
+  writes `var-run_id` and `var-pipeline` and stays on this dashboard so the
+  operator can expand Selected Run Details (panel header link). The Pipeline
+  column is hidden (already the selector) so the UUID stays readable. The
+  matching `$run_id` row is marked via Ops HTTP `selected`. Column widths keep
+  the selected marker plus UUID inside the first-window fold. Older runs:
+  pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
 - **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
   `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
@@ -70,7 +72,8 @@ Nested titles (must match JSON):
 - **Purpose:** Stage funnel (records_in/out, balance) for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel`
 - **Presentation:** Stage first; `removals` JSON is hidden in favor of
-  `removals_summary`. Shares a row with Top Run Reasons.
+  `removals_summary`. Empty stage removals render as `—`, not table-level
+  VALID EMPTY. Shares a row with Top Run Reasons.
 
 ### 8. Inspect Top Run Reasons
 - **Type:** Table
@@ -89,8 +92,8 @@ Nested titles (must match JSON):
 
 ### 11. Inspect Run Artifacts
 - **Type:** Table
-- **Purpose:** Artifact refs (report paths, exports) for exact run. Scan cells
-  stay short; Open/Copy uses the `ref` field.
+- **Purpose:** Artifact refs (report paths, exports) for exact run. The `ref`
+  cell wraps so rows stay distinguishable; Copy still yields the full `ref`.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts`
 
 ### 12. Inspect Timings & Failure

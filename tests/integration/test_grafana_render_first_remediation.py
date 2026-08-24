@@ -1067,3 +1067,105 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
     assert 3015 not in root_ids
+
+
+def _override_width(panel: dict[str, object], matcher: str) -> int | None:
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return None
+    for item in field_config.get("overrides") or []:
+        if not isinstance(item, dict):
+            continue
+        options = str((item.get("matcher") or {}).get("options") or "")
+        if matcher not in options:
+            continue
+        for prop in item.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "custom.width":
+                return int(prop.get("value") or 0)
+    return None
+
+
+def _override_novalue(panel: dict[str, object], matcher: str) -> str | None:
+    field_config = panel.get("fieldConfig")
+    if not isinstance(field_config, dict):
+        return None
+    for item in field_config.get("overrides") or []:
+        if not isinstance(item, dict):
+            continue
+        options = str((item.get("matcher") or {}).get("options") or "")
+        if matcher not in options:
+            continue
+        for prop in item.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "noValue":
+                return str(prop.get("value") or "")
+    return None
+
+
+def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    banner = _panel(explorer, 1)
+    content = str((banner.get("options") or {}).get("content") or "")
+    assert "not this time range" in content
+    recent = _panel(explorer, 3010)
+    description = str(recent.get("description") or "")
+    assert "time picker does not filter this table" in description
+    target_url = str((recent.get("targets") or [{}])[0].get("url") or "")
+    assert "$__range" not in target_url
+    assert "limit=10" in target_url
+
+
+def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    recent = _panel(explorer, 3010)
+    assert _override_width(recent, "selected") == 28
+    assert _override_width(recent, "message") == 160
+    assert (_override_width(recent, "Run") or 0) <= 300
+    grid = recent.get("gridPos") or {}
+    assert int(grid.get("h") or 0) == 12
+    assert recent.get("options", {}).get("cellHeight") == "sm"
+    assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
+        "limitField"
+    ) == 10
+
+
+def test_run_explorer_funnel_removals_empty_is_emdash_not_valid_empty() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    row = next(panel for panel in explorer.get("panels", []) if panel.get("id") == 3099)
+    nested = {
+        panel.get("id"): panel
+        for panel in row.get("panels") or []
+        if isinstance(panel, dict)
+    }
+    funnel = nested[3011]
+    defaults = str(
+        (funnel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
+    )
+    assert defaults.startswith("VALID EMPTY")
+    assert _override_novalue(funnel, "Removals") == "—"
+    assert (_override_width(funnel, "Removals") or 0) >= 280
+
+
+def test_run_explorer_artifact_ref_wraps_below_fold() -> None:
+    explorer = _load("bioetl-run-explorer-v1.json")
+    row = next(panel for panel in explorer.get("panels", []) if panel.get("id") == 3099)
+    assert row.get("collapsed") is True
+    nested = {
+        panel.get("id"): panel
+        for panel in row.get("panels") or []
+        if isinstance(panel, dict)
+    }
+    artifacts = nested[3013]
+    assert int((artifacts.get("gridPos") or {}).get("h") or 0) >= 8
+    assert (_override_width(artifacts, "ref") or 0) >= 720
+    wrap = False
+    for item in (artifacts.get("fieldConfig") or {}).get("overrides") or []:
+        if not isinstance(item, dict):
+            continue
+        if str((item.get("matcher") or {}).get("options") or "") != "ref":
+            continue
+        for prop in item.get("properties") or []:
+            if not isinstance(prop, dict) or prop.get("id") != "custom.cellOptions":
+                continue
+            value = prop.get("value") or {}
+            wrap = bool(isinstance(value, dict) and value.get("wrapText") is True)
+    assert wrap is True
