@@ -9,8 +9,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
@@ -177,6 +175,8 @@ def _collect_uses_violations() -> list[str]:
 
 def load_remote_artifacts_policy(path: Path | None = None) -> dict[str, Any]:
     """Load repository-controlled remote executable pins."""
+    import yaml
+
     policy_path = path or REMOTE_ARTIFACTS_FILE
     payload = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
     if not isinstance(payload, dict):
