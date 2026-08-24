@@ -32,7 +32,7 @@ def test_migrate_json_file_rejects_traversal(tmp_path: Path) -> None:
     victim = tmp_path / "victim.json"
     victim.write_text('{"id":"x"}\n', encoding="utf-8")
     sneaky = Path(tmp_path, "nested", "..", "victim.json")
-    sneaky.parent.mkdir(exist_ok=True)
+    (tmp_path / "nested").mkdir(exist_ok=True)
     with pytest.raises(ValueError, match="path traversal"):
         migrate_json_file(sneaky, target_version=1)
 
