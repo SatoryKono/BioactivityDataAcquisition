@@ -28,7 +28,7 @@ from bioetl.application.services.control_plane.replay.historical_certification_s
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplaySnapshotCertification as HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     CORPUS_MODEL_PUBLIC_NAMES,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
