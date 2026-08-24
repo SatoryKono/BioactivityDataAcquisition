@@ -1,0 +1,11 @@
+# zizmor policy for BioETL GitHub Actions YAML.
+# Fail CI on high-confidence / high-severity findings (see zizmor.yml workflow).
+# Do not grow ignore lists without an issue and a documented reason.
+
+rules:
+  dangerous-triggers:
+    ignore:
+      # labeler.yml uses pull_request_target so fork PRs can receive labels.
+      # The job does not checkout untrusted PR HEAD and does not expose
+      # secrets beyond GITHUB_TOKEN with pull-requests: write.
+      - .github/workflows/labeler.yml

@@ -16,37 +16,75 @@ COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
 REMOTE_ARTIFACTS_FILE = ROOT / "configs/quality/github_actions_remote_artifacts.yaml"
 
 ALLOWED_USES: dict[str, set[str]] = {
-    "actions/checkout": {"de0fac2e4500dabe0009e67214ff5f5447ce83dd"},  # v6.0.2
-    "actions/setup-python": {"a309ff8b426b58ec0e2a45f0f869d46889d02405"},  # v6.2.0
+    "actions/checkout": {
+        "de0fac2e4500dabe0009e67214ff5f5447ce83dd",  # v6.0.2
+        "3d3c42e5aac5ba805825da76410c181273ba90b1",  # v7.0.1
+    },
+    "actions/setup-python": {
+        "a309ff8b426b58ec0e2a45f0f869d46889d02405",  # v6.2.0
+        "5fda3b95a4ea91299a34e894583c3862153e4b97",  # v7.0.0
+    },
     "actions/cache": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
     "actions/cache/restore": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
     "actions/cache/save": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
     "actions/upload-artifact": {"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"},  # v7.0.1
-    "actions/setup-node": {"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e"},  # v6.4.0
+    "actions/setup-node": {
+        "48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",  # v6.4.0
+        "249970729cb0ef3589644e2896645e5dc5ba9c38",  # v6.5.0
+    },
     "actions/download-artifact": {"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"},  # v8.0.1
     "actions/github-script": {"f28e40c7f34bde8b3046d885e986cb6290c5673b"},  # v7
     "actions/labeler": {"8558fd74291d67161a8a78ce36a881fa63b766a9"},  # v5
     "actions/stale": {"5bef64f19d7facfb25b37b414482c7164d639639"},  # v9
+    "actions/dependency-review-action": {
+        "a1d282b36b6f3519aa1f3fc636f609c47dddb294",  # v5.0.0
+    },
     "astral-sh/setup-uv": {
         "37802adc94f370d6bfd71619e3f0bf239e1f3b78",  # v7 (canonical; composite setup-python-uv)
+        "20cfd1bf945f4377ade1205e4dbc17946fc9a30d",  # v10.0.1
     },
     "SonarSource/sonarqube-scan-action": {
         "fd88b7d7ccbaefd23d8f36f73b59db7a3d246602",
     },
-    "aquasecurity/trivy-action": {"57a97c7e7821a5776cebc9bb87c984fa69cba8f1"},
+    "anchore/sbom-action": {
+        "e22c389904149dbc22b58101806040fa8d37a610",  # v0.24.0
+    },
+    "aquasecurity/trivy-action": {
+        "57a97c7e7821a5776cebc9bb87c984fa69cba8f1",  # v0.35.0
+        "ed142fd0673e97e23eac54620cfb913e5ce36c25",  # v0.36.0
+    },
     "docker/build-push-action": {"ca052bb54ab0790a636c9b5f226502c73d547a25"},
     "docker/login-action": {"dbcb813823bdd20940b903addbd779551569679f"},
     "docker/setup-buildx-action": {"bb05f3f5519dd87d3ba754cc423b652a5edd6d2c"},
+    "gitleaks/gitleaks-action": {
+        "e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",  # v3.0.0
+    },
+    "github/codeql-action/init": {
+        "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+    },
+    "github/codeql-action/analyze": {
+        "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+    },
     "github/codeql-action/upload-sarif": {
-        "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",
+        "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
+        "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+    },
+    "google/osv-scanner-action/osv-scanner-action": {
+        "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
     },
     "hadolint/hadolint-action": {"2a66e89f53d0771bb131a7fa31f3136336094aa6"},
+    "ossf/scorecard-action": {
+        "2d1146689b8cda280b9bc96326124645441f03bc",  # v2.4.4
+    },
     "pypa/gh-action-pypi-publish": {
         "dc37677b2e1c63e2034f94d8a5b11f265b73ba33",
     },
     "softprops/action-gh-release": {"3d0d9888cb7fd7b750713d6e236d1fcb99157228"},
     "wagoid/commitlint-github-action": {
         "f133a0d95090ef2609192b4a21f54e20af819ea9",
+    },
+    "zizmorcore/zizmor-action": {
+        "3dc1ecc9bcb9e94e9b2c709687979e1298497054",  # v0.6.2
     },
 }
 
