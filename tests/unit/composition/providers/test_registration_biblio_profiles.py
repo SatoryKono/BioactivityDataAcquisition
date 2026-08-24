@@ -49,7 +49,9 @@ def _pipeline_config(*, email: str = "") -> SimpleNamespace:
     return SimpleNamespace(source=SimpleNamespace(email=email))
 
 
-def test_resolve_pubmed_request_profile_uses_pipeline_email_and_settings_api_key() -> None:
+def test_resolve_pubmed_request_profile_uses_pipeline_email_and_settings_api_key() -> (
+    None
+):
     settings = MagicMock()
     settings.default_email = "default@example.org"
     settings.pubmed_api_key = MagicMock()

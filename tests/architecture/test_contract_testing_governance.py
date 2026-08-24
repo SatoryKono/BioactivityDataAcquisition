@@ -86,7 +86,7 @@ class TestContractTestingGovernance:
         assert "|| echo" not in run_tests["run"]
 
         upload_results = steps["Upload Test Results"]
-        assert upload_results["if"] == "always()"
+        assert upload_results["if"] == "${{ always() && !cancelled() }}"
 
         create_issue = steps["Create Issue on Failure"]
         failure_condition = "always() && steps.contract_tests.outcome == 'failure'"
