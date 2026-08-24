@@ -825,6 +825,40 @@ class TestPipelineRunnerRun:
         )
 
     @pytest.mark.asyncio
+    async def test_run_logs_warning_when_outer_debug_export_finalize_raises(
+        self, runner, mock_logger
+    ) -> None:
+        runner._finalize_debug_export = AsyncMock(
+            side_effect=RuntimeError("outer finalize failed")
+        )
+
+        await runner.run()
+
+        mock_logger.warning.assert_any_call(
+            "debug_export_finalize_outer_failed",
+            error="outer finalize failed",
+            error_type="RuntimeError",
+            run_id=str(runner._context.run_id),
+        )
+
+    @pytest.mark.asyncio
+    async def test_run_logs_warning_when_cleanup_after_run_raises(
+        self, runner, mock_logger
+    ) -> None:
+        runner._cleanup_after_run = AsyncMock(
+            side_effect=RuntimeError("cleanup failed")
+        )
+
+        await runner.run()
+
+        mock_logger.warning.assert_any_call(
+            "cleanup_after_run_failed",
+            error="cleanup failed",
+            error_type="RuntimeError",
+            run_id=str(runner._context.run_id),
+        )
+
+    @pytest.mark.asyncio
     async def test_run_does_not_publish_debug_export_without_run_ledger(
         self, runner
     ) -> None:

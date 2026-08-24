@@ -28,9 +28,6 @@ from bioetl.application.services.control_plane.replay.historical_certification_s
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplaySnapshotCertification as HistoricalReplaySnapshotCertification,
 )
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    CORPUS_MODEL_PUBLIC_NAMES,
-)
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
     bulk_spec_order_key,
     certification_scope_for_context,
@@ -42,6 +39,10 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+
+CORPUS_MODEL_PUBLIC_NAMES: tuple[str, ...] = import_module(
+    "bioetl.application.services.control_plane.replay.historical_corpus_models"
+).CORPUS_MODEL_PUBLIC_NAMES
 
 
 def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, object]:
