@@ -27,10 +27,7 @@ def _resolve_required_persistence_profile(manifest: RunManifest) -> str:
             "control_plane",
             "required_persistence_profile",
         ),
-        lookup_mapping_path(
-            manifest.runtime_config,
-            "required_persistence_profile",
-        ),
+        lookup_mapping_path(manifest.runtime_config, "required_persistence_profile"),
     )
     for candidate in candidates:
         if isinstance(candidate, str):
@@ -50,15 +47,17 @@ def _resolve_requested_checkpoint_compatibility_policy(
     launch_policy = manifest.launch_context.get("checkpoint_compatibility_policy")
     if isinstance(launch_policy, str) and launch_policy.strip().lower() in allowed:
         return launch_policy.strip().lower()
-    runtime_paths = (
+    for path in (
         ("pipeline", "control_plane", "checkpoint_compatibility_policy"),
         ("control_plane", "checkpoint_compatibility_policy"),
-    )
-    for path in runtime_paths:
+    ):
         value = lookup_mapping_path(manifest.runtime_config, *path)
         if isinstance(value, str) and value.strip().lower() in allowed:
             return value.strip().lower()
     return None
 
 
-__all__ = ["_resolve_requested_checkpoint_compatibility_policy", "_resolve_required_persistence_profile"]
+__all__ = [
+    "_resolve_requested_checkpoint_compatibility_policy",
+    "_resolve_required_persistence_profile",
+]

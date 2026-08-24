@@ -4072,7 +4072,7 @@ dashboards:
   bioetl-run-explorer-v1:
     panels:
       '1':
-        title: Understand Run Scope
+        title: ''
         role: guidance
         tier: 4
         scope: selected_run

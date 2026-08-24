@@ -52,6 +52,7 @@ __all__ = [
 
 _workflow_memory_lock: LockPort | None = None
 
+
 @runtime_checkable
 class _WorkflowMetricsFactory(Protocol):
     """Lazy metrics-factory contract for canonical workflow settings."""

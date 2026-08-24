@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-24T14:08:18.537350+00:00",
+  "generated_at": "2026-08-24T18:19:17.817263+00:00",
   "summary": {
     "total_scripts": 599,
     "status_counts": {
@@ -20802,7 +20802,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 39,
+          "line": 42,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
