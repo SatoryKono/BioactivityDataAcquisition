@@ -112,6 +112,7 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
             "workflow_name": "demo_wf",
             "workflow_run_id": "wf1",
             "status": "success",
+            "completed_at": "2026-08-24T13:49:06+00:00",
         },
         plan_steps=[
             {
@@ -134,6 +135,7 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
     written = write_workflow_run_report(report, root=tmp_path)
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     assert payload["totals"]["records_extracted_sum"] == 42
+    assert payload["identity"]["completed_at"] == "2026-08-24T13:49:06+00:00"
     assert "Steps" in written.markdown_path.read_text(encoding="utf-8")
 
 
