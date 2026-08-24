@@ -110,3 +110,40 @@ def test_attach_workflow_run_report_logs_warning_on_failure(
     assert degraded.run_report_error == "RuntimeError: report boom"
     logger.warning.assert_called_once()
     assert logger.warning.call_args.kwargs["error_type"] == "RuntimeError"
+
+
+def test_attach_workflow_run_report_records_completed_at(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def _capture_build(**kwargs: object) -> object:
+        captured["identity"] = kwargs["identity"]
+        raise RuntimeError("stop after identity capture")
+
+    logger = MagicMock()
+    result = WorkflowRunExecutionResult(
+        workflow_name="wf",
+        status="success",
+        steps=(),
+        workflow_run_id="run-1",
+        manifest_id="manifest-1",
+        execution_fingerprint="fp",
+        resumed=False,
+    )
+    config = WorkflowConfig(
+        name="wf",
+        steps=(WorkflowStepConfig(step_id="p1", pipeline_name="chembl_activity"),),
+    )
+    monkeypatch.setattr(
+        "bioetl.domain.run_reports.workflow_builder.build_workflow_run_report",
+        _capture_build,
+    )
+
+    attach_workflow_run_report(config=config, result=result, logger=logger)
+
+    identity = captured["identity"]
+    assert isinstance(identity, dict)
+    completed_at = identity.get("completed_at")
+    assert isinstance(completed_at, str) and completed_at
+    assert "T" in completed_at
