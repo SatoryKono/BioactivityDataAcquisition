@@ -15,6 +15,7 @@ excluding configuration files, documentation, and intentional marker definitions
 """
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -75,7 +76,11 @@ def _is_excluded_pattern(line: str) -> bool:
 
 def _is_temporal_excluded_file(path: Path) -> bool:
     """Check if file is excluded from TEMPORAL marker check."""
-    path_str = str(path.relative_to(REPO_ROOT))
+    try:
+        # Normalize path separators for cross-platform compatibility
+        path_str = str(path.relative_to(REPO_ROOT)).replace(os.sep, "/")
+    except ValueError:
+        return False
     return any(excluded in path_str for excluded in TEMPORAL_EXCLUDED_FILES)
 
 
