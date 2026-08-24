@@ -7,11 +7,21 @@ from dataclasses import dataclass
 from importlib import import_module
 
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
-    HistoricalReplayBulkCertificationRecord,
-    HistoricalReplayBulkCertificationResult,
-    HistoricalReplayBulkCertificationSpec,
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
+    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
 )

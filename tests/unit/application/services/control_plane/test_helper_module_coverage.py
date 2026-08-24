@@ -41,6 +41,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.diagnostic_c
     extract_diagnostic_context,
     update_correlation_anchor_gaps,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
+    lookup_mapping_path as checkpoint_lookup_mapping_path,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
     lookup_mapping_path,
 )
@@ -140,6 +143,8 @@ def test_diagnostic_context_ignores_manifest_created_diagnostic_event() -> None:
 def test_replay_invariant_nested_mapping_facade_delegates_lookup() -> None:
     assert lookup_mapping_path({"a": {"b": 42}}, "a", "b") == 42
     assert lookup_mapping_path({"a": object()}, "a", "b") is None
+    assert checkpoint_lookup_mapping_path is lookup_mapping_path
+    assert checkpoint_lookup_mapping_path({"a": {"b": 1}}, "a", "b") == 1
 
 
 def test_manifest_inspection_result_model_serializes_payload() -> None:
