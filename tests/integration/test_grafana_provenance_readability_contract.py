@@ -110,7 +110,12 @@ def test_provenance_panel_readability_contract(
     content = str(panel["options"]["content"])
 
     assert panel["title"] == title
-    min_h = 3 if filename == "bioetl-overview-v2.json" else 4
+    min_h = (
+        3
+        if filename
+        in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
+        else 4
+    )
     assert panel["gridPos"]["h"] >= min_h
     assert panel["options"]["mode"] == "html"
     assert all(token in content for token in _REQUIRED_CSS)

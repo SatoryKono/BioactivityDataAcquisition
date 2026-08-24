@@ -13,7 +13,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
         "y": 0
@@ -98,10 +98,10 @@
       "type": "text",
       "title": "Understand Run Scope",
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 3
       },
       "options": {
         "mode": "html",
@@ -123,10 +123,10 @@
       "title": "Inspect Recent Runs (last 10)",
       "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and open Inspect Run Identity (viewPanel=3022). Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
-        "h": 10,
+        "h": 12,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 6
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -290,7 +290,7 @@
         {
           "id": "limit",
           "options": {
-            "limitField": 2
+            "limitField": 10
           }
         },
         {
