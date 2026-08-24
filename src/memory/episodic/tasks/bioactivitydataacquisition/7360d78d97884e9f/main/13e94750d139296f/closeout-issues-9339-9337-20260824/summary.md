@@ -2,7 +2,7 @@
 record_id: closeout-issues-9339-9337-20260824
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: 742c3bacd5ae1d1f56c4c7600e4838d108027941
+git_commit: 680da3b3ef8f777167a4e8eda2cf9bb1c85a6063
 branch: main
 worktree_id: 7360d78d97884e9f
 task_id: closeout-issues-9339-9337-20260824
@@ -10,7 +10,7 @@ actor:
   runtime: codex
   agent: codex
   model: null
-created_at: '2026-08-24T13:50:51.508288+00:00'
+created_at: '2026-08-24T15:31:54.726860+00:00'
 source_refs:
 - reports/quality/test-governance-current.json
 source_hashes: {}
@@ -19,18 +19,18 @@ security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: 4e79c26edca6bf7d444726c5249f27d7c7c76f7ec809e5a28286cf40ab066953
+content_digest: f0dbcfbefb676697580a6e901c58971b2358b0c183f3c75498bc5f80ab673b7c
 id: closeout-issues-9339-9337-20260824
 title: Closeout issues 9339 and 9337
 ttl_days: 14
 confidence: episodic
-summary: 'Fresh origin/main d3f225175b was checked in an isolated worktree. Issue
-  9339 remained open because report_test_governance_audit --check and its architecture
-  test both exited 1 with live counts 2362 files and 24925 tests versus committed
-  2361 and 24912. Issue 9337 remained open because validate-technical-debt-audit --json
-  exited 1: the audit hash is stale and module-coverage-inventory.json contains tracked
-  merge conflict markers at line 49013. No budgets, tracked files, or GitHub issue
-  states were changed.'
+summary: 'Final verification used fresh origin/main 742c3bacd5. Issue 9339 remained
+  open: report_test_governance_audit --check exited 1 and tests/architecture/test_test_governance_audit.py
+  had one failure. Issue 9337 remained open: validate-technical-debt-audit --json
+  exited 1 because the evidence hash is stale and tracked module-coverage-inventory.json
+  contains merge conflict markers at line 49013; --print-evidence-hash exited 0 with
+  969a085f163bc364bc627a407b5a60e9080739a711008989f261b1791e251bdf. No budgets, tracked
+  files, or GitHub issue states were changed.'
 ---
 
 # Episodic summary
@@ -41,7 +41,7 @@ summary: 'Fresh origin/main d3f225175b was checked in an isolated worktree. Issu
 
 ## Outcome
 
-- Fresh origin/main d3f225175b was checked in an isolated worktree. Issue 9339 remained open because report_test_governance_audit --check and its architecture test both exited 1 with live counts 2362 files and 24925 tests versus committed 2361 and 24912. Issue 9337 remained open because validate-technical-debt-audit --json exited 1: the audit hash is stale and module-coverage-inventory.json contains tracked merge conflict markers at line 49013. No budgets, tracked files, or GitHub issue states were changed.
+- Final verification used fresh origin/main 742c3bacd5. Issue 9339 remained open: report_test_governance_audit --check exited 1 and tests/architecture/test_test_governance_audit.py had one failure. Issue 9337 remained open: validate-technical-debt-audit --json exited 1 because the evidence hash is stale and tracked module-coverage-inventory.json contains merge conflict markers at line 49013; --print-evidence-hash exited 0 with 969a085f163bc364bc627a407b5a60e9080739a711008989f261b1791e251bdf. No budgets, tracked files, or GitHub issue states were changed.
 
 ## Lessons learned
 
