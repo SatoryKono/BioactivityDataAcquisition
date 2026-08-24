@@ -90,6 +90,20 @@ _REQUIRED_CSS = (
     "overflow-wrap:anywhere",
     "max-width:96ch",
 )
+_REQUIRED_CSS_FIRST_WINDOW_H3 = (
+    "padding:4px 10px",
+    "border-left:4px solid #ff9830",
+    "background:rgba(255,152,48,0.08)",
+    "font-size:16px",
+    "line-height:1.2",
+    "white-space:normal",
+    "overflow-wrap:anywhere",
+    "max-width:96ch",
+)
+_FIRST_WINDOW_H3 = {
+    "bioetl-overview-v2.json",
+    "bioetl-run-explorer-v1.json",
+}
 
 
 @pytest.mark.parametrize(
@@ -110,14 +124,15 @@ def test_provenance_panel_readability_contract(
     content = str(panel["options"]["content"])
 
     assert panel["title"] == title
-    min_h = (
-        3
-        if filename in {"bioetl-overview-v2.json", "bioetl-run-explorer-v1.json"}
-        else 4
-    )
+    min_h = 3 if filename in _FIRST_WINDOW_H3 else 4
     assert panel["gridPos"]["h"] >= min_h
     assert panel["options"]["mode"] == "html"
-    assert all(token in content for token in _REQUIRED_CSS)
+    css = (
+        _REQUIRED_CSS_FIRST_WINDOW_H3
+        if filename in _FIRST_WINDOW_H3
+        else _REQUIRED_CSS
+    )
+    assert all(token in content for token in css)
     assert all(token in content for token in required_copy)
     assert "white-space:nowrap" not in content
     assert "font-size:12px" not in content
