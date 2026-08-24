@@ -114,7 +114,7 @@ make security-check
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
 - **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning
-- **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; governed ignores in `osv-scanner.toml`
+- **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; job fails on HIGH/CRITICAL (and unknown severity), not Medium/Low
 - **Bandit**: Python anti-pattern scan in `.github/workflows/security.yml`
 - **CodeQL**: Python SAST uploaded to GitHub code scanning (`.github/workflows/codeql.yml`)
 - **OpenSSF Scorecard**: Weekly non-blocking baseline (`.github/workflows/scorecard.yml`)
