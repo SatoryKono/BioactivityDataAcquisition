@@ -13,6 +13,7 @@ Test to prevent TODO/FIXME markers in production code.
 This test enforces governance by detecting real TODO/FIXME comments in Python source code,
 excluding configuration files, documentation, and intentional marker definitions.
 """
+
 from __future__ import annotations
 
 import os
@@ -29,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 EXCLUDED_PATTERNS = [
     r"placeholder_markers.*todo",  # Config definitions of TODO as placeholder
     r"wip_markers.*todo",  # Memory graph WIP marker definitions
-    r'_PLACEHOLDER_.*RE.*todo',  # Regex patterns for placeholder validation
+    r"_PLACEHOLDER_.*RE.*todo",  # Regex patterns for placeholder validation
     r"ADR-XXX",  # ADR filename pattern
     r"Wxxxx",  # OpenAlex ID pattern
     r"CVCL_XXXX",  # Cellosaurus ID pattern
@@ -87,44 +88,44 @@ def _is_temporal_excluded_file(path: Path) -> bool:
 def test_no_todo_markers(source_content_cache: dict) -> None:
     """
     Test that no real TODO/FIXME comments exist in production code.
-    
+
     This test looks for actual TODO/FIXME comments in Python source code,
     excluding:
     - Configuration files that define TODO as a placeholder marker
     - Validation patterns that include TODO in regex
     - Documentation and examples
     - Test files
-    
+
     Real TODO comments should be tracked in GitHub issues, not left in code.
     """
     violations: list[str] = []
-    
+
     # Pattern for real TODO/FIXME comments (not just mentions in strings/docs)
     # Matches: # TODO:, # FIXME:, # TODO, # FIXME (case-insensitive)
     todo_pattern = re.compile(r"#\s*(TODO|FIXME)\s*:", re.IGNORECASE)
-    
+
     for path, text in source_content_cache.items():
         # Skip excluded paths
         if _is_excluded_path(path):
             continue
-        
+
         # Skip files with intentional TEMPORAL documentation
         if _is_temporal_excluded_file(path):
             continue
-        
+
         # Only check Python files
         if not path.suffix == ".py":
             continue
-        
+
         for i, line in enumerate(text.splitlines(), 1):
             # Check for TODO/FIXME pattern
             if todo_pattern.search(line):
                 # Skip if line matches excluded pattern
                 if _is_excluded_pattern(line):
                     continue
-                
+
                 violations.append(f"{path}:{i}: {line.strip()}")
-    
+
     assert not violations, (
         "Real TODO/FIXME comments found in production code. "
         "Track these in GitHub issues instead of leaving in code:\n"
@@ -135,36 +136,35 @@ def test_no_todo_markers(source_content_cache: dict) -> None:
 def test_no_temporal_markers_in_comments(source_content_cache: dict) -> None:
     """
     Test that no TEMPORAL TODO markers exist in code comments.
-    
+
     This test specifically looks for TEMPORAL markers used as TODO indicators
     (e.g., "# TEMPORAL: fix this later"), not legitimate use of the word
     "temporal" in documentation (e.g., "# Temporal fields" in mapping files).
     """
     violations: list[str] = []
-    
+
     # Pattern for TEMPORAL TODO markers (not just the word "temporal")
     # Matches: # TEMPORAL:, # TEMPORARY - used as TODO markers
     temporal_todo_pattern = re.compile(r"#\s*TEMPORAL\s*[:\-]", re.IGNORECASE)
-    
+
     for path, text in source_content_cache.items():
         # Skip excluded paths
         if _is_excluded_path(path):
             continue
-        
+
         # Skip files with intentional TEMPORAL documentation
         if _is_temporal_excluded_file(path):
             continue
-        
+
         # Only check Python files
         if not path.suffix == ".py":
             continue
-        
+
         for i, line in enumerate(text.splitlines(), 1):
             if temporal_todo_pattern.search(line):
                 violations.append(f"{path}:{i}: {line.strip()}")
-    
+
     assert not violations, (
         "TEMPORAL TODO markers found in code comments. "
-        "Use GitHub issues to track temporary code:\n"
-        + "\n".join(violations[:50])
+        "Use GitHub issues to track temporary code:\n" + "\n".join(violations[:50])
     )

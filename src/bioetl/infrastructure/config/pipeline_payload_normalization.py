@@ -165,6 +165,29 @@ def _has_mapping_content(value: object) -> bool:
     return isinstance(value, dict) and bool(value)
 
 
+def _reject_invalid_entity_source(entity_source: JsonDict) -> None:
+    """Reject pipeline.source keys that override provider transport or extras."""
+    forbidden_overrides = _collect_forbidden_pipeline_source_overrides(entity_source)
+    if forbidden_overrides:
+        joined = ", ".join(sorted(forbidden_overrides))
+        raise ValueError(
+            "Pipeline source overrides must not redefine provider transport "
+            f"settings via {joined}. Provider transport is owned by "
+            "configs/providers/<provider>.yaml; use pipeline.page_size_override "
+            "for page-size overrides. Credentials use api_key_env / Settings, "
+            "not pipeline.source.api_key."
+        )
+    unknown_keys = sorted(
+        key for key in entity_source if key not in _ENTITY_PIPELINE_SOURCE_KEYS
+    )
+    if unknown_keys:
+        joined = ", ".join(f"source.{key}" for key in unknown_keys)
+        raise ValueError(
+            "Pipeline source may only declare email, fields, and api; "
+            f"unsupported keys: {joined}."
+        )
+
+
 def load_source_section(
     config: JsonDict,  # Any: YAML config has heterogeneous values
     config_path: Path,
@@ -186,27 +209,7 @@ def load_source_section(
     base_source = source_config.model_dump(exclude_none=True).get("source", {})
     entity_source = config.get("source", {})
     if isinstance(entity_source, dict):
-        forbidden_overrides = _collect_forbidden_pipeline_source_overrides(
-            entity_source
-        )
-        if forbidden_overrides:
-            joined = ", ".join(sorted(forbidden_overrides))
-            raise ValueError(
-                "Pipeline source overrides must not redefine provider transport "
-                f"settings via {joined}. Provider transport is owned by "
-                "configs/providers/<provider>.yaml; use pipeline.page_size_override "
-                "for page-size overrides. Credentials use api_key_env / Settings, "
-                "not pipeline.source.api_key."
-            )
-        unknown_keys = sorted(
-            key for key in entity_source if key not in _ENTITY_PIPELINE_SOURCE_KEYS
-        )
-        if unknown_keys:
-            joined = ", ".join(f"source.{key}" for key in unknown_keys)
-            raise ValueError(
-                "Pipeline source may only declare email, fields, and api; "
-                f"unsupported keys: {joined}."
-            )
+        _reject_invalid_entity_source(entity_source)
     else:
         entity_source = {}
     merged = config_merge(base_source, entity_source)
