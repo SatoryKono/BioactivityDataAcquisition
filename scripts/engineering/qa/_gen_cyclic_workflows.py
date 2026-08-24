@@ -604,10 +604,10 @@ def rhail_escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def render(name: str, prompt_id: str, description: str, defaults: dict[str, str]) -> str:
-    param_lines = "\n".join(
-        f"- `{key}` = `{value}`" for key, value in defaults.items()
-    )
+def render(
+    name: str, prompt_id: str, description: str, defaults: dict[str, str]
+) -> str:
+    param_lines = "\n".join(f"- `{key}` = `{value}`" for key, value in defaults.items())
     baked = "\\n".join(f"{key}={value}" for key, value in defaults.items())
     scope = defaults.get("SCOPE", ".")
     n = defaults.get("N", defaults.get("CYCLE_COUNT", "1"))
@@ -627,12 +627,12 @@ def render(name: str, prompt_id: str, description: str, defaults: dict[str, str]
         "    ],",
         "};",
         "",
-        "let scope = \"" + rhail_escape(scope) + "\";",
-        "let n = \"" + rhail_escape(str(n)) + "\";",
-        "let language = \"" + rhail_escape(language) + "\";",
-        "let mode = \"" + rhail_escape(mode) + "\";",
-        "let monitoring = \"" + rhail_escape(monitoring) + "\";",
-        "let work_branch = \"" + rhail_escape(work_branch) + "\";",
+        'let scope = "' + rhail_escape(scope) + '";',
+        'let n = "' + rhail_escape(str(n)) + '";',
+        'let language = "' + rhail_escape(language) + '";',
+        'let mode = "' + rhail_escape(mode) + '";',
+        'let monitoring = "' + rhail_escape(monitoring) + '";',
+        'let work_branch = "' + rhail_escape(work_branch) + '";',
         "if args != () {",
         "    if args.scope != () { scope = args.scope; }",
         "    if args.n != () { n = args.n.to_string(); }",
@@ -642,7 +642,7 @@ def render(name: str, prompt_id: str, description: str, defaults: dict[str, str]
         "    if args.work_branch != () { work_branch = args.work_branch; }",
         "}",
         "",
-        "let baked = \"" + rhail_escape(baked) + "\";",
+        'let baked = "' + rhail_escape(baked) + '";',
         "",
         'phase("Audit");',
         f'let prompt = "Execute BioETL operator-paste card {prompt_id}.\\n";',
@@ -658,38 +658,42 @@ def render(name: str, prompt_id: str, description: str, defaults: dict[str, str]
         'prompt += "Write reports under reports/audit/. Return a short Russian summary with gate PASS|WARN|BLOCK, issue numbers, and artifact paths.\\n";',
         'prompt += "If no PROVEN findings after reading the checkout, say so explicitly.\\n";',
         "",
-        "let audit = agent(prompt, #{ label: \"audit\", capability_mode: \"all\" });",
-        'if audit == () || !audit.success {',
-        '    complete(#{ summary: "audit agent failed", prompt_id: "' + prompt_id + '", gate: "BLOCK" });',
+        'let audit = agent(prompt, #{ label: "audit", capability_mode: "all" });',
+        "if audit == () || !audit.success {",
+        '    complete(#{ summary: "audit agent failed", prompt_id: "'
+        + prompt_id
+        + '", gate: "BLOCK" });',
         "}",
         "",
         'phase("Issues");',
         f'let issues_prompt = "Continue the same BioETL task for {prompt_id}.\\n";',
-        'issues_prompt += \"From the audit just performed, search GitHub open AND closed issues and open PRs.\\n\";',
-        'issues_prompt += \"Create at most MAX_ISSUES_PER_ITERATION issues for PROVEN P0-P2 findings.\\n\";',
-        'issues_prompt += \"One issue per uid-or-path + requirement_id + root_cause. Dedup.\\n\";',
-        'issues_prompt += \"If ALLOW_ISSUE_WRITE is false, emit payloads only, do not gh issue create.\\n\";',
-        'issues_prompt += \"Baked defaults:\\n\" + baked + \"\\n\";',
-        'issues_prompt += \"Return issue numbers created or reused, or none.\\n\";',
-        "let issues = agent(issues_prompt, #{ label: \"issues\", capability_mode: \"all\", resume_from: audit.agent_id });",
+        'issues_prompt += "From the audit just performed, search GitHub open AND closed issues and open PRs.\\n";',
+        'issues_prompt += "Create at most MAX_ISSUES_PER_ITERATION issues for PROVEN P0-P2 findings.\\n";',
+        'issues_prompt += "One issue per uid-or-path + requirement_id + root_cause. Dedup.\\n";',
+        'issues_prompt += "If ALLOW_ISSUE_WRITE is false, emit payloads only, do not gh issue create.\\n";',
+        'issues_prompt += "Baked defaults:\\n" + baked + "\\n";',
+        'issues_prompt += "Return issue numbers created or reused, or none.\\n";',
+        'let issues = agent(issues_prompt, #{ label: "issues", capability_mode: "all", resume_from: audit.agent_id });',
         "",
         'phase("Fix");',
         f'let fix_prompt = "Continue the same BioETL task for {prompt_id}.\\n";',
-        'fix_prompt += \"Fix PROVEN defects on WORK_BRANCH=\" + work_branch + \" (never main).\\n\";',
-        'fix_prompt += \"Re-run focused tests. Close issues only vs origin/main or explicit PR-head acceptance.\\n\";',
-        'fix_prompt += \"Do not raise debt budgets. Do not edit .env. ALLOW_MERGE false means do not merge.\\n\";',
-        'fix_prompt += \"Baked defaults:\\n\" + baked + \"\\n\";',
-        'fix_prompt += \"Return gate PASS|WARN|BLOCK, remaining open issues, and artifact paths.\\n\";',
+        'fix_prompt += "Fix PROVEN defects on WORK_BRANCH=" + work_branch + " (never main).\\n";',
+        'fix_prompt += "Re-run focused tests. Close issues only vs origin/main or explicit PR-head acceptance.\\n";',
+        'fix_prompt += "Do not raise debt budgets. Do not edit .env. ALLOW_MERGE false means do not merge.\\n";',
+        'fix_prompt += "Baked defaults:\\n" + baked + "\\n";',
+        'fix_prompt += "Return gate PASS|WARN|BLOCK, remaining open issues, and artifact paths.\\n";',
         "let resume_id = audit.agent_id;",
         "if issues != () && issues.success { resume_id = issues.agent_id; }",
-        "let fix = agent(fix_prompt, #{ label: \"fix\", capability_mode: \"all\", resume_from: resume_id });",
+        'let fix = agent(fix_prompt, #{ label: "fix", capability_mode: "all", resume_from: resume_id });',
         "",
         'let summary = "workflow " + "' + name + '" + " finished";',
-        "if fix != () && fix.success && type_of(fix.output) == \"string\" { summary = fix.output; }",
-        "else if issues != () && issues.success && type_of(issues.output) == \"string\" { summary = issues.output; }",
-        "else if audit != () && audit.success && type_of(audit.output) == \"string\" { summary = audit.output; }",
+        'if fix != () && fix.success && type_of(fix.output) == "string" { summary = fix.output; }',
+        'else if issues != () && issues.success && type_of(issues.output) == "string" { summary = issues.output; }',
+        'else if audit != () && audit.success && type_of(audit.output) == "string" { summary = audit.output; }',
         'let report = write_scratch_file("report.md", summary);',
-        'complete(#{ path: report, prompt_id: "' + prompt_id + '", summary: summary });',
+        'complete(#{ path: report, prompt_id: "'
+        + prompt_id
+        + '", summary: summary });',
         "",
     ]
     header = (
@@ -708,7 +712,9 @@ def main() -> None:
         path = OUT / f"{name}.rhai"
         baked = normalize_defaults(defaults)
         path.write_text(render(name, prompt_id, description, baked), encoding="utf-8")
-        print("wrote", path, "lines", len(path.read_text(encoding="utf-8").splitlines()))
+        print(
+            "wrote", path, "lines", len(path.read_text(encoding="utf-8").splitlines())
+        )
 
 
 if __name__ == "__main__":

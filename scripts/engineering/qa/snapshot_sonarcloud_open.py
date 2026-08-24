@@ -113,8 +113,10 @@ def _acceptance(
         "code_smells_zero": str(measures.get("code_smells") or "0") == "0",
         "quality_gate_ok": qg_status == "OK",
         "security_rating_a": _rating_letter(measures.get("security_rating")) == "A",
-        "reliability_rating_a": _rating_letter(measures.get("reliability_rating")) == "A",
-        "revision_matches_origin_main": bool(revision) and origin_main.startswith(revision[:12]),
+        "reliability_rating_a": _rating_letter(measures.get("reliability_rating"))
+        == "A",
+        "revision_matches_origin_main": bool(revision)
+        and origin_main.startswith(revision[:12]),
         "no_indexing_discrepancy": open_total == resolved_false_total,
     }
 
@@ -122,7 +124,10 @@ def _acceptance(
 def snapshot(*, repo_root: Path) -> dict[str, Any]:
     env = {**_load_dotenv(repo_root / ".env"), **os.environ}
     token = (
-        env.get("SONARQUBE_TOKEN") or env.get("SONAR_LOGIN") or env.get("SONAR_TOKEN") or ""
+        env.get("SONARQUBE_TOKEN")
+        or env.get("SONAR_LOGIN")
+        or env.get("SONAR_TOKEN")
+        or ""
     ).strip()
     if not token:
         raise SystemExit("Sonar token missing from environment / .env")
@@ -197,7 +202,8 @@ def snapshot(*, repo_root: Path) -> dict[str, Any]:
         "analysis_date": latest.get("date"),
         "revision": revision,
         "origin_main_sha": origin_main,
-        "revision_matches_origin_main": bool(revision) and revision.startswith(origin_main[:12]),
+        "revision_matches_origin_main": bool(revision)
+        and revision.startswith(origin_main[:12]),
         "total": open_total,
         "unique_keys": len({item["key"] for item in issues}),
         "issues": issues,
