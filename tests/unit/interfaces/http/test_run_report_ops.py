@@ -284,7 +284,7 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
         {"parameter": "gold_delta", "value": "0"},
         {"parameter": "gold_vs_silver_status", "value": "OK"},
     ]
-    assert shaped["funnel"] == [{"stage": "bronze", "removals_summary": ""}]
+    assert shaped["funnel"] == [{"stage": "bronze", "removals_summary": "—"}]
     with_removals = _table_shape_pipeline_run_report(
         {
             "schema_version": "pipeline_run_report_v1",
