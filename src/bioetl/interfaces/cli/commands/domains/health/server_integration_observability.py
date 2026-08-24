@@ -163,7 +163,8 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
 class _ProviderHealthDeps(Protocol):
     """Minimal typed view of health-server deps used for provider-health rehydrate."""
 
-    metrics: MetricsPort
+    @property
+    def metrics(self) -> MetricsPort: ...
 
 
 def _rehydrate_provider_health_gauges(deps: _ProviderHealthDeps) -> None:

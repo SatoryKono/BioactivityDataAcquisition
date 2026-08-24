@@ -33,7 +33,12 @@ if TYPE_CHECKING:
     )
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.domain.control_plane import WorkflowManifest
-    from bioetl.domain.ports import LockPort, MetricsPort, WorkflowLedgerPort
+    from bioetl.domain.ports import (
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        WorkflowLedgerPort,
+    )
     from bioetl.domain.workflow import WorkflowConfig
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
@@ -85,7 +90,7 @@ def _default_pipeline_runner_service_factory(
     return bootstrap_pipeline_runner_service(registry=registry)
 
 
-def _workflow_reconciliation_loggers() -> tuple[object, object]:
+def _workflow_reconciliation_loggers() -> tuple[LoggerPort, LoggerPort]:
     """Return FK and row reconciliation loggers for workflow transforms."""
     from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
 
