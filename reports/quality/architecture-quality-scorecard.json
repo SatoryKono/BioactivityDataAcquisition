@@ -241,7 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "4f91f05e7a1f13ee9bb4f98368ee495cdbfffdeac81ab0cc6b63cbb26540dbe7"
+      "source_tree_sha256": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
