@@ -74,6 +74,17 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Generate dist SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: dist
+          format: spdx-json
+          output-file: bioetl-dist.spdx.json
+          artifact-name: bioetl-dist-sbom
+          upload-artifact: true
+          upload-artifact-retention: 30
+          upload-release-assets: false
+
   test-install:
     name: Test Installation
     needs: build
@@ -226,9 +237,16 @@ jobs:
           name: dist
           path: dist/
 
+      - name: Download dist SBOM
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: bioetl-dist-sbom
+          path: sbom/
+
       - name: Upload release assets
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           files: |
             dist/*.whl
             dist/*.tar.gz
+            sbom/**
