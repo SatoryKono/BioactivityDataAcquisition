@@ -780,4 +780,5 @@ def test_summary_rows_coverage_window_and_funnel_helpers() -> None:
     row = summary["summary"][0]
     assert row["gold_records_out"] == "8"
     assert row["excluded_by_contract"] == "3"
-    assert row["coverage_chip"] in {"IN RANGE", "OUT OF RANGE", "UNKNOWN"}
+    assert row["covers_selected_run"] == "outside"
+    assert row["coverage_chip"] == "OUT OF RANGE"
