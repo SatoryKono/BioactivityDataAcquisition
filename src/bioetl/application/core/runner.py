@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core._runner_dependency_support import (
     PipelineRunnerDependencies,
 )
+from bioetl.application.core._runner_finalize import _RUN_FAILURE_EXCEPTIONS
 from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
 from bioetl.application.core.pipeline_span_lifecycle import (
@@ -20,7 +21,6 @@ from bioetl.application.core.runner_flow import record_run_failed, record_run_st
 from bioetl.application.services.export_lineage.debug_export_service import (
     DebugExportResult,
 )
-from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -43,18 +43,6 @@ if TYPE_CHECKING:
     )
 
 __all__ = ["PipelineRunner", "PipelineRunnerDependencies"]
-
-_RUN_FAILURE_EXCEPTIONS = (
-    BioETLError,
-    AssertionError,
-    AttributeError,
-    KeyError,
-    LookupError,
-    OSError,
-    RuntimeError,
-    TypeError,
-    ValueError,
-)
 
 
 class PipelineRunner(PipelineRunnerSupportMixin):
