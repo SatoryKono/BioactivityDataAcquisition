@@ -14,7 +14,9 @@ from bioetl.application.services.control_plane.replay.historical_certification_s
     HistoricalReplayCertifiabilityRecord,
     HistoricalReplayCertificationResult,
     HistoricalReplayCertificationService,
-    HistoricalReplaySnapshotCertification,
+)
+from bioetl.application.services.control_plane.replay.historical_certification_service import (
+    HistoricalReplaySnapshotCertification as HistoricalReplaySnapshotCertification,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
     bulk_spec_order_key,
@@ -42,15 +44,15 @@ def build_diagnostics_summary(*args: object, **kwargs: object) -> dict[str, obje
 
 _build_diagnostics_summary = build_diagnostics_summary
 
-__all__ = [
+_CORPUS_MODEL_EXPORTS = (
     "HistoricalReplayBulkCertificationRecord",
     "HistoricalReplayBulkCertificationResult",
     "HistoricalReplayBulkCertificationSpec",
     "HistoricalReplayCertifiabilityInventory",
     "HistoricalReplayCertifiabilityRecord",
-    "HistoricalReplayCorpusService",
     "HistoricalReplaySnapshotCertification",
-]
+)
+__all__ = ["HistoricalReplayCorpusService", *_CORPUS_MODEL_EXPORTS]
 
 
 @dataclass(slots=True)

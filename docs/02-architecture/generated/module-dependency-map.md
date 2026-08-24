@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2448`
-- Internal import edges (raw): `7668`
+- Internal import edges (raw): `7671`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `323`
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1538 OK| application
-    application -->|978 OK| domain
+    application -->|1542 OK| application
+    application -->|977 OK| domain
     composition -->|162 OK| application
     composition -->|678 OK| composition
     composition -->|282 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1538 | allowed |
-| `application`    | `domain`         |     978 | allowed |
+| `application`    | `application`    |    1542 | allowed |
+| `application`    | `domain`         |     977 | allowed |
 | `composition`    | `application`    |     162 | allowed |
 | `composition`    | `composition`    |     678 | allowed |
 | `composition`    | `domain`         |     282 | allowed |
@@ -105,9 +105,9 @@ flowchart LR
 | `infrastructure.control_plane` | `domain.types`                             |      15 |
 | `infrastructure.quality`       | `domain.types`                             |      15 |
 | `infrastructure.storage`       | `domain.exceptions`                        |      15 |
-| `application.core`             | `domain.exceptions`                        |      14 |
 | `application.services`         | `domain.normalization`                     |      14 |
 | `composition.bootstrap`        | `infrastructure.observability`             |      14 |
+| `application.core`             | `domain.exceptions`                        |      13 |
 | `application.services`         | `domain.behavior`                          |      13 |
 | `application.services`         | `domain.workflow`                          |      13 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      13 |
