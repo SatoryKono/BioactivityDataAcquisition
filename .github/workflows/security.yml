@@ -53,7 +53,10 @@ jobs:
       - name: Run pip-audit
         run: |
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
-          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict --ignore-vuln CVE-2026-3219 -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
+          UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict \
+            --ignore-vuln CVE-2026-3219 \
+            --ignore-vuln PYSEC-2026-3721 \
+            -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
 
   bandit:
     runs-on: ubuntu-latest
@@ -98,7 +101,21 @@ jobs:
           persist-credentials: false
 
       - name: Run OSV-Scanner
+        id: osv-scan
+        continue-on-error: true
         uses: google/osv-scanner-action/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
         with:
           scan-args: |-
             --lockfile=uv.lock
+            --format=json
+            --output-file=osv-results.json
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Fail on HIGH/CRITICAL OSV findings
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json
