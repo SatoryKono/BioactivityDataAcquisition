@@ -407,9 +407,7 @@ def collect_blocking_osv_findings(payload: dict[str, Any]) -> list[str]:
                 if severity not in _BLOCKING_OSV_SEVERITIES and severity != "UNKNOWN":
                     continue
                 vuln_id = str(vuln.get("id") or "unknown-id")
-                findings.append(
-                    f"{vuln_id} {severity} {pkg_name}=={pkg_version}"
-                )
+                findings.append(f"{vuln_id} {severity} {pkg_name}=={pkg_version}")
     return findings
 
 
