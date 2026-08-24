@@ -204,6 +204,43 @@ def _shape_object_or_list_block(
         shaped[key] = []
 
 
+def _removals_summary(removals: object) -> str:
+    """Compact funnel removals for Grafana (not raw JSON arrays)."""
+    if not isinstance(removals, list) or not removals:
+        return ""
+    parts: list[str] = []
+    for item in removals:
+        if not isinstance(item, dict):
+            continue
+        count = item.get("count")
+        outcome = str(item.get("outcome") or "").strip()
+        code = str(item.get("reason_code") or "").strip()
+        label = code or outcome
+        if not label:
+            continue
+        if count in (None, ""):
+            parts.append(label)
+            continue
+        parts.append(f"{count} {label}")
+    return ", ".join(parts)
+
+
+def _shape_funnel_rows(payload: dict[str, object]) -> object:
+    """Copy funnel stages and add removals_summary for table display."""
+    funnel = payload.get("funnel")
+    if not isinstance(funnel, list):
+        return []
+    shaped_rows: list[object] = []
+    for stage in funnel:
+        if not isinstance(stage, dict):
+            shaped_rows.append(stage)
+            continue
+        row = dict(stage)
+        row["removals_summary"] = _removals_summary(stage.get("removals"))
+        shaped_rows.append(row)
+    return shaped_rows
+
+
 def _shape_identity_rows(payload: dict[str, object]) -> list[dict[str, str]]:
     """Build identity_rows, including tracking_coverage when not already present."""
     identity = payload.get("identity")
@@ -247,6 +284,7 @@ def _table_shape_pipeline_run_report(
     )
     _shape_object_or_list_block(payload, shaped, "stage_timings")
     shaped["identity_rows"] = _shape_identity_rows(payload)
+    shaped["funnel"] = _shape_funnel_rows(payload)
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),

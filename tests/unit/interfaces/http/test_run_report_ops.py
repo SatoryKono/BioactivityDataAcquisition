@@ -175,6 +175,22 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
     assert "source_identity_expected" in payload
     assert "source_identity_actual" in payload
     assert payload["items"][0]["run_id"] == "run1"
+    assert payload["items"][0]["selected"] == 0
+
+    marked = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_assay",
+        limit=5,
+        root=tmp_path,
+        selected_run_id="run1",
+    )
+    assert marked["items"][0]["selected"] == 1
+    ignored = list_pipeline_run_report_payloads(
+        pipeline_name="chembl_assay",
+        limit=5,
+        root=tmp_path,
+        selected_run_id="-",
+    )
+    assert ignored["items"][0]["selected"] == 0
 
 
 def test_list_workflow_payloads_includes_identity_and_artifact_paths(
@@ -216,6 +232,7 @@ def test_list_workflow_payloads_includes_identity_and_artifact_paths(
             "workflow_run_id": "wf1",
             "status": "success",
             "completed_at": "2026-08-10T00:00:00Z",
+            "selected": 0,
             "json_path": str(target.as_posix()),
             "markdown_path": str(markdown.as_posix()),
         }
@@ -267,7 +284,27 @@ def test_table_shape_pipeline_run_report_reconciliation_rows() -> None:
         {"parameter": "gold_delta", "value": "0"},
         {"parameter": "gold_vs_silver_status", "value": "OK"},
     ]
-    assert shaped["funnel"] == [{"stage": "bronze"}]
+    assert shaped["funnel"] == [{"stage": "bronze", "removals_summary": ""}]
+    with_removals = _table_shape_pipeline_run_report(
+        {
+            "schema_version": "pipeline_run_report_v1",
+            "funnel": [
+                {
+                    "stage_id": "gold",
+                    "removals": [
+                        {
+                            "count": 17,
+                            "outcome": "excluded_by_contract",
+                            "reason_code": "gold_contract_schema_failure",
+                        }
+                    ],
+                }
+            ],
+        }
+    )
+    assert with_removals["funnel"][0]["removals_summary"] == (
+        "17 gold_contract_schema_failure"
+    )
 
 
 def test_table_shape_pipeline_run_report_layers_failure_identity() -> None:
@@ -435,6 +472,7 @@ def test_list_pipeline_run_reports_distinguishes_no_artifacts(
             "run_id": "-",
             "status": "TREE_MISSING",
             "completed_at": None,
+            "selected": 0,
             "json_path": None,
             "markdown_path": None,
             "message": payload["index_state_message"],

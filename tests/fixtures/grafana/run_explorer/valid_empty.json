@@ -16,6 +16,6 @@
     "workflow": "chembl_baseline"
   },
   "title": "Inspect Recent Runs (last 10)",
-  "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=10",
-  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10"
+  "url": "/ops/observability/pipeline-run-reports?pipeline=chembl_assay&limit=10&run_id=00000000-0000-4000-8000-000000000942",
+  "url_template": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}"
 }
