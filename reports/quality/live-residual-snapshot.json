@@ -25,16 +25,16 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.325,
       "files": 51,
-      "total_loc": 6239,
+      "total_loc": 6236,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
     "composition_factories_pipeline": {
       "files_ge_250_loc": 2,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.342,
+      "helper_function_ratio": 0.351,
       "files": 33,
-      "total_loc": 4050,
+      "total_loc": 4028,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -50,9 +50,9 @@
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 3,
-      "helper_function_ratio": 0.368,
+      "helper_function_ratio": 0.371,
       "files": 57,
-      "total_loc": 7282,
+      "total_loc": 7267,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
