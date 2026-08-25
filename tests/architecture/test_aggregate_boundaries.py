@@ -378,7 +378,7 @@ def _assert_aggregate_state_changes_through_methods_only(
 ) -> None:
     """Check aggregate files for slot-based state protection."""
     expected_slots = {
-        "batch.py": "Batch",
+        "_batch_aggregate.py": "Batch",
         "pipeline_run.py": "PipelineRun",
         "quarantine_entry.py": "QuarantineEntry",
     }
@@ -531,7 +531,7 @@ class TestDomainEventsForCoordination:
             pytest.skip("Aggregates directory not found")
 
         required_events: dict[str, list[str]] = {
-            "batch.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
+            "_batch_lifecycle.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
             "pipeline_run.py": ["PipelineCompleted", "PipelineFailed"],
             "quarantine_entry.py": [
                 "QuarantineEntryCreated",
@@ -564,7 +564,7 @@ class TestDomainEventsForCoordination:
         _assert_aggregates_dir_exists(aggregates_dir)
         _assert_aggregate_collect_events_methods(
             aggregates_dir,
-            ["batch.py", "pipeline_run.py", "quarantine_entry.py"],
+            ["_batch_mixins.py", "pipeline_run.py", "quarantine_entry.py"],
         )
 
 
@@ -590,7 +590,7 @@ class TestAggregateConsistencyBoundary:
 
         # ID properties should not have setters
         id_properties = {
-            "batch.py": ["batch_id", "run_id"],
+            "_batch_mixins.py": ["batch_id", "run_id"],
             "pipeline_run.py": ["run_id"],
             "quarantine_entry.py": ["entry_id", "run_id", "batch_id"],
         }

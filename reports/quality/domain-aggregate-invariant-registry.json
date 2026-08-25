@@ -7,8 +7,7 @@
         "src/bioetl/domain/aggregates/_batch_aggregate.py",
         "src/bioetl/domain/aggregates/_batch_lifecycle.py",
         "src/bioetl/domain/aggregates/_batch_mixins.py",
-        "src/bioetl/domain/aggregates/_batch_record.py",
-        "src/bioetl/domain/aggregates/_batch_status.py"
+        "src/bioetl/domain/aggregates/batch.py"
       ],
       "invariants": [
         "batch_id and run_id are assigned at creation and exposed read-only",

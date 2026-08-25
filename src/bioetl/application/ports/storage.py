@@ -29,7 +29,7 @@ class CompositeRuntimeStorageProtocol(MergedStoragePort, SilverStoragePort, Prot
     """Storage capabilities required by composite runtime bootstrap."""
 
 
-class CompositeMergeStorage(MergedStoragePort, SilverStoragePort, Protocol):
+class CompositeMergeStorageProtocol(MergedStoragePort, SilverStoragePort, Protocol):
     """Storage capabilities required by composite merge assembly."""
 
 
@@ -66,7 +66,7 @@ class GoldMergedWriteProtocol(Protocol):
     ) -> None: ...
 
 
-class StorageContextLike(Protocol):
+class StorageContextProtocol(Protocol):
     """Minimal storage context required for checkpoint-port creation."""
 
     @property

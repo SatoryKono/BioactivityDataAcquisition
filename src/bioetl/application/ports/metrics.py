@@ -12,13 +12,14 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class WorkflowMetricsFactory(Protocol):
+class WorkflowMetricsFactoryProtocol(Protocol):
     """Lazy metrics-factory contract for canonical workflow settings."""
 
     def __call__(self, settings: Settings, /) -> MetricsPort: ...
 
 
-class MetricsFactory(Protocol):
+class MetricsFactoryProtocol(Protocol):
+    """Factory-like contract for constructing a metrics port from settings."""
     def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
