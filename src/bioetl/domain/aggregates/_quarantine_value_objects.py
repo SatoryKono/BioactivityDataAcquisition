@@ -178,12 +178,12 @@ class ResolutionInfo:
 class QuarantineEntryTransitionsMixin:
     """Host mixin implementing state machine and event collection."""
 
-    _entry_id: str = cast(Any, None)
-    _run_id: RunID = cast(Any, None)
-    _status: QuarantineStatus = cast(Any, None)
-    _resolution_info: ResolutionInfo | None = cast(Any, None)
-    _metadata: MetaDict = cast(Any, None)
-    _events: list[DomainEvent] = cast(Any, None)
+    _entry_id: str
+    _run_id: RunID
+    _status: QuarantineStatus
+    _resolution_info: ResolutionInfo | None
+    _metadata: MetaDict
+    _events: list[DomainEvent]
 
     def start_review(self) -> None:
         if self._status != QuarantineStatus.NEW:
