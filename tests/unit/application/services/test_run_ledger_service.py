@@ -144,6 +144,7 @@ def test_record_input_snapshot_published_appends_bounded_snapshot_event() -> Non
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-input-snapshot",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_input_snapshot_published(
@@ -174,6 +175,7 @@ def test_record_input_snapshot_published_rejects_missing_required_identity() -> 
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-input-snapshot-invalid",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     with pytest.raises(ValueError, match="content_hash is required"):
@@ -196,6 +198,7 @@ def test_record_manifest_created_rejects_mismatched_manifest_identity() -> None:
         manifest_id="pending",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-manifest-mismatch",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     with pytest.raises(
@@ -213,6 +216,7 @@ def test_record_run_started_uses_canonical_identity_anchor_names() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-canonical-anchors",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     service.record_manifest_created(
@@ -241,6 +245,7 @@ def test_record_run_started_rejects_missing_persisted_manifest_link() -> None:
         manifest_id="pending",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-missing-manifest-link",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     with pytest.raises(
@@ -258,6 +263,7 @@ def test_record_stage_started_captures_stage_and_details() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-stage-started",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_stage_started(
@@ -291,6 +297,7 @@ def test_record_run_failed_captures_message_and_metrics() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-2",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_run_failed(
@@ -327,6 +334,7 @@ def test_record_run_exception_uses_canonical_failure_payload() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-run-exception",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_run_exception(
@@ -349,6 +357,7 @@ def test_record_run_finished_captures_success_metrics() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-run-finished",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_run_finished(
@@ -419,6 +428,7 @@ def test_record_run_finished_distinguishes_different_logical_payloads() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: next(entry_ids),
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     first = service.record_run_finished(metrics_snapshot={"records_gold": 9})
@@ -436,6 +446,7 @@ def test_record_run_shutdown_captures_shutdown_metrics() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-run-shutdown",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_run_shutdown(
@@ -466,6 +477,7 @@ def test_record_stage_completed_captures_stage_and_metrics() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-3",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_stage_completed(
@@ -501,6 +513,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-4",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_artifact_published(
@@ -545,6 +558,7 @@ def test_record_artifact_published_rejects_unlinked_artifact() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-unlinked",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     with pytest.raises(
@@ -566,6 +580,7 @@ def test_record_artifact_published_rejects_missing_content_hash() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-missing-hash",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     with pytest.raises(ValueError, match="artifact_content_hash is required"):
@@ -585,6 +600,7 @@ def test_record_dq_policy_applied_captures_trace_anchors() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-5",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_dq_policy_applied(
@@ -623,6 +639,7 @@ def test_record_stage_started_canonicalizes_nested_detail_order() -> None:
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-canonical-details",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
 
     entry = service.record_stage_started(

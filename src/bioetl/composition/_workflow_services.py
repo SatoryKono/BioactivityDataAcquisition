@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -148,6 +149,12 @@ def _get_workflow_memory_lock() -> LockPort:
     return _workflow_memory_lock
 
 
+def _system_clock_now() -> Callable[[], datetime]:
+    from bioetl.infrastructure.time import SystemClock
+
+    return SystemClock().now
+
+
 def _create_workflow_ledger_service(
     ledger_port: WorkflowLedgerPort,
     manifest: WorkflowManifest,
@@ -159,6 +166,7 @@ def _create_workflow_ledger_service(
         workflow_run_id=manifest.workflow_run_id,
         workflow_name=manifest.workflow_name,
         _entry_id_factory=lambda: create_runtime_occurrence_id("workflow_ledger_entry"),
+        _occurred_at_factory=_system_clock_now(),
     )
 
 
@@ -206,6 +214,7 @@ def get_workflow_execution_service(
         workflow_lock_port=workflow_lock_port
         if workflow_lock_port is not None
         else _get_workflow_memory_lock(),
+        now_factory=infrastructure_time.SystemClock().now,
         run_id_factory=lambda: create_runtime_occurrence_run_id("workflow_execution"),
     )
 

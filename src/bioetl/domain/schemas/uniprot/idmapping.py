@@ -34,6 +34,7 @@ class IDMappingSchema(ETLRecordSchema):
     # === Primary Key ===
     target_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         description="Source ChEMBL target identifier (e.g., CHEMBL204)",
     )
 

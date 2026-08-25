@@ -25,6 +25,7 @@ class PubchemIdentitySchema(ETLRecordSchema):
 
     molecule_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         description="PubChem Compound ID (PK)",
     )
 

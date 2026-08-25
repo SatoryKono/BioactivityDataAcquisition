@@ -47,11 +47,9 @@ def test_fragment_timestamp_uses_first_supplied_timestamp() -> None:
     assert fragment_ids.fragment_timestamp(None, first, second) == first
 
 
-def test_fragment_timestamp_falls_back_to_current_time(monkeypatch) -> None:
-    now = datetime(2026, 1, 3, 12, 0, tzinfo=UTC)
-    monkeypatch.setattr(fragment_ids, "current_utc_time", lambda: now)
-
-    assert fragment_ids.fragment_timestamp(None, None) == now
+def test_fragment_timestamp_all_none_raises() -> None:
+    with pytest.raises(RuntimeError, match="wall-clock fallback is not allowed"):
+        fragment_ids.fragment_timestamp(None, None)
 
 
 def test_build_fragment_id_preserves_none_slots() -> None:

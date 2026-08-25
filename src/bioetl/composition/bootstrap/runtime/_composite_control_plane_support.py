@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
+from bioetl.application.runtime_clock import resolve_runtime_clock
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
 )
@@ -69,6 +70,7 @@ def build_run_ledger_service(
         _entry_id_factory=lambda: create_runtime_occurrence_id(
             "composite_run_ledger_entry"
         ),
+        _occurred_at_factory=resolve_runtime_clock(infra_context.clock).now,
     )
 
 

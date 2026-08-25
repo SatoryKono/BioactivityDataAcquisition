@@ -13,13 +13,13 @@ import orjson
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import BatchID, RunID, RunType
+from bioetl.infrastructure.storage.bronze.io_mixin import write_bytes_if_absent_or_same
 from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
     BronzeWriteArtifacts,
     BronzeWritePostwriteContext,
     BronzeWritePrepared,
     build_bronze_write_artifacts,
 )
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 
 class _BronzeWriteExecutionHostProtocol(Protocol):
@@ -160,14 +160,14 @@ async def write_bronze_data_and_sidecar(
             prepared.full_path,
         )
         meta_bytes = orjson.dumps(prepared.metadata, option=orjson.OPT_SORT_KEYS)
-        if prepared.meta_path.exists():
-            if prepared.meta_path.read_bytes() != meta_bytes:
-                raise FileExistsError(
-                    "Bronze metadata sidecar already exists with different payload: "
-                    f"{prepared.meta_path}"
-                )
-        else:
-            atomic_write_bytes(prepared.meta_path, meta_bytes)
+        write_bytes_if_absent_or_same(
+            prepared.meta_path,
+            meta_bytes,
+            mismatch_message=(
+                "Bronze metadata sidecar already exists with different payload: "
+                f"{prepared.meta_path}"
+            ),
+        )
         return count, size
 
     record_count, uncompressed_size = await asyncio.to_thread(_write_task)

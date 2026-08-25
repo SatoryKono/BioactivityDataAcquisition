@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import os
 import tempfile
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -73,13 +74,18 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         """Validate non-empty stream write and atomically publish temp payload."""
         if record_count == 0:
             raise ValueError("No records to write")
-        if target_path.exists():
-            if not self._compressed_payload_matches(target_path, temp_path):
-                raise FileExistsError(
-                    f"Bronze target already exists with different payload: {target_path}"
-                )
+        if _existing_payload_matches(target_path, temp_path, self._compressed_payload_matches):
             return
-        temp_path.replace(target_path)
+        try:
+            _publish_new_file_exclusive(temp_path, target_path)
+        except FileExistsError:
+            if _existing_payload_matches(
+                target_path, temp_path, self._compressed_payload_matches
+            ):
+                return
+            raise FileExistsError(
+                f"Bronze target already exists with different payload: {target_path}"
+            ) from None
 
     def _write_atomic_stream(
         self,
@@ -206,6 +212,40 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             atomic_write_bytes(json_full_path, jsonl_content)
 
         await asyncio.to_thread(_write)
+
+
+
+def _existing_payload_matches(
+    target_path: Path,
+    candidate_path: Path,
+    matches: Callable[[Path, Path], bool],
+) -> bool:
+    return target_path.exists() and matches(target_path, candidate_path)
+
+
+def _publish_new_file_exclusive(source: Path, target: Path) -> None:
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    fd = os.open(os.fspath(target), flags)
+    os.close(fd)
+    source.replace(target)
+
+
+def write_bytes_if_absent_or_same(
+    target: Path, data: bytes, *, mismatch_message: str
+) -> None:
+    if target.exists():
+        if target.read_bytes() != data:
+            raise FileExistsError(mismatch_message)
+        return
+    try:
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+        fd = os.open(os.fspath(target), flags)
+    except FileExistsError:
+        if target.read_bytes() != data:
+            raise FileExistsError(mismatch_message) from None
+        return
+    os.close(fd)
+    atomic_write_bytes(target, data)
 
 
 __all__ = ["BronzeWriterIOMixin"]

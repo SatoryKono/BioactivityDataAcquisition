@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
-from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.runtime_clock import resolve_runtime_clock
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import BronzeStoragePort, ClockPort, LoggerPort
@@ -66,7 +66,7 @@ class BronzeCleanupService:
 
     storage: BronzeStoragePort
     logger: LoggerPort
-    clock: ClockPort | None = None
+    clock: ClockPort
 
     async def cleanup(
         self,
@@ -87,7 +87,7 @@ class BronzeCleanupService:
         """
         if retention_days < 0:
             raise ValueError("retention_days cannot be negative")
-        now = self.clock.now() if self.clock is not None else current_utc_time()
+        now = resolve_runtime_clock(self.clock).now()
         cutoff_date = now - timedelta(days=retention_days)
 
         self.logger.info(

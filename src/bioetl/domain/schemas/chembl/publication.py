@@ -47,6 +47,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
     # === Primary Key (ChEMBL-specific) ===
     publication_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL Document ID.",
     )

@@ -29,6 +29,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from uuid import UUID
 
 import pytest
@@ -132,6 +134,7 @@ def test_control_plane_chain_surfaces_dq_failure_traceability() -> None:
         manifest_id=manifest.manifest_id,
         run_id=run_id,
         _entry_id_factory=lambda: "entry-chain-2",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     ledger_service.record_dq_policy_applied(
         stage="gold",

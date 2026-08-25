@@ -59,7 +59,36 @@ def make_silver_writer(
     pipeline_name: str | None = None,
 ) -> object:
     """Build a ``SilverWriter`` with the standard test base path."""
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServicesRequest,
+    )
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
+
+    if runtime_services is None and runtime_request is None:
+        runtime_request = SilverWriterRuntimeServicesRequest(
+            logger=logger,  # type: ignore[arg-type]
+            silver_validator=NoOpValidator(),
+        )
+    elif runtime_request is not None and runtime_request.silver_validator is None:
+        runtime_request = SilverWriterRuntimeServicesRequest(
+            csv_exporter=runtime_request.csv_exporter,
+            tracing=runtime_request.tracing,
+            write_policy=runtime_request.write_policy,
+            metrics=runtime_request.metrics,
+            audit=runtime_request.audit,
+            logger=runtime_request.logger or logger,  # type: ignore[arg-type]
+            silver_validator=NoOpValidator(),
+            metadata_writer=runtime_request.metadata_writer,
+            metadata_coordinator=runtime_request.metadata_coordinator,
+            lineage_store=runtime_request.lineage_store,
+            dq_calculator=runtime_request.dq_calculator,
+            merge_resilience_policy=runtime_request.merge_resilience_policy,
+            contract_rollout_policy=runtime_request.contract_rollout_policy,
+            base_path=runtime_request.base_path,
+            pipeline_name=runtime_request.pipeline_name,
+            delta_module_loader=runtime_request.delta_module_loader,
+        )
 
     return SilverWriter(
         base_path=str(SILVER_BASE_PATH if base_path is None else base_path),

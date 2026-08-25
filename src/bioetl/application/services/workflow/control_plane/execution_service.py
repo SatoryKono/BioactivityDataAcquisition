@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from functools import partial
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
@@ -50,6 +49,10 @@ def _missing_run_id_factory() -> RunID:
     raise RuntimeError("workflow run_id_factory must be supplied by composition root")
 
 
+def _missing_now_factory() -> datetime:
+    raise RuntimeError("workflow now_factory must be supplied by composition root")
+
+
 @dataclass(slots=True)
 class WorkflowExecutionService:
     """Orchestrate workflow execution around durable control-plane artifacts."""
@@ -60,7 +63,9 @@ class WorkflowExecutionService:
     workflow_ledger_factory: WorkflowLedgerFactory
     workflow_state_port: WorkflowExecutionStatePort
     workflow_lock_port: LockPort
-    now_factory: Callable[[], datetime] = current_utc_time
+    now_factory: Callable[[], datetime] = field(
+        default_factory=lambda: _missing_now_factory
+    )
     run_id_factory: Callable[[], RunID] = _missing_run_id_factory
 
     async def run_workflow(

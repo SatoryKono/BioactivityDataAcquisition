@@ -26,6 +26,7 @@ class AssayParametersSchema(ETLRecordSchema):
     # === Primary Key (Required) ===
     assay_param_id: Series[int] = pa.Field(
         nullable=False,
+        unique=True,
         coerce=True,
         ge=1,
         description="Parameter ID (PK, surrogate integer).",

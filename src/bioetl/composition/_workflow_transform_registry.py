@@ -11,6 +11,7 @@ from bioetl.application.workflow.transforms.builtins import (
 from bioetl.composition.bootstrap.cli.noop import create_noop_logger
 from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 from bioetl.infrastructure.storage.gold.runtime_helpers import (
     GoldWriterRuntimeServices,
@@ -64,7 +65,7 @@ def build_workflow_transform_registry(
                 metrics=metrics,
                 audit=NoOpAudit(),
                 logger=workflow_storage_logger,
-                silver_validator=None,
+                silver_validator=NoOpValidator(),
                 metadata_writer=NoOpMetadataWriter(),
                 metadata_coordinator=None,
                 lineage_store=None,
