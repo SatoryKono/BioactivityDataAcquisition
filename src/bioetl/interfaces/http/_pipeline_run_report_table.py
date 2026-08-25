@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from bioetl.interfaces.http._pipeline_run_report_coverage import (
+from bioetl.interfaces.http._processed_records_value_support import (
     _coverage_chip,
     _coverage_fields,
     _padded_range_ms,
