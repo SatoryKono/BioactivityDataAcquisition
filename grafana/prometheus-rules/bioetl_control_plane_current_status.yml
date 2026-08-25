@@ -288,3 +288,155 @@ groups:
             ) * 0 + 3
           )
 
+      # Source counters for Trust id=130 selected-range diet (#9596).
+      # Grafana applies increase[$__range]; rules must not embed Grafana vars.
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: manifest_write_failed
+        expr: >-
+          sum by (pipeline, run_type) (
+            bioetl_control_plane_manifest_writes_total{status="failed"}
+          )
+          or (bioetl_control_plane_run_type_universe * 0)
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: ledger_append_failed
+        expr: >-
+          sum by (pipeline, run_type) (
+            bioetl_control_plane_run_type_universe
+            * on (pipeline) group_left()
+            (
+              sum by (pipeline) (
+                bioetl_control_plane_ledger_appends_total{status="failed"}
+              )
+              or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+            )
+          )
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: checkpoint_incompatible
+        expr: >-
+          sum by (pipeline, run_type) (
+            bioetl_control_plane_run_type_universe
+            * on (pipeline) group_left()
+            (
+              sum by (pipeline) (
+                bioetl_checkpoint_compatibility_events_total{disposition=~".*_incompatible"}
+              )
+              or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+            )
+          )
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: not_reconstructable
+        expr: >-
+          sum by (pipeline, run_type) (
+            bioetl_control_plane_run_type_universe
+            * on (pipeline) group_left()
+            (
+              sum by (pipeline) (
+                bioetl_replay_reconstructability_events_total{status="not_reconstructable"}
+              )
+              or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+            )
+          )
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: replay_drift
+        expr: >-
+          sum by (pipeline, run_type) (bioetl_replay_drift_events_total)
+          or (bioetl_control_plane_run_type_universe * 0)
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: duplicate_overwrite_risk
+        expr: >-
+          sum by (pipeline, run_type) (bioetl_replay_duplicate_overwrite_risk_total)
+          or (bioetl_control_plane_run_type_universe * 0)
+
+      - record: bioetl_trust_replay_blocker_events_total
+        labels:
+          family: lineage_refs_missing
+        expr: >-
+          sum by (pipeline, run_type) (
+            bioetl_control_plane_run_type_universe
+            * on (pipeline) group_left()
+            (
+              sum by (pipeline) (bioetl_lineage_refs_missing_total)
+              or (max by (pipeline) (bioetl_control_plane_run_type_universe) * 0)
+            )
+          )
+
+      - record: bioetl_trust_replay_blocker_integrity
+        expr: >-
+          max by (pipeline, run_type) (
+            bioetl_manifest_ledger_integrity_ratio{integrity_type="inconsistent"}
+          )
+          or (bioetl_control_plane_run_type_universe * 0)
+
+      # Fixed 30m fail-rate severity for Trust id=132 / id=133 (#9595).
+      # 0=OK, 1=any failure, 2=fail rate >10%. Empty when the 30m increase is empty.
+      - record: bioetl_control_plane_manifest_fail_severity_30m
+        expr: >-
+          (
+            (
+              sum by (pipeline, run_type) (
+                increase(bioetl_control_plane_manifest_writes_total{status="failed"}[30m])
+              )
+              / clamp_min(
+                sum by (pipeline, run_type) (
+                  increase(bioetl_control_plane_manifest_writes_total[30m])
+                ),
+                1
+              )
+            ) > bool 0
+          )
+          +
+          (
+            (
+              sum by (pipeline, run_type) (
+                increase(bioetl_control_plane_manifest_writes_total{status="failed"}[30m])
+              )
+              / clamp_min(
+                sum by (pipeline, run_type) (
+                  increase(bioetl_control_plane_manifest_writes_total[30m])
+                ),
+                1
+              )
+            ) > bool 0.1
+          )
+
+      - record: bioetl_control_plane_ledger_fail_severity_30m
+        expr: >-
+          (
+            (
+              sum by (pipeline) (
+                increase(bioetl_control_plane_ledger_appends_total{status="failed"}[30m])
+              )
+              / clamp_min(
+                sum by (pipeline) (
+                  increase(bioetl_control_plane_ledger_appends_total[30m])
+                ),
+                1
+              )
+            ) > bool 0
+          )
+          +
+          (
+            (
+              sum by (pipeline) (
+                increase(bioetl_control_plane_ledger_appends_total{status="failed"}[30m])
+              )
+              / clamp_min(
+                sum by (pipeline) (
+                  increase(bioetl_control_plane_ledger_appends_total[30m])
+                ),
+                1
+              )
+            ) > bool 0.1
+          )
+
