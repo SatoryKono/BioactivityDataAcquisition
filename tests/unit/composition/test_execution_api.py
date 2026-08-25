@@ -40,7 +40,7 @@ pytestmark = pytest.mark.unit
 
 def test_push_metrics_to_gateway_forwards_restricted_metric_names() -> None:
     with mock.patch(
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         return_value=True,
     ) as mock_push:
         result = execution_api.push_metrics_to_gateway(

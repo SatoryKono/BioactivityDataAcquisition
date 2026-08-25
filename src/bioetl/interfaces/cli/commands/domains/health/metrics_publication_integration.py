@@ -17,7 +17,7 @@ def publish_metrics_safely(
 ) -> bool:
     """Push process-local metrics without failing the completed CLI command."""
     try:
-        from bioetl.composition.observability_api import push_metrics_to_gateway
+        from bioetl.composition.observability_runtime import push_metrics_to_gateway
 
         return bool(
             push_metrics_to_gateway(

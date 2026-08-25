@@ -351,6 +351,7 @@ class TestDIConstructors:
 
         # Check for services that might be missing from forbidden list
         missing = relevant_services - FORBIDDEN_SERVICE_INSTANTIATIONS
+        assert isinstance(found_services, set)
         if missing:
             # This is informational - new services should be reviewed
             # to determine if they need to be added to the forbidden list

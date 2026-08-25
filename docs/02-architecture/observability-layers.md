@@ -262,7 +262,7 @@ runtime code.
 
 Metrics server lifecycle and Pushgateway-style publication are exposed through
 the composition-owned `MetricsService` path. Public call sites should use
-`bioetl.composition.observability_api` rather than importing infra publication
+`bioetl.composition.observability_runtime` rather than importing infra publication
 helpers directly.
 
 Remaining explicit compatibility layers:

@@ -28,7 +28,7 @@
 """Unit tests for public composition resource-management entrypoints.
 
 Tests the resource management entrypoint functions exposed via
-``bioetl.composition.resources_api``. Dedicated entrypoint-boundary coverage is
+``bioetl.composition.resources_runtime``. Dedicated entrypoint-boundary coverage is
 allowed to patch the internal ``bioetl.composition._resource_management`` seam
 directly.
 """
@@ -62,7 +62,7 @@ class TestGetQuarantineRuntimeService:
                 return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
 
             result = get_quarantine_runtime_service("chembl_activity")
 
@@ -81,7 +81,7 @@ class TestGetQuarantineRuntimeService:
                 return_value=expected,
             ),
         ):
-            from bioetl.composition.resources_api import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
 
             result = get_quarantine_runtime_service("any_pipeline")
 
@@ -95,7 +95,7 @@ class TestGetQuarantineRuntimeService:
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
 
             get_quarantine_runtime_service("pubmed_publication")
 
@@ -124,7 +124,7 @@ class TestGetCheckpointRuntimeService:
                 return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_checkpoint_runtime_service
+            from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
 
             result = get_checkpoint_runtime_service("chembl_activity")
 
@@ -140,7 +140,7 @@ class TestGetCheckpointRuntimeService:
                 "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_checkpoint_runtime_service
+            from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
 
             get_checkpoint_runtime_service("uniprot_protein")
 
@@ -169,7 +169,7 @@ class TestGetLifecycleService:
                 return_value=mock_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_api import get_lifecycle_service
+            from bioetl.composition.resources_runtime import get_lifecycle_service
 
             result = get_lifecycle_service()
 
@@ -190,7 +190,7 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_calls_service_vacuum(self) -> None:
         """Test that vacuum_table delegates to lifecycle service.vacuum."""
-        from bioetl.composition.resources_api import VacuumOptions
+        from bioetl.composition.resources_runtime import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=42)
@@ -201,7 +201,7 @@ class TestVacuumTable:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.resources_api import vacuum_table
+            from bioetl.composition.resources_runtime import vacuum_table
 
             options = VacuumOptions(retention_days=30, dry_run=True)
             result = await vacuum_table("chembl.activity", options)
@@ -216,7 +216,7 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_returns_file_count(self) -> None:
         """Test that vacuum_table returns file count from service."""
-        from bioetl.composition.resources_api import VacuumOptions
+        from bioetl.composition.resources_runtime import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=7)
@@ -227,7 +227,7 @@ class TestVacuumTable:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.resources_api import vacuum_table
+            from bioetl.composition.resources_runtime import vacuum_table
 
             options = VacuumOptions(retention_days=7, dry_run=False)
             result = await vacuum_table("pubchem.compound", options)
@@ -237,7 +237,7 @@ class TestVacuumTable:
     @pytest.mark.asyncio
     async def test_vacuum_table_dry_run_mode(self) -> None:
         """Test that vacuum_table respects dry_run option."""
-        from bioetl.composition.resources_api import VacuumOptions
+        from bioetl.composition.resources_runtime import VacuumOptions
 
         mock_service = MagicMock()
         mock_service.vacuum = AsyncMock(return_value=0)
@@ -248,7 +248,7 @@ class TestVacuumTable:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.resources_api import vacuum_table
+            from bioetl.composition.resources_runtime import vacuum_table
 
             options = VacuumOptions(retention_days=7, dry_run=True)
             await vacuum_table("some.table", options)
@@ -269,7 +269,7 @@ class TestArchiveTable:
     @pytest.mark.asyncio
     async def test_archive_table_calls_service_archive(self) -> None:
         """Test that archive_table delegates to lifecycle service.archive."""
-        from bioetl.composition.resources_api import ArchiveOptions
+        from bioetl.composition.resources_runtime import ArchiveOptions
 
         mock_service = MagicMock()
         mock_service.archive = AsyncMock(return_value=10)
@@ -280,7 +280,7 @@ class TestArchiveTable:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.resources_api import archive_table
+            from bioetl.composition.resources_runtime import archive_table
 
             options = ArchiveOptions(target_path="/archive/path", remove_source=False)
             result = await archive_table("chembl.activity", options)
@@ -295,7 +295,7 @@ class TestArchiveTable:
     @pytest.mark.asyncio
     async def test_archive_table_with_remove_source(self) -> None:
         """Test that archive_table passes remove_source=True correctly."""
-        from bioetl.composition.resources_api import ArchiveOptions
+        from bioetl.composition.resources_runtime import ArchiveOptions
 
         mock_service = MagicMock()
         mock_service.archive = AsyncMock(return_value=5)
@@ -306,7 +306,7 @@ class TestArchiveTable:
                 return_value=mock_service,
             ),
         ):
-            from bioetl.composition.resources_api import archive_table
+            from bioetl.composition.resources_runtime import archive_table
 
             options = ArchiveOptions(target_path="/cold/storage", remove_source=True)
             await archive_table("old.table", options)
@@ -350,7 +350,7 @@ class TestPreviewCleanup:
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition.resources_api import preview_cleanup
+            from bioetl.composition.resources_runtime import preview_cleanup
 
             result = await preview_cleanup("chembl_activity")
 
@@ -380,7 +380,7 @@ class TestPreviewCleanup:
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition.resources_api import preview_cleanup
+            from bioetl.composition.resources_runtime import preview_cleanup
 
             await preview_cleanup("chembl_activity")
 
@@ -413,7 +413,7 @@ class TestPreviewCleanup:
                 return_value=mock_cleanup_service,
             ),
         ):
-            from bioetl.composition.resources_api import preview_cleanup
+            from bioetl.composition.resources_runtime import preview_cleanup
 
             await preview_cleanup("pubchem_compound")
 
@@ -445,7 +445,7 @@ class TestInspectQuarantine:
                 return_value=mock_runtime_service,
             ),
         ):
-            from bioetl.composition.resources_api import inspect_quarantine
+            from bioetl.composition.resources_runtime import inspect_quarantine
 
             result = await inspect_quarantine("chembl_activity", limit=50)
 
@@ -464,7 +464,7 @@ class TestInspectQuarantine:
                 return_value=mock_runtime_service,
             ),
         ):
-            from bioetl.composition.resources_api import inspect_quarantine
+            from bioetl.composition.resources_runtime import inspect_quarantine
 
             await inspect_quarantine("chembl_activity")
 
@@ -494,7 +494,7 @@ class TestListCheckpoints:
                 return_value=mock_runtime_service,
             ),
         ):
-            from bioetl.composition.resources_api import list_checkpoints
+            from bioetl.composition.resources_runtime import list_checkpoints
 
             result = await list_checkpoints("chembl_activity")
 
@@ -513,7 +513,7 @@ class TestListCheckpoints:
                 return_value=mock_runtime_service,
             ),
         ):
-            from bioetl.composition.resources_api import list_checkpoints
+            from bioetl.composition.resources_runtime import list_checkpoints
 
             result = await list_checkpoints("any_pipeline")
 

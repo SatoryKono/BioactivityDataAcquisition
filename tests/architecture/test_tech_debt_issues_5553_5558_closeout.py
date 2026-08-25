@@ -101,7 +101,7 @@ def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_i
     offenders = [
         path.relative_to(ROOT).as_posix()
         for path in interface_paths
-        if "bioetl.composition.control_plane_api" in path.read_text(encoding="utf-8")
+        if "bioetl.composition.control_plane_runtime" in path.read_text(encoding="utf-8")
     ]
     assert offenders == []
 

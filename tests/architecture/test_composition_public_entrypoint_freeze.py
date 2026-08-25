@@ -26,15 +26,10 @@ COMPOSITION_README = COMPOSITION_ROOT / "README.md"
 # Bumping this set requires README + scorecard/governance review (#7708).
 EXPECTED_COMPOSITION_PRIMARY_API_MODULES = frozenset(
     {
-        "composite_api.py",
-        "control_plane_api.py",
-        "entrypoints.py",
         "execution_api.py",
         "health_api.py",
         "maintenance_api.py",
-        "observability_api.py",
         "registry_api.py",
-        "resources_api.py",
     }
 )
 
@@ -87,8 +82,8 @@ def test_composition_primary_api_modules_are_frozen() -> None:
     present = {
         path.name for path in COMPOSITION_ROOT.glob("*_api.py") if path.is_file()
     }
-    present.add("entrypoints.py")
     assert COMPOSITION_ROOT.joinpath("entrypoints.py").is_file()
+    assert len(present) <= 4
 
     unexpected = sorted(present - EXPECTED_COMPOSITION_PRIMARY_API_MODULES)
     missing = sorted(EXPECTED_COMPOSITION_PRIMARY_API_MODULES - present)

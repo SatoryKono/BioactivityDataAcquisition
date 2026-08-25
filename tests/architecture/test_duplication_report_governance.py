@@ -19,30 +19,31 @@ from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster
 from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef
 from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 from scripts.engineering.qa.report_duplication_baseline import _render_markdown
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 HOTSPOT_BASELINE_JSON = (
-    PROJECT_ROOT / "reports/quality/hotspot-duplication-baseline.json"
+    quality_artifact_path("hotspot-duplication-baseline.json")
 )
 SPECIALIZED_DUPLICATION_ARTIFACTS = (
     {
         "name": "control-plane",
         "target": "src/bioetl/application/services/control_plane",
-        "json_path": PROJECT_ROOT / "reports/quality/control-plane-duplication.json",
-        "md_path": PROJECT_ROOT / "reports/quality/control-plane-duplication.md",
+        "json_path": quality_artifact_path("control-plane-duplication.json"),
+        "md_path": quality_artifact_path("control-plane-duplication.md"),
     },
     {
         "name": "runtime-builders",
         "target": "src/bioetl/composition/runtime_builders",
-        "json_path": PROJECT_ROOT / "reports/quality/runtime-builders-duplication.json",
-        "md_path": PROJECT_ROOT / "reports/quality/runtime-builders-duplication.md",
+        "json_path": quality_artifact_path("runtime-builders-duplication.json"),
+        "md_path": quality_artifact_path("runtime-builders-duplication.md"),
     },
 )
 FULL_APP_DUPLICATION_ARTIFACT = {
-    "json_path": PROJECT_ROOT / "reports/quality/full-app-duplication-baseline.json",
-    "md_path": PROJECT_ROOT / "reports/quality/full-app-duplication-baseline.md",
+    "json_path": quality_artifact_path("full-app-duplication-baseline.json"),
+    "md_path": quality_artifact_path("full-app-duplication-baseline.md"),
     "targets": {
         "src/bioetl/infrastructure/adapters",
         "src/bioetl/application/pipelines",

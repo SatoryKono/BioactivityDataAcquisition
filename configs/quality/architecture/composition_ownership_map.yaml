@@ -28,11 +28,11 @@ packages:
   responsibility: wiring/DI only
 - package: builders.py
   responsibility: wiring/DI only
-- package: composite_api.py
+- package: composite_catalog.py
   responsibility: wiring/DI only
 - package: config_catalog.py
   responsibility: wiring/DI only
-- package: control_plane_api.py
+- package: control_plane_runtime.py
   responsibility: wiring/DI only
 - package: control_plane_service_access.py
   responsibility: wiring/DI only
@@ -52,7 +52,7 @@ packages:
   responsibility: wiring/DI only
 - package: observability.py
   responsibility: wiring/DI only
-- package: observability_api.py
+- package: observability_runtime.py
   responsibility: wiring/DI only
 - package: observability_resolution.py
   responsibility: wiring/DI only
@@ -64,7 +64,7 @@ packages:
   responsibility: wiring/DI only
 - package: registry_api.py
   responsibility: wiring/DI only
-- package: resources_api.py
+- package: resources_runtime.py
   responsibility: wiring/DI only
 - package: runtime_builders
   responsibility: Run orchestration wiring and control-plane assembly

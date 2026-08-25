@@ -18,6 +18,7 @@ import re
 from pathlib import Path
 
 import pytest
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
@@ -55,7 +56,7 @@ def test_domain_public_facades_have_documented_classification() -> None:
 
 def test_aggregate_registry_anchors_resolve() -> None:
     registry = json.loads(
-        (ROOT / "reports/quality/domain-aggregate-invariant-registry.json").read_text(
+        (quality_artifact_path("domain-aggregate-invariant-registry.json")).read_text(
             encoding="utf-8"
         )
     )
@@ -70,7 +71,7 @@ def test_aggregate_registry_anchors_resolve() -> None:
 
 def test_pipeline_contract_matrix_matches_active_inventory() -> None:
     report = json.loads(
-        (ROOT / "reports/quality/contract-coverage-matrix.json").read_text(
+        (quality_artifact_path("contract-coverage-matrix.json")).read_text(
             encoding="utf-8"
         )
     )

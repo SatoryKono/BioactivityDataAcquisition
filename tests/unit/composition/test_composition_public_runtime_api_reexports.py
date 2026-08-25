@@ -38,9 +38,9 @@ import pytest
 @pytest.mark.unit
 def test_composite_api_reexports_bootstrap_entrypoints() -> None:
     """Public composite API should expose owner helpers unchanged."""
-    sys.modules.pop("bioetl.composition.composite_api", None)
+    sys.modules.pop("bioetl.composition.composite_catalog", None)
 
-    compat_module = importlib.import_module("bioetl.composition.composite_api")
+    compat_module = importlib.import_module("bioetl.composition.composite_catalog")
     target_module = importlib.import_module(
         "bioetl.composition.bootstrap.runtime.composite"
     )

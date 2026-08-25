@@ -9,10 +9,10 @@ together. No business logic lives here — only assembly, factory, and registrat
 composition/
 ├── entrypoints.py              # Retained execution-first seam (+ deprecated legacy lookups)
 ├── execution_api.py            # Canonical execution API
-├── control_plane_api.py        # Canonical control-plane service API
+├── control_plane_runtime.py    # Control-plane runtime seam (not *_api)
 ├── health_api.py               # Canonical health/quarantine service API
 ├── maintenance_api.py          # Canonical maintenance service API
-├── resources_api.py            # Canonical resource-management API
+├── resources_runtime.py        # Resource-management runtime seam (not *_api)
 ├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition

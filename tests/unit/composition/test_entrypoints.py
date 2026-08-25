@@ -49,7 +49,7 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
-from bioetl.composition.entrypoints import (
+from bioetl.composition.execution_api import (
     ArchiveOptions,
     RunOptions,
     RunResult,
@@ -461,7 +461,7 @@ class TestCompositeBootstrapFacade:
     def test_entrypoints_reexport_composite_bootstrap_helpers(self) -> None:
         """Composite CLI should use entrypoints instead of runtime bootstrap module."""
         from bioetl.composition import entrypoints as composition_entrypoints
-        from bioetl.composition.composite_api import (
+        from bioetl.composition.composite_catalog import (
             bootstrap_composite_runner as bootstrap_composite_runner_impl,
             load_composite_config as load_composite_config_impl,
         )
