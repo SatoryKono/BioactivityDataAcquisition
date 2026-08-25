@@ -5,7 +5,6 @@
       "aggregate": "Batch",
       "implementation_modules": [
         "src/bioetl/domain/aggregates/_batch_aggregate.py",
-        "src/bioetl/domain/aggregates/_batch_lifecycle.py",
         "src/bioetl/domain/aggregates/_batch_mixins.py",
         "src/bioetl/domain/aggregates/batch.py"
       ],
@@ -48,9 +47,8 @@
       "aggregate": "QuarantineEntry",
       "implementation_modules": [
         "src/bioetl/domain/aggregates/_quarantine_aggregate.py",
-        "src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py",
-        "src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py",
-        "src/bioetl/domain/aggregates/_quarantine_value_objects.py"
+        "src/bioetl/domain/aggregates/_quarantine_value_objects.py",
+        "src/bioetl/domain/aggregates/quarantine_entry.py"
       ],
       "invariants": [
         "payload is defensively copied at capture and exposed without caller aliasing",

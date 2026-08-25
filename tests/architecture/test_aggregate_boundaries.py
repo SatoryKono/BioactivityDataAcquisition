@@ -531,7 +531,8 @@ class TestDomainEventsForCoordination:
             pytest.skip("Aggregates directory not found")
 
         required_events: dict[str, list[str]] = {
-            "_batch_lifecycle.py": ["BatchCreated", "BatchSealed", "BatchWritten"],
+            "_batch_aggregate.py": ["BatchCreated"],
+            "_batch_mixins.py": ["BatchSealed", "BatchWritten"],
             "pipeline_run.py": ["PipelineCompleted", "PipelineFailed"],
             "quarantine_entry.py": [
                 "QuarantineEntryCreated",
@@ -564,7 +565,7 @@ class TestDomainEventsForCoordination:
         _assert_aggregates_dir_exists(aggregates_dir)
         _assert_aggregate_collect_events_methods(
             aggregates_dir,
-            ["_batch_mixins.py", "pipeline_run.py", "quarantine_entry.py"],
+            ["batch.py", "pipeline_run.py", "quarantine_entry.py"],
         )
 
 

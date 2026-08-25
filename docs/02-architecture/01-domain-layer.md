@@ -158,7 +158,7 @@ from bioetl.domain.ports.storage import BronzeStoragePort
 
 ##### 2.2.2.1. Batch Aggregate State Machine
 
-**Реализация:** `src/bioetl/domain/aggregates/_batch_lifecycle.py`
+**Реализация:** `src/bioetl/domain/aggregates/_batch_mixins.py`
 
 ```mermaid
 stateDiagram-v2
@@ -184,7 +184,7 @@ stateDiagram-v2
 
 ##### 2.2.2.3. QuarantineEntry Aggregate State Machine
 
-**Реализация:** `src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py`
+**Реализация:** `src/bioetl/domain/aggregates/quarantine_entry.py`
 
 ```mermaid
 stateDiagram-v2

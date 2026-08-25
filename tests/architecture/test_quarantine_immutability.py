@@ -145,9 +145,7 @@ def test_quarantine_entry_defensively_copies_constructor_and_accessor_payloads()
     assert _calls_deepcopy_with_arg(init_method, ("payload",))
     assert _calls_deepcopy_with_arg(init_method, ("metadata",))
 
-    properties_path = Path(
-        "src/bioetl/domain/aggregates/_quarantine_value_objects.py"
-    )
+    properties_path = Path("src/bioetl/domain/aggregates/_quarantine_value_objects.py")
     properties_tree = ast.parse(properties_path.read_text(encoding="utf-8"))
     payload_property = _find_class_method(
         properties_tree, "QuarantineEntryPropertiesMixin", "payload"

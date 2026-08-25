@@ -108,6 +108,7 @@ def sample_batch_record(sample_record_data):
 
 # Consolidated lifecycle behavior is exercised through Batch below.
 
+
 class TestBatchReadModelMixin:
     """Tests for _BatchReadModelMixin properties and methods."""
 

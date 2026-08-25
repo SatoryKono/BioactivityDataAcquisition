@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/aggregates
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, _batch_mixins, _pipeline_run_read_model_mixin, _quarantine_value_objects, pipeline_run_state, _batch_aggregate.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/aggregates; modules: events, batch, _batch_mixins, _pipeline_run_mixins, pipeline_run, _quarantine_value_objects, quarantine_entry, _quarantine_aggregate.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
 %% @date    2026-03-27
 %% @level   Package Family / Inventory Slice
-%% @nodes   30
+%% @nodes   29
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -24,18 +24,24 @@ classDiagram
     }
 
     namespace batch_mixins {
-        class _BatchAttrs
         class _BatchLifecycleMixin
         class _BatchMutationMixin
+    }
+
+    namespace batch {
+        class BatchRecord
+        class BatchStatus
+        class _BatchAttrs
         class _BatchReadModelMixin
     }
 
-    namespace pipeline_run_read_model_mixin {
+    namespace pipeline_run_mixins {
         class _PipelineRunAttrs
-        class _PipelineRunReadModelMixin
+        class _PipelineRunLifecycleMixin
     }
 
     namespace quarantine_value_objects {
+        class QuarantineEntryPropertiesMixin
         class QuarantineStatus
         class ResolutionInfo
     }
@@ -49,27 +55,11 @@ classDiagram
         class Batch
     }
 
-    namespace batch_record {
-        class BatchRecord
-    }
-
-    namespace batch_status {
-        class BatchStatus
-    }
-
-    namespace pipeline_run_mixins {
-        class _PipelineRunLifecycleMixin
-    }
-
     namespace quarantine_aggregate {
         class QuarantineEntry
     }
 
-    namespace quarantine_entry_properties_mixin {
-        class QuarantineEntryPropertiesMixin
-    }
-
-    namespace quarantine_entry_transitions_mixin {
+    namespace quarantine_entry {
         class QuarantineEntryTransitionsMixin
     }
 
@@ -99,6 +89,4 @@ classDiagram
     _BatchReadModelMixin <|-- _BatchLifecycleMixin
     _BatchReadModelMixin <|-- _BatchMutationMixin
     _PipelineRunAttrs <|-- _PipelineRunLifecycleMixin
-    _PipelineRunAttrs <|-- _PipelineRunReadModelMixin
     _PipelineRunLifecycleMixin <|-- PipelineRun
-    _PipelineRunReadModelMixin <|-- PipelineRun

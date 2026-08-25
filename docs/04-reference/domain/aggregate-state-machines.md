@@ -23,11 +23,11 @@ catalog in [Aggregates](aggregates.md).
 
 ## Sources Of Truth
 
-- `src/bioetl/domain/aggregates/_batch_lifecycle.py`
-- `src/bioetl/domain/aggregates/_batch_status.py`
+- `src/bioetl/domain/aggregates/batch.py`
+- `src/bioetl/domain/aggregates/_batch_mixins.py`
 - `src/bioetl/domain/aggregates/_pipeline_run_mixins.py`
-- `src/bioetl/domain/aggregates/pipeline_run_state.py`
-- `src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py`
+- `src/bioetl/domain/aggregates/pipeline_run.py`
+- `src/bioetl/domain/aggregates/quarantine_entry.py`
 - `src/bioetl/domain/aggregates/_quarantine_value_objects.py`
 
 ## `Batch`
@@ -45,10 +45,10 @@ catalog in [Aggregates](aggregates.md).
 | From | Operation | To | Source |
 | --- | --- | --- | --- |
 | `OPEN` | create batch | `OPEN` | `emit_batch_created(...)` records creation evidence without changing the initial state |
-| `OPEN` | `seal(...)` | `SEALED` | `_batch_lifecycle.seal` |
-| `SEALED` | `mark_writing(...)` | `WRITING` | `_batch_lifecycle.mark_writing` |
-| `WRITING` | `mark_committed(...)` | `COMMITTED` | `_batch_lifecycle.mark_committed` |
-| `WRITING` | `mark_failed(...)` | `FAILED` | `_batch_lifecycle.mark_failed` |
+| `OPEN` | `seal(...)` | `SEALED` | `_batch_mixins._BatchLifecycleMixin.seal` |
+| `SEALED` | `mark_writing(...)` | `WRITING` | `_batch_mixins._BatchLifecycleMixin.mark_writing` |
+| `WRITING` | `mark_committed(...)` | `COMMITTED` | `_batch_mixins._BatchLifecycleMixin.mark_committed` |
+| `WRITING` | `mark_failed(...)` | `FAILED` | `_batch_mixins._BatchLifecycleMixin.mark_failed` |
 
 ### Guard conditions
 
@@ -129,13 +129,13 @@ Stage-level evidence is also recorded while the aggregate remains `RUNNING`:
 
 | From | Operation | To | Source |
 | --- | --- | --- | --- |
-| `NEW` | `start_review()` | `UNDER_REVIEW` | `_quarantine_entry_transitions_mixin.start_review` |
-| `NEW` | `mark_ignored(...)` | `IGNORED` | `_quarantine_entry_transitions_mixin.mark_ignored` |
-| `UNDER_REVIEW` | `mark_ignored(...)` | `IGNORED` | `_quarantine_entry_transitions_mixin.mark_ignored` |
-| `NEW` | `mark_reprocessed(...)` | `REPROCESSED` | `_quarantine_entry_transitions_mixin.mark_reprocessed` |
-| `UNDER_REVIEW` | `mark_reprocessed(...)` | `REPROCESSED` | `_quarantine_entry_transitions_mixin.mark_reprocessed` |
-| `NEW` | `mark_expired(...)` | `EXPIRED` | `_quarantine_entry_transitions_mixin.mark_expired` |
-| `UNDER_REVIEW` | `mark_expired(...)` | `EXPIRED` | `_quarantine_entry_transitions_mixin.mark_expired` |
+| `NEW` | `start_review()` | `UNDER_REVIEW` | `quarantine_entry.QuarantineEntryTransitionsMixin.start_review` |
+| `NEW` | `mark_ignored(...)` | `IGNORED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_ignored` |
+| `UNDER_REVIEW` | `mark_ignored(...)` | `IGNORED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_ignored` |
+| `NEW` | `mark_reprocessed(...)` | `REPROCESSED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_reprocessed` |
+| `UNDER_REVIEW` | `mark_reprocessed(...)` | `REPROCESSED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_reprocessed` |
+| `NEW` | `mark_expired(...)` | `EXPIRED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_expired` |
+| `UNDER_REVIEW` | `mark_expired(...)` | `EXPIRED` | `quarantine_entry.QuarantineEntryTransitionsMixin.mark_expired` |
 
 ### Guard conditions
 
