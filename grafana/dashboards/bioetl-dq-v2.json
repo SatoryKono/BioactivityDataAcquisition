@@ -487,10 +487,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 220
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -1424,10 +1420,6 @@
               "options": "reason"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 220
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
