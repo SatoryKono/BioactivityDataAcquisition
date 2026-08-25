@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+import yaml
+
 from scripts.engineering.qa.report_composition_protocol_inventory import (
     collect_scoped_protocols,
     evaluate,
     main,
 )
-import yaml
-from pathlib import Path
+
+pytestmark = pytest.mark.architecture
 
 
 def test_composition_protocol_inventory_is_complete_and_shrinking() -> None:
