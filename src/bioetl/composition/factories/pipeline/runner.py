@@ -18,6 +18,8 @@ from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
 from bioetl.composition.runtime_builders.runner_builder import build_pipeline_runner
 
+from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.ports import (
@@ -38,7 +40,6 @@ def _require_execution_metrics_runner(
     runner: object,
 ) -> ExecutionMetricsRunnerPort:
     """Validate that a producer returned a metrics-readable runnable."""
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
 
     if not isinstance(runner, ExecutionMetricsRunnerPort):
         raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")

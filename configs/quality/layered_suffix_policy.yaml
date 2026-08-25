@@ -115,79 +115,79 @@ suffix_boundary_rules:
       - path: src/bioetl/application/composite/dependency_join_context_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when dependency-join helper API can move behind composition-owned construction vocabulary.
         reason: Existing application helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/application/services/dq/dq_report_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when DQ report assembly helpers are consolidated behind role-neutral service naming.
         reason: Existing DQ helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when lineage metadata node assembly helpers are consolidated behind role-neutral service naming.
         reason: Existing lineage helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/domain/value_objects/dq_report_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Rename module when DQ report value-object construction helpers are migrated to role-neutral naming.
         reason: Existing domain helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Rename module when CrossRef client component helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/crossref/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Rename module when CrossRef query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/openalex/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Rename module when OpenAlex query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/pubchem/client_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Rename module when PubChem client component helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/pubchem/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Rename module when PubChem query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/adapters/uniprot/query_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when UniProt query planning helpers move behind adapter-owned role-neutral naming.
         reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
         reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/domain/run_reports/pipeline_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when pipeline run-report assembly helpers move behind role-neutral domain naming.
         reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
       - path: src/bioetl/domain/run_reports/workflow_builder.py
         issue: "#3722"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-09-30"
         removal_step: Rename module when workflow run-report assembly helpers move behind role-neutral domain naming.
         reason: Existing domain helper module with build_* functions and no public *Builder symbol; retained as reviewed naming debt.
   - rule_id: composition_infrastructure_service_suffix
@@ -229,21 +229,21 @@ family_freeze_rules:
         path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime lock lifecycle collaborator.
       - symbol: LockRuntimeServiceCreateContext
         path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime lock collaborator creation seam.
       - symbol: LockService
         path: src/bioetl/application/services/ops/lock_service.py
         issue: "#3552"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin lock service.
 
@@ -262,28 +262,28 @@ family_freeze_rules:
         path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
         issue: "#3398"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-10-31"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime checkpoint collaborator.
       - symbol: QuarantineRuntimeService
         path: src/bioetl/application/core/quarantine_manager.py
         issue: "#3398"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical runtime quarantine write-path collaborator.
       - symbol: CheckpointService
         path: src/bioetl/application/services/checkpoint/checkpoint_service.py
         issue: "#3398"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin checkpoint service.
       - symbol: QuarantineService
         path: src/bioetl/application/services/quality/quarantine_service.py
         issue: "#3398"
         owner: "@bioetl-platform"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
         reason: Canonical operator/admin quarantine service.
 
@@ -299,7 +299,7 @@ family_freeze_rules:
         path: src/bioetl/application/composite/column_service.py
         issue: "#3402"
         owner: "@bioetl-architecture"
-        expires_on: "2026-12-31"
+        expires_on: "2026-11-30"
         removal_step: Remove freeze exception once column-ordering family policy is retired with zero ambiguity aliases.
         reason: Canonical unified column ordering surface.
 

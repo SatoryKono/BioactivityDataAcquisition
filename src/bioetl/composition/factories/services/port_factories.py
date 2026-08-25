@@ -5,8 +5,7 @@ Extracted from BaseServicesFactory to keep factory.py within LOC limits.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
@@ -20,6 +19,13 @@ from bioetl.domain.ports import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
+from bioetl.application.ports.storage import StorageContextLike as _StorageContextLike
+
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
+from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+
+
 __all__ = [
     "create_checkpoint",
     "create_lock",
@@ -29,16 +35,8 @@ __all__ = [
 ]
 
 
-class _StorageContextLike(Protocol):
-    """Minimal storage context required for checkpoint-port creation."""
-
-    @property
-    def checkpoints_path(self) -> Path: ...
-
-
 def create_lock() -> LockPort:
     """Create in-memory lock for local deployment."""
-    from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
     lock = MemoryLock()
     assert isinstance(lock, LockPort), (
@@ -49,7 +47,6 @@ def create_lock() -> LockPort:
 
 def create_checkpoint(storage_ctx: _StorageContextLike) -> CheckpointPort:
     """Create local filesystem checkpoint."""
-    from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 
     checkpoint = LocalCheckpointAdapter(base_path=storage_ctx.checkpoints_path)
     assert isinstance(checkpoint, CheckpointPort), (
@@ -60,7 +57,6 @@ def create_checkpoint(storage_ctx: _StorageContextLike) -> CheckpointPort:
 
 def create_quarantine(settings: SettingsPort) -> QuarantinePort:
     """Create unified quarantine storage."""
-    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
 
     quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (

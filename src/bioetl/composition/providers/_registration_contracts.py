@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import partial
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.composition.providers._models import (
     AdapterCreatorProtocol,
@@ -19,58 +19,12 @@ if TYPE_CHECKING:
     from bioetl.composition.providers._registry_protocols import (
         ProviderDataSourceAccessProtocol,
     )
-    from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
-class ProviderHttpClientFactoryProtocol(Protocol):
-    """Callable contract for provider HTTP client construction."""
-
-    def __call__(
-        self,
-        provider: str,
-        settings: ProviderSettingsProtocol | None = None,
-        *,
-        metrics: MetricsPort | None = None,
-        logger: LoggerPort | None = None,
-    ) -> UnifiedHTTPClient:
-        """Create a provider-scoped HTTP client."""
-        ...
-
-
-class ProviderAdapterFactoryProtocol(Protocol):
-    """Callable contract for provider adapter construction."""
-
-    def __call__(
-        self,
-        provider: str,
-        http_client: UnifiedHTTPClient | None = None,
-        logger: LoggerPort | None = None,
-        settings: ProviderSettingsProtocol | None = None,
-        **kwargs: object,
-    ) -> DataSourcePort:
-        """Create a provider adapter via composition-owned wiring."""
-        ...
-
-
-class SupportAwareDataSourceCreatorProtocol(Protocol):
-    """Protocol for data-source creators that accept injected assembly support."""
-
-    def __call__(
-        self,
-        settings: ProviderSettingsProtocol,
-        pipeline_config: PipelineYamlConfig,
-        logger: LoggerPort,
-        filter_config: InputFilterConfig | None = None,
-        metrics: MetricsPort | None = None,
-        pipeline_name: str = "unknown",
-        *,
-        assembly_support: ProviderAssemblySupport | None = None,
-    ) -> DataSourcePort:
-        """Create a fully configured data source with optional support injection."""
-        ...
+from bioetl.application.ports.providers import ProviderHttpClientFactoryProtocol
+from bioetl.application.ports.providers import ProviderAdapterFactoryProtocol
+from bioetl.application.ports.providers import SupportAwareDataSourceCreatorProtocol
 
 
 @dataclass(frozen=True)

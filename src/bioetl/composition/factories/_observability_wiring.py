@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import Protocol
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 
@@ -17,9 +16,10 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from .datasource.data_source_factory import DataSourceCreatorProtocol
 
+from bioetl.application.ports.metrics import MetricsFactory as _MetricsFactory
 
-class _MetricsFactory(Protocol):
-    def _create_metrics(self, settings: Settings) -> MetricsPort: ...
+from bioetl.infrastructure.adapters import CachedBronzeDataSource
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
 
 def create_shared_metrics(
@@ -69,8 +69,6 @@ def _create_cached_bronze_data_source(
     cached_bronze: CachedBronzeContext,
 ) -> DataSourcePort:
     """Create CachedBronzeDataSource for reading from Bronze cache."""
-    from bioetl.infrastructure.adapters import CachedBronzeDataSource
-    from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 
     provider = pipeline_config.provider
     entity_type = pipeline_config.entity_type

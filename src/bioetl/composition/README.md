@@ -59,7 +59,7 @@ Prefer this production wiring path:
    `interfaces/cli/registry_helpers.build_cli_registry()` (create +
    `register_all_pipelines(registry=…)`).
 2. CLI orchestration resolves `PipelineRunnerService` through
-   `composition.execution_service_access` / `_services.get_pipeline_runner_service`.
+   `composition.entrypoints` / `_services.get_pipeline_runner_service`.
 3. Direct library callers use `composition.entrypoints.run_pipeline()` /
    `create_pipeline_runner()` with an explicit registry when possible.
 

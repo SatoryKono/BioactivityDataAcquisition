@@ -185,6 +185,7 @@ log_test.txt
 !/reports/quality/config-discrepancy-baseline.json
 !/reports/quality/dead-code-inventory.json
 !/reports/quality/dead-code-inventory.md
+!/reports/quality/source-tree-manifest.json
 !/reports/quality/module-coverage-inventory.json
 !/reports/quality/architecture-quality-scorecard.json
 !/reports/quality/adr-enforcement-matrix.json

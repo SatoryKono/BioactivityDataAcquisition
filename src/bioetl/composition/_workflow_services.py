@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING
 
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
@@ -28,20 +28,55 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
-    from bioetl.application.services.workflow.workflow_runner_service import (
-        WorkflowRunnerService,
-    )
-    from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.domain.control_plane import WorkflowManifest
     from bioetl.domain.ports import (
         LockPort,
-        LoggerPort,
         MetricsPort,
         WorkflowLedgerPort,
     )
     from bioetl.domain.workflow import WorkflowConfig
     from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
+
+from bioetl.application.ports.metrics import (
+    WorkflowMetricsFactory as _WorkflowMetricsFactory,
+)
+from bioetl.application.services.workflow.workflow_runner_service import (
+    WorkflowRunnerService,
+)
+from bioetl.composition._workflow_transform_registry import (
+    build_workflow_transform_registry,
+)
+from bioetl.composition.bootstrap.runtime.runner import (
+    bootstrap_pipeline_runner_service,
+)
+from bioetl.composition.factories.services.port_factories import create_metrics
+from bioetl.infrastructure.config.workflow_config_api import (
+    load_workflow_config as load_workflow_config_impl,
+)
+from bioetl.infrastructure.time import SystemClock
+from bioetl.application.services.workflow.workflow_transform_service import (
+    WorkflowTransformService,
+)
+from bioetl.infrastructure.control_plane import (
+    FileWorkflowExecutionStateStore,
+    FileWorkflowLedgerStore,
+    FileWorkflowManifestStore,
+    FileWorkflowTransformArtifactStore,
+)
+from bioetl.infrastructure.locking import MemoryLock
+from bioetl.application.services.control_plane.workflow.ledger_service import (
+    WorkflowLedgerService,
+)
+from bioetl.application.services.control_plane.workflow.execution_service import (
+    WorkflowExecutionService,
+)
+from bioetl.application.services.control_plane.workflow.manifest_service import (
+    WorkflowManifestService,
+)
+from bioetl.application.services.control_plane.workflow.inspection_service import (
+    WorkflowInspectionService,
+)
+
 
 __all__ = [
     "get_workflow_execution_service",
@@ -52,16 +87,8 @@ __all__ = [
 _workflow_memory_lock: LockPort | None = None
 
 
-@runtime_checkable
-class _WorkflowMetricsFactory(Protocol):
-    """Lazy metrics-factory contract for canonical workflow settings."""
-
-    def __call__(self, settings: Settings, /) -> MetricsPort: ...
-
-
 def _create_workflow_metrics(settings: Settings) -> MetricsPort:
     """Resolve the patchable metrics factory through a typed lazy boundary."""
-    from bioetl.composition.factories.services.port_factories import create_metrics
 
     candidate: object = create_metrics
     if not isinstance(candidate, _WorkflowMetricsFactory):
@@ -71,9 +98,6 @@ def _create_workflow_metrics(settings: Settings) -> MetricsPort:
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical composition service seam."""
-    from bioetl.infrastructure.config.workflow_config_api import (
-        load_workflow_config as load_workflow_config_impl,
-    )
 
     return load_workflow_config_impl(name, configs_root=resolve_configs_root())
 
@@ -82,118 +106,8 @@ def _default_pipeline_runner_service_factory(
     registry: PipelineRegistry | None,
 ) -> PipelineRunnerService:
     """Build the pipeline runner service without depending on the facade module."""
-    from bioetl.composition.bootstrap.runtime.runner import (
-        bootstrap_pipeline_runner_service,
-    )
 
     return bootstrap_pipeline_runner_service(registry=registry)
-
-
-def _workflow_reconciliation_loggers() -> tuple[LoggerPort, LoggerPort]:
-    """Return FK and row reconciliation loggers for workflow transforms."""
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-
-    root = bootstrap_logger("workflow_reconciliation").bind(
-        component="workflow_reconciliation",
-    )
-    return (
-        root.bind(adapter="SilverForeignKeyReconciliationAdapter"),
-        root.bind(adapter="StorageRowReconciliationAdapter"),
-    )
-
-
-def _build_workflow_transform_registry(
-    settings: Settings,
-    metrics: MetricsPort,
-    artifact_sink: FileWorkflowTransformArtifactStore | None = None,
-) -> WorkflowTransformRegistry:
-    """Assemble workflow transform storage and builtin transform registry."""
-    from bioetl.application.workflow.transforms import WorkflowTransformRegistry
-    from bioetl.application.workflow.transforms.builtins import (
-        register_builtin_workflow_transforms,
-    )
-    from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-    from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
-    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
-    from bioetl.infrastructure.storage.gold.runtime_helpers import (
-        GoldWriterRuntimeServices,
-    )
-    from bioetl.infrastructure.storage.gold_writer import GoldWriter
-    from bioetl.infrastructure.storage.silver.runtime_helpers import (
-        SilverWriterRuntimeServicesRequest,
-        build_silver_writer_runtime_services,
-    )
-    from bioetl.infrastructure.storage.silver_writer import SilverWriter
-    from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
-        SilverForeignKeyReconciliationAdapter,
-    )
-    from bioetl.infrastructure.storage.workflow_row_reconciliation import (
-        StorageRowReconciliationAdapter,
-    )
-    from bioetl.infrastructure.time import SystemClock
-
-    workflow_storage_logger = create_noop_logger()
-    transform_storage = SilverWriter(
-        base_path=settings.silver_path,
-        logger=workflow_storage_logger,
-        runtime_services=build_silver_writer_runtime_services(
-            SilverWriterRuntimeServicesRequest(
-                csv_exporter=None,
-                tracing=NoOpTracing(),
-                write_policy=None,
-                metrics=metrics,
-                audit=NoOpAudit(),
-                logger=workflow_storage_logger,
-                silver_validator=None,
-                metadata_writer=NoOpMetadataWriter(),
-                metadata_coordinator=None,
-                lineage_store=None,
-                dq_calculator=None,
-                merge_resilience_policy=None,
-                base_path=settings.silver_path,
-                pipeline_name="workflow_transforms",
-            )
-        ),
-        pipeline_name="workflow_transforms",
-    )
-    transform_gold_storage = GoldWriter(
-        base_path=settings.gold_path,
-        logger=create_noop_logger(),
-        runtime_services=GoldWriterRuntimeServices(
-            csv_exporter=None,
-            tracing=NoOpTracing(),
-            metrics=metrics,
-            audit=NoOpAudit(),
-            metadata_writer=NoOpMetadataWriter(),
-            metadata_coordinator=None,
-            lineage_store=None,
-        ),
-    )
-    foreign_key_reconciliation_logger, row_reconciliation_logger = (
-        _workflow_reconciliation_loggers()
-    )
-    reconciliation_quarantine = UnifiedQuarantineAdapter(
-        base_path=str(settings.quarantine_path),
-    )
-    return register_builtin_workflow_transforms(
-        WorkflowTransformRegistry(),
-        foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
-            silver_writer=transform_storage,
-            logger=foreign_key_reconciliation_logger,
-            clock=SystemClock(),
-            metrics=metrics,
-            quarantine=reconciliation_quarantine,
-            quarantine_pipeline_name="workflow_transforms",
-            gold_writer=transform_gold_storage,
-            artifact_sink=artifact_sink,
-        ),
-        row_reconciliation_port=StorageRowReconciliationAdapter(
-            silver_reader=transform_storage,
-            gold_reader=transform_gold_storage,
-            logger=row_reconciliation_logger,
-            metrics=metrics,
-        ),
-    )
 
 
 def get_workflow_runner_service(
@@ -205,14 +119,6 @@ def get_workflow_runner_service(
     | None = None,
 ) -> WorkflowRunnerService:
     """Build the baseline declarative workflow runner through composition seams."""
-    from bioetl.application.services.workflow.workflow_runner_service import (
-        WorkflowRunnerService,
-    )
-    from bioetl.application.services.workflow.workflow_transform_service import (
-        WorkflowTransformService,
-    )
-    from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
-    from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
@@ -221,7 +127,7 @@ def get_workflow_runner_service(
         base_path=output_root / "workflow_transform_results",
         clock=SystemClock(),
     )
-    transform_registry = _build_workflow_transform_registry(
+    transform_registry = build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,
@@ -245,8 +151,6 @@ def get_workflow_runner_service(
 def _get_workflow_memory_lock() -> LockPort:
     global _workflow_memory_lock
     if _workflow_memory_lock is None:
-        from bioetl.infrastructure.locking import MemoryLock
-
         _workflow_memory_lock = MemoryLock()
     return _workflow_memory_lock
 
@@ -255,9 +159,6 @@ def _create_workflow_ledger_service(
     ledger_port: WorkflowLedgerPort,
     manifest: WorkflowManifest,
 ) -> WorkflowLedgerService:
-    from bioetl.application.services.control_plane.workflow.ledger_service import (
-        WorkflowLedgerService,
-    )
 
     return WorkflowLedgerService(
         ledger_port=ledger_port,
@@ -273,18 +174,6 @@ def get_workflow_execution_service(
     workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
-    from bioetl.application.services.control_plane.workflow.execution_service import (
-        WorkflowExecutionService,
-    )
-    from bioetl.application.services.control_plane.workflow.manifest_service import (
-        WorkflowManifestService,
-    )
-    from bioetl.infrastructure.control_plane import (
-        FileWorkflowExecutionStateStore,
-        FileWorkflowLedgerStore,
-        FileWorkflowManifestStore,
-    )
-    from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
@@ -322,14 +211,6 @@ def get_workflow_execution_service(
 
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Get workflow inspection service for operator diagnostics."""
-    from bioetl.application.services.control_plane.workflow.inspection_service import (
-        WorkflowInspectionService,
-    )
-    from bioetl.infrastructure.control_plane import (
-        FileWorkflowExecutionStateStore,
-        FileWorkflowLedgerStore,
-        FileWorkflowManifestStore,
-    )
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)

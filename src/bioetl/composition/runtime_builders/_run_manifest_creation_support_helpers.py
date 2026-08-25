@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
 from bioetl.application.services.control_plane.manifest.service import (
@@ -34,21 +34,11 @@ if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
         RunManifestContractIdentity,
     )
-    from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
-    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.domain.context import PipelineRunContext
 
-
-class _ManifestSourceRefBuilder(Protocol):
-    def build_run_source_refs(
-        self,
-        *,
-        ctx: PipelineRunContext,
-        cached_bronze: CachedBronzeContext | None,
-        settings: Settings,
-        provider: str,
-        entity: str,
-        required_persistence_profile: object,
-    ) -> tuple[RunSourceRef, ...]: ...
+from bioetl.composition.contracts.runtime import (
+    ManifestSourceRefBuilder as _ManifestSourceRefBuilder,
+)
 
 
 @dataclass(frozen=True, slots=True)

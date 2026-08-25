@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import os
 import pytest
 
 import ast
@@ -27,7 +28,18 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = (
     ROOT / "scripts" / "engineering" / "qa" / "check_naming_package_consistency.py"
 )
-POLICY_REVIEW_DATE = date(2026, 5, 15)
+_POLICY_REVIEW_DATE_ENV = "BIOETL_POLICY_REVIEW_DATE"
+_DEFAULT_POLICY_REVIEW_DATE = date(2026, 5, 15)
+
+
+def _policy_review_date() -> date:
+    raw = os.environ.get(_POLICY_REVIEW_DATE_ENV)
+    if raw:
+        return date.fromisoformat(raw)
+    return _DEFAULT_POLICY_REVIEW_DATE
+
+
+POLICY_REVIEW_DATE = _policy_review_date()
 
 
 def _load_gate_module() -> ModuleType:

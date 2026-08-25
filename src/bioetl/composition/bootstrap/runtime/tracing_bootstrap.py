@@ -8,6 +8,8 @@ from typing import cast, TYPE_CHECKING
 from bioetl.domain.ports import TracingPort
 from bioetl.domain.ports.noop import NoOpTracing
 
+from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
+
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
@@ -20,7 +22,6 @@ __all__ = [
 
 def _default_tracer_factory(service_name: str) -> TracingPort:
     """Create OpenTelemetry tracer for the given service name."""
-    from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
 
     return cast(
         "TracingPort", cast(object, OpenTelemetryTracer(service_name=service_name))

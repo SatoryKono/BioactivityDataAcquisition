@@ -9,15 +9,16 @@ from bioetl.domain.mapping.publication_controlled_vocabulary import (
     PublicationControlledVocabularyRegistry,
 )
 
+from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
+    PublicationControlledVocabularyLoader,
+)
+
 
 @cache
 def _load_publication_controlled_vocabulary_data(
     configs_root_key: str,
 ) -> PublicationControlledVocabularyRegistry:
     """Load publication controlled vocabulary once per configs root key."""
-    from bioetl.infrastructure.config.publication_controlled_vocabulary_loader import (
-        PublicationControlledVocabularyLoader,
-    )
 
     loader = PublicationControlledVocabularyLoader(Path(configs_root_key))
     return loader.load()

@@ -1,7 +1,8 @@
 """Batch Aggregate.
 
-Re-export facade: actual definitions live in sub-modules
-(_batch_status, _batch_record, _batch_aggregate).
+Compatibility re-export (ADR-059 / #9603): definitions live in
+`_batch_status`, `_batch_record`, and `_batch_aggregate`. New code should
+import from `bioetl.domain.aggregates`.
 """
 
 from __future__ import annotations

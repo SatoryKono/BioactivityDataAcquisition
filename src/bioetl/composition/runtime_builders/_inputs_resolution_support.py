@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.filtering.silver_filter_identity import (
@@ -30,13 +30,7 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
     )
 
-
-class PaginationConfigLike(Protocol):
-    id_batch_size: object
-
-
-class SourceConfigLike(Protocol):
-    pagination: PaginationConfigLike
+from bioetl.domain.ports import SourceConfigLike
 
 
 def apply_tracing_override(

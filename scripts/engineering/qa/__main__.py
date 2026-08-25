@@ -170,6 +170,12 @@ COMMAND_MODULES: dict[str, str] = {
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"
     ),
+    "report-lazy-import-inventory": (
+        "scripts.engineering.qa.report_lazy_import_inventory"
+    ),
+    "report-source-tree-manifest": (
+        "scripts.engineering.qa.report_source_tree_manifest"
+    ),
     "refresh-governance-artifacts": (
         "scripts.engineering.qa.refresh_governance_artifacts"
     ),

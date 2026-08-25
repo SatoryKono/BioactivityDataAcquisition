@@ -9,6 +9,10 @@ from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 
+from bioetl.domain.control_plane.reproducibility_policy import (
+    DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
+)
+
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap.runtime._observability_bundle_support import (
         ObservabilityComponents,
@@ -128,9 +132,6 @@ def _set_component_runtime_gauge(
 
 
 def _control_plane_settings(*, control_plane: object | None) -> tuple[str, bool, bool]:
-    from bioetl.domain.control_plane.reproducibility_policy import (
-        DEFAULT_REQUIRED_PERSISTENCE_PROFILE,
-    )
 
     required_profile = str(
         getattr(

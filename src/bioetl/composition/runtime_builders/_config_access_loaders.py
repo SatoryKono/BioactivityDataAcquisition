@@ -8,6 +8,13 @@ from pathlib import Path
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
+from bioetl.infrastructure.config.source_config_loader import (
+    load_source_config_from_root,
+)
+
 __all__ = [
     "create_dq_config_loader",
     "create_pipeline_config_loader",
@@ -19,9 +26,6 @@ def create_pipeline_config_loader(
     configs_root: Path,
 ) -> Callable[[str], PipelineYamlConfig]:
     """Bind pipeline config loading to one explicit config root."""
-    from bioetl.infrastructure.config.pipeline_config_api import (
-        load_pipeline_config_from_root,
-    )
 
     resolved_configs_root = resolve_configs_root(configs_root)
 
@@ -57,9 +61,6 @@ def create_source_config_loader(
     configs_root: Path,
 ) -> Callable[[str], object]:
     """Bind provider source config loading to one explicit config root."""
-    from bioetl.infrastructure.config.source_config_loader import (
-        load_source_config_from_root,
-    )
 
     resolved_configs_root = resolve_configs_root(configs_root)
 

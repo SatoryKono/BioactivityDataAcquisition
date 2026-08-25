@@ -10,10 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Layered port registries (ADR-058 / #9599):** `bioetl.application.ports`
-  is the public entry for application-service Protocols. First migration wave
-  moves 12 composition Protocol declarations into `domain/ports`,
-  `application/ports`, or `composition/contracts`. Remaining composition
-  declarations outside `contracts/` are shrink-only (max 43).
+  is the public entry for application-service Protocols. Composition no
+  longer declares Protocol classes outside `composition/contracts/`.
+- **Package cohesion budgets (ADR-059 / #9603):** shrink-only
+  `package_loc` / `module_count_per_package` ratchets; `batch.py` is a
+  compatibility re-export.
+- **Composition root (S5 / #9601):** `bioetl.composition.entrypoints` holds
+  the typed factory registry; execution/maintenance access seams folded in
+  (`*_service_access.py` count is 2).
+- **Architecture ratchets S4/S6–S9:** lazy-import max 102 (top-4 cyclic
+  files at 0 except two patchable `as impl` seams), package cohesion
+  budgets, domain dataframe zoning (130), assertless max 102, staggered
+  naming-exemption expiry (≤7 per date), unified
+  `reports/quality/source-tree-manifest.json`.
 
 ### Changed
 
