@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Run Explorer last-10 index (`3010`):** Ops HTTP pipeline-run-reports
+  rows now expose identity peeks `started_at` and `workflow_run_id`; the
+  first-window table shows Started and Workflow run without exceeding the
+  200% width budget.
+
 - **Generated `chembl_activity` pipeline dataflow documentation:** Added a
   typed effective-config IR, six Mermaid views, a pipeline passport, and
   machine-readable JSON/CSV companions covering source criteria, stage-level

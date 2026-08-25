@@ -141,6 +141,12 @@ def test_run_explorer_completed_at_is_converted_to_time():
             and conversion.get("destinationType") == "time"
             for conversion in conversions
         ), f"panel {panel_id} must convert completed_at to time"
+        if panel_id == 3010:
+            assert any(
+                conversion.get("targetField") == "started_at"
+                and conversion.get("destinationType") == "time"
+                for conversion in conversions
+            ), "panel 3010 must convert started_at to time"
     assert seen == required
 
 
