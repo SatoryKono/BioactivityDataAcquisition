@@ -26,7 +26,7 @@ multiple runs; use RunLedger for exact reconciliation.
 - **Type:** Table (`id=215`)
 - **Purpose:** Rank up to four urgency-ordered next actions for the current selectors/fleet and hand off to the recommended board.
 - **Data sources:** `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE vector fallback)` via recording rule `bioetl_l0_next_action_route`.
-- **Layout:** first-screen width `w=12` (paired with Review Domain Status `w=12`); `cellHeight: md`.
+- **Layout:** first-screen width `w=12` (paired with Review Domain Status `w=12`); `cellHeight: sm`.
 - **Columns (left→right):** Action (primary CTA, short labels, color-text + row link via `action_dashboard_uid`) → Priority (short badge `RUNTIME`/`CP`/`GOLD`/`DQ`/`PROV`/`WF`/`MON`/`NR`, color-background, not row-wide) → Why → Pipeline.
 - **Visual hierarchy:** Action is the sole color-text CTA emphasis; Priority is a secondary urgency badge. Table sorted by Priority desc so top row is first click.
 - **Presentation:** The routing UID remains available to the Action data-link but

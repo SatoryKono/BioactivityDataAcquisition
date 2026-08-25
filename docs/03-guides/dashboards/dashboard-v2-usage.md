@@ -682,7 +682,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `provider=unknown` while preserving `pipeline_context`. When Priority is
   `MON`/`NR` and Fleet Health is OK, continue monitoring rather than escalating.
   First-screen layout pairs RFA with Domain Status at `w=12` each; `cellHeight`
-  is `md`. The shipped dashboard JSON and its contracts are the durable record
+  is `sm`. The shipped dashboard JSON and its contracts are the durable record
   for the RFA-00 migration; the retired one-off mutator was historical only and
   should not be reintroduced under `scripts/ops/observability/grafana/` — edit
   shipped `grafana/dashboards/*.json` through reviewable PR changes.
