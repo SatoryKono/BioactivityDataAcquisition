@@ -74,19 +74,26 @@ def test_entrypoints_removed_compatibility_wrappers_fail_fast(name: str) -> None
 
 
 @pytest.mark.unit
-def test_entrypoints_register_health_and_e1_operation_ports() -> None:
-    """Production registry exposes Health plus the twelve E1 typed keys."""
+def test_entrypoints_register_zero_argument_service_ports() -> None:
+    """Production registry exposes all migrated zero-argument service keys."""
     from bioetl.application.ports import (
         AuditInspectionServiceProtocol,
         CheckpointServiceProtocol,
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
     from bioetl.composition.entrypoints import registered_ports
@@ -100,17 +107,77 @@ def test_entrypoints_register_health_and_e1_operation_ports() -> None:
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
         QuarantinePort,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     }
     factories = registered_ports()
 
     assert set(factories) == expected
     assert all(callable(factory) for factory in factories.values())
+
+
+@pytest.mark.unit
+def test_entrypoints_register_e2_ports_with_canonical_lazy_targets() -> None:
+    """E2 keys retain explicit canonical module and attribute metadata."""
+    from bioetl.application.ports import (
+        ForensicRunDiffServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
+        RunManifestInspectionServiceProtocol,
+        WorkflowInspectionServiceProtocol,
+    )
+    from bioetl.composition.entrypoints import registered_ports
+
+    expected = {
+        ForensicRunDiffServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.run_manifest",
+            "bootstrap_forensic_run_diff_service",
+        ),
+        HistoricalReplayClosureServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.run_manifest",
+            "bootstrap_historical_replay_closure_service",
+        ),
+        HistoricalReplayCorpusServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.run_manifest",
+            "bootstrap_historical_replay_corpus_service",
+        ),
+        HistoricalReplayUniverseServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.run_manifest",
+            "bootstrap_historical_replay_universe_service",
+        ),
+        LineageInspectionServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.lineage",
+            "bootstrap_lineage_service",
+        ),
+        RunManifestInspectionServiceProtocol: (
+            "bioetl.composition.bootstrap.cli.run_manifest",
+            "bootstrap_run_manifest_service",
+        ),
+        WorkflowInspectionServiceProtocol: (
+            "bioetl.composition._workflow_services",
+            "get_workflow_inspection_service",
+        ),
+    }
+
+    factories = registered_ports()
+    assert {
+        port: (factory.module_name, factory.attribute_name)
+        for port, factory in factories.items()
+        if port in expected
+    } == expected
 
 
 @pytest.mark.unit

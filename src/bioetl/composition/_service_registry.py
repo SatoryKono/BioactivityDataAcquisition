@@ -7,6 +7,15 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.ports.control_plane import (
+    ForensicRunDiffServiceProtocol,
+    HistoricalReplayClosureServiceProtocol,
+    HistoricalReplayCorpusServiceProtocol,
+    HistoricalReplayUniverseServiceProtocol,
+    LineageInspectionServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+    WorkflowInspectionServiceProtocol,
+)
 from bioetl.application.ports.metrics import MetricsService
 from bioetl.application.ports.operations import (
     AuditInspectionServiceProtocol,
@@ -57,9 +66,7 @@ class _LazyServiceFactory[T]:
         """Import and invoke one configured zero-argument bootstrap factory."""
         candidate = getattr(import_module(self.module_name), self.attribute_name)
         if not callable(candidate):
-            raise TypeError(
-                f"{self.module_name}.{self.attribute_name} is not callable"
-            )
+            raise TypeError(f"{self.module_name}.{self.attribute_name} is not callable")
         return cast(Callable[[], T], candidate)()
 
 
@@ -145,4 +152,39 @@ _register_lazy_service(
     LockServiceProtocol,
     "bioetl.composition.bootstrap.cli.lock",
     "bootstrap_lock_service",
+)
+_register_lazy_service(
+    ForensicRunDiffServiceProtocol,
+    "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_forensic_run_diff_service",
+)
+_register_lazy_service(
+    HistoricalReplayClosureServiceProtocol,
+    "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_historical_replay_closure_service",
+)
+_register_lazy_service(
+    HistoricalReplayCorpusServiceProtocol,
+    "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_historical_replay_corpus_service",
+)
+_register_lazy_service(
+    HistoricalReplayUniverseServiceProtocol,
+    "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_historical_replay_universe_service",
+)
+_register_lazy_service(
+    LineageInspectionServiceProtocol,
+    "bioetl.composition.bootstrap.cli.lineage",
+    "bootstrap_lineage_service",
+)
+_register_lazy_service(
+    RunManifestInspectionServiceProtocol,
+    "bioetl.composition.bootstrap.cli.run_manifest",
+    "bootstrap_run_manifest_service",
+)
+_register_lazy_service(
+    WorkflowInspectionServiceProtocol,
+    "bioetl.composition._workflow_services",
+    "get_workflow_inspection_service",
 )
