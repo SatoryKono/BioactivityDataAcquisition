@@ -580,6 +580,7 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
             json_path=item["json_path"],
             markdown_path=None,
             status=None,
+            started_at=None,
             completed_at=None,
             mtime=item["mtime"],
         ),
@@ -593,11 +594,37 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(
     tmp_path: Path,
 ) -> None:
-    assert report_query._read_identity_meta(tmp_path) == (None, None, None)
+    empty = report_query.IdentityIndexMeta(None, None, None, None, None)
+    assert report_query._read_identity_meta(tmp_path) == empty
 
     payload_path = tmp_path / "report.json"
     payload_path.write_text("[]", encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == (None, None, None)
+    assert report_query._read_identity_meta(payload_path) == empty
 
     payload_path.write_text('{"identity": "invalid"}', encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == (None, None, None)
+    assert report_query._read_identity_meta(payload_path) == empty
+
+
+def test_identity_metadata_reads_started_at_and_workflow_run_id(
+    tmp_path: Path,
+) -> None:
+    payload_path = tmp_path / "report.json"
+    payload_path.write_text(
+        (
+            '{"identity": {"status": "success", '
+            '"started_at": "2026-08-25T01:00:00Z", '
+            '"completed_at": "2026-08-25T01:05:00Z", '
+            '"workflow_id": "chembl_baseline", '
+            '"workflow_run_id": "wf-run-1"}}'
+        ),
+        encoding="utf-8",
+    )
+    assert report_query._read_identity_meta(payload_path) == (
+        report_query.IdentityIndexMeta(
+            "success",
+            "2026-08-25T01:00:00Z",
+            "2026-08-25T01:05:00Z",
+            "chembl_baseline",
+            "wf-run-1",
+        )
+    )
