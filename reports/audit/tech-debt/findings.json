@@ -1,0 +1,52 @@
+{
+  "run_id": "20260825T134536Z-debt-cycle-d9ac42612b",
+  "surface_score": 2,
+  "gate": "WARN",
+  "origin_main_sha": "e57d2818691442c4bc8d7857eea3e39755bdc2a9",
+  "findings": [
+    {
+      "id": "TECH-DEBT-001",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "governance-pin-drift",
+      "path": "configs/quality/technical_debt_audit_registry.yaml",
+      "observation": "Current tech-debt audit pin was stale versus live evidence on origin/main.",
+      "method": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+      "expected": "Pin SHA/hash and headlines match live evidence.",
+      "actual": "Pin 9f57924063 / 3d8fc076… while live e57d281869 / 9f6cd25c… after refresh.",
+      "impact": "False-green audit report vs live gates.",
+      "root_cause": "Evidence files moved after last re-pin without registry sync.",
+      "remediation": "Re-pin registry + current report. Done on fix/audit-cycle-tech-debt-d9ac42612b.",
+      "effort": "S",
+      "github_issue": 9646,
+      "paydown_status": "validated_on_feature_branch",
+      "automated_fix_possible": true
+    },
+    {
+      "id": "TECH-DEBT-002",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "generated-artifact-drift",
+      "path": "reports/quality/debt-governance-gates.json",
+      "observation": "Live debt-governance gates failed on inventory/scorecard hash mismatch and stale remote-main baseline.",
+      "method": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+      "expected": "0 failing gates.",
+      "actual": "Before: 3 live fails (hash, coherence, generated_artifact_drift). After paydown: 0 fail, 45/45 pass.",
+      "impact": "Release gate failing.",
+      "root_cause": "Quality artifacts not regenerated after Wave B source-tree change.",
+      "remediation": "refresh_governance_artifacts + remote-main baseline --update + gates --update.",
+      "effort": "M",
+      "github_issue": 9647,
+      "paydown_status": "validated_on_feature_branch",
+      "automated_fix_possible": true
+    }
+  ]
+}
