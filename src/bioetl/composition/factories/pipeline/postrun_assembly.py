@@ -28,6 +28,10 @@ from bioetl.domain.context import PipelineContext
 from bioetl.domain.ports import MetadataCoordinatorPort, MetadataWriterPort
 from bioetl.infrastructure.time import SystemClock
 
+from bioetl.application.core.pipeline_aux_service_protocols import (
+    PipelinePostrunServicesProtocol,
+)
+
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.services.quality.dq_report_service import DQReportService
@@ -153,9 +157,6 @@ def build_postrun_service(
         pipeline=pipeline,
         logger_port=logger_port,
         dq_configs=dq_configs,
-    )
-    from bioetl.application.core.pipeline_aux_service_protocols import (
-        PipelinePostrunServicesProtocol,
     )
 
     return PostrunService(

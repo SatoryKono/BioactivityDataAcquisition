@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Collection
-from typing import Protocol
 
 from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
@@ -28,13 +27,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.ports.noop import NoOpPiiHasher
 from bioetl.infrastructure.security.pii_hasher import Sha256PiiHasher
 
-
-class ContractPolicyLoader(Protocol):
-    """Callable contract for loading pipeline contract policy."""
-
-    def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol:
-        """Load contract policy for provider/entity."""
-        ...
+from bioetl.application.ports.pipeline import ContractPolicyLoader
 
 
 def _default_pii_hasher() -> PiiHasherPort:

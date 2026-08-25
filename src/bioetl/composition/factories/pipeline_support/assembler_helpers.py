@@ -3,13 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
-from bioetl.application.core.wiring.transformer import BaseTransformer
-from bioetl.composition.factories.datasource.data_source_factory import (
-    DataSourceCreatorProtocol,
-)
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
@@ -21,30 +16,7 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     extract_entity_type as extract_entity_type,
 )
 
-
-class _FactoryLike(Protocol):
-    @property
-    def pipeline_name(self) -> str: ...
-
-    @property
-    def _create_data_source(self) -> DataSourceCreatorProtocol: ...
-
-    @property
-    def pipeline_class(self) -> type[BasePipeline]: ...
-
-    @property
-    def provider(self) -> str: ...
-
-    @property
-    def transformer_class(self) -> type[BaseTransformer] | None: ...
-
-    @property
-    def pandera_silver_schema(self) -> object | None: ...
-
-    def create_with_services(
-        self,
-        request: _CreatePipelineWithServicesRequest,
-    ) -> BasePipeline: ...
+from bioetl.composition.contracts.factories import FactoryLike as _FactoryLike
 
 
 def build_factory_context(

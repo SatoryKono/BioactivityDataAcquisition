@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.dq._context_resolver_support import DQServiceBundle
 from bioetl.composition.factories.services.port_factories import (
@@ -49,22 +49,12 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+from bioetl.application.ports.storage import (
+    StorageFactoryProtocol as _StorageFactoryProtocol,
+)
 
-class _StorageFactoryProtocol(Protocol):
-    """Structural contract shared by the lazy and concrete storage factories."""
-
-    @staticmethod
-    def create(
-        settings: Settings,
-        config: PipelineYamlConfig,
-        logger: LoggerPort,
-        metrics: MetricsPort,
-        audit: AuditPort,
-        tracing: TracingPort | None = None,
-        metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-        pipeline_name: str | None = None,
-    ) -> StorageContext: ...
+from bioetl.application.core.wiring.runtime import PipelineService
+from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
 
 class _LazyStorageFactory:
@@ -222,8 +212,6 @@ def assemble_pipeline_service(
     common_ports: CommonServicePorts,
 ) -> PipelineService:
     """Assemble ``PipelineService`` from pre-built common ports."""
-    from bioetl.application.core.wiring.runtime import PipelineService
-    from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
 
     metadata_writer = MetadataWriter(logger=logger)
     dq_services = _coerce_dq_service_bundle(common_ports.dq_services)

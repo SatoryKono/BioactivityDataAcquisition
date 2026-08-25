@@ -11,12 +11,44 @@ from bioetl.infrastructure.config.field_group_loader import (
     load_field_groups,
 )
 
+from bioetl.application.services.quality.dq_report_service import DQReportService
+from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
+from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+    bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
+)
+from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+    build_runner_factories as _build_runner_factories_builder_impl,
+)
+from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
+    build_support_services as _build_support_services_builder_impl,
+)
+from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
+    CompositeFilterExtractor,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
+    CompositeSupportServicesFactory,
+)
+from bioetl.composition.bootstrap.runtime.observability import (
+    bootstrap_logger,
+    bootstrap_tracer,
+)
+from bioetl.composition.bootstrap.runtime.pipeline import (
+    bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
+)
+from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
+    RunnerFactoryBuilder,
+    resolve_bronze_opts,
+)
+from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
+from bioetl.composition.runtime_builders.config_access import get_settings
+from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+
 if TYPE_CHECKING:
     import polars as pl
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
-    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
@@ -33,7 +65,6 @@ FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
 def _composite_basics_uuid_factory() -> str:
     """Factory function for composite basics UUID generation."""
-    from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
 
     return str(create_runtime_occurrence_uuid("composite_basics"))
 
@@ -46,17 +77,6 @@ def bootstrap_runtime_basics_facade(
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap."""
     from uuid import UUID
-
-    from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_logger,
-        bootstrap_tracer,
-    )
-    from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
     def _bootstrap_logger(
         pipeline_name: str,
@@ -101,19 +121,6 @@ def build_runner_factories_facade(
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
     """Build seed/dependency/enricher runner factories for composite phases."""
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_runner_factories as _build_runner_factories_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-        CompositeFilterExtractor,
-    )
-    from bioetl.composition.bootstrap.runtime.pipeline import (
-        bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-        RunnerFactoryBuilder,
-        resolve_bronze_opts,
-    )
 
     return build_runner_factories_impl(
         config=config,
@@ -137,12 +144,6 @@ def build_support_services_facade(
     load_field_group_registry_fn: Callable[..., object],
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_support_services as _build_support_services_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
-        CompositeSupportServicesFactory,
-    )
 
     return build_support_services_impl(
         config=config,
@@ -224,8 +225,6 @@ def _create_dq_report_service(
     Returns:
         DQReportService ready for composite pipeline DQ report generation.
     """
-    from bioetl.application.services.quality.dq_report_service import DQReportService
-    from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 
     reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
     report_writer = DQReportWriter(

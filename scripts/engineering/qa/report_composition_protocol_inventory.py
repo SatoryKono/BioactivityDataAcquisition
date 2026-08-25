@@ -57,11 +57,15 @@ def collect_scoped_protocols() -> list[dict[str, Any]]:
     rows.extend(
         _protocol_rows(PROJECT_ROOT / "src" / "bioetl" / "application" / "ports")
     )
-    entity_type = (
-        PROJECT_ROOT / "src" / "bioetl" / "domain" / "ports" / "entity_type.py"
+    domain_extra = (
+        PROJECT_ROOT / "src" / "bioetl" / "domain" / "ports" / "entity_type.py",
+        PROJECT_ROOT / "src" / "bioetl" / "domain" / "ports" / "pipeline_callbacks.py",
+        PROJECT_ROOT / "src" / "bioetl" / "domain" / "ports" / "source_config.py",
+        PROJECT_ROOT / "src" / "bioetl" / "domain" / "ports" / "config_mapper.py",
     )
-    if entity_type.exists():
-        rows.extend(_protocol_rows(entity_type))
+    for path in domain_extra:
+        if path.exists():
+            rows.extend(_protocol_rows(path))
     return rows
 
 

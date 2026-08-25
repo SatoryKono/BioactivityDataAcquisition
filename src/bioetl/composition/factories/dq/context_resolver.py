@@ -25,6 +25,8 @@ from bioetl.composition.factories.dq._context_resolver_support import (
 )
 from bioetl.composition.factories.dq.factory import DQServicesFactory
 
+from bioetl.application.services.quality.dq_report_service import DQReportService
+
 if TYPE_CHECKING:
     from pydantic import BaseModel
 
@@ -139,7 +141,6 @@ def _create_dq_report_service(
     metrics: MetricsPort | None,
 ) -> object:
     """Bridge the DQ report service constructor to the factory protocol."""
-    from bioetl.application.services.quality.dq_report_service import DQReportService
 
     return DQReportService(
         logger=logger,

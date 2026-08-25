@@ -1,100 +1,66 @@
-"""Public composition entrypoint focused on execution-oriented APIs.
+"""Explicit composition root (S5 / #9601, ADR-058).
 
-`bioetl.composition.entrypoints` remains a stable import seam with an explicit
-execution-focused public surface.
+Typed factory registry for application/domain ports. ``*_api.py`` modules
+remain thin adapters. Full DI framework is intentionally not introduced
+(local-only determinism, ADR-010).
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Mapping
+from typing import cast
 
-from bioetl.composition.lazy_exports import install_lazy_exports
+from bioetl.composition._pipeline_execution import (
+    ensure_metrics_server_started as ensure_metrics_server_started,
+)
+from bioetl.composition._resource_management import (
+    MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
+)
+from bioetl.composition._resource_management import (
+    get_lifecycle_service as get_lifecycle_service,
+)
+from bioetl.composition._resource_management import preview_cleanup as preview_cleanup
+from bioetl.composition._services import (
+    get_bronze_cleanup_service as get_bronze_cleanup_service,
+)
+from bioetl.composition._services import (
+    get_contract_migration_service as get_contract_migration_service,
+)
+from bioetl.composition._services import (
+    get_pipeline_runner_service as get_pipeline_runner_service,
+)
+from bioetl.composition._services import get_vacuum_service as get_vacuum_service
 
-if TYPE_CHECKING:
-    from bioetl.composition.composite_api import (
-        bootstrap_composite_runner,
-        load_composite_config,
-    )
-    from bioetl.composition.execution_api import (
-        ArchiveOptions,
-        PipelineRunResult,
-        RunOptions,
-        RunResult,
-        VacuumOptions,
-        build_pipeline_context,
-        create_pipeline_runner,
-        ensure_metrics_server_started,
-        maybe_start_metrics_server,
-        push_metrics_to_gateway,
-        run_pipeline,
-    )
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-_COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
-_COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
 __all__ = [
-    "ArchiveOptions",
-    "PipelineRunResult",
-    "RunOptions",
-    "RunResult",
-    "VacuumOptions",
-    "bootstrap_composite_runner",
-    "build_pipeline_context",
-    "create_pipeline_runner",
+    "MedallionLifecycleServiceProtocol",
     "ensure_metrics_server_started",
-    "load_composite_config",
-    "maybe_start_metrics_server",
-    "push_metrics_to_gateway",
-    "run_pipeline",
+    "get_bronze_cleanup_service",
+    "get_contract_migration_service",
+    "get_lifecycle_service",
+    "get_pipeline_runner_service",
+    "get_vacuum_service",
+    "preview_cleanup",
+    "register",
+    "registered_ports",
+    "resolve",
 ]
 
-_PUBLIC_SYMBOL_TARGETS: dict[str, str] = {
-    "ArchiveOptions": _COMPOSITION_EXECUTION_API_MODULE,
-    "PipelineRunResult": _COMPOSITION_EXECUTION_API_MODULE,
-    "RunOptions": _COMPOSITION_EXECUTION_API_MODULE,
-    "RunResult": _COMPOSITION_EXECUTION_API_MODULE,
-    "VacuumOptions": _COMPOSITION_EXECUTION_API_MODULE,
-    "bootstrap_composite_runner": _COMPOSITION_COMPOSITE_API_MODULE,
-    "build_pipeline_context": _COMPOSITION_EXECUTION_API_MODULE,
-    "create_pipeline_runner": _COMPOSITION_EXECUTION_API_MODULE,
-    "ensure_metrics_server_started": _COMPOSITION_EXECUTION_API_MODULE,
-    "load_composite_config": _COMPOSITION_COMPOSITE_API_MODULE,
-    "maybe_start_metrics_server": _COMPOSITION_EXECUTION_API_MODULE,
-    "push_metrics_to_gateway": _COMPOSITION_EXECUTION_API_MODULE,
-    "run_pipeline": _COMPOSITION_EXECUTION_API_MODULE,
-}
-install_lazy_exports(
-    module_globals=globals(),
-    public_exports=_PUBLIC_SYMBOL_TARGETS,
-    module_name=__name__,
-)
+_REGISTRY: dict[type[object], Callable[[], object]] = {}
 
 
-def start_metrics_server(
-    port: int = 8000,
-    addr: str = "0.0.0.0",
-    *,
-    fail_fast: bool = False,
-    retry_count: int = 3,
-    retry_delay: float = 1.0,
-    logger: LoggerPort | None = None,
-) -> bool:
-    """Retained compatibility wrapper for observability-owned metrics startup."""
-    from bioetl.composition.observability_api import start_metrics_server as _impl
-
-    return _impl(
-        port=port,
-        addr=addr,
-        fail_fast=fail_fast,
-        retry_count=retry_count,
-        retry_delay=retry_delay,
-        logger=logger,
-    )
+def register[T](port: type[T], factory: Callable[[], T]) -> None:
+    """Register a zero-arg factory for a port/protocol type."""
+    _REGISTRY[cast(type[object], port)] = cast(Callable[[], object], factory)
 
 
-def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
-    """Retained compatibility wrapper for composite-owned pipeline config loading."""
-    from bioetl.composition.composite_api import load_pipeline_config as _impl
+def resolve[T](port: type[T]) -> T:
+    """Resolve a registered port factory."""
+    factory = _REGISTRY.get(cast(type[object], port))
+    if factory is None:
+        raise KeyError(f"no composition factory registered for {port!r}")
+    return cast(T, factory())
 
-    return _impl(pipeline_name)
+
+def registered_ports() -> Mapping[type[object], Callable[[], object]]:
+    """Return a snapshot of the composition factory registry."""
+    return dict(_REGISTRY)

@@ -3,22 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
-
-
-class PipelineRunnerProtocol(Protocol):
-    """Minimal runner contract required for ledger collaborator attachment."""
-
-    services: object
-
-    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
-        """Attach the run-ledger collaborator."""
-        ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +133,11 @@ from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
     _iter_unique_candidates,
 )
 
+from bioetl.application.ports.pipeline import PipelineRunnerProtocol
+from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
+    FileContractEvidenceRecorder,
+)
+
 
 def _attach_candidate_artifact_recorder(
     candidate: object,
@@ -173,10 +168,6 @@ def _attach_contract_evidence_recorder(
     if base_path is None:
         return
     from pathlib import Path
-
-    from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
-        FileContractEvidenceRecorder,
-    )
 
     manifest_root = Path(base_path).parent / "run_manifest"
     attach(FileContractEvidenceRecorder(base_path=manifest_root))

@@ -4,15 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
-    from bioetl.application.core.pipeline_services import PipelineService
-    from bioetl.application.services.lineage.metadata_coordinator import (
-        MetadataCoordinator,
-    )
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
     )
@@ -23,38 +19,15 @@ if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.domain.ports import (
-        AuditPort,
         DataSourcePort,
-        DQMonitorPort,
         LoggerPort,
         MetricsPort,
-        SilverValidatorPort,
-        TracingPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.config.domain_config_resolver import DomainConfigMapper
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
-
-class BaseServicesFactoryProtocol(Protocol):
-    """Class-like service factory surface used by lazy composition seams."""
-
-    def _create_metrics(self, settings: Settings) -> MetricsPort: ...
-
-    def create_common_services(
-        self,
-        settings: Settings,
-        logger: LoggerPort,
-        data_source: DataSourcePort,
-        pipeline_config: PipelineYamlConfig,
-        pipeline_name: str,
-        audit: AuditPort | None = None,
-        metrics: MetricsPort | None = None,
-        tracer: TracingPort | None = None,
-        dq_monitor: DQMonitorPort | None = None,
-        metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-    ) -> PipelineService: ...
+from bioetl.application.ports.pipeline import BaseServicesFactoryProtocol
 
 
 @dataclass(frozen=True, slots=True)

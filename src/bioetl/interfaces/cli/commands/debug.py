@@ -98,7 +98,7 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    from bioetl.composition.execution_service_access import (
+    from bioetl.composition.execution_api import (
         get_pipeline_runner_service as _impl,
     )
 

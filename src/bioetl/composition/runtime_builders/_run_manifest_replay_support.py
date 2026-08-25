@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -22,24 +22,9 @@ if TYPE_CHECKING:
         ReproducibilityPolicyAssessment,
     )
 
-
-class _ManifestLaunchContextBuilder(Protocol):
-    def build_launch_context_snapshot(
-        self,
-        ctx: PipelineRunContext,
-        *,
-        run_type_value: str,
-        execution_context_value: str,
-        configured_required_persistence_profile: str | None,
-        required_persistence_profile: str,
-        required_persistence_profile_opt_down: bool,
-        strict_exact_replay_supported: bool,
-        reproducibility_family: str,
-        replay_family_contract: str,
-        strict_replay_runtime_verdict: str,
-        replay_support_scope: str,
-        replay_support_reason: str,
-    ) -> dict[str, object]: ...
+from bioetl.composition.contracts.runtime import (
+    ManifestLaunchContextBuilder as _ManifestLaunchContextBuilder,
+)
 
 
 def validate_exact_replay_boundary(

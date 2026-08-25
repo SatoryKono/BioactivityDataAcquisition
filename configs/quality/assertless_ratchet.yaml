@@ -1,0 +1,6 @@
+# S9 / #9605 — shrink-only assertless-test ratchet.
+schema_version: 1
+owner: "@bioetl-architecture"
+linked_issue: "9605"
+max_assertless_tests: 102
+target_assertless_tests: 77

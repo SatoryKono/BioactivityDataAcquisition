@@ -28,6 +28,8 @@ from bioetl.composition.factories.services.pipeline_processing_components_builde
 from bioetl.domain.config import TableConfig
 from bioetl.infrastructure.validation import ContractAwareGoldValidator
 
+from bioetl.application.core.pipeline_services import PipelineService
+
 if TYPE_CHECKING:
     import pandera as pdr
     import pyarrow as pa
@@ -138,7 +140,6 @@ def create_record_processor_from_pipeline(
         pipeline,
         gold_schema=gold_schema,
     )
-    from bioetl.application.core.pipeline_services import PipelineService
 
     return create_record_processor_fn(
         request=_RecordProcessorBuildRequest(

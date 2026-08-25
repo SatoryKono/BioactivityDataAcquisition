@@ -45,6 +45,8 @@ from bioetl.infrastructure.observability.health_metrics_exposition import (
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
+from bioetl.infrastructure.adapters.http.health_monitor import ProviderHealthMonitor
+
 __all__ = [
     "HealthServerDependencies",
     "create_health_server_dependencies",
@@ -131,9 +133,6 @@ def _create_control_plane_ports(
 
 
 def _build_health_server_monitor(metrics: MetricsPort) -> HealthMonitorPort:
-    from bioetl.infrastructure.adapters.http.health_monitor import (
-        ProviderHealthMonitor,
-    )
 
     return ProviderHealthMonitor(metrics=metrics)
 
