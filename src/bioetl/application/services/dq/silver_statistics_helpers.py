@@ -186,7 +186,7 @@ def check_schema_drift_stats(
         SchemaDriftResult with new fields, missing fields, and type changes.
         Returns WARN/CRITICAL if missing fields or type changes are found.
     """
-    current_schema = dict(zip(df.columns, map(str, df.dtypes)))
+    current_schema = dict(zip(df.columns, map(str, df.dtypes), strict=True))
 
     if previous_schema is None:
         return SchemaDriftResult(

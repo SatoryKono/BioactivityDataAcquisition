@@ -18,7 +18,6 @@ from pathlib import Path
 import pytest
 import yaml
 from tests.architecture.quality_artifacts import (
-    load_quality_json,
     quality_artifact_path,
 )
 
