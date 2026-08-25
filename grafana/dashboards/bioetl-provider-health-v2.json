@@ -1203,7 +1203,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -1467,7 +1467,10 @@
           "type": "table",
           "fieldConfig": {
             "defaults": {
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
@@ -1544,7 +1547,10 @@
           "type": "table",
           "fieldConfig": {
             "defaults": {
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
@@ -1621,7 +1627,10 @@
           "type": "table",
           "fieldConfig": {
             "defaults": {
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
@@ -1818,7 +1827,8 @@
               "custom": {
                 "cellOptions": {
                   "type": "auto"
-                }
+                },
+                "inspect": true
               },
               "noValue": "VALID EMPTY — no events in the selected range (not missing telemetry)"
             },
@@ -1882,7 +1892,8 @@
               },
               "custom": {
                 "align": "auto",
-                "displayMode": "auto"
+                "displayMode": "auto",
+                "inspect": true
               },
               "mappings": [
                 {
@@ -2854,7 +2865,10 @@
                 ]
               },
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {

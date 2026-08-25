@@ -914,14 +914,23 @@ def test_incident_alert_count_and_dq_reason_have_honest_table_semantics() -> Non
         }
         for override in dq_suspects["fieldConfig"]["overrides"]
     }
-    assert overrides["Pipeline"]["custom.width"] == 160
-    assert overrides["Reason"]["custom.width"] == 300
+    assert overrides["Pipeline"]["custom.width"] == 70
+    assert "custom.width" not in overrides["Reason"]
+    assert overrides["Reason"]["custom.cellOptions"] == {
+        "type": "auto",
+        "wrapText": True,
+    }
     assert overrides["Signal"]["custom.align"] == "right"
     assert overrides["Signal"]["custom.width"] == 88
     assert overrides["Signal"]["custom.cellOptions"] == {
         "type": "color-text",
         "mode": "basic",
     }
+    assert "reason" not in overrides
+    visible_width = int(overrides["Pipeline"]["custom.width"]) + int(
+        overrides["Signal"]["custom.width"]
+    )
+    assert visible_width <= 187
 
 
 def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
@@ -1216,3 +1225,51 @@ def test_below_fold_tables_exclude_time_without_name_metric() -> None:
     funnel = _panel(_load("bioetl-run-explorer-v1.json"), 3011)
     custom = (funnel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
     assert custom.get("inspect") is True
+
+
+def test_cycle3_inspect_enabled_on_named_below_fold_tables() -> None:
+    """#9533 #9534 #9535 #9536: remaining inspect tables expose cell inspect."""
+    cases = (
+        ("bioetl-provider-health-v2.json", 9103),
+        ("bioetl-runtime.json", 256),
+        ("bioetl-runtime.json", 241),
+        ("bioetl-dq-v2.json", 121),
+        ("bioetl-dq-v2.json", 122),
+        ("bioetl-overview-v2.json", 9010),
+        ("bioetl-overview-v2.json", 9011),
+        ("bioetl-overview-v2.json", 9013),
+        ("bioetl-control-plane-v1.json", 908),
+        ("bioetl-control-plane-v1.json", 138),
+        ("bioetl-dq-v2.json", 118),
+        ("bioetl-dq-v2.json", 156),
+        ("bioetl-overview-v2.json", 9003),
+        ("bioetl-overview-v2.json", 9004),
+        ("bioetl-overview-v2.json", 9005),
+        ("bioetl-overview-v2.json", 9006),
+        ("bioetl-overview-v2.json", 9007),
+        ("bioetl-provider-health-v2.json", 9111),
+        ("bioetl-provider-health-v2.json", 9112),
+        ("bioetl-provider-health-v2.json", 9113),
+        ("bioetl-provider-health-v2.json", 107),
+        ("bioetl-provider-health-v2.json", 108),
+        ("bioetl-provider-health-v2.json", 114),
+    )
+    for dashboard_name, panel_id in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+        assert custom.get("inspect") is True, (dashboard_name, panel_id)
+
+
+def test_all_shipped_table_panels_enable_inspect() -> None:
+    """Every shipped Grafana table exposes cell inspect (DASH-FIRST-002)."""
+    missing: list[str] = []
+    for path in sorted(DASHBOARD_DIR.glob("*.json")):
+        dashboard = _load(path.name)
+        for panel in _iter_panels(list(dashboard.get("panels") or [])):
+            if panel.get("type") != "table":
+                continue
+            custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+            if custom.get("inspect") is True:
+                continue
+            missing.append(f"{path.name}:{panel.get('id')}:{panel.get('title')}")
+    assert not missing, "tables missing inspect=true:\n" + "\n".join(missing)
