@@ -23,7 +23,7 @@ from scripts.ops.observability.grafana.check_dashboard_panel_fill import (
     run_panel_fill_check,
 )
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.network]
 
 
 def _dotenv_value(name: str) -> str:
@@ -67,6 +67,11 @@ def test_every_dashboard_panel_fill_has_no_gateway_or_query_error() -> None:
     Valid empty / No data / UNKNOWN is allowed. Grafana must already be running;
     this test does not start docker-compose.monitoring.yml.
     """
+    opt_in = os.getenv("BIOETL_GRAFANA_PANEL_FILL", "").strip().lower()
+    if opt_in not in {"1", "true", "yes"}:
+        pytest.skip(
+            "Live Grafana panel-fill is opt-in (BIOETL_GRAFANA_PANEL_FILL=true)"
+        )
     config = _fill_config()
     skip_reason = grafana_can_query(config)
     if skip_reason is not None:
