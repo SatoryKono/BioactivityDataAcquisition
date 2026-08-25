@@ -585,6 +585,73 @@ def test_osv_high_critical_gate_ignores_medium_and_fails_high() -> None:
     assert policy.collect_blocking_osv_findings(high) == ["GHSA-high HIGH demo==1.0"]
 
 
+def test_osv_gate_fails_closed_for_unknown_severity() -> None:
+    payload = {
+        "results": [
+            {
+                "packages": [
+                    {
+                        "package": {"name": "demo", "version": "2.0"},
+                        "vulnerabilities": [{"id": "GHSA-unknown"}],
+                    }
+                ]
+            }
+        ]
+    }
+
+    assert policy.collect_blocking_osv_findings(payload) == [
+        "GHSA-unknown UNKNOWN demo==2.0"
+    ]
+    assert policy.collect_blocking_osv_findings({}) == [
+        "OSV JSON missing results array"
+    ]
+
+
+def test_osv_gate_ignores_malformed_nested_entries_without_reordering() -> None:
+    payload = {
+        "results": [
+            None,
+            {"packages": [None, {"package": "invalid"}]},
+            {
+                "packages": [
+                    {
+                        "package": {"name": "first", "version": "1"},
+                        "vulnerabilities": [
+                            None,
+                            {
+                                "id": "LOW-id",
+                                "database_specific": {"severity": "LOW"},
+                            },
+                            {
+                                "id": "HIGH-id",
+                                "database_specific": {"severity": "HIGH"},
+                            },
+                        ],
+                    },
+                    {
+                        "vulnerabilities": [
+                            {
+                                "id": "CRITICAL-id",
+                                "database_specific": {"severity": "CRITICAL"},
+                            }
+                        ]
+                    },
+                ]
+            },
+        ]
+    }
+
+    assert policy.collect_blocking_osv_findings(payload) == [
+        "HIGH-id HIGH first==1",
+        "CRITICAL-id CRITICAL unknown==?",
+    ]
+
+
+def test_cvss_vector_parser_rejects_non_v3_and_incomplete_vectors() -> None:
+    assert policy._cvss_from_vector("not-a-vector") is None
+    assert policy._cvss_from_vector("CVSS:3.1/AV:N/AC:L") is None
+
+
 def test_security_policy_lists_canonical_supply_chain_scanners() -> None:
     security_md = (ROOT / ".github/SECURITY.md").read_text(encoding="utf-8")
 
