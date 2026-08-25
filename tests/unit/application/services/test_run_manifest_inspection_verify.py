@@ -251,6 +251,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
         manifest_id=manifest.manifest_id,
         run_id=run_id,
         _entry_id_factory=lambda: "entry-chain-1",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     ledger_service.record_manifest_created(manifest)
     ledger_service.record_artifact_published(
@@ -344,6 +345,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
         manifest_id=manifest.manifest_id,
         run_id=run_id,
         _entry_id_factory=lambda: f"entry-smoke-{len(ledger_store.items) + 1}",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     ledger_service.record_manifest_created(manifest)
     ledger_service.record_run_started()

@@ -85,41 +85,19 @@ class TestSilverWriterInit:
 
     def test_runtime_helper_builds_defaults(self) -> None:
         """Runtime helper should resolve the standard SilverWriter defaults."""
-        from bioetl.domain.medallion import WriteModePolicy
-        from bioetl.domain.ports.noop import NoOpMetadataWriter
-        from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
         from bioetl.infrastructure.storage.silver.runtime_helpers import (
             resolve_silver_writer_runtime,
         )
-        from bioetl.infrastructure.storage.delta.resilience import (
-            DEFAULT_SILVER_MERGE_POLICY,
-        )
-        from bioetl.infrastructure.validation.pandera_validator import (
-            NoOpValidator,
-        )
 
-        (
-            tracing,
-            write_policy,
-            silver_validator,
-            metadata_writer,
-            dq_calculator,
-            merge_resilience_policy,
-        ) = resolve_silver_writer_runtime(
-            tracing=None,
-            write_policy=None,
-            silver_validator=None,
-            metadata_writer=None,
-            dq_calculator=None,
-            merge_resilience_policy=None,
-        )
-
-        assert tracing is None
-        assert isinstance(write_policy, WriteModePolicy)
-        assert isinstance(silver_validator, NoOpValidator)
-        assert isinstance(metadata_writer, NoOpMetadataWriter)
-        assert isinstance(dq_calculator, DQMetricsCalculator)
-        assert merge_resilience_policy is DEFAULT_SILVER_MERGE_POLICY
+        with pytest.raises(ValueError, match="SilverValidatorPort is required"):
+            resolve_silver_writer_runtime(
+                tracing=None,
+                write_policy=None,
+                silver_validator=None,
+                metadata_writer=None,
+                dq_calculator=None,
+                merge_resilience_policy=None,
+            )
 
     def test_runtime_helper_preserves_custom_dependencies(self) -> None:
         """Runtime helper should preserve explicitly provided dependencies."""

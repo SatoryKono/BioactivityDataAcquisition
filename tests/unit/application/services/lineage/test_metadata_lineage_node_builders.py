@@ -76,9 +76,9 @@ class TestFragmentTimestamp:
         assert result == dt1
 
     def test_fragment_timestamp_all_none(self):
-        """Test that current_utc_time is returned when all values are None."""
-        result = fragment_timestamp(None, None, None)
-        assert isinstance(result, datetime)
+        """Absence of timestamps is fail-closed, not wall-clock."""
+        with pytest.raises(RuntimeError, match="wall-clock fallback is not allowed"):
+            fragment_timestamp(None, None, None)
 
 
 class TestBuildFragmentId:

@@ -63,6 +63,7 @@ class PublicationSchema(ETLRecordSchema):
     # === Primary Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=DOI_REGEX_PATTERN,
         description="Digital Object Identifier (PK)",
     )

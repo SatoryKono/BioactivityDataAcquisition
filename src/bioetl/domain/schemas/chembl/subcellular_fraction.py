@@ -29,6 +29,7 @@ class SubcellularFractionSchema(ETLRecordSchema):
     )
     subcellular_fraction: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_length={"min_value": 1, "max_value": 200},
         description="Normalized subcellular fraction name.",
     )

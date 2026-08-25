@@ -33,6 +33,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     build_silver_writer_runtime_services,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
@@ -161,7 +162,7 @@ def bootstrap_storage_adapter(
                     metrics=metrics,
                     audit=None,
                     logger=logger,
-                    silver_validator=None,
+                    silver_validator=NoOpValidator(),
                     metadata_writer=metadata_writer,
                     metadata_coordinator=metadata_coordinator,
                     lineage_store=lineage_store,

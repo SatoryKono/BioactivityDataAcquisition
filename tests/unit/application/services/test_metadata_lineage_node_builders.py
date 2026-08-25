@@ -112,13 +112,6 @@ def test_source_request_node_exposes_snapshot_identity() -> None:
     assert list(node.attributes["input_snapshot_content_hashes"]) == ["a" * 64]
 
 
-def test_fragment_timestamp_falls_back_to_sanctioned_time_helper(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    fixed_now = datetime(2026, 4, 24, 12, 0, tzinfo=UTC)
-    monkeypatch.setattr(
-        "bioetl.application.services.lineage.metadata_lineage_node_builders.current_utc_time",
-        lambda: fixed_now,
-    )
-
-    assert fragment_timestamp(None, None) == fixed_now
+def test_fragment_timestamp_all_none_raises() -> None:
+    with pytest.raises(RuntimeError, match="wall-clock fallback is not allowed"):
+        fragment_timestamp(None, None)

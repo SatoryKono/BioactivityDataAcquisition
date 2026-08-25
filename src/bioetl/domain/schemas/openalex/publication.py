@@ -43,6 +43,7 @@ class OpenAlexPublicationSchema(PublicationBaseSchema):
     # === Primary Key (OpenAlex-specific) ===
     openalex_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=r"^W\d+$",
         description="OpenAlex Work ID (e.g., W2148763428)",
     )

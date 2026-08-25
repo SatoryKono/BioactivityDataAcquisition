@@ -33,6 +33,10 @@ TARGETS: tuple[Path, ...] = (
     Path("src/bioetl/application/composite/checkpoint"),
     Path("src/bioetl/application/services/control_plane"),
     Path("src/bioetl/application/services/control_plane/manifest/service.py"),
+    Path("src/bioetl/application/services/lineage/metadata_lineage_fragment_ids.py"),
+    Path("src/bioetl/application/services/lineage/metadata_lineage_node_builders.py"),
+    Path("src/bioetl/application/services/ops/bronze_cleanup_service.py"),
+    Path("src/bioetl/application/services/workflow/control_plane/execution_service.py"),
     Path("src/bioetl/composition/_pipeline_execution.py"),
     Path("src/bioetl/composition/bootstrap/runtime/pipeline_context_builder.py"),
 )
@@ -75,13 +79,11 @@ def _datetime_now_calls(py_file: Path) -> list[str]:
 
 
 def _current_utc_time_refs(py_file: Path) -> list[str]:
-    if "src/bioetl/application/composite/checkpoint/" not in py_file.as_posix():
-        return []
     source = py_file.read_text(encoding="utf-8")
     tree = ast.parse(source)
     refs: list[str] = []
     for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom) and node.module == "bioetl.domain.context":
+        if isinstance(node, ast.ImportFrom):
             for alias in node.names:
                 if alias.name == "current_utc_time":
                     refs.append(
@@ -93,6 +95,14 @@ def _current_utc_time_refs(py_file: Path) -> list[str]:
             and node.func.id == "current_utc_time"
         ):
             refs.append(f"{_relative_path(py_file)}:{node.lineno}: current_utc_time()")
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "current_utc_time"
+        ):
+            refs.append(
+                f"{_relative_path(py_file)}:{node.lineno}: .current_utc_time()"
+            )
     return refs
 
 

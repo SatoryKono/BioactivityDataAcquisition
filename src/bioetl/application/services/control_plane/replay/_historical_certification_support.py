@@ -156,6 +156,7 @@ class HistoricalReplayCertificationValidator:
             dq_contract_compatibility_hash=provenance.dq_contract_compatibility_hash,
             effective_config_artifact_id=provenance.effective_config_artifact_id,
             _entry_id_factory=entry_id_factory,
+            _occurred_at_factory=lambda: manifest.created_at,
         )
 
     @staticmethod

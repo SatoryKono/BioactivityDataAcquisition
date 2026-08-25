@@ -38,6 +38,7 @@ class MoleculeSchema(ETLRecordSchema):
     # === Identifiers ===
     molecule_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="Canonical molecule ID (ChEMBL ID).",
     )
