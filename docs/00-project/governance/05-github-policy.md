@@ -470,6 +470,17 @@ concurrency:
   cancel-in-progress: true
 ```
 
+Required push workflows on `main` (Tests, Lint and Architecture Gates, CodeQL)
+MUST NOT share a ref-wide group. Queued runs for an older SHA are otherwise
+discarded when a newer `main` SHA arrives, even with `cancel-in-progress: false`.
+Those three workflows use:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+```
+
 ______________________________________________________________________
 
 ## Quick Reference
