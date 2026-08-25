@@ -794,6 +794,10 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 45
               }
             ]
           },
@@ -1094,6 +1098,10 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
