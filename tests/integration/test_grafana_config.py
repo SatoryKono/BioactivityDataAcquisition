@@ -1425,7 +1425,11 @@ def test_review_and_context_panels_use_no_scroll_layout_contract() -> None:
     timings_targets = run_panels[3014].get("targets") or []
     assert len(timings_targets) == 1
     assert timings_targets[0].get("root_selector") == "timings_and_failure"
-    assert run_panels[3014].get("transformations") in (None, [])
+    transforms = run_panels[3014].get("transformations") or []
+    assert transforms in (
+        [],
+        [{"id": "organize", "options": {"excludeByName": {"Time": True}}}],
+    )
 
     assert 9403 not in run_panels
     assert 3021 not in run_panels
