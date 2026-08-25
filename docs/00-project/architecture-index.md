@@ -69,3 +69,19 @@ copying these integers forward.
 `composition_factories_pipeline` `files_ge_250_loc` 2/2) is a tracked residual,
 not a budget-growth event. Do not raise the fan-in or loc caps; keep new
 internal imports and oversized files flat.
+
+## Architecture scorecard semantics
+
+`reports/quality/architecture-quality-scorecard.json` is a diagnostic grade,
+not an independent proof that every architecture program gate is satisfied.
+The `ddd_invariants` category uses module coverage status as a proxy; it does
+not count aggregates or prove invariant completeness. The
+`module_boundaries_coupling` category uses hotspot budget warnings and duplicate
+clusters as proxies; families exactly at budget remain non-blocking but are
+reported in `diagnostics`.
+
+The diagnostic payload also records the live lazy-import observation against
+`configs/quality/lazy_import_ratchet.yaml` and the composition module count
+against the shrink-only ADR-059 cap in
+`configs/quality/package_cohesion_budget.yaml`. Program-gate thresholds remain
+owned by their executable checks and are not changed by scorecard regeneration.

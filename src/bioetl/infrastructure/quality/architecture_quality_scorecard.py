@@ -13,9 +13,12 @@ from scripts.engineering.ci.validate_registry_dq_refs import (
 from scripts.engineering.qa.report_adr_enforcement_matrix import (
     build_payload as build_adr_enforcement_matrix,
 )
+from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports
 
 from bioetl.infrastructure.quality.architecture_quality_scoring import (
     _build_categories,
+    _build_diagnostic_payload,
+    _count_hotspot_families_at_budget,
     _interpretation,
     _score_category,
 )
@@ -71,6 +74,8 @@ def _load_scorecard_inputs(repo_root: Path) -> tuple[JsonMap, ...]:
         _load_json(repo_root, "reports/quality/test-governance-current.json"),
         build_adr_enforcement_matrix(repo_root=repo_root),
         _load_yaml(repo_root, "configs/quality/debt_scorecard.yaml"),
+        _load_yaml(repo_root, "configs/quality/lazy_import_ratchet.yaml"),
+        _load_yaml(repo_root, "configs/quality/package_cohesion_budget.yaml"),
     )
 
 
@@ -156,6 +161,10 @@ def _build_source_artifacts(
             "blocking_gap_count": adr_enforcement_matrix["summary"][
                 "blocking_gap_count"
             ],
+        },
+        "diagnostic_policy": {
+            "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
+            "package_cohesion_budget": "configs/quality/package_cohesion_budget.yaml",
         },
     }
 
@@ -315,30 +324,6 @@ def _build_debt_budget_policy(scorecard: JsonMap) -> dict[str, object]:
     }
 
 
-def _count_hotspot_families_at_budget(
-    hotspot_baseline: JsonMap,
-) -> dict[str, object]:
-    """Surface at-budget families for narrative honesty (ARCH-RES-06).
-
-    Hard gates still fail only on ``budget_warnings`` (over budget). At-budget
-    families remain non-blocking but must be visible in scorecard metrics so
-    coupling scores are not misread as infinite headroom.
-    """
-    names: list[str] = []
-    for family in hotspot_baseline.get("families", []):
-        if not isinstance(family, dict):
-            continue
-        notes = family.get("budget_review_notes") or []
-        if any(
-            isinstance(note, str) and note.startswith("at_budget:") for note in notes
-        ):
-            name = family.get("name")
-            if isinstance(name, str):
-                names.append(name)
-    names.sort()
-    return {"count": len(names), "names": names}
-
-
 def build_architecture_quality_scorecard(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -358,6 +343,8 @@ def build_architecture_quality_scorecard(
         test_governance_report,
         adr_enforcement_matrix,
         scorecard,
+        lazy_import_ratchet,
+        package_cohesion_budget,
     ) = _load_scorecard_inputs(repo_root)
 
     metrics = _build_architecture_quality_metrics(
@@ -373,6 +360,14 @@ def build_architecture_quality_scorecard(
         test_governance_report,
         adr_enforcement_matrix,
         scorecard,
+    )
+    composition_root = repo_root / "src" / "bioetl" / "composition"
+    diagnostics = _build_diagnostic_payload(
+        families_at_budget=_count_hotspot_families_at_budget(hotspot_baseline),
+        lazy_import_observed_count=len(collect_lazy_imports(composition_root)),
+        lazy_import_ratchet=lazy_import_ratchet,
+        composition_module_count=sum(1 for _ in composition_root.rglob("*.py")),
+        package_cohesion_budget=package_cohesion_budget,
     )
     categories = _build_categories(metrics)
     integral_score = round(
@@ -407,6 +402,7 @@ def build_architecture_quality_scorecard(
         "weights_sum": weights_sum,
         "integral_score": integral_score,
         "interpretation": _interpretation(integral_score),
+        "diagnostics": diagnostics,
         "categories": categories,
         "metrics": metrics,
         "debt_budget_policy": _build_debt_budget_policy(scorecard),
