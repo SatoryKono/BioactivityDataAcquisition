@@ -178,6 +178,7 @@ def _run_index_item(
         "workflow_id": _index_optional_label(item.workflow_id),
         "workflow_run_id": _index_optional_label(item.workflow_run_id),
         "started_at": item.started_at,
+        "run_type": item.run_type,
         **paths,
     }
 
@@ -214,6 +215,7 @@ def _diagnostic_index_item(
     row["workflow_id"] = "—"
     row["workflow_run_id"] = "—"
     row["started_at"] = None
+    row["run_type"] = None
     return row
 
 

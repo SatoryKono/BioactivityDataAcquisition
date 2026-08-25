@@ -19,6 +19,8 @@ endpoints:
   pipeline_run_reports:
     path: /ops/observability/pipeline-run-reports
     required_query: [pipeline]
+    # List items include identity peeks started_at, run_type, workflow_id,
+    # workflow_run_id so panel 3010 can bind var-run_type from the row.
   identity_table:
     path: /ops/control-plane/identity-table
     required_query: [pipeline, run_type, run_id]

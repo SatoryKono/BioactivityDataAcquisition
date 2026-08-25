@@ -31,6 +31,7 @@ class ReportIndexEntry:
     mtime: float
     workflow_id: str | None = None
     workflow_run_id: str | None = None
+    run_type: str | None = None
 
 
 def _root(root: Path | None) -> Path:
@@ -220,6 +221,7 @@ def _build_report_index_entry(
         mtime=mtime,
         workflow_id=meta.workflow_id if kind == "pipeline" else None,
         workflow_run_id=meta.workflow_run_id if kind == "pipeline" else None,
+        run_type=meta.run_type if kind == "pipeline" else None,
     )
 
 
