@@ -41,23 +41,8 @@ if TYPE_CHECKING:
 from bioetl.composition.factories.services.port_factories import (
     WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
-from bioetl.infrastructure.control_plane import (
-    FileWorkflowExecutionStateStore,
-    FileWorkflowLedgerStore,
-    FileWorkflowManifestStore,
-    FileWorkflowTransformArtifactStore,
-)
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
-)
-from bioetl.application.services.control_plane.workflow.execution_service import (
-    WorkflowExecutionService,
-)
-from bioetl.application.services.control_plane.workflow.manifest_service import (
-    WorkflowManifestService,
-)
-from bioetl.application.services.control_plane.workflow.inspection_service import (
-    WorkflowInspectionService,
 )
 
 
@@ -177,27 +162,35 @@ def get_workflow_execution_service(
     workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
+    execution_service = import_module(
+        "bioetl.application.services.control_plane.workflow.execution_service"
+    )
+    manifest_service_module = import_module(
+        "bioetl.application.services.control_plane.workflow.manifest_service"
+    )
+    control_plane = import_module("bioetl.infrastructure.control_plane")
+    infrastructure_time = import_module("bioetl.infrastructure.time")
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
-    manifest_store = FileWorkflowManifestStore(
+    manifest_store = control_plane.FileWorkflowManifestStore(
         base_path=output_root / "workflow_manifest",
         metrics=metrics,
     )
-    ledger_store = FileWorkflowLedgerStore(
+    ledger_store = control_plane.FileWorkflowLedgerStore(
         base_path=output_root / "workflow_ledger",
         metrics=metrics,
     )
-    state_store = FileWorkflowExecutionStateStore(
+    state_store = control_plane.FileWorkflowExecutionStateStore(
         base_path=output_root / "workflow_state",
         metrics=metrics,
     )
-    return WorkflowExecutionService(
+    return execution_service.WorkflowExecutionService(
         workflow_runner=get_workflow_runner_service(registry=registry),
-        manifest_service=WorkflowManifestService(
+        manifest_service=manifest_service_module.WorkflowManifestService(
             manifest_port=manifest_store,
-            clock=SystemClock(),
+            clock=infrastructure_time.SystemClock(),
             _manifest_id_factory=lambda: create_runtime_occurrence_id(
                 "workflow_manifest"
             ),
@@ -214,20 +207,24 @@ def get_workflow_execution_service(
 
 def get_workflow_inspection_service() -> WorkflowInspectionService:
     """Get workflow inspection service for operator diagnostics."""
+    inspection_service = import_module(
+        "bioetl.application.services.control_plane.workflow.inspection_service"
+    )
+    control_plane = import_module("bioetl.infrastructure.control_plane")
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
-    return WorkflowInspectionService(
-        manifest_port=FileWorkflowManifestStore(
+    return inspection_service.WorkflowInspectionService(
+        manifest_port=control_plane.FileWorkflowManifestStore(
             base_path=output_root / "workflow_manifest",
             metrics=metrics,
         ),
-        ledger_port=FileWorkflowLedgerStore(
+        ledger_port=control_plane.FileWorkflowLedgerStore(
             base_path=output_root / "workflow_ledger",
             metrics=metrics,
         ),
-        state_port=FileWorkflowExecutionStateStore(
+        state_port=control_plane.FileWorkflowExecutionStateStore(
             base_path=output_root / "workflow_state",
             metrics=metrics,
         ),
