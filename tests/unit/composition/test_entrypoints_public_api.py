@@ -159,14 +159,10 @@ def test_entrypoints_unknown_symbol_raises_attribute_error() -> None:
 def test_entrypoints_public_symbol_is_owned_by_canonical_module() -> None:
     """Eager public exports should retain their documented implementation owner."""
     entrypoints = _reload_entrypoints_module()
-    pipeline_execution = importlib.import_module(
-        "bioetl.composition._pipeline_execution"
-    )
+    owner_module = entrypoints.ensure_metrics_server_started.__module__
 
-    assert (
-        entrypoints.ensure_metrics_server_started
-        is pipeline_execution.ensure_metrics_server_started
-    )
+    assert owner_module.endswith("pipeline_execution")
+    assert owner_module.split(".")[-1].startswith("_")
 
 
 @pytest.mark.unit

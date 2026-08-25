@@ -6,6 +6,9 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.composition.observability import ObservabilityBundle
+from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
+    validate_strict_data_root_policy as _validate_strict_data_root_policy,
+)
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     build_runtime_config as _build_runtime_config,
     log_filter_config as _log_filter_config,
@@ -29,10 +32,6 @@ def validate_runner_data_root_policy(
     settings: Settings,
     required_persistence_profile: str,
 ) -> None:
-    from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
-        validate_strict_data_root_policy as _validate_strict_data_root_policy,
-    )
-
     _validate_strict_data_root_policy(
         settings=settings,
         required_profile=required_persistence_profile,

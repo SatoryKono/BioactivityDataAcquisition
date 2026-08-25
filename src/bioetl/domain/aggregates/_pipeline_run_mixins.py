@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates._pipeline_run_read_model_mixin import (
-    _PipelineRunAttrs,
-    _PipelineRunReadModelMixin,
-)
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
     PipelineFailed,
@@ -19,12 +16,43 @@ from bioetl.domain.aggregates.pipeline_run_stage_result import (
     StageStatus,
 )
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.types import JsonDict, RunID, RunType
+
+if TYPE_CHECKING:
+    from bioetl.domain.aggregates.events import DomainEvent
 
 __all__ = [
     "_PipelineRunAttrs",
     "_PipelineRunLifecycleMixin",
-    "_PipelineRunReadModelMixin",
 ]
+
+
+class _PipelineRunAttrs:
+    """Typed private attributes shared by PipelineRun behavior."""
+
+    __slots__ = (
+        "_ended_at",
+        "_events",
+        "_manifest_id",
+        "_metadata",
+        "_pipeline_name",
+        "_run_id",
+        "_run_type",
+        "_stages",
+        "_started_at",
+        "_status",
+    )
+
+    _run_id: RunID
+    _run_type: RunType
+    _pipeline_name: str
+    _status: PipelineRunState
+    _stages: list[StageResult]
+    _started_at: datetime | None
+    _ended_at: datetime | None
+    _events: list[DomainEvent]
+    _manifest_id: str | None
+    _metadata: JsonDict
 
 
 class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
@@ -67,20 +95,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         started_at: datetime,
         completed_at: datetime,
     ) -> None:
-        """Record successful completion of a pipeline stage.
-
-        Compatibility path (P2-9):
-            Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
-
-        Args:
-            stage: Name of the pipeline stage that succeeded.
-            result: Optional stage result payload for audit/lineage purposes.
-            records_processed: Number of records processed during this stage. Defaults to 0.
-            started_at: Explicit stage start timestamp.
-            completed_at: Explicit stage completion timestamp.
-        """
+        """Record a successful stage (compat P2-9 until 2026-06-30)."""
         self._assert_running("record_stage_success")
         completed = StageResult(
             stage=stage,
@@ -123,20 +138,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         started_at: datetime,
         completed_at: datetime,
     ) -> None:
-        """Record failure of a pipeline stage and fail the run.
-
-        Compatibility path (P2-9):
-            Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
-
-        Args:
-            stage: Name of the pipeline stage that failed.
-            error: Error message string or Exception instance describing the failure.
-            error_type: Optional error classification (e.g., exception class name).
-            started_at: Explicit stage start timestamp.
-            completed_at: Explicit failure timestamp.
-        """
+        """Record a failed stage and fail the run (compat P2-9)."""
         self._assert_running("record_stage_failure")
         error_message = str(error) if isinstance(error, Exception) else error
 

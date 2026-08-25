@@ -5,8 +5,8 @@ owner: "@bioetl-architecture"
 linked_issue: "9603"
 packages:
   - path: src/bioetl/domain/aggregates
-    max_modules: 15
-    max_package_loc: 2500
+    max_modules: 11
+    max_package_loc: 2100
     target_modules: 8
   - path: src/bioetl/application/services/control_plane
     max_modules: 150

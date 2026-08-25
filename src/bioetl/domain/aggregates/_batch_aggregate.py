@@ -6,12 +6,12 @@ from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-import bioetl.domain.aggregates._batch_lifecycle as lifecycle
 from bioetl.domain.aggregates._batch_mixins import (
     _BatchLifecycleMixin,
     _BatchMutationMixin,
 )
 from bioetl.domain.aggregates.batch import BatchRecord, BatchStatus
+from bioetl.domain.aggregates.events import BatchCreated
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
@@ -96,7 +96,14 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             created_at=created_at,
             metadata=metadata,
         )
-        lifecycle.emit_batch_created(batch._events, batch._created_at, run_id, batch_id)
+        batch._events.append(
+            BatchCreated(
+                occurred_at=batch._created_at,
+                run_id=run_id,
+                batch_id=batch_id,
+                record_count=0,
+            )
+        )
         return batch
 
     @classmethod
@@ -124,11 +131,12 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
             metadata=metadata,
         )
         batch.add_records(records)
-        lifecycle.emit_batch_created(
-            batch._events,
-            batch._created_at,
-            run_id,
-            batch_id,
-            record_count=batch.record_count,
+        batch._events.append(
+            BatchCreated(
+                occurred_at=batch._created_at,
+                run_id=run_id,
+                batch_id=batch_id,
+                record_count=batch.record_count,
+            )
         )
         return batch

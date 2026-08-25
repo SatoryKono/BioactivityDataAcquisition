@@ -1,7 +1,7 @@
 schema_version: 1
 owner: "@bioetl-architecture"
-linked_issue: "9600"
+linked_issue: "9619"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
-max_count: 102
+max_count: 101
 target_count: 60
 whitelist_category: optional_heavy_dependency

@@ -15,6 +15,9 @@ from bioetl.application.services.control_plane.manifest._inspection_support impo
 from bioetl.application.services.control_plane.manifest.diagnostics import (
     build_diagnostics_summary,
 )
+from bioetl.application.services.control_plane.manifest.diagnostics.finalization import (
+    refresh_reproducibility_audit_score,
+)
 from bioetl.application.services.control_plane.manifest.inspection_helpers import (
     build_authoritative_replay_dossier,
 )
@@ -38,9 +41,6 @@ from bioetl.application.services.control_plane.manifest.inspection_verification 
 )
 from bioetl.application.services.control_plane.manifest.inspection_verification import (
     parse_run_id,
-)
-from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
-    build_reproducibility_audit_scoring,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.ports import (
@@ -126,8 +126,7 @@ class RunManifestInspectionService(
         diagnostics["historical_replay_universe_durable_evidence_claimed"] = bool(
             durable_claim.get("claimed")
         )
-        score = build_reproducibility_audit_scoring(diagnostics)
-        diagnostics["reproducibility_audit_score"] = score
+        refresh_reproducibility_audit_score(diagnostics)
         self._attach_reproducibility_claim_views(diagnostics)
 
     def _attach_reproducibility_claim_views(
