@@ -8,10 +8,10 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `31168997c83429db9aa8ece0469ce7c2d347a2a9`
+Audited commit SHA: `825f8f36e0bc553c77ff50a6f07259a512bfab82`
 
 
-Evidence surface SHA-256: `f8bfe79adf1cde0176a84c7e35c246f2bb9f8897b4834df9c5e1a5a7f42fd5b0`
+Evidence surface SHA-256: `1306286a780c8cd41c88882bbe73331ad52ab368e4ffb3697c9118ef32cda1d9`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,8 +19,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "31168997c83429db9aa8ece0469ce7c2d347a2a9",
-  "evidence_surface_sha256": "f8bfe79adf1cde0176a84c7e35c246f2bb9f8897b4834df9c5e1a5a7f42fd5b0",
+  "audited_commit_sha": "825f8f36e0bc553c77ff50a6f07259a512bfab82",
+  "evidence_surface_sha256": "1306286a780c8cd41c88882bbe73331ad52ab368e4ffb3697c9118ef32cda1d9",
   "metrics": {
     "architecture_integral_score": 9.28,
     "architecture_interpretation": "good_targeted_improvements",
@@ -31,11 +31,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1564,
+    "fully_covered_module_count": 1563,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
     "partially_covered_module_count": 898,
-    "source_module_count": 2466,
+    "source_module_count": 2465,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -48,7 +48,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `31168997c8` for #9646 after the final #9647 artifact refresh; all debt-governance gates pass and no budget grows.
+Refresh reason: Re-pin to origin/main `825f8f36e0` for #9646 after concurrent #9620/#9627/#9631 source merges and the #9647 artifact refresh; all debt-governance gates pass and no budget grows.
 
 
 ## Executive summary
@@ -57,13 +57,13 @@ Refresh reason: Re-pin to origin/main `31168997c8` for #9646 after the final #96
 1. Release status: **debt-governance gates passing**.
 1. Architecture quality integral score: **9.28** (`good_targeted_improvements`). Integral score `9.28`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2466**
-   - fully_covered: **1564**
+   - source_module_count: **2465**
+   - fully_covered: **1563**
    - partially_covered: **898**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2466 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2465 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
