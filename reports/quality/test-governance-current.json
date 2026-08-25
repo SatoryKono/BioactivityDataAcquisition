@@ -615,28 +615,28 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "571",
+      "line": "573",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_http_empty_request"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1116",
+      "line": "1118",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_handle_request_error_without_logger"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1159",
+      "line": "1161",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_close_writer_handles_exceptions"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1243",
+      "line": "1245",
       "path": "tests/unit/interfaces/http/test_health_server.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_consume_headers"
@@ -1753,28 +1753,28 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "571",
+        "line": "573",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_http_empty_request"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1116",
+        "line": "1118",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_handle_request_error_without_logger"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1159",
+        "line": "1161",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_close_writer_handles_exceptions"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1243",
+        "line": "1245",
         "path": "tests/unit/interfaces/http/test_health_server.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_consume_headers"
@@ -2006,8 +2006,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2367,
-      "test_python_file_count": 2596,
+      "test_glob_file_count": 2369,
+      "test_python_file_count": 2598,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2046,13 +2046,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2367,
-    "total_test_functions": 24972,
+    "total_test_files": 2369,
+    "total_test_functions": 24990,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b9575d3cc58621d38c64c7797251066a7dffbbe49323bc59a5e550933b1dc8df",
+  "source_tree_sha256": "188ba7fcaa71d3d2d55701e7cd11e33949e1f8accb6c5db5f412b28dac7b7e93",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2072,8 +2072,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2367,
-    "test_python_file_count": 2596,
+    "test_glob_file_count": 2369,
+    "test_python_file_count": 2598,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2112,8 +2112,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2367,
-  "total_test_functions": 24972,
+  "total_test_files": 2369,
+  "total_test_functions": 24990,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
