@@ -2421,7 +2421,10 @@
               ],
               "mappings": [],
               "unit": "short",
-              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
+              "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
@@ -3639,7 +3642,10 @@
                 ]
               },
               "unit": "short",
-              "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure."
+              "noValue": "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
