@@ -1516,7 +1516,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -1617,6 +1617,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 200
                   }
                 ]
               },
@@ -1635,6 +1639,10 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   }
                 ]
               }

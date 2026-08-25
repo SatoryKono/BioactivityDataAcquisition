@@ -250,11 +250,6 @@ first_window_summary_tables:
     max_rows: 10
     owner: "@bioetl-observability"
     bind: limit
-  - dashboard: bioetl-dq-v2.json
-    id: 9102
-    max_rows: 5
-    owner: "@bioetl-observability"
-    bind: topk
   - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1
