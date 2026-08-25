@@ -21,6 +21,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_panels,
     get_panel_expressions,
     get_row_child_panels,
+    index_panels_by_base_title,
     load_dashboard,
 )
 
@@ -43,11 +44,7 @@ def _dashboard() -> dict:
 
 
 def _panels_by_title() -> dict[str, dict]:
-    return {
-        str(panel.get("title")): panel
-        for panel in get_dashboard_panels(_dashboard())
-        if panel.get("title")
-    }
+    return index_panels_by_base_title(get_dashboard_panels(_dashboard()))
 
 
 def _panel_expr(panel: dict) -> str:
