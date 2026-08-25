@@ -1184,11 +1184,23 @@ def test_run_explorer_artifact_ref_wraps_below_fold() -> None:
 
 
 def test_below_fold_tables_exclude_time_without_name_metric() -> None:
-    """#9514 #9511 #9513: below-fold inspect tables hide Grafana Time, not __name__."""
+    """Below-fold inspect tables hide Grafana Time, not __name__."""
     cases = (
         ("bioetl-run-explorer-v1.json", 3014),
         ("bioetl-incident-v1.json", 2002),
         ("bioetl-incident-v1.json", 2005),
+        ("bioetl-control-plane-v1.json", 9415),
+        ("bioetl-control-plane-v1.json", 9413),
+        ("bioetl-control-plane-v1.json", 9414),
+        ("bioetl-control-plane-v1.json", 9407),
+        ("bioetl-control-plane-v1.json", 9405),
+        ("bioetl-control-plane-v1.json", 9406),
+        ("bioetl-control-plane-v1.json", 9408),
+        ("bioetl-control-plane-v1.json", 9409),
+        ("bioetl-control-plane-v1.json", 9417),
+        ("bioetl-run-explorer-v1.json", 3022),
+        ("bioetl-run-explorer-v1.json", 3011),
+        ("bioetl-run-explorer-v1.json", 3012),
     )
     for dashboard_name, panel_id in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -1200,3 +1212,6 @@ def test_below_fold_tables_exclude_time_without_name_metric() -> None:
         exclude = (organize.get("options") or {}).get("excludeByName") or {}
         assert exclude.get("Time") is True, (dashboard_name, panel_id)
         assert "__name__" not in exclude, (dashboard_name, panel_id)
+    funnel = _panel(_load("bioetl-run-explorer-v1.json"), 3011)
+    custom = (funnel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+    assert custom.get("inspect") is True
