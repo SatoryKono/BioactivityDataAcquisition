@@ -8,10 +8,10 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `ee932368a5a728619376403572945b07a34c98f8`
+Audited commit SHA: `710930f41f7632699bd55f0d18c3c71b39471f51`
 
 
-Evidence surface SHA-256: `e839b974dc9882abf3765d4b924302295a8c2c2285bd6181a56dddae4b504905`
+Evidence surface SHA-256: `81238e2a26b1fcb4e2e597fcf75e11eb5ba187f7ecb3b254d8a0dc6af94fa23a`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,10 +19,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "ee932368a5a728619376403572945b07a34c98f8",
-  "evidence_surface_sha256": "e839b974dc9882abf3765d4b924302295a8c2c2285bd6181a56dddae4b504905",
+  "audited_commit_sha": "710930f41f7632699bd55f0d18c3c71b39471f51",
+  "evidence_surface_sha256": "81238e2a26b1fcb4e2e597fcf75e11eb5ba187f7ecb3b254d8a0dc6af94fa23a",
   "metrics": {
-    "architecture_integral_score": 9.28,
+    "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
@@ -48,14 +48,14 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `ee932368a5` for #9646 after the final #9647 remote-main baseline refresh; all debt-governance gates pass and no budget grows.
+Refresh reason: Re-pin to origin/main `710930f41f` for #9646 after the final #9629/#9647 unified-governance cascade; all debt-governance gates pass and no budget grows.
 
 
 ## Executive summary
 
 1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
 1. Release status: **debt-governance gates passing**.
-1. Architecture quality integral score: **9.28** (`good_targeted_improvements`). Integral score `9.28`.
+1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2465**
    - fully_covered: **1563**
