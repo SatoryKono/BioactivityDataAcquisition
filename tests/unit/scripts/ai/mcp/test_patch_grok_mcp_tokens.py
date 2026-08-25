@@ -16,7 +16,12 @@ from pathlib import Path
 
 import pytest
 
-from scripts.ai.mcp._patch_grok_mcp_tokens import bump_timeouts, main, wire_ref
+from scripts.ai.mcp._patch_grok_mcp_tokens import (
+    _trusted_config_targets,
+    bump_timeouts,
+    main,
+    wire_ref,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -44,11 +49,9 @@ def test_main_never_prints_configuration_content(
         ),
         encoding="utf-8",
     )
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(Path, "home", lambda: tmp_path / "missing-home")
     original = config_path.read_text(encoding="utf-8")
 
-    main([])
+    main([], repo_root=tmp_path, home=tmp_path / "missing-home")
 
     output = capsys.readouterr().out
     assert "would-update" in output
@@ -57,7 +60,7 @@ def test_main_never_prints_configuration_content(
     assert secret_marker not in output
     assert "[mcp_servers.ref]" not in output
 
-    main(["--apply"])
+    main(["--apply"], repo_root=tmp_path, home=tmp_path / "missing-home")
 
     apply_output = capsys.readouterr().out
     assert "updated" in apply_output
@@ -77,14 +80,81 @@ def test_main_does_not_touch_home_config_without_include_home(
     home_config = home_dir / ".grok" / "config.toml"
     home_config.parent.mkdir(parents=True)
     home_config.write_text("startup_timeout_sec = 60\n", encoding="utf-8")
-    monkeypatch.chdir(repo_dir)
-    monkeypatch.setattr(Path, "home", lambda: home_dir)
-
-    main(["--apply"])
+    main(["--apply"], repo_root=repo_dir, home=home_dir)
 
     output = capsys.readouterr().out
     assert "missing" in output
     assert home_config.read_text(encoding="utf-8") == "startup_timeout_sec = 60\n"
+
+
+def test_main_ignores_untrusted_current_working_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_dir = tmp_path / "repo"
+    repo_config = repo_dir / ".grok" / "config.toml"
+    repo_config.parent.mkdir(parents=True)
+    repo_config.write_text(
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 60\n",
+        encoding="utf-8",
+    )
+    untrusted_dir = tmp_path / "untrusted"
+    untrusted_config = untrusted_dir / ".grok" / "config.toml"
+    untrusted_config.parent.mkdir(parents=True)
+    untrusted_config.write_text(
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 60\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(untrusted_dir)
+
+    main(["--apply"], repo_root=repo_dir, home=tmp_path / "home")
+
+    assert repo_config.read_text(encoding="utf-8") == (
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 180\n"
+    )
+    assert untrusted_config.read_text(encoding="utf-8") == (
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 60\n"
+    )
+
+
+def test_main_include_home_updates_only_confined_home_target(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "repo"
+    repo_dir.mkdir()
+    home_dir = tmp_path / "home"
+    home_config = home_dir / ".grok" / "config.toml"
+    home_config.parent.mkdir(parents=True)
+    home_config.write_text(
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 60\n",
+        encoding="utf-8",
+    )
+
+    main(
+        ["--apply", "--include-home"],
+        repo_root=repo_dir,
+        home=home_dir,
+    )
+
+    assert home_config.read_text(encoding="utf-8") == (
+        "[mcp_servers.ast-grep]\nstartup_timeout_sec = 180\n"
+    )
+
+
+def test_trusted_config_targets_reject_symlink_escape(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "repo"
+    repo_dir.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    try:
+        (repo_dir / ".grok").symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("symlink creation is unavailable")
+
+    with pytest.raises(ValueError, match="refusing path outside"):
+        _trusted_config_targets(
+            include_home=False,
+            repo_root=repo_dir,
+            home=tmp_path / "home",
+        )
 
 
 class TestBumpTimeouts:

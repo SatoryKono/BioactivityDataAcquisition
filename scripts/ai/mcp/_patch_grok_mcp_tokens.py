@@ -7,6 +7,8 @@ import argparse
 import re
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import REPO_ROOT, ensure_path_within_root
+
 
 TIMEOUTS = {
     "adr-analysis": 300,
@@ -67,7 +69,48 @@ def wire_ref(text: str) -> str:
     return new_text if n else text
 
 
-def main(argv: list[str] | None = None) -> int:
+def _trusted_config_targets(
+    *,
+    include_home: bool,
+    repo_root: Path,
+    home: Path,
+) -> tuple[tuple[Path, Path], ...]:
+    """Return config paths paired with their explicit trust roots."""
+    safe_repo_root = repo_root.resolve()
+    project_grok_root = ensure_path_within_root(
+        safe_repo_root / ".grok",
+        safe_repo_root,
+    )
+    targets = [
+        (
+            ensure_path_within_root(
+                project_grok_root / "config.toml",
+                project_grok_root,
+            ),
+            project_grok_root,
+        )
+    ]
+    if include_home:
+        safe_home = home.resolve()
+        home_grok_root = ensure_path_within_root(safe_home / ".grok", safe_home)
+        targets.append(
+            (
+                ensure_path_within_root(
+                    home_grok_root / "config.toml",
+                    home_grok_root,
+                ),
+                home_grok_root,
+            )
+        )
+    return tuple(targets)
+
+
+def main(
+    argv: list[str] | None = None,
+    *,
+    repo_root: Path | None = None,
+    home: Path | None = None,
+) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--apply",
@@ -80,23 +123,30 @@ def main(argv: list[str] | None = None) -> int:
         help="Also consider Path.home() / .grok / config.toml (requires --apply to write).",
     )
     args = parser.parse_args(argv)
-    paths = [Path(".grok/config.toml")]
-    if args.include_home:
-        paths.append(Path.home() / ".grok" / "config.toml")
-    for path in paths:
-        if not path.is_file():
-            print("missing", path)
+    targets = _trusted_config_targets(
+        include_home=args.include_home,
+        repo_root=repo_root or REPO_ROOT,
+        home=home or Path.home(),
+    )
+    for candidate, allowed_root in targets:
+        safe_path = ensure_path_within_root(candidate, allowed_root)
+        if not safe_path.is_file():
+            print("missing", safe_path)
             continue
-        original = path.read_text(encoding="utf-8")
+        original = safe_path.read_text(encoding="utf-8")
         updated = bump_timeouts(wire_ref(original))
         if updated != original:
             if args.apply:
-                path.write_text(updated, encoding="utf-8", newline="\n")
-                print("updated", path)
+                safe_path.write_text(  # NOSONAR - target is confined above
+                    updated,
+                    encoding="utf-8",
+                    newline="\n",
+                )
+                print("updated", safe_path)
             else:
-                print("would-update", path)
+                print("would-update", safe_path)
         else:
-            print("unchanged", path)
+            print("unchanged", safe_path)
     return 0
 
 
