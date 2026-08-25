@@ -9,4 +9,6 @@ from typing import Protocol, runtime_checkable
 class EntityTypeExtractor(Protocol):
     """Callable contract for deriving entity type from pipeline name."""
 
-    def __call__(self, pipeline_name: str) -> str | None: ...
+    def __call__(self, pipeline_name: str) -> str | None:
+        """Return the entity type for ``pipeline_name``, or ``None``."""
+        ...

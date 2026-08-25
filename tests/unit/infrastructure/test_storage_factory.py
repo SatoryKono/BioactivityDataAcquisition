@@ -67,6 +67,12 @@ def mock_audit():
 
 
 @pytest.fixture
+def mock_silver_validator():
+    """Create the explicit Silver validator required by storage composition."""
+    return MagicMock()
+
+
+@pytest.fixture
 def mock_metadata_coordinator():
     """Create a mock metadata coordinator."""
     return MagicMock()
@@ -241,6 +247,7 @@ class TestStorageFactoryLocal:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test that local runs use paths from settings."""
         with (
@@ -254,6 +261,7 @@ class TestStorageFactoryLocal:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             assert isinstance(result, StorageContext)
@@ -268,6 +276,7 @@ class TestStorageFactoryLocal:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test that YAML paths override settings paths when specified."""
         config = MagicMock()
@@ -307,6 +316,7 @@ class TestStorageFactoryLocal:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             # Verify YAML paths are used
@@ -331,6 +341,7 @@ class TestStorageFactoryLocal:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test local run with JSON export enabled."""
         with (
@@ -346,6 +357,7 @@ class TestStorageFactoryLocal:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             # Verify BronzeWriter was called with packed json_export flags
@@ -360,6 +372,7 @@ class TestStorageFactoryLocal:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test local run with CSV export enabled for Silver and Gold."""
         from bioetl.infrastructure.export.csv_exporter import CsvExporter
@@ -382,6 +395,7 @@ class TestStorageFactoryLocal:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             # Verify SilverWriter receives csv_exporter through runtime services.
@@ -412,6 +426,7 @@ class TestStorageFactoryEdgeCases:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test handling of empty sink configuration."""
         with (
@@ -427,6 +442,7 @@ class TestStorageFactoryEdgeCases:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             # Should still create context with default settings
@@ -443,6 +459,7 @@ class TestStorageFactoryEdgeCases:
         mock_logger,
         mock_metrics,
         mock_audit,
+        mock_silver_validator,
     ):
         """Test that adapter contains all three writers."""
         bronze_instance = MagicMock()
@@ -470,6 +487,7 @@ class TestStorageFactoryEdgeCases:
                 logger=mock_logger,
                 metrics=mock_metrics,
                 audit=mock_audit,
+                silver_validator=mock_silver_validator,
             )
 
             assert result.adapter.bronze is bronze_instance
