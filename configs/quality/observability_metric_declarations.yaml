@@ -5,6 +5,8 @@ recording_rule_metrics:
   - bioetl_control_plane_checkpoint_evidence_status
   - bioetl_control_plane_current_evidence_status
   - bioetl_control_plane_current_status_trusted
+  - bioetl_control_plane_ledger_fail_severity_30m
+  - bioetl_control_plane_manifest_fail_severity_30m
   - bioetl_control_plane_run_type_universe
   - bioetl_control_plane_telemetry_missing_5m
   - bioetl_dq_current_activity_15m
@@ -12,6 +14,7 @@ recording_rule_metrics:
   - bioetl_dq_current_failure_signals_15m
   - bioetl_dq_current_reason
   - bioetl_dq_current_status
+  - bioetl_dq_first_window_reason
   - bioetl_dq_monitor_disabled_current
   - bioetl_gold_terminal_records_15m
   - bioetl_l0_input_status
@@ -92,6 +95,7 @@ recording_rule_metrics:
   - bioetl_runtime_alert_condition_stage_backlog_active_15m
   - bioetl_runtime_alert_condition_stage_lag_high_15m
   - bioetl_runtime_alert_condition_validation_backlog_active_15m
+  - bioetl_runtime_control_plane_alert_count
   - bioetl_runtime_current_activity_15m
   - bioetl_runtime_current_blocker_reason
   - bioetl_runtime_current_blocker_reason_scoped
@@ -101,14 +105,18 @@ recording_rule_metrics:
   - bioetl_runtime_current_status_scoped
   - bioetl_runtime_current_status_trusted
   - bioetl_runtime_error_rate_30m
+  - bioetl_runtime_pipeline_alert_count
   - bioetl_runtime_pipeline_run_type_universe
   - bioetl_runtime_pipeline_run_type_universe_scoped
+  - bioetl_runtime_provider_alert_count
   - bioetl_runtime_trust_gap_active_10m
   - bioetl_runtime_trust_gap_status_10m
   - bioetl_silver_filter_reject_total_mismatch_15m
   - bioetl_silver_filter_rejections_breakdown_total_15m
   - bioetl_silver_filter_rejects_stage_total_15m
   - bioetl_terminal_events_15m
+  - bioetl_trust_replay_blocker_events_total
+  - bioetl_trust_replay_blocker_integrity
   - bioetl_workflow_pipeline_verdict_status
   - bioetl_workflow_universe
 policy_alias_metrics:
