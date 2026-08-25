@@ -30,7 +30,7 @@ trend evidence only.
 - Source branch: `fix/regression-contracts-9345-9347`
 - Source commit: `d1c97617563eee3fc3aaa1f5bdd9e17307482fec`
 - Source run id: `32516555293`
-- Source tree sha256: `5f5fcf8304f0e02d442e2409c682dfa022a48cd625a15de560e4df1fadf6c9d5`
+- Source tree sha256: df2a273c71d0fd736f7a39156e9f8f871da295b641f0ca11c952e4430bbcbbb9
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-08-21T19:24:12.023426+00:00`
 
