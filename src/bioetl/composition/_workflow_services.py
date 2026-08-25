@@ -39,23 +39,6 @@ if TYPE_CHECKING:
 
 from bioetl.composition.factories.services.port_factories import (
     WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
-    create_metrics,
-)
-from bioetl.application.services.workflow.workflow_runner_service import (
-    WorkflowRunnerService,
-)
-from bioetl.composition._workflow_transform_registry import (
-    build_workflow_transform_registry,
-)
-from bioetl.composition.bootstrap.runtime.runner import (
-    bootstrap_pipeline_runner_service,
-)
-from bioetl.infrastructure.config.workflow_config_api import (
-    load_workflow_config as load_workflow_config_impl,
-)
-from bioetl.infrastructure.time import SystemClock
-from bioetl.application.services.workflow.workflow_transform_service import (
-    WorkflowTransformService,
 )
 from bioetl.infrastructure.control_plane import (
     FileWorkflowExecutionStateStore,
@@ -63,7 +46,6 @@ from bioetl.infrastructure.control_plane import (
     FileWorkflowManifestStore,
     FileWorkflowTransformArtifactStore,
 )
-from bioetl.infrastructure.locking import MemoryLock
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
@@ -89,8 +71,9 @@ _workflow_memory_lock: LockPort | None = None
 
 def _create_workflow_metrics(settings: Settings) -> MetricsPort:
     """Resolve the patchable metrics factory through a typed lazy boundary."""
+    from bioetl.composition.factories.services import port_factories
 
-    candidate: object = create_metrics
+    candidate: object = port_factories.create_metrics
     if not isinstance(candidate, _WorkflowMetricsFactory):
         raise TypeError("Workflow metrics factory does not satisfy its contract")
     return candidate(settings)
@@ -98,16 +81,21 @@ def _create_workflow_metrics(settings: Settings) -> MetricsPort:
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical composition service seam."""
+    from bioetl.infrastructure.config import workflow_config_api
 
-    return load_workflow_config_impl(name, configs_root=resolve_configs_root())
+    return workflow_config_api.load_workflow_config(
+        name,
+        configs_root=resolve_configs_root(),
+    )
 
 
 def _default_pipeline_runner_service_factory(
     registry: PipelineRegistry | None,
 ) -> PipelineRunnerService:
     """Build the pipeline runner service without depending on the facade module."""
+    from bioetl.composition.bootstrap.runtime import runner
 
-    return bootstrap_pipeline_runner_service(registry=registry)
+    return runner.bootstrap_pipeline_runner_service(registry=registry)
 
 
 def get_workflow_runner_service(
@@ -119,15 +107,20 @@ def get_workflow_runner_service(
     | None = None,
 ) -> WorkflowRunnerService:
     """Build the baseline declarative workflow runner through composition seams."""
+    from bioetl.application.services.workflow import workflow_runner_service
+    from bioetl.application.services.workflow import workflow_transform_service
+    from bioetl.composition import _workflow_transform_registry
+    from bioetl.infrastructure import control_plane
+    from bioetl.infrastructure import time as infrastructure_time
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
-    artifact_sink = FileWorkflowTransformArtifactStore(
+    artifact_sink = control_plane.FileWorkflowTransformArtifactStore(
         base_path=output_root / "workflow_transform_results",
-        clock=SystemClock(),
+        clock=infrastructure_time.SystemClock(),
     )
-    transform_registry = build_workflow_transform_registry(
+    transform_registry = _workflow_transform_registry.build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,
@@ -137,9 +130,9 @@ def get_workflow_runner_service(
         if pipeline_runner_service_factory is None
         else pipeline_runner_service_factory
     )
-    return WorkflowRunnerService(
+    return workflow_runner_service.WorkflowRunnerService(
         pipeline_runner=pipeline_runner_factory(registry),
-        transform_service=WorkflowTransformService(
+        transform_service=workflow_transform_service.WorkflowTransformService(
             registry=transform_registry,
             metrics=metrics,
         ),
@@ -151,7 +144,9 @@ def get_workflow_runner_service(
 def _get_workflow_memory_lock() -> LockPort:
     global _workflow_memory_lock
     if _workflow_memory_lock is None:
-        _workflow_memory_lock = MemoryLock()
+        from bioetl.infrastructure import locking
+
+        _workflow_memory_lock = locking.MemoryLock()
     return _workflow_memory_lock
 
 
