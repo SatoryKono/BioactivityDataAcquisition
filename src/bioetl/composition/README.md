@@ -63,9 +63,10 @@ Prefer this production wiring path:
 3. Direct library callers use `composition.entrypoints.run_pipeline()` /
    `create_pipeline_runner()` with an explicit registry when possible.
 
-`get_default_registry()` remains a **compatibility / test** shared-default
-export. Production CLI must not call it as the primary path (guarded by
-`tests/architecture/test_cli_registry_explicit_path.py`).
+`get_default_registry()` remains a **test-only compatibility** export.
+Production composition must use a caller-provided registry or create a fresh
+isolated registry; architecture guards reject production calls to the shared
+compatibility instance.
 
 ## Key Entry Points
 

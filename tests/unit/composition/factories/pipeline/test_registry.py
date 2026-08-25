@@ -50,8 +50,9 @@ pytestmark = pytest.mark.unit
 @pytest.fixture(scope="session")
 def session_registered_pipeline_names() -> frozenset[str]:
     """Register pipelines once per session for completeness/list hotspots (#8329)."""
-    register_all_pipelines()
-    return frozenset(get_default_registry().list_pipelines())
+    registry = get_default_registry()
+    register_all_pipelines(registry=registry)
+    return frozenset(registry.list_pipelines())
 
 
 class _DummyPipelineFactory:
@@ -72,7 +73,7 @@ class _DummyPipelineFactory:
 @pytest.fixture(autouse=True)
 def ensure_registration():
     """Ensure pipeline factories are registered before tests."""
-    register_all_pipelines()
+    register_all_pipelines(registry=get_default_registry())
 
 
 def _pipeline_config_name(path: Path, *, config_dir: Path) -> str | None:
@@ -163,7 +164,7 @@ def test_register_all_pipelines_is_idempotent():
     initial_count = len(registry.list_pipelines())
 
     # Call again - should be no-op
-    register_all_pipelines()
+    register_all_pipelines(registry=registry)
 
     # Count should remain the same
     assert len(registry.list_pipelines()) == initial_count
@@ -214,27 +215,42 @@ def test_multiple_registries_in_same_process():
 def test_reset_registration_clears_default_registry_state():
     """reset_registration should clear the default registry and registration flag."""
     try:
-        register_all_pipelines()
+        registry = get_default_registry()
+        register_all_pipelines(registry=registry)
         assert is_registered()
-        assert len(get_default_registry().list_pipelines()) > 0
+        assert len(registry.list_pipelines()) > 0
 
-        reset_registration()
+        reset_registration(registry=registry)
 
         assert not is_registered()
-        assert get_default_registry().list_pipelines() == []
+        assert registry.list_pipelines() == []
     finally:
-        register_all_pipelines()
+        register_all_pipelines(registry=get_default_registry())
 
 
 def test_explicit_registration_state_tracks_registration_independently():
     """Explicit registration state should avoid coupling tests to module globals."""
     registration_state = create_pipeline_registration_state()
+    registry = create_registry()
 
     assert not is_registered(registration_state=registration_state)
 
-    register_all_pipelines(registration_state=registration_state)
+    register_all_pipelines(
+        registry=registry,
+        registration_state=registration_state,
+    )
 
     assert is_registered(registration_state=registration_state)
+
+
+def test_register_all_pipelines_rejects_missing_explicit_registry() -> None:
+    with pytest.raises(ValueError, match="explicit registry"):
+        register_all_pipelines()
+
+
+def test_reset_registration_rejects_missing_explicit_registry() -> None:
+    with pytest.raises(ValueError, match="explicit registry"):
+        reset_registration()
 
 
 def test_core_registry_contract_edges_are_explicit():

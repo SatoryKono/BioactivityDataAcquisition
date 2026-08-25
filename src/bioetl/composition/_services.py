@@ -105,9 +105,16 @@ def _ensure_provider_registrations() -> None:
     _ensure_registrations(scope="providers")
 
 
-def _ensure_pipeline_registrations(registry: PipelineRegistry | None = None) -> None:
-    """Ensure full provider and pipeline factory registration."""
+def _ensure_pipeline_registrations(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRegistry:
+    """Return an explicit registry with provider and pipeline registrations."""
+    if registry is None:
+        from bioetl.composition.registry_api import create_registry
+
+        registry = create_registry()
     _ensure_registrations(registry=registry, scope="pipelines")
+    return registry
 
 
 def get_checkpoint_service() -> CheckpointService:
@@ -157,8 +164,11 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
-    _ensure_pipeline_registrations(registry=registry)
-    return _invoke_bootstrap("bootstrap_pipeline_runner_service", registry=registry)
+    effective_registry = _ensure_pipeline_registrations(registry=registry)
+    return _invoke_bootstrap(
+        "bootstrap_pipeline_runner_service",
+        registry=effective_registry,
+    )
 
 
 def get_workflow_runner_service(
