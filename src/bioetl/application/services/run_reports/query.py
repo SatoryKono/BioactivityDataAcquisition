@@ -7,8 +7,11 @@ import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any
 
+from bioetl.application.services.run_reports._identity_index import (
+    read_identity_preview,
+)
 from bioetl.application.services.run_reports.paths import resolve_report_root
 from bioetl.application.services.run_reports.writer import _safe_segment
 
@@ -203,7 +206,7 @@ def _build_report_index_entry(
     json_path: Path,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    meta = _read_identity_meta(json_path)
+    meta = read_identity_preview(json_path)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
         kind=kind,
@@ -370,41 +373,6 @@ def _remove_report_directories(
         if not dry_run:
             _rm_tree(directory)
     return removed
-
-
-class IdentityIndexMeta(NamedTuple):
-    """Bounded identity peek for run-report index rows."""
-
-    status: str | None
-    started_at: str | None
-    completed_at: str | None
-    workflow_id: str | None
-    workflow_run_id: str | None
-
-
-def _optional_identity_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _read_identity_meta(path: Path) -> IdentityIndexMeta:
-    empty = IdentityIndexMeta(None, None, None, None, None)
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return empty
-    identity = payload.get("identity") if isinstance(payload, dict) else None
-    if not isinstance(identity, dict):
-        return empty
-    return IdentityIndexMeta(
-        status=_optional_identity_text(identity.get("status")),
-        started_at=_optional_identity_text(identity.get("started_at")),
-        completed_at=_optional_identity_text(identity.get("completed_at")),
-        workflow_id=_optional_identity_text(identity.get("workflow_id")),
-        workflow_run_id=_optional_identity_text(identity.get("workflow_run_id")),
-    )
 
 
 def _int(value: object) -> int:
