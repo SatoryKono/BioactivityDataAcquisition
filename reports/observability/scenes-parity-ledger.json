@@ -21,7 +21,7 @@
   },
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "30940beb7fa36a2c46a0a8ff6e12eb901ac23a13d5a75bc7e128b3195f0ae117",
-    "bioetl-dq-v2": "ffdfea39fd117055cca7b03ff414abcd01405c50e1474c2ca425cb6d6e8e28a1",
+    "bioetl-dq-v2": "d7ce8b3b5963632a993e58c3e94eb00a07d28d06a433467fc8d33edf69054e81",
     "bioetl-incident-v1": "871192f9f5427649b71216cb7e35d09756ae35e6ce8d3a50ecaa8635039ec8da",
     "bioetl-overview-v2": "f66038928c2c4d641527f7156bec9acd440c5a9571be25d9657df93db2482ef7",
     "bioetl-provider-health-v2": "ff19173a5f26527bd085715a65633e541f8598cbddb763acb7219f5b645214c1",
