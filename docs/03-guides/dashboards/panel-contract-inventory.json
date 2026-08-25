@@ -14,7 +14,7 @@
   "schema_version": 1,
   "source": "grafana/dashboards/*.json",
   "target_counts": {
-    "http": 37,
+    "http": 35,
     "loki": 0,
     "promql": 171,
     "tempo": 0,
@@ -4453,13 +4453,14 @@
       "documents_backend_down": false,
       "documents_valid_empty": false,
       "empty_state": "coverage_gap",
-      "formula": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+      "formula": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
       "kind": "promql",
       "panel_id": 9104,
       "panel_title": "Monitor Telemetry Presence",
-      "query": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
+      "query": "max(bioetl_provider_current_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0 + max(bioetl_provider_health_status{provider=~\"$provider\",provider!~\"^(test|synthetic)$\"}) * 0",
       "query_tokens": [
-        "bioetl_provider_current_status"
+        "bioetl_provider_current_status",
+        "bioetl_provider_health_status"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4674,11 +4675,12 @@
       "kind": "http",
       "panel_id": 3010,
       "panel_title": "Inspect Recent Runs (last 10)",
-      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10",
+      "query": "/ops/observability/pipeline-run-reports?pipeline=${pipeline}&limit=10&run_id=${run_id}",
       "query_tokens": [
         "/ops/observability/pipeline-run-reports",
         "pipeline",
-        "limit"
+        "limit",
+        "run_id"
       ],
       "ref_id": "A",
       "runbook_urls": [
@@ -4771,28 +4773,6 @@
         "run_id"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": ""
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
-      "panel_id": 3014,
-      "panel_title": "Inspect Timings & Failure",
-      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/observability/pipeline-run-report",
-        "pipeline",
-        "run_id"
-      ],
-      "ref_id": "B",
       "runbook_urls": [],
       "thresholds": [],
       "unit": ""
