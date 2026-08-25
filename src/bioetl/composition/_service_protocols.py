@@ -1,4 +1,4 @@
-"""Compatibility re-export of composition health contracts."""
+"""Private re-export of composition health contracts."""
 
 from __future__ import annotations
 

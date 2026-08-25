@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from importlib import import_module
 
 __all__ = [
     "ensure_metrics_server_started",
@@ -21,10 +22,9 @@ __all__ = [
 
 def ensure_metrics_server_started() -> bool:
     """Start the metrics server through composition on demand."""
-    from bioetl.composition.execution_api import (
-        ensure_metrics_server_started as _impl,
-    )
-
+    _impl = import_module(
+        "bioetl.composition.entrypoints"
+    ).ensure_metrics_server_started
     return bool(_impl())
 
 

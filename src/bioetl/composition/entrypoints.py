@@ -8,7 +8,9 @@ remain thin adapters. Full DI framework is intentionally not introduced
 from __future__ import annotations
 
 from bioetl.composition._pipeline_execution import (
+    create_pipeline_runner as create_pipeline_runner,
     ensure_metrics_server_started as ensure_metrics_server_started,
+    run_pipeline as run_pipeline,
 )
 from bioetl.composition._service_registry import register as register
 from bioetl.composition._service_registry import registered_ports as registered_ports
@@ -29,10 +31,6 @@ from bioetl.composition.composite_catalog import (
 from bioetl.composition.contracts import (
     MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
 )
-from bioetl.composition.execution_api import (
-    create_pipeline_runner as create_pipeline_runner,
-)
-from bioetl.composition.execution_api import run_pipeline as run_pipeline
 from bioetl.composition.resources_runtime import (
     get_lifecycle_service as get_lifecycle_service,
 )

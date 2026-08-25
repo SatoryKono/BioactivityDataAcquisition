@@ -36,6 +36,8 @@ if TYPE_CHECKING:
 
     def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int: ...
 
+    def get_runtime_settings() -> object: ...
+
 
 __all__ = [
     "HealthServerDependencies",
@@ -53,6 +55,7 @@ _RESOURCE_MANAGEMENT_MODULE = "bioetl.composition._resource_management"
 _PREFLIGHT_HEALTH_MODULE = (
     "bioetl.composition.factories.pipeline._preflight_health_monitor"
 )
+_CONFIG_ACCESS_MODULE = "bioetl.composition.runtime_builders.config_access"
 _PUBLIC_EXPORTS = {
     "HealthServerDependencies": _BOOTSTRAP_HEALTH_MODULE,
     "get_health_server_dependencies": _SERVICES_MODULE,
@@ -62,17 +65,14 @@ _PUBLIC_EXPORTS = {
     "get_quarantine_service": _SERVICES_MODULE,
     "rehydrate_provider_health_gauges": _PREFLIGHT_HEALTH_MODULE,
 }
-
-
-def get_runtime_settings() -> object:
-    """Retained health wrapper outside ``__all__``."""
-    from bioetl.composition.runtime_builders.config_access import get_settings as _impl
-
-    return _impl()
+_COMPATIBILITY_EXPORTS = {
+    "get_runtime_settings": (_CONFIG_ACCESS_MODULE, "get_settings"),
+}
+_LAZY_EXPORTS = {**_PUBLIC_EXPORTS, **_COMPATIBILITY_EXPORTS}
 
 
 install_cached_public_exports(
     module_globals=globals(),
-    public_exports=_PUBLIC_EXPORTS,
+    public_exports=_LAZY_EXPORTS,
     module_name=__name__,
 )

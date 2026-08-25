@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from contextlib import AbstractAsyncContextManager
+from importlib import import_module
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.services.execution.cli_run_orchestration_models import (
@@ -46,10 +47,9 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Resolve the pipeline runner service lazily for CLI runtime helpers."""
-    from bioetl.composition.execution_api import (
-        get_pipeline_runner_service as _impl,
-    )
-
+    _impl = import_module(
+        "bioetl.composition.entrypoints"
+    ).get_pipeline_runner_service
     return cast(PipelineRunnerService, _impl(registry=registry))  # pyright: ignore[reportInvalidCast]
 
 

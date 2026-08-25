@@ -127,7 +127,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.debug",
         "get_pipeline_runner_service",
-        "bioetl.composition.execution_api.get_pipeline_runner_service",
+        "bioetl.composition.entrypoints.get_pipeline_runner_service",
         _registry_kwarg,
         object(),
         "identity",
@@ -175,7 +175,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration",
         "ensure_metrics_server_started",
-        "bioetl.composition.execution_api.ensure_metrics_server_started",
+        "bioetl.composition.entrypoints.ensure_metrics_server_started",
         _no_args,
         True,
         True,
@@ -183,7 +183,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.run_all",
         "get_pipeline_runner_service",
-        "bioetl.composition.execution_api.get_pipeline_runner_service",
+        "bioetl.composition.entrypoints.get_pipeline_runner_service",
         _registry_kwarg,
         object(),
         "identity",
