@@ -251,8 +251,7 @@ def test_shared_launcher_enforces_singleton_and_loopback() -> None:
     assert '"mermaid-npx"' in launcher
     assert 'child_env["BIOETL_AI_MEMORY_MODE"] = "read-write"' in launcher
     windows_launcher = (
-        Path(__file__).resolve().parents[3]
-        / "scripts/ops/runtime/mcp/start-shared.ps1"
+        Path(__file__).resolve().parents[3] / "scripts/ops/runtime/mcp/start-shared.ps1"
     ).read_text(encoding="utf-8")
     assert "$env:BIOETL_AI_MEMORY_MODE = 'read-write'" in windows_launcher
     assert "$env:BIOETL_MCP_SHARED = '1'" in windows_launcher
