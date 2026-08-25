@@ -4,12 +4,19 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID
 
 import pytest
 
-from bioetl.composition import _service_protocols, _services, registry_api
+from bioetl.application.ports import MetricsService
+from bioetl.composition import (
+    _service_protocols,
+    _service_registry,
+    _services,
+    registry_api,
+)
 from bioetl.composition.factories.datasource import http_client
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     build_control_plane_artifacts,
@@ -44,11 +51,18 @@ def test_service_protocol_module_is_runtime_importable() -> None:
     assert _service_protocols.BronzeCleanupServiceProtocol is not None
 
 
-def test_bootstrap_export_must_be_callable(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(_services, "resolve_bootstrap_attr", lambda _name: object())
+def test_lazy_service_factory_target_must_be_callable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    factory = _service_registry.registered_ports()[MetricsService]
+    monkeypatch.setattr(
+        _service_registry,
+        "import_module",
+        lambda _name: SimpleNamespace(bootstrap_metrics_service=object()),
+    )
 
     with pytest.raises(TypeError, match="is not callable"):
-        _services._invoke_bootstrap("broken")
+        factory()
 
 
 def test_runner_request_coercion_accepts_declared_types() -> None:

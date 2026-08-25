@@ -56,11 +56,38 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         "control_plane_service_access.py",
         "health_service_access.py",
     ]
-    from bioetl.application.ports import HealthServiceProtocol
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        VacuumServiceProtocol,
+    )
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
     from bioetl.composition.entrypoints import resolve, register, registered_ports
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
     assert callable(resolve) and callable(register)
-    assert set(registered_ports()) == {HealthServiceProtocol}
+    assert set(registered_ports()) == {
+        AdrServicePort,
+        AuditInspectionServiceProtocol,
+        BronzeCleanupServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        QuarantinePort,
+        VacuumServiceProtocol,
+    }
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
     assert [path.name for path in api_files] == [
         "execution_api.py",

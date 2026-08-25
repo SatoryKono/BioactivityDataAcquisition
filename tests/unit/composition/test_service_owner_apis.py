@@ -45,20 +45,48 @@ def test_retired_services_api_module_stays_absent() -> None:
     assert not (ROOT / "src" / "bioetl" / "composition" / "services_api.py").exists()
 
 
-def test_get_metrics_service_runtime_cast_is_bound(
+def test_operations_getters_resolve_typed_ports(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Facade getters must keep typing.cast imported for runtime use."""
-    from bioetl.composition import _services
-
-    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
-    monkeypatch.setattr(
-        _services,
-        "_invoke_bootstrap",
-        lambda name, *args, **kwargs: (name, args, kwargs),
+    """E1 operation getters resolve their application/domain port keys."""
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        VacuumServiceProtocol,
     )
+    from bioetl.composition import _services
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
-    assert _services.get_metrics_service() == ("bootstrap_metrics_service", (), {})
+    expected = object()
+    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
+    resolve = Mock(return_value=expected)
+    monkeypatch.setattr(_services, "_resolve", resolve)
+    getter_ports = {
+        "get_checkpoint_service": CheckpointServiceProtocol,
+        "get_audit_service": AuditInspectionServiceProtocol,
+        "get_bronze_cleanup_service": BronzeCleanupServiceProtocol,
+        "get_vacuum_service": VacuumServiceProtocol,
+        "get_contract_migration_service": ContractMigrationServiceProtocol,
+        "get_observability_workflow_service": ObservabilityWorkflowServiceProtocol,
+        "get_metrics_service": MetricsService,
+        "get_quarantine_port": QuarantinePort,
+        "get_adr_service": AdrServicePort,
+        "get_config_service": ConfigServiceProtocol,
+        "get_export_service": ExportServiceProtocol,
+        "get_lock_service": LockServiceProtocol,
+    }
+
+    for getter_name, port in getter_ports.items():
+        resolve.reset_mock()
+        assert getattr(_services, getter_name)() is expected
+        resolve.assert_called_once_with(port)
 
 
 def test_get_health_service_resolves_typed_application_port(
