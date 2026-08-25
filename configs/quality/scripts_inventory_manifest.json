@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-24T18:30:37.222576+00:00",
+  "generated_at": "2026-08-25T04:36:33.471065+00:00",
   "summary": {
     "total_scripts": 599,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 73,
       "scripts": 500,
       "skills": 12,
-      "tests": 400
+      "tests": 401
     }
   },
   "scripts": [
@@ -3247,19 +3247,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 266,
+          "line": 271,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 278,
+          "line": 283,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 286,
+          "line": 291,
           "source_group": "tests",
           "text": "assert '\"BRAVE_API_KEY\"' in sources[\"mcp_brave_search_wrapper.ps1\"]"
         }
@@ -3308,19 +3308,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 265,
+          "line": 270,
           "source_group": "tests",
           "text": "\"mcp_brave_search_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 274,
+          "line": 279,
           "source_group": "tests",
           "text": "not in sources[\"mcp_brave_search_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 285,
+          "line": 290,
           "source_group": "tests",
           "text": "assert \"-e BRAVE_API_KEY\" in sources[\"mcp_brave_search_wrapper.sh\"]"
         }
@@ -3761,13 +3761,13 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 1071,
+          "line": 1076,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 1141,
+          "line": 1146,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_filesystem_wrapper.sh\""
         }
@@ -3838,19 +3838,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 268,
+          "line": 273,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.ps1\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 293,
+          "line": 298,
           "source_group": "tests",
           "text": "'@(\"-e\", \"GRAFANA_SERVICE_ACCOUNT_TOKEN\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 295,
+          "line": 300,
           "source_group": "tests",
           "text": "assert '@(\"-e\", \"GRAFANA_PASSWORD\")' in sources[\"mcp_grafana_wrapper.ps1\"]"
         }
@@ -3899,19 +3899,19 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 267,
+          "line": 272,
           "source_group": "tests",
           "text": "\"mcp_grafana_wrapper.sh\","
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 289,
+          "line": 294,
           "source_group": "tests",
           "text": "in sources[\"mcp_grafana_wrapper.sh\"]"
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 291,
+          "line": 296,
           "source_group": "tests",
           "text": "assert \"docker_args+=(-e GRAFANA_PASSWORD)\" in sources[\"mcp_grafana_wrapper.sh\"]"
         }
@@ -3983,7 +3983,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 546,
+          "line": 551,
           "source_group": "tests",
           "text": "assert servers[\"memory\"][\"args\"][0].endswith(\"mcp_memory_wrapper.sh\")"
         }
@@ -20741,7 +20741,7 @@
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 180,
+          "line": 182,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180"
         },
@@ -20816,25 +20816,25 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 42,
+          "line": 44,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 137,
+          "line": 139,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 164,
+          "line": 166,
           "source_group": "docs",
           "text": "`verify_report_bind.py`. The verifier compares the normalized bind path,"
         },
         {
           "path": "docs/04-reference/reports/run-reports.md",
-          "line": 168,
+          "line": 170,
           "source_group": "docs",
           "text": "6. Operator re-check: `python scripts/ops/runtime/docker/verify_report_bind.py`."
         }
@@ -20888,7 +20888,7 @@
         },
         {
           "path": "tests/unit/scripts/test_setup_copilot_codex_mcp.py",
-          "line": 299,
+          "line": 304,
           "source_group": "tests",
           "text": "from scripts.ops.runtime.mcp import _materialize_shared_http_configs as materialize"
         }
@@ -21081,7 +21081,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",

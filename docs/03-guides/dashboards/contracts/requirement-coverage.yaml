@@ -105,9 +105,8 @@ allowlists:
       id: 9102
       owner: "@bioetl-observability"
       rationale: >-
-        NOW-lane current DQ reasons. First-window Inspect table, not a collapsed
-        range forensic dump.
-      retire_when: 9102 leaves the first window
+        NOW-lane current DQ reasons. First-window Inspect table because the operator question is the active reason list, not a RANGE dump.
+      retire_when: 9102 leaves the first window or is retitled without Inspect
   answer_panels_without_cta:
     - dashboard: bioetl-run-explorer-v1.json
       id: 3010

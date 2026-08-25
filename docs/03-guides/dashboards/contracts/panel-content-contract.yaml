@@ -2223,6 +2223,8 @@ dashboards:
         - valid_empty
         - backend_error
         render_profiles:
+        - first_window_dark
+        - first_window_light
         - full_dark
       '9103':
         title: ''

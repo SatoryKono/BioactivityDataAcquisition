@@ -265,16 +265,18 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
             )
 
     dq_dashboard = load_dashboard(Path("grafana/dashboards") / "bioetl-dq-v2.json")
+    dq_reason = next(
+        panel for panel in dq_dashboard.get("panels", []) if panel.get("id") == 9102
+    )
+    assert dq_reason.get("title") == "Inspect Current DQ Reasons"
+    assert int((dq_reason.get("gridPos") or {}).get("y", 999)) < 18
     dq_reason_row = next(
         panel
         for panel in dq_dashboard.get("panels", [])
         if panel.get("title") == "Selected Range · Impact & Freshness"
     )
     assert dq_reason_row.get("collapsed") is True
-    assert any(
-        panel.get("title") == "Inspect Current DQ Reasons"
-        for panel in dq_reason_row.get("panels", [])
-    )
+    assert all(panel.get("id") != 9102 for panel in dq_reason_row.get("panels", []))
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
