@@ -115,6 +115,78 @@ def _metric_int(metrics: dict[str, object], key: str) -> int:
     return int(value) if isinstance(value, (int, float)) else 0
 
 
+def _composition_module_cap(package_cohesion_budget: dict[str, object]) -> int:
+    """Return the shrink-only module cap for the composition package."""
+    packages = package_cohesion_budget.get("packages", [])
+    if not isinstance(packages, list):
+        raise TypeError("package_cohesion_budget.packages must be a list")
+    for package in packages:
+        if not isinstance(package, dict):
+            continue
+        if package.get("path") == "src/bioetl/composition":
+            cap = package.get("max_modules")
+            if isinstance(cap, int):
+                return cap
+            raise TypeError("composition max_modules must be an integer")
+    raise ValueError("composition package cohesion budget is missing")
+
+
+def _build_diagnostic_payload(
+    *,
+    families_at_budget: dict[str, object],
+    lazy_import_observed_count: int,
+    lazy_import_ratchet: dict[str, object],
+    composition_module_count: int,
+    package_cohesion_budget: dict[str, object],
+) -> dict[str, object]:
+    """Build decision-support evidence without changing program-gate scoring."""
+    lazy_import_cap = lazy_import_ratchet.get("max_count")
+    if not isinstance(lazy_import_cap, int):
+        raise TypeError("lazy_import_ratchet.max_count must be an integer")
+    return {
+        "grade_kind": "diagnostic_proxy",
+        "program_gate_policy": "external_unchanged",
+        "proxy_notes": {
+            "ddd_invariants": (
+                "module coverage status proxy; not a count of DDD aggregates "
+                "or invariant completeness"
+            ),
+            "module_boundaries_coupling": (
+                "hotspot budget warnings and duplicate clusters proxy; "
+                "at-budget families remain visible but non-blocking"
+            ),
+        },
+        "families_at_budget_count": families_at_budget["count"],
+        "families_at_budget": families_at_budget["names"],
+        "lazy_import_observed_count": lazy_import_observed_count,
+        "lazy_import_cap": lazy_import_cap,
+        "composition_module_count": composition_module_count,
+        "composition_module_cap": _composition_module_cap(package_cohesion_budget),
+    }
+
+
+def _count_hotspot_families_at_budget(
+    hotspot_baseline: dict[str, object],
+) -> dict[str, object]:
+    """Return hotspot families whose governed metric is exactly at budget."""
+    names: list[str] = []
+    families = hotspot_baseline.get("families", [])
+    if not isinstance(families, list):
+        return {"count": 0, "names": names}
+    for family in families:
+        if not isinstance(family, dict):
+            continue
+        notes = family.get("budget_review_notes") or []
+        if any(
+            isinstance(note, str) and note.startswith("at_budget:") for note in notes
+        ):
+            name = family.get("name")
+            if isinstance(name, str):
+                names.append(name)
+    names.sort()
+    return {"count": len(names), "names": names}
+
+
 def _clamp_score(value: float) -> float:
     return round(max(0.0, min(10.0, value)), 1)
 

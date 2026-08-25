@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -30,6 +31,9 @@ HOTSPOT_BASELINE_ARTIFACT = (
     ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
 )
 TEST_GOVERNANCE_ARTIFACT = ROOT / "reports" / "quality" / "test-governance-current.json"
+ADR_ENFORCEMENT_ARTIFACT = ROOT / "reports" / "quality" / "adr-enforcement-matrix.json"
+LAZY_IMPORT_RATCHET = ROOT / "configs" / "quality" / "lazy_import_ratchet.yaml"
+PACKAGE_COHESION_BUDGET = ROOT / "configs" / "quality" / "package_cohesion_budget.yaml"
 SCORECARD_REFRESH_HINT = (
     "Refresh architecture artifacts with: "
     "`python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`, "
@@ -154,6 +158,7 @@ def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent()
 @pytest.mark.architecture
 def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -> None:
     committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    adr_enforcement = json.loads(ADR_ENFORCEMENT_ARTIFACT.read_text(encoding="utf-8"))
 
     assert committed["source_artifacts"]["adr_enforcement_matrix"]["path"] == (
         "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -173,10 +178,41 @@ def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -
         ]
         == "reports/observability/runtime_cardinality_inventory.json"
     )
-    assert committed["metrics"]["adr_enforcement_blocking_gap_count"] == 0
+    assert (
+        committed["metrics"]["adr_enforcement_blocking_gap_count"]
+        == (adr_enforcement["summary"]["blocking_gap_count"])
+    )
     assert committed["metrics"]["dashboarded_without_emission_count"] == 0
     assert committed["metrics"]["dashboarded_without_declaration_count"] == 0
     assert committed["metrics"]["runtime_cardinality_review_required_count"] == 0
+
+
+@pytest.mark.architecture
+def test_architecture_quality_scorecard_diagnostics_match_shrink_only_sources() -> None:
+    committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    lazy_import_ratchet = yaml.safe_load(
+        LAZY_IMPORT_RATCHET.read_text(encoding="utf-8")
+    )
+    package_cohesion_budget = yaml.safe_load(
+        PACKAGE_COHESION_BUDGET.read_text(encoding="utf-8")
+    )
+    composition_budget = next(
+        package
+        for package in package_cohesion_budget["packages"]
+        if package["path"] == "src/bioetl/composition"
+    )
+    diagnostics = committed["diagnostics"]
+
+    assert diagnostics["grade_kind"] == "diagnostic_proxy"
+    assert diagnostics["program_gate_policy"] == "external_unchanged"
+    assert (
+        diagnostics["families_at_budget_count"]
+        == committed["metrics"]["families_at_budget_count"]
+    )
+    assert diagnostics["lazy_import_cap"] == lazy_import_ratchet["max_count"]
+    assert diagnostics["lazy_import_observed_count"] >= 0
+    assert diagnostics["composition_module_cap"] == composition_budget["max_modules"]
+    assert diagnostics["composition_module_count"] >= 0
 
 
 @pytest.mark.architecture
