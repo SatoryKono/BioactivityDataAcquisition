@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -71,8 +72,9 @@ _workflow_memory_lock: LockPort | None = None
 
 def _create_workflow_metrics(settings: Settings) -> MetricsPort:
     """Resolve the patchable metrics factory through a typed lazy boundary."""
-    from bioetl.composition.factories.services import port_factories
-
+    port_factories = import_module(
+        "bioetl.composition.factories.services.port_factories"
+    )
     candidate: object = port_factories.create_metrics
     if not isinstance(candidate, _WorkflowMetricsFactory):
         raise TypeError("Workflow metrics factory does not satisfy its contract")
@@ -93,7 +95,7 @@ def _default_pipeline_runner_service_factory(
     registry: PipelineRegistry | None,
 ) -> PipelineRunnerService:
     """Build the pipeline runner service without depending on the facade module."""
-    from bioetl.composition.bootstrap.runtime import runner
+    runner = import_module("bioetl.composition.bootstrap.runtime.runner")
 
     return runner.bootstrap_pipeline_runner_service(registry=registry)
 
@@ -107,11 +109,17 @@ def get_workflow_runner_service(
     | None = None,
 ) -> WorkflowRunnerService:
     """Build the baseline declarative workflow runner through composition seams."""
-    from bioetl.application.services.workflow import workflow_runner_service
-    from bioetl.application.services.workflow import workflow_transform_service
-    from bioetl.composition import _workflow_transform_registry
-    from bioetl.infrastructure import control_plane
-    from bioetl.infrastructure import time as infrastructure_time
+    workflow_runner_service = import_module(
+        "bioetl.application.services.workflow.workflow_runner_service"
+    )
+    workflow_transform_service = import_module(
+        "bioetl.application.services.workflow.workflow_transform_service"
+    )
+    workflow_transform_registry = import_module(
+        "bioetl.composition._workflow_transform_registry"
+    )
+    control_plane = import_module("bioetl.infrastructure.control_plane")
+    infrastructure_time = import_module("bioetl.infrastructure.time")
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
@@ -120,7 +128,7 @@ def get_workflow_runner_service(
         base_path=output_root / "workflow_transform_results",
         clock=infrastructure_time.SystemClock(),
     )
-    transform_registry = _workflow_transform_registry.build_workflow_transform_registry(
+    transform_registry = workflow_transform_registry.build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,
