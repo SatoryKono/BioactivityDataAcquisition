@@ -27,7 +27,7 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/regression-contracts-9345-9347`
+- Source branch: `main`
 - Source commit: `d1c97617563eee3fc3aaa1f5bdd9e17307482fec`
 - Source run id: `32516555293`
 - Source tree sha256: `5f5fcf8304f0e02d442e2409c682dfa022a48cd625a15de560e4df1fadf6c9d5`
