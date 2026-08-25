@@ -365,8 +365,8 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
     from bioetl.application.ports import MetricsService
 
     fake_module = ModuleType("fake_bootstrap")
-    fake_module.bootstrap_forensic_run_diff_service = (
-        lambda: mock.sentinel.forensic_diff
+    fake_module.bootstrap_forensic_run_diff_service = lambda: (
+        mock.sentinel.forensic_diff
     )
     fake_module.bootstrap_run_manifest_service = lambda: mock.sentinel.run_manifest
     monkeypatch.setattr(_services, "import_module", lambda _: fake_module)
@@ -417,11 +417,18 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
@@ -469,24 +476,29 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         _services.get_contract_migration_service()[0]
         is ContractMigrationServiceProtocol
     )
-    assert _services.get_run_manifest_service()[0] == "bootstrap_run_manifest_service"
     assert (
-        _services.get_forensic_run_diff_service()[0]
-        == "bootstrap_forensic_run_diff_service"
+        _services.get_run_manifest_service()[0] is RunManifestInspectionServiceProtocol
+    )
+    assert (
+        _services.get_forensic_run_diff_service()[0] is ForensicRunDiffServiceProtocol
     )
     assert (
         _services.get_historical_replay_corpus_service()[0]
-        == "bootstrap_historical_replay_corpus_service"
+        is HistoricalReplayCorpusServiceProtocol
     )
     assert (
         _services.get_historical_replay_closure_service()[0]
-        == "bootstrap_historical_replay_closure_service"
+        is HistoricalReplayClosureServiceProtocol
     )
     assert (
         _services.get_historical_replay_universe_service()[0]
-        == "bootstrap_historical_replay_universe_service"
+        is HistoricalReplayUniverseServiceProtocol
     )
-    assert _services.get_lineage_service()[0] == "bootstrap_lineage_service"
+    assert _services.get_lineage_service()[0] is LineageInspectionServiceProtocol
+    assert (
+        _services.get_workflow_inspection_service()[0]
+        is WorkflowInspectionServiceProtocol
+    )
     assert _services.get_health_service()[0] is HealthServiceProtocol
     assert (
         _services.get_observability_workflow_service()[0]
@@ -509,14 +521,25 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
         QuarantinePort,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     }
-    assert all(name != "bootstrap_metrics_service" for name, _, _ in bootstrap_calls)
+    assert {name for name, _, _ in bootstrap_calls} == {
+        "bootstrap_health_server_dependencies",
+        "bootstrap_pipeline_runner_service",
+        "bootstrap_quarantine_service",
+    }
 
 
 def test_cleanup_bronze_awaits_protocol_service(

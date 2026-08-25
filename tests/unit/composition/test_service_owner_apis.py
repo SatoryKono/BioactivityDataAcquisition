@@ -45,20 +45,27 @@ def test_retired_services_api_module_stays_absent() -> None:
     assert not (ROOT / "src" / "bioetl" / "composition" / "services_api.py").exists()
 
 
-def test_operations_getters_resolve_typed_ports(
+def test_registered_zero_argument_getters_resolve_typed_ports(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """E1 operation getters resolve their application/domain port keys."""
+    """Migrated zero-argument getters resolve their typed registry keys."""
     from bioetl.application.ports import (
         AuditInspectionServiceProtocol,
         CheckpointServiceProtocol,
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition import _services
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
@@ -81,6 +88,17 @@ def test_operations_getters_resolve_typed_ports(
         "get_config_service": ConfigServiceProtocol,
         "get_export_service": ExportServiceProtocol,
         "get_lock_service": LockServiceProtocol,
+        "get_forensic_run_diff_service": ForensicRunDiffServiceProtocol,
+        "get_historical_replay_closure_service": (
+            HistoricalReplayClosureServiceProtocol
+        ),
+        "get_historical_replay_corpus_service": HistoricalReplayCorpusServiceProtocol,
+        "get_historical_replay_universe_service": (
+            HistoricalReplayUniverseServiceProtocol
+        ),
+        "get_lineage_service": LineageInspectionServiceProtocol,
+        "get_run_manifest_service": RunManifestInspectionServiceProtocol,
+        "get_workflow_inspection_service": WorkflowInspectionServiceProtocol,
     }
 
     for getter_name, port in getter_ports.items():

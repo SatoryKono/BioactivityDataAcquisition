@@ -7,6 +7,13 @@ from __future__ import annotations
 
 from bioetl.application.ports.control_plane import (
     ControlPlaneArtifactLifecycleStoreProtocol,
+    ForensicRunDiffServiceProtocol,
+    HistoricalReplayClosureServiceProtocol,
+    HistoricalReplayCorpusServiceProtocol,
+    HistoricalReplayUniverseServiceProtocol,
+    LineageInspectionServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+    WorkflowInspectionServiceProtocol,
 )
 from bioetl.application.ports.dq import (
     ConfigurableDQMonitor,
@@ -74,8 +81,13 @@ __all__ = [
     "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
     "ExportServiceProtocol",
+    "ForensicRunDiffServiceProtocol",
     "GoldMergedWriteProtocol",
     "HealthServiceProtocol",
+    "HistoricalReplayClosureServiceProtocol",
+    "HistoricalReplayCorpusServiceProtocol",
+    "HistoricalReplayUniverseServiceProtocol",
+    "LineageInspectionServiceProtocol",
     "LockServiceProtocol",
     "MetricsFactoryProtocol",
     "MetricsService",
@@ -89,6 +101,7 @@ __all__ = [
     "ProviderRegistrarProtocol",
     "ProviderSettingsProtocol",
     "RegistryEntryProtocol",
+    "RunManifestInspectionServiceProtocol",
     "SchemaBuilderProtocol",
     "SecretValueProviderProtocol",
     "SilverMergedWriteProtocol",
@@ -96,5 +109,6 @@ __all__ = [
     "StorageFactoryProtocol",
     "SupportAwareDataSourceCreatorProtocol",
     "VacuumServiceProtocol",
+    "WorkflowInspectionServiceProtocol",
     "WorkflowMetricsFactoryProtocol",
 ]

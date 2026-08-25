@@ -62,11 +62,18 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
     from bioetl.composition.entrypoints import resolve, register, registered_ports
@@ -81,12 +88,19 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         ConfigServiceProtocol,
         ContractMigrationServiceProtocol,
         ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
         QuarantinePort,
+        RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     }
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
     assert [path.name for path in api_files] == [

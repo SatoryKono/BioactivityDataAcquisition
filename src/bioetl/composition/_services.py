@@ -6,6 +6,15 @@ from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.ports.control_plane import (
+    ForensicRunDiffServiceProtocol,
+    HistoricalReplayClosureServiceProtocol,
+    HistoricalReplayCorpusServiceProtocol,
+    HistoricalReplayUniverseServiceProtocol,
+    LineageInspectionServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+    WorkflowInspectionServiceProtocol,
+)
 from bioetl.application.ports.metrics import MetricsService
 from bioetl.application.ports.operations import (
     AuditInspectionServiceProtocol,
@@ -29,19 +38,12 @@ if TYPE_CHECKING:
     from bioetl.application.ports.health import HealthServiceProtocol
     from bioetl.composition._service_types import (
         BronzeCleanupResult,
-        ForensicRunDiffService,
-        HistoricalReplayClosureService,
-        HistoricalReplayCorpusService,
-        HistoricalReplayUniverseService,
-        LineageInspectionService,
         LockPort,
         PipelineRegistry,
         PipelineRunnerService,
         QuarantineService,
-        RunManifestInspectionService,
         WorkflowConfig,
         WorkflowExecutionService,
-        WorkflowInspectionService,
         WorkflowRunnerService,
     )
     from bioetl.composition.bootstrap.assembly.health_server import (
@@ -175,11 +177,9 @@ def get_workflow_execution_service(
     )
 
 
-def get_workflow_inspection_service() -> WorkflowInspectionService:
+def get_workflow_inspection_service() -> WorkflowInspectionServiceProtocol:
     """Build workflow inspection service via the canonical workflow seam."""
-    from bioetl.composition import _workflow_services
-
-    return _workflow_services.get_workflow_inspection_service()
+    return _resolve(WorkflowInspectionServiceProtocol)
 
 
 def load_workflow_config(name: str) -> WorkflowConfig:
@@ -250,34 +250,34 @@ def get_export_service() -> ExportServiceProtocol:
     return _resolve(ExportServiceProtocol)
 
 
-def get_forensic_run_diff_service() -> ForensicRunDiffService:
+def get_forensic_run_diff_service() -> ForensicRunDiffServiceProtocol:
     """Get forensic run diff service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_forensic_run_diff_service")
+    return _resolve(ForensicRunDiffServiceProtocol)
 
 
-def get_historical_replay_closure_service() -> HistoricalReplayClosureService:
+def get_historical_replay_closure_service() -> HistoricalReplayClosureServiceProtocol:
     """Get historical replay closure service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_closure_service")
+    return _resolve(HistoricalReplayClosureServiceProtocol)
 
 
-def get_historical_replay_corpus_service() -> HistoricalReplayCorpusService:
+def get_historical_replay_corpus_service() -> HistoricalReplayCorpusServiceProtocol:
     """Get historical replay corpus service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_corpus_service")
+    return _resolve(HistoricalReplayCorpusServiceProtocol)
 
 
-def get_historical_replay_universe_service() -> HistoricalReplayUniverseService:
+def get_historical_replay_universe_service() -> HistoricalReplayUniverseServiceProtocol:
     """Get historical replay universe service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_historical_replay_universe_service")
+    return _resolve(HistoricalReplayUniverseServiceProtocol)
 
 
-def get_lineage_service() -> LineageInspectionService:
+def get_lineage_service() -> LineageInspectionServiceProtocol:
     """Get lineage service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_lineage_service")
+    return _resolve(LineageInspectionServiceProtocol)
 
 
 def get_lock_service() -> LockServiceProtocol:
@@ -286,7 +286,7 @@ def get_lock_service() -> LockServiceProtocol:
     return _resolve(LockServiceProtocol)
 
 
-def get_run_manifest_service() -> RunManifestInspectionService:
+def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
     """Get run-manifest service without full pipeline registration."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_run_manifest_service")
+    return _resolve(RunManifestInspectionServiceProtocol)
