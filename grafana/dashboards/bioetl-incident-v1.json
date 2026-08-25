@@ -1311,7 +1311,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 160
+                    "value": 70
                   }
                 ]
               },
@@ -1322,8 +1322,11 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 300
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },
@@ -1400,64 +1403,6 @@
                       "tooltip": false,
                       "viz": true,
                       "legend": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 220
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.hidden",
-                    "value": true
-                  },
-                  {
-                    "id": "custom.hideFrom",
-                    "value": {
-                      "tooltip": false,
-                      "viz": true,
-                      "legend": true
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "reason"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 220
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
                     }
                   }
                 ]
