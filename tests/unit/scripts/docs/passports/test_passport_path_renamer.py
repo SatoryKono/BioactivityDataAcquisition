@@ -6,7 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from scripts.docs.passports.rename_underscore_to_hyphen import _materialize_repo_file, main
+from scripts.docs.passports.rename_underscore_to_hyphen import (
+    _materialize_repo_file,
+    main,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -19,16 +22,8 @@ def _write(path: Path, content: str) -> None:
 def test_migration_dry_run_apply_and_check_are_idempotent(tmp_path: Path) -> None:
     pipeline_legacy_name = "chembl" + "_activity.md"
     workflow_legacy_name = "publication" + "_provider_pack.md"
-    pipeline = (
-        tmp_path
-        / "docs/04-reference/passports/pipelines"
-        / pipeline_legacy_name
-    )
-    workflow = (
-        tmp_path
-        / "docs/04-reference/passports/workflows"
-        / workflow_legacy_name
-    )
+    pipeline = tmp_path / "docs/04-reference/passports/pipelines" / pipeline_legacy_name
+    workflow = tmp_path / "docs/04-reference/passports/workflows" / workflow_legacy_name
     _write(pipeline, "# pipeline\n")
     _write(workflow, "# workflow\n")
     index = tmp_path / "docs/04-reference/passports/index.md"
@@ -68,6 +63,7 @@ def test_migration_refuses_to_overwrite_existing_target(tmp_path: Path) -> None:
     with pytest.raises(FileExistsError, match="target exists"):
         main(["--root", str(tmp_path), "--apply"])
 
+
 def test_materialize_repo_file_rejects_parent_and_absolute(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     (root / "docs").mkdir(parents=True)
@@ -79,3 +75,17 @@ def test_materialize_repo_file_rejects_parent_and_absolute(tmp_path: Path) -> No
     with pytest.raises(ValueError, match="refusing path"):
         _materialize_repo_file(root, "/etc/passwd")
 
+
+def test_materialize_repo_file_rejects_symlink_escape(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    root.mkdir()
+    outside = tmp_path / "outside.md"
+    outside.write_text("outside\n", encoding="utf-8")
+    link = root / "README.md"
+    try:
+        link.symlink_to(outside)
+    except OSError:
+        pytest.skip("symlink creation is unavailable")
+
+    with pytest.raises(ValueError, match="refusing path outside"):
+        _materialize_repo_file(root, "README.md")
