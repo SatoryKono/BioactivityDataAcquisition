@@ -419,7 +419,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     monkeypatch.setattr(
         _services,
         "_ensure_pipeline_registrations",
-        lambda registry=None: pipeline_calls.append(registry),
+        lambda registry=None: pipeline_calls.append(registry) or registry,
     )
     monkeypatch.setattr(
         _services,
