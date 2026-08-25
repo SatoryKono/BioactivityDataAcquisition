@@ -3419,13 +3419,6 @@
                     "value": "left"
                   },
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
-                  },
-                  {
                     "id": "links",
                     "value": [
                       {
@@ -3598,7 +3591,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": true
                     }
                   }
                 ]

@@ -1957,7 +1957,8 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
         for prop in parameter_overrides[0].get("properties", [])
     }
     assert parameter_properties["custom.align"] == "left"
-    assert parameter_properties["custom.cellOptions"] == {"type": "color-text"}
+    assert parameter_properties["custom.cellOptions"]["type"] == "color-text"
+    assert parameter_properties["custom.cellOptions"].get("wrapText") is True
 
     assert_processed_records_field_overrides(
         processed,
