@@ -986,6 +986,47 @@ def test_short_table_panels_use_compact_cell_height() -> None:
     )
 
 
+UNIFORM_TABLE_CELL_HEIGHT = "sm"
+
+
+def test_all_table_panels_use_uniform_cell_height() -> None:
+    """Every shipped table panel uses the same Grafana cellHeight.
+
+    Mixed or omitted presets make row height differ across boards. FIT-004
+    already requires ``sm`` on short tables; this lock extends that preset to
+    every table so operator tables share one row height.
+    """
+    tables: list[tuple[str, int | str, str]] = []
+    violations: list[str] = []
+    heights: set[object] = set()
+
+    for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            if panel.get("type") != "table":
+                continue
+            panel_id = panel.get("id", "?")
+            title = panel_display_title(panel) or panel.get("title") or f"id={panel_id}"
+            tables.append((dashboard_path.name, panel_id, str(title)))
+            cell_height = panel.get("options", {}).get("cellHeight")
+            heights.add(cell_height)
+            if cell_height != UNIFORM_TABLE_CELL_HEIGHT:
+                violations.append(
+                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
+                    f"cellHeight={cell_height!r}"
+                )
+
+    assert tables, "expected at least one table panel in shipped dashboards"
+    assert heights == {UNIFORM_TABLE_CELL_HEIGHT}, (
+        "all table panels must share options.cellHeight="
+        f"{UNIFORM_TABLE_CELL_HEIGHT!r}; observed={sorted(heights, key=str)}"
+    )
+    assert not violations, (
+        "table panels must set options.cellHeight="
+        f"{UNIFORM_TABLE_CELL_HEIGHT!r}:\n" + "\n".join(violations)
+    )
+
+
 def test_dq_ultra_short_timeseries_hides_legend() -> None:
     """Ultra-short timeseries (h≤4) free vertical chrome by hiding the legend.
 
