@@ -382,7 +382,7 @@
             "align": "auto",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true
           },
@@ -1314,7 +1314,7 @@
             "align": "auto",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true
           },
