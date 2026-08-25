@@ -9,10 +9,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from bioetl.application.services.run_reports._identity_index import (
+from bioetl.application.services.run_reports.paths import (
     read_identity_preview,
+    resolve_report_root,
 )
-from bioetl.application.services.run_reports.paths import resolve_report_root
 from bioetl.application.services.run_reports.writer import _safe_segment
 
 
