@@ -1116,6 +1116,50 @@
       "type": "stat"
     },
     {
+      "id": 906,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 2,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "options": {
+        "bioetlDisplayTitle": "Review Recovery Action",
+        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. This-screen tables: <em>Review Selected-Run Trust</em> and <em>Review Retention Compliance</em>. Then expand the row <em>Review Lineage Validation</em>.</div>",
+        "mode": "html",
+        "dataLinks": [
+          {
+            "title": "Open Replay Safety Diagnostics",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=130&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Selected-Run Trust",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9418&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Lineage Validation",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9415&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Retention Compliance",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9416&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
+      },
+      "transparent": false,
+      "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
+    },
+    {
       "collapsed": true,
       "gridPos": {
         "h": 1,

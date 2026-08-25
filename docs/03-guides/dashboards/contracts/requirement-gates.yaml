@@ -81,8 +81,8 @@ first_window_inspect_tables:
   - dashboard: bioetl-dq-v2.json
     id: 9102
     owner: "@bioetl-observability"
-    rationale: First-window current DQ reasons (NOW lane), not range forensics.
-    retire_when: 9102 leaves the first window
+    rationale: NOW-lane current DQ reasons belong on the first window, not the RANGE row; the Inspect title reflects the active reason list, not a forensics dump.
+    retire_when: 9102 is no longer a first-window table or is retitled without Inspect
 
 # DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
 operator_question:
