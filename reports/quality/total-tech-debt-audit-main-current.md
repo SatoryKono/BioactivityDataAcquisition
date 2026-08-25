@@ -8,10 +8,10 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `825f8f36e0bc553c77ff50a6f07259a512bfab82`
+Audited commit SHA: `ee932368a5a728619376403572945b07a34c98f8`
 
 
-Evidence surface SHA-256: `1306286a780c8cd41c88882bbe73331ad52ab368e4ffb3697c9118ef32cda1d9`
+Evidence surface SHA-256: `e839b974dc9882abf3765d4b924302295a8c2c2285bd6181a56dddae4b504905`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,8 +19,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "825f8f36e0bc553c77ff50a6f07259a512bfab82",
-  "evidence_surface_sha256": "1306286a780c8cd41c88882bbe73331ad52ab368e4ffb3697c9118ef32cda1d9",
+  "audited_commit_sha": "ee932368a5a728619376403572945b07a34c98f8",
+  "evidence_surface_sha256": "e839b974dc9882abf3765d4b924302295a8c2c2285bd6181a56dddae4b504905",
   "metrics": {
     "architecture_integral_score": 9.28,
     "architecture_interpretation": "good_targeted_improvements",
@@ -48,7 +48,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `825f8f36e0` for #9646 after concurrent #9620/#9627/#9631 source merges and the #9647 artifact refresh; all debt-governance gates pass and no budget grows.
+Refresh reason: Re-pin to origin/main `ee932368a5` for #9646 after the final #9647 remote-main baseline refresh; all debt-governance gates pass and no budget grows.
 
 
 ## Executive summary
