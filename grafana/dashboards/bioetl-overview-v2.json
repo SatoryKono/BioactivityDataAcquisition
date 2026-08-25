@@ -794,10 +794,6 @@
                   "type": "auto",
                   "wrapText": true
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 45
               }
             ]
           },
@@ -1098,10 +1094,6 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 110
               }
             ]
           },
@@ -1625,10 +1617,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 200
                   }
                 ]
               },
@@ -2075,18 +2063,6 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
                   "options": "run_type"
                 },
                 "properties": [
@@ -2202,18 +2178,6 @@
                   {
                     "id": "displayName",
                     "value": "Count"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "pipeline"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
                   }
                 ]
               },
