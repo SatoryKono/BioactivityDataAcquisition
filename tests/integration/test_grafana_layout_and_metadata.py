@@ -1022,7 +1022,6 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
     )
 
 
-
 def _table_hidden_fields(panel: dict) -> set[str]:
     hidden: set[str] = set()
     for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
@@ -1099,7 +1098,9 @@ def test_table_panels_fill_panel_width() -> None:
             pinned = _table_width_fields(panel)
             if all(field in pinned for field in visible):
                 panel_id = panel.get("id", "?")
-                title = panel_display_title(panel) or panel.get("title") or f"id={panel_id}"
+                title = (
+                    panel_display_title(panel) or panel.get("title") or f"id={panel_id}"
+                )
                 violations.append(
                     f"{dashboard_path.name} panel {panel_id} ({title!r}) "
                     f"visible={visible} pinned={sorted(pinned & set(visible))}"
