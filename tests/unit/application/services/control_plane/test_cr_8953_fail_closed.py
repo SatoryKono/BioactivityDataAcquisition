@@ -82,14 +82,14 @@ from bioetl.application.services.control_plane.run_manifest_reproducibility_clai
 from bioetl.application.services.control_plane.run_manifest_reproducibility_scoring import (
     build_reproducibility_audit_scoring,
 )
-from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording import (
+from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
     record_workflow_finished,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
+from bioetl.application.services.workflow.control_plane.execution_recording_payloads import (
     build_step_completion_details,
 )
 from bioetl.application.services.control_plane.workflow.manifest_models import (

@@ -1,4 +1,4 @@
-"""Workflow execution preparation helpers."""
+"""Workflow-owned execution preparation helpers."""
 
 from __future__ import annotations
 
@@ -7,7 +7,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from bioetl.application.services.control_plane.workflow._execution_resume_support import (
+from bioetl.application.services.control_plane.workflow.manifest_models import (
+    WorkflowManifestCreateSpec,
+)
+from bioetl.application.services.workflow.control_plane._execution_resume_support import (
     load_resume_manifest,
     load_resume_state,
     normalize_resume_state,
@@ -15,11 +18,8 @@ from bioetl.application.services.control_plane.workflow._execution_resume_suppor
     resolve_skipped_step_ids,
     validate_resume_state,
 )
-from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
-)
-from bioetl.application.services.control_plane.workflow.manifest_models import (
-    WorkflowManifestCreateSpec,
 )
 from bioetl.domain.control_plane import (
     WorkflowExecutionState,

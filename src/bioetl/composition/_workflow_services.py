@@ -17,7 +17,7 @@ from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow.execution_service import (
+    from bioetl.application.services.workflow.control_plane.execution_service import (
         WorkflowExecutionService,
     )
     from bioetl.application.services.control_plane.workflow.inspection_service import (
@@ -29,6 +29,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
+    from bioetl.application.services.workflow.workflow_runner_service import (
+        WorkflowRunnerService,
+    )
     from bioetl.domain.control_plane import WorkflowManifest
     from bioetl.domain.ports import (
         LockPort,
@@ -38,11 +41,11 @@ if TYPE_CHECKING:
     from bioetl.domain.workflow import WorkflowConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
-from bioetl.composition.factories.services.port_factories import (
-    WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
-)
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
+)
+from bioetl.composition.factories.services.port_factories import (
+    WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
 
 
@@ -68,7 +71,9 @@ def _create_workflow_metrics(settings: Settings) -> MetricsPort:
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical composition service seam."""
-    from bioetl.infrastructure.config import workflow_config_api
+    workflow_config_api = import_module(
+        "bioetl.infrastructure.config.workflow_config_api"
+    )
 
     return workflow_config_api.load_workflow_config(
         name,
@@ -163,7 +168,7 @@ def get_workflow_execution_service(
 ) -> WorkflowExecutionService:
     """Build workflow execution orchestration with durable control-plane seams."""
     execution_service = import_module(
-        "bioetl.application.services.control_plane.workflow.execution_service"
+        "bioetl.application.services.workflow.control_plane.execution_service"
     )
     manifest_service_module = import_module(
         "bioetl.application.services.control_plane.workflow.manifest_service"

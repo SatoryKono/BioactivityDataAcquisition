@@ -86,12 +86,12 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 142,
-      "total_loc": 16438,
+      "files": 133,
+      "total_loc": 15077,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.402,
+      "helper_function_ratio": 0.374,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_types",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2

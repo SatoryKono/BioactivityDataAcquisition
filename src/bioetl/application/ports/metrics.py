@@ -18,12 +18,14 @@ class WorkflowMetricsFactoryProtocol(Protocol):
     def __call__(self, settings: Settings, /) -> MetricsPort: ...
 
 
+@runtime_checkable
 class MetricsFactoryProtocol(Protocol):
     """Factory-like contract for constructing a metrics port from settings."""
 
     def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
+@runtime_checkable
 class MetricsService(Protocol):
     """Metrics HTTP server lifecycle contract used by composition bootstrap."""
 

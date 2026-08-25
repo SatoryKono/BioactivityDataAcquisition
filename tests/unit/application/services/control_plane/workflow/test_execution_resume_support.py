@@ -35,7 +35,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.workflow import (
+from bioetl.application.services.workflow.control_plane import (
     _execution_resume_support as support,
 )
 from bioetl.domain.control_plane import (

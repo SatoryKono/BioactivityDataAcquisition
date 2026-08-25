@@ -1,4 +1,4 @@
-"""Incremental workflow execution metadata helpers."""
+"""Workflow-owned incremental execution metadata helpers."""
 
 from __future__ import annotations
 

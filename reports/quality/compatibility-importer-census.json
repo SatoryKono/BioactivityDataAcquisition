@@ -21,7 +21,7 @@
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0,
-    "retained_public_export_facades_with_wrapper_contract_drift": 0
+    "retained_public_export_facades_with_wrapper_contract_drift": 1
   },
   "retained_entrypoints": [
     {
@@ -191,12 +191,12 @@
         "registered_ports",
         "resolve"
       ],
-      "retained_wrappers_outside_all": [
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
@@ -628,12 +628,12 @@
         "registered_ports",
         "resolve"
       ],
-      "retained_wrappers_outside_all": [
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
@@ -928,12 +928,12 @@
         "registered_ports",
         "resolve"
       ],
-      "retained_wrappers_outside_all": [
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
@@ -1134,12 +1134,12 @@
         "registered_ports",
         "resolve"
       ],
-      "retained_wrappers_outside_all": [
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
@@ -1508,7 +1508,7 @@
       "surface_id": "workflow_execution_preparation",
       "path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",
       "module_name": "bioetl.application.services.control_plane.workflow_execution_preparation",
-      "canonical_target": "bioetl.application.services.control_plane.workflow.execution_preparation",
+      "canonical_target": "bioetl.application.services.workflow.control_plane.execution_preparation",
       "owner": "bioetl.application.services.control_plane.workflow",
       "path_exists": false,
       "src_importers": [],
@@ -1521,7 +1521,7 @@
       "surface_id": "workflow_execution_recording",
       "path": "src/bioetl/application/services/control_plane/workflow_execution_recording.py",
       "module_name": "bioetl.application.services.control_plane.workflow_execution_recording",
-      "canonical_target": "bioetl.application.services.control_plane.workflow.execution_recording",
+      "canonical_target": "bioetl.application.services.workflow.control_plane.execution_recording",
       "owner": "bioetl.application.services.control_plane.workflow",
       "path_exists": false,
       "src_importers": [],
@@ -1534,7 +1534,7 @@
       "surface_id": "workflow_execution_service",
       "path": "src/bioetl/application/services/control_plane/workflow_execution_service.py",
       "module_name": "bioetl.application.services.control_plane.workflow_execution_service",
-      "canonical_target": "bioetl.application.services.control_plane.workflow.execution_service",
+      "canonical_target": "bioetl.application.services.workflow.control_plane.execution_service",
       "owner": "bioetl.application.services.control_plane.workflow",
       "path_exists": false,
       "src_importers": [],

@@ -177,7 +177,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "surface_id": "workflow_execution_preparation",
         "path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_preparation",
-        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_preparation",
+        "canonical_target": "bioetl.application.services.workflow.control_plane.execution_preparation",
         "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
@@ -185,7 +185,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "surface_id": "workflow_execution_recording",
         "path": "src/bioetl/application/services/control_plane/workflow_execution_recording.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_recording",
-        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_recording",
+        "canonical_target": "bioetl.application.services.workflow.control_plane.execution_recording",
         "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
@@ -193,7 +193,7 @@ REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
         "surface_id": "workflow_execution_service",
         "path": "src/bioetl/application/services/control_plane/workflow_execution_service.py",
         "module_name": "bioetl.application.services.control_plane.workflow_execution_service",
-        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_service",
+        "canonical_target": "bioetl.application.services.workflow.control_plane.execution_service",
         "owner": OWNER_CONTROL_PLANE_WORKFLOW,
     },
     {
