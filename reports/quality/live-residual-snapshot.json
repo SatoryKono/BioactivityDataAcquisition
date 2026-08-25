@@ -25,7 +25,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.33,
       "files": 51,
-      "total_loc": 6197,
+      "total_loc": 6199,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 3
     },
@@ -41,9 +41,9 @@
     "application_services_control_plane": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
-      "helper_function_ratio": 0.374,
+      "helper_function_ratio": 0.376,
       "files": 133,
-      "total_loc": 15076,
+      "total_loc": 15091,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.375,
       "files": 57,
-      "total_loc": 7227,
+      "total_loc": 7229,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }

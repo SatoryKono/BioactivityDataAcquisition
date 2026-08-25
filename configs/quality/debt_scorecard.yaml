@@ -138,7 +138,7 @@ sanctioned_public_entrypoint_governance:
       review_policy: Review owner metadata, allowed call sites, target state, and completion gates whenever
         the compatibility inventory changes or quarterly lifecycle review runs.
     stable_public_api_count:
-      current_count: 11
+      current_count: 12
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: Stable public entrypoints intentionally remain external patch/import seams and should
@@ -147,12 +147,12 @@ sanctioned_public_entrypoint_governance:
       review_policy: Keep the sanctioned public API set explicit and block reversion to internal-owner
         imports outside approved boundary coverage.
     narrow_first_party_callers_count:
-      current_count: 1
+      current_count: 0
       owner: '@bioetl-architecture'
       linked_issue: '4565'
-      rationale: One sanctioned public entrypoint remains in the narrow-first-party-callers governance
-        state so the stable facade can remain public while ordinary first-party callers stay confined
-        to the reviewed owner seam.
+      rationale: No sanctioned public entrypoint remains in the narrow-first-party-callers governance
+        state; stable facades remain public while ordinary first-party callers stay confined to their
+        reviewed owner seams.
       review_cadence: quarterly
       review_policy: Ratchet first-party callers toward reviewed facade exports and keep deeper owner
         modules hidden behind the sanctioned public seam.
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 51
-      total_loc: 6197
+      total_loc: 6199
       files_ge_250_loc: 0
       helper_function_ratio: 0.33
       max_internal_fan_in: 2
@@ -541,9 +541,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 133
-      total_loc: 15076
+      total_loc: 15091
       files_ge_250_loc: 0
-      helper_function_ratio: 0.374
+      helper_function_ratio: 0.376
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_types
     trend:
@@ -569,7 +569,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 57
-      total_loc: 7227
+      total_loc: 7229
       files_ge_250_loc: 0
       helper_function_ratio: 0.375
       max_internal_fan_in: 3
