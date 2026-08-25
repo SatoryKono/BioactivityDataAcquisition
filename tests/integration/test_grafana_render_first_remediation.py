@@ -596,7 +596,6 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         19,
         20,
         21,
-
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 
@@ -743,7 +742,8 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         wrapped = _wrapped_field_names(panel)
         assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
         assert any(
-            (_override_width(panel, name) is None) or ((_override_width(panel, name) or 0) >= 260)
+            (_override_width(panel, name) is None)
+            or ((_override_width(panel, name) or 0) >= 260)
             for name in wrapped
         )
 
