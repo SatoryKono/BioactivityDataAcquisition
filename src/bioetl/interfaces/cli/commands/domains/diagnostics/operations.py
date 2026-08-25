@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         MetricsOperatorProfile,
         ObservabilityDiagnosticsBundle,
     )

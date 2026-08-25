@@ -18,13 +18,14 @@ from typing import Any
 
 import pytest
 import yaml
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 DOMAIN_ROOT = ROOT / "src/bioetl/domain"
 CLASSIFICATION_PATH = ROOT / "configs/quality/domain_aggregate_classification.yaml"
-REGISTRY_PATH = ROOT / "reports/quality/domain-aggregate-invariant-registry.json"
+REGISTRY_PATH = quality_artifact_path("domain-aggregate-invariant-registry.json")
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:

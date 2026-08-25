@@ -108,7 +108,7 @@ def test_entrypoints_start_metrics_server_wrapper_delegates_to_observability_api
         return True
 
     monkeypatch.setattr(
-        "bioetl.composition.observability_api.start_metrics_server",
+        "bioetl.composition.observability_runtime.start_metrics_server",
         _fake_start,
     )
     logger = object()
@@ -160,7 +160,7 @@ def test_entrypoints_load_pipeline_config_wrapper_delegates_to_composite_api(
         return sentinel
 
     monkeypatch.setattr(
-        "bioetl.composition.composite_api.load_pipeline_config",
+        "bioetl.composition.composite_catalog.load_pipeline_config",
         _fake_load,
     )
     assert entrypoints.load_pipeline_config("chembl_activity") is sentinel
@@ -285,10 +285,10 @@ def test_composition_package_root_budget_excludes_legacy_facade_modules() -> Non
 @pytest.mark.unit
 def test_canonical_composition_owner_modules_remain_directly_importable() -> None:
     """Owner-focused composition APIs stay importable without package-root re-exports."""
-    resources_api_module = importlib.import_module("bioetl.composition.resources_api")
+    resources_api_module = importlib.import_module("bioetl.composition.resources_runtime")
     registry_api_module = importlib.import_module("bioetl.composition.registry_api")
     control_plane_api_module = importlib.import_module(
-        "bioetl.composition.control_plane_api"
+        "bioetl.composition.control_plane_runtime"
     )
     health_api_module = importlib.import_module("bioetl.composition.health_api")
     maintenance_api_module = importlib.import_module(

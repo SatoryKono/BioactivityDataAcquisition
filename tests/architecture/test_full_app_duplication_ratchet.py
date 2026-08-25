@@ -17,12 +17,13 @@ from pathlib import Path
 
 import pytest
 import yaml
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
-BASELINE_PATH = PROJECT_ROOT / "reports/quality/full-app-duplication-baseline.json"
+BASELINE_PATH = quality_artifact_path("full-app-duplication-baseline.json")
 
 
 def _load_scorecard() -> dict[str, object]:

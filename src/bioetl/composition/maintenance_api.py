@@ -40,14 +40,14 @@ get_vacuum_service: Callable[[], VacuumService]
 
 async def archive_table(table: str, options: ArchiveOptions) -> int:
     """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_api import archive_table as _archive_table
+    from bioetl.composition.resources_runtime import archive_table as _archive_table
 
     return await _archive_table(table, options)
 
 
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
     """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_api import (
+    from bioetl.composition.resources_runtime import (
         get_lifecycle_service as _get_lifecycle_service,
     )
 
@@ -56,14 +56,14 @@ def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
 
 async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
     """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_api import preview_cleanup as _preview_cleanup
+    from bioetl.composition.resources_runtime import preview_cleanup as _preview_cleanup
 
     return await _preview_cleanup(pipeline)
 
 
 async def vacuum_table(table: str, options: VacuumOptions) -> int:
     """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_api import vacuum_table as _vacuum_table
+    from bioetl.composition.resources_runtime import vacuum_table as _vacuum_table
 
     return await _vacuum_table(table, options)
 

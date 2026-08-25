@@ -35,7 +35,7 @@ def push_metrics_to_gateway(
     pipeline_name: str | None = None,
 ) -> bool:
     """Push metrics without turning a completed CLI run into failure."""
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         push_metrics_to_gateway as _push_metrics_to_gateway,
     )
 

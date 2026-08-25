@@ -564,6 +564,7 @@ class TestMetricsPortProperties:
         from bioetl.domain.ports.noop import NoOpMetrics
 
         metrics = NoOpMetrics()
+        assert metrics is not None
 
         # Should not raise for any valid input
         metrics.increment_counter(metric_name, 1, {})
@@ -583,6 +584,7 @@ class TestMetricsPortProperties:
         from bioetl.domain.ports.noop import NoOpMetrics
 
         metrics = NoOpMetrics()
+        assert metrics is not None
 
         # Should not raise for any valid labels
         metrics.increment_counter("test_metric", 1, labels)
@@ -619,6 +621,7 @@ class TestLoggerPortProperties:
         from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
         logger = NoOpLogger()
+        assert logger is not None
 
         # Should not raise for any input
         logger.info(message, **context)

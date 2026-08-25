@@ -14,8 +14,11 @@ from bioetl.domain.aggregates._pipeline_run_mixins import (
     _PipelineRunLifecycleMixin,
     _PipelineRunReadModelMixin,
 )
-from bioetl.domain.aggregates.pipeline_run_stage_result import StageResult
-from bioetl.domain.aggregates.pipeline_run_state import PipelineRunState, StageStatus
+from bioetl.domain.aggregates.pipeline_run_stage_result import (
+    PipelineRunState,
+    StageResult,
+    StageStatus,
+)
 from bioetl.domain.types import JsonDict, RunID, RunType
 
 if TYPE_CHECKING:

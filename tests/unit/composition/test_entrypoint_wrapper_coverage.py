@@ -69,7 +69,7 @@ def test_load_pipeline_config_delegates(monkeypatch: pytest.MonkeyPatch) -> None
     # Mock the actual implementation that gets imported inside the function
     sentinel = object()
     monkeypatch.setattr(
-        "bioetl.composition.composite_api.load_pipeline_config",
+        "bioetl.composition.composite_catalog.load_pipeline_config",
         lambda name: sentinel,
     )
 

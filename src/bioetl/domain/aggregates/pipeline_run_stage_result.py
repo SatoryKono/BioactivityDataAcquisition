@@ -1,11 +1,38 @@
-"""Stage-level value objects for pipeline runs."""
+"""Stage-level value objects and run-state enums for pipeline runs."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import StrEnum
 
-from bioetl.domain.aggregates.pipeline_run_state import StageStatus
+
+class StageStatus(StrEnum):
+    """Status of a pipeline stage."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    SUCCESS = "success"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+class PipelineRunState(StrEnum):
+    """Lifecycle state of a pipeline run (PENDING -> RUNNING -> terminal)."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SHUTDOWN = "shutdown"
+
+    def is_terminal(self) -> bool:
+        """Check if terminal (no more transitions)."""
+        return self in {
+            PipelineRunState.COMPLETED,
+            PipelineRunState.FAILED,
+            PipelineRunState.SHUTDOWN,
+        }
 
 
 def _validate_stage_name(stage: str) -> None:

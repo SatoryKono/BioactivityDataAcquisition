@@ -17,6 +17,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 
 pytestmark = pytest.mark.architecture
@@ -24,7 +25,7 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 CURRENT_STATE = ROOT / "docs/02-architecture/current-state-inventory.md"
 PLAYBOOK = ROOT / "docs/00-project/governance/08-debt-ownership-playbook.md"
-FULL_APP_DUPLICATION = ROOT / "reports/quality/full-app-duplication-baseline.json"
+FULL_APP_DUPLICATION = quality_artifact_path("full-app-duplication-baseline.json")
 SCORECARD = ROOT / "configs/quality/debt_scorecard.yaml"
 EXEMPTIONS = ROOT / "configs/quality/architecture_metric_exemptions.yaml"
 

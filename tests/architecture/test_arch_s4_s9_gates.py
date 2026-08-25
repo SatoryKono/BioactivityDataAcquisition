@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import ast
-import json
 from collections import Counter
 from pathlib import Path
 
@@ -14,6 +13,7 @@ from scripts.engineering.qa.report_lazy_import_inventory import (
     collect_lazy_imports,
     main as lazy_main,
 )
+from tests.architecture.quality_artifacts import load_quality_json
 
 pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,16 +31,21 @@ def test_s4_lazy_import_ratchet_is_shrink_only() -> None:
 
 def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
     from scripts.engineering.qa.report_source_tree_manifest import (
-        DEFAULT_OUTPUT,
         build_manifest,
         main as manifest_main,
     )
 
     live = build_manifest()
-    payload = json.loads(DEFAULT_OUTPUT.read_text(encoding="utf-8"))
+    payload = load_quality_json("source-tree-manifest.json")
     assert payload["source_tree_sha256"] == live["source_tree_sha256"]
     assert payload["generated_from_manifest"] is True
     assert manifest_main(["--check"]) == 0
+    helper_users = [
+        path
+        for path in (ROOT / "tests/architecture").rglob("*.py")
+        if "quality_artifacts" in path.read_text(encoding="utf-8")
+    ]
+    assert len(helper_users) >= 15, len(helper_users)
 
 
 def test_s5_service_access_seams_are_at_most_two() -> None:
@@ -55,7 +60,12 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
     assert callable(resolve) and callable(register)
     assert isinstance(registered_ports(), dict)
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
-    assert len(api_files) <= 8
+    assert [path.name for path in api_files] == [
+        "execution_api.py",
+        "health_api.py",
+        "maintenance_api.py",
+        "registry_api.py",
+    ]
 
 
 def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
@@ -106,11 +116,7 @@ def test_s8_domain_framework_import_ratchet() -> None:
                     pandas_in_forbidden.append(rel)
     assert count <= int(config["max_framework_imports"])
     assert not pandas_in_forbidden
-    inventory = json.loads(
-        (ROOT / "reports/quality/module-coverage-inventory.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    inventory = load_quality_json("module-coverage-inventory.json")
     summary = inventory["summary"]
     status = summary["status_counts"]
     doc = (ROOT / "docs/02-architecture/current-state-inventory.md").read_text(

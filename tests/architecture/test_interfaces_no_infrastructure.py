@@ -343,7 +343,7 @@ class TestInterfacesNoDIrectInfrastructure:
         obs_path = SRC_PATH / "interfaces" / "observability.py"
         assert not obs_path.exists(), (
             "interfaces/observability.py should stay removed; use "
-            "bioetl.composition.observability_api instead."
+            "bioetl.composition.observability_runtime instead."
         )
 
 

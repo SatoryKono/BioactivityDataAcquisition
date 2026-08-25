@@ -10,7 +10,7 @@ from bioetl.composition.bootstrap.assembly.health_server import (
     HealthServerDependencies,
     create_health_server_dependencies,
 )
-from bioetl.composition.composite_api import load_pipeline_config
+from bioetl.composition.composite_catalog import load_pipeline_config
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceFactory,
 )

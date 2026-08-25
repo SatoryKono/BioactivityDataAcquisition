@@ -25,7 +25,7 @@ from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     build_pipeline_context as build_pipeline_context_impl,
 )
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
-from bioetl.composition.observability_api import (
+from bioetl.composition.observability_runtime import (
     push_metrics_to_gateway as push_metrics_to_gateway_impl,
 )
 from bioetl.domain.exceptions import BioETLError
