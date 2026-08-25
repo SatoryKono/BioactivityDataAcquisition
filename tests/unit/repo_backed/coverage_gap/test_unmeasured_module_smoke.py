@@ -154,5 +154,9 @@ def test_pipeline_bootstrap_lazy_dependencies_delegate() -> None:
     with patch(
         "bioetl.composition.factories.pipeline.registry.register_all_pipelines"
     ) as register_all:
-        lazy.register_all_pipelines()
-        register_all.assert_called_once()
+        registry = object()
+        lazy.register_all_pipelines(registry=registry)
+        register_all.assert_called_once_with(
+            registry=registry,
+            registration_state=None,
+        )

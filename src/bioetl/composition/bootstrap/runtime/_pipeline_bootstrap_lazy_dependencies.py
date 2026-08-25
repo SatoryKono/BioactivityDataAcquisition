@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.application.ports import PipelineRegistryProtocol
     from bioetl.composition.factories.pipeline.registry import (
         PipelineFactoryRegistrationState,
-        PipelineRegistryProtocol,
     )
 
 
@@ -49,7 +49,7 @@ def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
 
 
 def register_all_pipelines(
-    registry: PipelineRegistryProtocol | None = None,
+    registry: PipelineRegistryProtocol,
     *,
     registration_state: PipelineFactoryRegistrationState | None = None,
 ) -> None:

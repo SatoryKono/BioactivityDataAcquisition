@@ -30,6 +30,15 @@ PIPELINE_RUNNER_SERVICE_PATH = (
     / "execution"
     / "pipeline_runner_service.py"
 )
+LOGGER_BOOTSTRAP_PATH = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "bootstrap"
+    / "runtime"
+    / "logger_bootstrap.py"
+)
 
 
 @pytest.mark.architecture
@@ -74,3 +83,11 @@ def test_pipeline_runner_service_binds_logger_through_context_contract() -> None
         "PipelineRunnerService must pass the explicit correlation contract "
         "directly into LoggerPort.bind()."
     )
+
+
+@pytest.mark.architecture
+def test_logger_bootstrap_fallback_does_not_use_process_identity() -> None:
+    """Pre-run correlation fallback must not depend on an OS process id."""
+    source = LOGGER_BOOTSTRAP_PATH.read_text(encoding="utf-8")
+
+    assert "getpid" not in source
