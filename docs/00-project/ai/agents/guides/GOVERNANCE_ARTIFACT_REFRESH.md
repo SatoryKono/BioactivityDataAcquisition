@@ -1,6 +1,6 @@
 # Governance Artifact Refresh Recipe
 
-*Status: internal-published (architecture audit M4 #6513)*
+*Status: internal-published (architecture audit M4 #6513; regen hygiene #9629)*
 
 ## Purpose
 
@@ -13,36 +13,40 @@ stale hashes.
 ## Entrypoint
 
 ```bash
-# refresh (writes inventory digests when source tree changed)
+# refresh the coupled artifact set in dependency order
 python -m scripts.engineering.qa.refresh_governance_artifacts
 
-# verify only (no write)
+# verify the same set without writes; any failed checker returns non-zero
 python -m scripts.engineering.qa.refresh_governance_artifacts --check
 ```
 
-## Ordered steps (manual equivalent)
+Do not invoke individual generators to assemble a coupled refresh. The unified
+entrypoint is the PR-checklist command and prevents a partial bundle from being
+reported as current.
 
-1. Module coverage inventory `source_tree_sha256`:
-   ```bash
-   python -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml
-   ```
-   Or root helper when present:
-   ```bash
-   python _refresh_module_coverage_inventory.py
-   ```
-2. Verify:
-   ```bash
-   pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current -q
-   ```
-3. Architecture audit closeout gates:
-   ```bash
-   pytest tests/architecture/test_architecture_audit_closeout_gates.py -q
-   ```
-4. Full architecture hash/debt scorecard gates only when those surfaces changed
-   (follow existing quality scripts; do not raise budgets).
+## Ordered artifact set
+
+The refresh path runs these existing owners in order; it does not introduce a
+new YAML registry:
+
+1. unified source-tree manifest;
+2. module coverage inventory `source_tree_sha256` (preserving measured rows
+   when `coverage.xml` is absent);
+3. architecture dependency map;
+4. test-governance and fixture-duplication snapshots;
+5. hotspot family baseline and shrink-only scorecard alignment;
+6. dead-code inventory;
+7. architecture quality scorecard;
+8. config-surface backlog;
+9. live residual snapshot;
+10. debt-governance gates, always last.
+
+`--check` verifies the corresponding check-capable artifacts plus the focused
+coverage/scorecard guards. It fails immediately with the failing subprocess
+exit code; a preceding drift cannot be hidden by later green checks.
 
 ## Related
 
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 - `AGENTS.md` post-change validation section
-- Issues: #6513 (M4), umbrella #6506
+- Issues: #6513 (M4), #9629 (regen hygiene), umbrella #6506

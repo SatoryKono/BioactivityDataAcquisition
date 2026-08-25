@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-04'
+  Last verified: '2026-08-25'
 
 ______________________________________________________________________
 
@@ -71,11 +71,12 @@ debt PRs.
 **Exceptions:** allowed when the PR body cites a concrete dependency (for
 example a generator lives under another tree) and reviewers accept the scope.
 
-After scorecard/baseline input changes, refresh debt gates last:
+After scorecard/baseline input changes, use the coupled refresh path and its
+fail-closed check. The entrypoint refreshes debt gates last:
 
 ```bash
 python -m scripts.engineering.qa.refresh_governance_artifacts
-python -m scripts.engineering.qa report-debt-governance-gates --check
+python -m scripts.engineering.qa.refresh_governance_artifacts --check
 ```
 
 Canonical gate input set is embedded in
@@ -146,5 +147,3 @@ Bare `--check` without `--changed-from-ref` records
 evaluate saturated-metric compensation. CI and freeze PRs MUST pass the
 reference-aware invocation so scorecard `max_count` / `bounded_growth_budgets`
 cannot grow unnoticed.
-
-
