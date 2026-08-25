@@ -175,13 +175,15 @@ def _run_index_item(
     return {
         "pipeline": item.owner,
         "run_id": item.run_id,
-        "workflow_id": _index_workflow_id(item.workflow_id),
+        "workflow_id": _index_optional_label(item.workflow_id),
+        "workflow_run_id": _index_optional_label(item.workflow_run_id),
+        "started_at": item.started_at,
         **paths,
     }
 
 
-def _index_workflow_id(value: str | None) -> str:
-    """Compact workflow name for the pipeline index; empty is emdash, not VALID EMPTY."""
+def _index_optional_label(value: str | None) -> str:
+    """Compact identity label for the pipeline index; empty is emdash, not VALID EMPTY."""
     token = (value or "").strip()
     return token if token else "—"
 
@@ -210,6 +212,8 @@ def _diagnostic_index_item(
     row["pipeline"] = owner_value
     row["run_id"] = "-"
     row["workflow_id"] = "—"
+    row["workflow_run_id"] = "—"
+    row["started_at"] = None
     return row
 
 

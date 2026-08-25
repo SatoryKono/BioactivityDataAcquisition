@@ -390,6 +390,12 @@ foreach ($name in $selected) {
         }
 
         Write-Host "Starting shared MCP $name on 127.0.0.1:$port (attempt $attempt/$attempts, settle=${serverSettle}s, gate=/ping) ..."
+        $savedSharedFlag = $env:BIOETL_MCP_SHARED
+        $savedMemoryMode = $env:BIOETL_AI_MEMORY_MODE
+        $env:BIOETL_MCP_SHARED = '1'
+        if ($name -eq 'memory') {
+            $env:BIOETL_AI_MEMORY_MODE = 'read-write'
+        }
         try {
             $proc = Start-Process -FilePath $comSpec `
                 -ArgumentList $cmdArgs `
@@ -406,6 +412,19 @@ foreach ($name in $selected) {
                 continue
             }
             break
+        } finally {
+            if ($null -eq $savedSharedFlag) {
+                Remove-Item Env:BIOETL_MCP_SHARED -ErrorAction SilentlyContinue
+            } else {
+                $env:BIOETL_MCP_SHARED = $savedSharedFlag
+            }
+            if ($name -eq 'memory') {
+                if ($null -eq $savedMemoryMode) {
+                    Remove-Item Env:BIOETL_AI_MEMORY_MODE -ErrorAction SilentlyContinue
+                } else {
+                    $env:BIOETL_AI_MEMORY_MODE = $savedMemoryMode
+                }
+            }
         }
 
         $lastPid = $proc.Id

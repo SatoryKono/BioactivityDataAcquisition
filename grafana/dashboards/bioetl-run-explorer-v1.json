@@ -122,7 +122,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and var-pipeline, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline is already the selector, so it is hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and var-pipeline, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline is already the selector, so it is hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
         "h": 12,
         "w": 24,
@@ -155,6 +155,22 @@
           {
             "matcher": {
               "id": "byRegexp",
+              "options": "^(started_at|Started)$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
               "options": "^(completed_at|Completed)$"
             },
             "properties": [
@@ -164,7 +180,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 130
+                "value": 100
               }
             ]
           },
@@ -182,7 +198,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 64
               },
               {
                 "id": "mappings",
@@ -247,7 +263,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 240
+                "value": 160
               },
               {
                 "id": "custom.inspect",
@@ -279,6 +295,26 @@
               },
               {
                 "id": "custom.width",
+                "value": 72
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(workflow_run_id|Workflow run)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Workflow run"
+              },
+              {
+                "id": "custom.width",
                 "value": 120
               },
               {
@@ -299,7 +335,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 28
+                "value": 24
               },
               {
                 "id": "custom.cellOptions",
@@ -384,6 +420,10 @@
           "options": {
             "conversions": [
               {
+                "targetField": "started_at",
+                "destinationType": "time"
+              },
+              {
                 "targetField": "completed_at",
                 "destinationType": "time"
               }
@@ -403,17 +443,21 @@
             },
             "indexByName": {
               "selected": 0,
-              "completed_at": 1,
-              "run_id": 2,
-              "workflow_id": 3,
-              "status": 4,
-              "pipeline": 5,
-              "message": 6
+              "started_at": 1,
+              "completed_at": 2,
+              "run_id": 3,
+              "workflow_id": 4,
+              "workflow_run_id": 5,
+              "status": 6,
+              "pipeline": 7,
+              "message": 8
             },
             "renameByName": {
+              "started_at": "Started",
               "completed_at": "Completed",
               "run_id": "Run",
               "workflow_id": "Workflow",
+              "workflow_run_id": "Workflow run",
               "pipeline": "Pipeline",
               "status": "Status",
               "message": "Message",
