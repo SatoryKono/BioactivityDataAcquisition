@@ -28,6 +28,10 @@ from tests.architecture._module_coverage_inventory_support import (
     skip_if_module_coverage_inventory_is_dirty,
 )
 from tests.architecture._test_matrix_policy_support import load_matrix
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 pytestmark = pytest.mark.architecture
 

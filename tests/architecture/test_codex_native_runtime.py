@@ -19,6 +19,10 @@ CODEX_SCRIPTS = ROOT / "scripts/ai/codex"
 sys.path.insert(0, str(CODEX_SCRIPTS))
 
 import importlib
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 doctor = importlib.import_module("doctor")
 mcp_profile_contract = importlib.import_module("mcp_profile_contract")
