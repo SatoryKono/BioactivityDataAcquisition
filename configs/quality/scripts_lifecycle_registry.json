@@ -745,6 +745,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
+    "scripts/engineering/dev/pretest_guardrails.ps1": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as the native-Windows compatibility facade that delegates to the canonical pretest_guardrails.sh implementation; keep the shell implementation as the governed behavior source and remove this wrapper only when Windows test launchers no longer require it.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/dev/zed_env_doctor.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the stdlib-only environment validation helper shared by the tracked Zed task adapters; keep `.zed/tasks.json` as the governed editor entry surface and do not promote this helper without offsetting an active script elsewhere.",
@@ -1411,6 +1417,18 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ops/launchers/codex/verify-setup.bat": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as the cmd.exe compatibility facade over verify-setup.ps1; keep setup verification behavior in the canonical run-codex.ps1 check path and remove this wrapper only after batch callers are retired.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ops/launchers/codex/verify-setup.ps1": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as the legacy PowerShell setup-verification facade over scripts/ai/codex/run-codex.ps1 check; keep the canonical launcher as the behavior owner and remove this facade after documented compatibility callers migrate.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/ops/runtime/docker/_rf017_finalize_observation.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as an RF-017 Docker restore observation helper; keep private underscore modules supporting and do not promote them to public ops commands.",
@@ -1482,6 +1500,12 @@
       "next_step": "Retain as the Linux/WSL companion shutdown helper for the shared MCP runtime plane while cross-platform local tooling depends on it; remove it together with the shared-plane launcher if that workflow is retired.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/runtime/mcp/windows_tcp_relay.ps1": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the binary-safe Windows stdio relay invoked by windows_docker_mcp_bridge.py; keep the Python bridge as the governed entrypoint and do not expose the relay as a separate operator command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "decision": "legacy_manual_utility",
