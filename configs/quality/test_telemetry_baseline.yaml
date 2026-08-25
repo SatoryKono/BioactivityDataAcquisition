@@ -1,7 +1,7 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/regression-contracts-9345-9347
+source_branch: main
 refreshed_at_utc: '2026-08-21T19:24:12.023426+00:00'
 refresh_status: captured
 source_commit: d1c97617563eee3fc3aaa1f5bdd9e17307482fec
@@ -11,10 +11,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/coverage/coverage-ci-32516555293.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/audit-runs/fix-9345-9347/ci-run-32516555293-artifacts/test-duration-telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
