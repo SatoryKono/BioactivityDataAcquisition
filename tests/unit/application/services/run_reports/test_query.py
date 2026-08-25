@@ -40,6 +40,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from bioetl.application.services.run_reports import query as report_query
+from bioetl.application.services.run_reports.paths import (
+    IdentityIndexPreview,
+    read_identity_preview,
+)
 from bioetl.application.services.run_reports.query import (
     diff_pipeline_reports,
     list_pipeline_reports,
@@ -594,15 +598,15 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(
     tmp_path: Path,
 ) -> None:
-    empty = report_query.IdentityIndexMeta(None, None, None, None, None)
-    assert report_query._read_identity_meta(tmp_path) == empty
+    empty = IdentityIndexPreview(None, None, None, None, None)
+    assert read_identity_preview(tmp_path) == empty
 
     payload_path = tmp_path / "report.json"
     payload_path.write_text("[]", encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == empty
+    assert read_identity_preview(payload_path) == empty
 
     payload_path.write_text('{"identity": "invalid"}', encoding="utf-8")
-    assert report_query._read_identity_meta(payload_path) == empty
+    assert read_identity_preview(payload_path) == empty
 
 
 def test_identity_metadata_reads_started_at_and_workflow_run_id(
@@ -619,12 +623,10 @@ def test_identity_metadata_reads_started_at_and_workflow_run_id(
         ),
         encoding="utf-8",
     )
-    assert report_query._read_identity_meta(payload_path) == (
-        report_query.IdentityIndexMeta(
-            "success",
-            "2026-08-25T01:00:00Z",
-            "2026-08-25T01:05:00Z",
-            "chembl_baseline",
-            "wf-run-1",
-        )
+    assert read_identity_preview(payload_path) == IdentityIndexPreview(
+        "success",
+        "2026-08-25T01:00:00Z",
+        "2026-08-25T01:05:00Z",
+        "chembl_baseline",
+        "wf-run-1",
     )
