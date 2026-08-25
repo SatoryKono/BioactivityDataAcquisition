@@ -1022,6 +1022,95 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
     )
 
 
+
+def _table_hidden_fields(panel: dict) -> set[str]:
+    hidden: set[str] = set()
+    for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+        if not isinstance(override, dict):
+            continue
+        name = (override.get("matcher") or {}).get("options")
+        if not isinstance(name, str):
+            continue
+        for prop in override.get("properties") or []:
+            if not isinstance(prop, dict):
+                continue
+            if prop.get("id") == "custom.hidden" and prop.get("value") is True:
+                hidden.add(name)
+            hide = prop.get("value")
+            if (
+                prop.get("id") == "custom.hideFrom"
+                and isinstance(hide, dict)
+                and hide.get("viz") is True
+            ):
+                hidden.add(name)
+    return hidden
+
+
+def _table_width_fields(panel: dict) -> set[str]:
+    widths: set[str] = set()
+    for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+        if not isinstance(override, dict):
+            continue
+        name = (override.get("matcher") or {}).get("options")
+        if not isinstance(name, str):
+            continue
+        for prop in override.get("properties") or []:
+            if isinstance(prop, dict) and prop.get("id") == "custom.width":
+                widths.add(name)
+    return widths
+
+
+def _organize_visible_fields(panel: dict) -> list[str] | None:
+    for transform in panel.get("transformations") or []:
+        if not isinstance(transform, dict) or transform.get("id") != "organize":
+            continue
+        options = transform.get("options") or {}
+        index = options.get("indexByName") or {}
+        if not isinstance(index, dict) or not index:
+            return None
+        excluded = options.get("excludeByName") or {}
+        hidden = _table_hidden_fields(panel)
+        return [
+            str(name)
+            for name in index
+            if not excluded.get(name) and str(name) not in hidden
+        ]
+    return None
+
+
+def test_table_panels_fill_panel_width() -> None:
+    """Grafana TableNG only distributes leftover panel width to columns without custom.width.
+
+    If every visible organize column is pinned, the table leaves an empty band
+    inside the panel. Keep at least one flex column so the table occupies the
+    full panel width.
+    """
+    violations: list[str] = []
+    checked = 0
+    for dashboard_path in sorted(Path("grafana/dashboards").glob("*.json")):
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            if panel.get("type") != "table":
+                continue
+            visible = _organize_visible_fields(panel)
+            if not visible:
+                continue
+            checked += 1
+            pinned = _table_width_fields(panel)
+            if all(field in pinned for field in visible):
+                panel_id = panel.get("id", "?")
+                title = panel_display_title(panel) or panel.get("title") or f"id={panel_id}"
+                violations.append(
+                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
+                    f"visible={visible} pinned={sorted(pinned & set(visible))}"
+                )
+    assert checked > 0
+    assert not violations, (
+        "table panels must leave at least one visible organize column without "
+        "custom.width so Grafana fills the panel:\n" + "\n".join(violations)
+    )
+
+
 def test_dq_ultra_short_timeseries_hides_legend() -> None:
     """Ultra-short timeseries (h≤4) free vertical chrome by hiding the legend.
 
