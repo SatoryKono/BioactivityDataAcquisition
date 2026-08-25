@@ -55,6 +55,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `run-tests`                      | `test_health.py`                                      | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |
 | `summarize-junit`                | `test_health.py`                                      | Aggregate existing JUnit XML into test-health JSON summary                                        |
 | `test-health`                    | `test_health.py`                                      | Summarize historical lane history from recent `reports/quality/test-runs/*.json` evidence         |
+| `_gen_cyclic_workflows`          | `_gen_cyclic_workflows.py`                            | Bounded generator of zero-arg Grok workflow cards; supporting catalog utility                     |
+| `snapshot-sonarcloud-open`       | `snapshot_sonarcloud_open.py`                         | Bounded live SonarCloud OPEN-issue snapshot exporter; supporting catalog utility                  |
 
 ## When to Use
 

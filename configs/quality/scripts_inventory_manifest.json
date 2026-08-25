@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-24T14:08:18.537350+00:00",
+  "generated_at": "2026-08-24T18:30:37.222576+00:00",
   "summary": {
     "total_scripts": 599,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 81,
       "docs": 250,
       "other": 73,
-      "scripts": 498,
+      "scripts": 500,
       "skills": 12,
       "tests": 400
     }
@@ -12145,8 +12145,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "| `_gen_cyclic_workflows`          | `_gen_cyclic_workflows.py`                            | Bounded generator of zero-arg Grok workflow cards; supporting catalog utility                     |"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -13649,7 +13656,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 121,
+          "line": 123,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog."
         },
@@ -14390,7 +14397,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 122,
+          "line": 124,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
@@ -15243,13 +15250,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 119,
+          "line": 121,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review."
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 163,
+          "line": 165,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
@@ -15716,7 +15723,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 132,
+          "line": 134,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
@@ -15866,13 +15873,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 129,
+          "line": 131,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 130,
+          "line": 132,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
@@ -15930,7 +15937,7 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 120,
+          "line": 122,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/run_architecture_audit_read_only.py` (`python -m scripts.engineering.qa run-architecture-audit-read-only`) runs check-only architecture diagnostics and fails if tracked gover"
         },
@@ -16147,8 +16154,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "| `snapshot-sonarcloud-open`       | `snapshot_sonarcloud_open.py`                         | Bounded live SonarCloud OPEN-issue snapshot exporter; supporting catalog utility                  |"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -20802,7 +20816,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
-          "line": 39,
+          "line": 42,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/verify_report_bind.py` from the checkout"
         },

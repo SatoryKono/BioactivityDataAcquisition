@@ -1,6 +1,6 @@
 {
   "canonical_coverage_lane": "coverage-verify",
-  "coverage_xml_path": "reports/coverage/coverage-ci-32506740774.xml",
+  "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
@@ -24174,6 +24174,16 @@
       "module": "bioetl.interfaces.http._health_server_routing_support",
       "path": "src/bioetl/interfaces/http/_health_server_routing_support.py",
       "source_lines": 308
+    },
+    {
+      "coverage_percent": 0.0,
+      "coverage_status": "unmeasured",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._pipeline_run_report_coverage",
+      "path": "src/bioetl/interfaces/http/_pipeline_run_report_coverage.py",
+      "source_lines": 101
     },
     {
       "coverage_percent": 87.58,
@@ -48678,6 +48688,16 @@
       "source_lines": 308
     },
     {
+      "coverage_percent": 0.0,
+      "coverage_status": "unmeasured",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.interfaces.http._pipeline_run_report_coverage",
+      "path": "src/bioetl/interfaces/http/_pipeline_run_report_coverage.py",
+      "source_lines": 101
+    },
+    {
       "coverage_percent": 87.58,
       "coverage_status": "partially_covered",
       "covered_lines": 141,
@@ -49010,7 +49030,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
-  "source_tree_sha256": "96ae755fe0c7b9996d7bff87667142f57e28c4e4dc20210c8a48b578205e589d",
+  "source_tree_sha256": "ecf44c11644492ac9254e73467646939064b4f3afbd0cd29b145b3aa9145a7fc",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49165,18 +49185,24 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2450,
+    "source_module_count": 2451,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1548,
       "no_executable_lines": 3,
       "partially_covered": 899,
       "uncovered": 0,
-      "unmeasured": 0
+      "unmeasured": 1
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 0,
-    "unmeasured_modules": []
+    "unmeasured_module_count": 1,
+    "unmeasured_modules": [
+      {
+        "module": "bioetl.interfaces.http._pipeline_run_report_coverage",
+        "path": "src/bioetl/interfaces/http/_pipeline_run_report_coverage.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      }
+    ]
   }
 }

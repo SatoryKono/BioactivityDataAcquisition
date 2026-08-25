@@ -30,16 +30,12 @@ from bioetl.application.services.control_plane.replay.historical_corpus_models i
     HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    CORPUS_MODEL_PUBLIC_NAMES as CORPUS_MODEL_PUBLIC_NAMES,
-)
-from bioetl.application.services.control_plane.replay.historical_corpus_models import (
     HistoricalReplaySnapshotCertification,
 )
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort
 from bioetl.domain.types import RunID
 
 __all__ = [
-    "CORPUS_MODEL_PUBLIC_NAMES",
     "HistoricalReplayCertificationResult",
     "HistoricalReplayCertificationService",
     "HistoricalReplaySnapshotCertification",

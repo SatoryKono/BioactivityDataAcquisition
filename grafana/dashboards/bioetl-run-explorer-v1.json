@@ -108,7 +108,7 @@
         "mode": "html",
         "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Which exact run should be inspected? BROWSE last 10, not this time range. Selected: $run_id. Expand SELECTED RUN. Paths are report artifacts, not triage bodies.</div></div>"
       },
-      "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline (disk index, not the dashboard time picker). Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, reconciliation, and artifacts for one exact run. The time picker is for Identity coverage IN RANGE / OUT OF RANGE only. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
+      "description": "Run Explorer has two modes. Browse mode lists the last 10 run-report artifacts for the selected pipeline (disk index, not the dashboard time picker). Selected-run mode uses BioETL Ops HTTP under Selected Run Details to show identity, accounting, layers, timings/failure, reasons, and artifacts for one exact run. The time picker is for Identity coverage IN RANGE / OUT OF RANGE only. Default pipeline=unknown and run_id=- intentionally show no runs (not a missing data store and not a healthy run). Older than last 10: pick a concrete run_id from the catalog (not -). Then open Trust for recovery/replay safety. Run Explorer is evidence-only. Run ID is never a Prometheus label. Full filesystem paths belong to report-artifact Open/Copy actions. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
       "links": [
         {
           "title": "Run-manifest inspection runbook",
@@ -457,7 +457,7 @@
           "description": "SELECTED RUN · Identity rows for the selected run (control-plane table plus pipeline_run_report_v1 identity/tracking_coverage). Selection required when no run ID is set. VALID EMPTY means the selected run has no identity; backend failure renders as QUERY ERROR.",
           "gridPos": {
             "h": 14,
-            "w": 12,
+            "w": 14,
             "x": 0,
             "y": 19
           },
@@ -523,8 +523,8 @@
           "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK.",
           "gridPos": {
             "h": 14,
-            "w": 12,
-            "x": 12,
+            "w": 10,
+            "x": 14,
             "y": 19
           },
           "datasource": "BioETL Ops HTTP",
@@ -1025,125 +1025,6 @@
           ]
         },
         {
-          "id": 3015,
-          "type": "table",
-          "title": "Inspect Reconciliation",
-          "description": "SELECTED RUN · Selected run: Record-accounting reconciliation evidence from pipeline_run_report_v1 for the selected run. Selection required when no run ID is set. Valid empty means reconciliation evidence was not recorded. Review Processed Records and the raw report before escalation; verify /health/live for unexpected empty or errors. SELECT RUN / VALID EMPTY is not OK.",
-          "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 39
-          },
-          "datasource": "BioETL Ops HTTP",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "left",
-                "inspect": false
-              },
-              "noValue": "VALID EMPTY — selected run report has no reconciliation rows. Backend failure renders as QUERY ERROR."
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Value"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "left"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "value",
-                        "options": {
-                          "OK": {
-                            "text": "OK",
-                            "color": "green"
-                          },
-                          "ok": {
-                            "text": "OK",
-                            "color": "green"
-                          },
-                          "FAIL": {
-                            "text": "FAIL",
-                            "color": "red"
-                          },
-                          "fail": {
-                            "text": "FAIL",
-                            "color": "red"
-                          },
-                          "MISMATCH": {
-                            "text": "MISMATCH",
-                            "color": "orange"
-                          },
-                          "mismatch": {
-                            "text": "MISMATCH",
-                            "color": "orange"
-                          },
-                          "WARN": {
-                            "text": "WARN",
-                            "color": "orange"
-                          },
-                          "warn": {
-                            "text": "WARN",
-                            "color": "orange"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
-            },
-            "cellHeight": "sm"
-          },
-          "targets": [
-            {
-              "format": "table",
-              "parser": "backend",
-              "refId": "A",
-              "root_selector": "reconciliation",
-              "source": "url",
-              "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-              "url_options": {
-                "data": "",
-                "method": "GET"
-              },
-              "expr": ""
-            }
-          ],
-          "links": [
-            {
-              "title": "Open Processed Records",
-              "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=3023&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
-        },
-        {
           "id": 3013,
           "type": "table",
           "title": "Inspect Run Artifacts",
@@ -1152,7 +1033,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 47
+            "y": 39
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1286,7 +1167,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 55
+            "y": 47
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1369,7 +1250,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 51
       },
       "panels": [
         {
@@ -1381,7 +1262,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 59
+            "y": 51
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {

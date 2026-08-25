@@ -4806,28 +4806,6 @@
       "empty_state": "valid_empty",
       "formula": "",
       "kind": "http",
-      "panel_id": 3015,
-      "panel_title": "Inspect Reconciliation",
-      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}",
-      "query_tokens": [
-        "/ops/observability/pipeline-run-report",
-        "pipeline",
-        "run_id"
-      ],
-      "ref_id": "A",
-      "runbook_urls": [],
-      "thresholds": [],
-      "unit": ""
-    },
-    {
-      "coverage_class": null,
-      "dashboard_uid": "bioetl-run-explorer-v1",
-      "datasource_type": "yesoreyeram-infinity-datasource",
-      "documents_backend_down": true,
-      "documents_valid_empty": true,
-      "empty_state": "valid_empty",
-      "formula": "",
-      "kind": "http",
       "panel_id": 3020,
       "panel_title": "Inspect Recent Workflow Runs (last 20)",
       "query": "/ops/observability/workflow-run-reports?workflow=${workflow}&limit=20",

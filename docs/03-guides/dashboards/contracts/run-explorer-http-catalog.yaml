@@ -72,13 +72,6 @@ panels:
     root_selector: reasons_top_n
     no_value_tokens: [VALID EMPTY, QUERY ERROR]
     copy_tokens: []
-  - id: 3015
-    title: Inspect Reconciliation
-    endpoint: pipeline_run_report
-    url: /ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}
-    root_selector: reconciliation
-    no_value_tokens: [VALID EMPTY, QUERY ERROR]
-    copy_tokens: []
   - id: 3013
     title: Inspect Run Artifacts
     endpoint: pipeline_run_report
