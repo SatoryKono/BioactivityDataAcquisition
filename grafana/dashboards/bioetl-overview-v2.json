@@ -1094,10 +1094,6 @@
                   "mode": "fixed",
                   "fixedColor": "text"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 110
               }
             ]
           },
@@ -1621,10 +1617,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 200
                   }
                 ]
               },
@@ -2073,12 +2065,7 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2206,12 +2193,7 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 90
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
