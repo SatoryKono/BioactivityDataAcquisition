@@ -64,7 +64,6 @@ Commands:
     report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
     report-private-import-inventory Generate/check shrink-only private-import ratchet
     report-composition-protocol-inventory Generate/check S3 Protocol placement inventory
-
     refresh-governance-artifacts Refresh/check committed governance artifacts
     validate-technical-debt-audit Validate and resolve the SHA-pinned current technical-debt audit
     run-architecture-audit-read-only Run check-only architecture evidence diagnostics
@@ -171,7 +170,6 @@ COMMAND_MODULES: dict[str, str] = {
     "report-composition-protocol-inventory": (
         "scripts.engineering.qa.report_composition_protocol_inventory"
     ),
-
     "refresh-governance-artifacts": (
         "scripts.engineering.qa.refresh_governance_artifacts"
     ),
