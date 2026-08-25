@@ -1947,7 +1947,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "inspect": true
               },
               "mappings": [
                 {
@@ -2075,7 +2076,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "inspect": true
               },
               "mappings": [
                 {
