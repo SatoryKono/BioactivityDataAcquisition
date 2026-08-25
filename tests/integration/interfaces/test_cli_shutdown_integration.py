@@ -50,8 +50,11 @@ def _get_cli():
 
 def _register_all_pipelines() -> None:
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+    from bioetl.composition.factories.pipeline.registry_core import (
+        get_default_registry,
+    )
 
-    register_all_pipelines()
+    register_all_pipelines(registry=get_default_registry())
 
 
 async def _yield_control(turns: int = 1) -> None:

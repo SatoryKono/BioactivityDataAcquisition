@@ -28,5 +28,7 @@ def ensure_runtime_registrations(
     ensure_providers_loaded()
     if resolved_scope is RuntimeRegistrationScope.PROVIDERS:
         return
-    if registry is None or not registry.list_pipelines():
+    if registry is None:
+        raise ValueError("pipeline registration requires an explicit registry")
+    if not registry.list_pipelines():
         register_all_pipelines(registry=registry)

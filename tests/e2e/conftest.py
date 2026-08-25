@@ -516,9 +516,12 @@ def e2e_environment():
     # Register all pipelines (required for bootstrap_pipeline_runner to work)
     # Note: This import is session-scoped (once per E2E test session) to avoid timeout
     from bioetl.composition.factories.pipeline.registry import register_all_pipelines
+    from bioetl.composition.factories.pipeline.registry_core import (
+        get_default_registry,
+    )
 
     _clear_runtime_config_caches()
-    register_all_pipelines()
+    register_all_pipelines(registry=get_default_registry())
 
     yield
 

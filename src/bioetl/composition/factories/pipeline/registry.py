@@ -67,19 +67,6 @@ def _register_to_explicit_registry(registry: PipelineRegistryProtocol) -> None:
     _register_factories_to(registry)
 
 
-def _register_default_registry_once(
-    registration_state: PipelineFactoryRegistrationState,
-) -> None:
-    """Register factories into the default registry exactly once."""
-    if registration_state._registered:
-        return
-    with registration_state._lock:
-        if registration_state._registered:
-            return
-        _register_factories_to(get_default_registry())
-        registration_state._registered = True
-
-
 def register_all_pipelines(
     registry: PipelineRegistryProtocol | None = None,
     *,
@@ -87,34 +74,26 @@ def register_all_pipelines(
 ) -> None:
     """Explicitly register all pipeline factories with PipelineRegistry.
 
-    This function is idempotent and thread-safe - calling it multiple times
-    or from multiple threads has no effect after the first successful call.
-
-    Uses double-checked locking pattern to minimize lock contention while
-    ensuring thread-safe initialization.
-
-    When called with a custom registry, registration is still safe to repeat:
+    Registration against the same explicit registry is safe to repeat:
     already-registered pipeline names are skipped and only missing factories
     are added.
 
     Args:
-        registry: Optional PipelineRegistry instance. If None, uses the
-            default global registry. Pass a custom registry for test isolation.
-        registration_state: Optional explicit idempotency state for the default
-            registry path. Pass one when composing isolated startup contexts.
+        registry: Explicit PipelineRegistry instance. ``None`` is rejected.
+        registration_state: Optional idempotency state for test observation.
 
     Should be called once at application startup (e.g., in cli.py or bootstrap.py).
     """
-    if registry is not None:
-        _register_to_explicit_registry(registry)
-        return
-
+    if registry is None:
+        raise ValueError("register_all_pipelines requires an explicit registry")
     state = (
         registration_state
         if registration_state is not None
         else _get_default_registration_state()
     )
-    _register_default_registry_once(state)
+    with state._lock:
+        _register_to_explicit_registry(registry)
+        state._registered = True
 
 
 def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
@@ -163,20 +142,21 @@ def reset_registration(
 ) -> None:
     """Reset registration state (for testing only).
 
-    Thread-safe reset of registration flag. Also clears the default PipelineRegistry.
+    Thread-safe reset of registration state and an explicit PipelineRegistry.
     WARNING: Only use in tests. Not for production.
 
     Note: For isolated tests, prefer creating a new registry instance with
     create_registry() rather than using reset_registration().
     """
+    if registry is None:
+        raise ValueError("reset_registration requires an explicit registry")
     state = (
         registration_state
         if registration_state is not None
         else _get_default_registration_state()
     )
-    target_registry = get_default_registry() if registry is None else registry
     with state._lock:
-        target_registry.clear()
+        registry.clear()
         state._registered = False
 
 

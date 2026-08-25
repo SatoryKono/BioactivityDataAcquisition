@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Explicit pipeline registry wiring (#9636):** production composition no
+  longer falls back to the process-wide compatibility registry.
+  `register_all_pipelines()` and `reset_registration()` now require an explicit
+  registry; `get_default_registry()` remains temporarily available for
+  compatibility and test-only callers.
+
 - **Architecture residuals after #9612:** frozen composition `*_api.py` seams
   are 4 (`execution`, `health`, `maintenance`, `registry`); former
   composite/control-plane/observability/resources APIs renamed off the
