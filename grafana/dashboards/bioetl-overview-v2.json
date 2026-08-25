@@ -3856,7 +3856,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": true
                     }
                   }
                 ]
