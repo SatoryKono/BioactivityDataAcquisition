@@ -20,6 +20,16 @@ from bioetl.application.ports.metrics import (
     WorkflowMetricsFactoryProtocol,
 )
 from bioetl.application.ports.observability import ObservabilitySettingsProtocol
+from bioetl.application.ports.operations import (
+    AuditInspectionServiceProtocol,
+    CheckpointServiceProtocol,
+    ConfigServiceProtocol,
+    ContractMigrationServiceProtocol,
+    ExportServiceProtocol,
+    LockServiceProtocol,
+    ObservabilityWorkflowServiceProtocol,
+    VacuumServiceProtocol,
+)
 from bioetl.application.ports.pipeline import (
     BaseServicesFactoryProtocol,
     ContractPolicyLoaderProtocol,
@@ -50,20 +60,27 @@ from bioetl.application.ports.storage import (
 
 __all__ = [
     "AdapterCreatorProtocol",
+    "AuditInspectionServiceProtocol",
     "BaseServicesFactoryProtocol",
+    "CheckpointServiceProtocol",
     "CompositeMergeStorageProtocol",
     "CompositeRuntimeStorageProtocol",
+    "ConfigServiceProtocol",
     "ConfigurableDQMonitor",
+    "ContractMigrationServiceProtocol",
     "ContractPolicyLoaderProtocol",
     "ControlPlaneArtifactLifecycleStoreProtocol",
     "DQDetectorConfig",
     "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
+    "ExportServiceProtocol",
     "GoldMergedWriteProtocol",
     "HealthServiceProtocol",
+    "LockServiceProtocol",
     "MetricsFactoryProtocol",
     "MetricsService",
     "ObservabilitySettingsProtocol",
+    "ObservabilityWorkflowServiceProtocol",
     "PipelineRegistryProtocol",
     "PipelineRunnerProtocol",
     "ProviderAdapterFactoryProtocol",
@@ -78,5 +95,6 @@ __all__ = [
     "StorageContextProtocol",
     "StorageFactoryProtocol",
     "SupportAwareDataSourceCreatorProtocol",
+    "VacuumServiceProtocol",
     "WorkflowMetricsFactoryProtocol",
 ]

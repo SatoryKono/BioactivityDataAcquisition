@@ -362,18 +362,22 @@ def test_cli_bootstrap_adr_service_uses_filesystem_catalog() -> None:
 def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from bioetl.application.ports import MetricsService
+
     fake_module = ModuleType("fake_bootstrap")
-    fake_module.bootstrap_metrics_service = lambda: mock.sentinel.metrics
-    fake_module.bootstrap_checkpoint_service = lambda: mock.sentinel.checkpoint
+    fake_module.bootstrap_forensic_run_diff_service = (
+        lambda: mock.sentinel.forensic_diff
+    )
+    fake_module.bootstrap_run_manifest_service = lambda: mock.sentinel.run_manifest
     monkeypatch.setattr(_services, "import_module", lambda _: fake_module)
 
     assert (
-        _services.resolve_bootstrap_attr("bootstrap_metrics_service")
-        is fake_module.bootstrap_metrics_service
+        _services.resolve_bootstrap_attr("bootstrap_forensic_run_diff_service")
+        is fake_module.bootstrap_forensic_run_diff_service
     )
     assert (
-        _services._invoke_bootstrap("bootstrap_checkpoint_service")
-        is mock.sentinel.checkpoint
+        _services._invoke_bootstrap("bootstrap_run_manifest_service")
+        is mock.sentinel.run_manifest
     )
     with pytest.raises(AttributeError):
         _services.resolve_bootstrap_attr("missing_export")
@@ -386,11 +390,11 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
     )
     monkeypatch.setattr(
         _services,
-        "_invoke_bootstrap",
-        lambda name, *args, **kwargs: (name, args, kwargs),
+        "_resolve",
+        lambda port: ("resolved", port),
     )
     result = _services.get_metrics_service()
-    assert result == ("bootstrap_metrics_service", (), {})
+    assert result == ("resolved", MetricsService)
     assert calls[-1] == (None, "providers")
 
     monkeypatch.setattr(
@@ -407,10 +411,25 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
 def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        VacuumServiceProtocol,
+    )
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
+
     provider_calls: list[str] = []
     pipeline_calls: list[object | None] = []
     bootstrap_calls: list[tuple[str, tuple[object, ...], dict[str, object]]] = []
-    health_service = object()
+    resolve_calls: list[type[object]] = []
 
     monkeypatch.setattr(
         _services,
@@ -429,24 +448,26 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
             bootstrap_calls.append((name, args, kwargs)) or (name, args, kwargs)
         ),
     )
-    monkeypatch.setattr(_services, "_resolve", lambda port: health_service)
-
-    assert _services.get_checkpoint_service()[0] == "bootstrap_checkpoint_service"
-    assert _services.get_audit_service()[0] == "bootstrap_audit_inspection_service"
-    assert _services.get_quarantine_service()[0] == "bootstrap_quarantine_service"
-    assert (
-        _services.get_bronze_cleanup_service()[0] == "bootstrap_bronze_cleanup_service"
+    monkeypatch.setattr(
+        _services,
+        "_resolve",
+        lambda port: resolve_calls.append(port) or (port, (), {}),
     )
-    assert _services.get_vacuum_service()[0] == "bootstrap_vacuum_service"
-    assert _services.get_export_service()[0] == "bootstrap_export_service"
-    assert _services.get_lock_service()[0] == "bootstrap_lock_service"
+
+    assert _services.get_checkpoint_service()[0] is CheckpointServiceProtocol
+    assert _services.get_audit_service()[0] is AuditInspectionServiceProtocol
+    assert _services.get_quarantine_service()[0] == "bootstrap_quarantine_service"
+    assert _services.get_bronze_cleanup_service()[0] is BronzeCleanupServiceProtocol
+    assert _services.get_vacuum_service()[0] is VacuumServiceProtocol
+    assert _services.get_export_service()[0] is ExportServiceProtocol
+    assert _services.get_lock_service()[0] is LockServiceProtocol
     assert _services.get_pipeline_runner_service(registry="registry-2")[2] == {
         "registry": "registry-2"
     }
-    assert _services.get_config_service()[0] == "bootstrap_config_service"
+    assert _services.get_config_service()[0] is ConfigServiceProtocol
     assert (
         _services.get_contract_migration_service()[0]
-        == "bootstrap_contract_migration_service"
+        is ContractMigrationServiceProtocol
     )
     assert _services.get_run_manifest_service()[0] == "bootstrap_run_manifest_service"
     assert (
@@ -466,21 +487,36 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         == "bootstrap_historical_replay_universe_service"
     )
     assert _services.get_lineage_service()[0] == "bootstrap_lineage_service"
-    assert _services.get_health_service() is health_service
+    assert _services.get_health_service()[0] is HealthServiceProtocol
     assert (
         _services.get_observability_workflow_service()[0]
-        == "bootstrap_observability_workflow_service"
+        is ObservabilityWorkflowServiceProtocol
     )
     assert (
         _services.get_health_server_dependencies()[0]
         == "bootstrap_health_server_dependencies"
     )
-    assert _services.get_metrics_service()[0] == "bootstrap_metrics_service"
-    assert _services.get_adr_service()[0] == "bootstrap_adr_service"
-    assert _services.get_quarantine_port()[0] == "bootstrap_quarantine_adapter"
+    assert _services.get_metrics_service()[0] is MetricsService
+    assert _services.get_adr_service()[0] is AdrServicePort
+    assert _services.get_quarantine_port()[0] is QuarantinePort
     assert provider_calls
     assert pipeline_calls == ["registry-2"]
-    assert any(name == "bootstrap_metrics_service" for name, _, _ in bootstrap_calls)
+    assert set(resolve_calls) == {
+        AdrServicePort,
+        AuditInspectionServiceProtocol,
+        BronzeCleanupServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        QuarantinePort,
+        VacuumServiceProtocol,
+    }
+    assert all(name != "bootstrap_metrics_service" for name, _, _ in bootstrap_calls)
 
 
 def test_cleanup_bronze_awaits_protocol_service(

@@ -74,6 +74,46 @@ def test_entrypoints_removed_compatibility_wrappers_fail_fast(name: str) -> None
 
 
 @pytest.mark.unit
+def test_entrypoints_register_health_and_e1_operation_ports() -> None:
+    """Production registry exposes Health plus the twelve E1 typed keys."""
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        VacuumServiceProtocol,
+    )
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.composition.entrypoints import registered_ports
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
+
+    expected = {
+        AdrServicePort,
+        AuditInspectionServiceProtocol,
+        BronzeCleanupServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        HealthServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        QuarantinePort,
+        VacuumServiceProtocol,
+    }
+    factories = registered_ports()
+
+    assert set(factories) == expected
+    assert all(callable(factory) for factory in factories.values())
+
+
+@pytest.mark.unit
 def test_entrypoints_register_resolve_and_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
