@@ -549,7 +549,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 220
+                    "value": 170
                   }
                 ]
               }
@@ -748,10 +748,6 @@
                   {
                     "id": "custom.align",
                     "value": "right"
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 110
                   },
                   {
                     "id": "noValue",

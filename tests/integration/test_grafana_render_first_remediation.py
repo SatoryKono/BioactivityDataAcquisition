@@ -1260,6 +1260,39 @@ def test_cycle3_inspect_enabled_on_named_below_fold_tables() -> None:
         assert custom.get("inspect") is True, (dashboard_name, panel_id)
 
 
+def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
+    """#9554 #9555 #9556 #9557: declared visible widths must fit DASH-REFLOW-001."""
+    layout_width = 1366 // 2
+    chrome_px = 40
+    cases = (
+        ("bioetl-incident-v1.json", 2002, 8),
+        ("bioetl-control-plane-v1.json", 9403, 6),
+        ("bioetl-run-explorer-v1.json", 3022, 14),
+        ("bioetl-run-explorer-v1.json", 3023, 10),
+    )
+    for dashboard_name, panel_id, grid_w in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        budget = layout_width * grid_w // 24 - chrome_px
+        hidden: set[str] = set()
+        widths: dict[str, int] = {}
+        for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+            field = str((override.get("matcher") or {}).get("options"))
+            props = {
+                item.get("id"): item.get("value")
+                for item in override.get("properties") or []
+            }
+            if props.get("custom.hidden") is True:
+                hidden.add(field)
+            if "custom.width" in props:
+                widths[field] = int(props["custom.width"])
+        visible_sum = sum(
+            width for field, width in widths.items() if field not in hidden
+        )
+        assert visible_sum <= budget, (
+            f"{dashboard_name}:{panel_id} w={grid_w} sum={visible_sum} budget={budget}"
+        )
+
+
 def test_all_shipped_table_panels_enable_inspect() -> None:
     """Every shipped Grafana table exposes cell inspect (DASH-FIRST-002)."""
     missing: list[str] = []
@@ -1268,7 +1301,9 @@ def test_all_shipped_table_panels_enable_inspect() -> None:
         for panel in _iter_panels(list(dashboard.get("panels") or [])):
             if panel.get("type") != "table":
                 continue
-            custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+            custom = (
+                (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+            )
             if custom.get("inspect") is True:
                 continue
             missing.append(f"{path.name}:{panel.get('id')}:{panel.get('title')}")
