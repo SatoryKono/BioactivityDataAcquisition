@@ -99,12 +99,6 @@ facades:
       <<: *composition_external,
     }
   - {
-      path: src/bioetl/composition/entrypoints.py,
-      module: bioetl.composition.entrypoints,
-      markers: [_PUBLIC_SYMBOL_TARGETS],
-      <<: *composition_external,
-    }
-  - {
       path: src/bioetl/composition/execution_api.py,
       module: bioetl.composition.execution_api,
       markers: [_PUBLIC_EXPORTS],
@@ -133,6 +127,15 @@ facades:
       module: bioetl.composition.resources_runtime,
       markers: [_PUBLIC_EXPORTS],
       <<: *composition_external,
+    }
+  - {
+      path: src/bioetl/domain/aggregates/batch.py,
+      module: bioetl.domain.aggregates.batch,
+      markers: [__getattr__],
+      classification: compatibility_debt,
+      owner: "@bioetl-domain",
+      allowed_importers: [owning_package, tests],
+      exit_criteria: "Retain the Batch compatibility re-export until ADR-059 callers import _batch_aggregate directly.",
     }
   - {
       path: src/bioetl/domain/__init__.py,

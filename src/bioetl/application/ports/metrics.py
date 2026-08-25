@@ -24,6 +24,7 @@ class MetricsFactoryProtocol(Protocol):
 
 
 class MetricsService(Protocol):
+    """Metrics HTTP server lifecycle contract used by composition bootstrap."""
     def start(
         self,
         port: int,

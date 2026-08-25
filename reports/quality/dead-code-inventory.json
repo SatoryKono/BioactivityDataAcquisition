@@ -15,19 +15,19 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 4,
-    "repo_wide_classified_zero_import_candidate_count": 4,
+    "repo_wide_zero_import_candidate_count": 8,
+    "repo_wide_classified_zero_import_candidate_count": 8,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 4,
+    "repo_wide_owner_test_anchored_candidate_count": 8,
     "repo_wide_candidates_without_owner_tests_count": 0,
     "repo_wide_non_static_reachability_candidate_count": 3,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 1,
+      "retain_canonical_owner_module": 5,
       "retain_dynamic_entrypoint": 2,
       "retain_public_facade": 1
     },
     "repo_wide_evidence_lane_counts": {
-      "canonical_owner_contract": 1,
+      "canonical_owner_contract": 5,
       "compatibility_facade_contract": 1,
       "dynamic_runtime_entrypoint": 2
     },
@@ -385,6 +385,94 @@
       ],
       "owner_test_count": 1,
       "owner_test_paths_exist_count": 1
+    },
+    {
+      "module_name": "bioetl.domain.ports.config_mapper",
+      "path": "src/bioetl/domain/ports/config_mapper.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-08-25",
+      "review_by": "2026-11-23",
+      "linked_issue": "#9641",
+      "rationale": "Canonical owner for the lazily exported DomainConfigMapper protocol; first-party consumers must import it through the bioetl.domain.ports facade.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.entity_type",
+      "path": "src/bioetl/domain/ports/entity_type.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-08-25",
+      "review_by": "2026-11-23",
+      "linked_issue": "#9641",
+      "rationale": "Canonical owner for the lazily exported EntityTypeExtractor protocol; first-party consumers must import it through the bioetl.domain.ports facade.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.pipeline_callbacks",
+      "path": "src/bioetl/domain/ports/pipeline_callbacks.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-08-25",
+      "review_by": "2026-11-23",
+      "linked_issue": "#9641",
+      "rationale": "Canonical owner for lazily exported transform/filter callback protocols; first-party consumers must import them through the bioetl.domain.ports facade.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
+    },
+    {
+      "module_name": "bioetl.domain.ports.source_config",
+      "path": "src/bioetl/domain/ports/source_config.py",
+      "is_private_module": false,
+      "src_importer_count": 0,
+      "test_importer_count": 0,
+      "classification_status": "classified",
+      "disposition": "retain_canonical_owner_module",
+      "reviewed_on": "2026-08-25",
+      "review_by": "2026-11-23",
+      "linked_issue": "#9641",
+      "rationale": "Canonical owner for lazily exported source pagination config protocols; first-party consumers must import them through the bioetl.domain.ports facade.",
+      "owner": "@bioetl-architecture",
+      "evidence_lane": "canonical_owner_contract",
+      "owner_tests": [
+        "tests/architecture/test_domain_public_api.py",
+        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
+      "owner_test_count": 3,
+      "owner_test_paths_exist_count": 3
     },
     {
       "module_name": "bioetl.interfaces.cli.commands.maintenance",

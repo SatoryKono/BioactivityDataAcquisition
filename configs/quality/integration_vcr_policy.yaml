@@ -242,6 +242,7 @@ tracked_suite_inventory:
       prometheus:
       - tests/integration/test_observability_emission_integration.py
       - tests/integration/test_prometheus_rules_config.py
+      - tests/integration/test_prometheus_rules_config_status.py
       - tests/integration/test_prometheus_scrape_topology.py
     composite_config_and_merge:
     - tests/integration/composite/test_column_naming_integration.py

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         BronzeCleanupService,
     )
     from bioetl.application.services.ops.vacuum_service import VacuumService
-    from bioetl.composition._resource_management import (
+    from bioetl.composition.contracts import (
         MedallionLifecycleServiceProtocol,
     )
 
@@ -69,7 +69,7 @@ def get_contract_migration_service() -> ContractMigrationService:
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:
     """Preview pipeline cleanup through the maintenance composition seam."""
-    from bioetl.composition._resource_management import preview_cleanup as _impl
+    from bioetl.composition.maintenance_api import preview_cleanup as _impl
 
     impl = cast("Callable[[str], Awaitable[CleanupPreview]]", _impl)
     return await impl(pipeline)

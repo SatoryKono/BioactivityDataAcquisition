@@ -48,7 +48,6 @@ def test_entrypoints_all_is_typed_registry_budget() -> None:
     expected = {
         "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "get_bronze_cleanup_service",
         "get_contract_migration_service",
         "get_lifecycle_service",
         "get_pipeline_runner_service",

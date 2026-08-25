@@ -3,23 +3,25 @@
 Supported entry: ``bioetl.application.ports``.
 """
 
+from __future__ import annotations
+
 from bioetl.application.ports.control_plane import (
     ControlPlaneArtifactLifecycleStoreProtocol,
 )
 from bioetl.application.ports.dq import (
     ConfigurableDQMonitor,
     DQDetectorConfig,
-    DQReportServiceFactory,
+    DQReportServiceFactoryProtocol,
 )
 from bioetl.application.ports.metrics import (
-    MetricsFactory,
+    MetricsFactoryProtocol,
     MetricsService,
-    WorkflowMetricsFactory,
+    WorkflowMetricsFactoryProtocol,
 )
 from bioetl.application.ports.observability import ObservabilitySettingsProtocol
 from bioetl.application.ports.pipeline import (
     BaseServicesFactoryProtocol,
-    ContractPolicyLoader,
+    ContractPolicyLoaderProtocol,
     PipelineRunnerProtocol,
     RegistryEntryProtocol,
     SchemaBuilderProtocol,
@@ -37,27 +39,27 @@ from bioetl.application.ports.providers import (
     SupportAwareDataSourceCreatorProtocol,
 )
 from bioetl.application.ports.storage import (
-    CompositeMergeStorage,
+    CompositeMergeStorageProtocol,
     CompositeRuntimeStorageProtocol,
     GoldMergedWriteProtocol,
     SilverMergedWriteProtocol,
-    StorageContextLike,
+    StorageContextProtocol,
     StorageFactoryProtocol,
 )
 
 __all__ = [
     "AdapterCreatorProtocol",
     "BaseServicesFactoryProtocol",
-    "CompositeMergeStorage",
+    "CompositeMergeStorageProtocol",
     "CompositeRuntimeStorageProtocol",
     "ConfigurableDQMonitor",
-    "ContractPolicyLoader",
+    "ContractPolicyLoaderProtocol",
     "ControlPlaneArtifactLifecycleStoreProtocol",
     "DQDetectorConfig",
-    "DQReportServiceFactory",
+    "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
     "GoldMergedWriteProtocol",
-    "MetricsFactory",
+    "MetricsFactoryProtocol",
     "MetricsService",
     "ObservabilitySettingsProtocol",
     "PipelineRegistryProtocol",
@@ -71,8 +73,8 @@ __all__ = [
     "SchemaBuilderProtocol",
     "SecretValueProviderProtocol",
     "SilverMergedWriteProtocol",
-    "StorageContextLike",
+    "StorageContextProtocol",
     "StorageFactoryProtocol",
     "SupportAwareDataSourceCreatorProtocol",
-    "WorkflowMetricsFactory",
+    "WorkflowMetricsFactoryProtocol",
 ]

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 from bioetl.composition.contracts.structural import ModelDumpable
 
-from bioetl.application.ports.dq import DQReportServiceFactory
+from bioetl.application.ports.dq import DQReportServiceFactoryProtocol
 
 from bioetl.infrastructure.schemas.dq_report_config import (
     BronzeSinkConfig,
@@ -213,7 +213,7 @@ def create_dq_services_impl(
     create_silver_analyzer_fn: Callable[[], object],
     create_gold_analyzer_fn: Callable[[], object],
     create_report_writer_fn: Callable[..., object],
-    dq_report_service_cls: DQReportServiceFactory,
+    dq_report_service_cls: DQReportServiceFactoryProtocol,
     is_dq_report_enabled_fn: Callable[[PipelineYamlConfig], bool],
     get_output_root_fn: Callable[[Settings, PipelineYamlConfig], Path],
     get_flat_structure_fn: Callable[[PipelineYamlConfig], bool],

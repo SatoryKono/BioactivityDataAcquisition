@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.application.ports.metrics import (
-    WorkflowMetricsFactory as _WorkflowMetricsFactory,
+    WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunnerService,

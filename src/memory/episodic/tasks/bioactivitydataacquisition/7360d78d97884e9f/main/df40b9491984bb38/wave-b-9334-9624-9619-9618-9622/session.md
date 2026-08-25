@@ -2,15 +2,15 @@
 record_id: wave-b-9334-9624-9619-9618-9622
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: 2de8ba422c50e305468362cd290c7f2b6a1ab760
+git_commit: a453a4e7ef93bbb34c2417039c7a7c076dc81a1a
 branch: main
 worktree_id: 7360d78d97884e9f
 task_id: wave-b-9334-9624-9619-9618-9622
 actor:
-  runtime: grok
-  agent: grok-4.6
-  model: grok-4.6
-created_at: '2026-08-25T12:07:39.023036+00:00'
+  runtime: codex
+  agent: root
+  model: null
+created_at: '2026-08-25T13:19:43.953275+00:00'
 source_refs:
 - <add-source-ref>
 source_hashes: {}
@@ -19,22 +19,22 @@ security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: 01697856c61463623271d7eded53198cb96a613e3a322a4ed73e291c93e207df
+content_digest: 8be6f3bc775d934182cdef1437c4c65592998dda6bcc948337e3bb50dfffc479
 id: wave-b-9334-9624-9619-9618-9622
-title: 'Wave B architecture: dep-map, ADR matrix, lazy-import, control_plane, aggregates'
+title: Wave B architecture debt implementation
 ttl_days: 14
 confidence: episodic
 summary: Active task session context.
-query: module-dependency-map ADR-058 ADR-059 lazy_import_ratchet control_plane cohesion
-  aggregates mixins
+query: Wave B implement issues 9334 9624 9619 continue 9618 and implement 9622 without
+  increasing debt budgets
 ---
 
 # Session note
 
 ## Task
 
-- Title: Wave B architecture: dep-map, ADR matrix, lazy-import, control_plane, aggregates
-- Retrieval query: module-dependency-map ADR-058 ADR-059 lazy_import_ratchet control_plane cohesion aggregates mixins
+- Title: Wave B architecture debt implementation
+- Retrieval query: Wave B implement issues 9334 9624 9619 continue 9618 and implement 9622 without increasing debt budgets
 
 ## Retrieved context
 

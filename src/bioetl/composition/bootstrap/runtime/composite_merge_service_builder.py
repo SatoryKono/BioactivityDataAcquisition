@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 from bioetl.application.ports.storage import (
-    CompositeMergeStorage as _CompositeMergeStorage,
+    CompositeMergeStorageProtocol as _CompositeMergeStorage,
 )
 
 
