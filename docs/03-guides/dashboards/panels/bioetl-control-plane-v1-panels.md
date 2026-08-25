@@ -48,7 +48,7 @@ absence.
 | --- | --- | --- | --- | --- | --- | --- |
 | 902 | Inspect Replay & Checkpoint Evidence | row | Static | Collapsed-by-default incident section for checkpoint/replay safety evidence. | shared shell | Expand only after the first-screen verdict points to replay/checkpoint evidence. |
 | 894 | Review Coverage Limits | text | Static | Static explanation of expected-empty and backend caveat cases. | shared shell | No thresholds; interpretive guidance only. |
-| 130 | Track Replay Blockers | stat | Prometheus | Selected-range blocker rollup across manifest, ledger, replay, and checkpoint failure families. | shared shell | Count panel; no separate threshold mapping documented. |
+| 130 | Track Replay Blockers | stat | Prometheus | Selected-range blocker rollup from `bioetl_trust_replay_blocker_events_total` / `bioetl_trust_replay_blocker_integrity` with Grafana `$__range`. | shared shell | Count panel; no separate threshold mapping documented. |
 | 3 | Track Checkpoint Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
 | 104 | Track Unreconstructable Replays | stat | Prometheus | `bioetl_replay_reconstructability_events_total` with `status="not_reconstructable"`. | shared shell | Count panel. |
 | 120 | Track Replay Drift | stat | Prometheus | Replay drift events from `bioetl_replay_drift_events_total`. | shared shell | Count panel. |
@@ -73,8 +73,8 @@ absence.
 | 2 | Track Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
 | 131 | Compare Manifest Writes by Status | timeseries | Prometheus | Manifest writes by `status` and `run_type` over time. | shared shell | Series legend maps status/run type. |
 | 7 | Compare Ledger Appends by Type & Status | timeseries | Prometheus | Ledger appends by `event_type` and `status`. | shared shell | Series legend maps event/status breakdown. |
-| 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
-| 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 132 | Monitor Manifest Failures (30m) | stat | Prometheus | 30-minute manifest write failure ratio severity from `bioetl_control_plane_manifest_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
+| 133 | Monitor Ledger Failures (30m) | stat | Prometheus | 30-minute ledger append failure ratio severity from `bioetl_control_plane_ledger_fail_severity_30m`. | shared shell | Threshold/value mapping encodes ratio severity. |
 | 9414 | Review Manifest Validation | table | BioETL Ops HTTP | Run-scoped parse, schema, schema-version, and contract-compatibility checks with stable reason codes. | shared shell | `OK/WARNING/ERROR/UNKNOWN`; unsupported schema versions are explicit. |
 
 ### Inspect Global Store Reliability
