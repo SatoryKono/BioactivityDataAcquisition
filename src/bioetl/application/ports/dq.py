@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports import DQMonitorPort
 
@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
 
 
+@runtime_checkable
 class DQDetectorConfig(Protocol):
     """Configuration surface used when wiring DQ thresholds."""
 
@@ -24,12 +25,14 @@ class DQDetectorConfig(Protocol):
     ) -> None: ...
 
 
+@runtime_checkable
 class ConfigurableDQMonitor(DQMonitorPort, Protocol):
     """DQ monitor contract with detector configuration support."""
 
     detector: DQDetectorConfig
 
 
+@runtime_checkable
 class DQReportServiceFactoryProtocol(Protocol):
     """Callable contract for constructing a DQ report service."""
 
