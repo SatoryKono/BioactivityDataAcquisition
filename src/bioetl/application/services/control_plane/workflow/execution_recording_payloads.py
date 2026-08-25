@@ -151,28 +151,9 @@ def _build_result_summary(result: WorkflowRunExecutionResult) -> dict[str, objec
     return {"status": result.status, "step_counts": counts}
 
 
-def _find_failed_step(
-    result: WorkflowRunExecutionResult,
-) -> WorkflowStepExecutionResult | None:
-    for step in result.steps:
-        if step.status == "failed":
-            return step
-    return None
-
-
-def _workflow_failure_message(
-    failed_step: WorkflowStepExecutionResult | None,
-) -> str:
-    if failed_step is not None and failed_step.error_message:
-        return failed_step.error_message
-    return "Workflow execution failed"
-
-
 __all__ = [
     "_build_result_summary",
-    "_find_failed_step",
     "_fingerprint_details",
     "_resolve_result_fingerprint",
-    "_workflow_failure_message",
     "build_step_completion_details",
 ]
