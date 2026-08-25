@@ -30,6 +30,13 @@ first_screen_max_panels: 8
 # Empty-title text rails that are not budget panels (next-step / divider).
 # Not an exemption from an over-budget layout: they are outside the count set.
 first_screen_shell_panels:
+  - dashboard: bioetl-overview-v2.json
+    id: 99
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the banner can keep a native title without overflowing at 200%
   - dashboard: bioetl-control-plane-v1.json
     id: 906
     owner: "@bioetl-observability"
