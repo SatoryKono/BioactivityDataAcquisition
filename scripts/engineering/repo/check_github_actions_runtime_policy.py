@@ -294,7 +294,10 @@ def _cvss_roundup(value: float) -> float:
 def _cvss_from_vector(vector: str) -> float | None:
     if not vector.startswith("CVSS:3"):
         return None
-    parts = dict(item.split(":", 1) for item in vector.split("/")[1:] if ":" in item)
+    metrics = (item.split(":", 1) for item in vector.split("/")[1:] if ":" in item)
+    parts = {  # noqa: C416 - Sonar python:S7494 requires a comprehension
+        key: value for key, value in metrics
+    }
     try:
         scope = parts["S"]
         pr_map = _CVSS_PR_CHANGED if scope == "C" else _CVSS_PR_UNCHANGED
@@ -376,38 +379,68 @@ def _vulnerability_severity(vuln: dict[str, Any]) -> str:
     return "UNKNOWN"
 
 
+def _osv_package_identity(package: dict[str, Any]) -> tuple[str, str]:
+    package_metadata = package.get("package")
+    if not isinstance(package_metadata, dict):
+        return "unknown", "?"
+    return (
+        str(package_metadata.get("name") or "unknown"),
+        str(package_metadata.get("version") or "?"),
+    )
+
+
+def _blocking_vulnerability_finding(
+    vuln: dict[str, Any],
+    *,
+    package_name: str,
+    package_version: str,
+) -> str | None:
+    severity = _vulnerability_severity(vuln)
+    if severity not in _BLOCKING_OSV_SEVERITIES and severity != "UNKNOWN":
+        return None
+    vulnerability_id = str(vuln.get("id") or "unknown-id")
+    return f"{vulnerability_id} {severity} {package_name}=={package_version}"
+
+
+def _blocking_package_findings(package: dict[str, Any]) -> list[str]:
+    vulnerabilities = package.get("vulnerabilities")
+    if not isinstance(vulnerabilities, list):
+        return []
+    package_name, package_version = _osv_package_identity(package)
+    findings: list[str] = []
+    for vulnerability in vulnerabilities:
+        if not isinstance(vulnerability, dict):
+            continue
+        finding = _blocking_vulnerability_finding(
+            vulnerability,
+            package_name=package_name,
+            package_version=package_version,
+        )
+        if finding is not None:
+            findings.append(finding)
+    return findings
+
+
+def _blocking_result_findings(result: dict[str, Any]) -> list[str]:
+    packages = result.get("packages")
+    if not isinstance(packages, list):
+        return []
+    findings: list[str] = []
+    for package in packages:
+        if isinstance(package, dict):
+            findings.extend(_blocking_package_findings(package))
+    return findings
+
+
 def collect_blocking_osv_findings(payload: dict[str, Any]) -> list[str]:
     """Return HIGH/CRITICAL (or unknown-severity) OSV finding summaries."""
-    findings: list[str] = []
     results = payload.get("results")
     if not isinstance(results, list):
         return ["OSV JSON missing results array"]
+    findings: list[str] = []
     for result in results:
-        if not isinstance(result, dict):
-            continue
-        packages = result.get("packages")
-        if not isinstance(packages, list):
-            continue
-        for package in packages:
-            if not isinstance(package, dict):
-                continue
-            pkg_meta = package.get("package")
-            pkg_name = "unknown"
-            pkg_version = "?"
-            if isinstance(pkg_meta, dict):
-                pkg_name = str(pkg_meta.get("name") or "unknown")
-                pkg_version = str(pkg_meta.get("version") or "?")
-            vulns = package.get("vulnerabilities")
-            if not isinstance(vulns, list):
-                continue
-            for vuln in vulns:
-                if not isinstance(vuln, dict):
-                    continue
-                severity = _vulnerability_severity(vuln)
-                if severity not in _BLOCKING_OSV_SEVERITIES and severity != "UNKNOWN":
-                    continue
-                vuln_id = str(vuln.get("id") or "unknown-id")
-                findings.append(f"{vuln_id} {severity} {pkg_name}=={pkg_version}")
+        if isinstance(result, dict):
+            findings.extend(_blocking_result_findings(result))
     return findings
 
 
