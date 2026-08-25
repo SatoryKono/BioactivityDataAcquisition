@@ -17,23 +17,33 @@ from collections import defaultdict
 from pathlib import Path
 
 import pytest
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import quality_artifact_path
+from tests.helpers.git_index_scan import git_tracked_files
 
 pytestmark = pytest.mark.architecture
 
 _REPO = Path(__file__).resolve().parents[2]
 _INV = quality_artifact_path("test-basename-collision-inventory.json")
-_ADAPTERS = _REPO / "tests/unit/infrastructure/adapters"
 
 
 @pytest.mark.architecture
 def test_request_metadata_basenames_are_provider_prefixed() -> None:
-    legacy = list(_ADAPTERS.rglob("test_request_metadata.py"))
+    adapter_tests = git_tracked_files(
+        root=_REPO,
+        paths=("tests/unit/infrastructure/adapters",),
+        suffixes=(".py",),
+    )
+    legacy = [path for path in adapter_tests if path.name == "test_request_metadata.py"]
     assert not legacy, (
         "Provider-prefixed names required after TEST-SYS-10: "
         + ", ".join(p.relative_to(_REPO).as_posix() for p in legacy)
     )
-    renamed = list(_ADAPTERS.rglob("test_*_request_metadata.py"))
+    renamed = [
+        path
+        for path in adapter_tests
+        if path.name.startswith("test_")
+        and path.name.endswith("_request_metadata.py")
+    ]
     assert len(renamed) >= 7
 
 
@@ -42,7 +52,13 @@ def test_basename_collision_inventory_exists_and_is_honest() -> None:
     assert _INV.is_file()
     payload = json.loads(_INV.read_text(encoding="utf-8"))
     by_base: dict[str, list[str]] = defaultdict(list)
-    for path in (_REPO / "tests").rglob("test_*.py"):
+    for path in git_tracked_files(
+        root=_REPO,
+        paths=("tests",),
+        suffixes=(".py",),
+    ):
+        if not path.name.startswith("test_"):
+            continue
         by_base[path.name].append(path.relative_to(_REPO).as_posix())
     live_dups = {k: v for k, v in by_base.items() if len(v) > 1}
     assert payload["duplicate_basename_count"] == len(live_dups)

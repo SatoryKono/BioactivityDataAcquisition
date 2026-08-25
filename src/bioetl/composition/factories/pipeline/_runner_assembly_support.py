@@ -17,21 +17,18 @@ from bioetl.application.core.lifecycle.lock_runtime_service import (
     LockRuntimeServiceCreateContext,
 )
 from bioetl.application.core.postrun import PostrunService
-from bioetl.application.core.preflight import (
-    HealthAggregator,
-    MedallionConfigValidator,
-    PreflightService,
-)
+from bioetl.application.core.preflight import PreflightService
 from bioetl.application.observability.observer import PipelineObserver
 from bioetl.application.services.medallion.medallion_lifecycle import (
     MedallionLifecycleService,
 )
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.dq.context_resolver import extract_dq_output_paths
-from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
-from bioetl.composition.factories.pipeline._preflight_health_monitor import (
-    build_preflight_health_monitor,
+from bioetl.composition.factories.pipeline._runner_preflight_observer import (
+    build_observer as build_observer,
+    build_preflight_service as build_preflight_service,
 )
+from bioetl.composition.factories.pipeline.postrun_assembly import build_postrun_service
 from bioetl.composition.factories.pipeline.runner_constructor import (
     RunnerAssemblyParts,
     RunnerConstructorPayload,
@@ -43,13 +40,9 @@ from bioetl.composition.factories.services.pipeline_builder import (
 )
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.domain.locking import LockContextHolder
-from bioetl.domain.medallion import WriteModePolicy
 from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-from bioetl.infrastructure.time import SystemClock
-
-from bioetl.application.observability.observer import PipelineObserverParams
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,56 +83,6 @@ def build_lock_runtime_service(
             checkpoint_manager=checkpoint_manager,
             context_holder=context_holder,
         )
-    )
-
-
-def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
-    """Build the preflight service for a pipeline runner."""
-    pipeline = context.pipeline
-    health_aggregator = HealthAggregator(
-        logger=context.logger_port,
-        health_monitor=build_preflight_health_monitor(pipeline.services.metrics),
-        health_check_mode=pipeline.runtime.health_check_mode,
-        clock=SystemClock(),
-    )
-    medallion_validator = MedallionConfigValidator(
-        config=pipeline.config,
-        logger=context.logger_port,
-        write_mode_policy=WriteModePolicy(),
-    )
-    return PreflightService(
-        config=pipeline.config,
-        context=pipeline.context,
-        logger=context.logger_port,
-        metrics=pipeline.services.metrics,
-        health_aggregator=health_aggregator,
-        medallion_validator=medallion_validator,
-    )
-
-
-def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
-    """Build the pipeline observer bound to the current run context."""
-
-    pipeline = context.pipeline
-    pipeline_context = pipeline.context
-    return PipelineObserver(
-        identity=PipelineObserverParams(
-            pipeline_name=pipeline.config.pipeline_name,
-            run_id=pipeline_context.run_id,
-            run_type=pipeline.runtime.run_type,
-            manifest_id=getattr(pipeline_context, "manifest_id", None),
-            entity=getattr(pipeline_context, "entity", None),
-            effective_config_hash=getattr(
-                pipeline_context, "effective_config_hash", None
-            ),
-            contract_ref=getattr(pipeline_context, "contract_ref", None),
-            contract_version=getattr(pipeline_context, "contract_version", None),
-            composite_run_id=getattr(pipeline_context, "composite_run_id", None),
-        ),
-        metrics=pipeline.services.metrics,
-        logger=context.logger_port,
-        clock=SystemClock(),
-        tracer=context.observability.tracer,
     )
 
 

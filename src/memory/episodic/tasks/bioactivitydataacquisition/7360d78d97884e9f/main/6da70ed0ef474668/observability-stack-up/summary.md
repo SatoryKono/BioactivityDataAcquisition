@@ -2,7 +2,7 @@
 record_id: observability-stack-up
 record_type: working
 repo_id: bioactivitydataacquisition
-git_commit: d818a571ac4929f326d22781fc817514ca5f659a
+git_commit: 2de8ba422c50e305468362cd290c7f2b6a1ab760
 branch: main
 worktree_id: 7360d78d97884e9f
 task_id: observability-stack-up
@@ -10,7 +10,7 @@ actor:
   runtime: grok
   agent: grok-4.6
   model: grok-4.6
-created_at: '2026-08-20T10:27:49.051734+00:00'
+created_at: '2026-08-25T11:35:39.133116+00:00'
 source_refs:
 - docker-compose.monitoring.yml
 source_hashes: {}
@@ -19,26 +19,28 @@ security_class: internal
 status: active
 supersedes: []
 schema_version: 1
-content_digest: fc455a16161b7ef02caa86fc2468279e243d12a11030dce4cb1323723a882e84
+content_digest: 71e10a57ae9bbe2289d2cc24be57894d6280bee1aff5ed1de78711764233b9df
 id: observability-stack-up
-title: Raise and configure observability stack
+title: Check and raise observability stack
 ttl_days: 14
 confidence: episodic
-summary: 'Raised optional monitoring stack from this checkout: Prometheus/Grafana/Pushgateway/renderer
-  healthy, Grafana dashboard_profile=full, Ops HTTP identity matched, bioetl scrape
-  UP. Residual: .env BIOETL_RUNTIME_SOURCE_ID conflicts with checkout identity; Docker
-  Desktop PROJECT_ORIGIN WSL/Windows dual path; neo4j still from BioactivityDataAcquisition2.'
+summary: 'Docker Desktop was down (docker-desktop WSL stopped). Started engine, recreated
+  main+monitoring from E:\github\BioactivityDataAcquisition. Grafana dashboard_profile=full,
+  ops_http=ready identity_matched, all Prom targets UP including bioetl. Disabled
+  hung watchdog registered against BioactivityDataAcquisition2 (ensure-stable stops
+  monitoring). Residual: .env BIOETL_RUNTIME_SOURCE_ID conflicts with checkout identity
+  (not edited).'
 ---
 
 # Episodic summary
 
 ## Task
 
-- Title: Raise and configure observability stack
+- Title: Check and raise observability stack
 
 ## Outcome
 
-- Raised optional monitoring stack from this checkout: Prometheus/Grafana/Pushgateway/renderer healthy, Grafana dashboard_profile=full, Ops HTTP identity matched, bioetl scrape UP. Residual: .env BIOETL_RUNTIME_SOURCE_ID conflicts with checkout identity; Docker Desktop PROJECT_ORIGIN WSL/Windows dual path; neo4j still from BioactivityDataAcquisition2.
+- Docker Desktop was down (docker-desktop WSL stopped). Started engine, recreated main+monitoring from E:\github\BioactivityDataAcquisition. Grafana dashboard_profile=full, ops_http=ready identity_matched, all Prom targets UP including bioetl. Disabled hung watchdog registered against BioactivityDataAcquisition2 (ensure-stable stops monitoring). Residual: .env BIOETL_RUNTIME_SOURCE_ID conflicts with checkout identity (not edited).
 
 ## Lessons learned
 

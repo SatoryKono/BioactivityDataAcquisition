@@ -273,6 +273,8 @@ nav:
           - "ADR-055 Workflow Reconciliation Ownership": 02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md
           - "ADR-056 Proof-or-Stop Lifecycle Control": 02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md
           - "ADR-057 Deterministic Runtime Config Authority": 02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md
+          - "ADR-058 Layered Port Registries": 02-architecture/decisions/ADR-058-layered-port-registries.md
+          - "ADR-059 Package Cohesion Budgets": 02-architecture/decisions/ADR-059-package-cohesion-budgets.md
           - "Infrastructure Config Package Root Sunset": 02-architecture/compatibility/infrastructure-config-package-root-sunset.md
           - "Public API Freeze": 00-project/ai/agents/guides/PUBLIC_API_FREEZE.md
   - Guides:

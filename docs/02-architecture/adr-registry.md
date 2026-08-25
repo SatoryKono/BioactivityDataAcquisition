@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 57
-**Last Updated**: 2026-08-10
+**Total ADRs**: 59
+**Last Updated**: 2026-08-25
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 55 | 96.5% |
-| `superseded` | 2 | 3.5% |
+| `accepted` | 57 | 96.6% |
+| `superseded` | 2 | 3.4% |
 
 ## 🟢 Accepted ADRs
 
-### 55 decisions
+### 57 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -676,6 +676,34 @@ mi...
 working directory before explicit initialization and process environme...
 
 [📄 View Full ADR](decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md)
+
+---
+
+### ADR-058: Layered Port Registries
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-005, ADR-048
+
+**Context**: Composition declared 62 `Protocol` classes across 37 modules, parallel to
+`domain/ports`. CLI and factories used these as a second contract system.
+Pu...
+
+[📄 View Full ADR](decisions/ADR-058-layered-port-registries.md)
+
+---
+
+### ADR-059: Package Cohesion Budgets
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-041, ADR-049
+
+**Context**: Per-file LOC caps (`test_code_metrics.py`) force horizontal splits:
+`domain/aggregates` has 19 modules, several of which are mixins created to
+stay un...
+
+[📄 View Full ADR](decisions/ADR-059-package-cohesion-budgets.md)
 
 ---
 

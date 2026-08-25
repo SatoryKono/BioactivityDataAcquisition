@@ -379,6 +379,7 @@
         "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
         "scripts/ops/observability/grafana/recover_renderer.py",
         "scripts/ops/runtime/docker/runtime_manager.py",
+        "src/bioetl/composition/entrypoints.py",
         "src/bioetl/domain/locking.py",
         "src/bioetl/infrastructure/observability/tracing.py",
         "src/bioetl/interfaces/http/_processed_records_table_support.py",
@@ -2153,6 +2154,57 @@
       "owner": "BioETL Team",
       "status": "enforced",
       "title": "Deterministic Runtime Config Authority and Identity"
+    },
+    {
+      "adr_id": "ADR-058",
+      "category": "Architecture",
+      "decision_date": "2026-08-25",
+      "decision_path": "docs/02-architecture/decisions/ADR-058-layered-port-registries.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
+        "src/bioetl/application/ports/__init__.py",
+        "src/bioetl/application/ports/dq.py",
+        "src/bioetl/application/ports/metrics.py",
+        "src/bioetl/application/ports/pipeline.py",
+        "src/bioetl/application/ports/providers.py",
+        "src/bioetl/application/ports/storage.py",
+        "src/bioetl/composition/contracts/factories.py",
+        "src/bioetl/composition/contracts/providers.py",
+        "src/bioetl/composition/contracts/runtime.py",
+        "src/bioetl/composition/entrypoints.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Layered Port Registries"
+    },
+    {
+      "adr_id": "ADR-059",
+      "category": "Architecture",
+      "decision_date": "2026-08-25",
+      "decision_path": "docs/02-architecture/decisions/ADR-059-package-cohesion-budgets.md",
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py"
+      ],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
+        "src/bioetl/domain/aggregates/batch.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py"
+      ],
+      "manual_exception": null,
+      "owner": "BioETL Team",
+      "status": "enforced",
+      "title": "Package Cohesion Budgets"
     }
   ],
   "schema_version": 1,
@@ -2162,9 +2214,9 @@
     "tracked_file_discovery": "git grep --untracked with python fallback"
   },
   "summary": {
-    "accepted_adr_count": 55,
+    "accepted_adr_count": 57,
     "blocking_gap_count": 0,
-    "enforced_adr_count": 55,
+    "enforced_adr_count": 57,
     "manual_exception_count": 0,
     "missing_enforcement_owner_count": 0,
     "missing_implementation_owner_count": 0

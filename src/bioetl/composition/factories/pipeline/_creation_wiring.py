@@ -8,27 +8,20 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import cast
 
-import pyarrow as pa
-
 from bioetl.application.core.wiring.factory import (
     BasePipeline,
     ShutdownSignal,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
-from bioetl.application.services.lineage.metadata_coordinator import (
-    MetadataCoordinator,
-)
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline.construction_types import (
-    _SchemaBuilder,
+from bioetl.composition.factories.pipeline._creation_metadata import (
+    _build_metadata_coordinator,
+    _create_silver_validator,
 )
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     ControlPlaneArtifacts,
-)
-from bioetl.composition.factories.pipeline.run_context_factory import (
-    RunContextFactory,
 )
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
@@ -41,7 +34,6 @@ from bioetl.domain.ports import (
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
-    SilverValidatorPort,
     TracingPort,
 )
 from bioetl.domain.types import RunID
@@ -64,9 +56,6 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 from bioetl.application.core.pipeline_service_protocols import (
     PipelineServicesProtocol,
-)
-from bioetl.infrastructure.validation import (
-    ContractAwareSilverValidator,
 )
 
 
@@ -108,51 +97,6 @@ def _resolve_yaml_config(
 ) -> PipelineYamlConfig:
     """Resolve the effective pipeline YAML config for one creation request."""
     return inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name)
-
-
-def _build_metadata_coordinator(
-    *,
-    inputs: _PipelineCreationInputs,
-    yaml_config: PipelineYamlConfig,
-    deps: _ServiceBundleDeps,
-    extract_entity_type: Callable[[str], str | None],
-) -> MetadataCoordinator:
-    """Build the metadata coordinator from the canonical run context factory."""
-    from bioetl.composition.services.versioning import (
-        get_git_commit,
-        get_pipeline_version,
-    )
-
-    request = inputs.request
-    run_context_factory = RunContextFactory(
-        pipeline_name=inputs.pipeline_name,
-        provider=inputs.provider,
-        entity_type_extractor=extract_entity_type,
-        pipeline_version_getter=get_pipeline_version,
-        git_commit_getter=get_git_commit,
-        config_hash_getter=deps.compute_config_hash,
-    )
-    return MetadataCoordinator(
-        run_context_factory.create(
-            run_id=request.run_id,
-            runtime=request.runtime,
-            started_at=request.started_at,
-            yaml_config=yaml_config,
-            manifest_id=request.manifest_id,
-            execution_fingerprint=request.execution_fingerprint,
-            config_hashes=(
-                request.config_hash,
-                request.resolved_config_hash,
-                request.effective_config_hash,
-            ),
-            dq_contract_compatibility_hash=request.dq_contract_compatibility_hash,
-            effective_config_artifact_id=request.effective_config_artifact_id,
-            exact_replay=bool(request.runtime.exact_replay),
-            replay_of_run_id=request.replay_of_run_id,
-            replay_of_manifest_id=request.replay_of_manifest_id,
-            input_snapshot_fingerprint=request.input_snapshot_fingerprint,
-        )
-    )
 
 
 def _build_pipeline_transformer(
@@ -249,24 +193,3 @@ def _create_pipeline_with_services_impl(
         started_at=request.started_at,
         transformer=transformer,
     )
-
-
-def _create_silver_validator(
-    pandera_silver_schema: object | None,
-    dq_config: DQConfig | None = None,
-) -> SilverValidatorPort | None:
-    """Create contract-aware silver validator when schema is configured.
-
-    Args:
-        pandera_silver_schema: Optional Pandera DataFrameModel class with a
-            to_schema() method; returns None when not provided.
-
-    Returns:
-        ContractAwareSilverValidator wrapping the schema, or None if schema is absent.
-    """
-    if pandera_silver_schema is None:
-        return None
-
-    schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
-    typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())
-    return ContractAwareSilverValidator(typed_schema, dq_config=dq_config)

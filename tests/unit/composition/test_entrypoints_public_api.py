@@ -31,8 +31,6 @@ from __future__ import annotations
 
 import importlib
 import sys
-from types import SimpleNamespace
-from unittest.mock import patch
 
 import pytest
 
@@ -43,128 +41,73 @@ def _reload_entrypoints_module():
 
 
 @pytest.mark.unit
-def test_entrypoints_all_is_execution_focused_budget() -> None:
-    """Explicit public entrypoint surface should stay narrow and execution-focused."""
+def test_entrypoints_all_is_typed_registry_budget() -> None:
+    """Explicit composition-root surface stays narrow and registry-focused."""
     entrypoints = _reload_entrypoints_module()
 
     expected = {
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
+        "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline",
+        "get_bronze_cleanup_service",
+        "get_contract_migration_service",
+        "get_lifecycle_service",
+        "get_pipeline_runner_service",
+        "get_vacuum_service",
+        "preview_cleanup",
+        "register",
+        "registered_ports",
+        "resolve",
     }
 
     assert set(entrypoints.__all__) == expected
-    assert len(entrypoints.__all__) <= 14
+    assert len(entrypoints.__all__) <= 11
 
 
 @pytest.mark.unit
-def test_entrypoints_retains_start_metrics_server_only_as_compatibility_wrapper() -> (
-    None
-):
-    """Metrics startup stays callable but drops out of the official export budget."""
+@pytest.mark.parametrize("name", ["start_metrics_server", "load_pipeline_config"])
+def test_entrypoints_removed_compatibility_wrappers_fail_fast(name: str) -> None:
+    """Removed compatibility wrappers must not regrow on the typed registry."""
     entrypoints = _reload_entrypoints_module()
 
-    assert "start_metrics_server" not in entrypoints.__all__
-    assert callable(entrypoints.start_metrics_server)
+    assert name not in entrypoints.__all__
+    with pytest.raises(AttributeError):
+        getattr(entrypoints, name)
 
 
 @pytest.mark.unit
-def test_entrypoints_start_metrics_server_wrapper_delegates_to_observability_api(
+def test_entrypoints_register_resolve_and_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Compatibility wrapper must forward kwargs to observability-owned startup."""
+    """The typed registry resolves factories and returns an isolated snapshot."""
     entrypoints = _reload_entrypoints_module()
-    calls: list[dict[str, object]] = []
+    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
 
-    def _fake_start(
-        port: int = 8000,
-        addr: str = "0.0.0.0",
-        *,
-        fail_fast: bool = False,
-        retry_count: int = 3,
-        retry_delay: float = 1.0,
-        logger: object | None = None,
-    ) -> bool:
-        calls.append(
-            {
-                "port": port,
-                "addr": addr,
-                "fail_fast": fail_fast,
-                "retry_count": retry_count,
-                "retry_delay": retry_delay,
-                "logger": logger,
-            }
-        )
-        return True
+    class Port:
+        pass
 
-    monkeypatch.setattr(
-        "bioetl.composition.observability_runtime.start_metrics_server",
-        _fake_start,
-    )
-    logger = object()
-    assert (
-        entrypoints.start_metrics_server(
-            9100,
-            "127.0.0.1",
-            fail_fast=True,
-            retry_count=2,
-            retry_delay=0.5,
-            logger=logger,  # type: ignore[arg-type]
-        )
-        is True
-    )
-    assert calls == [
-        {
-            "port": 9100,
-            "addr": "127.0.0.1",
-            "fail_fast": True,
-            "retry_count": 2,
-            "retry_delay": 0.5,
-            "logger": logger,
-        }
-    ]
-
-
-@pytest.mark.unit
-def test_entrypoints_retains_load_pipeline_config_only_as_compatibility_wrapper() -> (
-    None
-):
-    """Pipeline config loading stays callable but drops out of the official export budget."""
-    entrypoints = _reload_entrypoints_module()
-
-    assert "load_pipeline_config" not in entrypoints.__all__
-    assert callable(entrypoints.load_pipeline_config)
-
-
-@pytest.mark.unit
-def test_entrypoints_load_pipeline_config_wrapper_delegates_to_composite_api(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Compatibility wrapper must forward pipeline names to composite-owned loader."""
-    entrypoints = _reload_entrypoints_module()
     sentinel = object()
-    seen: list[str] = []
+    entrypoints.register(Port, lambda: sentinel)
 
-    def _fake_load(pipeline_name: str) -> object:
-        seen.append(pipeline_name)
-        return sentinel
+    assert entrypoints.resolve(Port) is sentinel
+    snapshot = entrypoints.registered_ports()
+    assert snapshot == {Port: snapshot[Port]}
+    snapshot.clear()
+    assert entrypoints.resolve(Port) is sentinel
 
-    monkeypatch.setattr(
-        "bioetl.composition.composite_catalog.load_pipeline_config",
-        _fake_load,
-    )
-    assert entrypoints.load_pipeline_config("chembl_activity") is sentinel
-    assert seen == ["chembl_activity"]
+
+@pytest.mark.unit
+def test_entrypoints_resolve_unregistered_port_raises_key_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Missing registrations fail explicitly with the requested port in context."""
+    entrypoints = _reload_entrypoints_module()
+    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
+
+    class MissingPort:
+        pass
+
+    with pytest.raises(KeyError, match="no composition factory registered"):
+        entrypoints.resolve(MissingPort)
 
 
 @pytest.mark.unit
@@ -172,7 +115,6 @@ def test_entrypoints_load_pipeline_config_wrapper_delegates_to_composite_api(
     "removed_name",
     (
         "get_checkpoint_service",
-        "preview_cleanup",
     ),
 )
 def test_entrypoints_legacy_service_and_resource_symbols_are_removed(
@@ -215,22 +157,17 @@ def test_entrypoints_unknown_symbol_raises_attribute_error() -> None:
 
 
 @pytest.mark.unit
-def test_entrypoints_public_symbol_resolves_from_canonical_owner_module() -> None:
-    """Lazy public exports should delegate to the documented owner module."""
+def test_entrypoints_public_symbol_is_owned_by_canonical_module() -> None:
+    """Eager public exports should retain their documented implementation owner."""
     entrypoints = _reload_entrypoints_module()
-    sentinel = object()
+    pipeline_execution = importlib.import_module(
+        "bioetl.composition._pipeline_execution"
+    )
 
-    def fake_import_module(module_name: str) -> SimpleNamespace:
-        assert module_name == "bioetl.composition.execution_api"
-        return SimpleNamespace(run_pipeline=sentinel)
-
-    with patch(
-        "bioetl.composition.lazy_exports.import_module",
-        side_effect=fake_import_module,
-    ) as import_module:
-        assert entrypoints.run_pipeline is sentinel
-
-    import_module.assert_called_once_with("bioetl.composition.execution_api")
+    assert (
+        entrypoints.ensure_metrics_server_started
+        is pipeline_execution.ensure_metrics_server_started
+    )
 
 
 @pytest.mark.unit

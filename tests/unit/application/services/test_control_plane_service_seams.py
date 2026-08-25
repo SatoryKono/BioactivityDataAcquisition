@@ -29,6 +29,9 @@
 
 from __future__ import annotations
 
+import importlib
+import sys
+
 import pytest
 
 from pathlib import Path
@@ -79,6 +82,44 @@ def test_control_plane_responsibility_facades_preserve_canonical_exports() -> No
     assert LedgerSeamService is RunLedgerService
     assert EffectiveConfigSeamService is EffectiveConfigService
     assert WorkflowSeamExecutionService is WorkflowExecutionService
+
+
+def test_workflow_manifest_service_preserves_request_model_compatibility_export() -> (
+    None
+):
+    """The service module keeps its legacy model export without eager ownership."""
+    from bioetl.application.services.control_plane.workflow.manifest_models import (
+        WorkflowManifestCreateSpec as CanonicalSpec,
+    )
+    from bioetl.application.services.control_plane.workflow.manifest_service import (
+        WorkflowManifestCreateSpec as CompatibilitySpec,
+    )
+
+    assert CompatibilitySpec is CanonicalSpec
+
+
+def test_workflow_facade_does_not_eagerly_import_service_owners() -> None:
+    """The workflow package keeps execution, inspection, and manifest owners lazy."""
+    package_name = "bioetl.application.services.control_plane.workflow"
+    owner_modules = (
+        f"{package_name}.execution_service",
+        f"{package_name}.inspection_service",
+        f"{package_name}.manifest_service",
+        f"{package_name}.manifest_models",
+    )
+    stale_modules = [
+        name
+        for name in list(sys.modules)
+        if name == package_name or name.startswith(package_name + ".")
+    ]
+    for name in stale_modules:
+        del sys.modules[name]
+
+    workflow = importlib.import_module(package_name)
+
+    for owner in owner_modules:
+        assert owner not in sys.modules, f"eager import of {owner}"
+    assert set(workflow.__all__) == set(workflow._LAZY_ATTR_EXPORTS)
 
 
 def test_control_plane_replay_facade_exposes_replay_services() -> None:

@@ -25,52 +25,47 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Delegation coverage for retained composition entrypoint wrappers."""
+"""Behavior coverage for the typed composition-root registry."""
 
 import pytest
 
-from bioetl.composition import entrypoints, observability_api
+from bioetl.composition import entrypoints
 
 pytestmark = pytest.mark.unit
 
 
-def test_start_metrics_server_forwards_all_arguments(
+def test_register_replaces_factory_for_the_same_port(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    logger = object()
-    observed: dict[str, object] = {}
+    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
 
-    def implementation(**kwargs: object) -> bool:
-        observed.update(kwargs)
-        return True
+    class Port:
+        pass
 
-    monkeypatch.setattr(observability_api, "start_metrics_server", implementation)
+    first = object()
+    second = object()
+    entrypoints.register(Port, lambda: first)
+    entrypoints.register(Port, lambda: second)
 
-    assert entrypoints.start_metrics_server(
-        9100,
-        "127.0.0.1",
-        fail_fast=True,
-        retry_count=5,
-        retry_delay=0.25,
-        logger=logger,
-    )
-    assert observed == {
-        "port": 9100,
-        "addr": "127.0.0.1",
-        "fail_fast": True,
-        "retry_count": 5,
-        "retry_delay": 0.25,
-        "logger": logger,
-    }
+    assert entrypoints.resolve(Port) is second
 
 
-def test_load_pipeline_config_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The wrapper delegates to composite_api.load_pipeline_config."""
-    # Mock the actual implementation that gets imported inside the function
-    sentinel = object()
-    monkeypatch.setattr(
-        "bioetl.composition.composite_catalog.load_pipeline_config",
-        lambda name: sentinel,
-    )
+def test_registered_ports_returns_factory_without_invoking_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
 
-    assert entrypoints.load_pipeline_config("chembl_activity") is sentinel
+    class Port:
+        pass
+
+    calls = 0
+
+    def factory() -> object:
+        nonlocal calls
+        calls += 1
+        return object()
+
+    entrypoints.register(Port, factory)
+
+    assert entrypoints.registered_ports() == {Port: factory}
+    assert calls == 0

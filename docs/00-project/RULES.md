@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.10
-Last verified: 2026-08-14
+Version: 6.1.11
+Last verified: 2026-08-25
 Status: active
 Class: published
 Owner: BioETL Team
@@ -2157,9 +2157,14 @@ fields:
 | [ADR-055](../02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Retain Foreign-key Reconciliation as a Governed Workflow Data Step | Accepted | 2026-07-29 |
 | [ADR-056](../02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | 2026-08-09 |
 | [ADR-057](../02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | 2026-08-10 |
+| [ADR-058](../02-architecture/decisions/ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | 2026-08-25 |
+| [ADR-059](../02-architecture/decisions/ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | 2026-08-25 |
 
 ## История Изменений (Changelog)
 
+- **6.1.11** (2026-08-25): синхронизирован индекс принятых решений с
+  ADR-058 (layered port registries) и ADR-059 (shrink-only package cohesion
+  budgets).
 - **6.1.10** (2026-08-14): добавлен scoped Dashboard Presentation Contract:
   измеримая плотность дополнительных panel groups, typography floors 12pt/14pt
   и запрет area fills вне первого окна; требования связаны с executable

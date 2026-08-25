@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2448,
+        "source_module_count": 2440,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -84,15 +84,15 @@
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 2,
+        "adr_enforcement_blocking_gap_count": 0,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 6.2,
+      "score": 9.2,
       "weight": 0.09,
-      "weighted_score": 0.558
+      "weighted_score": 0.828
     },
     {
       "evidence_metrics": {
@@ -162,11 +162,11 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.14,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
-    "adr_enforcement_blocking_gap_count": 2,
+    "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "contract_blocking_issue_count": 0,
@@ -175,10 +175,9 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane",
-      "composition_factories_pipeline"
+      "application_services_control_plane"
     ],
-    "families_at_budget_count": 2,
+    "families_at_budget_count": 1,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,
@@ -190,7 +189,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2448,
+    "source_module_count": 2440,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -202,7 +201,7 @@
   "source_artifacts": {
     "adr_enforcement_matrix": {
       "accepted_adr_count": 57,
-      "blocking_gap_count": 2,
+      "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -226,7 +225,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "d2840068896cd0ac625d08d7a5fd5f98f3a332918d59107ac468728d19f8d99e"
+      "source_fingerprint": "7017062b2981ce18fa700009a3cb22bc88d17cb78b8ab1bcfb31f9c7c54f15a8"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -241,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "8877ea3129b6321a5c5b2ec624e2c40948ce393d646e01a6993d129c864aa51e"
+      "source_tree_sha256": "00b924948cf507014d409c9080e99da8fc543d82835af7b02ca8e33456af3ea5"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

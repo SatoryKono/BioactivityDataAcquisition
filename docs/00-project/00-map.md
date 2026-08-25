@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.10 | Last updated: 2026-08-14*
+*Synced with RULES.md v6.1.11 | Last updated: 2026-08-25*
 
 > **Documentation Update:** 2026-06-03
 >

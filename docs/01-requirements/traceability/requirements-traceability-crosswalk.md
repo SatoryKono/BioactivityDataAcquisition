@@ -2,7 +2,7 @@
 
 - snapshot_date: 2026-08-14
 - source: `docs/01-requirements/REQUIREMENTS.md` v1.12.4
-- canonical_rules_owner: `docs/00-project/RULES.md` v6.1.10
+- canonical_rules_owner: `docs/00-project/RULES.md` v6.1.11
 - artifact: `docs/01-requirements/traceability/requirements-traceability-crosswalk.csv`
 - row_count: 171
 - modality_counts: `150 MUST`, `16 MUST NOT`, `4 SHOULD`, `1 MAY`

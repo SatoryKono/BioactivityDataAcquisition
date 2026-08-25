@@ -49,6 +49,7 @@ def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
 
 
 def test_s5_service_access_seams_are_at_most_two() -> None:
+    """Enforce the layered registry and composition seam contract from ADR-058."""
     files = sorted((ROOT / "src/bioetl/composition").glob("*service_access.py"))
     names = [path.name for path in files]
     assert names == [
@@ -69,6 +70,7 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
 
 
 def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
+    """Enforce the shrink-only package cohesion budgets from ADR-059."""
     config = yaml.safe_load(
         (ROOT / "configs/quality/package_cohesion_budget.yaml").read_text(
             encoding="utf-8"

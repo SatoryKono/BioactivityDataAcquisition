@@ -35,7 +35,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest import mock
 
-from bioetl.composition import observability_api
+from bioetl.composition import observability_runtime as observability_api
 
 
 pytestmark = pytest.mark.unit
