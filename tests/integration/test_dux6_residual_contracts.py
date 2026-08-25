@@ -92,9 +92,7 @@ def test_provenance_panels_share_readability_contract() -> None:
         provenance = panels[panel_id]
         content = str((provenance.get("options") or {}).get("content") or "")
 
-        compact_banner = (
-            "font-size:16px" in content and "padding:4px 10px" in content
-        )
+        compact_banner = "font-size:16px" in content and "padding:4px 10px" in content
         min_h = 3 if compact_banner else 4
         assert provenance.get("gridPos", {}).get("h", 0) >= min_h, filename
         assert provenance.get("options", {}).get("mode") == "html", filename
