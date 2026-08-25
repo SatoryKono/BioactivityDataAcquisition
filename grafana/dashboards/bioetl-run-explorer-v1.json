@@ -263,7 +263,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 148
+                "value": 340
               },
               {
                 "id": "custom.inspect",
@@ -294,6 +294,10 @@
                 "value": "Workflow"
               },
               {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
                 "id": "custom.width",
                 "value": 72
               },
@@ -312,6 +316,10 @@
               {
                 "id": "displayName",
                 "value": "Workflow run"
+              },
+              {
+                "id": "custom.hidden",
+                "value": true
               },
               {
                 "id": "custom.width",
@@ -439,7 +447,11 @@
               "path": true,
               "report_path": true,
               "artifact_path": true,
-              "row_kind": true
+              "row_kind": true,
+              "workflow_id": true,
+              "workflow_run_id": true,
+              "Workflow": true,
+              "Workflow run": true
             },
             "indexByName": {
               "selected": 0,

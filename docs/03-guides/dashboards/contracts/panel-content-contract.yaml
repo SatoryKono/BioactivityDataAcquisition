@@ -1125,7 +1125,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9400':
-        title: Inspect Scope & Evidence
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -2240,7 +2240,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '9400':
-        title: Understand Evidence Scope
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -2625,7 +2625,7 @@ dashboards:
         - backend_error
         render_profiles: *id002
       '9400':
-        title: Understand Incident Scope
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -3955,7 +3955,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9400':
-        title: Understand Evidence Scope
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -5044,7 +5044,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9400':
-        title: Understand Pipeline Scope
+        title: ''
         role: guidance
         tier: 4
         scope: global
