@@ -105,6 +105,11 @@ _REQUIRED_CSS_FIRST_WINDOW_H3 = (
 _FIRST_WINDOW_H3 = {
     "bioetl-overview-v2.json",
     "bioetl-run-explorer-v1.json",
+    "bioetl-control-plane-v1.json",
+    "bioetl-runtime.json",
+    "bioetl-provider-health-v2.json",
+    "bioetl-dq-v2.json",
+    "bioetl-incident-v1.json",
 }
 
 

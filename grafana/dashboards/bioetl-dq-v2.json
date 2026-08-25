@@ -117,7 +117,7 @@
       "description": "Current panels show the latest DQ verdict and reasons for the selected pipeline. Selected-run panels use HTTP-backed identity and record accounting; run ID never filters Prometheus. Selected-range panels show scores, freshness, rejects, and delivery impact. These scopes answer different questions and must not be compared as equivalent status signals. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage}.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what impact needs action?</div> CURRENT = Status/reasons. SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is data conformant, and what impact needs action? CURRENT = Status/reasons. SELECTED RUN = accounting. TIME RANGE scopes are not peers.</div></div>"
       },
       "links": []
     },
@@ -236,7 +236,7 @@
     {
       "id": 9103,
       "type": "text",
-      "title": "Start DQ Triage",
+      "title": "",
       "gridPos": {
         "h": 3,
         "w": 24,

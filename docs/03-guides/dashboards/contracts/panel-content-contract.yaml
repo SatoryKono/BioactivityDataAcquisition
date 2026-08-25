@@ -2225,7 +2225,7 @@ dashboards:
         render_profiles:
         - full_dark
       '9103':
-        title: Start DQ Triage
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -2397,7 +2397,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '2001':
-        title: Start Incident Triage
+        title: ''
         role: guidance
         tier: 4
         scope: global
@@ -5131,7 +5131,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '9991':
-        title: Start Pipeline Triage
+        title: ''
         role: guidance
         tier: 4
         scope: global

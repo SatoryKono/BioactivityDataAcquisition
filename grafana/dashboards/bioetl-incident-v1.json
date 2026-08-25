@@ -107,7 +107,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:6px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.35;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\"><div style=\"font-size:18px;font-weight:700\">What is the highest-confidence active suspect?</div> CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
+        "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">What is the highest-confidence active suspect? CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
       },
       "links": []
     },
@@ -215,7 +215,7 @@
     {
       "id": 2001,
       "type": "text",
-      "title": "Start Incident Triage",
+      "title": "",
       "description": "DSA-07 decision rail. Read-only",
       "gridPos": {
         "h": 3,
@@ -225,6 +225,7 @@
       },
       "options": {
         "mode": "html",
+        "bioetlDisplayTitle": "Start Incident Triage",
         "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: open the top Ranked Suspect.</div>"
       },
       "links": []
