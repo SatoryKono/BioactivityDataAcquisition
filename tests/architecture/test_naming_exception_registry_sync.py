@@ -218,6 +218,8 @@ def test_naming_audit_registry_loader_matches_policy_registry() -> None:
 
     assert "README.md" in registry.documentation_exceptions
     assert "SKILL.md" in registry.documentation_exceptions
+    assert "REQUIREMENTS.md" in registry.documentation_exceptions
+    assert "DASHBOARD_REQUIREMENTS.md" in registry.documentation_exceptions
     assert "PubchemMolecule" in registry.class_suffix_exceptions
     assert "UniprotTarget" in registry.class_suffix_exceptions
     assert "Compound" not in registry.class_suffix_exceptions

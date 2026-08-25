@@ -9,6 +9,7 @@ documentation_exceptions:
   - README.md # Standard project readme
   - CHANGELOG.md # Standard changelog (Keep a Changelog format)
   - REQUIREMENTS.md # Project requirements document
+  - DASHBOARD_REQUIREMENTS.md # Dashboard presentation requirements (REQ-DASH-*)
   - RULES.md # Project rules/constitution
   - CONTRIBUTING.md # Contribution guidelines
   - SECURITY.md # Security policy
