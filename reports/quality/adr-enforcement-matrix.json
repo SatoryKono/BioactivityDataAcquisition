@@ -2161,7 +2161,9 @@
       "enforcement_owner_paths": [
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_documentation_audit_remediation.py"
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+        "tests/unit/domain/ports/test_adr_058_lazy_owner_modules.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2181,7 +2183,9 @@
         "src/bioetl/composition/entrypoints.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_documentation_audit_remediation.py"
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+        "tests/unit/domain/ports/test_adr_058_lazy_owner_modules.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

@@ -6,10 +6,10 @@
 ## Summary
 
 - Scanned modules: `2464`
-- Internal import edges (raw): `7700`
+- Internal import edges (raw): `7691`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `330`
+- Cross-layer module-group edges (total): `335`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,17 +21,17 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1554 OK| application
+    application -->|1550 OK| application
     application -->|978 OK| domain
-    composition -->|183 OK| application
-    composition -->|692 OK| composition
-    composition -->|286 OK| domain
-    composition -->|236 OK| infrastructure
+    composition -->|190 OK| application
+    composition -->|682 OK| composition
+    composition -->|290 OK| domain
+    composition -->|240 OK| infrastructure
     domain -->|1242 OK| domain
     infrastructure -->|761 OK| domain
-    infrastructure -->|1196 OK| infrastructure
+    infrastructure -->|1195 OK| infrastructure
     interfaces -->|51 OK| application
-    interfaces -->|57 OK| composition
+    interfaces -->|48 OK| composition
     interfaces -->|69 OK| domain
     interfaces -->|395 OK| interfaces
 ```
@@ -40,17 +40,17 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1554 | allowed |
+| `application`    | `application`    |    1550 | allowed |
 | `application`    | `domain`         |     978 | allowed |
-| `composition`    | `application`    |     183 | allowed |
-| `composition`    | `composition`    |     692 | allowed |
-| `composition`    | `domain`         |     286 | allowed |
-| `composition`    | `infrastructure` |     236 | allowed |
+| `composition`    | `application`    |     190 | allowed |
+| `composition`    | `composition`    |     682 | allowed |
+| `composition`    | `domain`         |     290 | allowed |
+| `composition`    | `infrastructure` |     240 | allowed |
 | `domain`         | `domain`         |    1242 | allowed |
 | `infrastructure` | `domain`         |     761 | allowed |
-| `infrastructure` | `infrastructure` |    1196 | allowed |
+| `infrastructure` | `infrastructure` |    1195 | allowed |
 | `interfaces`     | `application`    |      51 | allowed |
-| `interfaces`     | `composition`    |      57 | allowed |
+| `interfaces`     | `composition`    |      48 | allowed |
 | `interfaces`     | `domain`         |      69 | allowed |
 | `interfaces`     | `interfaces`     |     395 | allowed |
 
