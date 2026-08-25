@@ -1237,6 +1237,11 @@ def test_cycle3_inspect_enabled_on_named_below_fold_tables() -> None:
         ("bioetl-dq-v2.json", 122),
         ("bioetl-overview-v2.json", 9010),
         ("bioetl-overview-v2.json", 9011),
+        ("bioetl-overview-v2.json", 9013),
+        ("bioetl-control-plane-v1.json", 908),
+        ("bioetl-control-plane-v1.json", 138),
+        ("bioetl-dq-v2.json", 118),
+        ("bioetl-dq-v2.json", 156),
     )
     for dashboard_name, panel_id in cases:
         panel = _panel(_load(dashboard_name), panel_id)
