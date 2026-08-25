@@ -19,6 +19,7 @@
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08` | `9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2450, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08'}` | `{'source_module_count': 2450, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |

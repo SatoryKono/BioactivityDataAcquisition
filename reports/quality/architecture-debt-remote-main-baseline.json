@@ -7,6 +7,7 @@
       "required": true,
       "required_on_remote": true,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true,
         "integral_score": 9.41,
@@ -21,6 +22,7 @@
       "required": true,
       "required_on_remote": true,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true,
         "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
@@ -38,6 +40,7 @@
       "required": true,
       "required_on_remote": true,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -51,6 +54,7 @@
       "required": true,
       "required_on_remote": true,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -64,6 +68,7 @@
       "required": true,
       "required_on_remote": true,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -77,6 +82,7 @@
       "required": false,
       "required_on_remote": false,
       "source_revision": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
       "summary": {
         "available": true
       }
@@ -103,8 +109,10 @@
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
   "local_tracking_ref_sha": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
   "remote_main_sha": "c4893a8d1bd4162ef05215e446e8d9e56ed35e11",
+
   "schema_version": 1
 }
