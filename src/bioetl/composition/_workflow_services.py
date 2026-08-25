@@ -19,6 +19,7 @@ from bioetl.composition.occurrence_identity import (
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import get_settings
 from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
     from bioetl.application.services.workflow.control_plane.execution_service import (
@@ -150,8 +151,6 @@ def _get_workflow_memory_lock() -> LockPort:
 
 
 def _system_clock_now() -> Callable[[], datetime]:
-    from bioetl.infrastructure.time import SystemClock
-
     return SystemClock().now
 
 

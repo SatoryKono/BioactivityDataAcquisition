@@ -86,12 +86,11 @@ def test_issue_5507_cli_config_bootstrap_uses_owner_config_access_seam() -> None
 
 def test_issue_5508_maintenance_cli_chain_no_longer_imports_retained_facade() -> None:
     imported_modules = _imports(MAINTENANCE_SERVICE_ACCESS)
-    assert "bioetl.composition.maintenance_api" in imported_modules
+    assert "bioetl.composition.maintenance_api" not in imported_modules
+    assert "bioetl.composition.contracts" in imported_modules
     assert "bioetl.composition._resource_management" not in imported_modules
     assert "bioetl.composition.entrypoints" not in imported_modules
-    assert _collect_exact_importers("bioetl.composition.maintenance_api") == {
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-    }
+    assert _collect_exact_importers("bioetl.composition.maintenance_api") == set()
 
 
 def test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills() -> (
