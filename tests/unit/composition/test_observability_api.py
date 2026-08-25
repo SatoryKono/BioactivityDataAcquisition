@@ -32,7 +32,7 @@ import pytest
 import asyncio
 import sys
 from datetime import UTC, datetime
-from types import ModuleType, SimpleNamespace
+from types import SimpleNamespace
 from unittest import mock
 
 from bioetl.composition import observability_api
@@ -100,13 +100,11 @@ def test_start_metrics_server_returns_false_or_raises_on_failed_start() -> None:
 
 def test_get_metrics_service_delegates_to_internal_services_owner() -> None:
     expected = mock.Mock()
-    fake_services = ModuleType("bioetl.composition._services")
-    mock_impl = mock.Mock(return_value=expected)
-    fake_services.get_metrics_service = mock_impl
-    with mock.patch.dict(
-        sys.modules,
-        {"bioetl.composition._services": fake_services},
-    ):
+    with mock.patch.object(
+        observability_api._services,
+        "get_metrics_service",
+        return_value=expected,
+    ) as mock_impl:
         result = observability_api.get_metrics_service()
 
     assert result is expected
@@ -283,13 +281,11 @@ def test_delete_metrics_from_gateway_overrides_logger_and_uses_configured_gatewa
 
 def test_get_audit_service_delegates_to_internal_services_owner() -> None:
     expected = mock.Mock()
-    fake_services = ModuleType("bioetl.composition._services")
-    mock_impl = mock.Mock(return_value=expected)
-    fake_services.get_audit_service = mock_impl
-    with mock.patch.dict(
-        sys.modules,
-        {"bioetl.composition._services": fake_services},
-    ):
+    with mock.patch.object(
+        observability_api._services,
+        "get_audit_service",
+        return_value=expected,
+    ) as mock_impl:
         result = observability_api.get_audit_service()
 
     assert result is expected
@@ -300,13 +296,11 @@ def test_get_observability_workflow_service_delegates_to_internal_services_owner
     None
 ):
     expected = mock.Mock()
-    fake_services = ModuleType("bioetl.composition._services")
-    mock_impl = mock.Mock(return_value=expected)
-    fake_services.get_observability_workflow_service = mock_impl
-    with mock.patch.dict(
-        sys.modules,
-        {"bioetl.composition._services": fake_services},
-    ):
+    with mock.patch.object(
+        observability_api._services,
+        "get_observability_workflow_service",
+        return_value=expected,
+    ) as mock_impl:
         result = observability_api.get_observability_workflow_service()
 
     assert result is expected
@@ -314,7 +308,6 @@ def test_get_observability_workflow_service_delegates_to_internal_services_owner
 
 
 def test_remaining_service_delegates_use_internal_services_owner() -> None:
-    fake_services = ModuleType("bioetl.composition._services")
     delegates = {
         "get_checkpoint_service": observability_api.get_checkpoint_service,
         "get_health_service": observability_api.get_health_service,
@@ -322,18 +315,14 @@ def test_remaining_service_delegates_use_internal_services_owner() -> None:
         "get_run_manifest_service": observability_api.get_run_manifest_service,
         "get_lineage_service": observability_api.get_lineage_service,
     }
-    mocks: dict[str, mock.Mock] = {}
-    for name in delegates:
-        mocks[name] = mock.Mock(return_value=f"{name}:result")
-        setattr(fake_services, name, mocks[name])
-
-    with mock.patch.dict(
-        sys.modules,
-        {"bioetl.composition._services": fake_services},
-    ):
-        for name, fn in delegates.items():
+    for name, fn in delegates.items():
+        with mock.patch.object(
+            observability_api._services,
+            name,
+            return_value=f"{name}:result",
+        ) as mock_impl:
             assert fn() == f"{name}:result"
-            mocks[name].assert_called_once_with()
+            mock_impl.assert_called_once_with()
 
 
 def test_get_metrics_operator_profile_reports_enabled_and_disabled_modes() -> None:
