@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         TableVacuumResult,
         VacuumAllResult,
     )
-    from bioetl.application.services.workflow._observability_workflow_models import (
+    from bioetl.application.services.workflow.observability_workflow_service import (
         AuditRunWorkflowResult,
         CheckpointAuditWorkflowResult,
         RunForensicDossierResult,
