@@ -23,7 +23,7 @@ Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
 `source_module_count=2435` with
-`source_tree_sha256=79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887`.
+`source_tree_sha256=dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -90,6 +90,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887`
+- source_tree_sha256: `dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc`
 
 `source_module_count=2435`

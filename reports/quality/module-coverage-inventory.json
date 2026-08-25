@@ -48710,25 +48710,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
-<<<<<<< Updated upstream
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "source_tree_sha256": "79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887",
-||||||| e57d281869
-  "source_tree_sha256": "1919669ceaca9c436116c44aca40f457719c2b5a8492972531e034806defc3ea",
-=======
-  "source_tree_sha256": "428a10c2f0d422834320b7b6ef3954fb2df54b244f2209c4273e232411ca94be",
->>>>>>> fix/audit-tech-debt-cycle-cdff5b63
-||||||| 885a348472
-  "source_tree_sha256": "9b770f72a5aa6b2462c10b5cce7b32ef2b6c12be1daf9d853482aaaedc10616d",
-=======
-  "source_tree_sha256": "d2e1722520d66ee687b260c80160d62bd2deaf79846e9357b9e717edac2a3e16",
->>>>>>> fix/architecture-audit-cycle-9624
-||||||| Stash base
-  "source_tree_sha256": "1919669ceaca9c436116c44aca40f457719c2b5a8492972531e034806defc3ea",
-=======
   "source_tree_sha256": "dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc",
->>>>>>> Stashed changes
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
