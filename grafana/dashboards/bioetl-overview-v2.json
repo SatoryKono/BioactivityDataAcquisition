@@ -1302,7 +1302,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -1345,6 +1345,25 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "alertname"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 280
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "Value"
                 },
                 "properties": [
@@ -1355,6 +1374,10 @@
                   {
                     "id": "custom.align",
                     "value": "right"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   },
                   {
                     "id": "custom.cellOptions",
@@ -1401,6 +1424,10 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   }
                 ]
               }
