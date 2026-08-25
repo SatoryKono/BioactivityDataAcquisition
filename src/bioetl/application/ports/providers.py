@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     UnifiedHTTPClient = object
 
 
+@runtime_checkable
 class SecretValueProviderProtocol(Protocol):
     """Minimal secret wrapper contract used by provider settings wiring."""
 
@@ -24,6 +25,7 @@ class SecretValueProviderProtocol(Protocol):
         ...
 
 
+@runtime_checkable
 class ProviderSettingsProtocol(Protocol):
     """Minimal settings surface required by provider registration helpers."""
 
@@ -49,6 +51,7 @@ class ProviderSettingsProtocol(Protocol):
     def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None: ...
 
 
+@runtime_checkable
 class AdapterCreatorProtocol(Protocol):
     """Protocol for typed composition-owned provider adapter creators."""
 
@@ -61,6 +64,7 @@ class AdapterCreatorProtocol(Protocol):
     ) -> DataSourcePort: ...
 
 
+@runtime_checkable
 class DataSourceCreatorProtocol(Protocol):
     """Protocol for composition-side data source creator callables."""
 
@@ -75,6 +79,7 @@ class DataSourceCreatorProtocol(Protocol):
     ) -> DataSourcePort: ...
 
 
+@runtime_checkable
 class ProviderHttpClientFactoryProtocol(Protocol):
     """Callable contract for provider HTTP client construction."""
 
@@ -88,6 +93,7 @@ class ProviderHttpClientFactoryProtocol(Protocol):
     ) -> UnifiedHTTPClient: ...
 
 
+@runtime_checkable
 class ProviderAdapterFactoryProtocol(Protocol):
     """Callable contract for provider adapter construction."""
 
@@ -101,6 +107,7 @@ class ProviderAdapterFactoryProtocol(Protocol):
     ) -> DataSourcePort: ...
 
 
+@runtime_checkable
 class SupportAwareDataSourceCreatorProtocol(Protocol):
     """Protocol for data-source creators that accept injected assembly support."""
 
@@ -117,6 +124,7 @@ class SupportAwareDataSourceCreatorProtocol(Protocol):
     ) -> DataSourcePort: ...
 
 
+@runtime_checkable
 class ProviderRegistrarProtocol(Protocol):
     """Minimal registry contract for provider registration assembly."""
 
@@ -129,6 +137,7 @@ class ProviderRegistrarProtocol(Protocol):
     def clear(self) -> None: ...
 
 
+@runtime_checkable
 class ProviderDataSourceAccessProtocol(ProviderRegistrarProtocol, Protocol):
     """Registry contract required by datasource and HTTP-client factories."""
 

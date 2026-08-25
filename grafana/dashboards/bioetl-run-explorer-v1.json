@@ -536,7 +536,6 @@
               "custom": {
                 "align": "left",
                 "inspect": true,
-                "wrapText": true,
                 "cellOptions": {
                   "type": "auto"
                 }
@@ -569,8 +568,7 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "wrapText": true
+                      "type": "auto"
                     }
                   }
                 ]

@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
 )
+from bioetl.application.services.control_plane.workflow.manifest_models import (
+    WorkflowManifestCreateSpec as WorkflowManifestCreateSpec,
+)
 from bioetl.domain.control_plane import WorkflowManifest, WorkflowManifestStep
 from bioetl.domain.normalization import compute_execution_identity_fingerprint
 from bioetl.domain.ports import WorkflowManifestPort
@@ -15,10 +18,6 @@ from bioetl.domain.workflow import (
     TransformStepConfig,
     WorkflowConfig,
     WorkflowStepConfig,
-)
-
-from bioetl.application.services.control_plane.workflow.manifest_models import (
-    WorkflowManifestCreateSpec as WorkflowManifestCreateSpec,
 )
 
 __all__ = ["WorkflowManifestCreateSpec", "WorkflowManifestService"]

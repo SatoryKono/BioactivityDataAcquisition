@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.application.services.ops.health_service import HealthCheckSummary
 
 
+@runtime_checkable
 class HealthServiceProtocol(Protocol):
     """Provider-health orchestration used by first-party interfaces."""
 

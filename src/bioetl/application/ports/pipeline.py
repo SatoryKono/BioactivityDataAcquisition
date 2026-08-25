@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     Settings = object
 
 
+@runtime_checkable
 class ContractPolicyLoaderProtocol(Protocol):
     """Callable contract for loading pipeline contract policy."""
 
@@ -34,6 +35,7 @@ class ContractPolicyLoaderProtocol(Protocol):
 ContractPolicyLoader = ContractPolicyLoaderProtocol
 
 
+@runtime_checkable
 class SchemaBuilderProtocol(Protocol):
     """Protocol for schema classes that can materialize a runtime schema."""
 
@@ -41,6 +43,7 @@ class SchemaBuilderProtocol(Protocol):
     def to_schema(cls) -> object: ...
 
 
+@runtime_checkable
 class RegistryEntryProtocol(Protocol):
     """Structural fields required by registry-manifest validation."""
 
@@ -52,6 +55,7 @@ class RegistryEntryProtocol(Protocol):
     pandera_silver_schema: object | None
 
 
+@runtime_checkable
 class BaseServicesFactoryProtocol(Protocol):
     """Class-like service factory surface used by lazy composition seams."""
 
@@ -73,6 +77,7 @@ class BaseServicesFactoryProtocol(Protocol):
     ) -> PipelineService: ...
 
 
+@runtime_checkable
 class PipelineRunnerProtocol(Protocol):
     """Minimal runner contract required for ledger collaborator attachment."""
 
