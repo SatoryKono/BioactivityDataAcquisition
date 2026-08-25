@@ -18,6 +18,7 @@ import json
 from pathlib import Path
 
 import yaml
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
@@ -194,7 +195,7 @@ def test_reviewed_baseline_hotspot_families_match_reviewed_duplication_snapshot(
     hotspot_policy = scorecard.get("hotspot_family_ratchets", {})
     assert isinstance(hotspot_policy, dict)
 
-    family_baseline_path = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
+    family_baseline_path = quality_artifact_path("hotspot-family-baseline.json")
     baseline_payload = _load_json(family_baseline_path)
     baseline_summary = baseline_payload.get("summary", {})
     assert isinstance(baseline_summary, dict)

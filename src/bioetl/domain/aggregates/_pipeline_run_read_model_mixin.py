@@ -7,8 +7,11 @@ from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates.pipeline_run_stage_result import StageResult
-from bioetl.domain.aggregates.pipeline_run_state import PipelineRunState, StageStatus
+from bioetl.domain.aggregates.pipeline_run_stage_result import (
+    PipelineRunState,
+    StageResult,
+    StageStatus,
+)
 from bioetl.domain.types import JsonDict, RunID, RunType
 
 if TYPE_CHECKING:

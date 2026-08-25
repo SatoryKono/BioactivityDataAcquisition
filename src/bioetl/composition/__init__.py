@@ -27,15 +27,15 @@ _REGISTRY_API_MODULE = "bioetl.composition.registry_api"
 __all__: list[str] = []
 
 _LAZY_MODULE_EXPORTS = {
-    "composite_api",
-    "control_plane_api",
+    "composite_catalog",
+    "control_plane_runtime",
     "entrypoints",
     "execution_api",
     "health_api",
     "maintenance_api",
-    "observability_api",
+    "observability_runtime",
     "registry_api",
-    "resources_api",
+    "resources_runtime",
     "types",
 }
 

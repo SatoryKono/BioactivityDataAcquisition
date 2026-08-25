@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     import click
 
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         MetricsOperatorProfile,
         ObservabilityDiagnosticsBundle,
     )

@@ -23,7 +23,7 @@ pytestmark = pytest.mark.architecture
 METRICS_BOOTSTRAP_PATH = Path(
     "src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py"
 )
-OBSERVABILITY_API_PATH = Path("src/bioetl/composition/observability_api.py")
+OBSERVABILITY_API_PATH = Path("src/bioetl/composition/observability_runtime.py")
 RUNTIME_OBSERVABILITY_PATH = Path(
     "src/bioetl/composition/bootstrap/runtime/observability.py"
 )

@@ -132,11 +132,10 @@ def test_no_hardcoded_secrets() -> None:
                     f"{relative_path}:{finding.line_number}: {finding.type}"
                 )
 
-    if violations:
-        raise AssertionError(
-            "Potential secrets detected. Update .secrets.baseline if false positives:\n"
-            + "\n".join(violations[:50])
-        )
+    assert not violations, (
+        "Potential secrets detected. Update .secrets.baseline if false positives:\n"
+        + "\n".join(violations[:50])
+    )
 
 
 def test_no_print_in_production(source_content_cache: dict) -> None:
