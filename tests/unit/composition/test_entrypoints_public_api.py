@@ -112,9 +112,7 @@ def test_entrypoints_resolve_unregistered_port_raises_key_error(
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "removed_name",
-    (
-        "get_checkpoint_service",
-    ),
+    ("get_checkpoint_service",),
 )
 def test_entrypoints_legacy_service_and_resource_symbols_are_removed(
     removed_name: str,
@@ -217,7 +215,9 @@ def test_composition_package_root_budget_excludes_legacy_facade_modules() -> Non
 @pytest.mark.unit
 def test_canonical_composition_owner_modules_remain_directly_importable() -> None:
     """Owner-focused composition APIs stay importable without package-root re-exports."""
-    resources_api_module = importlib.import_module("bioetl.composition.resources_runtime")
+    resources_api_module = importlib.import_module(
+        "bioetl.composition.resources_runtime"
+    )
     registry_api_module = importlib.import_module("bioetl.composition.registry_api")
     control_plane_api_module = importlib.import_module(
         "bioetl.composition.control_plane_runtime"

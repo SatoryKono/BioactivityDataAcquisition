@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
@@ -56,8 +56,6 @@ class _PipelineRunAttrs:
 
     def __init__(self) -> None:
         """Initialize typed slots for standalone mixin safety."""
-        self._run_id = cast(Any, None)
-        self._run_type = cast(Any, None)
         self._pipeline_name = ""
         self._status = PipelineRunState.PENDING
         self._stages = []

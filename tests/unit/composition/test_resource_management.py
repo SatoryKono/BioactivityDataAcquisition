@@ -62,7 +62,9 @@ class TestGetQuarantineRuntimeService:
                 return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import (
+                get_quarantine_runtime_service,
+            )
 
             result = get_quarantine_runtime_service("chembl_activity")
 
@@ -81,7 +83,9 @@ class TestGetQuarantineRuntimeService:
                 return_value=expected,
             ),
         ):
-            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import (
+                get_quarantine_runtime_service,
+            )
 
             result = get_quarantine_runtime_service("any_pipeline")
 
@@ -95,7 +99,9 @@ class TestGetQuarantineRuntimeService:
                 "bioetl.composition._resource_management.bootstrap_quarantine_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_runtime import get_quarantine_runtime_service
+            from bioetl.composition.resources_runtime import (
+                get_quarantine_runtime_service,
+            )
 
             get_quarantine_runtime_service("pubmed_publication")
 
@@ -124,7 +130,9 @@ class TestGetCheckpointRuntimeService:
                 return_value=mock_runtime_service,
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
+            from bioetl.composition.resources_runtime import (
+                get_checkpoint_runtime_service,
+            )
 
             result = get_checkpoint_runtime_service("chembl_activity")
 
@@ -140,7 +148,9 @@ class TestGetCheckpointRuntimeService:
                 "bioetl.composition._resource_management.bootstrap_checkpoint_runtime_service"
             ) as mock_bootstrap,
         ):
-            from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
+            from bioetl.composition.resources_runtime import (
+                get_checkpoint_runtime_service,
+            )
 
             get_checkpoint_runtime_service("uniprot_protein")
 

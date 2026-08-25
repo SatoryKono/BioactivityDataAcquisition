@@ -1989,5 +1989,3 @@ def test_dq_and_provider_alerts_reference_expected_metrics() -> None:
         annotations = rule.get("annotations", {})
         assert metric_name in expr
         assert annotations.get("runbook") == runbook_path
-
-

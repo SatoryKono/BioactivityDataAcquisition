@@ -19,7 +19,10 @@ import pytest
 import yaml
 
 from tests.helpers.vcr_config import STRICT_LFS_POINTER_BLOCKER_PATTERNS
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"

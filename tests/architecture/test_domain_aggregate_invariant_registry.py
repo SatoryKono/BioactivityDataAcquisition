@@ -17,14 +17,15 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = (
-    quality_artifact_path("domain-aggregate-invariant-registry.json")
-)
+REGISTRY_PATH = quality_artifact_path("domain-aggregate-invariant-registry.json")
 PUBLIC_AGGREGATE_ROOTS = frozenset({"Batch", "PipelineRun", "QuarantineEntry"})
 
 

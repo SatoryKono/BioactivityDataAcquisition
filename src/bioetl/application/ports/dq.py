@@ -32,6 +32,7 @@ class ConfigurableDQMonitor(DQMonitorPort, Protocol):
 
 class DQReportServiceFactoryProtocol(Protocol):
     """Callable contract for constructing a DQ report service."""
+
     def __call__(
         self,
         *,

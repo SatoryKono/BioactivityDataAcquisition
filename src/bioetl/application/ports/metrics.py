@@ -20,11 +20,13 @@ class WorkflowMetricsFactoryProtocol(Protocol):
 
 class MetricsFactoryProtocol(Protocol):
     """Factory-like contract for constructing a metrics port from settings."""
+
     def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
 class MetricsService(Protocol):
     """Metrics HTTP server lifecycle contract used by composition bootstrap."""
+
     def start(
         self,
         port: int,
