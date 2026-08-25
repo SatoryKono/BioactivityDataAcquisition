@@ -45,8 +45,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
-from bioetl.domain.aggregates._batch_record import BatchRecord
-from bioetl.domain.aggregates._batch_status import BatchStatus
+from bioetl.domain.aggregates.batch import BatchRecord, BatchStatus
 from bioetl.domain.aggregates.batch import Batch
 from bioetl.domain.aggregates.events import (
     BatchCreated,
@@ -574,7 +573,7 @@ class TestBatchMutationMixin:
 
     def test_quarantine_record_rejects_foreign_record_with_same_index(self, run_id):
         """Foreign BatchRecord sharing only index must not overwrite owned row (#8645)."""
-        from bioetl.domain.aggregates._batch_record import BatchRecord
+        from bioetl.domain.aggregates.batch import BatchRecord
 
         batch = Batch.create(run_id=run_id, created_at=_ts(0))
         owned = batch.add_record({"id": "owned"})

@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates._batch_status import BatchStatus
+from bioetl.domain.aggregates.batch import BatchStatus
 from bioetl.domain.aggregates.events import (
     BatchCreated,
     BatchFailed,

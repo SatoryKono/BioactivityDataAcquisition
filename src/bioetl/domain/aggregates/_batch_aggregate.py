@@ -11,8 +11,7 @@ from bioetl.domain.aggregates._batch_mixins import (
     _BatchLifecycleMixin,
     _BatchMutationMixin,
 )
-from bioetl.domain.aggregates._batch_record import BatchRecord
-from bioetl.domain.aggregates._batch_status import BatchStatus
+from bioetl.domain.aggregates.batch import BatchRecord, BatchStatus
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent

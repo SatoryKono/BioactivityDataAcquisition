@@ -253,7 +253,7 @@ class TestBootstrapLayerBoundaries:
         content = legacy_init.read_text(encoding="utf-8")
 
         assert "from bioetl.composition.bootstrap.runtime." in content or (
-            "from bioetl.composition.composite_api import" in content
+            "from bioetl.composition.composite_catalog import" in content
         ), (
             "_bootstrap/__init__.py should re-export through owner-focused bootstrap APIs"
         )

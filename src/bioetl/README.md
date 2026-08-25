@@ -12,7 +12,7 @@ Use the following entrypoints when tracing runtime behavior:
 | CLI command dispatch | `interfaces/cli/main.py` |
 | Health / readiness HTTP surface | `interfaces/http/` |
 | Pipeline execution bootstrap | `composition/execution_api.py` |
-| Control-plane and inspection services | `composition/control_plane_api.py` |
+| Control-plane and inspection services | `composition/control_plane_runtime.py` |
 | Runtime assembly / dependency wiring | `composition/` |
 | Single-pipeline orchestration | `application/core/` |
 | Composite orchestration | `application/composite/` |

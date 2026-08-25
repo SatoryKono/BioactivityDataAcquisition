@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Architecture residuals after #9612:** frozen composition `*_api.py` seams
+  are 4 (`execution`, `health`, `maintenance`, `registry`); former
+  composite/control-plane/observability/resources APIs renamed off the
+  `*_api` glob. `domain/aggregates` module count 19→15. Control-plane
+  helper_ratio 0.424→0.399. Architecture tests load quality JSON through
+  `tests.architecture.quality_artifacts`.
+
 ### Added
 
 - **Layered port registries (ADR-058 / #9599):** `bioetl.application.ports`

@@ -146,7 +146,7 @@ class TestMaybeStartMetricsServer:
         from bioetl.composition.bootstrap.runtime.observability import (
             maybe_start_metrics_server,
         )
-        from bioetl.composition.observability_api import MetricsServerError
+        from bioetl.composition.observability_runtime import MetricsServerError
 
         settings = MagicMock()
         settings.metrics_port = 8000

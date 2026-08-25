@@ -172,7 +172,7 @@ def test_workflow_cli_uses_dedicated_composition_seam_module() -> None:
 
     source = inspect.getsource(workflow_cmd)
 
-    assert "bioetl.composition.control_plane_api" not in source
+    assert "bioetl.composition.control_plane_runtime" not in source
     assert "_workflow_composition_seams" in source
 
 

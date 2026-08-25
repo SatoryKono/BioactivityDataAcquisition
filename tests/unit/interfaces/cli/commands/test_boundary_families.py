@@ -135,7 +135,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.diagnostics",
         "get_observability_diagnostics_bundle",
-        "bioetl.composition.observability_api.get_observability_diagnostics_bundle",
+        "bioetl.composition.observability_runtime.get_observability_diagnostics_bundle",
         _no_args,
         object(),
         "identity",
@@ -191,7 +191,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.run_composite",
         "load_composite_config",
-        "bioetl.composition.composite_api.load_composite_config",
+        "bioetl.composition.composite_catalog.load_composite_config",
         _composite_config_args,
         object(),
         "identity",
@@ -199,7 +199,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.run_composite",
         "bootstrap_composite_runner",
-        "bioetl.composition.composite_api.bootstrap_composite_runner",
+        "bioetl.composition.composite_catalog.bootstrap_composite_runner",
         _composite_runner_args,
         object(),
         "identity",
@@ -207,7 +207,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.composite.support",
         "push_metrics_to_gateway",
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         _push_metrics_kwargs,
         True,
         True,
@@ -215,7 +215,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
         "publish_metrics_safely",
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         _cli_metrics_publish_kwargs,
         True,
         True,

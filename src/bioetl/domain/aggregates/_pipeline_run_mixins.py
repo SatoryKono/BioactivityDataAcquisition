@@ -13,8 +13,11 @@ from bioetl.domain.aggregates.events import (
     PipelineFailed,
     PipelineShutdown,
 )
-from bioetl.domain.aggregates.pipeline_run_stage_result import StageResult
-from bioetl.domain.aggregates.pipeline_run_state import PipelineRunState, StageStatus
+from bioetl.domain.aggregates.pipeline_run_stage_result import (
+    PipelineRunState,
+    StageResult,
+    StageStatus,
+)
 from bioetl.domain.exceptions import InvalidStateError
 
 __all__ = [

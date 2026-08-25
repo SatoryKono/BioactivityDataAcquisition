@@ -17,12 +17,13 @@ from pathlib import Path
 
 import pytest
 import yaml
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = PROJECT_ROOT / "configs/quality/module_coverage_gates.yaml"
-INVENTORY_PATH = PROJECT_ROOT / "reports/quality/module-coverage-inventory.json"
+INVENTORY_PATH = quality_artifact_path("module-coverage-inventory.json")
 
 
 def _load_yaml(path: Path) -> dict[str, object]:

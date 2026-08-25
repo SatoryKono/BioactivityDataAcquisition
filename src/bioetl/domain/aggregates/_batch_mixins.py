@@ -7,9 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
-from bioetl.domain.aggregates._batch_attrs import _BatchAttrs
-from bioetl.domain.aggregates._batch_record import BatchRecord
-from bioetl.domain.aggregates._batch_status import BatchStatus
+from bioetl.domain.aggregates.batch import BatchRecord, BatchStatus, _BatchAttrs
 from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:

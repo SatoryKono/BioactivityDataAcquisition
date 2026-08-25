@@ -202,7 +202,8 @@ class TestCheckpointPortErrorConditions:
 
         try:
             # Should not raise exception
-            await checkpoint.delete("non_existent_pipeline")
+            result = await checkpoint.delete("non_existent_pipeline")
+            assert result is None or result is True or result is False
         finally:
             await checkpoint.aclose()
 

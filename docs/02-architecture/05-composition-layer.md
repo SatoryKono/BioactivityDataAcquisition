@@ -24,7 +24,7 @@ ______________________________________________________________________
 **Ключевые характеристики:**
 
 - **Глобальная осведомленность:** Единственный слой (наряду с `Interfaces`), который "знает" обо всех остальных слоях. Ему разрешено импортировать из `infrastructure`, `application` и `domain`.
-- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические first-party public seams проходят через `entrypoints.py`, `execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`, `maintenance_api.py`, `resources_api.py`, `composite_api.py`, `observability_api.py`; retired umbrella `services_api.py` не является допустимым import surface для first-party кода.
+- **Сборка зависимостей:** Здесь происходит внедрение зависимостей (Dependency Injection). Канонические first-party public seams проходят через `entrypoints.py`, `execution_api.py`, `registry_api.py`, `control_plane_runtime.py`, `health_api.py`, `maintenance_api.py`, `resources_runtime.py`, `composite_catalog.py`, `observability_runtime.py`; retired umbrella `services_api.py` не является допустимым import surface для first-party кода.
 - **Конфигурация:** Потребляет уже загруженные и нормализованные конфигурации. Канонический owner для YAML I/O, merge и normalization находится в `bioetl.infrastructure.config`, а `composition` сохраняет только thin public access / compat seams (`load_pipeline_config()`, `load_composite_config()`) для стабильных runtime entrypoints. Pipeline, composite и workflow loaders должны разрешать tracked configs через `bioetl.infrastructure.config.config_root`, чтобы `configs/` был привязан к repo root, а не к process `cwd`.
 
 ## 2. Ключевые Компоненты
@@ -147,24 +147,24 @@ import paths.
 
 Также в корне `composition/` находятся:
 `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`,
-`execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`,
-`maintenance_api.py`, `resources_api.py`, `composite_api.py`,
-`observability_api.py`, `observability.py`, `registry.py`, `types.py`,
+`execution_api.py`, `registry_api.py`, `control_plane_runtime.py`, `health_api.py`,
+`maintenance_api.py`, `resources_runtime.py`, `composite_catalog.py`,
+`observability_runtime.py`, `observability.py`, `registry.py`, `types.py`,
 `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
 Политика использования root-level composition seams:
 
 - `entrypoints.py` — `public-entrypoint` и стабильный публичный composition seam.
-- `execution_api.py`, `registry_api.py`, `control_plane_api.py`, `health_api.py`,
-  `maintenance_api.py`, `composite_api.py`, `observability_api.py` — канонический
+- `execution_api.py`, `registry_api.py`, `control_plane_runtime.py`, `health_api.py`,
+  `maintenance_api.py`, `composite_catalog.py`, `observability_runtime.py` — канонический
   first-party composition import surface для `src/`.
 - `services_api.py` — retired umbrella facade; новые first-party `src/` imports
   туда не добавляются, а файл должен оставаться удалённым.
 - package root `bioetl.composition` и package root `bioetl.composition.bootstrap`
   — retained compatibility façades; они остаются стабильными для внешнего
   import/patch contract, но новые first-party `src/` imports туда не добавляются.
-- `composite_api.py`, `observability_api.py` — узкие façade-модули для composite runtime
-  и observability-related call sites; `observability_api.py` является каноническим
+- `composite_catalog.py`, `observability_runtime.py` — узкие façade-модули для composite runtime
+  и observability-related call sites; `observability_runtime.py` является каноническим
   public seam для metrics bootstrap, Pushgateway publication и operator diagnostics bundle.
   Metrics publication route проходит через `MetricsService` и composition-owned
   publisher adapter, а selection `NoOpMetrics` / `NoOpTracing` централизована в

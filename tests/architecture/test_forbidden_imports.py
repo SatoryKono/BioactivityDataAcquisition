@@ -606,8 +606,8 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.composite_api\n"
-            "  - bioetl.composition.observability_api\n\n"
+            "  - bioetl.composition.composite_catalog\n"
+            "  - bioetl.composition.observability_runtime\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
@@ -631,8 +631,8 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.composite_api\n"
-            "  - bioetl.composition.observability_api\n\n"
+            "  - bioetl.composition.composite_catalog\n"
+            "  - bioetl.composition.observability_runtime\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
@@ -656,8 +656,8 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.composite_api\n"
-            "  - bioetl.composition.observability_api\n\n"
+            "  - bioetl.composition.composite_catalog\n"
+            "  - bioetl.composition.observability_runtime\n\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 
@@ -669,12 +669,12 @@ class TestInterfacesBootstrapIsolation:
                 _module_import_violations(
                     py_file,
                     src_dir,
-                    exact_modules={"bioetl.composition.resources_api"},
+                    exact_modules={"bioetl.composition.resources_runtime"},
                 )
             )
 
         assert not violations, (
-            "Interfaces layer must not import bioetl.composition.resources_api.\n"
+            "Interfaces layer must not import bioetl.composition.resources_runtime.\n"
             "Use owner-focused public APIs instead:\n"
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.health_api\n"
@@ -692,12 +692,12 @@ class TestInterfacesBootstrapIsolation:
                 _module_import_violations(
                     py_file,
                     src_dir,
-                    exact_modules={"bioetl.composition.control_plane_api"},
+                    exact_modules={"bioetl.composition.control_plane_runtime"},
                 )
             )
 
         assert not violations, (
-            "Interfaces layer must not import bioetl.composition.control_plane_api.\n"
+            "Interfaces layer must not import bioetl.composition.control_plane_runtime.\n"
             "Use bioetl.composition.control_plane_service_access for first-party "
             "CLI/service wiring and keep control_plane_api as the stable public "
             "compatibility facade.\n\n"
@@ -752,7 +752,7 @@ class TestInterfacesBootstrapIsolation:
     ) -> None:
         """Interfaces may import only the approved composition public API modules."""
         allowed_modules = {
-            "bioetl.composition.composite_api",
+            "bioetl.composition.composite_catalog",
             "bioetl.composition.control_plane_service_access",
             "bioetl.composition.execution_api",
             "bioetl.composition.execution_api",
@@ -760,7 +760,7 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.health_service_access",
             "bioetl.composition.maintenance_api",
             "bioetl.composition.maintenance_api",
-            "bioetl.composition.observability_api",
+            "bioetl.composition.observability_runtime",
             "bioetl.composition.registry_api",
             # Internal composition modules used by interfaces for runtime access
             "bioetl.composition._resource_management",
@@ -781,7 +781,7 @@ class TestInterfacesBootstrapIsolation:
         assert not violations, (
             "Interfaces layer imported non-sanctioned composition modules.\n"
             "Allowed modules:\n"
-            "  - bioetl.composition.composite_api\n"
+            "  - bioetl.composition.composite_catalog\n"
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.execution_api\n"
             "  - bioetl.composition.execution_api\n"
@@ -789,7 +789,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.health_service_access\n"
             "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.observability_api\n"
+            "  - bioetl.composition.observability_runtime\n"
             "  - bioetl.composition.registry_api\n"
             "  - bioetl.composition._resource_management (internal runtime access)\n"
             "  - bioetl.composition._service_protocols (internal runtime access)\n"

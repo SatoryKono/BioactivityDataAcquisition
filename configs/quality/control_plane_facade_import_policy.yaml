@@ -5,8 +5,8 @@ review_date: "2026-06-23"
 owner: "@bioetl-architecture"
 new_src_import_policy: fail_fast_review_required
 facades:
-  - module: bioetl.composition.control_plane_api
-    path: src/bioetl/composition/control_plane_api.py
+  - module: bioetl.composition.control_plane_runtime
+    path: src/bioetl/composition/control_plane_runtime.py
     lifecycle: retained_external_composition_api
     owner: "@bioetl-composition"
     disposition: retain_external_public_api_zero_first_party_src

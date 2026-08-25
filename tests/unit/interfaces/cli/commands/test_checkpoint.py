@@ -302,7 +302,7 @@ def test_get_observability_workflow_service_delegates_to_interfaces_api() -> Non
     workflow = MagicMock()
 
     with patch(
-        "bioetl.composition.observability_api.get_observability_workflow_service",
+        "bioetl.composition.observability_runtime.get_observability_workflow_service",
         return_value=workflow,
     ) as mock_get_workflow_service:
         result = checkpoint_module.get_observability_workflow_service()

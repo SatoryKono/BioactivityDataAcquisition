@@ -163,6 +163,7 @@ def test_codex_project_skills_do_not_have_user_global_duplicates() -> None:
         return
 
     project_names = {_frontmatter(path)["name"] for path in _skill_files(root)}
+    assert project_names
     duplicate_names: list[str] = []
     for global_skill in sorted(global_skills_root.rglob("SKILL.md")):
         if ".system" in global_skill.parts:
