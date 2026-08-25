@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from scripts.engineering.common.repo_paths import ensure_path_within_root
+
 _SAFE_RELATIVE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_./-]*$")
 
 PASSPORT_GROUPS = ("pipelines", "workflows")
@@ -124,14 +126,12 @@ def referenced_files(
 
 def _materialize_repo_file(root: Path, relative_posix: str) -> Path:
     """Rebuild a repo file path from a sanitized relative POSIX string."""
-    if not _SAFE_RELATIVE.fullmatch(relative_posix) or ".." in relative_posix.split("/"):
+    if not _SAFE_RELATIVE.fullmatch(relative_posix) or ".." in relative_posix.split(
+        "/"
+    ):
         raise ValueError(f"refusing path outside {root}: {relative_posix}")
     materialized = root.joinpath(*relative_posix.split("/"))
-    resolved_root = root.resolve()
-    resolved = materialized.resolve()
-    if not resolved.is_relative_to(resolved_root):
-        raise ValueError(f"refusing path outside {root}: {relative_posix}")
-    return materialized
+    return ensure_path_within_root(materialized, root)
 
 
 _REFERENCE_RELATIVES = (
@@ -142,17 +142,26 @@ _REFERENCE_RELATIVES = (
 )
 
 
-def _rewrite_constant_file(path: Path, pairs: tuple[tuple[str, str], ...]) -> bool:
+def _rewrite_constant_file(
+    path: Path,
+    pairs: tuple[tuple[str, str], ...],
+    *,
+    root: Path,
+) -> bool:
     """Replace path tokens in one constant file. Returns True when the file changed."""
-    if not path.is_file():
+    safe_path = ensure_path_within_root(path, root)
+    if not safe_path.is_file():
         return False
-    current = path.read_text(encoding="utf-8")
+    current = safe_path.read_text(encoding="utf-8")
     rewritten = current
     for source, target in pairs:
         rewritten = rewritten.replace(source, target)
     if rewritten == current:
         return False
-    path.write_text(rewritten, encoding="utf-8")
+    safe_path.write_text(  # NOSONAR - sink is confined to the explicit repo root
+        rewritten,
+        encoding="utf-8",
+    )
     return True
 
 
@@ -164,7 +173,7 @@ def apply_plan(root: Path, plans: tuple[RenamePlan, ...]) -> tuple[Path, ...]:
     updated_paths: list[Path] = []
     for relative in _REFERENCE_RELATIVES:
         path = _materialize_repo_file(root, relative)
-        if _rewrite_constant_file(path, pairs):
+        if _rewrite_constant_file(path, pairs, root=root):
             updated_paths.append(path)
     return tuple(updated_paths)
 
