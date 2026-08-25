@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from . import config_mapper as _config_mapper
+from . import entity_type as _entity_type
+from . import pipeline_callbacks as _pipeline_callbacks
+from . import source_config as _source_config
+
 
 def build_export_modules(
     export_groups: dict[str, tuple[str, ...]],
@@ -17,6 +22,12 @@ def build_export_modules(
                     f"{existing!r} and {module_name!r}"
                 )
             export_modules[export_name] = module_name
+    _ = (
+        _config_mapper.__name__,
+        _entity_type.__name__,
+        _pipeline_callbacks.__name__,
+        _source_config.__name__,
+    )
     return export_modules
 
 

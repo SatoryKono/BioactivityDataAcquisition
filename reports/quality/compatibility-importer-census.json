@@ -21,7 +21,7 @@
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0,
-    "retained_public_export_facades_with_wrapper_contract_drift": 1
+    "retained_public_export_facades_with_wrapper_contract_drift": 0
   },
   "retained_entrypoints": [
     {
@@ -165,7 +165,7 @@
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
-      "max_public_exports": 13,
+      "max_public_exports": 10,
       "public_exports": [
         "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
@@ -187,23 +187,17 @@
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
       "retained_wrapper_contract": [
-        "load_pipeline_config",
-        "start_metrics_server"
+        "register",
+        "registered_ports",
+        "resolve"
       ],
       "retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [
-        "load_pipeline_config",
-        "start_metrics_server"
-      ],
-      "unexpected_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -608,7 +602,7 @@
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
-      "max_public_exports": 13,
+      "max_public_exports": 10,
       "public_exports": [
         "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
@@ -630,23 +624,17 @@
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
       "retained_wrapper_contract": [
-        "load_pipeline_config",
-        "start_metrics_server"
+        "register",
+        "registered_ports",
+        "resolve"
       ],
       "retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [
-        "load_pipeline_config",
-        "start_metrics_server"
-      ],
-      "unexpected_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -914,7 +902,7 @@
       "path": "src/bioetl/composition/entrypoints.py",
       "module_name": "bioetl.composition.entrypoints",
       "canonical_target": "bioetl.composition.entrypoints",
-      "max_public_exports": 13,
+      "max_public_exports": 10,
       "public_exports": [
         "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
@@ -936,23 +924,17 @@
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
       "retained_wrapper_contract": [
-        "load_pipeline_config",
-        "start_metrics_server"
+        "register",
+        "registered_ports",
+        "resolve"
       ],
       "retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [
-        "load_pipeline_config",
-        "start_metrics_server"
-      ],
-      "unexpected_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -1126,7 +1108,7 @@
       "path": "src/bioetl/composition/entrypoints.py",
       "module_name": "bioetl.composition.entrypoints",
       "canonical_target": "bioetl.composition.entrypoints",
-      "max_public_exports": 13,
+      "max_public_exports": 10,
       "public_exports": [
         "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
@@ -1148,23 +1130,17 @@
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
       "retained_wrapper_contract": [
-        "load_pipeline_config",
-        "start_metrics_server"
+        "register",
+        "registered_ports",
+        "resolve"
       ],
       "retained_wrappers_outside_all": [
         "register",
         "registered_ports",
         "resolve"
       ],
-      "missing_retained_wrappers_outside_all": [
-        "load_pipeline_config",
-        "start_metrics_server"
-      ],
-      "unexpected_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",

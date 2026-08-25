@@ -103,7 +103,7 @@
     },
     "5747": {
       "retained_entrypoint_count": 12,
-      "retained_public_entrypoint_burden": 0,
+      "retained_public_entrypoint_burden": 1,
       "retained_public_export_facade_count": 4,
       "retained_public_export_facades_with_duplicate_exports": 0,
       "retained_public_export_facades_with_resolution_conflicts": 0,
@@ -119,9 +119,9 @@
       "total_loc": 23092
     },
     "5749": {
-      "assertless_total_candidates": 106,
+      "assertless_total_candidates": 87,
       "compatibility_test_files": 0,
-      "intentional_no_exception_contract": 89,
+      "intentional_no_exception_contract": 86,
       "markerless_test_functions": 0,
       "opening_assertless_total_candidates": 113,
       "opening_intentional_no_exception_contract": 99,
@@ -167,7 +167,7 @@
       "opening": 22360
     },
     "assertless_total_candidates": {
-      "current": 106,
+      "current": 87,
       "max": 113,
       "opening": 113
     },
@@ -177,7 +177,7 @@
       "opening": 0
     },
     "intentional_no_exception_contract": {
-      "current": 89,
+      "current": 86,
       "max": 94,
       "opening": 99
     },

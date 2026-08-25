@@ -6,10 +6,10 @@
 - next_review_by: 2026-10-30
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 7
-- repo_wide_classified_zero_import_candidate_count: 7
+- repo_wide_zero_import_candidate_count: 3
+- repo_wide_classified_zero_import_candidate_count: 3
 - repo_wide_untriaged_zero_import_candidate_count: 0
-- repo_wide_owner_test_anchored_candidate_count: 7
+- repo_wide_owner_test_anchored_candidate_count: 3
 - repo_wide_candidates_without_owner_tests_count: 0
 - repo_wide_non_static_reachability_candidate_count: 2
 - triaged_retained_owner_test_anchored_count: 14
@@ -45,10 +45,6 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.application.services.control_plane.manifest.diagnostics.base` | `retain_dynamic_entrypoint` | `src/bioetl/application/services/control_plane/manifest/diagnostics/base.py` |
-| `bioetl.domain.ports.config_mapper` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/config_mapper.py` |
-| `bioetl.domain.ports.entity_type` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/entity_type.py` |
-| `bioetl.domain.ports.pipeline_callbacks` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/pipeline_callbacks.py` |
-| `bioetl.domain.ports.source_config` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/source_config.py` |
 | `bioetl.interfaces.cli.commands.maintenance` | `retain_public_facade` | `src/bioetl/interfaces/cli/commands/maintenance.py` |
 | `bioetl.domain.ports.stage_accounting` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/stage_accounting.py` |
 
@@ -71,10 +67,6 @@
 | `triaged_retained` | `src/bioetl/application/composite/runtime_models.py` | `retained_module_owner_suite` | `tests/unit/application/composite/test_runtime_models.py` |
 | `triaged_retained` | `src/bioetl/application/composite/runtime_wiring_api.py` | `retained_module_owner_suite` | `tests/architecture/test_composite_canonical_surfaces.py`, `tests/architecture/test_column_ordering_family.py`, `tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py` |
 | `repo_wide_zero_import` | `src/bioetl/application/services/control_plane/manifest/diagnostics/base.py` | `dynamic_runtime_entrypoint` | `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/config_mapper.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/entity_type.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/pipeline_callbacks.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/source_config.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/interfaces/cli/commands/maintenance.py` | `compatibility_facade_contract` | `tests/unit/interfaces/cli/commands/test_runtime_wrapper_contracts.py`, `tests/architecture/test_control_plane_diagnostics_dynamic_loaders.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/stage_accounting.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py`, `tests/unit/domain/run_reports/test_stage_accounting.py`, `tests/architecture/test_runtime_checkable_completeness.py` |
 

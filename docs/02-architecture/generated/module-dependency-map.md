@@ -6,10 +6,10 @@
 ## Summary
 
 - Scanned modules: `2461`
-- Internal import edges (raw): `7693`
+- Internal import edges (raw): `7700`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `331`
+- Cross-layer module-group edges (total): `330`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,13 +21,13 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1552 OK| application
+    application -->|1553 OK| application
     application -->|978 OK| domain
     composition -->|188 OK| application
     composition -->|684 OK| composition
     composition -->|286 OK| domain
     composition -->|239 OK| infrastructure
-    domain -->|1237 OK| domain
+    domain -->|1243 OK| domain
     infrastructure -->|761 OK| domain
     infrastructure -->|1196 OK| infrastructure
     interfaces -->|51 OK| application
@@ -40,13 +40,13 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1552 | allowed |
+| `application`    | `application`    |    1553 | allowed |
 | `application`    | `domain`         |     978 | allowed |
 | `composition`    | `application`    |     188 | allowed |
 | `composition`    | `composition`    |     684 | allowed |
 | `composition`    | `domain`         |     286 | allowed |
 | `composition`    | `infrastructure` |     239 | allowed |
-| `domain`         | `domain`         |    1237 | allowed |
+| `domain`         | `domain`         |    1243 | allowed |
 | `infrastructure` | `domain`         |     761 | allowed |
 | `infrastructure` | `infrastructure` |    1196 | allowed |
 | `interfaces`     | `application`    |      51 | allowed |
@@ -111,8 +111,8 @@ flowchart LR
 | `application.services`         | `domain.behavior`                          |      13 |
 | `application.services`         | `domain.workflow`                          |      13 |
 | `composition.bootstrap`        | `infrastructure.control_plane`             |      13 |
+| `composition.factories`        | `application.ports`                        |      13 |
 | `infrastructure.observability` | `domain.ports`                             |      13 |
-| `composition.factories`        | `application.ports`                        |      12 |
 
 ## Policy Violations
 

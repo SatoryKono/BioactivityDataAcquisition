@@ -38,14 +38,14 @@
       "evidence_metrics": {
         "layer_violations": 0,
         "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 1,
+        "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 8.0,
+      "score": 9.0,
       "weight": 0.1,
-      "weighted_score": 0.8
+      "weighted_score": 0.9
     },
     {
       "evidence_metrics": {
@@ -114,7 +114,7 @@
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 1,
+        "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "sunset_compat_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.4,
+      "score": 9.9,
       "weight": 0.06,
-      "weighted_score": 0.564
+      "weighted_score": 0.594
     }
   ],
   "debt_budget_policy": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.28,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
@@ -182,7 +182,7 @@
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
-    "public_export_facade_conflict_count": 1,
+    "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "retained_entrypoint_count": 12,
@@ -225,7 +225,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "099fe44a188985c57e84f0a73778d396bc686476899104c3a3b5f16f71482dc2"
+      "source_fingerprint": "c40abdc7a27bdee988249c019f24f70aee68b8fbe93feda0d49935155ffb9a73"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "89d71803f078505e1858b36058533499a61784256112cf7f0afd9bd56c29a3b8"
+      "source_tree_sha256": "dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

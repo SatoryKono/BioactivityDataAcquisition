@@ -1,0 +1,70 @@
+{
+  "findings": [
+    {
+      "id": "TECH-DEBT-001",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "governance-pin-drift",
+      "path": "configs/quality/technical_debt_audit_registry.yaml",
+      "observation": "Current tech-debt audit pin is stale versus live evidence on origin/main cdff5b63e6.",
+      "method": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+      "expected": "audited_commit_sha and evidence_surface_sha256 match origin/main live evidence; headline markers match committed gates/inventory.",
+      "actual": "Pin SHA 9f57924063 / hash 3d8fc076…; live SHA cdff5b63e6; report still claims integral 9.41 and 2450/1548 modules while live is 9.28 and 2435/1534.",
+      "impact": "Release closeout reads a false-green audit report (9.41/2450) after Wave B reduced modules to 2435.",
+      "root_cause": "Evidence files moved after last merged re-pin (#9337); PR #9648 re-pin to e57d281869 never merged and is now dirty.",
+      "remediation": "Re-pin registry + current report to live evidence hash; do not raise budgets.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa validate-technical-debt-audit --json"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9646,
+      "evidence": [
+        {
+          "path": "configs/quality/technical_debt_audit_registry.yaml",
+          "line": 8,
+          "command": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+          "observation": "ok=false; evidence_surface_sha256 is stale; headlines 9.28/2435/1534/898"
+        }
+      ]
+    },
+    {
+      "id": "TECH-DEBT-002",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "generated-artifact-drift",
+      "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+      "observation": "Live debt-governance gates fail solely on generated_artifact_drift for remote_main_baseline after Wave B refresh on origin/main.",
+      "method": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+      "expected": "0 failing gates; remote_main_sha equals origin/main cdff5b63e6.",
+      "actual": "fail: generated_artifact_drift artifacts=['remote_main_baseline']; committed JSON already 45/45 pass; baseline source_revision still e57d281869.",
+      "impact": "Release `--check` cannot pass even though committed gates JSON is green.",
+      "root_cause": "origin/main advanced cdff5b63e6 (Wave B artifacts) without regenerating remote-main baseline.",
+      "remediation": "report-architecture-debt-remote-main-baseline --update then report-debt-governance-gates --update. Never raise max_count.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9647,
+      "evidence": [
+        {
+          "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+          "line": 9,
+          "command": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+          "observation": "source_revision e57d281869 != origin/main cdff5b63e6; live fail generated_artifact_drift count=1"
+        }
+      ]
+    }
+  ]
+}

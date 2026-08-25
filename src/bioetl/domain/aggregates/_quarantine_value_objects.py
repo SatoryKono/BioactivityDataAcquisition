@@ -10,7 +10,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BronzeRecord, ContentHash
@@ -59,17 +59,17 @@ class QuarantineStatus(StrEnum):
 class QuarantineEntryPropertiesMixin:
     """Host mixin exposing immutable aggregate state and projections."""
 
-    _entry_id: str = cast(Any, None)
-    _pipeline_name: str = cast(Any, None)
-    _error_code: str = cast(Any, None)
-    _payload: BronzeRecord = cast(Any, None)
-    _payload_hash: ContentHash = cast(Any, None)
-    _run_id: RunID = cast(Any, None)
-    _batch_id: BatchID = cast(Any, None)
-    _status: QuarantineStatus = cast(Any, None)
-    _created_at: datetime = cast(Any, None)
-    _metadata: MetaDict = cast(Any, None)
-    _resolution_info: ResolutionInfo | None = cast(Any, None)
+    _entry_id: str
+    _pipeline_name: str
+    _error_code: str
+    _payload: BronzeRecord
+    _payload_hash: ContentHash
+    _run_id: RunID
+    _batch_id: BatchID
+    _status: QuarantineStatus
+    _created_at: datetime
+    _metadata: MetaDict
+    _resolution_info: ResolutionInfo | None
 
     @property
     def entry_id(self) -> str:

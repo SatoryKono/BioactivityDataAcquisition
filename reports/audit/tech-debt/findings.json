@@ -1,0 +1,52 @@
+{
+  "run_id": "20260825T1419Z-debt-cycle-cdff5b63",
+  "surface_score": 2,
+  "gate": "WARN",
+  "origin_main_sha": "cdff5b63e6f31bee5c31ae1d3c19a4fe7045481b",
+  "findings": [
+    {
+      "id": "TECH-DEBT-001",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "governance-pin-drift",
+      "path": "configs/quality/technical_debt_audit_registry.yaml",
+      "observation": "Current tech-debt audit pin was stale versus live evidence on origin/main cdff5b63e6.",
+      "method": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+      "expected": "Pin SHA/hash and headlines match live evidence.",
+      "actual": "Pin 9f57924063 / 3d8fc076… while live cdff5b63e6 / 8bfb7cca… after refresh.",
+      "impact": "False-green audit report (9.41/2450) vs live 9.28/2435.",
+      "root_cause": "Evidence files moved after last merged re-pin without registry sync; PR #9648 not merged.",
+      "remediation": "Re-pin registry + current report. Done on fix/audit-tech-debt-cycle-cdff5b63.",
+      "effort": "S",
+      "github_issue": 9646,
+      "paydown_status": "validated_on_feature_branch",
+      "automated_fix_possible": true
+    },
+    {
+      "id": "TECH-DEBT-002",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "generated-artifact-drift",
+      "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+      "observation": "Live debt-governance gates failed on stale remote-main baseline after Wave B artifact refresh.",
+      "method": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+      "expected": "0 failing gates; remote_main_sha = origin/main.",
+      "actual": "Before: 1 live fail (remote_main_baseline @ e57d281869). After paydown: 0 fail, 45/45 pass, remote_main_sha=cdff5b63e6.",
+      "impact": "Release `--check` failing despite committed 45/45 JSON.",
+      "root_cause": "Quality remote-main baseline not regenerated after origin/main advanced to cdff5b63e6.",
+      "remediation": "remote-main baseline --update + gates --update.",
+      "effort": "S",
+      "github_issue": 9647,
+      "paydown_status": "validated_on_feature_branch",
+      "automated_fix_possible": true
+    }
+  ]
+}
