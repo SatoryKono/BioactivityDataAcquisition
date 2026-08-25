@@ -118,3 +118,12 @@ def test_composition_readme_maps_primary_apis_to_factories() -> None:
         assert token in readme, (
             f"composition README factory map must mention `{token}` (#7708)"
         )
+
+
+def test_composition_readme_does_not_advertise_retired_registry_module() -> None:
+    """Package-root navigation must name registry_api.py, not retired registry.py (#9624)."""
+    readme = COMPOSITION_README.read_text(encoding="utf-8")
+    assert "├── registry_api.py" in readme
+    assert "├── registry.py" not in readme
+    assert "registry_api.PipelineRegistry" in readme
+    assert "`registry.PipelineRegistry`" not in readme
