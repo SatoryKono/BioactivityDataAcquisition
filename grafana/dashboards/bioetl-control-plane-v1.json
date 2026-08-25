@@ -415,7 +415,8 @@
               "reasons": true,
               "reasons_truncated": true,
               "scope_kind": true,
-              "evidence_freshness": true
+              "evidence_freshness": true,
+              "Time": true
             },
             "indexByName": {
               "processing_status": 0,
@@ -646,7 +647,8 @@
               "detail": true,
               "endpoint": true,
               "retryable": true,
-              "observed_at": true
+              "observed_at": true,
+              "Time": true
             },
             "indexByName": {
               "check": 0,
