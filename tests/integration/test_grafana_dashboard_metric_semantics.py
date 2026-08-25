@@ -1917,6 +1917,10 @@ def test_processed_records_parameter_rows_sort_and_display_cleanly(
     assert excluded_fields.get("row_status") is True
     # Legacy typo field may still appear from stale backends; hide it in Grafana.
     assert excluded_fields.get("percintage") is True
+    assert excluded_fields.get("Time") is True
+    assert "__name__" not in excluded_fields
+    custom = processed.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
+    assert custom.get("inspect") is True
     assert "percintage" not in organize_options.get("indexByName", {})
     assert "percintage" not in organize_options.get("renameByName", {})
     # All Processed Records tables show parameter + count + percentage.

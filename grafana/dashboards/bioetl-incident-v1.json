@@ -644,7 +644,17 @@
               "show": false
             },
             "cellHeight": "sm"
-          }
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "id": 2006,
@@ -990,7 +1000,17 @@
             "footer": {
               "show": false
             }
-          }
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "id": 2003,
