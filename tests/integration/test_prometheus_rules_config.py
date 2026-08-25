@@ -1536,16 +1536,24 @@ def test_runtime_collapsed_alert_count_recordings_sum_component_conditions() -> 
     """#9592 #9593 #9594: collapsed Runtime alert stats read composite counts."""
     payload = _load_rules()
     record_map = _build_record_map(payload)
-    pipeline_expr = str(record_map["bioetl_runtime_pipeline_alert_count"].get("expr", ""))
+    pipeline_expr = str(
+        record_map["bioetl_runtime_pipeline_alert_count"].get("expr", "")
+    )
     control_expr = str(
         record_map["bioetl_runtime_control_plane_alert_count"].get("expr", "")
     )
-    provider_expr = str(record_map["bioetl_runtime_provider_alert_count"].get("expr", ""))
-    assert "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m" in pipeline_expr
+    provider_expr = str(
+        record_map["bioetl_runtime_provider_alert_count"].get("expr", "")
+    )
+    assert (
+        "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m" in pipeline_expr
+    )
     assert "bioetl_runtime_alert_condition_runtime_error_rate_high_30m" in pipeline_expr
     assert "bioetl_runtime_alert_condition_manifest_write_failed_15m" in control_expr
     assert "bioetl_runtime_alert_condition_lineage_refs_missing_15m" in control_expr
-    assert "bioetl_runtime_alert_condition_provider_failure_rate_high_15m" in provider_expr
+    assert (
+        "bioetl_runtime_alert_condition_provider_failure_rate_high_15m" in provider_expr
+    )
     assert "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m" in (
         provider_expr
     )

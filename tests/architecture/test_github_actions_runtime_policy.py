@@ -36,6 +36,15 @@ ALWAYS_ON_REQUIRED_CHECKS = {
     "checks-complete": ROOT / ".github" / "workflows" / "import-linter.yml",
     "root-hygiene": ROOT / ".github" / "workflows" / "root-hygiene.yml",
 }
+SHA_OR_PR_CONCURRENCY_GROUP = (
+    "${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}"
+)
+PR_ONLY_CANCEL_IN_PROGRESS = "${{ github.event_name == 'pull_request' }}"
+MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS = (
+    TESTS_WORKFLOW,
+    ALWAYS_ON_REQUIRED_CHECKS["checks-complete"],
+    ROOT / ".github" / "workflows" / "codeql.yml",
+)
 UPLOAD_ARTIFACT_PREFIX = "actions/upload-artifact@"
 MAX_ARTIFACT_RETENTION_DAYS = 30
 
@@ -214,6 +223,20 @@ def test_ruleset_required_checks_materialize_on_every_pr() -> None:
         "type-check",
     ):
         assert f"`{path_scoped_check}`" not in required_section
+
+
+def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
+    """Queued Tests/Lint/CodeQL on main must not share a ref-wide group (#9504)."""
+    policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
+    assert SHA_OR_PR_CONCURRENCY_GROUP in policy_doc
+    assert PR_ONLY_CANCEL_IN_PROGRESS in policy_doc
+    for path in MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS:
+        workflow = _load_yaml(path)
+        concurrency = cast(dict[str, Any], workflow["concurrency"])
+        assert concurrency["group"] == SHA_OR_PR_CONCURRENCY_GROUP, path.name
+        assert concurrency["cancel-in-progress"] == PR_ONLY_CANCEL_IN_PROGRESS, (
+            path.name
+        )
 
 
 def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
