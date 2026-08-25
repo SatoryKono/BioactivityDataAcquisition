@@ -65,6 +65,54 @@ def test_lazy_service_factory_target_must_be_callable(
         factory()
 
 
+def test_lazy_contextual_factory_returns_callable_without_invoking(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.composition.contracts.factories import (
+        QuarantineServiceFactoryProtocol,
+    )
+
+    calls: list[Path | None] = []
+
+    def contextual_factory(*, data_root: Path | None = None) -> object:
+        calls.append(data_root)
+        return object()
+
+    factory = _service_registry.registered_ports()[
+        QuarantineServiceFactoryProtocol
+    ]
+    monkeypatch.setattr(
+        _service_registry,
+        "import_module",
+        lambda _name: SimpleNamespace(
+            bootstrap_quarantine_service=contextual_factory
+        ),
+    )
+
+    assert factory() is contextual_factory
+    assert calls == []
+
+
+def test_lazy_contextual_factory_target_must_be_callable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from bioetl.composition.contracts.factories import (
+        QuarantineServiceFactoryProtocol,
+    )
+
+    factory = _service_registry.registered_ports()[
+        QuarantineServiceFactoryProtocol
+    ]
+    monkeypatch.setattr(
+        _service_registry,
+        "import_module",
+        lambda _name: SimpleNamespace(bootstrap_quarantine_service=object()),
+    )
+
+    with pytest.raises(TypeError, match="is not callable"):
+        factory()
+
+
 def test_runner_request_coercion_accepts_declared_types() -> None:
     run_id = UUID("00000000-0000-0000-0000-000000000001")
 

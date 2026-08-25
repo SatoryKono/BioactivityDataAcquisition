@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 77
+expected_total: 80
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -23,6 +23,18 @@ protocols:
 - name: LoggerBindableObservability
   path: src/bioetl/composition/contracts/factories.py
   line: 103
+  target_tier: composition_contracts
+- name: QuarantineServiceFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 117
+  target_tier: composition_contracts
+- name: PipelineRunnerServiceFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 127
+  target_tier: composition_contracts
+- name: HealthServerDependenciesFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 136
   target_tier: composition_contracts
 - name: HealthServerDependenciesProtocol
   path: src/bioetl/composition/contracts/health.py

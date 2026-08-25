@@ -27,6 +27,11 @@ from bioetl.application.ports.operations import (
     ObservabilityWorkflowServiceProtocol,
     VacuumServiceProtocol,
 )
+from bioetl.composition.contracts.factories import (
+    HealthServerDependenciesFactoryProtocol,
+    PipelineRunnerServiceFactoryProtocol,
+    QuarantineServiceFactoryProtocol,
+)
 from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
 from bioetl.domain.ports.adr import AdrServicePort
 from bioetl.domain.ports.quality.quarantine import QuarantinePort
@@ -64,10 +69,33 @@ class _LazyServiceFactory[T]:
 
     def __call__(self) -> T:
         """Import and invoke one configured zero-argument bootstrap factory."""
-        candidate = getattr(import_module(self.module_name), self.attribute_name)
+        candidate = cast(
+            object,
+            getattr(import_module(self.module_name), self.attribute_name),
+        )
         if not callable(candidate):
             raise TypeError(f"{self.module_name}.{self.attribute_name} is not callable")
         return cast(Callable[[], T], candidate)()
+
+
+@dataclass(frozen=True, slots=True)
+class _LazyContextualFactory[T]:
+    """Zero-argument registry thunk returning one lazy contextual factory."""
+
+    module_name: str
+    attribute_name: str
+
+    def __call__(self) -> T:
+        """Import and return one configured callable without invoking it."""
+        candidate = cast(
+            object,
+            getattr(import_module(self.module_name), self.attribute_name),
+        )
+        if not callable(candidate):
+            raise TypeError(
+                f"{self.module_name}.{self.attribute_name} is not callable"
+            )
+        return cast(T, candidate)
 
 
 def _register_lazy_service[T](
@@ -78,7 +106,22 @@ def _register_lazy_service[T](
     """Register a typed port against one lazy bootstrap target."""
     register(
         port,
-        _LazyServiceFactory(
+        _LazyServiceFactory[T](
+            module_name=module_name,
+            attribute_name=attribute_name,
+        ),
+    )
+
+
+def _register_lazy_contextual_factory[T](
+    port: type[T],
+    module_name: str,
+    attribute_name: str,
+) -> None:
+    """Register a typed contextual factory through a zero-argument thunk."""
+    register(
+        port,
+        _LazyContextualFactory[T](
             module_name=module_name,
             attribute_name=attribute_name,
         ),
@@ -187,4 +230,19 @@ _register_lazy_service(
     WorkflowInspectionServiceProtocol,
     "bioetl.composition._workflow_services",
     "get_workflow_inspection_service",
+)
+_register_lazy_contextual_factory(
+    QuarantineServiceFactoryProtocol,
+    "bioetl.composition.bootstrap.cli.checkpoint",
+    "bootstrap_quarantine_service",
+)
+_register_lazy_contextual_factory(
+    PipelineRunnerServiceFactoryProtocol,
+    "bioetl.composition.bootstrap.runtime.runner",
+    "bootstrap_pipeline_runner_service",
+)
+_register_lazy_contextual_factory(
+    HealthServerDependenciesFactoryProtocol,
+    "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_health_server_dependencies",
 )

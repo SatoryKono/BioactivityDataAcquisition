@@ -123,6 +123,55 @@ def test_get_health_service_resolves_typed_application_port(
     resolve.assert_called_once_with(HealthServiceProtocol)
 
 
+def test_contextual_getters_resolve_typed_factory_ports(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """E3 getters resolve typed factories and forward their exact context."""
+    from bioetl.composition import _services
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
+
+    data_root = Path("custom-data")
+    resolve_calls: list[type[object]] = []
+
+    def resolve(port: type[object]) -> object:
+        resolve_calls.append(port)
+        if port is QuarantineServiceFactoryProtocol:
+            return lambda *, data_root=None: ("quarantine", data_root)
+        if port is PipelineRunnerServiceFactoryProtocol:
+            return lambda *, registry: ("runner", registry)
+        if port is HealthServerDependenciesFactoryProtocol:
+            return lambda *, data_root=None: ("health", data_root)
+        raise AssertionError(port)
+
+    monkeypatch.setattr(_services, "_resolve", resolve)
+    monkeypatch.setattr(
+        _services,
+        "_ensure_pipeline_registrations",
+        lambda registry=None: "fresh-registry" if registry is None else registry,
+    )
+
+    assert _services.get_quarantine_service(data_root=data_root) == (
+        "quarantine",
+        data_root,
+    )
+    assert _services.get_pipeline_runner_service() == ("runner", "fresh-registry")
+    assert _services.get_pipeline_runner_service(registry="explicit-registry") == (
+        "runner",
+        "explicit-registry",
+    )
+    assert _services.get_health_server_dependencies() == ("health", None)
+    assert resolve_calls == [
+        QuarantineServiceFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        HealthServerDependenciesFactoryProtocol,
+    ]
+
+
 @pytest.mark.parametrize(
     ("module_name", "expected_exports"),
     [
