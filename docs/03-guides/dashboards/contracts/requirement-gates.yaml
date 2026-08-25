@@ -78,6 +78,11 @@ first_window_inspect_tables:
     owner: "@bioetl-observability"
     rationale: DASH-FIT-003 browse index (last 10); identity/accounting stay collapsed.
     retire_when: browse index moves behind a collapsed row
+  - dashboard: bioetl-dq-v2.json
+    id: 9102
+    owner: "@bioetl-observability"
+    rationale: First-window current DQ reasons (NOW lane), not range forensics.
+    retire_when: 9102 leaves the first window
 
 # DASH-FIRST-001: one operator question via answer panel + next-action + basis copy.
 operator_question:
