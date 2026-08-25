@@ -211,25 +211,24 @@ def _shape_object_or_list_block(
         shaped[key] = []
 
 
+def _removal_label(item: object) -> str:
+    if not isinstance(item, dict):
+        return ""
+    label = str(item.get("reason_code") or item.get("outcome") or "").strip()
+    count = item.get("count")
+    if not label:
+        return ""
+    if count in (None, ""):
+        return label
+    return f"{count} {label}"
+
+
 def _removals_summary(removals: object) -> str:
     """Compact funnel removals for Grafana (not raw JSON arrays)."""
-    if not isinstance(removals, list) or not removals:
+    if not isinstance(removals, list):
         return "—"
-    parts: list[str] = []
-    for item in removals:
-        if not isinstance(item, dict):
-            continue
-        count = item.get("count")
-        outcome = str(item.get("outcome") or "").strip()
-        code = str(item.get("reason_code") or "").strip()
-        label = code or outcome
-        if not label:
-            continue
-        if count in (None, ""):
-            parts.append(label)
-            continue
-        parts.append(f"{count} {label}")
-    return ", ".join(parts) or "—"
+    parts = [_removal_label(item) for item in removals]
+    return ", ".join(part for part in parts if part) or "—"
 
 
 def _shape_funnel_rows(payload: dict[str, object]) -> object:
