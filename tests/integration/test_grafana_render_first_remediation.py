@@ -1186,6 +1186,7 @@ def test_run_explorer_artifact_ref_wraps_below_fold() -> None:
 def test_below_fold_tables_exclude_time_without_name_metric() -> None:
     """#9514 #9511 #9513: below-fold inspect tables hide Grafana Time, not __name__."""
     cases = (
+        ("bioetl-run-explorer-v1.json", 3011),
         ("bioetl-run-explorer-v1.json", 3014),
         ("bioetl-incident-v1.json", 2002),
         ("bioetl-incident-v1.json", 2005),
