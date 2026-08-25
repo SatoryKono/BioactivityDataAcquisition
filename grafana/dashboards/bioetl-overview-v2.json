@@ -3680,7 +3680,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto"
+                      "type": "auto",
+                      "wrapText": true
                     }
                   },
                   {
