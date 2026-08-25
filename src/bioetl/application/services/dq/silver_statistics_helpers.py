@@ -157,9 +157,10 @@ def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:
     errors = []
     type_coercions: dict[str, JsonDict] = {}
 
-    for col in df.columns:
-        if df[col].dtype == pl.Object:
-            errors.append(f"Column {col} has mixed types (Object)")
+    from polars import selectors as cs
+
+    for col in df.select(cs.by_dtype(pl.Object)).columns:
+        errors.append(f"Column {col} has mixed types (Object)")
 
     status = DQCheckStatus.PASS if not errors else DQCheckStatus.WARN
     return TypeConformanceResult(
@@ -185,7 +186,7 @@ def check_schema_drift_stats(
         SchemaDriftResult with new fields, missing fields, and type changes.
         Returns WARN/CRITICAL if missing fields or type changes are found.
     """
-    current_schema = {col: str(df[col].dtype) for col in df.columns}
+    current_schema = dict(zip(df.columns, map(str, df.dtypes)))
 
     if previous_schema is None:
         return SchemaDriftResult(
