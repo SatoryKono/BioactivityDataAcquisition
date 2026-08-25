@@ -134,3 +134,30 @@ def test_non_aggregate_classifications_do_not_overlap_aggregate_package() -> Non
         if path.startswith("src/bioetl/domain/aggregates")
     ]
     assert len(non_aggregate_paths) == len(set(non_aggregate_paths))
+
+
+def test_retired_batch_split_modules_are_absent() -> None:
+    """ADR-059 facade must not keep deleted Batch split-module paths (#9642)."""
+    aggregates = DOMAIN_ROOT / "aggregates"
+    retired = (
+        "_batch_record.py",
+        "_batch_status.py",
+        "_batch_lifecycle.py",
+    )
+    assert [name for name in retired if (aggregates / name).exists()] == []
+
+    live_paths: set[str] = set()
+    classification = _load_yaml(CLASSIFICATION_PATH)
+    for row in classification["true_aggregates"]:
+        live_paths.add(str(row["root_module"]))
+        live_paths.update(str(path) for path in row["implementation_modules"])
+    registry = _load_json(REGISTRY_PATH)
+    for row in registry["aggregates"]:
+        live_paths.add(str(row["root_module"]))
+        live_paths.update(str(path) for path in row["implementation_modules"])
+    forbidden = {
+        "src/bioetl/domain/aggregates/_batch_record.py",
+        "src/bioetl/domain/aggregates/_batch_status.py",
+        "src/bioetl/domain/aggregates/_batch_lifecycle.py",
+    }
+    assert live_paths.isdisjoint(forbidden)
