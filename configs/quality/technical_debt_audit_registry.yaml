@@ -4,8 +4,8 @@ audits:
   - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
-    audited_commit_sha: cdff5b63e6f31bee5c31ae1d3c19a4fe7045481b
-    evidence_surface_sha256: b749f19138a43d8563b3448e7ff3adf9c77e6df0942cc6a52fbfeddd19f8fdbc
+    audited_commit_sha: 31168997c83429db9aa8ece0469ce7c2d347a2a9
+    evidence_surface_sha256: f8bfe79adf1cde0176a84c7e35c246f2bb9f8897b4834df9c5e1a5a7f42fd5b0
 
     evidence_paths:
       - configs/quality/constructor_waivers.yaml
