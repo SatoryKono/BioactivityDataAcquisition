@@ -77,17 +77,17 @@ Observed facts:
 - Strict YAML validation is owned by `WorkflowConfigFileSchema` and
   `WorkflowConfigSchema` in `src/bioetl/infrastructure/schemas/workflow_config.py`.
 - DAG invariants are enforced in `src/bioetl/domain/workflow/dag.py`.
-- Runtime execution is owned by
-  `src/bioetl/application/services/workflow_runner_service.py`.
-- Workflow control-plane services are in
+- Runtime execution and mutable state-transition orchestration are owned by
+  `src/bioetl/application/services/workflow/`.
+- Immutable manifest, append-only ledger, and inspection services remain in
   `src/bioetl/application/services/control_plane/workflow/`.
 
 | Object family | Files | Purpose | Dependencies | Layer |
 | --- | --- | --- | --- | --- |
 | Workflow config model | `src/bioetl/domain/workflow/config.py` | Immutable workflow definition, defaults, and step models. | `topologically_sorted_step_ids` from `domain.workflow.dag`; no I/O. | Domain |
 | Workflow schema validation | `src/bioetl/infrastructure/schemas/workflow_config.py` | Pydantic strict YAML contract and conversion to domain model. | Domain workflow config classes. | Infrastructure |
-| Workflow runner | `src/bioetl/application/services/workflow_runner_service.py` | Executes workflow DAG steps and returns step-level result projection. | Domain workflow config, pipeline run services, transform services. | Application |
-| Workflow control plane | `src/bioetl/application/services/control_plane/workflow/*.py` | Manifest, ledger, execution-state preparation, recording, and inspection. | Domain control-plane ports and infrastructure stores via DI. | Application |
+| Workflow execution | `src/bioetl/application/services/workflow/**` | Executes workflow DAG steps and owns execution-state preparation, resume, and recording transitions. | Domain workflow config, control-plane ports, pipeline run services, transform services. | Application |
+| Workflow control plane | `src/bioetl/application/services/control_plane/workflow/*.py` | Immutable manifest, append-only ledger, and inspection services. | Domain control-plane ports and infrastructure stores via DI. | Application |
 | Workflow stores | `src/bioetl/infrastructure/control_plane/file_workflow_*_store.py` | File-backed manifest, ledger, and mutable execution-state persistence. | Domain control-plane ports; local filesystem. | Infrastructure |
 
 ## Pipeline Inventory
@@ -277,7 +277,8 @@ by storage technology. Current owner boundaries:
 | Snapshot materialization | `src/bioetl/application/services/control_plane/manifest/diagnostics/snapshot_*.py` | Project input-snapshot IDs, hashes, materialization mode, and ledger-derived snapshot summaries. |
 | Ledger recording | `src/bioetl/application/services/control_plane/ledger/**` | Append and inspect run-ledger events through domain control-plane ports. |
 | Historical replay services | `src/bioetl/application/services/control_plane/replay/**` | Historical replay closure, corpus/universe policy, certification, and reproducibility scorecards. |
-| Workflow control-plane services | `src/bioetl/application/services/control_plane/workflow/**` | Workflow manifest, ledger, execution-state preparation, recording, and inspection. |
+| Workflow state transitions | `src/bioetl/application/services/workflow/control_plane/**` | Workflow execution preparation, resume, recording, and mutable execution-state coordination. |
+| Workflow control-plane services | `src/bioetl/application/services/control_plane/workflow/**` | Workflow manifest, append-only ledger, and inspection. |
 
 ## Documentation Drift Resolved In This Update
 

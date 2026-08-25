@@ -1,4 +1,4 @@
-"""Workflow finished success/failure ledger updates."""
+"""Workflow-owned success/failure state-transition updates."""
 
 from __future__ import annotations
 

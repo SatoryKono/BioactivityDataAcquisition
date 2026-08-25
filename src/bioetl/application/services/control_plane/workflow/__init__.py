@@ -9,9 +9,10 @@ from bioetl.application.core.wiring.lazy_export_hooks import (
 # TD2-02: do not re-export ledger service/manifest spec; use modules or lazy facade.
 
 _WORKFLOW_MODULE = "bioetl.application.services.control_plane.workflow"
+_WORKFLOW_EXECUTION_MODULE = "bioetl.application.services.workflow.control_plane"
 _LAZY_ATTR_EXPORTS = {
     "WorkflowExecutionService": (
-        f"{_WORKFLOW_MODULE}.execution_service",
+        f"{_WORKFLOW_EXECUTION_MODULE}.execution_service",
         "WorkflowExecutionService",
     ),
     "WorkflowInspectionResult": (
