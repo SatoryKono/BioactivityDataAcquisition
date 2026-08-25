@@ -262,15 +262,22 @@ def _stage_delta(
 ) -> dict[str, Any]:  # Any: dynamic stage delta payload
     return {
         "stage_id": stage,
-        "records_in_delta": _int(right.get("records_in")) - _int(left.get("records_in")),
-        "records_out_delta": _int(right.get("records_out")) - _int(left.get("records_out")),
-        "removed_total_delta": _int(right.get("removed_total")) - _int(left.get("removed_total")),
+        "records_in_delta": _int(right.get("records_in"))
+        - _int(left.get("records_in")),
+        "records_out_delta": _int(right.get("records_out"))
+        - _int(left.get("records_out")),
+        "removed_total_delta": _int(right.get("removed_total"))
+        - _int(left.get("removed_total")),
     }
 
 
 def _reason_counts(payload: ReportPayload) -> dict[str, int]:
     items = payload.get("reasons_top_n") or []
-    return {str(i.get("reason_code")): _int(i.get("count")) for i in items if isinstance(i, dict)}
+    return {
+        str(i.get("reason_code")): _int(i.get("count"))
+        for i in items
+        if isinstance(i, dict)
+    }
 
 
 def _reasons_delta(

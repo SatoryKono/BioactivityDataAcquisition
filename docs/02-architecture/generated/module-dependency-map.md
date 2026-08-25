@@ -5,7 +5,7 @@
 
 ## Summary
 
-- Scanned modules: `2449`
+- Scanned modules: `2448`
 - Internal import edges (raw): `7680`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
