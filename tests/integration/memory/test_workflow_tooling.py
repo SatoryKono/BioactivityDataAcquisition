@@ -28,6 +28,8 @@ from tests.helpers.memory_manifests import write_test_rag_manifest
 def _explicit_actor_identity(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BIOETL_AI_RUNTIME", "test-runtime")
     monkeypatch.setenv("BIOETL_AI_AGENT", "test-agent")
+    # Isolate from an ambient BIOETL_AI_MEMORY_MODE=read-only|off shell.
+    monkeypatch.setenv("BIOETL_AI_MEMORY_MODE", "read-write")
 
 
 def test_pre_task_off_mode_performs_no_persistent_read_or_write(
