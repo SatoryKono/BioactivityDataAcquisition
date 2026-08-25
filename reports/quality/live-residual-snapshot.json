@@ -42,8 +42,8 @@
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.402,
-      "files": 143,
-      "total_loc": 16463,
+      "files": 142,
+      "total_loc": 16452,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -52,7 +52,7 @@
       "max_internal_fan_in": 3,
       "helper_function_ratio": 0.375,
       "files": 57,
-      "total_loc": 7228,
+      "total_loc": 7227,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }
@@ -73,7 +73,7 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10457,
+    "tech_debt_closeout_test_loc": 10460,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
