@@ -747,10 +747,10 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
         assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
-        assert any(
-            (_override_width(panel, name) is None)
-            or ((_override_width(panel, name) or 0) >= 260)
-            for name in wrapped
+        assert all((_override_width(panel, name) or 0) >= 260 for name in wrapped), (
+            dashboard_name,
+            panel_id,
+            wrapped,
         )
 
 
@@ -1311,6 +1311,58 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
                 hidden.add(field)
             if "custom.width" in props:
                 widths[field] = int(props["custom.width"])
+        visible_sum = sum(
+            width for field, width in widths.items() if field not in hidden
+        )
+        assert visible_sum <= budget, (
+            f"{dashboard_name}:{panel_id} w={grid_w} sum={visible_sum} budget={budget}"
+        )
+
+
+def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
+    """#9563 #9564 #9565 #9566: wrap columns keep a declared width; one column stays flex."""
+    layout_width = 1366 // 2
+    chrome_px = 40
+    cases = (
+        ("bioetl-provider-health-v2.json", 9107, 12, "reason", 260, "Value"),
+        ("bioetl-runtime.json", 9101, 16, "reason", 260, "action_target"),
+        (
+            "bioetl-control-plane-v1.json",
+            9418,
+            12,
+            "reasons_text",
+            150,
+            "trust_status",
+        ),
+        ("bioetl-control-plane-v1.json", 9416, 12, "reason", 150, "status"),
+        ("bioetl-overview-v2.json", 9003, 4, "Value", 40, "pipeline"),
+        ("bioetl-overview-v2.json", 9004, 5, "Value", 40, "pipeline"),
+        ("bioetl-overview-v2.json", 9005, 6, "Value", 40, "pipeline"),
+        ("bioetl-overview-v2.json", 9006, 5, "Value", 40, "pipeline"),
+        ("bioetl-overview-v2.json", 9007, 4, "Value", 40, "provider"),
+    )
+    for dashboard_name, panel_id, grid_w, wrap_field, wrap_width, flex_field in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        budget = layout_width * grid_w // 24 - chrome_px
+        hidden: set[str] = set()
+        widths: dict[str, int] = {}
+        for override in (panel.get("fieldConfig") or {}).get("overrides") or []:
+            field = str((override.get("matcher") or {}).get("options"))
+            props = {
+                item.get("id"): item.get("value")
+                for item in override.get("properties") or []
+            }
+            if props.get("custom.hidden") is True:
+                hidden.add(field)
+            if "custom.width" in props:
+                widths[field] = int(props["custom.width"])
+        assert widths.get(wrap_field) == wrap_width, (
+            dashboard_name,
+            panel_id,
+            wrap_field,
+            widths.get(wrap_field),
+        )
+        assert flex_field not in widths, (dashboard_name, panel_id, flex_field, widths)
         visible_sum = sum(
             width for field, width in widths.items() if field not in hidden
         )
