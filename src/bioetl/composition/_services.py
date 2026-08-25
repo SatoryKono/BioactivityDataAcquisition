@@ -36,8 +36,7 @@ from bioetl.composition.contracts.factories import (
     QuarantineServiceFactoryProtocol,
 )
 from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
-from bioetl.domain.ports.adr import AdrServicePort
-from bioetl.domain.ports.quality.quarantine import QuarantinePort
+from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
 if TYPE_CHECKING:
     from bioetl.application.ports.health import HealthServiceProtocol
