@@ -8,6 +8,9 @@ from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition._workflow_transform_registry import (
+    build_workflow_transform_registry,
+)
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
     create_runtime_occurrence_run_id,
@@ -105,9 +108,6 @@ def get_workflow_runner_service(
     workflow_transform_service = import_module(
         "bioetl.application.services.workflow.workflow_transform_service"
     )
-    workflow_transform_registry = import_module(
-        "bioetl.composition._workflow_transform_registry"
-    )
     control_plane = import_module("bioetl.infrastructure.control_plane")
     infrastructure_time = import_module("bioetl.infrastructure.time")
 
@@ -118,7 +118,7 @@ def get_workflow_runner_service(
         base_path=output_root / "workflow_transform_results",
         clock=infrastructure_time.SystemClock(),
     )
-    transform_registry = workflow_transform_registry.build_workflow_transform_registry(
+    transform_registry = build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,
