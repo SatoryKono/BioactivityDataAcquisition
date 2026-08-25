@@ -149,13 +149,12 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         """
         self._assert_running("record_stage_failure")
         error_message = str(error) if isinstance(error, Exception) else error
-        ended_at = completed_at
 
         failed = StageResult(
             stage=stage,
             status=StageStatus.FAILED,
             started_at=started_at,
-            completed_at=ended_at,
+            completed_at=completed_at,
             error=error_message,
             error_type=error_type,
         )
@@ -168,10 +167,10 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
                 return
             self._stages.append(failed)
         self._status = PipelineRunState.FAILED
-        self._ended_at = ended_at
+        self._ended_at = completed_at
         self._events.append(
             PipelineFailed(
-                occurred_at=ended_at,
+                occurred_at=completed_at,
                 run_id=self._run_id,
                 pipeline_name=self._pipeline_name,
                 failed_stage=stage,
@@ -223,12 +222,11 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             failed_at: Explicit failure timestamp.
         """
         self._assert_running("fail")
-        ended_at = failed_at
         self._status = PipelineRunState.FAILED
-        self._ended_at = ended_at
+        self._ended_at = failed_at
         self._events.append(
             PipelineFailed(
-                occurred_at=ended_at,
+                occurred_at=failed_at,
                 run_id=self._run_id,
                 pipeline_name=self._pipeline_name,
                 failed_stage="unknown",
