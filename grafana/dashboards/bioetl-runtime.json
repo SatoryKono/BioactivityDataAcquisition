@@ -407,10 +407,6 @@
               {
                 "id": "custom.inspect",
                 "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 260
               }
             ]
           },
