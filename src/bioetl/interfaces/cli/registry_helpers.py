@@ -40,10 +40,11 @@ def create_registry() -> PipelineRegistry:
 
 
 def register_all_pipelines(*, registry: PipelineRegistry | None = None) -> None:
-    """Register pipelines via the public composition facade."""
+    """Register pipelines through a fresh or caller-provided registry."""
     from bioetl.composition.registry_api import register_all_pipelines as _impl
 
-    _impl(registry=registry)
+    effective_registry = create_registry() if registry is None else registry
+    _impl(registry=effective_registry)
 
 
 def format_command_help_rows(

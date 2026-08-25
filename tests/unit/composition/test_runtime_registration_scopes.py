@@ -79,6 +79,20 @@ def test_pipeline_scope_loads_providers_and_registers_missing_pipelines() -> Non
     register_pipelines.assert_called_once_with(registry=registry)
 
 
+def test_pipeline_scope_rejects_missing_explicit_registry() -> None:
+    with (
+        patch.object(_registration, "ensure_providers_loaded") as ensure_providers,
+        patch.object(_registration, "register_all_pipelines") as register_pipelines,
+        pytest.raises(ValueError, match="explicit registry"),
+    ):
+        _registration.ensure_runtime_registrations(
+            scope=RuntimeRegistrationScope.PIPELINES
+        )
+
+    ensure_providers.assert_called_once_with()
+    register_pipelines.assert_not_called()
+
+
 def test_pipeline_scope_skips_registration_when_registry_is_populated() -> None:
     registry = cast(Any, _PopulatedRegistry())
 

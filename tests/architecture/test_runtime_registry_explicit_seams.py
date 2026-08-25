@@ -23,9 +23,7 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
 
-ALLOWED_DEFAULT_REGISTRY_CALLERS = {
-    "src/bioetl/composition/factories/pipeline/registry.py",
-}
+ALLOWED_DEFAULT_REGISTRY_CALLERS: set[str] = set()
 
 RUNTIME_REGISTRY_SEAMS = {
     "src/bioetl/composition/_services.py": {
@@ -101,8 +99,8 @@ def test_runtime_registry_hot_path_seams_keep_explicit_registry_parameter() -> N
     )
 
 
-def test_default_registry_singleton_stays_out_of_runtime_hot_paths() -> None:
-    """Default registry calls are compatibility-owned, not runtime hot-path wiring."""
+def test_default_registry_singleton_stays_out_of_production_composition() -> None:
+    """Production composition must never call the compatibility registry."""
     violations: list[str] = []
     for path in sorted(SRC_ROOT.rglob("*.py")):
         relative_path = path.relative_to(ROOT).as_posix()

@@ -9,7 +9,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.composition import _service_protocols, _services
+from bioetl.composition import _service_protocols, _services, registry_api
 from bioetl.composition.factories.datasource import http_client
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
     build_control_plane_artifacts,
@@ -117,11 +117,14 @@ def test_pipeline_registration_delegate_preserves_explicit_scope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     ensure = MagicMock()
+    registry = MagicMock()
     monkeypatch.setattr(_services, "_ensure_registrations", ensure)
+    monkeypatch.setattr(registry_api, "create_registry", lambda: registry)
 
-    _services._ensure_pipeline_registrations()
+    resolved = _services._ensure_pipeline_registrations()
 
-    ensure.assert_called_once_with(registry=None, scope="pipelines")
+    assert resolved is registry
+    ensure.assert_called_once_with(registry=registry, scope="pipelines")
 
 
 def test_snapshot_mapping_fails_closed_if_normalization_changes_shape(
