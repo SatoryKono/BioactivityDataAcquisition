@@ -123,7 +123,7 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
     from bioetl.application.observability.current_metrics_rehydrate import (
         rehydrate_current_pipeline_run_metrics,
     )
-    from bioetl.composition._services import get_health_server_dependencies
+    from bioetl.composition.health_service_access import get_health_server_dependencies
 
     try:
         deps = get_health_server_dependencies()

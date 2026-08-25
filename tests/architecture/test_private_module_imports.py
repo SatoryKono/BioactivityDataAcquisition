@@ -10,9 +10,10 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Owner-aware guardrail for first-party private-module imports in src/.
 
-RF-011.0 introduced a baseline-aware mode; RF-011.2 switched this guard to strict.
-Only imports within the same immediate owner package may target ``._*`` modules.
-All cross-owner private-module imports in ``src/`` are forbidden.
+Same-owner ``._*`` imports are allowed. Cross-owner private-module imports
+are tracked in ``configs/quality/private_import_ratchet.yaml`` as a
+shrink-only baseline (``STRICT_PRIVATE_IMPORT_GUARD = False``). The YAML
+``max_count`` must equal the live observed pair count and must not grow.
 """
 
 from __future__ import annotations
@@ -22,154 +23,26 @@ from pathlib import Path
 
 import pytest
 
-STRICT_PRIVATE_IMPORT_GUARD = False
-
-# RF-011.0 baseline (historical, kept for traceability):
-# {
-#   ("src/bioetl/composition/bootstrap/assembly/storage.py",
-#    "bioetl.composition.factories.storage._resilience"),
-#   ("src/bioetl/composition/factories/datasource/data_source_factory.py",
-#    "bioetl.composition.providers._models"),
-#   ("src/bioetl/composition/factories/services/bundle.py",
-#    "bioetl.composition.factories._observability_wiring"),
-#   ("src/bioetl/composition/factories/services/bundle.py",
-#    "bioetl.composition.factories.pipeline._creation_wiring"),
-#   ("src/bioetl/domain/contracts/__init__.py",
-#    "bioetl.domain.contracts.gold._base"),
-#   ("src/bioetl/infrastructure/export/dq_report_writer.py",
-#    "bioetl.infrastructure.storage.support.atomic_ops"),
-# }
-ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset(
-    {
-        # Internal composition modules used by interfaces for runtime access
-        (
-            "bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-            "bioetl.composition._resource_management",
-        ),
-        (
-            "bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-            "bioetl.composition._service_protocols",
-        ),
-        (
-            "bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-            "bioetl.composition._services",
-        ),
-        (
-            "bioetl/interfaces/cli/commands/health.py",
-            "bioetl.composition._service_protocols",
-        ),
-        # Workflow control plane support helpers (RF-6042)
-        (
-            "bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-            "bioetl.composition.runtime_builders._run_manifest_refs",
-        ),
-        (
-            "bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-            "bioetl.composition.runtime_builders._snapshot_mapping_support",
-        ),
-        # Domain immutability utilities (RF-6225)
-        (
-            "bioetl/domain/aggregates/_batch_record.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/control_plane/contract_registry_types.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/control_plane/workflow_manifest.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/entities/crossref.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/entities/openalex.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/entities/pubmed.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/domain/workflow/transform_spec.py",
-            "bioetl.domain._immutability",
-        ),
-        (
-            "bioetl/application/composite/helpers/preflight_schema_field_extraction.py",
-            "bioetl.application.composite._preflight_types",
-        ),
-        (
-            "bioetl/application/composite/helpers/preflight_type_and_aggregation.py",
-            "bioetl.application.composite._preflight_types",
-        ),
-        (
-            "bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py",
-            "bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes",
-        ),
-        (
-            "bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py",
-            "bioetl.application.services.control_plane.replay._historical_claim_reason",
-        ),
-        (
-            "bioetl/application/services/lineage/metadata_lineage_fragment_ids.py",
-            "bioetl.domain.lineage._shared",
-        ),
-        (
-            "bioetl/composition/bootstrap/assembly/health_service.py",
-            "bioetl.composition.providers._registry_protocols",
-        ),
-        (
-            "bioetl/composition/factories/pipeline/postrun_assembly.py",
-            "bioetl.application.core.postrun._failure_policy",
-        ),
-        (
-            "bioetl/composition/factories/services/common_service_wiring.py",
-            "bioetl.composition.factories.dq._context_resolver_support",
-        ),
-        (
-            "bioetl/composition/health_service_access.py",
-            "bioetl.composition.factories.pipeline._preflight_health_monitor",
-        ),
-        (
-            "bioetl/domain/lineage/_shared.py",
-            "bioetl.domain.normalization._control_plane_primitives",
-        ),
-        (
-            "bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
-            "bioetl.domain.workflow._foreign_key_reconciliation_guards",
-        ),
-        (
-            "bioetl/infrastructure/adapters/_error_handling_support.py",
-            "bioetl.infrastructure.adapters.decorators._retry_support",
-        ),
-        (
-            "bioetl/infrastructure/adapters/_health_check_observability.py",
-            "bioetl.infrastructure.adapters.decorators._retry_support",
-        ),
-        (
-            "bioetl/infrastructure/adapters/http/_client_retry_flow.py",
-            "bioetl.infrastructure.adapters.decorators._retry_support",
-        ),
-        (
-            "bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py",
-            "bioetl.infrastructure.checkpoint._local_checkpoint_io",
-        ),
-        (
-            "bioetl/infrastructure/control_plane/provider_health_evidence.py",
-            "bioetl.infrastructure.adapters.http._health_monitor_observability",
-        ),
-        (
-            "bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py",
-            "bioetl.domain.exceptions._redaction",
-        ),
-        (
-            "bioetl/interfaces/cli/commands/domains/health/server_integration_observability.py",
-            "bioetl.composition._services",
-        ),
-    }
+from scripts.engineering.qa.report_private_import_inventory import (
+    allowed_pairs_from_config,
+    evaluate_ratchet,
+    load_ratchet_config,
 )
+
+STRICT_PRIVATE_IMPORT_GUARD = False
+RATCHET_CONFIG_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "configs"
+    / "quality"
+    / "private_import_ratchet.yaml"
+)
+
+
+def _allowed_baseline_imports() -> frozenset[tuple[str, str]]:
+    return allowed_pairs_from_config(load_ratchet_config(RATCHET_CONFIG_PATH))
+
+
+ALLOWED_BASELINE_IMPORTS = _allowed_baseline_imports()
 
 
 def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
@@ -319,4 +192,49 @@ def test_owner_aware_private_module_imports(
             f"  - {path}:{min(violations[(path, module)])} -> {module}"
             for path, module in sorted(unexpected)
         )
+    )
+
+
+@pytest.mark.architecture
+def test_private_import_baseline_is_monotonically_non_increasing(
+    src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """#9597: YAML max_count is shrink-only and must match live observed pairs."""
+    config = load_ratchet_config(RATCHET_CONFIG_PATH)
+    violations = _collect_external_private_imports(src_dir, source_ast_cache)
+    payload = {
+        "max_count": int(config["max_count"]),
+        "allowlist_count": len(ALLOWED_BASELINE_IMPORTS),
+        "observed_count": len(violations),
+        "unexpected": [
+            {"importer": path, "target": module}
+            for path, module in sorted(frozenset(violations) - ALLOWED_BASELINE_IMPORTS)
+        ],
+        "unused_allowlist": [
+            {"importer": path, "target": module}
+            for path, module in sorted(ALLOWED_BASELINE_IMPORTS - frozenset(violations))
+        ],
+    }
+    errors = evaluate_ratchet(payload)
+    assert not errors, "\n".join(errors)
+    assert int(config["max_count"]) <= 19
+
+
+@pytest.mark.architecture
+def test_interfaces_do_not_import_private_composition_modules() -> None:
+    """#9598: CLI must not import bioetl.composition._* implementation modules."""
+    root = Path("src/bioetl/interfaces")
+    hits: list[str] = []
+    for py_file in root.rglob("*.py"):
+        for lineno, line in enumerate(
+            py_file.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            stripped = line.lstrip()
+            if stripped.startswith("#"):
+                continue
+            if "bioetl.composition._" in line:
+                hits.append(f"{py_file.as_posix()}:{lineno}:{line.strip()}")
+    assert not hits, "interfaces imported private composition modules:\n" + "\n".join(
+        hits
     )
