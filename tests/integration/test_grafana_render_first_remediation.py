@@ -1156,7 +1156,15 @@ def test_run_explorer_artifact_ref_wraps_below_fold() -> None:
     }
     artifacts = nested[3013]
     assert int((artifacts.get("gridPos") or {}).get("h") or 0) >= 8
-    assert (_override_width(artifacts, "ref") or 0) >= 720
+    assert (_override_width(artifacts, "ref") or 0) == 640
+    organize = next(
+        transform
+        for transform in artifacts.get("transformations") or []
+        if transform.get("id") == "organize"
+    )
+    exclude = (organize.get("options") or {}).get("excludeByName") or {}
+    assert exclude.get("Time") is True
+    assert "__name__" not in exclude
     wrap = False
     for item in (artifacts.get("fieldConfig") or {}).get("overrides") or []:
         if not isinstance(item, dict):
@@ -1169,3 +1177,22 @@ def test_run_explorer_artifact_ref_wraps_below_fold() -> None:
             value = prop.get("value") or {}
             wrap = bool(isinstance(value, dict) and value.get("wrapText") is True)
     assert wrap is True
+
+
+def test_below_fold_tables_exclude_time_without_name_metric() -> None:
+    """#9514 #9511 #9513: below-fold inspect tables hide Grafana Time, not __name__."""
+    cases = (
+        ("bioetl-run-explorer-v1.json", 3014),
+        ("bioetl-incident-v1.json", 2002),
+        ("bioetl-incident-v1.json", 2005),
+    )
+    for dashboard_name, panel_id in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        organize = next(
+            transform
+            for transform in panel.get("transformations") or []
+            if transform.get("id") == "organize"
+        )
+        exclude = (organize.get("options") or {}).get("excludeByName") or {}
+        assert exclude.get("Time") is True, (dashboard_name, panel_id)
+        assert "__name__" not in exclude, (dashboard_name, panel_id)
