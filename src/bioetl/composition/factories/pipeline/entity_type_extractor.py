@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.domain.ports.entity_type import EntityTypeExtractor
+from bioetl.domain.ports import EntityTypeExtractor
 
 __all__ = ["EntityTypeExtractor"]

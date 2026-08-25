@@ -18,6 +18,8 @@ from bioetl.infrastructure.config.contract_policy_validation import (
     validate_pipeline_contract_policy as _validate_pipeline_contract_policy_impl,
 )
 
+from bioetl.application.core.base_transformer import BaseTransformer
+
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import BaseTransformer
     from bioetl.composition.factories.pipeline.config_types import (
@@ -65,7 +67,6 @@ def _resolve_transformer_class_ref(
     if not module_name or not attr_name:
         raise ValueError(f"Invalid transformer class reference: {transformer_class!r}")
     resolved = getattr(import_module(module_name), attr_name)
-    from bioetl.application.core.base_transformer import BaseTransformer
 
     if not isinstance(resolved, type) or not issubclass(resolved, BaseTransformer):
         raise TypeError(

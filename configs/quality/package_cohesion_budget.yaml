@@ -1,0 +1,21 @@
+# S7 / #9603 — package cohesion budgets. Per-file LOC caps are unchanged.
+# package_loc and module_count_per_package are shrink-only.
+schema_version: 1
+owner: "@bioetl-architecture"
+linked_issue: "9603"
+packages:
+  - path: src/bioetl/domain/aggregates
+    max_modules: 19
+    max_package_loc: 2500
+    target_modules: 8
+  - path: src/bioetl/application/services/control_plane
+    max_modules: 150
+    max_package_loc: 20000
+    max_helper_ratio: 0.424
+    target_helper_ratio: 0.40
+  - path: src/bioetl/composition
+    max_modules: 300
+    max_package_loc: 40000
+  - path: src/bioetl/infrastructure/quality
+    max_modules: 40
+    max_package_loc: 8000

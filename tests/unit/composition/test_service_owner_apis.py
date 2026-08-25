@@ -72,7 +72,7 @@ def test_get_metrics_service_runtime_cast_is_bound(
             },
         ),
         (
-            "bioetl.composition.execution_service_access",
+            "bioetl.composition.execution_api",
             {
                 "ensure_metrics_server_started",
                 "get_pipeline_runner_service",

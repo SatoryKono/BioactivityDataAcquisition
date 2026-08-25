@@ -8,20 +8,10 @@ surface. This module validates that the two remain in sync.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Protocol
 
 import yaml
 
-
-class RegistryEntryProtocol(Protocol):
-    """Structural fields required by registry-manifest validation."""
-
-    pipeline_name: str
-    provider: str
-    entity_type: str
-    transformer_class: object | None
-    gold_schema: object | None
-    pandera_silver_schema: object | None
+from bioetl.application.ports.pipeline import RegistryEntryProtocol
 
 
 __all__ = ["RegistryEntryProtocol"]

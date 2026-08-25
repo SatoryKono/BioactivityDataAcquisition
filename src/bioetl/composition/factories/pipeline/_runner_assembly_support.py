@@ -49,6 +49,8 @@ from bioetl.domain.types import GoldSchemaType
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.time import SystemClock
 
+from bioetl.application.observability.observer import PipelineObserverParams
+
 
 @dataclass(frozen=True, slots=True)
 class RunnerAssemblyContext:
@@ -117,7 +119,6 @@ def build_preflight_service(context: RunnerAssemblyContext) -> PreflightService:
 
 def build_observer(context: RunnerAssemblyContext) -> PipelineObserver:
     """Build the pipeline observer bound to the current run context."""
-    from bioetl.application.observability.observer import PipelineObserverParams
 
     pipeline = context.pipeline
     pipeline_context = pipeline.context

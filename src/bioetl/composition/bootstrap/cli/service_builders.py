@@ -32,6 +32,8 @@ from bioetl.domain.types import RunID
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter
 from bioetl.infrastructure.time import SystemClock
 
+from bioetl.application.core.lifecycle import CheckpointRuntimeParams
+
 if TYPE_CHECKING:
     from bioetl.application.services.control_plane.effective_config.service import (
         EffectiveConfigService,
@@ -130,7 +132,6 @@ def build_cli_checkpoint_runtime_service(
     ],
 ) -> CheckpointRuntimeService:
     """Build the CLI checkpoint runtime-service graph."""
-    from bioetl.application.core.lifecycle import CheckpointRuntimeParams
 
     logger = logger_factory()
     return CheckpointRuntimeService(

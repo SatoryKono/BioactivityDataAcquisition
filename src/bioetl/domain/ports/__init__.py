@@ -44,6 +44,16 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "WorkflowManifestPort",
     ),
     "bioetl.domain.ports.entity_type": ("EntityTypeExtractor",),
+    "bioetl.domain.ports.pipeline_callbacks": (
+        "GoldFilterCallback",
+        "GoldTransformCallback",
+        "TransformCallback",
+    ),
+    "bioetl.domain.ports.source_config": (
+        "PaginationConfigLike",
+        "SourceConfigLike",
+    ),
+    "bioetl.domain.ports.config_mapper": ("DomainConfigMapper",),
     "bioetl.domain.ports.data_normalization": ("DataNormalizationPort",),
     "bioetl.domain.ports.data_source": (
         "DataSourceFactoryPort",

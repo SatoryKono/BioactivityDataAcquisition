@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 from bioetl.domain.types import JsonDict
 
@@ -15,45 +15,20 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
+from bioetl.application.ports.storage import (
+    SilverMergedWriteProtocol as _SilverMergedWriteProtocol,
+)
+from bioetl.application.ports.storage import (
+    GoldMergedWriteProtocol as _GoldMergedWriteProtocol,
+)
+
+
 __all__ = ["StorageBundleMergedMixin"]
 
 # Pandera DataFrameModel classes (or resolved DataFrameSchema) used as providers.
 CompositeSchemaProvider = (
     Any  # Any: accepts schema classes and resolved schema instances.
 )
-
-
-class _SilverMergedWriteProtocol(Protocol):
-    """Minimal bound-method contract for merged Silver writes."""
-
-    async def write_silver_merged(
-        self,
-        table_name: str,
-        records: list[JsonDict],
-        primary_keys: list[str] | None = None,
-        *,
-        schema: CompositeSchemaProvider | None = None,
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
-        preserve_column_order: bool = False,
-    ) -> None: ...
-
-
-class _GoldMergedWriteProtocol(Protocol):
-    """Minimal bound-method contract for merged Gold writes."""
-
-    async def write_gold_merged(
-        self,
-        table_name: str,
-        records: list[JsonDict],
-        primary_keys: list[str] | None = None,
-        *,
-        schema: CompositeSchemaProvider,
-        completed_at: datetime | None = None,
-        run_id: str | None = None,
-        sources_used: list[str] | None = None,
-        preserve_column_order: bool = False,
-    ) -> None: ...
 
 
 class StorageBundleMergedMixin:

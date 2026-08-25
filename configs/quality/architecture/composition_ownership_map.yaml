@@ -40,8 +40,6 @@ packages:
   responsibility: wiring/DI only
 - package: execution_api.py
   responsibility: wiring/DI only
-- package: execution_service_access.py
-  responsibility: wiring/DI only
 - package: factories
   responsibility: DI factories and runtime bootstrap (no domain policy)
 - package: health_api.py
@@ -51,8 +49,6 @@ packages:
 - package: lazy_exports.py
   responsibility: wiring/DI only
 - package: maintenance_api.py
-  responsibility: wiring/DI only
-- package: maintenance_service_access.py
   responsibility: wiring/DI only
 - package: observability.py
   responsibility: wiring/DI only

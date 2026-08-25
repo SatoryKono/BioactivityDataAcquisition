@@ -114,6 +114,7 @@ class TestFileSizeLimits:
         self._check_layer(
             src_dir, "domain", self.LAYER_LIMITS["domain"], source_content_cache
         )
+        assert self.LAYER_LIMITS["domain"] == 305
 
     def test_application_files_under_limit(
         self, src_dir: Path, source_content_cache: dict
@@ -125,6 +126,7 @@ class TestFileSizeLimits:
             self.LAYER_LIMITS["application"],
             source_content_cache,
         )
+        assert self.LAYER_LIMITS["application"] == 411
 
     def test_composition_files_under_limit(
         self, src_dir: Path, source_content_cache: dict
@@ -136,6 +138,7 @@ class TestFileSizeLimits:
             self.LAYER_LIMITS["composition"],
             source_content_cache,
         )
+        assert self.LAYER_LIMITS["composition"] == 350
 
     def test_infrastructure_files_under_limit(
         self, src_dir: Path, source_content_cache: dict
@@ -147,6 +150,7 @@ class TestFileSizeLimits:
             self.LAYER_LIMITS["infrastructure"],
             source_content_cache,
         )
+        assert self.LAYER_LIMITS["infrastructure"] == 443
 
     def test_interfaces_files_under_limit(
         self, src_dir: Path, source_content_cache: dict
@@ -155,6 +159,7 @@ class TestFileSizeLimits:
         self._check_layer(
             src_dir, "interfaces", self.LAYER_LIMITS["interfaces"], source_content_cache
         )
+        assert self.LAYER_LIMITS["interfaces"] == 418
 
     def _check_layer(
         self,
@@ -208,6 +213,7 @@ class TestFunctionComplexity:
         self._check_layer(
             src_dir, "domain", self.MAX_COMPLEXITY["domain"], source_content_cache
         )
+        assert self.MAX_COMPLEXITY["domain"] == 5
 
     def test_application_complexity(
         self, src_dir: Path, source_content_cache: dict
@@ -219,6 +225,7 @@ class TestFunctionComplexity:
             self.MAX_COMPLEXITY["application"],
             source_content_cache,
         )
+        assert self.MAX_COMPLEXITY["application"] == 10
 
     def test_infrastructure_complexity(
         self, src_dir: Path, source_content_cache: dict
@@ -230,6 +237,7 @@ class TestFunctionComplexity:
             self.MAX_COMPLEXITY["infrastructure"],
             source_content_cache,
         )
+        assert self.MAX_COMPLEXITY["infrastructure"] == 15
 
     def _check_layer(
         self,

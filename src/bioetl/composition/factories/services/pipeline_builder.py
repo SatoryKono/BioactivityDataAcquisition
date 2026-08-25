@@ -53,6 +53,8 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import GoldSchemaType, RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
+from bioetl.application.core.lifecycle import CheckpointRuntimeParams
+
 
 def create_batch_processing_components(
     *,
@@ -97,7 +99,6 @@ def create_checkpoint_manager(
     current_metadata: CheckpointMetadata | None = None,
     compatibility_policy: Literal["observe", "soft_fail", "hard_fail"] = "soft_fail",
 ) -> CheckpointRuntimeService:
-    from bioetl.application.core.lifecycle import CheckpointRuntimeParams
 
     return CheckpointRuntimeService(
         checkpoint_port,

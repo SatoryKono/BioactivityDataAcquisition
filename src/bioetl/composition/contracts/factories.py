@@ -1,0 +1,104 @@
+"""Factory/bootstrap structural contracts (ADR-058)."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import (
+        AuditPort,
+        DQMonitorPort,
+        LoggerPort,
+        TracingPort,
+    )
+
+    CachedBronzeContext = object
+    DataSourceCreatorProtocol = object
+    DomainConfigMapper = object
+    InputFilterConfig = object
+    MetadataCoordinator = object
+    PipelineService = object
+    PipelineYamlConfig = object
+    Settings = object
+    SilverValidatorPort = object
+    _CreatePipelineWithServicesRequest = object
+
+
+class ObservabilityApiModule(Protocol):
+    """Typed subset of the public observability API."""
+
+    def start_metrics_server(
+        self,
+        port: int = 8000,
+        addr: str = "0.0.0.0",
+        *,
+        fail_fast: bool = False,
+        retry_count: int = 3,
+        retry_delay: float = 1.0,
+        logger: LoggerPort | None = None,
+    ) -> bool: ...
+
+
+class ServiceBundleDeps(Protocol):
+    """Subset of dependencies required by pipeline creation internals."""
+
+    @property
+    def load_pipeline_config(self) -> Callable[[str], PipelineYamlConfig]: ...
+
+    @property
+    def yaml_config_to_domain(self) -> DomainConfigMapper: ...
+
+    @property
+    def compute_config_hash(
+        self,
+    ) -> Callable[[PipelineYamlConfig | dict[str, object]], str]: ...
+
+
+class BuildPipelineServicesFn(Protocol):
+    """Typed callback for constructing the service bundle."""
+
+    def __call__(
+        self,
+        pipeline_name: str,
+        create_data_source_fn: DataSourceCreatorProtocol,
+        settings: Settings,
+        logger: LoggerPort,
+        audit: AuditPort | None,
+        config: PipelineYamlConfig | None = None,
+        filter_config: InputFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+    ) -> PipelineService: ...
+
+
+class FactoryLike(Protocol):
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def _create_data_source(self) -> DataSourceCreatorProtocol: ...
+
+    @property
+    def pipeline_class(self) -> type[object]: ...
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def transformer_class(self) -> type[object] | None: ...
+
+    @property
+    def pandera_silver_schema(self) -> object | None: ...
+
+    def create_with_services(
+        self,
+        request: _CreatePipelineWithServicesRequest,
+    ) -> object: ...
+
+
+class LoggerBindableObservability(Protocol):
+    logger: object
