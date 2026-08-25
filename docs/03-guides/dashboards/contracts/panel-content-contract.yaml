@@ -4072,7 +4072,7 @@ dashboards:
   bioetl-run-explorer-v1:
     panels:
       '1':
-        title: Understand Run Scope
+        title: ''
         role: guidance
         tier: 4
         scope: selected_run
@@ -4202,27 +4202,6 @@ dashboards:
         fixture_cases:
         - populated
         - valid_empty
-        - backend_error
-        render_profiles: *id001
-      '3015':
-        title: Inspect Reconciliation
-        role: forensic_table
-        tier: 3
-        scope: selected_run
-        scope_class: selected_run
-        evidence_source: ops_http
-        empty_state_class: select_run
-        state_model:
-        - VALID_EMPTY
-        - ERROR
-        - TELEMETRY_ABSENT
-        required_copy:
-        - evidence_scope
-        - no_data
-        fixture_cases:
-        - populated
-        - valid_empty
-        - telemetry_absent
         - backend_error
         render_profiles: *id001
       '3020':

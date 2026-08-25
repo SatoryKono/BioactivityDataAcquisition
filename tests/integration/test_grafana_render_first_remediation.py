@@ -939,40 +939,9 @@ def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
     assert {"Expected", "Observed Records"} <= matchers
 
 
-def test_run_explorer_reconciliation_fits_all_bounded_rows_without_scroll() -> None:
+def test_run_explorer_drops_reconciliation_panel() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
-    reconciliation = _panel(explorer, 3015)
-    next_panel = _panel(explorer, 3013)
-    grid = reconciliation.get("gridPos", {})
-
-    assert grid.get("h", 0) >= 8
-    assert next_panel.get("gridPos", {}).get("y", 0) >= (
-        grid.get("y", 0) + grid.get("h", 0)
-    )
-    assert reconciliation.get("targets", [{}])[0].get("root_selector") == (
-        "reconciliation"
-    )
-    assert any(
-        property_ == {"id": "displayName", "value": "Value"}
-        for override in reconciliation.get("fieldConfig", {}).get("overrides", [])
-        for property_ in override.get("properties", [])
-    )
-    # REC-01: mixed numeric/status column is Value, not Count.
-    value_override = next(
-        (
-            override
-            for override in reconciliation.get("fieldConfig", {}).get("overrides", [])
-            if override.get("matcher", {}).get("options") == "value"
-        ),
-        None,
-    )
-    assert value_override is not None
-    props = {
-        prop.get("id"): prop.get("value")
-        for prop in value_override.get("properties", [])
-    }
-    assert props.get("displayName") == "Value"
-    assert props.get("custom.cellOptions") == {"type": "color-text"}
+    assert all(panel.get("id") != 3015 for panel in _iter_panels(explorer.get("panels") or []))
 
 
 def test_run_explorer_novalue_has_no_uninterpolated_variables() -> None:
@@ -1050,7 +1019,8 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
         if isinstance(panel, dict)
     }
     nested_ids = set(nested)
-    assert {3011, 3012, 3015, 3013, 3014, 3022, 3023} <= nested_ids
+    assert {3011, 3012, 3013, 3014, 3022, 3023} <= nested_ids
+    assert 3015 not in nested_ids
     assert 3021 not in nested_ids
     assert 3001 not in nested_ids
     identity_grid = nested[3022].get("gridPos") or {}
@@ -1060,6 +1030,8 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     timings_grid = nested[3014].get("gridPos") or {}
     assert int(identity_grid.get("h") or 0) >= 14
     assert int(records_grid.get("h") or 0) >= 14
+    assert int(records_grid.get("w") or 0) == int(reasons_grid.get("w") or 0)
+    assert int(identity_grid.get("w") or 0) + int(records_grid.get("w") or 0) == 24
     assert int(funnel_grid.get("w") or 0) + int(reasons_grid.get("w") or 0) == 24
     assert funnel_grid.get("y") == reasons_grid.get("y")
     assert int(timings_grid.get("h") or 0) <= 4

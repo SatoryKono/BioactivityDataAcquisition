@@ -25,14 +25,14 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2450,
+        "source_module_count": 2451,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 9.0,
+      "score": 8.2,
       "weight": 0.09,
-      "weighted_score": 0.81
+      "weighted_score": 0.738
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 1
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 9.9,
+      "score": 8.4,
       "weight": 0.12,
-      "weighted_score": 1.188
+      "weighted_score": 1.008
     },
     {
       "evidence_metrics": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
+  "integral_score": 9.16,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 55,
@@ -190,13 +190,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2450,
+    "source_module_count": 2451,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 1
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -241,7 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "f69a7765974fecc534e31982b0cca9e8b278cc91ff22a3d6e95b538dfda14f1a"
+      "source_tree_sha256": "ecf44c11644492ac9254e73467646939064b4f3afbd0cd29b145b3aa9145a7fc"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

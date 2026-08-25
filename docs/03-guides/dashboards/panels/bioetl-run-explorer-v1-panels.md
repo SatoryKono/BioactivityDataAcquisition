@@ -61,8 +61,7 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 ### 6. Selected Run Details
 - **Type:** Row (**collapsed by default**, `id=3099`)
 - **Purpose:** Progressive disclosure for identity, processed-records
-  accounting, funnel, reasons, reconciliation, layer accounting, artifacts,
-  and timings/failure.
+  accounting, funnel, reasons, artifacts, and timings/failure.
 
 - **Data sources:** Nested panels below (expand row to load).
 
@@ -81,15 +80,6 @@ Nested titles (must match JSON):
 - **Purpose:** Top removal/reason codes for exact run.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
 - **Presentation:** Shares a row with Stage Funnel.
-
-### 9. Inspect Reconciliation
-- **Type:** Table (`id=3015`)
-- **Purpose:** Reconciliation block from `pipeline_run_report_v1`.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reconciliation`
-- **Presentation:** Six canonical rows in stable silver→gold order; `value`
-  column labeled **Value** (not Count) with color-text for status tokens
-  (`OK`/`FAIL`/…). HTTP missing-report path returns empty shell (200), not 404.
-  Panel links: Processed Records (`3023`) + Trust.
 
 ### 11. Inspect Run Artifacts
 - **Type:** Table
