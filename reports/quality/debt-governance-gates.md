@@ -55,5 +55,5 @@
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `a4254b4a9fffb4b8fc72e1204c8bd15959f131669e14c9eefa272907696dba01` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
-| `generated_artifact_drift` | `fail` | `stale_artifact_count` | `{'count': 1, 'artifacts': ['remote_main_baseline']}` | `0` | `reports/quality/*.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `0bfd6ed1f41aecfbd013e0fd0d77aa77765e4091ff9457136d740001405e39e5` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `generated_artifact_drift` | `pass` | `stale_artifact_count` | `{'count': 0, 'artifacts': []}` | `0` | `reports/quality/*.json` |
