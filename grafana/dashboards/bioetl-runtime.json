@@ -782,7 +782,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -817,7 +817,20 @@
               "unit": "short",
               "noValue": "No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean."
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 400
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "x": 0,
@@ -1076,7 +1089,7 @@
                 "cellOptions": {
                   "type": "color-text"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -1165,6 +1178,10 @@
                         }
                       ]
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   }
                 ]
               },
@@ -1183,6 +1200,22 @@
                     "value": {
                       "type": "auto"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 200
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "stage"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -1609,6 +1642,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   }
                 ]
               },
@@ -1631,6 +1668,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 70
                   }
                 ]
               }
@@ -1736,7 +1789,8 @@
                 ]
               },
               "unit": "short",
-              "decimals": 0
+              "decimals": 0,
+              "custom": {}
             },
             "overrides": [
               {
@@ -1758,6 +1812,10 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
                   }
                 ]
               },
@@ -1780,6 +1838,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 70
                   }
                 ]
               }
