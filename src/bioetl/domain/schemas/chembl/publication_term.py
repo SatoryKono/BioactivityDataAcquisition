@@ -10,8 +10,6 @@ PublicationTerms are derived entities extracted from Publication (ChEMBL Documen
 
 from __future__ import annotations
 
-from typing import ClassVar
-
 import pandera.pandas as pa
 from pandera.typing import Series
 
@@ -68,4 +66,4 @@ class PublicationTermSchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = True
-        unique: ClassVar[list[str]] = ["publication_id", "term_type", "term"]
+        unique = ("publication_id", "term_type", "term")

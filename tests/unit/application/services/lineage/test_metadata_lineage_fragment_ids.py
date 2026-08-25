@@ -47,7 +47,7 @@ def test_fragment_timestamp_uses_first_supplied_timestamp() -> None:
     assert fragment_ids.fragment_timestamp(None, first, second) == first
 
 
-def test_fragment_timestamp_all_none_raises() -> None:
+def test_fragment_id_timestamp_all_none_raises() -> None:
     with pytest.raises(RuntimeError, match="wall-clock fallback is not allowed"):
         fragment_ids.fragment_timestamp(None, None)
 
