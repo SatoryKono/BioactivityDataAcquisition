@@ -204,9 +204,13 @@ lanes:
     notes: >-
       Coverage verification combines shard artifacts, runs the canonical serial
       subset, and is the only lane that enforces the hard 85 percent line and
-      branch coverage thresholds. Offline contract execution arrives through
-      the contract-confidence shard; live e2e, live provider contracts, and
-      dedicated memory tests stay outside the aggregate.
+      branch coverage thresholds. It still runs after completed upstream test
+      failures because those lanes upload their coverage shards on failure; the
+      producer fails closed when any required shard is absent and builds the
+      SHA-bound XML and inventory candidate before enforcing thresholds.
+      Offline contract execution arrives through the contract-confidence shard;
+      live e2e, live provider contracts, and dedicated memory tests stay outside
+      the aggregate.
   - job: coverage-inventory-currentness
     lane_type: artifact_currentness_gate
     emits_coverage_artifact: false
