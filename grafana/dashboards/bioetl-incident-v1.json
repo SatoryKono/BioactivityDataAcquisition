@@ -573,7 +573,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -622,6 +622,21 @@
                   {
                     "id": "displayName",
                     "value": "Active Alerts"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "alertname"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -832,7 +847,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -1011,7 +1026,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -1110,6 +1125,21 @@
                     "value": "Signal"
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "cause"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1172,7 +1202,7 @@
                 "align": "left",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -1244,6 +1274,13 @@
                   {
                     "id": "custom.width",
                     "value": 300
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               },

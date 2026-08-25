@@ -1015,6 +1015,16 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                     f"{dashboard_path.name} panel {panel_id} ({title!r}) "
                     f"cellHeight={cell_height!r}"
                 )
+            custom = (
+                (panel.get("fieldConfig") or {}).get("defaults") or {}
+            ).get("custom") or {}
+            wrap_default = (custom.get("cellOptions") or {}).get("wrapText")
+            if wrap_default is True:
+                violations.append(
+                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
+                    "defaults.custom.cellOptions.wrapText=True "
+                    "(grows row height; wrap named columns instead)"
+                )
 
     assert tables, "expected at least one table panel in shipped dashboards"
     assert heights == {UNIFORM_TABLE_CELL_HEIGHT}, (

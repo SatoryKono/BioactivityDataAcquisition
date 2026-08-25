@@ -716,8 +716,15 @@ def test_operator_critical_tables_expose_full_values() -> None:
             panel = _panel(dashboard, panel_id)
             custom = panel["fieldConfig"]["defaults"]["custom"]
             assert custom["inspect"] is True
-            if dashboard_name != "bioetl-run-explorer-v1.json":
-                assert custom["cellOptions"]["wrapText"] is True
+            # Uniform row height: do not wrap at table default. Long fields wrap
+            # via named-column overrides (same pattern as #8977 / panel 2010).
+            assert custom.get("cellOptions", {}).get("wrapText") is not True
+            if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:
+                continue
+            wrapped = _wrapped_field_names(panel)
+            assert wrapped, (
+                f"{dashboard_name} panel {panel_id} must wrap at least one named field"
+            )
 
 
 def test_first_window_named_text_columns_wrap_without_table_default() -> None:

@@ -1085,7 +1085,7 @@
                 "align": "auto",
                 "cellOptions": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 },
                 "inspect": true
               },
@@ -1180,6 +1180,21 @@
                         }
                       }
                     ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -1855,7 +1870,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "cellOptions": {}
               },
               "mappings": [
                 {
@@ -1963,7 +1979,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "cellOptions": {}
               },
               "mappings": [
                 {
@@ -2072,7 +2089,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "cellOptions": {}
               },
               "mappings": [
                 {
@@ -2180,7 +2198,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "cellOptions": {}
               },
               "mappings": [
                 {
