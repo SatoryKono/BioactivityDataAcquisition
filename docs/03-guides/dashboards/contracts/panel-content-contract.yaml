@@ -2670,7 +2670,7 @@ dashboards:
   bioetl-overview-v2:
     panels:
       '99':
-        title: Inspect Scope & Evidence
+        title: ''
         role: guidance
         tier: 4
         scope: global

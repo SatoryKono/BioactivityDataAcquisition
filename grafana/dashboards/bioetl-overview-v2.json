@@ -114,10 +114,11 @@
       "id": 99,
       "options": {
         "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">What is broken or degraded right now? SELECTED RUN = UUID. CURRENT = Status + First Action. TIME RANGE = Domain Status.</div></div>",
-        "mode": "html"
+        "mode": "html",
+        "bioetlDisplayTitle": "Inspect Scope & Evidence"
       },
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN persisted HTTP evidence, and TIME RANGE history. Pipeline and Run Type affect current and historical evidence; Run ID never filters Prometheus. UNKNOWN means missing or stale evidence, never healthy. To inspect a selected run, set a concrete run_id (not -) after choosing pipeline/run_type. Default run_id=- keeps fleet/current status only — exact identity/processed-record panels stay empty until a run is selected. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
-      "title": "Inspect Scope & Evidence",
+      "title": "",
       "type": "text",
       "links": []
     },
@@ -837,10 +838,6 @@
               {
                 "id": "displayName",
                 "value": ""
-              },
-              {
-                "id": "custom.width",
-                "value": 1
               },
               {
                 "id": "custom.hidden",
