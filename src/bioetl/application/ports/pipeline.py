@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     Settings = object
 
 
-class ContractPolicyLoader(Protocol):
+class ContractPolicyLoaderProtocol(Protocol):
     """Callable contract for loading pipeline contract policy."""
 
     def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol: ...

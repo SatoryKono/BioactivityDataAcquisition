@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -106,7 +107,6 @@ class _BatchAttrs:
 
 def __getattr__(name: str) -> object:
     if name == "Batch":
-        from bioetl.domain.aggregates._batch_aggregate import Batch
-
-        return Batch
+        module = importlib.import_module("bioetl.domain.aggregates._batch_aggregate")
+        return getattr(module, "Batch")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

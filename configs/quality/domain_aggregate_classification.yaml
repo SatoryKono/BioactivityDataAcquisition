@@ -23,8 +23,7 @@ true_aggregates:
       - src/bioetl/domain/aggregates/_batch_aggregate.py
       - src/bioetl/domain/aggregates/_batch_lifecycle.py
       - src/bioetl/domain/aggregates/_batch_mixins.py
-      - src/bioetl/domain/aggregates/_batch_record.py
-      - src/bioetl/domain/aggregates/_batch_status.py
+      - src/bioetl/domain/aggregates/batch.py
     invariant_tests:
       - tests/unit/domain/aggregates/test_batch.py
       - tests/unit/domain/aggregates/test_batch_determinism.py

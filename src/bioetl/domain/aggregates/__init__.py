@@ -16,8 +16,8 @@ All aggregates follow DDD principles:
 
 from __future__ import annotations
 
+from bioetl.domain.aggregates._batch_aggregate import Batch
 from bioetl.domain.aggregates.batch import (
-    Batch,
     BatchRecord,
     BatchStatus,
 )
