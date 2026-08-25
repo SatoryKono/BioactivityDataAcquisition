@@ -8,6 +8,7 @@ import pandera.pandas as pa
 import pytest
 
 from bioetl.domain.schemas.chembl.activity import ActivitySchema
+from bioetl.domain.schemas.chembl.publication_term import PublicationTermSchema
 
 
 @pytest.mark.unit
@@ -23,3 +24,9 @@ def test_unique_constraint_rejects_duplicate_pk_values() -> None:
     with pytest.raises(pa.errors.SchemaError):
         schema.validate(df)
 
+
+
+@pytest.mark.unit
+def test_publication_term_composite_unique_is_immutable() -> None:
+    unique = PublicationTermSchema.to_schema().unique
+    assert tuple(unique) == ("publication_id", "term_type", "term")
