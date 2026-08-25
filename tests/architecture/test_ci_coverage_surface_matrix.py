@@ -77,6 +77,8 @@ class TestCiCoverageSurfaceMatrix:
             "test-fast",
             "repo-backed-unit",
             "unit-scripts-tooling",
+            "unit-filesystem-contracts",
+            "unit-subprocess-backed",
             "test-matrix",
             "coverage-verify",
             "coverage-inventory-currentness",
@@ -96,6 +98,8 @@ class TestCiCoverageSurfaceMatrix:
             "contract-confidence",
             "repo-backed-unit",
             "unit-scripts-tooling",
+            "unit-filesystem-contracts",
+            "unit-subprocess-backed",
             "test-matrix",
         }
         for job in coverage_shard_jobs:
@@ -145,6 +149,8 @@ class TestCiCoverageSurfaceMatrix:
         assert "name: coverage-data-contract-confidence" in workflow
         assert "name: coverage-data-repo-backed-unit" in workflow
         assert "name: coverage-data-unit-scripts-tooling" in workflow
+        assert "name: coverage-data-unit-filesystem-contracts" in workflow
+        assert "name: coverage-data-unit-subprocess-backed" in workflow
         assert "name: coverage-data-fast" not in workflow
         assert "name: coverage-data-control-plane-e2e" not in workflow
         assert "name: coverage-data-memory" not in workflow
@@ -173,6 +179,7 @@ class TestCiCoverageSurfaceMatrix:
         aggregation = matrix["coverage_aggregation"]
         coverage_block = _job_block(workflow, "coverage-verify")
 
+        assert "if: ${{ always() && !cancelled() }}" in coverage_block
         assert aggregation["artifact_pattern"] == "coverage-data-*"
         assert "pattern: coverage-data-*" in coverage_block
         for job in aggregation["required_upstream_jobs"]:
@@ -185,6 +192,8 @@ class TestCiCoverageSurfaceMatrix:
             "contract-confidence",
             "repo-backed-unit",
             "unit-scripts-tooling",
+            "unit-filesystem-contracts",
+            "unit-subprocess-backed",
         ):
             entry = entries[job]
             block = _job_block(workflow, job)
@@ -213,6 +222,10 @@ class TestCiCoverageSurfaceMatrix:
         }
         assert set(matrix_entry["coverage_files"]) == matrix_shards
         assert matrix_shards <= set(aggregation["required_blocking_lane_shards"])
+        assert (
+            'if [ ! -s "reports/coverage/.coverage.${{ matrix.test-group.name }}" ]'
+            in matrix_block
+        )
         assert "if-no-files-found: error" in matrix_block
 
     def test_candidate_producer_and_currentness_gate_are_separate(self) -> None:
@@ -224,6 +237,14 @@ class TestCiCoverageSurfaceMatrix:
 
         assert "module-coverage-inventory.candidate.json" in producer
         assert "cmp --silent" not in producer
+        assert producer.index("coverage xml") < producer.index("report-module-coverage")
+        assert producer.index("report-module-coverage") < producer.index(
+            "coverage report --show-missing --fail-under=85"
+        )
+        assert producer.index("report-module-coverage") < producer.index(
+            "check-branch-coverage"
+        )
+        assert "--min-percent 85" in producer
         assert "needs: coverage-verify" in currentness
         assert "name: coverage-report" in currentness
         assert "cmp --silent" in currentness
