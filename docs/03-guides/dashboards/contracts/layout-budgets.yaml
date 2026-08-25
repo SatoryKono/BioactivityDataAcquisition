@@ -44,6 +44,27 @@ first_screen_shell_panels:
       Native title omitted so h=2 Start Provider Triage fits DASH-FIT-004.
       Growing h=3 would push Monitor Telemetry Presence (9104) past VIEWPORT_ROWS.
     retire_when: the CTA can use h=3 without folding 9104 past row 18
+  - dashboard: bioetl-dq-v2.json
+    id: 9103
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Start DQ Triage body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the CTA can keep a native title without overflowing at 200%
+  - dashboard: bioetl-incident-v1.json
+    id: 2001
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Start Incident Triage body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the CTA can keep a native title without overflowing at 200%
+  - dashboard: bioetl-runtime.json
+    id: 9991
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Start Pipeline Triage body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the CTA can keep a native title without overflowing at 200%
 
 min_height:
   root:
