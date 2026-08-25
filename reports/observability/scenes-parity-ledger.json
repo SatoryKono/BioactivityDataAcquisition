@@ -27,6 +27,7 @@
     "bioetl-provider-health-v2": "7e6bd6c025a9d1582caf32dd7d3bdc7287f878bba8cc8e303ed23f148fcba965",
     "bioetl-run-explorer-v1": "b826a7bd8bdcd17b1f063e41a528cf5295bb650f955b15367443ba4a5f11c0f2",
     "bioetl-runtime": "ba4aeeccf7ec617168561e9b70a92c199d00f44bfcd06420e7ab70098f4ac073"
+
   },
   "panels": [
     {
