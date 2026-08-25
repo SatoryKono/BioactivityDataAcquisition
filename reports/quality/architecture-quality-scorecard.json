@@ -84,15 +84,15 @@
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 0,
+        "adr_enforcement_blocking_gap_count": 1,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 9.2,
+      "score": 7.7,
       "weight": 0.09,
-      "weighted_score": 0.828
+      "weighted_score": 0.693
     },
     {
       "evidence_metrics": {
@@ -162,11 +162,11 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
+  "integral_score": 9.27,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 55,
-    "adr_enforcement_blocking_gap_count": 0,
+    "accepted_adr_count": 56,
+    "adr_enforcement_blocking_gap_count": 1,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "contract_blocking_issue_count": 0,
@@ -201,8 +201,8 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 55,
-      "blocking_gap_count": 0,
+      "accepted_adr_count": 56,
+      "blocking_gap_count": 1,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -241,7 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "3c979c96866bff9fb1c60495219d2149fcb9f5671fa0d0c7eb3f3aa61637206c"
+      "source_tree_sha256": "9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
