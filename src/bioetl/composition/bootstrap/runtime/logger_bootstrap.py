@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from itertools import count
-from os import getpid
 from typing import TYPE_CHECKING
 from uuid import NAMESPACE_OID, UUID, uuid5
 
@@ -22,10 +21,10 @@ __all__ = [
 _FALLBACK_LOG_RUN_ID_COUNTER = count()
 
 
-def _fallback_log_correlation_run_id() -> UUID:
-    """Return a deterministic process-local fallback log correlation ID."""
+def _fallback_log_correlation_run_id(pipeline: str) -> UUID:
+    """Return a deterministic pre-run fallback log correlation ID."""
     occurrence = next(_FALLBACK_LOG_RUN_ID_COUNTER)
-    return uuid5(NAMESPACE_OID, f"bioetl.logger_bootstrap:{getpid()}:{occurrence}")
+    return uuid5(NAMESPACE_OID, f"bioetl.logger_bootstrap:{pipeline}:{occurrence}")
 
 
 def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
@@ -59,7 +58,7 @@ def bootstrap_logger(
         Configured LoggerPort for structured pipeline logging.
     """
     effective_run_id = (
-        run_id if run_id is not None else _fallback_log_correlation_run_id()
+        run_id if run_id is not None else _fallback_log_correlation_run_id(pipeline)
     )
     factory = logger_factory or _default_logger_factory
     return factory(pipeline, effective_run_id, log_level)
