@@ -451,7 +451,8 @@
               "workflow_id": true,
               "workflow_run_id": true,
               "Workflow": true,
-              "Workflow run": true
+              "Workflow run": true,
+              "Time": true
             },
             "indexByName": {
               "selected": 0,

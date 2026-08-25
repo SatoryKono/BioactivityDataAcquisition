@@ -588,10 +588,6 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        16,
-        17,
-        18,
-        19,
         18,
         19,
         20,
@@ -764,6 +760,7 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
         if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
+        "Time": True,
         "detail": True,
         "endpoint": True,
         "retryable": True,
