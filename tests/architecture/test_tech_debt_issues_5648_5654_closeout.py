@@ -230,7 +230,7 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
         len(family["budget_review_notes"]) for family in baseline["families"]
     )
     assert baseline["summary"]["budget_review_notes"] <= 6
-    assert baseline_family["files_ge_250_loc"] == 2
+    assert baseline_family["files_ge_250_loc"] == 0
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 2
     assert baseline_family["budget_warnings"] == []
     # At-budget notes are informational; only budget_warnings are fail-fast.
@@ -238,7 +238,7 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
         note.startswith("at_budget:") or note.startswith("near_budget:")
         for note in baseline_family["budget_review_notes"]
     )
-    assert scorecard_family["metrics"]["files_ge_250_loc"] == 2
+    assert scorecard_family["metrics"]["files_ge_250_loc"] == 0
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 2
     assert _gate(gates, "debt_scorecard_budget_violations")["status"] == "pass"
     assert _gate(gates, "debt_budget_growth_policy")["status"] == "pass"
