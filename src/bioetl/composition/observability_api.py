@@ -40,6 +40,9 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.quality.quarantine_service import QuarantineService
 
+    from bioetl.composition.runtime_builders.config_access import get_settings
+    from bioetl.composition._services import get_audit_service as _impl
+
 __all__ = [
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
