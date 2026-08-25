@@ -56,10 +56,11 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         "control_plane_service_access.py",
         "health_service_access.py",
     ]
+    from bioetl.application.ports import HealthServiceProtocol
     from bioetl.composition.entrypoints import resolve, register, registered_ports
 
     assert callable(resolve) and callable(register)
-    assert isinstance(registered_ports(), dict)
+    assert set(registered_ports()) == {HealthServiceProtocol}
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
     assert [path.name for path in api_files] == [
         "execution_api.py",

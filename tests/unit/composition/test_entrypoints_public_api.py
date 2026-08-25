@@ -78,8 +78,10 @@ def test_entrypoints_register_resolve_and_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The typed registry resolves factories and returns an isolated snapshot."""
+    from bioetl.composition import _service_registry
+
     entrypoints = _reload_entrypoints_module()
-    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
+    monkeypatch.setattr(_service_registry, "_REGISTRY", {})
 
     class Port:
         pass
@@ -99,8 +101,10 @@ def test_entrypoints_resolve_unregistered_port_raises_key_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Missing registrations fail explicitly with the requested port in context."""
+    from bioetl.composition import _service_registry
+
     entrypoints = _reload_entrypoints_module()
-    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
+    monkeypatch.setattr(_service_registry, "_REGISTRY", {})
 
     class MissingPort:
         pass
