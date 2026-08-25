@@ -164,7 +164,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
         "wrapText": True,
     }
     assert override_properties["reasons_text"]["custom.inspect"] is True
-    assert "custom.width" not in override_properties["reasons_text"]
+    assert int(override_properties["reasons_text"]["custom.width"]) == 150
     assert override_properties["evidence_observed_at"]["custom.hidden"] is True
     assert override_properties["evidence_observed_at"]["unit"] == (
         "time:YYYY-MM-DD HH:mm"
@@ -185,8 +185,11 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     assert override_properties["scope_kind"]["custom.hidden"] is True
     assert override_properties["evidence_freshness"]["custom.hidden"] is True
     assert (
-        sum(int(override_properties[field]["custom.width"]) for field in enum_fields)
-        == 144
+        sum(
+            int(override_properties[field]["custom.width"])
+            for field in (*enum_fields, "reasons_text")
+        )
+        == 294
     )
 
 
@@ -240,13 +243,9 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert override_properties["status"]["custom.cellOptions"].get("wrapText") is False
     assert override_properties["reason"]["custom.cellOptions"].get("wrapText") is True
     assert override_properties["reason"]["custom.inspect"] is True
-    assert "custom.width" not in override_properties["reason"]
+    assert int(override_properties["reason"]["custom.width"]) == 150
     assert (
-        sum(
-            int(override_properties[field]["custom.width"])
-            for field in ("check", "status")
-        )
-        == 150
+        sum(int(override_properties[field]["custom.width"]) for field in visible) == 300
     )
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
         assert override_properties[hidden]["custom.hidden"] is True

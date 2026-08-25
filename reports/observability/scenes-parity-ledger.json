@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "3c82fa3c8da7fbd4dbae149d619e7e8a32745bb2d0f6f13aee17679f288eda81",
-    "bioetl-dq-v2": "87f063f1452632b9a0377600b7452a30829c667830c8b017b016a5f2805508d2",
-    "bioetl-incident-v1": "f7aead2b50c97dfaccc72a0da6af75bfc737e5879fff38f812baf0e56d363ef1",
-    "bioetl-overview-v2": "7feac9387e7ce3cd15721b207379b81719cc302781dcc1a273cc8f3b29891114",
-    "bioetl-provider-health-v2": "97198f27e613e69fb37cde2d5a4b14f8acba08afd13a14fedb83c6477a704ba2",
+    "bioetl-control-plane-v1": "d1c4ff2bec55df150bc0c4cc836efd5c9c7e475ff9140897543d86fb54da6651",
+    "bioetl-dq-v2": "b578c928f5a1eb3a02dd34b92792623f818c53744bf5d19232450c7fc0000208",
+    "bioetl-incident-v1": "871192f9f5427649b71216cb7e35d09756ae35e6ce8d3a50ecaa8635039ec8da",
+    "bioetl-overview-v2": "a9b44bc57c9369b6422d50027dea95223fddf715296059b47de2dbfddfb88d2c",
+    "bioetl-provider-health-v2": "8b2f6ab577b3e0628237ebe0630f6334588af2b11ef9343cd9e3df02bf05d516",
     "bioetl-run-explorer-v1": "5347eaa6f213cbd5f1877b6cfcb56202690023c94ffcde8e8df52367bc37313a",
-    "bioetl-runtime": "7fb79d9eed36f3dcd1496d8ac5f369cc758d7b1e1739ea65ed557200c74028d5"
+    "bioetl-runtime": "cf122b10f072220b686180818273031273ad5c0e4267e90429ffedd21ea823cc"
   },
   "panels": [
     {
@@ -211,23 +211,6 @@
           "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         ],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-control-plane-v1",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 906,
-      "panel_title": "Review Recovery Action",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
       }
     },
     {
@@ -1305,25 +1288,6 @@
         "datasource_uid": null,
         "expressions": [
           "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}"
-        ],
-        "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "JSON fallback",
-      "dashboard_uid": "bioetl-dq-v2",
-      "disposition": "advanced-evidence",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-dq-v2",
-      "panel_id": 9102,
-      "panel_title": "Inspect Current DQ Reasons",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": "prometheus",
-        "datasource_uid": "prometheus",
-        "expressions": [
-          "topk(5,bioetl_dq_current_reason{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}>0) or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}==1 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"warn\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\") or label_replace(label_replace(label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"}>=2 unless on(pipeline) max by(pipeline)(bioetl_dq_current_reason{pipeline=~\"$pipeline\"}>0)),\"reason\",\"reason_evidence_unavailable\",\"\",\"\"),\"severity\",\"crit\",\"\",\"\"),\"action_target\",\"verify_dq_reason_rules\",\"\",\"\")"
         ],
         "target_count": 1
       }
@@ -3938,7 +3902,7 @@
     "dashboard_uid_count": 7,
     "hidden_datasources": [],
     "missing_dashboard_uids": [],
-    "panel_disposition_count": 207,
+    "panel_disposition_count": 205,
     "parity_status": "pass",
     "route_count": 6,
     "run_id_prometheus_violations": [],

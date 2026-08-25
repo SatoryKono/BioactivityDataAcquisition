@@ -751,11 +751,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
         assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
-        assert any(
-            (_override_width(panel, name) is None)
-            or ((_override_width(panel, name) or 0) >= 260)
-            for name in wrapped
-        )
+        assert any((_override_width(panel, name) or 0) >= 260 for name in wrapped)
 
 
 def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:

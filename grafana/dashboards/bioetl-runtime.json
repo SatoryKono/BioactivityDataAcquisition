@@ -407,6 +407,10 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "custom.width",
+                "value": 260
               }
             ]
           },
@@ -1664,10 +1668,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 140
                   }
                 ]
               },
@@ -1846,10 +1846,6 @@
                         }
                       }
                     ]
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 140
                   }
                 ]
               },
@@ -3619,6 +3615,10 @@
                         "includeVars": false
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               },
@@ -3631,6 +3631,10 @@
                   {
                     "id": "links",
                     "value": []
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 220
                   }
                 ]
               },
@@ -3665,6 +3669,22 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 140
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 110
                   }
                 ]
               }
