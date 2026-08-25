@@ -5,11 +5,11 @@
 
 ## Summary
 
-- Scanned modules: `2468`
-- Internal import edges (raw): `7714`
+- Scanned modules: `2466`
+- Internal import edges (raw): `7709`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
-- Cross-layer module-group edges (total): `331`
+- Cross-layer module-group edges (total): `332`
 - Cross-layer module-group edges (top 55): `55`
 
 ## Layer Dependency Graph
@@ -21,13 +21,13 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1559 OK| application
+    application -->|1556 OK| application
     application -->|978 OK| domain
-    composition -->|187 OK| application
-    composition -->|681 OK| composition
-    composition -->|283 OK| domain
-    composition -->|238 OK| infrastructure
-    domain -->|1259 OK| domain
+    composition -->|188 OK| application
+    composition -->|685 OK| composition
+    composition -->|286 OK| domain
+    composition -->|239 OK| infrastructure
+    domain -->|1248 OK| domain
     infrastructure -->|761 OK| domain
     infrastructure -->|1196 OK| infrastructure
     interfaces -->|51 OK| application
@@ -40,13 +40,13 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1559 | allowed |
+| `application`    | `application`    |    1556 | allowed |
 | `application`    | `domain`         |     978 | allowed |
-| `composition`    | `application`    |     187 | allowed |
-| `composition`    | `composition`    |     681 | allowed |
-| `composition`    | `domain`         |     283 | allowed |
-| `composition`    | `infrastructure` |     238 | allowed |
-| `domain`         | `domain`         |    1259 | allowed |
+| `composition`    | `application`    |     188 | allowed |
+| `composition`    | `composition`    |     685 | allowed |
+| `composition`    | `domain`         |     286 | allowed |
+| `composition`    | `infrastructure` |     239 | allowed |
+| `domain`         | `domain`         |    1248 | allowed |
 | `infrastructure` | `domain`         |     761 | allowed |
 | `infrastructure` | `infrastructure` |    1196 | allowed |
 | `interfaces`     | `application`    |      51 | allowed |
@@ -67,11 +67,11 @@ flowchart LR
 | `infrastructure.storage`       | `domain.ports`                             |      61 |
 | `application.pipelines`        | `domain.types`                             |      57 |
 | `application.composite`        | `domain.ports`                             |      54 |
-| `composition.factories`        | `application.core`                         |      46 |
+| `composition.factories`        | `application.core`                         |      47 |
 | `infrastructure.storage`       | `domain.value_objects`                     |      43 |
 | `application.services`         | `domain.ports`                             |      42 |
 | `composition.bootstrap`        | `application.services`                     |      38 |
-| `composition.factories`        | `domain.ports`                             |      37 |
+| `composition.factories`        | `domain.ports`                             |      38 |
 | `infrastructure.storage`       | `domain.models`                            |      34 |
 | `application.composite`        | `domain.exceptions`                        |      33 |
 | `infrastructure.storage`       | `domain.medallion`                         |      31 |
