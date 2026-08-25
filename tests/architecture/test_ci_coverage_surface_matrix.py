@@ -173,6 +173,7 @@ class TestCiCoverageSurfaceMatrix:
         aggregation = matrix["coverage_aggregation"]
         coverage_block = _job_block(workflow, "coverage-verify")
 
+        assert "if: ${{ always() && !cancelled() }}" in coverage_block
         assert aggregation["artifact_pattern"] == "coverage-data-*"
         assert "pattern: coverage-data-*" in coverage_block
         for job in aggregation["required_upstream_jobs"]:
@@ -224,6 +225,12 @@ class TestCiCoverageSurfaceMatrix:
 
         assert "module-coverage-inventory.candidate.json" in producer
         assert "cmp --silent" not in producer
+        assert producer.index("coverage xml") < producer.index(
+            "report-module-coverage"
+        )
+        assert producer.index("report-module-coverage") < producer.index(
+            "coverage report --show-missing --fail-under=85"
+        )
         assert "needs: coverage-verify" in currentness
         assert "name: coverage-report" in currentness
         assert "cmp --silent" in currentness
