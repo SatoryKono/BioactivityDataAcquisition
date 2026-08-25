@@ -10,7 +10,7 @@ This document describes the internal implementation modules within the compositi
 
 ### `_pipeline_execution`
 
-**Purpose**: Internal implementation module behind the public `entrypoints` and `execution_api` modules.
+**Purpose**: Execution owner behind canonical first-party `entrypoints`; `execution_api` is an external logic-free lazy re-export shim.
 
 **Key Responsibilities**:
 
@@ -20,8 +20,8 @@ This document describes the internal implementation modules within the compositi
 
 **Public Counterparts**:
 
-- `composition.entrypoints`
-- `composition.execution_api`
+- `composition.entrypoints` (first-party runtime)
+- `composition.execution_api` (external compatibility)
 
 ### `_resource_management`
 
@@ -50,11 +50,11 @@ This document describes the internal implementation modules within the compositi
 
 **Public Counterparts**:
 
-- `composition.entrypoints`
-- `composition.control_plane_api`
-- `composition.health_api`
-- `composition.maintenance_api`
-- `composition.observability_api`
+- `composition.entrypoints` (first-party runtime)
+- `composition.health_service_access` (first-party health owner seam)
+- `composition.health_api` (external compatibility)
+- `composition.maintenance_api` (external compatibility)
+- `composition.observability_runtime`
 
 ## Implementation Patterns
 
@@ -81,7 +81,7 @@ graph TD
 
 ## Usage Guidelines
 
-1. **Import Paths**: Always import from public modules (`entrypoints`, `execution_api`, etc.) rather than internal modules.
+1. **Import Paths**: First-party runtime code resolves `entrypoints` or a reviewed owner seam. External integrations may retain `execution_api`, `health_api`, and `maintenance_api` imports.
 1. **Stability**: Internal modules may change without notice.
 1. **Testing**: Internal modules should only be imported by tests within the `composition` package.
 

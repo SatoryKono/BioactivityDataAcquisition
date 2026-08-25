@@ -45,20 +45,66 @@ def test_retired_services_api_module_stays_absent() -> None:
     assert not (ROOT / "src" / "bioetl" / "composition" / "services_api.py").exists()
 
 
-def test_get_metrics_service_runtime_cast_is_bound(
+def test_registered_zero_argument_getters_resolve_typed_ports(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Facade getters must keep typing.cast imported for runtime use."""
-    from bioetl.composition import _services
-
-    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
-    monkeypatch.setattr(
-        _services,
-        "_invoke_bootstrap",
-        lambda name, *args, **kwargs: (name, args, kwargs),
+    """Migrated zero-argument getters resolve their typed registry keys."""
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
+        VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
     )
+    from bioetl.composition import _services
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
-    assert _services.get_metrics_service() == ("bootstrap_metrics_service", (), {})
+    expected = object()
+    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
+    resolve = Mock(return_value=expected)
+    monkeypatch.setattr(_services, "_resolve", resolve)
+    getter_ports = {
+        "get_checkpoint_service": CheckpointServiceProtocol,
+        "get_audit_service": AuditInspectionServiceProtocol,
+        "get_bronze_cleanup_service": BronzeCleanupServiceProtocol,
+        "get_vacuum_service": VacuumServiceProtocol,
+        "get_contract_migration_service": ContractMigrationServiceProtocol,
+        "get_observability_workflow_service": ObservabilityWorkflowServiceProtocol,
+        "get_metrics_service": MetricsService,
+        "get_quarantine_port": QuarantinePort,
+        "get_adr_service": AdrServicePort,
+        "get_config_service": ConfigServiceProtocol,
+        "get_export_service": ExportServiceProtocol,
+        "get_lock_service": LockServiceProtocol,
+        "get_forensic_run_diff_service": ForensicRunDiffServiceProtocol,
+        "get_historical_replay_closure_service": (
+            HistoricalReplayClosureServiceProtocol
+        ),
+        "get_historical_replay_corpus_service": HistoricalReplayCorpusServiceProtocol,
+        "get_historical_replay_universe_service": (
+            HistoricalReplayUniverseServiceProtocol
+        ),
+        "get_lineage_service": LineageInspectionServiceProtocol,
+        "get_run_manifest_service": RunManifestInspectionServiceProtocol,
+        "get_workflow_inspection_service": WorkflowInspectionServiceProtocol,
+    }
+
+    for getter_name, port in getter_ports.items():
+        resolve.reset_mock()
+        assert getattr(_services, getter_name)() is expected
+        resolve.assert_called_once_with(port)
 
 
 def test_get_health_service_resolves_typed_application_port(
@@ -75,6 +121,55 @@ def test_get_health_service_resolves_typed_application_port(
 
     assert _services.get_health_service() is expected
     resolve.assert_called_once_with(HealthServiceProtocol)
+
+
+def test_contextual_getters_resolve_typed_factory_ports(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """E3 getters resolve typed factories and forward their exact context."""
+    from bioetl.composition import _services
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
+
+    data_root = Path("custom-data")
+    resolve_calls: list[type[object]] = []
+
+    def resolve(port: type[object]) -> object:
+        resolve_calls.append(port)
+        if port is QuarantineServiceFactoryProtocol:
+            return lambda *, data_root=None: ("quarantine", data_root)
+        if port is PipelineRunnerServiceFactoryProtocol:
+            return lambda *, registry: ("runner", registry)
+        if port is HealthServerDependenciesFactoryProtocol:
+            return lambda *, data_root=None: ("health", data_root)
+        raise AssertionError(port)
+
+    monkeypatch.setattr(_services, "_resolve", resolve)
+    monkeypatch.setattr(
+        _services,
+        "_ensure_pipeline_registrations",
+        lambda registry=None: "fresh-registry" if registry is None else registry,
+    )
+
+    assert _services.get_quarantine_service(data_root=data_root) == (
+        "quarantine",
+        data_root,
+    )
+    assert _services.get_pipeline_runner_service() == ("runner", "fresh-registry")
+    assert _services.get_pipeline_runner_service(registry="explicit-registry") == (
+        "runner",
+        "explicit-registry",
+    )
+    assert _services.get_health_server_dependencies() == ("health", None)
+    assert resolve_calls == [
+        QuarantineServiceFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        HealthServerDependenciesFactoryProtocol,
+    ]
 
 
 @pytest.mark.parametrize(

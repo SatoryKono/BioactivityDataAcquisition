@@ -216,7 +216,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
 
 
 def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
-    """Maintenance API should keep thin compatibility wrappers over owner seams."""
+    """Maintenance API should keep logic-free lazy exports over owner seams."""
     from bioetl.composition.maintenance_api import (
         get_bronze_cleanup_service as canonical_get_bronze_cleanup_service,
         get_vacuum_service as canonical_get_vacuum_service,

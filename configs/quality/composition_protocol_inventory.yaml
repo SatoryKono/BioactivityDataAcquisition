@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 62
+expected_total: 80
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -23,6 +23,18 @@ protocols:
 - name: LoggerBindableObservability
   path: src/bioetl/composition/contracts/factories.py
   line: 103
+  target_tier: composition_contracts
+- name: QuarantineServiceFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 117
+  target_tier: composition_contracts
+- name: PipelineRunnerServiceFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 127
+  target_tier: composition_contracts
+- name: HealthServerDependenciesFactoryProtocol
+  path: src/bioetl/composition/contracts/factories.py
+  line: 136
   target_tier: composition_contracts
 - name: HealthServerDependenciesProtocol
   path: src/bioetl/composition/contracts/health.py
@@ -108,6 +120,34 @@ protocols:
   path: src/bioetl/application/ports/control_plane.py
   line: 15
   target_tier: application
+- name: ForensicRunDiffServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 63
+  target_tier: application
+- name: HistoricalReplayClosureServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 73
+  target_tier: application
+- name: HistoricalReplayCorpusServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 88
+  target_tier: application
+- name: HistoricalReplayUniverseServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 102
+  target_tier: application
+- name: LineageInspectionServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 112
+  target_tier: application
+- name: RunManifestInspectionServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 127
+  target_tier: application
+- name: WorkflowInspectionServiceProtocol
+  path: src/bioetl/application/ports/control_plane.py
+  line: 145
+  target_tier: application
 - name: DQDetectorConfig
   path: src/bioetl/application/ports/dq.py
   line: 13
@@ -139,6 +179,38 @@ protocols:
 - name: ObservabilitySettingsProtocol
   path: src/bioetl/application/ports/observability.py
   line: 8
+  target_tier: application
+- name: CheckpointServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 41
+  target_tier: application
+- name: AuditInspectionServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 65
+  target_tier: application
+- name: VacuumServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 97
+  target_tier: application
+- name: ContractMigrationServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 118
+  target_tier: application
+- name: ObservabilityWorkflowServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 124
+  target_tier: application
+- name: ConfigServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 158
+  target_tier: application
+- name: ExportServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 188
+  target_tier: application
+- name: LockServiceProtocol
+  path: src/bioetl/application/ports/operations.py
+  line: 208
   target_tier: application
 - name: ContractPolicyLoaderProtocol
   path: src/bioetl/application/ports/pipeline.py

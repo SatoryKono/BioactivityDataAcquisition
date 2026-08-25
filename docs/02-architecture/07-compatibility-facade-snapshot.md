@@ -17,8 +17,8 @@
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
 - Curated rows requiring external breaking change process: `12`
-- Curated rows marked internal-callers-zero: `6`
-- First-party src imports targeting internal-callers-zero rows: `1`
+- Curated rows marked internal-callers-zero: `7`
+- First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
 ## Tracked Docstring Prefixes
@@ -56,7 +56,7 @@
 - `src/bioetl/interfaces/cli/commands/quarantine.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/composition/entrypoints.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/composition/health_api.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/composition/maintenance_api.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/maintenance_api.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/infrastructure/config/__init__.py` — consumer class: `bioetl.infrastructure.config`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — consumer class: `bioetl.domain.composite`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/application/composite/merger.py` — consumer class: `bioetl.application.composite`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
@@ -125,4 +125,4 @@
 
 ### First-Party Src Imports Of Internal-Callers-Zero Rows
 
-- `bioetl.composition.health_api` imported by `src/bioetl/interfaces/cli/commands/domains/health/server_integration_observability.py`
+- None.
