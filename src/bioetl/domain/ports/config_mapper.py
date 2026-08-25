@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.config.pipeline import PipelineConfig
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     PipelineYamlConfig = object
 
 
+@runtime_checkable
 class DomainConfigMapper(Protocol):
     """Callable contract for mapping YAML config to domain config."""
 

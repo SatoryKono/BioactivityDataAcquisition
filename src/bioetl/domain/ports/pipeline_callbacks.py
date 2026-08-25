@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     PipelineContext = object
 
 
+@runtime_checkable
 class TransformCallback(Protocol):
     """Bronze-to-Silver transformation callback contract."""
 
@@ -24,6 +25,7 @@ class TransformCallback(Protocol):
         ...
 
 
+@runtime_checkable
 class GoldFilterCallback(Protocol):
     """Gold-write predicate callback contract."""
 
@@ -32,6 +34,7 @@ class GoldFilterCallback(Protocol):
         ...
 
 
+@runtime_checkable
 class GoldTransformCallback(Protocol):
     """Silver-to-Gold transformation callback contract."""
 

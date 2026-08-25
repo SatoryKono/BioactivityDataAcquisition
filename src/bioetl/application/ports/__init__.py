@@ -3,6 +3,8 @@
 Supported entry: ``bioetl.application.ports``.
 """
 
+from __future__ import annotations
+
 from bioetl.application.ports.control_plane import (
     ControlPlaneArtifactLifecycleStoreProtocol,
 )

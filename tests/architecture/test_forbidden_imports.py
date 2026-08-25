@@ -755,15 +755,13 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.composite_catalog",
             "bioetl.composition.control_plane_service_access",
             "bioetl.composition.execution_api",
-            "bioetl.composition.execution_api",
             "bioetl.composition.health_api",
             "bioetl.composition.health_service_access",
             "bioetl.composition.maintenance_api",
-            "bioetl.composition.maintenance_api",
             "bioetl.composition.observability_runtime",
             "bioetl.composition.registry_api",
+            "bioetl.composition.contracts",
             # Internal composition modules used by interfaces for runtime access
-            "bioetl.composition._resource_management",
             "bioetl.composition._service_protocols",
             "bioetl.composition._services",
             "bioetl.composition.runtime_builders.config_access",
@@ -784,14 +782,12 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.composite_catalog\n"
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.execution_api\n"
-            "  - bioetl.composition.execution_api\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.health_service_access\n"
             "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.maintenance_api\n"
             "  - bioetl.composition.observability_runtime\n"
             "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition._resource_management (internal runtime access)\n"
+            "  - bioetl.composition.contracts\n"
             "  - bioetl.composition._service_protocols (internal runtime access)\n"
             "  - bioetl.composition._services (internal runtime access)\n"
             "  - bioetl.composition.runtime_builders.config_access (internal runtime access)\n\n"

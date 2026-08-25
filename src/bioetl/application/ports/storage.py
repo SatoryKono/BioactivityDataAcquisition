@@ -73,6 +73,10 @@ class StorageContextProtocol(Protocol):
     def checkpoints_path(self) -> Path: ...
 
 
+StorageContextLike = StorageContextProtocol
+CompositeMergeStorage = CompositeMergeStorageProtocol
+
+
 class StorageFactoryProtocol(Protocol):
     """Structural contract shared by the lazy and concrete storage factories."""
 
