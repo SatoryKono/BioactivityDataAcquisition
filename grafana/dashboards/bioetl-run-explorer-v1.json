@@ -1019,6 +1019,7 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
+                  "Time": true,
                   "removals": true
                 },
                 "indexByName": {
