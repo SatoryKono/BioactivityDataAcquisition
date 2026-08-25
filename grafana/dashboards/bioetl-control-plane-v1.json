@@ -5243,6 +5243,7 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
+                  "Time": true,
                   "row_status": true,
                   "percintage": true
                 },
