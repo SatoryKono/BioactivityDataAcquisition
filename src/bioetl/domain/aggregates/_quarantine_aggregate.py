@@ -23,11 +23,11 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineEntryPropertiesMixin,
+    QuarantineEntryTransitionsMixin,
     QuarantineStatus,
     ResolutionInfo,
     _validate_quarantine_required_fields,
 )
-from bioetl.domain.aggregates.quarantine_entry import QuarantineEntryTransitionsMixin
 from bioetl.domain.deterministic_identity import deterministic_id
 
 if TYPE_CHECKING:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.aggregates.events import (
     PipelineCompleted,
@@ -54,6 +54,19 @@ class _PipelineRunAttrs:
     _manifest_id: str | None
     _metadata: JsonDict
 
+    def __init__(self) -> None:
+        """Initialize typed slots for standalone mixin safety."""
+        self._run_id = cast(Any, None)
+        self._run_type = cast(Any, None)
+        self._pipeline_name = ""
+        self._status = PipelineRunState.PENDING
+        self._stages = []
+        self._started_at = None
+        self._ended_at = None
+        self._events = []
+        self._manifest_id = None
+        self._metadata = {}
+
 
 class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
     """State-transition methods for PipelineRun."""
@@ -61,11 +74,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
     __slots__ = ()
 
     def start(self, started_at: datetime) -> None:
-        """Start the pipeline run.
-
-        Args:
-            started_at: Explicit start timestamp.
-        """
+        """Start the pipeline run at an explicit timestamp."""
         if self._status != PipelineRunState.PENDING:
             raise InvalidStateError(
                 f"Cannot start run in status {self._status.value}",
@@ -172,11 +181,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         )
 
     def complete(self, completed_at: datetime) -> None:
-        """Mark run as COMPLETED if all stages succeeded.
-
-        Args:
-            completed_at: Explicit completion timestamp.
-        """
+        """Mark run as COMPLETED if all stages succeeded."""
         self._assert_running("complete")
         self._assert_can_complete()
         ended_at = completed_at
@@ -206,13 +211,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         *,
         failed_at: datetime,
     ) -> None:
-        """Mark run as failed without stage-level details.
-
-        Args:
-            error: Human-readable error description.
-            error_type: Optional error classification (e.g., exception class name).
-            failed_at: Explicit failure timestamp.
-        """
+        """Mark run as failed without stage-level details."""
         self._assert_running("fail")
         self._status = PipelineRunState.FAILED
         self._ended_at = failed_at
