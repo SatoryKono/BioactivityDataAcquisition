@@ -1089,9 +1089,14 @@
                 ]
               },
               {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto"
+                  "type": "auto",
+                  "wrapText": true
                 }
               },
               {
@@ -1114,9 +1119,14 @@
                 "value": "Status"
               },
               {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-text"
+                  "type": "color-text",
+                  "wrapText": false
                 }
               },
               {

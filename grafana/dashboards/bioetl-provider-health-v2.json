@@ -273,7 +273,7 @@
       },
       "options": {
         "bioetlDisplayTitle": "Start Provider Triage",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">Next action: open the worst Fleet Severity row.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">Next action: open the worst Fleet Severity row.</div>",
         "mode": "html"
       },
       "links": [
@@ -391,14 +391,38 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Value"
             },
             "properties": [
               {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "mode": "basic"
+                  "mode": "basic",
+                  "wrapText": false
                 }
               },
               {

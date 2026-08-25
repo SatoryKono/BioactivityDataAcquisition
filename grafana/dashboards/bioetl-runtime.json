@@ -251,7 +251,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">First action: if OK continue monitoring; else open the highest-severity blocker.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: if OK continue monitoring; else open the highest-severity blocker.</div>"
       },
       "links": [
         {
@@ -373,12 +373,31 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "reason"
             },
             "properties": [
               {
                 "id": "custom.width",
-                "value": 280
+                "value": 220
               },
               {
                 "id": "custom.cellOptions",
@@ -390,6 +409,25 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action_target"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -442,7 +480,15 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "__name__": true
+              "Time": true,
+              "__name__": true,
+              "pipeline": true,
+              "run_type": true
+            },
+            "indexByName": {
+              "severity": 0,
+              "reason": 1,
+              "action_target": 2
             },
             "renameByName": {
               "Value": "Count",
