@@ -8,10 +8,10 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `9f57924063685bd8ee71f78bf5b14417fe7132c7`
+Audited commit SHA: `cdff5b63e6f31bee5c31ae1d3c19a4fe7045481b`
 
 
-Evidence surface SHA-256: `e20338a8a88c2b697e1a3843af49c5d16865611f787ea7b924ac92af2706bccb`
+Evidence surface SHA-256: `8bfb7cca71ed2c3e4597394c67c7483800ad838c4f4b86d3de7dc99740934ebe`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,10 +19,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "9f57924063685bd8ee71f78bf5b14417fe7132c7",
-  "evidence_surface_sha256": "e20338a8a88c2b697e1a3843af49c5d16865611f787ea7b924ac92af2706bccb",
+  "audited_commit_sha": "cdff5b63e6f31bee5c31ae1d3c19a4fe7045481b",
+  "evidence_surface_sha256": "8bfb7cca71ed2c3e4597394c67c7483800ad838c4f4b86d3de7dc99740934ebe",
   "metrics": {
-    "architecture_integral_score": 9.41,
+    "architecture_integral_score": 9.28,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
@@ -48,15 +48,14 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-
-Refresh reason: Re-pin to origin/main `9f57924063` for #9337 after remote-main baseline refresh; no budget growth.
+Refresh reason: Re-pin to origin/main `cdff5b63e6` for #9646/#9647 after Wave B artifact refresh; remote-main baseline updated; no budget growth.
 
 
 ## Executive summary
 
 1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
 1. Release status: **debt-governance gates passing**.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
+1. Architecture quality integral score: **9.28** (`good_targeted_improvements`). Integral score `9.28`.
 1. Module inventory (from `module-coverage-inventory.json` only):
    - source_module_count: **2435**
    - fully_covered: **1534**

@@ -48710,7 +48710,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
+<<<<<<< HEAD
   "source_tree_sha256": "79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887",
+||||||| e57d281869
+  "source_tree_sha256": "1919669ceaca9c436116c44aca40f457719c2b5a8492972531e034806defc3ea",
+=======
+  "source_tree_sha256": "428a10c2f0d422834320b7b6ef3954fb2df54b244f2209c4273e232411ca94be",
+>>>>>>> fix/audit-tech-debt-cycle-cdff5b63
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
