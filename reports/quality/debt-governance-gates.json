@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2",
-      "limit": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2",
+      "current": "840ce03820ddf19376b50391896ced3a1dc983a76e378612b876f9a91431f51b",
+      "limit": "840ce03820ddf19376b50391896ced3a1dc983a76e378612b876f9a91431f51b",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,16 +56,16 @@
     },
     {
       "current": {
-        "source_module_count": 2465,
-        "source_tree_sha256": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2",
+        "source_module_count": 2466,
+        "source_tree_sha256": "840ce03820ddf19376b50391896ced3a1dc983a76e378612b876f9a91431f51b",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 76
+        "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2465,
-        "source_tree_sha256": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2",
+        "source_module_count": 2466,
+        "source_tree_sha256": "840ce03820ddf19376b50391896ced3a1dc983a76e378612b876f9a91431f51b",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 76
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,13 +74,13 @@
       "status": "pass"
     },
     {
-      "current": 76,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "2d7a69883cd8953de229bc9b98fa9cf9e2392008f557a56c4fbeeca6ee9efda0",
+      "current": "5915edce6d7f1d3ff39ccdaac54da86cb67d483e366717d295dd4cec97aab9fb",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -458,20 +458,18 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 44,
+    "fail": 0,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.28,
-    "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 1,
-    "failing_gates": [
-      "module_coverage_unmeasured_modules"
-    ],
+    "architecture_quality_scorecard_integral_score": 9.28,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 45,
-    "pass_count": 44,
-    "release_gate_status": "failing",
+    "pass_count": 45,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
