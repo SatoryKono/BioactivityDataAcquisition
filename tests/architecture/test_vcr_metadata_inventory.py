@@ -18,6 +18,10 @@ from typing import Any, cast
 
 import pytest
 import yaml
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"

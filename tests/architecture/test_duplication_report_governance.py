@@ -20,6 +20,7 @@ from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRe
 from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 from scripts.engineering.qa.report_duplication_baseline import _render_markdown
 from tests.architecture.quality_artifacts import (
+    load_quality_json,
     quality_artifact_path,
 )
 
