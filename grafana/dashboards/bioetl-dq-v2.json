@@ -1943,7 +1943,9 @@
                   "mode": "off"
                 },
                 "inspect": true,
-                "cellOptions": {}
+                "cellOptions": {
+                  "type": "auto"
+                }
               },
               "mappings": [
                 {
@@ -2096,7 +2098,9 @@
                   "mode": "off"
                 },
                 "inspect": true,
-                "cellOptions": {}
+                "cellOptions": {
+                  "type": "auto"
+                }
               },
               "mappings": [
                 {
