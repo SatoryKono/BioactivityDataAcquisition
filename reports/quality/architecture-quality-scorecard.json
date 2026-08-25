@@ -226,7 +226,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "796af2622008a01f861d55759d4b28e7cd64df2daeb71a77cc5458375b25dca5"
+      "source_fingerprint": "a967733664feb88b447886bc5ed6e39637e26405e3ca2cbe9c379956818435ce"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
