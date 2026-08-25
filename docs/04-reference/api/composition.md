@@ -24,9 +24,10 @@ See also: [ADR-005: Composition Layer Separation](../../02-architecture/decision
 
 Package-root note: `bioetl.composition` is narrower than the layer as a whole.
 Its package root currently exports registry helpers, while execution/resource
-and service-oriented seams are exposed through dedicated submodules such as
-`entrypoints`, `execution_api`, `resources_api`, `control_plane_api`,
-`health_api`, `maintenance_api`, and `observability_api`.
+and service-oriented seams are exposed through dedicated submodules. First-party
+runtime code resolves `entrypoints` or responsibility-focused owners;
+`execution_api`, `health_api`, and `maintenance_api` are logic-free lazy
+re-export shims retained as stable external import paths.
 
 ______________________________________________________________________
 
@@ -215,9 +216,10 @@ Current sanctioned public surfaces in `composition/`:
 
 | Module          | Policy Role                            | New Code Guidance                                                                                                   |
 | --------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `entrypoints`   | `public-entrypoint` stable public seam | Treat as execution-focused seam. For service/resource operations, import narrow owner APIs directly.                |
-| `execution_api` | Narrow execution-focused public API    | Prefer for new CLI/orchestration execution call sites.                                                              |
-| `resources_api` | Narrow resource-management public API  | Prefer for new quarantine/checkpoint/lifecycle call sites.                                                          |
+| `entrypoints`   | Canonical first-party runtime seam      | Use for execution and registered service/resource operations.                                                       |
+| `execution_api` | Logic-free external compatibility shim | Preserve for external imports; first-party code resolves `entrypoints`.                                             |
+| `health_api`    | Logic-free external compatibility shim | Preserve for external imports; first-party code uses `health_service_access` or an owner module.                    |
+| `maintenance_api` | Logic-free external compatibility shim | Preserve for external imports; first-party code resolves `entrypoints` or a reviewed owner.                       |
 
 Internal modules `_pipeline_execution`, `_resource_management`, `_services` remain
 implementation seams behind the public modules above and are not sanctioned import paths
@@ -275,23 +277,15 @@ ______________________________________________________________________
 
 ## Entrypoints (`composition.entrypoints`)
 
-`composition.entrypoints` is a sanctioned, stable public composition seam.
-Its explicit public surface (`__all__`) is intentionally execution-focused:
+`composition.entrypoints` is the canonical first-party runtime seam. Its
+explicit `__all__` exposes typed registry operations plus the reviewed service,
+maintenance, and metrics-server capabilities. Execution/composite compatibility
+attributes remain import-stable without widening `__all__`.
 
-- `ArchiveOptions`, `PipelineRunResult`, `RunOptions`, `RunResult`, `VacuumOptions`
-- `build_pipeline_context`, `create_pipeline_runner`, `run_pipeline`
-- `ensure_metrics_server_started`, `maybe_start_metrics_server`, `push_metrics_to_gateway`, `start_metrics_server`
-- `bootstrap_composite_runner`, `load_composite_config`, `load_pipeline_config`
-
-Legacy service/resource symbols are still resolved through lazy compatibility lookup
-and emit `DeprecationWarning` with canonical targets.
-First-party source must not add imports of those deprecated symbols; they are
-retained only for external compatibility and dedicated boundary tests.
-
-When new call sites only need one capability family, import the narrower
-`execution_api`, `resources_api`, `control_plane_api`, `health_api`,
-`maintenance_api`, or `observability_api` modules directly instead of expanding
-`entrypoints`.
+External consumers may keep the stable `execution_api`, `health_api`, and
+`maintenance_api` import paths; those modules contain lazy export tables and no
+executable wrapper bodies. First-party callers resolve `entrypoints`,
+`health_service_access`, or responsibility-focused owners instead.
 
 ______________________________________________________________________
 
@@ -311,8 +305,10 @@ ______________________________________________________________________
 | `builders`             | `FilterConfigBuilder` -- builds filter configs from YAML                                                                           |
 | `bootstrap_logger`     | `BootstrapLogger` -- logging during bootstrap phase                                                                                |
 | `bootstrap_contexts`   | Context objects for bootstrap configuration                                                                                        |
-| `entrypoints`          | Retained stable public composition seam (execution-first + legacy compatibility lookup)                                            |
-| `execution_api`        | Public execution-focused composition API                                                                                           |
+| `entrypoints`          | Canonical first-party runtime and typed registry seam                                                                               |
+| `execution_api`        | Logic-free lazy re-export shim retained for external compatibility                                                                 |
+| `health_api`           | Logic-free lazy re-export shim retained for external compatibility                                                                 |
+| `maintenance_api`      | Logic-free lazy re-export shim retained for external compatibility                                                                 |
 | `resources_api`        | Public resource-management composition API                                                                                         |
 | `composite_api`        | Public composite-runtime composition API                                                                                           |
 | `observability_api`    | Public observability composition API                                                                                               |

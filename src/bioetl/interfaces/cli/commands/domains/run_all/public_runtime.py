@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable, Coroutine, Mapping
 from contextlib import AbstractAsyncContextManager
+from importlib import import_module
 from typing import TYPE_CHECKING
 
 import click
@@ -74,10 +75,9 @@ def load_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    from bioetl.composition.execution_api import (
-        get_pipeline_runner_service as impl,
-    )
-
+    impl = import_module(
+        "bioetl.composition.entrypoints"
+    ).get_pipeline_runner_service
     return impl(registry=registry)
 
 

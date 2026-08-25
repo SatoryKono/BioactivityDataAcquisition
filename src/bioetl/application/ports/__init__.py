@@ -7,6 +7,13 @@ from __future__ import annotations
 
 from bioetl.application.ports.control_plane import (
     ControlPlaneArtifactLifecycleStoreProtocol,
+    ForensicRunDiffServiceProtocol,
+    HistoricalReplayClosureServiceProtocol,
+    HistoricalReplayCorpusServiceProtocol,
+    HistoricalReplayUniverseServiceProtocol,
+    LineageInspectionServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+    WorkflowInspectionServiceProtocol,
 )
 from bioetl.application.ports.dq import (
     ConfigurableDQMonitor,
@@ -20,6 +27,16 @@ from bioetl.application.ports.metrics import (
     WorkflowMetricsFactoryProtocol,
 )
 from bioetl.application.ports.observability import ObservabilitySettingsProtocol
+from bioetl.application.ports.operations import (
+    AuditInspectionServiceProtocol,
+    CheckpointServiceProtocol,
+    ConfigServiceProtocol,
+    ContractMigrationServiceProtocol,
+    ExportServiceProtocol,
+    LockServiceProtocol,
+    ObservabilityWorkflowServiceProtocol,
+    VacuumServiceProtocol,
+)
 from bioetl.application.ports.pipeline import (
     BaseServicesFactoryProtocol,
     ContractPolicyLoaderProtocol,
@@ -50,20 +67,32 @@ from bioetl.application.ports.storage import (
 
 __all__ = [
     "AdapterCreatorProtocol",
+    "AuditInspectionServiceProtocol",
     "BaseServicesFactoryProtocol",
+    "CheckpointServiceProtocol",
     "CompositeMergeStorageProtocol",
     "CompositeRuntimeStorageProtocol",
+    "ConfigServiceProtocol",
     "ConfigurableDQMonitor",
+    "ContractMigrationServiceProtocol",
     "ContractPolicyLoaderProtocol",
     "ControlPlaneArtifactLifecycleStoreProtocol",
     "DQDetectorConfig",
     "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
+    "ExportServiceProtocol",
+    "ForensicRunDiffServiceProtocol",
     "GoldMergedWriteProtocol",
     "HealthServiceProtocol",
+    "HistoricalReplayClosureServiceProtocol",
+    "HistoricalReplayCorpusServiceProtocol",
+    "HistoricalReplayUniverseServiceProtocol",
+    "LineageInspectionServiceProtocol",
+    "LockServiceProtocol",
     "MetricsFactoryProtocol",
     "MetricsService",
     "ObservabilitySettingsProtocol",
+    "ObservabilityWorkflowServiceProtocol",
     "PipelineRegistryProtocol",
     "PipelineRunnerProtocol",
     "ProviderAdapterFactoryProtocol",
@@ -72,11 +101,14 @@ __all__ = [
     "ProviderRegistrarProtocol",
     "ProviderSettingsProtocol",
     "RegistryEntryProtocol",
+    "RunManifestInspectionServiceProtocol",
     "SchemaBuilderProtocol",
     "SecretValueProviderProtocol",
     "SilverMergedWriteProtocol",
     "StorageContextProtocol",
     "StorageFactoryProtocol",
     "SupportAwareDataSourceCreatorProtocol",
+    "VacuumServiceProtocol",
+    "WorkflowInspectionServiceProtocol",
     "WorkflowMetricsFactoryProtocol",
 ]

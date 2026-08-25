@@ -14,6 +14,7 @@ __all__ = [
 ]
 
 _SERVICES_MODULE = "bioetl.composition._services"
+_RESOURCES_RUNTIME_MODULE = "bioetl.composition.resources_runtime"
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -32,40 +33,18 @@ if TYPE_CHECKING:
         MedallionLifecycleServiceProtocol,
     )
 
+    async def archive_table(table: str, options: ArchiveOptions) -> int: ...
+
+    def get_lifecycle_service() -> MedallionLifecycleServiceProtocol: ...
+
+    async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol: ...
+
+    async def vacuum_table(table: str, options: VacuumOptions) -> int: ...
+
 cleanup_bronze: Callable[[int, bool], Awaitable[BronzeCleanupResult]]
 get_bronze_cleanup_service: Callable[[], BronzeCleanupService]
 get_contract_migration_service: Callable[[], ContractMigrationService]
 get_vacuum_service: Callable[[], VacuumService]
-
-
-async def archive_table(table: str, options: ArchiveOptions) -> int:
-    """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_runtime import archive_table as _archive_table
-
-    return await _archive_table(table, options)
-
-
-def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
-    """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_runtime import (
-        get_lifecycle_service as _get_lifecycle_service,
-    )
-
-    return _get_lifecycle_service()
-
-
-async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
-    """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_runtime import preview_cleanup as _preview_cleanup
-
-    return await _preview_cleanup(pipeline)
-
-
-async def vacuum_table(table: str, options: VacuumOptions) -> int:
-    """Retained maintenance wrapper outside ``__all__``."""
-    from bioetl.composition.resources_runtime import vacuum_table as _vacuum_table
-
-    return await _vacuum_table(table, options)
 
 
 _PUBLIC_EXPORTS = {
@@ -74,8 +53,15 @@ _PUBLIC_EXPORTS = {
     "get_contract_migration_service": _SERVICES_MODULE,
     "get_vacuum_service": _SERVICES_MODULE,
 }
+_COMPATIBILITY_EXPORTS = {
+    "archive_table": _RESOURCES_RUNTIME_MODULE,
+    "get_lifecycle_service": _RESOURCES_RUNTIME_MODULE,
+    "preview_cleanup": _RESOURCES_RUNTIME_MODULE,
+    "vacuum_table": _RESOURCES_RUNTIME_MODULE,
+}
+_LAZY_EXPORTS = {**_PUBLIC_EXPORTS, **_COMPATIBILITY_EXPORTS}
 install_cached_public_exports(
     module_globals=globals(),
-    public_exports=_PUBLIC_EXPORTS,
+    public_exports=_LAZY_EXPORTS,
     module_name=__name__,
 )

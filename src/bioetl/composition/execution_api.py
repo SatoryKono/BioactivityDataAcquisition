@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
@@ -13,6 +12,7 @@ _PIPELINE_EXECUTION_MODULE = "bioetl.composition._pipeline_execution"
 _PIPELINE_RUNNER_MODELS_MODULE = (
     "bioetl.application.services.execution.pipeline_runner_models"
 )
+_OBSERVABILITY_RUNTIME_MODULE = "bioetl.composition.observability_runtime"
 
 _PUBLIC_EXPORTS: dict[str, str] = {
     "ArchiveOptions": _PIPELINE_EXECUTION_MODULE,
@@ -25,6 +25,7 @@ _PUBLIC_EXPORTS: dict[str, str] = {
     "ensure_metrics_server_started": _PIPELINE_EXECUTION_MODULE,
     "get_pipeline_runner_service": "bioetl.composition._services",
     "maybe_start_metrics_server": "bioetl.composition.bootstrap.runtime.observability",
+    "push_metrics_to_gateway": _OBSERVABILITY_RUNTIME_MODULE,
     "run_pipeline": _PIPELINE_EXECUTION_MODULE,
 }
 
@@ -44,7 +45,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
     from bioetl.application.services.execution.pipeline_runner_models import (
         PipelineRunResult,
@@ -84,32 +85,16 @@ if TYPE_CHECKING:
         registry: PipelineRegistry | None = None,
     ) -> PipelineRunnerService: ...
 
+    def push_metrics_to_gateway(
+        run_label: str = "bioetl",
+        *,
+        pipeline_name: str | None = None,
+        run_type: str | None = None,
+        grouping_key_extra: Mapping[str, str] | None = None,
+        metric_names: tuple[str, ...] | None = None,
+    ) -> bool: ...
+
     async def run_pipeline(name: str, options: RunOptions) -> RunResult: ...
-
-
-def push_metrics_to_gateway(
-    run_label: str = "bioetl",
-    *,
-    pipeline_name: str | None = None,
-    run_type: str | None = None,
-    grouping_key_extra: Mapping[str, str] | None = None,
-    metric_names: tuple[str, ...] | None = None,
-) -> bool:
-    """Push metrics through the composition-owned observability seam."""
-    from bioetl.composition.observability_runtime import (
-        push_metrics_to_gateway as _impl,
-    )
-
-    return bool(
-        _impl(
-            run_label=run_label,
-            pipeline_name=pipeline_name,
-            run_type=run_type,
-            grouping_key_extra=grouping_key_extra,
-            metric_names=metric_names,
-        )
-    )
-
 
 install_lazy_exports(
     module_globals=globals(), public_exports=_PUBLIC_EXPORTS, module_name=__name__

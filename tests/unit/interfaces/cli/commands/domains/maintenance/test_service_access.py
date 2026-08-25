@@ -45,14 +45,20 @@ def test_service_access_delegates_sync_accessors(
 ) -> None:
     calls: list[str] = []
 
-    maintenance = ModuleType("bioetl.composition.maintenance_api")
-    maintenance.get_lifecycle_service = lambda: calls.append("lifecycle") or "lifecycle"
-    maintenance.get_vacuum_service = lambda: calls.append("vacuum") or "vacuum"
-    maintenance.get_bronze_cleanup_service = lambda: calls.append("bronze") or "bronze"
-    maintenance.get_contract_migration_service = lambda: (
+    entrypoints = ModuleType("bioetl.composition.entrypoints")
+    entrypoints.get_lifecycle_service = (
+        lambda: calls.append("lifecycle") or "lifecycle"
+    )
+    entrypoints.get_vacuum_service = lambda: calls.append("vacuum") or "vacuum"
+    entrypoints.get_contract_migration_service = lambda: (
         calls.append("contract") or "contract"
     )
-    monkeypatch.setitem(__import__("sys").modules, maintenance.__name__, maintenance)
+    services = ModuleType("bioetl.composition._services")
+    services.get_bronze_cleanup_service = (
+        lambda: calls.append("bronze") or "bronze"
+    )
+    monkeypatch.setitem(__import__("sys").modules, entrypoints.__name__, entrypoints)
+    monkeypatch.setitem(__import__("sys").modules, services.__name__, services)
 
     assert subject.get_lifecycle_service() == "lifecycle"
     assert subject.get_vacuum_service() == "vacuum"
@@ -68,7 +74,7 @@ async def test_service_access_preview_cleanup_delegates_async(
     async def _preview_cleanup(pipeline: str) -> str:
         return f"preview:{pipeline}"
 
-    fake_access = ModuleType("bioetl.composition.maintenance_api")
+    fake_access = ModuleType("bioetl.composition.entrypoints")
     fake_access.preview_cleanup = _preview_cleanup
     monkeypatch.setitem(__import__("sys").modules, fake_access.__name__, fake_access)
 

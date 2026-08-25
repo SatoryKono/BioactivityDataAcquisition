@@ -56,11 +56,67 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         "control_plane_service_access.py",
         "health_service_access.py",
     ]
-    from bioetl.application.ports import HealthServiceProtocol
+    from bioetl.application.ports import (
+        AuditInspectionServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
+        HealthServiceProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        RunManifestInspectionServiceProtocol,
+        VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
+    )
+    from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
     from bioetl.composition.entrypoints import resolve, register, registered_ports
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
     assert callable(resolve) and callable(register)
-    assert set(registered_ports()) == {HealthServiceProtocol}
+    assert set(registered_ports()) == {
+        AdrServicePort,
+        AuditInspectionServiceProtocol,
+        BronzeCleanupServiceProtocol,
+        CheckpointServiceProtocol,
+        ConfigServiceProtocol,
+        ContractMigrationServiceProtocol,
+        ExportServiceProtocol,
+        ForensicRunDiffServiceProtocol,
+        HealthServiceProtocol,
+        HealthServerDependenciesFactoryProtocol,
+        HistoricalReplayClosureServiceProtocol,
+        HistoricalReplayCorpusServiceProtocol,
+        HistoricalReplayUniverseServiceProtocol,
+        LineageInspectionServiceProtocol,
+        LockServiceProtocol,
+        MetricsService,
+        ObservabilityWorkflowServiceProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantinePort,
+        QuarantineServiceFactoryProtocol,
+        RunManifestInspectionServiceProtocol,
+        VacuumServiceProtocol,
+        WorkflowInspectionServiceProtocol,
+    }
+    services_source = (
+        ROOT / "src/bioetl/composition/_services.py"
+    ).read_text(encoding="utf-8")
+    assert "invoke_bootstrap" not in services_source
+    assert "_BOOTSTRAP_EXPORTS" not in services_source
+    assert "resolve_bootstrap_attr" not in services_source
+    assert not (ROOT / "src/bioetl/composition/_service_invocation.py").exists()
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
     assert [path.name for path in api_files] == [
         "execution_api.py",
@@ -68,6 +124,16 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         "maintenance_api.py",
         "registry_api.py",
     ]
+    for api_file in api_files:
+        tree = ast.parse(api_file.read_text(encoding="utf-8"))
+        executable_bodies = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        ]
+        assert executable_bodies == [], (
+            f"{api_file.name} must remain a logic-free lazy re-export facade"
+        )
 
 
 def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:
