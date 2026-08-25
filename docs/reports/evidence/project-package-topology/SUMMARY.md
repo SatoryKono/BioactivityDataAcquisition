@@ -22,8 +22,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2435` with
-`source_tree_sha256=dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc`.
+`source_module_count=2463` with
+`source_tree_sha256=a36cf49dd39876187d3775cc3225d06f7ea2fbd471ec8a1e6f40f4fced8489aa`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -31,7 +31,7 @@ and related module-coverage inventory hash-only reconcile.
 
 Refresh note (2026-08-25): ARCH-VG hash-only reconcile after composition/domain
 facade closeout. Source baseline is
-`source_module_count=2435` with the updated `source_tree_sha256` above; the
+`source_module_count=2463` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -68,7 +68,7 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2435`, including two
+- Current Python file count under `src/bioetl` is `2463`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=609`, `application=750`,
   `infrastructure=626`, `composition=283`, `interfaces=157`.
@@ -90,6 +90,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc`
+- source_tree_sha256: `a36cf49dd39876187d3775cc3225d06f7ea2fbd471ec8a1e6f40f4fced8489aa`
 
-`source_module_count=2435`
+`source_module_count=2463`

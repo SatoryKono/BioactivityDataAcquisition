@@ -11,7 +11,6 @@ from bioetl.infrastructure.config.field_group_loader import (
     load_field_groups,
 )
 
-from bioetl.application.services.quality.dq_report_service import DQReportService
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
 from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
     bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
@@ -41,7 +40,6 @@ from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import 
 )
 from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
 from bioetl.composition.runtime_builders.config_access import get_settings
-from bioetl.infrastructure.export.dq_report_writer import DQReportWriter
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 
 if TYPE_CHECKING:
@@ -49,6 +47,7 @@ if TYPE_CHECKING:
 
     from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
+    from bioetl.application.services.quality.dq_report_service import DQReportService
     from bioetl.composition.bootstrap.composite_infrastructure_context import (
         CompositeInfrastructureContext,
     )
@@ -225,13 +224,15 @@ def _create_dq_report_service(
     Returns:
         DQReportService ready for composite pipeline DQ report generation.
     """
+    from bioetl.application.services.quality import dq_report_service
+    from bioetl.infrastructure.export import dq_report_writer
 
     reports_base_path = Path(settings.data_dir) / "output" / "reports" / "dq"
-    report_writer = DQReportWriter(
+    report_writer = dq_report_writer.DQReportWriter(
         base_path=reports_base_path,
         logger=logger,
     )
-    return DQReportService(
+    return dq_report_service.DQReportService(
         logger=logger,
         report_writer=report_writer,
         metrics=metrics,

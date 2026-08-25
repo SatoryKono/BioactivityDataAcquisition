@@ -15,9 +15,6 @@ from bioetl.domain.ports import DataSourcePort
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.config.source_config_loader import load_source_config
 
-from bioetl.application.core.data_sources.filtered import FilteredDataSource
-from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
-
 if TYPE_CHECKING:
     from bioetl.composition.bootstrap_contexts import RateLimitContext
     from bioetl.composition.providers._models import ProviderConfig
@@ -227,6 +224,9 @@ def _wrap_with_filter(
     Returns:
         FilteredDataSource wrapping data_source, or data_source unchanged.
     """
+    from bioetl.application.core.data_sources.filtered import FilteredDataSource
+    from bioetl.infrastructure.adapters.input.csv_filter_reader import CsvFilterReader
+
     _wire_composable_fallback(data_source)
 
     if filter_config and filter_config.enabled:
