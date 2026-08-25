@@ -758,6 +758,10 @@
                 "value": "Why"
               },
               {
+                "id": "custom.width",
+                "value": 45
+              },
+              {
                 "id": "mappings",
                 "value": [
                   {
@@ -795,7 +799,7 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": false
+                  "wrapText": true
                 }
               }
             ]
@@ -986,7 +990,7 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": false
+            "inspect": true
           },
           "mappings": [
             {
