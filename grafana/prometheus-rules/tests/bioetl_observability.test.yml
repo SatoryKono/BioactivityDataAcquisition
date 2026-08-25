@@ -1026,6 +1026,41 @@ tests:
           - labels: '{__name__="bioetl_control_plane_current_evidence_status",pipeline="chembl",run_type="incremental"}'
             value: 0
 
+  - name: control-plane-dashboard-recordings-preserve-nonzero-severity
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: "0+2x40"
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: "0+8x40"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",event_type="run_failed",status="failed"}'
+        values: "0+2x40"
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",event_type="run_succeeded",status="success"}'
+        values: "0+8x40"
+      - series: 'bioetl_manifest_ledger_integrity_ratio{pipeline="chembl",run_type="incremental",integrity_type="inconsistent"}'
+        values: "0.25+0x40"
+    promql_expr_test:
+      - expr: bioetl_trust_replay_blocker_events_total{pipeline="chembl",run_type="incremental",family="manifest_write_failed"}
+        eval_time: 35m
+        exp_samples:
+          - labels: '{__name__="bioetl_trust_replay_blocker_events_total",family="manifest_write_failed",pipeline="chembl",run_type="incremental"}'
+            value: 70
+      - expr: bioetl_trust_replay_blocker_integrity{pipeline="chembl",run_type="incremental"}
+        eval_time: 35m
+        exp_samples:
+          - labels: '{__name__="bioetl_trust_replay_blocker_integrity",pipeline="chembl",run_type="incremental"}'
+            value: 0.25
+      - expr: bioetl_control_plane_manifest_fail_severity_30m{pipeline="chembl",run_type="incremental"}
+        eval_time: 35m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_manifest_fail_severity_30m",pipeline="chembl",run_type="incremental"}'
+            value: 2
+      - expr: bioetl_control_plane_ledger_fail_severity_30m{pipeline="chembl"}
+        eval_time: 35m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_ledger_fail_severity_30m",pipeline="chembl"}'
+            value: 2
+
   - name: control-plane-current-evidence-unknown-without-present-gauge
     interval: 1m
     input_series:
