@@ -794,10 +794,6 @@
                   "type": "auto",
                   "wrapText": true
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 45
               }
             ]
           },
