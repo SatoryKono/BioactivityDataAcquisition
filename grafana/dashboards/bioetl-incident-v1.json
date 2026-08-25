@@ -884,6 +884,7 @@
             ]
           },
           "options": {
+            "cellHeight": "sm",
             "showHeader": true,
             "footer": {
               "show": false
@@ -1023,6 +1024,7 @@
             ]
           },
           "options": {
+            "cellHeight": "sm",
             "showHeader": true,
             "footer": {
               "show": false
@@ -1293,6 +1295,7 @@
             ]
           },
           "options": {
+            "cellHeight": "sm",
             "showHeader": true,
             "footer": {
               "show": false
