@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
-from importlib import import_module
-from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.service_scaffold import (
     ManifestServiceScaffoldMixin,
@@ -19,23 +17,11 @@ from bioetl.domain.workflow import (
     WorkflowStepConfig,
 )
 
-if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow.manifest_models import (
-        WorkflowManifestCreateSpec,
-    )
+from bioetl.application.services.control_plane.workflow.manifest_models import (
+    WorkflowManifestCreateSpec as WorkflowManifestCreateSpec,
+)
 
 __all__ = ["WorkflowManifestCreateSpec", "WorkflowManifestService"]
-
-
-def __getattr__(name: str) -> object:
-    """Resolve the legacy request-model export without an eager runtime edge."""
-    if name != "WorkflowManifestCreateSpec":
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    value = import_module(
-        "bioetl.application.services.control_plane.workflow.manifest_models"
-    ).WorkflowManifestCreateSpec
-    globals()[name] = value
-    return value
 
 
 _EXECUTION_FINGERPRINT_IGNORED_LAUNCH_KEYS = frozenset(

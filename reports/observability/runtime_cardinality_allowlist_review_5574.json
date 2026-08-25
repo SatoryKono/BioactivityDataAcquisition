@@ -8,7 +8,7 @@
   "source_inventory": "reports/observability/runtime_cardinality_inventory.json",
   "debt_budget_outcome": "reduced_or_unchanged",
   "summary": {
-    "allowlisted_metric_count": 5,
+    "allowlisted_metric_count": 6,
     "runtime_cardinality_review_required_count": 0,
     "declared_risky_label_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
@@ -57,7 +57,21 @@
       ],
       "owner": "@bioetl-observability"
     },
-
+    {
+      "metric": "bioetl_pipeline_runs_total",
+      "allowlist_field": "runtime_cardinality_review_required",
+      "review_result": "retain_bounded_runtime_cardinality",
+      "review_date": "2026-09-30",
+      "approved_max_series": 500,
+      "observed_series_count": 0,
+      "runtime_emitter_count": 3,
+      "bounded_label_keys": [
+        "pipeline",
+        "run_type",
+        "status"
+      ],
+      "owner": "@bioetl-observability"
+    },
     {
       "metric": "bioetl_publication_raw_vocab_unknown_total",
       "allowlist_field": "declared_risky_label_review_required",

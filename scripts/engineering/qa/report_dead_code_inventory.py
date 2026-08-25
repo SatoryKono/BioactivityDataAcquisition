@@ -99,22 +99,6 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
             "tests/architecture/test_runtime_checkable_completeness.py",
         ),
     },
-    "src/bioetl/domain/ports/config_mapper.py": {
-        "evidence_lane": "canonical_owner_contract",
-        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
-    },
-    "src/bioetl/domain/ports/pipeline_callbacks.py": {
-        "evidence_lane": "canonical_owner_contract",
-        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
-    },
-    "src/bioetl/domain/ports/source_config.py": {
-        "evidence_lane": "canonical_owner_contract",
-        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
-    },
-    "src/bioetl/domain/ports/entity_type.py": {
-        "evidence_lane": "canonical_owner_contract",
-        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
-    },
     "src/bioetl/infrastructure/config/reason_catalog_loader.py": {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": (

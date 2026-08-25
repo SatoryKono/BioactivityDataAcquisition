@@ -43,7 +43,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.402,
       "files": 142,
-      "total_loc": 16452,
+      "total_loc": 16438,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 2
     },
@@ -58,9 +58,9 @@
     }
   },
   "dead_code": {
-    "repo_wide_zero_import_candidate_count": 7,
+    "repo_wide_zero_import_candidate_count": 3,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_classified_zero_import_candidate_count": 7,
+    "repo_wide_classified_zero_import_candidate_count": 3,
     "repo_wide_candidates_without_owner_tests_count": 0
   },
   "config_surface": {
@@ -73,7 +73,7 @@
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10460,
+    "tech_debt_closeout_test_loc": 10503,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,

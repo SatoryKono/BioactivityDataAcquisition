@@ -34,3 +34,7 @@ class MetricsService(Protocol):
         retry_count: int,
         retry_delay: float,
     ) -> StartResult: ...
+
+
+WorkflowMetricsFactory = WorkflowMetricsFactoryProtocol
+MetricsFactory = MetricsFactoryProtocol

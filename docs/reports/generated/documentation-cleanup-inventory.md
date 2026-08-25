@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3409 |
-| Tracked doc-like files | 3404 |
+| Doc-like files | 3442 |
+| Tracked doc-like files | 3437 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,14 +19,14 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 3404 |
+| tracked | 3437 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 272 |
+| active_draft | 278 |
 | active_quality_baseline | 61 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
@@ -38,22 +38,22 @@
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 55 |
-| live_issue_mirror | 4 |
+| issue_pack | 56 |
+| live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 832 |
+| working_report | 852 |
 
 ## GitHub Issue Drafts And Packs
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 272 |
+| active_draft | 278 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 55 |
-| live_issue_mirror | 4 |
+| issue_pack | 56 |
+| live_issue_mirror | 8 |
 
 ## Status Counts
 
@@ -61,10 +61,10 @@
 | --- | --- |
 | Active | 745 |
 | Archived | 170 |
-| Canonical | 70 |
+| Canonical | 72 |
 | Deprecated | 8 |
 | Generated | 1092 |
-| Working | 1324 |
+| Working | 1355 |
 
 ## Surface Families
 
@@ -72,20 +72,20 @@
 | --- | --- |
 | active | 745 |
 | archive | 170 |
-| canonical | 70 |
+| canonical | 72 |
 | duplicate | 8 |
 | generated | 1092 |
-| working | 1324 |
+| working | 1355 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 327 |
-| archive-after-migration | 844 |
+| archive-after-github-state-check | 334 |
+| archive-after-migration | 864 |
 | generate-automatically | 1092 |
-| keep | 1134 |
-| reconcile-with-github-state | 4 |
+| keep | 1136 |
+| reconcile-with-github-state | 8 |
 | replace-with-link | 8 |
 
 ## Cleanup Candidates
@@ -272,6 +272,7 @@
 | `.github/ISSUES/ARCH-QA-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-REF-2026-07-28-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCH-RES-2026-07-27-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/ARCH-VG-2026-08-25-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
@@ -301,7 +302,6 @@
 | `.github/ISSUES/CHEMBL-020-Expand-Observed-Value-Inventory-For-Weakly-Covered-ChEMBL-Reference-Pipelines.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-021-Sync-ChEMBL-Provider-Docs-With-Active-Normalization-Surfaces.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-ISSUES-INDEX.md` | index |  | keep |
-| `.github/ISSUES/CODERABBIT-FULL-2026-08-FINDINGS-PACK.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 

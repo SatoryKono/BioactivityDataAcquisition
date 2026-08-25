@@ -18,9 +18,7 @@ if TYPE_CHECKING:
         BronzeCleanupService,
     )
     from bioetl.application.services.ops.vacuum_service import VacuumService
-    from bioetl.composition.contracts import (
-        MedallionLifecycleServiceProtocol,
-    )
+    from bioetl.composition.contracts import MedallionLifecycleServiceProtocol
 
 __all__ = [
     "get_bronze_cleanup_service",

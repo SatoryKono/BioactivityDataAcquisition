@@ -117,8 +117,9 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "DQReportWriterPort", "ErrorClassifierPort", "ErrorHandlerPort",
         "FallbackPolicyPort", "GoldDQAnalyzerPort", "GoldDQConfigPort",
         "GoldValidatorPort", "QuarantinePort", "QuarantineWriteRequest",
-        "SilverDQAnalyzeRequest", "SilverDQAnalyzerPort", "SilverDQConfigPort",
-        "SilverValidatorPort", "coerce_silver_dq_analyze_request",
+        "SilverDQAnalyzeRequest", "SilverDQAnalyzerPort",
+        "SilverDQConfigPort", "SilverValidatorPort",
+        "coerce_silver_dq_analyze_request",
     ),
     "bioetl.domain.ports.resilience": (
         "CircuitBreakerPort",

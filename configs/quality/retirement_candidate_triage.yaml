@@ -48,53 +48,8 @@ repo_wide_zero_import_classification:
       rationale:
         Canonical owner for the lazily exported StageAccountingPort protocol;
         first-party consumers must import it through the bioetl.domain.ports facade.
-    - module_path: src/bioetl/domain/ports/config_mapper.py
-      module_name: bioetl.domain.ports.config_mapper
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-08-25"
-      review_by: "2026-11-23"
-      linked_issue: "#9641"
-      rationale:
-        Canonical owner for the lazily exported DomainConfigMapper protocol;
-        first-party consumers must import it through the bioetl.domain.ports facade.
-    - module_path: src/bioetl/domain/ports/pipeline_callbacks.py
-      module_name: bioetl.domain.ports.pipeline_callbacks
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-08-25"
-      review_by: "2026-11-23"
-      linked_issue: "#9641"
-      rationale:
-        Canonical owner for lazily exported transform/filter callback protocols;
-        first-party consumers must import them through the bioetl.domain.ports facade.
-    - module_path: src/bioetl/domain/ports/source_config.py
-      module_name: bioetl.domain.ports.source_config
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-08-25"
-      review_by: "2026-11-23"
-      linked_issue: "#9641"
-      rationale:
-        Canonical owner for lazily exported source pagination config protocols;
-        first-party consumers must import them through the bioetl.domain.ports facade.
-    - module_path: src/bioetl/domain/ports/entity_type.py
-      module_name: bioetl.domain.ports.entity_type
-      disposition: retain_canonical_owner_module
-      reviewed_on: "2026-08-25"
-      review_by: "2026-11-23"
-      linked_issue: "#9641"
-      rationale:
-        Canonical owner for the lazily exported EntityTypeExtractor protocol;
-        first-party consumers must import it through the bioetl.domain.ports facade.
     - module_path: src/bioetl/application/services/control_plane/manifest/diagnostics/base.py
       module_name: bioetl.application.services.control_plane.manifest.diagnostics.base
-      disposition: retain_dynamic_entrypoint
-      reviewed_on: "2026-07-28"
-      review_by: "2026-10-26"
-      linked_issue: "#6786"
-      rationale:
-        Loaded via importlib from diagnostics/__init__.py for ARCH-REF fan-in
-        control; static import scans stay at zero by design.
-    - module_path: src/bioetl/application/services/control_plane/manifest/diagnostics/finalization.py
-      module_name: bioetl.application.services.control_plane.manifest.diagnostics.finalization
       disposition: retain_dynamic_entrypoint
       reviewed_on: "2026-07-28"
       review_by: "2026-10-26"

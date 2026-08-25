@@ -24,9 +24,9 @@
       "opening_baseline": 11
     },
     "repo_wide_zero_import_candidates": {
-      "classified": 4,
-      "count": 4,
-      "owner_test_anchored": 4
+      "classified": 3,
+      "count": 3,
+      "owner_test_anchored": 3
     },
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,

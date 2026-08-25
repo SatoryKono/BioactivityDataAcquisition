@@ -76,7 +76,7 @@
     },
     "dependency_cross_layer_group_edges_total": {
       "opening": 343,
-      "current": 303,
+      "current": 330,
       "max": 330,
       "source": "docs/02-architecture/generated/module-dependency-map.json"
     },
