@@ -985,11 +985,12 @@ UNIFORM_TABLE_CELL_HEIGHT = "sm"
 
 
 def test_all_table_panels_use_uniform_cell_height() -> None:
-    """Every shipped table panel uses the same Grafana cellHeight.
+    """Every shipped table panel uses the same Grafana row-height contract.
 
-    Mixed or omitted presets make row height differ across boards. FIT-004
-    already requires ``sm`` on short tables; this lock extends that preset to
-    every table so operator tables share one row height.
+    Mixed or omitted ``cellHeight`` presets make rows differ across boards.
+    FIT-004 already requires ``sm`` on short tables; this lock extends that
+    preset to every table. Table-default ``wrapText=True`` still grows some
+    rows, so defaults must not wrap; long fields wrap on named columns.
     """
     tables: list[tuple[str, int | str, str]] = []
     violations: list[str] = []
@@ -1010,6 +1011,16 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                     f"{dashboard_path.name} panel {panel_id} ({title!r}) "
                     f"cellHeight={cell_height!r}"
                 )
+            custom = (
+                (panel.get("fieldConfig") or {}).get("defaults") or {}
+            ).get("custom") or {}
+            wrap_default = (custom.get("cellOptions") or {}).get("wrapText")
+            if wrap_default is True:
+                violations.append(
+                    f"{dashboard_path.name} panel {panel_id} ({title!r}) "
+                    "defaults.custom.cellOptions.wrapText=True "
+                    "(grows row height; wrap named columns instead)"
+                )
 
     assert tables, "expected at least one table panel in shipped dashboards"
     assert heights == {UNIFORM_TABLE_CELL_HEIGHT}, (
@@ -1018,7 +1029,8 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
     )
     assert not violations, (
         "table panels must set options.cellHeight="
-        f"{UNIFORM_TABLE_CELL_HEIGHT!r}:\n" + "\n".join(violations)
+        f"{UNIFORM_TABLE_CELL_HEIGHT!r} and must not wrap at table default:\n"
+        + "\n".join(violations)
     )
 
 
