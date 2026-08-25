@@ -16,6 +16,9 @@ from bioetl.domain.ports import (
     SettingsPort,
 )
 
+from bioetl.application.ports.metrics import (
+    WorkflowMetricsFactoryProtocol as WorkflowMetricsFactoryProtocol,
+)
 from bioetl.application.ports.storage import StorageContextProtocol as _StorageContextLike
 
 from bioetl.infrastructure.locking.memory_lock import MemoryLock

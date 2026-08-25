@@ -2,8 +2,8 @@
   "source_branch": "main",
   "source_commit": "3d8c2ad20411b67e447299b2923e3ccd1a96eb44",
   "source_run_id": "local-arch-vg-20260825",
-  "source_tree_sha256": "5e989522dde19ea4921776de9020505dc4e934939a6315aede8016898e0152aa",
-  "refreshed_at_utc": "2026-08-25T14:12:12.960353+00:00",
+  "source_tree_sha256": "ac8fe710ace01eeb3eb5a203a3568fe1445625a81b135fb5c422da21e6835c6b",
+  "refreshed_at_utc": "2026-08-25T14:24:21.401396+00:00",
   "refresh_status": "captured",
   "total_cases": 49046,
   "top_slowest": [

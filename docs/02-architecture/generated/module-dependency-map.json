@@ -4,9 +4,9 @@
     "total_internal_imports": 7700,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 331,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "3922e273a2e95e6b1b20abb530c23e24818c27e870edd1f743cd0255b8c7e56f"
+    "source_fingerprint": "cbcb0d1019671db604dad81e2046e16ee1ee8f4629b6a6f06586ca3652a7127a"
   },
   "layer_edges": [
     {
@@ -355,14 +355,14 @@
       "imports": 13
     },
     {
-      "source": "infrastructure.observability",
-      "target": "domain.ports",
+      "source": "composition.factories",
+      "target": "application.ports",
       "imports": 13
     },
     {
-      "source": "composition.factories",
-      "target": "application.ports",
-      "imports": 12
+      "source": "infrastructure.observability",
+      "target": "domain.ports",
+      "imports": 13
     }
   ],
   "violations": []

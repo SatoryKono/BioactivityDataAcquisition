@@ -48710,7 +48710,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
-  "source_tree_sha256": "56da800dcb6f10e992f5564c07e87bbf4ec3155c58bd3686aa09e53db96900cc",
+  "source_tree_sha256": "79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
