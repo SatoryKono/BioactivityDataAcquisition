@@ -1947,7 +1947,8 @@
                 "thresholdsStyle": {
                   "mode": "off"
                 },
-                "inspect": true
+                "inspect": true,
+                "cellOptions": {}
               },
               "mappings": [
                 {
@@ -1986,7 +1987,15 @@
                   "id": "byName",
                   "options": "reason_code"
                 },
-                "properties": []
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               },
               {
                 "matcher": {
@@ -1997,6 +2006,21 @@
                   {
                     "id": "custom.width",
                     "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reject Reason"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -2076,7 +2100,8 @@
                 "thresholdsStyle": {
                   "mode": "off"
                 },
-                "inspect": true
+                "inspect": true,
+                "cellOptions": {}
               },
               "mappings": [
                 {
@@ -2115,7 +2140,15 @@
                   "id": "byName",
                   "options": "field"
                 },
-                "properties": []
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               },
               {
                 "matcher": {
@@ -2126,6 +2159,21 @@
                   {
                     "id": "custom.width",
                     "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Reject Field"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
