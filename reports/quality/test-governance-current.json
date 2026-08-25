@@ -503,21 +503,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "201",
+      "line": "204",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_noop_validator"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "211",
+      "line": "214",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_valid_records"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "225",
+      "line": "228",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
@@ -1641,21 +1641,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "201",
+        "line": "204",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_noop_validator"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "211",
+        "line": "214",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_valid_records"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "225",
+        "line": "228",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
@@ -2006,8 +2006,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2369,
-      "test_python_file_count": 2598,
+      "test_glob_file_count": 2371,
+      "test_python_file_count": 2600,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2046,13 +2046,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2369,
-    "total_test_functions": 24990,
+    "total_test_files": 2371,
+    "total_test_functions": 25003,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "188ba7fcaa71d3d2d55701e7cd11e33949e1f8accb6c5db5f412b28dac7b7e93",
+  "source_tree_sha256": "427af9aecd186b5cbb1d3c7c733368b48aa969ad3085bd5f3e269dc861c0c560",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2072,8 +2072,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2369,
-    "test_python_file_count": 2598,
+    "test_glob_file_count": 2371,
+    "test_python_file_count": 2600,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2112,8 +2112,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2369,
-  "total_test_functions": 24990,
+  "total_test_files": 2371,
+  "total_test_functions": 25003,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
