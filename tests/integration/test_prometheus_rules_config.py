@@ -961,6 +961,9 @@ def test_control_plane_current_status_recording_rules_exist_and_reference_source
         "bioetl_control_plane_telemetry_missing_5m": "bioetl_control_plane_manifest_writes_total",
         "bioetl_checkpoint_age_seconds": "bioetl_checkpoint_saved_at_seconds",
         "bioetl_terminal_events_15m": "bioetl_control_plane_terminal_events_total",
+        "bioetl_trust_replay_blocker_integrity": "bioetl_manifest_ledger_integrity_ratio",
+        "bioetl_control_plane_manifest_fail_severity_30m": "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_ledger_fail_severity_30m": "bioetl_control_plane_ledger_appends_total",
     }
 
     missing = [name for name in expected if name not in record_map]
@@ -971,6 +974,12 @@ def test_control_plane_current_status_recording_rules_exist_and_reference_source
         assert source_metric in expr, (
             f"{record_name} must reference {source_metric} to avoid semantic drift"
         )
+    assert "> bool 0.1" in str(
+        record_map["bioetl_control_plane_manifest_fail_severity_30m"].get("expr", "")
+    )
+    assert "> bool 0.1" in str(
+        record_map["bioetl_control_plane_ledger_fail_severity_30m"].get("expr", "")
+    )
 
 
 def test_pipeline_universe_rules_include_workflow_planned_scopes() -> None:
@@ -1492,6 +1501,58 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
         quarantined_reason_rules[0].get("expr", "")
         == "max by (pipeline) (max_over_time(bioetl_dq_records_quarantined_total[15m])) > bool 0"
     )
+
+
+def test_trust_replay_blocker_source_recordings_cover_range_families() -> None:
+    """#9596: selected-range Trust blockers keep $__range in Grafana, families in rules."""
+    payload = _load_control_plane_current_status_rules()
+    rules = _recording_rules_named(payload, "bioetl_trust_replay_blocker_events_total")
+    families = {str(rule.get("labels", {}).get("family")) for rule in rules}
+    assert families == {
+        "manifest_write_failed",
+        "ledger_append_failed",
+        "checkpoint_incompatible",
+        "not_reconstructable",
+        "replay_drift",
+        "duplicate_overwrite_risk",
+        "lineage_refs_missing",
+    }
+    joined = "\n".join(str(rule.get("expr", "")) for rule in rules)
+    for metric in (
+        "bioetl_control_plane_manifest_writes_total",
+        "bioetl_control_plane_ledger_appends_total",
+        "bioetl_checkpoint_compatibility_events_total",
+        "bioetl_replay_reconstructability_events_total",
+        "bioetl_replay_drift_events_total",
+        "bioetl_replay_duplicate_overwrite_risk_total",
+        "bioetl_lineage_refs_missing_total",
+    ):
+        assert metric in joined
+    assert "$__range" not in joined
+    assert "$pipeline" not in joined
+
+
+def test_runtime_collapsed_alert_count_recordings_sum_component_conditions() -> None:
+    """#9592 #9593 #9594: collapsed Runtime alert stats read composite counts."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+    pipeline_expr = str(record_map["bioetl_runtime_pipeline_alert_count"].get("expr", ""))
+    control_expr = str(
+        record_map["bioetl_runtime_control_plane_alert_count"].get("expr", "")
+    )
+    provider_expr = str(record_map["bioetl_runtime_provider_alert_count"].get("expr", ""))
+    assert "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m" in pipeline_expr
+    assert "bioetl_runtime_alert_condition_runtime_error_rate_high_30m" in pipeline_expr
+    assert "bioetl_runtime_alert_condition_manifest_write_failed_15m" in control_expr
+    assert "bioetl_runtime_alert_condition_lineage_refs_missing_15m" in control_expr
+    assert "bioetl_runtime_alert_condition_provider_failure_rate_high_15m" in provider_expr
+    assert "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m" in (
+        provider_expr
+    )
+    for expr in (pipeline_expr, control_expr, provider_expr):
+        assert "$pipeline" not in expr
+        assert "$provider_hint" not in expr
+        assert "or vector(0)" not in expr
 
 
 def test_dq_first_window_reason_record_keeps_status_gap_fallback() -> None:
