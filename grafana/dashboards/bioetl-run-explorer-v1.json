@@ -524,7 +524,8 @@
               "custom": {
                 "align": "left",
                 "inspect": true,
-                "wrapText": true
+                "wrapText": true,
+                "cellOptions": {}
               },
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
@@ -550,6 +551,13 @@
                   {
                     "id": "custom.width",
                     "value": 170
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
