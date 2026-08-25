@@ -8,20 +8,48 @@ Usage (repo root):
     python -m scripts.engineering.qa.refresh_governance_artifacts
     python -m scripts.engineering.qa.refresh_governance_artifacts --check
 
-Does NOT raise tech-debt budgets. Does NOT rewrite baselines unless the
-underlying source tree changed. Prefer shrink-only scorecard sync after
-measured improvements.
+The command is fail-closed: any generator or checker failure is propagated to
+the caller. It does not raise tech-debt budgets or create new registries.
+Prefer shrink-only scorecard sync after measured improvements.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+
+_TEST_GOVERNANCE_JSON = "reports/quality/test-governance-current.json"
+_FIXTURE_DUPLICATION_JSON = "reports/quality/test-fixture-asset-duplication.json"
+
+
+def _write_text_atomically(path: Path, payload: str) -> None:
+    """Write UTF-8/LF text through a same-directory atomic replacement."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(
+            descriptor,
+            "w",
+            encoding="utf-8",
+            newline="\n",
+        ) as handle:
+            handle.write(payload)
+        os.replace(temporary_path, path)
+    except BaseException:
+        temporary_path.unlink(missing_ok=True)
+        raise
 
 
 def _run(cmd: list[str], *, check: bool = True) -> int:
@@ -110,8 +138,14 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
     baseline_path = ROOT / "reports/quality/hotspot-family-baseline.json"
     scorecard_path = ROOT / "configs/quality/debt_scorecard.yaml"
     if not baseline_path.exists() or not scorecard_path.exists():
-        print("SKIP scorecard sync: baseline or scorecard missing")
-        return
+        missing = [
+            str(path.relative_to(ROOT))
+            for path in (baseline_path, scorecard_path)
+            if not path.exists()
+        ]
+        raise FileNotFoundError(
+            "scorecard sync requires existing inputs: " + ", ".join(missing)
+        )
 
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
     by_name = _baseline_families_by_name(baseline)
@@ -127,14 +161,14 @@ def _sync_scorecard_hotspot_metrics_from_baseline() -> None:
             changed += _sync_one_scorecard_family(family, by_name)
 
     if changed:
-        scorecard_path.write_text(
+        _write_text_atomically(
+            scorecard_path,
             yaml.safe_dump(
                 scorecard,
                 sort_keys=False,
                 allow_unicode=True,
                 width=100,
             ),
-            encoding="utf-8",
         )
         print(f"SYNC scorecard hotspot metrics ({changed} field updates)")
     else:
@@ -146,10 +180,42 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
+            "scripts.engineering.qa.report_source_tree_manifest",
+            "--check",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_module_coverage_inventory",
+            "--check",
+            "--allow-missing-coverage-xml",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.generate_architecture_dependency_map",
+            "--check",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_test_governance_audit",
+            "--check",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
             "scripts.engineering.qa.report_hotspot_family_baseline",
             "--check",
-        ],
-        check=False,
+        ]
     )
     _run(
         [
@@ -157,8 +223,24 @@ def _run_check_only() -> None:
             "-m",
             "scripts.engineering.qa.report_dead_code_inventory",
             "--check",
-        ],
-        check=False,
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_live_residual_snapshot",
+            "--check",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa",
+            "report-debt-governance-gates",
+            "--check",
+        ]
     )
     _run(
         [
@@ -196,12 +278,30 @@ def _run_refresh() -> None:
         ]
     )
 
-    # 2) Optional root helper when present
-    refresh_helper = ROOT / "_refresh_module_coverage_inventory.py"
-    if refresh_helper.exists():
-        _run([sys.executable, str(refresh_helper)])
+    # 2) Architecture dependency map (generated docs)
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.generate_architecture_dependency_map",
+            "--update",
+        ]
+    )
 
-    # 3) Hotspot family baseline (measured)
+    # 3) Test-governance snapshots
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_test_governance_audit",
+            "--json-out",
+            _TEST_GOVERNANCE_JSON,
+            "--fixture-duplication-out",
+            _FIXTURE_DUPLICATION_JSON,
+        ]
+    )
+
+    # 4) Hotspot family baseline (measured)
     _run(
         [
             sys.executable,
@@ -211,43 +311,40 @@ def _run_refresh() -> None:
         ]
     )
 
-    # 4) Align scorecard measured metrics to baseline (no budget growth)
+    # 5) Align scorecard measured metrics to baseline (no budget growth)
     _sync_scorecard_hotspot_metrics_from_baseline()
 
-    # 5) Dead-code inventory
+    # 6) Dead-code inventory
     _run([sys.executable, "-m", "scripts.engineering.qa.report_dead_code_inventory"])
 
-    # 6) Architecture quality scorecard (input to debt gates)
+    # 7) Architecture quality scorecard (input to debt gates)
     _run(
         [
             sys.executable,
             "-m",
             "scripts.engineering.qa.report_architecture_quality_scorecard",
-        ],
-        check=False,
+        ]
     )
 
-    # 7) Config surface backlog (input to debt gates / residual snapshot)
+    # 8) Config surface backlog (input to debt gates / residual snapshot)
     _run(
         [
             sys.executable,
             "-m",
             "scripts.engineering.qa.report_config_surface_backlog",
-        ],
-        check=False,
+        ]
     )
 
-    # 8) Live residual snapshot for closeout non-growth freezes (#6891 / #7464)
+    # 9) Live residual snapshot for closeout non-growth freezes (#6891 / #7464)
     _run(
         [
             sys.executable,
             "-m",
             "scripts.engineering.qa.report_live_residual_snapshot",
-        ],
-        check=False,
+        ]
     )
 
-    # 9) Debt governance gates rollup MUST run last (#7465).
+    # 10) Debt governance gates rollup MUST run last (#7465).
     # Any scorecard/baseline input refresh above invalidates committed gates until
     # this step rewrites reports/quality/debt-governance-gates.{json,md}.
     _run(

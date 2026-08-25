@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-08-05'
+  Last verified: '2026-08-25'
 
 ______________________________________________________________________
 
@@ -49,6 +49,17 @@ artifact families below.
 ### 2. Run the matching check and refresh commands
 
 Run the same commands locally and in CI:
+
+For a source/config change that affects multiple governance artifacts, use the
+coupled command instead of invoking rows from the table independently:
+
+```bash
+python -m scripts.engineering.qa.refresh_governance_artifacts
+python -m scripts.engineering.qa.refresh_governance_artifacts --check
+```
+
+The coupled check is fail-closed and propagates the first failing checker exit
+code. Use the individual rows below to diagnose a specific artifact family.
 
 | Surface | Check command | Refresh command |
 | --- | --- | --- |
