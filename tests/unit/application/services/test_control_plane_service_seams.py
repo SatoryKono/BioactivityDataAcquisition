@@ -124,10 +124,10 @@ def test_workflow_facade_does_not_eagerly_import_service_owners() -> None:
 
 def test_execution_recording_facade_does_not_import_ledger_service() -> None:
     """The recording facade depends on the ledger owner only for typing."""
-    package_name = "bioetl.application.services.control_plane.workflow"
-    recording_module = f"{package_name}.execution_recording"
-    finish_module = f"{package_name}._execution_recording_finish"
-    ledger_module = f"{package_name}.ledger_service"
+    recording_package = "bioetl.application.services.workflow.control_plane"
+    recording_module = f"{recording_package}.execution_recording"
+    finish_module = f"{recording_package}._execution_recording_finish"
+    ledger_module = "bioetl.application.services.control_plane.workflow.ledger_service"
     for name in (recording_module, finish_module, ledger_module):
         sys.modules.pop(name, None)
 
@@ -161,7 +161,7 @@ def test_control_plane_services_live_under_ownership_packages() -> None:
         "bioetl.application.services.control_plane.ledger.service",
         "bioetl.application.services.control_plane.manifest.service",
         "bioetl.application.services.control_plane.replay.historical_certification_service",
-        "bioetl.application.services.control_plane.workflow.execution_service",
+        "bioetl.application.services.workflow.control_plane.execution_service",
     }
 
 

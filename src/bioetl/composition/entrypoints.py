@@ -7,7 +7,6 @@ remain thin adapters. Full DI framework is intentionally not introduced
 
 from __future__ import annotations
 
-from importlib import import_module
 from bioetl.composition._pipeline_execution import (
     ensure_metrics_server_started as ensure_metrics_server_started,
 )
@@ -21,9 +20,19 @@ from bioetl.composition._services import (
     get_pipeline_runner_service as get_pipeline_runner_service,
 )
 from bioetl.composition._services import get_vacuum_service as get_vacuum_service
+from bioetl.composition.composite_catalog import (
+    bootstrap_composite_runner as bootstrap_composite_runner,
+)
+from bioetl.composition.composite_catalog import (
+    load_composite_config as load_composite_config,
+)
 from bioetl.composition.contracts import (
     MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
 )
+from bioetl.composition.execution_api import (
+    create_pipeline_runner as create_pipeline_runner,
+)
+from bioetl.composition.execution_api import run_pipeline as run_pipeline
 from bioetl.composition.resources_runtime import (
     get_lifecycle_service as get_lifecycle_service,
 )
@@ -41,17 +50,3 @@ __all__ = [
     "registered_ports",
     "resolve",
 ]
-_COMPAT_EXPORT_TARGETS = {
-    "bootstrap_composite_runner": "bioetl.composition.composite_catalog",
-    "create_pipeline_runner": "bioetl.composition.execution_api",
-    "load_composite_config": "bioetl.composition.composite_catalog",
-    "run_pipeline": "bioetl.composition.execution_api",
-}
-
-
-def __getattr__(name: str) -> object:
-    """Resolve retained execution/composite attributes without widening ``__all__``."""
-    module_name = _COMPAT_EXPORT_TARGETS.get(name)
-    if module_name is None:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    return getattr(import_module(module_name), name)

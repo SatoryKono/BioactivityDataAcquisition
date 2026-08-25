@@ -51,7 +51,7 @@ def test_rule_test_coverage_is_measured_and_regression_guarded() -> None:
     assert coverage["directly_tested_records"] >= (
         check_prometheus_rules.MIN_DIRECTLY_TESTED_RECORDS
     )
-    assert len(coverage["control_plane_records"]) == 9
+    assert len(coverage["control_plane_records"]) == 13
     assert coverage["untested_control_plane_records"] == []
     assert coverage["undefined_fixture_alerts"] == []
     assert check_prometheus_rules.validate_rule_test_coverage(coverage) == []

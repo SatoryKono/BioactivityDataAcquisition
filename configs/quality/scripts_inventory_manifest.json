@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T14:18:09.275526+00:00",
+  "generated_at": "2026-08-25T17:11:05.030353+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -796,7 +796,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 389,
+          "line": 393,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -5088,7 +5088,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 34,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5134,7 +5134,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 101,
+          "line": 102,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
         }
@@ -7849,7 +7849,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 149,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/docs/build/generate_docs_export.py\","
         }
@@ -9209,7 +9209,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 272,
+          "line": 273,
           "source_group": "docs",
           "text": "| Manifest service orchestration | `src/bioetl/application/services/control_plane/manifest/service.py`, `models.py`, `validation.py` | Create/inspect immutable run manifests and enforce application-le"
         },
@@ -9644,7 +9644,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 341,
+          "line": 344,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -9797,7 +9797,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 223,
+          "line": 226,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
@@ -9854,7 +9854,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 39,
+          "line": 42,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -9905,7 +9905,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 217,
+          "line": 220,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -9953,7 +9953,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 151,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -9974,13 +9974,13 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 152,
+          "line": 155,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 141,
+          "line": 144,
           "source_group": "tests",
           "text": "assert \"validate_contract_registry.py\" in contract_workflow"
         },
@@ -10058,7 +10058,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 153,
+          "line": 156,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -10103,7 +10103,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 154,
+          "line": 157,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         },
@@ -10191,7 +10191,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 148,
+          "line": 151,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/file_merger.py\","
         },
@@ -13684,7 +13684,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 425,
+          "line": 428,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14015,7 +14015,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_dead_code_inventory.py",
-          "line": 817,
+          "line": 801,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.import_graph_inventory import ("
         },
@@ -14425,7 +14425,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 428,
+          "line": 431,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -15162,7 +15162,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 295,
+          "line": 296,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -15231,7 +15231,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 155,
+          "line": 158,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -15350,7 +15350,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 156,
+          "line": 159,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         },
@@ -16003,7 +16003,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 410,
+          "line": 413,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -16694,7 +16694,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 208,
+          "line": 211,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         }
@@ -19021,13 +19021,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 411,
+          "line": 414,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 461,
+          "line": 464,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -19353,7 +19353,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 290,
+          "line": 293,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -19405,7 +19405,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 309,
+          "line": 312,
           "source_group": "tests",
           "text": "/ \"check_dashboard_panel_fill.py\""
         },
@@ -19864,7 +19864,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 275,
+          "line": 278,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
@@ -21831,7 +21831,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 65,
+          "line": 68,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
@@ -22431,7 +22431,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 150,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/schema/generation/generate_schema_artifacts.py\","
         },

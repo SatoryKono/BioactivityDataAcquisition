@@ -52,7 +52,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     ),
     "src/bioetl/composition/runtime_builders/inputs_resolver.py": "public_facade",
     "src/bioetl/domain/aggregates/batch.py": "compatibility_facade",
-    "src/bioetl/domain/aggregates/quarantine_entry.py": "compatibility_facade",
     "src/bioetl/domain/__init__.py": "public_package_facade",
     "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
     "src/bioetl/domain/config/__init__.py": "public_package_facade",

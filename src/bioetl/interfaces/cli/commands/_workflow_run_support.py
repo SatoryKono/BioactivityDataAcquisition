@@ -54,7 +54,7 @@ _WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES = (
 )
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow.execution_service import (
+    from bioetl.application.services.workflow.control_plane.execution_service import (
         WorkflowExecutionService,
     )
     from bioetl.application.services.workflow.workflow_runner_service import (

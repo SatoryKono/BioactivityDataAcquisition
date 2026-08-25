@@ -1,11 +1,11 @@
-"""Workflow execution ledger/state recording helpers."""
+"""Workflow-owned execution ledger/state transition helpers."""
 
 from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime
 
-from bioetl.application.services.control_plane.workflow._execution_recording_finish import (
+from bioetl.application.services.workflow.control_plane._execution_recording_finish import (
     _UNSET_CURSOR,
     WorkflowExecutionRecorder,
     _find_failed_step,
@@ -13,13 +13,13 @@ from bioetl.application.services.control_plane.workflow._execution_recording_fin
     _record_workflow_success,
     _workflow_failure_message,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
+from bioetl.application.services.workflow.control_plane.execution_recording_payloads import (
     _build_result_summary,
     _fingerprint_details,
     _resolve_result_fingerprint,
     build_step_completion_details,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_state import (
+from bioetl.application.services.workflow.control_plane.execution_recording_state import (
     _apply_completed_step_state,
     _clear_ambiguous_step,
     _find_step_state,

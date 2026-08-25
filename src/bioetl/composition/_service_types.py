@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.replay.historical_universe_service import (
         HistoricalReplayUniverseService as HistoricalReplayUniverseService,
     )
-    from bioetl.application.services.control_plane.workflow.execution_service import (
+    from bioetl.application.services.workflow.control_plane.execution_service import (
         WorkflowExecutionService as WorkflowExecutionService,
     )
     from bioetl.application.services.control_plane.workflow.inspection_service import (

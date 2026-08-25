@@ -5,11 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.workflow.execution_service import (
-        WorkflowExecutionService,
-    )
     from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
+    )
+    from bioetl.application.services.workflow.control_plane.execution_service import (
+        WorkflowExecutionService,
     )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.domain.workflow import WorkflowConfig

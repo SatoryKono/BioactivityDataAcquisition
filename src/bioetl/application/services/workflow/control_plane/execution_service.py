@@ -1,4 +1,4 @@
-"""Workflow execution orchestration with manifest, ledger, state, and locking."""
+"""Workflow-owned orchestration with manifest, ledger, state, and locking."""
 
 from __future__ import annotations
 
@@ -8,22 +8,22 @@ from datetime import datetime
 from functools import partial
 
 from bioetl.application.runtime_clock import current_utc_time
-from bioetl.application.services.control_plane.workflow.execution_incremental_metadata import (
+from bioetl.application.services.control_plane.workflow.ledger_service import (
+    WorkflowLedgerService,
+)
+from bioetl.application.services.workflow.control_plane.execution_incremental_metadata import (
     extract_incremental_metadata,
 )
-from bioetl.application.services.control_plane.workflow.execution_preparation import (
+from bioetl.application.services.workflow.control_plane.execution_preparation import (
     prepare_workflow_execution,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording import (
+from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
     record_step_completed,
     record_step_started,
     record_transform_commit,
     record_workflow_finished,
     record_workflow_started,
-)
-from bioetl.application.services.control_plane.workflow.ledger_service import (
-    WorkflowLedgerService,
 )
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,

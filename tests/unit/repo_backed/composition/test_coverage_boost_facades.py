@@ -199,7 +199,7 @@ def _install_workflow_execution_service_dependencies(
     execution_module.WorkflowExecutionService = _WorkflowExecutionService
     monkeypatch.setitem(
         sys.modules,
-        "bioetl.application.services.control_plane.workflow.execution_service",
+        "bioetl.application.services.workflow.control_plane.execution_service",
         execution_module,
     )
 
@@ -410,6 +410,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     provider_calls: list[str] = []
     pipeline_calls: list[object | None] = []
     bootstrap_calls: list[tuple[str, tuple[object, ...], dict[str, object]]] = []
+    health_service = object()
 
     monkeypatch.setattr(
         _services,
@@ -428,6 +429,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
             bootstrap_calls.append((name, args, kwargs)) or (name, args, kwargs)
         ),
     )
+    monkeypatch.setattr(_services, "_resolve", lambda port: health_service)
 
     assert _services.get_checkpoint_service()[0] == "bootstrap_checkpoint_service"
     assert _services.get_audit_service()[0] == "bootstrap_audit_inspection_service"
@@ -464,7 +466,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         == "bootstrap_historical_replay_universe_service"
     )
     assert _services.get_lineage_service()[0] == "bootstrap_lineage_service"
-    assert _services.get_health_service()[0] == "bootstrap_health_service"
+    assert _services.get_health_service() is health_service
     assert (
         _services.get_observability_workflow_service()[0]
         == "bootstrap_observability_workflow_service"
