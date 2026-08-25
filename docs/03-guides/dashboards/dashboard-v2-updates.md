@@ -72,6 +72,12 @@ also: `docs/reports/dashboard-ux-checks/2026-07-28.md`; canonical baseline:
 - Do not use `dateTimeAsIso` (ISO-8601 with `T` and offset) on operator
   panels.
 
+## Run Explorer timestamps (2026-08-25)
+
+- `Inspect Recent Runs` formats `started_at` / Started and `completed_at` /
+  Completed with the canonical dashboard clock unit above.
+- Pipeline index items also show `workflow_run_id` as Workflow run.
+
 ## Run Explorer Completed timestamp format (2026-08-05)
 
 - `Inspect Recent Runs` formats `completed_at` / `Completed` with the

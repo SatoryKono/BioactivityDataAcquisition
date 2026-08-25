@@ -88,7 +88,7 @@ FIELD_IDENTIFIERS = (
     "run_id",
 )
 TIMESTAMP_FIELD_RE = re.compile(
-    r"(?:^|_)((?:completed|created|updated|saved|observed)_at|evidence_observed_at)$"
+    r"(?:^|_)((?:completed|started|created|updated|saved|observed)_at|evidence_observed_at)$"
 )
 FORBIDDEN_DATETIME_UNITS = frozenset(
     {
