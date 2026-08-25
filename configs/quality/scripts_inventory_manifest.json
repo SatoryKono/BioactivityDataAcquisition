@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T19:50:16.322789+00:00",
+  "generated_at": "2026-08-25T20:29:47.460502+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -5122,13 +5122,13 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 230,
+          "line": 232,
           "source_group": "docs",
           "text": "### 2.4. `registry.py` — Реестр пайплайнов"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 268,
+          "line": 270,
           "source_group": "docs",
           "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
         },
@@ -11588,7 +11588,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 330,
+          "line": 331,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
@@ -16061,7 +16061,7 @@
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 255,
+          "line": 257,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/run_architecture_audit_read_only.py`."
         },
@@ -17608,9 +17608,9 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 244,
+          "line": 246,
           "source_group": "docs",
-          "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` delegates into `bioetl.composition.entrypoints` / execution API seams | `src/bioetl/composition/bootstrap/runtime/pipeline.py::bootstra"
+          "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
