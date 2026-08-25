@@ -68,6 +68,13 @@ def attach_summary_reproducibility_views(summary: dict[str, object]) -> None:
     )
 
 
+def refresh_reproducibility_audit_score(summary: dict[str, object]) -> None:
+    """Refresh the score after inspection adds governed replay evidence."""
+    summary["reproducibility_audit_score"] = build_reproducibility_audit_scoring(
+        summary
+    )
+
+
 def attach_base_summary_runtime_views(
     manifest: RunManifest,
     summary: dict[str, object],

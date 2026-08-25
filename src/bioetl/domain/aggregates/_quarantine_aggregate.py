@@ -21,17 +21,13 @@ from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from bioetl.domain.aggregates._quarantine_entry_properties_mixin import (
-    QuarantineEntryPropertiesMixin,
-)
-from bioetl.domain.aggregates._quarantine_entry_transitions_mixin import (
-    QuarantineEntryTransitionsMixin,
-)
 from bioetl.domain.aggregates._quarantine_value_objects import (
+    QuarantineEntryPropertiesMixin,
     QuarantineStatus,
     ResolutionInfo,
     _validate_quarantine_required_fields,
 )
+from bioetl.domain.aggregates.quarantine_entry import QuarantineEntryTransitionsMixin
 from bioetl.domain.deterministic_identity import deterministic_id
 
 if TYPE_CHECKING:

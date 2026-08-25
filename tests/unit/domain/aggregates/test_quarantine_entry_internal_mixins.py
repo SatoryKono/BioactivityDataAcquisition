@@ -30,8 +30,8 @@
 
 This test file provides focused coverage for QuarantineEntry internal modules:
 - _quarantine_aggregate.py: Aggregate root construction and factory methods
-- _quarantine_entry_properties_mixin.py: Read model properties and projections
-- _quarantine_entry_transitions_mixin.py: State transition methods and event collection
+- _quarantine_value_objects.py: Value objects and read-model projections
+- quarantine_entry.py: State transition methods and event collection
 - _quarantine_value_objects.py: Value objects and validation helpers
 
 These tests complement the existing test_quarantine_entry.py by testing internal
@@ -244,7 +244,7 @@ class TestQuarantineValidationFunctions:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _quarantine_entry_properties_mixin.py Tests
+# quarantine read-model tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -360,7 +360,7 @@ class TestQuarantineEntryPropertiesMixin:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _quarantine_entry_transitions_mixin.py Tests
+# quarantine transition tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 

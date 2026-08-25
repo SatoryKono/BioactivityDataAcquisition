@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._pipeline_run_mixins import (
     _PipelineRunLifecycleMixin,
-    _PipelineRunReadModelMixin,
 )
 from bioetl.domain.aggregates.pipeline_run_stage_result import (
     PipelineRunState,
@@ -34,7 +33,7 @@ __all__ = [
 ]
 
 
-class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
+class PipelineRun(_PipelineRunLifecycleMixin):
     """Aggregate Root for pipeline execution.
 
     Invariants:
@@ -84,3 +83,75 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
         self._events = []
         self._manifest_id = manifest_id
         self._metadata = deepcopy(metadata) if metadata is not None else {}
+
+    @property
+    def run_id(self) -> RunID:
+        return self._run_id
+
+    @property
+    def run_type(self) -> RunType:
+        return self._run_type
+
+    @property
+    def pipeline_name(self) -> str:
+        return self._pipeline_name
+
+    @property
+    def status(self) -> PipelineRunState:
+        return self._status
+
+    @property
+    def stages(self) -> tuple[StageResult, ...]:
+        return tuple(self._stages)
+
+    @property
+    def started_at(self) -> datetime | None:
+        return self._started_at
+
+    @property
+    def ended_at(self) -> datetime | None:
+        return self._ended_at
+
+    @property
+    def metadata(self) -> JsonDict:
+        return deepcopy(self._metadata)
+
+    @property
+    def manifest_id(self) -> str | None:
+        return self._manifest_id
+
+    @property
+    def duration_seconds(self) -> float | None:
+        if self._started_at is None or self._ended_at is None:
+            return None
+        return (self._ended_at - self._started_at).total_seconds()
+
+    def duration_seconds_at(self, reference_time: datetime) -> float | None:
+        if self._started_at is None:
+            return None
+        return ((self._ended_at or reference_time) - self._started_at).total_seconds()
+
+    @property
+    def total_records_processed(self) -> int:
+        return sum(stage.records_processed for stage in self._stages)
+
+    @property
+    def failed_stages(self) -> tuple[StageResult, ...]:
+        return tuple(stage for stage in self._stages if stage.status == StageStatus.FAILED)
+
+    @property
+    def successful_stages(self) -> tuple[StageResult, ...]:
+        return tuple(
+            stage for stage in self._stages if stage.status == StageStatus.SUCCESS
+        )
+
+    def collect_events(self) -> list[DomainEvent]:
+        events = self._events.copy()
+        self._events.clear()
+        return events
+
+    def __repr__(self) -> str:
+        return (
+            f"PipelineRun(run_id={self._run_id!r}, "
+            f"status={self._status.value!r}, stages={len(self._stages)})"
+        )

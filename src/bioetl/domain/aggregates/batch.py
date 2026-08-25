@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -105,8 +106,78 @@ class _BatchAttrs:
     _metadata: MetaDict  # pyright: ignore[reportUninitializedInstanceVariable]
 
 
+class _BatchReadModelMixin(_BatchAttrs):
+    """Read model projections and event collection."""
+
+    __slots__ = ()
+
+    @property
+    def batch_id(self) -> BatchID:
+        return self._batch_id
+
+    @property
+    def run_id(self) -> RunID:
+        return self._run_id
+
+    @property
+    def status(self) -> BatchStatus:
+        return self._status
+
+    @property
+    def records(self) -> tuple[BatchRecord, ...]:
+        return tuple(record for record in self._records if record.is_valid)
+
+    @property
+    def all_records(self) -> tuple[BatchRecord, ...]:
+        return tuple(self._records)
+
+    @property
+    def quarantined_records(self) -> tuple[BatchRecord, ...]:
+        return tuple(self._quarantined)
+
+    @property
+    def record_count(self) -> int:
+        return len(self._records)
+
+    @property
+    def valid_count(self) -> int:
+        return sum(1 for record in self._records if record.is_valid)
+
+    @property
+    def quarantined_count(self) -> int:
+        return len(self._quarantined)
+
+    @property
+    def next_index(self) -> int:
+        return self._start_index + len(self._records)
+
+    @property
+    def created_at(self) -> datetime:
+        return self._created_at
+
+    @property
+    def sealed_at(self) -> datetime | None:
+        return self._sealed_at
+
+    @property
+    def metadata(self) -> MetaDict:
+        return deepcopy(self._metadata)
+
+    def collect_events(self) -> list[DomainEvent]:
+        events = self._events.copy()
+        self._events.clear()
+        return events
+
+    def __repr__(self) -> str:
+        return (
+            f"Batch(batch_id={self._batch_id!r}, "
+            f"status={self._status.value!r}, records={self.record_count}, "
+            f"valid={self.valid_count}, quarantined={self.quarantined_count})"
+        )
+
+
 def __getattr__(name: str) -> object:
     if name == "Batch":
         module = importlib.import_module("bioetl.domain.aggregates._batch_aggregate")
-        return getattr(module, "Batch")
+        return module.Batch
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

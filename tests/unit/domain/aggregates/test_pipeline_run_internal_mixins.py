@@ -30,7 +30,7 @@
 
 This test file provides focused coverage for PipelineRun internal modules:
 - _pipeline_run_mixins.py: State transition methods and lifecycle operations
-- _pipeline_run_read_model_mixin.py: Read model properties and event collection
+- pipeline_run.py: Read model properties and event collection
 - pipeline_run_stage_result.py: Stage result value objects and transformations
 
 These tests complement the existing test_pipeline_run.py by testing internal
@@ -100,12 +100,12 @@ def started_run(pipeline_run: PipelineRun) -> PipelineRun:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# _pipeline_run_read_model_mixin.py Tests
+# pipeline_run.py read-model tests
 # ──────────────────────────────────────────────────────────────────────────────
 
 
 class TestPipelineRunReadModelMixin:
-    """Tests for _PipelineRunReadModelMixin properties and methods."""
+    """Tests for PipelineRun read-model properties and methods."""
 
     def test_pipeline_run_read_model_property_accessors_return_correct_values(
         self, run_id: RunID

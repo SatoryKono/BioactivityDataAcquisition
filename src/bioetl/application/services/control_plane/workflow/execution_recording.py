@@ -7,11 +7,11 @@ from datetime import datetime
 
 from bioetl.application.services.control_plane.workflow._execution_recording_finish import (
     _UNSET_CURSOR,
+    WorkflowExecutionRecorder,
     _find_failed_step,
     _record_workflow_failure,
     _record_workflow_success,
     _workflow_failure_message,
-    WorkflowExecutionRecorder,
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
     _build_result_summary,

@@ -193,6 +193,6 @@ def test_issue_5528_entrypoints_public_export_budget_is_ratchet_down() -> None:
         and item.get("path") == "src/bioetl/composition/entrypoints.py"
     )
 
-    assert row["public_export_count"] == 13
+    assert row["public_export_count"] == 10
     assert row["internal_callers_zero"] is True
-    assert inventory_row["public_export_contract"]["max_public_exports"] == 13
+    assert inventory_row["public_export_contract"]["max_public_exports"] == 10

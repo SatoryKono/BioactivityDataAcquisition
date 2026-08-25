@@ -21,7 +21,6 @@ true_aggregates:
     root_module: src/bioetl/domain/aggregates/batch.py
     implementation_modules:
       - src/bioetl/domain/aggregates/_batch_aggregate.py
-      - src/bioetl/domain/aggregates/_batch_lifecycle.py
       - src/bioetl/domain/aggregates/_batch_mixins.py
       - src/bioetl/domain/aggregates/batch.py
     invariant_tests:
@@ -45,9 +44,8 @@ true_aggregates:
     root_module: src/bioetl/domain/aggregates/quarantine_entry.py
     implementation_modules:
       - src/bioetl/domain/aggregates/_quarantine_aggregate.py
-      - src/bioetl/domain/aggregates/_quarantine_entry_properties_mixin.py
-      - src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py
       - src/bioetl/domain/aggregates/_quarantine_value_objects.py
+      - src/bioetl/domain/aggregates/quarantine_entry.py
     invariant_tests:
       - tests/unit/domain/aggregates/test_quarantine_entry.py
       - tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py

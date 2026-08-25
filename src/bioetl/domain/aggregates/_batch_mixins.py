@@ -6,107 +6,26 @@ from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-import bioetl.domain.aggregates._batch_lifecycle as lifecycle
-from bioetl.domain.aggregates.batch import BatchRecord, BatchStatus, _BatchAttrs
+from bioetl.domain.aggregates.batch import (
+    BatchRecord,
+    BatchStatus,
+    _BatchReadModelMixin,
+)
+from bioetl.domain.aggregates.events import (
+    BatchFailed,
+    BatchSealed,
+    BatchWritten,
+    RecordQuarantined,
+)
 from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.medallion import Layer
     from bioetl.domain.types import (
-        BatchID,
         BronzeRecord,
         ContentHash,
-        DomainEvent,
         EntityID,
-        MetaDict,
-        RunID,
     )
-
-
-class _BatchReadModelMixin(_BatchAttrs):
-    """Read model projections and event collection."""
-
-    __slots__ = ()
-
-    @property
-    def batch_id(self) -> BatchID:
-        """Return the unique identifier for this batch."""
-        return self._batch_id
-
-    @property
-    def run_id(self) -> RunID:
-        """Return the pipeline run identifier that owns this batch."""
-        return self._run_id
-
-    @property
-    def status(self) -> BatchStatus:
-        """Return the current lifecycle status of this batch."""
-        return self._status
-
-    @property
-    def records(self) -> tuple[BatchRecord, ...]:
-        """Return valid (non-quarantined) records in insertion order."""
-        return tuple(record for record in self._records if record.is_valid)
-
-    @property
-    def all_records(self) -> tuple[BatchRecord, ...]:
-        """Return all records including quarantined ones in insertion order."""
-        return tuple(self._records)
-
-    @property
-    def quarantined_records(self) -> tuple[BatchRecord, ...]:
-        """Return records that failed validation and were quarantined."""
-        return tuple(self._quarantined)
-
-    @property
-    def record_count(self) -> int:
-        """Return the total number of records including quarantined."""
-        return len(self._records)
-
-    @property
-    def valid_count(self) -> int:
-        """Return the number of records that passed validation."""
-        return sum(1 for record in self._records if record.is_valid)
-
-    @property
-    def quarantined_count(self) -> int:
-        """Return the number of quarantined records."""
-        return len(self._quarantined)
-
-    @property
-    def next_index(self) -> int:
-        """Return the next sequential index for appending a record."""
-        return self._start_index + len(self._records)
-
-    @property
-    def created_at(self) -> datetime:
-        """Return the UTC timestamp when this batch was created."""
-        return self._created_at
-
-    @property
-    def sealed_at(self) -> datetime | None:
-        """Return the UTC timestamp when the batch was sealed, or None if still open."""
-        return self._sealed_at
-
-    @property
-    def metadata(self) -> MetaDict:
-        """Return a copy of the batch metadata dictionary."""
-        return deepcopy(self._metadata)
-
-    def collect_events(self) -> list[DomainEvent]:
-        """Collect and clear accumulated domain events."""
-        events = self._events.copy()
-        self._events.clear()
-        return events
-
-    def __repr__(self) -> str:
-        return (
-            f"Batch(batch_id={self._batch_id!r}, "
-            f"status={self._status.value!r}, "
-            f"records={self.record_count}, "
-            f"valid={self.valid_count}, "
-            f"quarantined={self.quarantined_count})"
-        )
 
 
 class _BatchMutationMixin(_BatchReadModelMixin):
@@ -163,15 +82,16 @@ class _BatchMutationMixin(_BatchReadModelMixin):
         self._records[position] = quarantined
         self._quarantined.append(quarantined)
 
-        lifecycle.emit_record_quarantined(
-            self._events,
-            self._run_id,
-            self._batch_id,
-            record.entity_id,
-            error_code,
-            error,
-            record.content_hash,
-            quarantined_at,
+        self._events.append(
+            RecordQuarantined(
+                occurred_at=quarantined_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                record_id=str(record.entity_id) if record.entity_id is not None else None,
+                error_code=error_code,
+                error_message=error,
+                content_hash=record.content_hash,
+            )
         )
         return quarantined
 
@@ -231,21 +151,34 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
                 f"valid_count ({valid_count}) + quarantined_count "
                 f"({quarantined_count}) != record_count ({record_count})"
             )
-        self._status, self._sealed_at = lifecycle.seal(
-            self._status,
-            self._events,
-            self._run_id,
-            self._batch_id,
-            record_count,
-            valid_count,
-            quarantined_count,
-            sealed_at,
+        if not self._status.is_modifiable():
+            raise InvalidStateError(
+                f"Cannot seal: batch is in status {self._status.value}",
+                current_state=self._status.value,
+                attempted_operation="seal",
+            )
+        self._events.append(
+            BatchSealed(
+                occurred_at=sealed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                record_count=record_count,
+                valid_count=valid_count,
+                quarantined_count=quarantined_count,
+            )
         )
+        self._status, self._sealed_at = BatchStatus.SEALED, sealed_at
         self._sealed_valid_count = valid_count
 
     def mark_writing(self) -> None:
         """Mark batch as being written (SEALED -> WRITING)."""
-        self._status = lifecycle.mark_writing(self._status)
+        if self._status != BatchStatus.SEALED:
+            raise InvalidStateError(
+                f"Cannot mark as writing: batch is in status {self._status.value}",
+                current_state=self._status.value,
+                attempted_operation="mark_writing",
+            )
+        self._status = BatchStatus.WRITING
 
     def mark_committed(self, layer: Layer, committed_at: datetime) -> None:
         """Mark batch as committed (WRITING -> COMMITTED).
@@ -259,15 +192,22 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             if self._sealed_valid_count is not None
             else self.valid_count
         )
-        self._status = lifecycle.mark_committed(
-            self._status,
-            self._events,
-            self._run_id,
-            self._batch_id,
-            sealed_valid_count,
-            layer,
-            committed_at,
+        if self._status != BatchStatus.WRITING:
+            raise InvalidStateError(
+                f"Cannot commit: batch is in status {self._status.value}",
+                current_state=self._status.value,
+                attempted_operation="mark_committed",
+            )
+        self._events.append(
+            BatchWritten(
+                occurred_at=committed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                layer=layer,
+                record_count=sealed_valid_count,
+            )
         )
+        self._status = BatchStatus.COMMITTED
 
     def mark_failed(
         self,
@@ -285,13 +225,20 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
             error_type: Optional error classification (e.g., exception class name).
             failed_at: Explicit timestamp when the batch failure occurred.
         """
-        self._status = lifecycle.mark_failed(
-            self._status,
-            self._events,
-            self._run_id,
-            self._batch_id,
-            layer,
-            error,
-            error_type,
-            failed_at=failed_at,
+        if self._status != BatchStatus.WRITING:
+            raise InvalidStateError(
+                f"Cannot fail: batch is in status {self._status.value}",
+                current_state=self._status.value,
+                attempted_operation="mark_failed",
+            )
+        self._events.append(
+            BatchFailed(
+                occurred_at=failed_at,
+                run_id=self._run_id,
+                batch_id=self._batch_id,
+                layer=layer,
+                error=error,
+                error_type=error_type,
+            )
         )
+        self._status = BatchStatus.FAILED

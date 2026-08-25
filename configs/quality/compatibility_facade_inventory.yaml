@@ -177,11 +177,12 @@ retained_entrypoints:
       at zero, internal implementation-module imports outside `composition/` stay at zero, and internal-module patch coverage
       remains confined to the dedicated entrypoint-boundary tests.
     public_export_contract:
-      max_public_exports: 13
+      max_public_exports: 10
       lazy_export_table: _PUBLIC_SYMBOL_TARGETS
       retained_wrappers_outside_all:
-        - start_metrics_server
-        - load_pipeline_config
+        - register
+        - registered_ports
+        - resolve
   - path: src/bioetl/composition/health_api.py
     compatibility_role:
       Permanent public health composition facade that intentionally shields split services/bootstrap/resource
