@@ -67,7 +67,6 @@ def _workflow_step_with_start_offset(
     step: WorkflowStepConfig,
     start_offset: int,
 ) -> WorkflowStepConfig:
-    """Return a workflow step with its run-options offset overridden."""
     return replace(
         step,
         run_options=replace(step.run_options, start_offset=start_offset),
