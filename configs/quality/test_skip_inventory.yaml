@@ -255,7 +255,7 @@ entries:
     owner: "@bioetl-observability"
     linked_issue: "#8969"
     lifecycle: permanent_policy
-    reviewed_skip_calls: 1
+    reviewed_skip_calls: 2
     vcr_related: false
     review_date: "2026-08-18"
     rationale: Live Grafana /api/ds/query fill check skips when Grafana health or API auth is unavailable.
