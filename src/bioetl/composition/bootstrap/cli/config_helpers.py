@@ -3,18 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import Protocol, cast, runtime_checkable
+from typing import cast
 
 from bioetl.domain.types import JsonDict
 
 __all__ = ["get_pipeline_yaml_for_dq"]
 
 
-@runtime_checkable
-class _ModelDumpProvider(Protocol):
-    def model_dump(self) -> object:
-        """Return a serializable configuration payload."""
-        ...
+from bioetl.composition.contracts.structural import (
+    ModelDumpProvider as _ModelDumpProvider,
+)
 
 
 def get_pipeline_yaml_for_dq(

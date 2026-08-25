@@ -43,6 +43,7 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "WorkflowLedgerPort",
         "WorkflowManifestPort",
     ),
+    "bioetl.domain.ports.entity_type": ("EntityTypeExtractor",),
     "bioetl.domain.ports.data_normalization": ("DataNormalizationPort",),
     "bioetl.domain.ports.data_source": (
         "DataSourceFactoryPort",

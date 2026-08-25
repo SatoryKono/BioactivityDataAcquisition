@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.composition.lazy_exports import install_cached_public_exports
 
@@ -16,23 +16,13 @@ if TYPE_CHECKING:
         HealthServerDependencies as HealthServerDependencies,
     )
     from bioetl.domain.ports import (
-        CheckpointPort,
-        HealthMonitorPort,
         MetricsPort,
         QuarantinePort,
-        RunLedgerPort,
-        RunManifestPort,
-        WorkflowManifestPort,
     )
 
-    class ObservabilitySettingsProtocol(Protocol):
-        metrics_enabled: bool
-        metrics_server_enabled: bool
-        metrics_fail_fast: bool
-        metrics_retry_count: int
-        metrics_retry_delay: float
+    from bioetl.composition.contracts.health import HealthListenerDependenciesProtocol
 
-    def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
+    def get_health_server_dependencies() -> HealthListenerDependenciesProtocol: ...
 
     def get_quarantine_runtime_service(
         pipeline: str,
@@ -72,18 +62,6 @@ _PUBLIC_EXPORTS = {
     "get_quarantine_service": _SERVICES_MODULE,
     "rehydrate_provider_health_gauges": _PREFLIGHT_HEALTH_MODULE,
 }
-
-
-class HealthServerDependenciesProtocol(Protocol):
-    """Typed view of health-server dependencies exposed through the facade."""
-
-    health_monitor: HealthMonitorPort
-    metrics: MetricsPort
-    checkpoint_port: CheckpointPort
-    run_manifest_port: RunManifestPort
-    run_ledger_port: RunLedgerPort
-    workflow_manifest_port: WorkflowManifestPort
-    metrics_exposition: object
 
 
 def get_runtime_settings() -> object:

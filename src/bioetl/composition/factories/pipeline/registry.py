@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import threading
-from typing import Protocol, cast
+from typing import cast
 
 from bioetl.composition.factories.pipeline._registry_factory_catalog import (
     LazyFactoryCatalog,
@@ -22,23 +22,8 @@ from bioetl.composition.factories.pipeline.registry_exports import (
     FACTORY_EXPORTS,
     REGISTRY_PUBLIC_EXPORTS,
 )
+from bioetl.application.ports import PipelineRegistryProtocol
 from bioetl.domain.ports import PipelineFactoryPort
-
-
-class PipelineRegistryProtocol(Protocol):
-    """Minimal pipeline registry contract required for factory registration."""
-
-    def list_pipelines(self) -> list[str]:
-        """Return registered pipeline names."""
-        ...
-
-    def register_factory(self, factory: PipelineFactoryPort) -> None:
-        """Register one pipeline factory."""
-        ...
-
-    def clear(self) -> None:
-        """Clear registered factories."""
-        ...
 
 
 _factories = LazyFactoryCatalog()

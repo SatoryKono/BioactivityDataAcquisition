@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Protocol
 
 from bioetl.composition.observability import ObservabilityContractError
 from bioetl.composition.runtime_builders.runner_control_plane_assembly import (
@@ -14,12 +13,10 @@ from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
-class _AuditRequiredFn(Protocol):
-    def __call__(self, *, audit: AuditPort | None, audit_required: bool) -> bool: ...
-
-
-class _ControlPlaneSettingsFn(Protocol):
-    def __call__(self, *, control_plane: object | None) -> tuple[str, bool, bool]: ...
+from bioetl.composition.contracts.structural import (
+    AuditRequiredFn as _AuditRequiredFn,
+    ControlPlaneSettingsFn as _ControlPlaneSettingsFn,
+)
 
 
 _FORENSIC_GRADE_PROFILE = "forensic_grade"
