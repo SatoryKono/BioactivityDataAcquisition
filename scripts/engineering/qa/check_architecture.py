@@ -153,6 +153,7 @@ def main() -> int:
     all_violations.extend(check_no_circular_imports(base_path))
     all_violations.extend(check_composition_contracts_isolation(base_path))
     all_violations.extend(check_composition_protocol_placement(base_path))
+
     all_violations.extend(_collect_adapter_violations(base_path))
 
     if all_violations:
