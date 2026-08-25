@@ -43,6 +43,12 @@ LEGACY_METRICS_PORT_PATH = PROJECT_ROOT / "src/bioetl/domain/ports/metrics_port.
 METRICS_CATALOG_PATH = (
     PROJECT_ROOT / "docs/04-reference/observability/metrics-catalog.md"
 )
+TRACING_GUIDE_PATH = (
+    PROJECT_ROOT / "docs/04-reference/observability/tracing-guide.md"
+)
+LOGGING_GUIDE_PATH = (
+    PROJECT_ROOT / "docs/04-reference/observability/logging-guide.md"
+)
 
 
 def test_project_navigator_tracks_package_based_observability_ports() -> None:
@@ -142,3 +148,19 @@ def test_dq_validation_score_docs_use_canonical_ratio_scale() -> None:
     for content in (rules, panel_guide, dashboard):
         assert "0.0-1.0" in content
         assert "0-100" not in content
+
+
+def test_reference_guides_distinguish_run_identity_from_otel_context() -> None:
+    """Reference docs must not model a run UUID as an OTel trace identifier."""
+    tracing_guide = TRACING_GUIDE_PATH.read_text(encoding="utf-8")
+    logging_guide = LOGGING_GUIDE_PATH.read_text(encoding="utf-8")
+
+    assert "uuid.uuid4()" not in tracing_guide
+    for content in (tracing_guide, logging_guide):
+        assert "`run_id`" in content
+        assert "`trace_id`" in content
+        assert "`span_id`" in content
+        assert "OpenTelemetry" in content
+    assert "32 символа" in tracing_guide
+    assert "16 символов" in tracing_guide
+    assert "Без активного span" in logging_guide

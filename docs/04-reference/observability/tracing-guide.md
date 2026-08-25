@@ -6,11 +6,15 @@ BioETL использует distributed tracing для отслеживания 
 
 ## Trace Context
 
-Каждый pipeline run имеет уникальный `trace_id`:
+`run_id` и trace context имеют разные назначения:
 
-```python
-trace_id = str(uuid.uuid4())
-```
+- `run_id` — UUID control-plane запуска. Он остаётся основным идентификатором
+  прогона в логах, manifest/ledger и replay-поверхностях.
+- `trace_id` и `span_id` — идентификаторы OpenTelemetry span context. При
+  активном span runtime представляет их как lowercase hex: 32 символа для
+  `trace_id` и 16 символов для `span_id`.
+- Если активного span нет, `trace_id` и `span_id` отсутствуют. Runtime не
+  синтезирует их из UUID и не подменяет ими `run_id`.
 
 ## Span Propagation
 
@@ -19,8 +23,8 @@ Spans распространяются через контекст выполн�
 ```python
 with tracer.start_as_current_span("pipeline_execution") as span:
     span.set_attribute("pipeline_name", pipeline_name)
-    span.set_attribute("run_id", run_id)
-    
+    span.set_attribute("bioetl.run_id", str(run_id))
+
     # Child span
     with tracer.start_as_current_span("data_fetch"):
         # fetch data
@@ -37,7 +41,10 @@ with tracer.start_as_current_span("pipeline_execution") as span:
 
 ## Trace Export
 
-Tracing данные экспортируются в OpenTelemetry-compatible backend (если настроен).
+Tracing данные экспортируются в OpenTelemetry-compatible backend, если он
+настроен. `logging_config.trace_context_processor` автоматически добавляет
+идентификаторы активного span в structured logs; `run_id` передаётся отдельно
+через runtime/control-plane context.
 
 ## Configuration
 
