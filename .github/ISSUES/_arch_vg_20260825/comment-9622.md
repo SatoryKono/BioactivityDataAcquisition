@@ -1,0 +1,1 @@
+Гейт сейчас красный из-за facade `batch.py` + ссылок на удалённые `_batch_record.py`/`_batch_status.py` и unreviewed SCC. Узкий unblocker (не полная пересборка mixin): https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9642.
