@@ -37,7 +37,9 @@ pytestmark = pytest.mark.unit
 def test_register_replaces_factory_for_the_same_port(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
+    from bioetl.composition import _service_registry
+
+    monkeypatch.setattr(_service_registry, "_REGISTRY", {})
 
     class Port:
         pass
@@ -53,7 +55,9 @@ def test_register_replaces_factory_for_the_same_port(
 def test_registered_ports_returns_factory_without_invoking_it(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(entrypoints, "_REGISTRY", {})
+    from bioetl.composition import _service_registry
+
+    monkeypatch.setattr(_service_registry, "_REGISTRY", {})
 
     class Port:
         pass
