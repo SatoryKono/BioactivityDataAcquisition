@@ -41,8 +41,7 @@ def test_request_metadata_basenames_are_provider_prefixed() -> None:
     renamed = [
         path
         for path in adapter_tests
-        if path.name.startswith("test_")
-        and path.name.endswith("_request_metadata.py")
+        if path.name.startswith("test_") and path.name.endswith("_request_metadata.py")
     ]
     assert len(renamed) >= 7
 

@@ -18,7 +18,10 @@ import re
 from pathlib import Path
 
 import pytest
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 pytestmark = pytest.mark.architecture
 

@@ -15,7 +15,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 pytestmark = pytest.mark.architecture
 

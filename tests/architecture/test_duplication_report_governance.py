@@ -19,14 +19,15 @@ from scripts.engineering.qa.report_duplication_baseline import DuplicateCluster
 from scripts.engineering.qa.report_duplication_baseline import DuplicateModuleRef
 from scripts.engineering.qa.report_duplication_baseline import TargetDuplicationReport
 from scripts.engineering.qa.report_duplication_baseline import _render_markdown
-from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
+from tests.architecture.quality_artifacts import (
+    load_quality_json,
+    quality_artifact_path,
+)
 
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-HOTSPOT_BASELINE_JSON = (
-    quality_artifact_path("hotspot-duplication-baseline.json")
-)
+HOTSPOT_BASELINE_JSON = quality_artifact_path("hotspot-duplication-baseline.json")
 SPECIALIZED_DUPLICATION_ARTIFACTS = (
     {
         "name": "control-plane",
