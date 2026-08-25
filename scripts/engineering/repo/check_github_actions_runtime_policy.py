@@ -294,10 +294,10 @@ def _cvss_roundup(value: float) -> float:
 def _cvss_from_vector(vector: str) -> float | None:
     if not vector.startswith("CVSS:3"):
         return None
-    metrics = (item.split(":", 1) for item in vector.split("/")[1:] if ":" in item)
-    parts = {  # noqa: C416 - Sonar python:S7494 requires a comprehension
-        key: value for key, value in metrics
-
+    parts = {
+        item.split(":", 1)[0]: item.split(":", 1)[1]
+        for item in vector.split("/")[1:]
+        if ":" in item
     }
     try:
         scope = parts["S"]
