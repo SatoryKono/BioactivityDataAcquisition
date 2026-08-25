@@ -1,18 +1,18 @@
 {
   "summary": {
-    "scanned_modules": 2461,
-    "total_internal_imports": 7700,
+    "scanned_modules": 2463,
+    "total_internal_imports": 7702,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "c40abdc7a27bdee988249c019f24f70aee68b8fbe93feda0d49935155ffb9a73"
+    "source_fingerprint": "64f78eb43cd4b759d6ab42d30dbf62c6136f412173da7bd4b1f1784de18ba2cd"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1553,
+      "imports": 1554,
       "allowed": true
     },
     {
@@ -24,13 +24,13 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 188,
+      "imports": 183,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 684,
+      "imports": 693,
       "allowed": true
     },
     {
@@ -42,13 +42,13 @@
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 239,
+      "imports": 237,
       "allowed": true
     },
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1243,
+      "imports": 1242,
       "allowed": true
     },
     {
@@ -180,14 +180,14 @@
       "imports": 30
     },
     {
-      "source": "composition.factories",
-      "target": "infrastructure.adapters",
-      "imports": 28
-    },
-    {
       "source": "interfaces.cli",
       "target": "application.services",
       "imports": 28
+    },
+    {
+      "source": "composition.factories",
+      "target": "infrastructure.adapters",
+      "imports": 27
     },
     {
       "source": "composition.runtime_builders",
@@ -350,11 +350,6 @@
       "imports": 13
     },
     {
-      "source": "composition.bootstrap",
-      "target": "infrastructure.control_plane",
-      "imports": 13
-    },
-    {
       "source": "composition.factories",
       "target": "application.ports",
       "imports": 13
@@ -363,6 +358,11 @@
       "source": "infrastructure.observability",
       "target": "domain.ports",
       "imports": 13
+    },
+    {
+      "source": "composition.bootstrap",
+      "target": "infrastructure.control_plane",
+      "imports": 12
     }
   ],
   "violations": []

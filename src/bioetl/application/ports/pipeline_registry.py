@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import PipelineFactoryPort
 
 
+@runtime_checkable
 class PipelineRegistryProtocol(Protocol):
     """Minimal pipeline registry contract required for factory registration."""
 

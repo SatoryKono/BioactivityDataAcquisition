@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
 
@@ -25,14 +25,17 @@ if TYPE_CHECKING:
     StorageContext = object
 
 
+@runtime_checkable
 class CompositeRuntimeStorageProtocol(MergedStoragePort, SilverStoragePort, Protocol):
     """Storage capabilities required by composite runtime bootstrap."""
 
 
+@runtime_checkable
 class CompositeMergeStorageProtocol(MergedStoragePort, SilverStoragePort, Protocol):
     """Storage capabilities required by composite merge assembly."""
 
 
+@runtime_checkable
 class SilverMergedWriteProtocol(Protocol):
     """Minimal bound-method contract for merged Silver writes."""
 
@@ -49,6 +52,7 @@ class SilverMergedWriteProtocol(Protocol):
     ) -> None: ...
 
 
+@runtime_checkable
 class GoldMergedWriteProtocol(Protocol):
     """Minimal bound-method contract for merged Gold writes."""
 
@@ -66,6 +70,7 @@ class GoldMergedWriteProtocol(Protocol):
     ) -> None: ...
 
 
+@runtime_checkable
 class StorageContextProtocol(Protocol):
     """Minimal storage context required for checkpoint-port creation."""
 
@@ -77,6 +82,7 @@ StorageContextLike = StorageContextProtocol
 CompositeMergeStorage = CompositeMergeStorageProtocol
 
 
+@runtime_checkable
 class StorageFactoryProtocol(Protocol):
     """Structural contract shared by the lazy and concrete storage factories."""
 

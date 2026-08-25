@@ -29,6 +29,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
+    from bioetl.application.services.workflow.workflow_runner_service import (
+        WorkflowRunnerService,
+    )
     from bioetl.domain.control_plane import WorkflowManifest
     from bioetl.domain.ports import (
         LockPort,
@@ -38,11 +41,14 @@ if TYPE_CHECKING:
     from bioetl.domain.workflow import WorkflowConfig
     from bioetl.infrastructure.config.settings_api import Settings
 
-from bioetl.composition.factories.services.port_factories import (
-    WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
-)
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
+)
+from bioetl.composition._workflow_transform_registry import (
+    build_workflow_transform_registry,
+)
+from bioetl.composition.factories.services.port_factories import (
+    WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
 
 
@@ -68,9 +74,11 @@ def _create_workflow_metrics(settings: Settings) -> MetricsPort:
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical composition service seam."""
-    from bioetl.infrastructure.config import workflow_config_api
+    from bioetl.infrastructure.config.workflow_config_api import (
+        load_workflow_config as load_workflow_config_impl,
+    )
 
-    return workflow_config_api.load_workflow_config(
+    return load_workflow_config_impl(
         name,
         configs_root=resolve_configs_root(),
     )
@@ -100,9 +108,6 @@ def get_workflow_runner_service(
     workflow_transform_service = import_module(
         "bioetl.application.services.workflow.workflow_transform_service"
     )
-    workflow_transform_registry = import_module(
-        "bioetl.composition._workflow_transform_registry"
-    )
     control_plane = import_module("bioetl.infrastructure.control_plane")
     infrastructure_time = import_module("bioetl.infrastructure.time")
 
@@ -113,7 +118,7 @@ def get_workflow_runner_service(
         base_path=output_root / "workflow_transform_results",
         clock=infrastructure_time.SystemClock(),
     )
-    transform_registry = workflow_transform_registry.build_workflow_transform_registry(
+    transform_registry = build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,

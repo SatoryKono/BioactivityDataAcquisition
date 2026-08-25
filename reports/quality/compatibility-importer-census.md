@@ -15,7 +15,7 @@
 - retained_public_export_facade_count: 4
 - retained_public_export_facades_with_duplicate_exports: 0
 - retained_public_export_facades_with_resolution_conflicts: 0
-- retained_public_export_facades_with_wrapper_contract_drift: 0
+- retained_public_export_facades_with_wrapper_contract_drift: 1
 - purpose: measure sanctioned public seams and underscore/public twin usage
 
 ## Retained Entrypoints
@@ -56,7 +56,7 @@
 
 | Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |
 | --- | ---: | ---: | --- | --- | --- |
-| `src/bioetl/composition/entrypoints.py` | 10 | 0 | register, registered_ports, resolve | none | none |
+| `src/bioetl/composition/entrypoints.py` | 10 | 0 | none (drift: register, registered_ports, resolve) | none | none |
 | `src/bioetl/composition/health_api.py` | 7 | 7 | get_runtime_settings | none | none |
 | `src/bioetl/composition/maintenance_api.py` | 4 | 4 | archive_table, get_lifecycle_service, preview_cleanup, vacuum_table | none | none |
 | `src/bioetl/infrastructure/config/__init__.py` | 18 | 5 | none | none | none |

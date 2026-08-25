@@ -1,7 +1,7 @@
 # Slowest Tests
 
-Source commit: `3d8c2ad20411b67e447299b2923e3ccd1a96eb44`
-Source run id: `local-arch-vg-20260825`
+Source commit: `eb26f42b46fa7675d860def9ccd25a31f95c2159`
+Source run id: `local`
 Refresh status: `captured`
 Collected test cases: `49046`
 Freshness guard: `<=45 days`

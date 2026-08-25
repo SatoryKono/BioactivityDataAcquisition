@@ -4641,6 +4641,16 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
+      "module": "bioetl.application.ports.health",
+      "path": "src/bioetl/application/ports/health.py",
+      "source_lines": 20
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.application.ports.metrics",
       "path": "src/bioetl/application/ports/metrics.py",
       "source_lines": 40
@@ -7764,6 +7774,16 @@
       "module": "bioetl.composition._service_protocols",
       "path": "src/bioetl/composition/_service_protocols.py",
       "source_lines": 13
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition._service_registry",
+      "path": "src/bioetl/composition/_service_registry.py",
+      "source_lines": 38
     },
     {
       "coverage_percent": null,
@@ -29273,6 +29293,16 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
+      "module": "bioetl.application.ports.health",
+      "path": "src/bioetl/application/ports/health.py",
+      "source_lines": 20
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
       "module": "bioetl.application.ports.metrics",
       "path": "src/bioetl/application/ports/metrics.py",
       "source_lines": 40
@@ -32396,6 +32426,16 @@
       "module": "bioetl.composition._service_protocols",
       "path": "src/bioetl/composition/_service_protocols.py",
       "source_lines": 13
+    },
+    {
+      "coverage_percent": null,
+      "coverage_status": "unmeasured",
+      "covered_lines": null,
+      "executable_lines": null,
+      "missing_lines": null,
+      "module": "bioetl.composition._service_registry",
+      "path": "src/bioetl/composition/_service_registry.py",
+      "source_lines": 38
     },
     {
       "coverage_percent": null,
@@ -49270,7 +49310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
-  "source_tree_sha256": "52f9fc36ff282850389afa5dd3ed93881df84bac628f4ca07319afdebb61b11c",
+  "source_tree_sha256": "1fd56ef1b0b96dcb491de1ad546d34f7769dcaa4a66007cae0666e08aff613a7",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49439,18 +49479,18 @@
         "unmeasured_module_count": 1
       }
     },
-    "source_module_count": 2463,
+    "source_module_count": 2465,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1452,
       "no_executable_lines": 11,
       "partially_covered": 926,
       "uncovered": 0,
-      "unmeasured": 74
+      "unmeasured": 76
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 74,
+    "unmeasured_module_count": 76,
     "unmeasured_modules": [
       {
         "module": "bioetl.application.core._batch_writer_column_order",
@@ -49563,6 +49603,11 @@
         "reason": "coverage_xml_has_no_class_entry"
       },
       {
+        "module": "bioetl.application.ports.health",
+        "path": "src/bioetl/application/ports/health.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
         "module": "bioetl.application.ports.metrics",
         "path": "src/bioetl/application/ports/metrics.py",
         "reason": "coverage_xml_has_no_class_entry"
@@ -49620,6 +49665,11 @@
       {
         "module": "bioetl.composition._service_invocation",
         "path": "src/bioetl/composition/_service_invocation.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      },
+      {
+        "module": "bioetl.composition._service_registry",
+        "path": "src/bioetl/composition/_service_registry.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {
