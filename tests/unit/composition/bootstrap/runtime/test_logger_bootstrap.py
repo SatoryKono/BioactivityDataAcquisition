@@ -33,12 +33,15 @@ verifying correct DI wiring and UUID generation.
 
 from __future__ import annotations
 
+from itertools import count
 from unittest.mock import MagicMock
-from uuid import UUID
+from uuid import NAMESPACE_OID, UUID, uuid5
+
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
+from bioetl.composition.bootstrap.runtime import logger_bootstrap as logger_bootstrap_module
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
     bootstrap_logger,
 )
@@ -151,3 +154,32 @@ class TestBootstrapLoggerPort:
         bootstrap_logger(pipeline="test", run_id=None, logger_factory=capture_factory)
 
         assert captured_run_ids[0] != captured_run_ids[1]
+
+    def test_fallback_run_id_uses_pipeline_and_occurrence_without_pid(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Fallback correlation is reproducible from governed inputs only."""
+        monkeypatch.setattr(
+            logger_bootstrap_module,
+            "_FALLBACK_LOG_RUN_ID_COUNTER",
+            count(7),
+        )
+        captured_run_ids: list[UUID] = []
+
+        def capture_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
+            captured_run_ids.append(run_id)
+            return MagicMock(spec=LoggerPort)
+
+        bootstrap_logger(
+            pipeline="chembl_activity",
+            run_id=None,
+            logger_factory=capture_factory,
+        )
+
+        assert captured_run_ids == [
+            uuid5(
+                NAMESPACE_OID,
+                "bioetl.logger_bootstrap:chembl_activity:7",
+            )
+        ]
