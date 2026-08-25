@@ -526,7 +526,33 @@
                 "wrapText": true
               },
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
-            }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "field"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 220
+                  }
+                ]
+              }
+            ]
           },
           "options": {
             "showHeader": true,
@@ -1248,6 +1274,10 @@
                   {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               },
@@ -1264,6 +1294,10 @@
                   {
                     "id": "custom.align",
                     "value": "left"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 480
                   }
                 ]
               }
