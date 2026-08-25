@@ -1052,15 +1052,9 @@ def test_dq_current_status_and_reasons_share_one_instant_snapshot() -> None:
 
     reasons = panels[9102]
     expression = str(reasons["targets"][0]["expr"])
-    compact_expression = expression.replace(" ", "")
-    for marker in (
-        "reason_evidence_unavailable",
-        "verify_dq_reason_rules",
-        '"severity","warn"',
-        '"severity","crit"',
-        "unlesson(pipeline)",
-    ):
-        assert marker in compact_expression
+    assert "bioetl_dq_first_window_reason" in expression
+    assert len(expression) <= 200
+    assert "label_replace" not in expression
     no_value = str(reasons["fieldConfig"]["defaults"]["noValue"]).lower()
     assert "valid only when current dq status is ok" in no_value
 

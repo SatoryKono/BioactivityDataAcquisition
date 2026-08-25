@@ -821,6 +821,20 @@ groups:
             unless on (pipeline) (max by (pipeline) (bioetl_dq_current_reason{severity="warn"} > 0))
           )
 
+      - record: bioetl_dq_first_window_reason
+        expr: >-
+          bioetl_dq_current_reason
+          or label_replace(label_replace(label_replace(
+          (bioetl_dq_current_status == 1 unless on (pipeline) max by (pipeline) (bioetl_dq_current_reason > 0)),
+          "reason", "reason_evidence_unavailable", "", ""),
+          "severity", "warn", "", ""),
+          "action_target", "verify_dq_reason_rules", "", "")
+          or label_replace(label_replace(label_replace(
+          (bioetl_dq_current_status >= 2 unless on (pipeline) max by (pipeline) (bioetl_dq_current_reason > 0)),
+          "reason", "reason_evidence_unavailable", "", ""),
+          "severity", "crit", "", ""),
+          "action_target", "verify_dq_reason_rules", "", "")
+
       - record: bioetl_provider_health_check_provider_universe_15m
         expr: (sum by (provider) (increase(bioetl_health_check_success_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_degraded_total[15m]))) or (sum by (provider) (increase(bioetl_health_check_failures_total[15m])))
 
