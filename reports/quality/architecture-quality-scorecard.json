@@ -100,14 +100,14 @@
         "dashboarded_without_declaration_count": 0,
         "dashboarded_without_emission_count": 0,
         "layer_violations": 0,
-        "runtime_cardinality_review_required_count": 1,
+        "runtime_cardinality_review_required_count": 0,
         "runtime_cardinality_threshold_violation_count": 0
       },
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
-      "score": 8.0,
+      "score": 9.0,
       "weight": 0.08,
-      "weighted_score": 0.64
+      "weighted_score": 0.72
     },
     {
       "evidence_metrics": {
@@ -162,7 +162,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.2,
+  "integral_score": 9.28,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
@@ -187,7 +187,7 @@
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
-    "runtime_cardinality_review_required_count": 1,
+    "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
     "source_module_count": 2440,
     "sunset_compat_count": 0,
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "016ca2f6348df61322d28fa86d5e6cfbfc052c1a06dfe4d992c9cf350527e958"
+      "source_tree_sha256": "ff484c55068f91684053eb2e32ee21b16f6935cb3d5a745583b6cc4a96cb129d"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

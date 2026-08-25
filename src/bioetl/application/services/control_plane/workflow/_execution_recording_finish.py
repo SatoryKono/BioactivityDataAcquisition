@@ -2,19 +2,32 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from bioetl.application.services.control_plane.workflow.execution_recording_context import (
-    WorkflowExecutionRecorder,
-)
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
+from bioetl.domain.control_plane import WorkflowExecutionState
+from bioetl.domain.ports import WorkflowExecutionStatePort
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.workflow.ledger_service import (
+        WorkflowLedgerService,
+    )
 
 _UNSET_CURSOR = object()
+
+
+@dataclass(slots=True)
+class WorkflowExecutionRecorder:
+    """Mutable recording context for one locked workflow execution."""
+
+    ledger: WorkflowLedgerService
+    state_port: WorkflowExecutionStatePort
+    state: WorkflowExecutionState
 
 
 def _find_failed_step(

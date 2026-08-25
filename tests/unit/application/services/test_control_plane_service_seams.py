@@ -122,15 +122,15 @@ def test_workflow_facade_does_not_eagerly_import_service_owners() -> None:
     assert set(workflow.__all__) == set(workflow._LAZY_ATTR_EXPORTS)
 
 
-def test_execution_recording_context_does_not_import_ledger_service() -> None:
-    """The recording context depends on the ledger owner only for typing."""
+def test_execution_recording_facade_does_not_import_ledger_service() -> None:
+    """The recording facade depends on the ledger owner only for typing."""
     package_name = "bioetl.application.services.control_plane.workflow"
-    context_module = f"{package_name}.execution_recording_context"
+    recording_module = f"{package_name}.execution_recording"
     ledger_module = f"{package_name}.ledger_service"
-    for name in (context_module, ledger_module):
+    for name in (recording_module, ledger_module):
         sys.modules.pop(name, None)
 
-    importlib.import_module(context_module)
+    importlib.import_module(recording_module)
 
     assert ledger_module not in sys.modules
 
