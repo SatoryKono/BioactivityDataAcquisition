@@ -244,10 +244,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     assert override_properties["reason"]["custom.inspect"] is True
     assert "custom.width" not in override_properties["reason"]
     assert (
-        sum(
-            int(override_properties[field]["custom.width"])
-            for field in ("check", "status")
-        )
+        sum(int(override_properties[field]["custom.width"]) for field in ("check", "status"))
         == 150
     )
     for hidden in ("detail", "endpoint", "retryable", "observed_at"):
