@@ -788,7 +788,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "decimals": 0,
               "unit": "none",
@@ -868,6 +868,10 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 165
                   }
                 ]
               },
@@ -1079,7 +1083,9 @@
               "options": {
                 "excludeByName": {
                   "row_status": true,
-                  "percintage": true
+                  "percentage": true,
+                  "Time": true,
+                  "__name__": true
                 },
                 "indexByName": {
                   "parameter": 0,
@@ -1423,7 +1429,6 @@
                 "value": 220
               },
               {
-
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
