@@ -1,0 +1,254 @@
+schema_version: 1
+owner: '@bioetl-architecture'
+linked_issue: '9599'
+expected_total: 62
+max_composition_declarations_outside_contracts: 43
+protocols:
+  - name: _WorkflowMetricsFactory
+    path: src/bioetl/composition/_workflow_services.py
+    line: 56
+    target_tier: application
+  - name: CompositeRuntimeStorageProtocol
+    path: src/bioetl/composition/bootstrap/composite_infrastructure_context.py
+    line: 20
+    target_tier: application
+  - name: _CompositeMergeStorage
+    path: src/bioetl/composition/bootstrap/runtime/composite_merge_service_builder.py
+    line: 32
+    target_tier: composition_contracts
+  - name: _ConfigurableDQMonitor
+    path: src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py
+    line: 15
+    target_tier: application
+  - name: _DQDetectorConfig
+    path: src/bioetl/composition/bootstrap/runtime/dq_bootstrap.py
+    line: 21
+    target_tier: application
+  - name: _MetricsService
+    path: src/bioetl/composition/bootstrap/runtime/metrics_bootstrap.py
+    line: 22
+    target_tier: application
+  - name: _ObservabilityApiModule
+    path: src/bioetl/composition/bootstrap/runtime/observability.py
+    line: 47
+    target_tier: composition_contracts
+  - name: TransformCallback
+    path: src/bioetl/composition/bootstrap_contexts.py
+    line: 45
+    target_tier: domain
+  - name: GoldFilterCallback
+    path: src/bioetl/composition/bootstrap_contexts.py
+    line: 58
+    target_tier: domain
+  - name: GoldTransformCallback
+    path: src/bioetl/composition/bootstrap_contexts.py
+    line: 66
+    target_tier: domain
+  - name: HealthServerDependenciesProtocol
+    path: src/bioetl/composition/contracts/health.py
+    line: 21
+    target_tier: composition_contracts
+  - name: HealthListenerDependenciesProtocol
+    path: src/bioetl/composition/contracts/health.py
+    line: 30
+    target_tier: composition_contracts
+  - name: BronzeCleanupServiceProtocol
+    path: src/bioetl/composition/contracts/health.py
+    line: 42
+    target_tier: composition_contracts
+  - name: QuarantineRuntimeServiceProtocol
+    path: src/bioetl/composition/contracts/resources.py
+    line: 13
+    target_tier: composition_contracts
+  - name: CheckpointRuntimeServiceProtocol
+    path: src/bioetl/composition/contracts/resources.py
+    line: 34
+    target_tier: composition_contracts
+  - name: MedallionLifecycleServiceProtocol
+    path: src/bioetl/composition/contracts/resources.py
+    line: 42
+    target_tier: composition_contracts
+  - name: CleanupPreviewProtocol
+    path: src/bioetl/composition/contracts/resources.py
+    line: 66
+    target_tier: composition_contracts
+  - name: CleanupServiceProtocol
+    path: src/bioetl/composition/contracts/resources.py
+    line: 75
+    target_tier: composition_contracts
+  - name: ModelDumpable
+    path: src/bioetl/composition/contracts/structural.py
+    line: 13
+    target_tier: composition_contracts
+  - name: ModelDumpProvider
+    path: src/bioetl/composition/contracts/structural.py
+    line: 18
+    target_tier: composition_contracts
+  - name: ModelDumpHost
+    path: src/bioetl/composition/contracts/structural.py
+    line: 25
+    target_tier: composition_contracts
+  - name: DictHost
+    path: src/bioetl/composition/contracts/structural.py
+    line: 35
+    target_tier: composition_contracts
+  - name: AuditRequiredFn
+    path: src/bioetl/composition/contracts/structural.py
+    line: 39
+    target_tier: composition_contracts
+  - name: ControlPlaneSettingsFn
+    path: src/bioetl/composition/contracts/structural.py
+    line: 43
+    target_tier: composition_contracts
+  - name: CandidatePathsFactory
+    path: src/bioetl/composition/contracts/structural.py
+    line: 47
+    target_tier: composition_contracts
+  - name: _MetricsFactory
+    path: src/bioetl/composition/factories/_observability_wiring.py
+    line: 21
+    target_tier: application
+  - name: DQReportServiceFactory
+    path: src/bioetl/composition/factories/dq/_context_resolver_support.py
+    line: 30
+    target_tier: application
+  - name: _ServiceBundleDeps
+    path: src/bioetl/composition/factories/pipeline/_creation_wiring.py
+    line: 58
+    target_tier: composition_contracts
+  - name: _BuildPipelineServicesFn
+    path: src/bioetl/composition/factories/pipeline/_creation_wiring.py
+    line: 73
+    target_tier: composition_contracts
+  - name: DomainConfigMapper
+    path: src/bioetl/composition/factories/pipeline/construction_types.py
+    line: 15
+    target_tier: domain
+  - name: ContractPolicyLoader
+    path: src/bioetl/composition/factories/pipeline/construction_types.py
+    line: 27
+    target_tier: application
+  - name: _SchemaBuilder
+    path: src/bioetl/composition/factories/pipeline/construction_types.py
+    line: 35
+    target_tier: application
+  - name: ContractPolicyLoader
+    path: src/bioetl/composition/factories/pipeline/transformer_dependencies.py
+    line: 32
+    target_tier: application
+  - name: _FactoryLike
+    path: src/bioetl/composition/factories/pipeline_support/assembler_helpers.py
+    line: 25
+    target_tier: composition_contracts
+  - name: RegistryEntryProtocol
+    path: src/bioetl/composition/factories/pipeline_support/registry_validation_helpers.py
+    line: 16
+    target_tier: application
+  - name: BaseServicesFactoryProtocol
+    path: src/bioetl/composition/factories/services/_bundle_support.py
+    line: 39
+    target_tier: application
+  - name: _StorageFactoryProtocol
+    path: src/bioetl/composition/factories/services/common_service_wiring.py
+    line: 53
+    target_tier: composition_contracts
+  - name: _StorageContextLike
+    path: src/bioetl/composition/factories/services/port_factories.py
+    line: 32
+    target_tier: composition_contracts
+  - name: _SilverMergedWriteProtocol
+    path: src/bioetl/composition/factories/storage/merged_mixin.py
+    line: 26
+    target_tier: application
+  - name: _GoldMergedWriteProtocol
+    path: src/bioetl/composition/factories/storage/merged_mixin.py
+    line: 42
+    target_tier: application
+  - name: _LoggerBindableObservability
+    path: src/bioetl/composition/observability.py
+    line: 147
+    target_tier: composition_contracts
+  - name: _SupportsDefaultRegistry
+    path: src/bioetl/composition/providers/_default_registry.py
+    line: 18
+    target_tier: composition_contracts
+  - name: _SupportsProviderStore
+    path: src/bioetl/composition/providers/_default_registry.py
+    line: 25
+    target_tier: composition_contracts
+  - name: _SupportsProviderRegistryStore
+    path: src/bioetl/composition/providers/_default_registry.py
+    line: 29
+    target_tier: composition_contracts
+  - name: SecretValueProviderProtocol
+    path: src/bioetl/composition/providers/_models.py
+    line: 24
+    target_tier: application
+  - name: ProviderSettingsProtocol
+    path: src/bioetl/composition/providers/_models.py
+    line: 32
+    target_tier: application
+  - name: AdapterCreatorProtocol
+    path: src/bioetl/composition/providers/_models.py
+    line: 71
+    target_tier: application
+  - name: DataSourceCreatorProtocol
+    path: src/bioetl/composition/providers/_models.py
+    line: 85
+    target_tier: application
+  - name: ProviderHttpClientFactoryProtocol
+    path: src/bioetl/composition/providers/_registration_contracts.py
+    line: 28
+    target_tier: application
+  - name: ProviderAdapterFactoryProtocol
+    path: src/bioetl/composition/providers/_registration_contracts.py
+    line: 43
+    target_tier: application
+  - name: SupportAwareDataSourceCreatorProtocol
+    path: src/bioetl/composition/providers/_registration_contracts.py
+    line: 58
+    target_tier: application
+  - name: ProviderRegistrarProtocol
+    path: src/bioetl/composition/providers/_registry_protocols.py
+    line: 20
+    target_tier: application
+  - name: ProviderDataSourceAccessProtocol
+    path: src/bioetl/composition/providers/_registry_protocols.py
+    line: 40
+    target_tier: application
+  - name: PaginationConfigLike
+    path: src/bioetl/composition/runtime_builders/_inputs_resolution_support.py
+    line: 34
+    target_tier: domain
+  - name: SourceConfigLike
+    path: src/bioetl/composition/runtime_builders/_inputs_resolution_support.py
+    line: 38
+    target_tier: domain
+  - name: _ManifestSourceRefBuilder
+    path: src/bioetl/composition/runtime_builders/_run_manifest_creation_support_helpers.py
+    line: 41
+    target_tier: composition_contracts
+  - name: _ManifestLaunchContextBuilder
+    path: src/bioetl/composition/runtime_builders/_run_manifest_replay_support.py
+    line: 26
+    target_tier: composition_contracts
+  - name: PipelineRunnerProtocol
+    path: src/bioetl/composition/runtime_builders/ledger_collaborator.py
+    line: 14
+    target_tier: application
+  - name: ControlPlaneArtifactLifecycleStoreProtocol
+    path: src/bioetl/application/ports/control_plane.py
+    line: 15
+    target_tier: application
+  - name: ObservabilitySettingsProtocol
+    path: src/bioetl/application/ports/observability.py
+    line: 8
+    target_tier: application
+  - name: PipelineRegistryProtocol
+    path: src/bioetl/application/ports/pipeline_registry.py
+    line: 11
+    target_tier: application
+  - name: EntityTypeExtractor
+    path: src/bioetl/domain/ports/entity_type.py
+    line: 8
+    target_tier: domain
