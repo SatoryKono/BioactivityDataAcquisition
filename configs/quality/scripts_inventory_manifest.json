@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T17:11:05.030353+00:00",
+  "generated_at": "2026-08-25T17:40:46.666577+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -15162,7 +15162,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 296,
+          "line": 297,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },

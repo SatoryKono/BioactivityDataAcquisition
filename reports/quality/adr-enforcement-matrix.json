@@ -2171,6 +2171,7 @@
         "src/bioetl/application/README.md",
         "src/bioetl/application/ports/__init__.py",
         "src/bioetl/application/ports/dq.py",
+        "src/bioetl/application/ports/health.py",
         "src/bioetl/application/ports/metrics.py",
         "src/bioetl/application/ports/pipeline.py",
         "src/bioetl/application/ports/providers.py",
