@@ -41,62 +41,6 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "110",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_domain_files_under_limit"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "118",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_application_files_under_limit"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "129",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_composition_files_under_limit"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "140",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_infrastructure_files_under_limit"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "151",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_interfaces_files_under_limit"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "206",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_domain_complexity"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "212",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_application_complexity"
-    },
-    {
-      "category": "architecture_helper_guard",
-      "line": "223",
-      "path": "tests/architecture/test_code_metrics.py",
-      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-      "test_name": "test_infrastructure_complexity"
-    },
-    {
-      "category": "architecture_helper_guard",
       "line": "157",
       "path": "tests/architecture/test_codex_skill_agent_links.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
@@ -748,7 +692,7 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 16,
+    "architecture_helper_guard": 8,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 86,
@@ -756,14 +700,6 @@
   },
   "assertless_examples": [
     "tests/architecture/test_antipatterns.py:105",
-    "tests/architecture/test_code_metrics.py:110",
-    "tests/architecture/test_code_metrics.py:118",
-    "tests/architecture/test_code_metrics.py:129",
-    "tests/architecture/test_code_metrics.py:140",
-    "tests/architecture/test_code_metrics.py:151",
-    "tests/architecture/test_code_metrics.py:206",
-    "tests/architecture/test_code_metrics.py:212",
-    "tests/architecture/test_code_metrics.py:223",
     "tests/architecture/test_codex_skill_agent_links.py:157",
     "tests/architecture/test_di_constructors.py:332",
     "tests/architecture/test_port_contracts_hypothesis.py:560",
@@ -779,19 +715,21 @@
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
     "tests/unit/application/core/test_dq_metrics.py:60",
     "tests/unit/application/core/test_otel_spans.py:586",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
+    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
+    "tests/unit/application/observability/test_pipeline_metrics.py:297",
+    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
+    "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
+    "tests/unit/composition/test_observability_contract.py:420",
+    "tests/unit/composition/test_observability_contract.py:430",
+    "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+    "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:576"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
       "assertless_tests": 1,
       "categories": {
         "architecture_helper_guard": 1
-      }
-    },
-    "tests/architecture/test_code_metrics.py": {
-      "assertless_tests": 8,
-      "categories": {
-        "architecture_helper_guard": 8
       }
     },
     "tests/architecture/test_codex_skill_agent_links.py": {
@@ -1089,7 +1027,7 @@
       }
     }
   },
-  "assertless_total_candidates": 102,
+  "assertless_total_candidates": 94,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1317,62 +1255,6 @@
         "path": "tests/architecture/test_antipatterns.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_no_hardcoded_secrets"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "110",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_domain_files_under_limit"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "118",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_application_files_under_limit"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "129",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_composition_files_under_limit"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "140",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_infrastructure_files_under_limit"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "151",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_interfaces_files_under_limit"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "206",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_domain_complexity"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "212",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_application_complexity"
-      },
-      {
-        "category": "architecture_helper_guard",
-        "line": "223",
-        "path": "tests/architecture/test_code_metrics.py",
-        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
-        "test_name": "test_infrastructure_complexity"
       },
       {
         "category": "architecture_helper_guard",
@@ -2027,7 +1909,7 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 16,
+      "architecture_helper_guard": 8,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 86,
@@ -2035,14 +1917,6 @@
     },
     "assertless_examples": [
       "tests/architecture/test_antipatterns.py:105",
-      "tests/architecture/test_code_metrics.py:110",
-      "tests/architecture/test_code_metrics.py:118",
-      "tests/architecture/test_code_metrics.py:129",
-      "tests/architecture/test_code_metrics.py:140",
-      "tests/architecture/test_code_metrics.py:151",
-      "tests/architecture/test_code_metrics.py:206",
-      "tests/architecture/test_code_metrics.py:212",
-      "tests/architecture/test_code_metrics.py:223",
       "tests/architecture/test_codex_skill_agent_links.py:157",
       "tests/architecture/test_di_constructors.py:332",
       "tests/architecture/test_port_contracts_hypothesis.py:560",
@@ -2058,9 +1932,17 @@
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:282",
       "tests/unit/application/core/test_dq_metrics.py:60",
       "tests/unit/application/core/test_otel_spans.py:586",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129"
+      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:129",
+      "tests/unit/application/observability/test_pipeline_metrics.py:297",
+      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:319",
+      "tests/unit/application/services/test_checkpoint_telemetry_helpers.py:68",
+      "tests/unit/composition/test_observability_contract.py:420",
+      "tests/unit/composition/test_observability_contract.py:430",
+      "tests/unit/composition/factories/storage/test_health_mixin.py:72",
+      "tests/unit/composition/factories/storage/test_health_mixin.py:103",
+      "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py:576"
     ],
-    "assertless_total_candidates": 102,
+    "assertless_total_candidates": 94,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2252,8 +2134,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2364,
-      "test_python_file_count": 2592,
+      "test_glob_file_count": 2366,
+      "test_python_file_count": 2594,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2292,18 +2174,16 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2364,
-    "total_test_functions": 24967,
-
+    "total_test_files": 2366,
+    "total_test_functions": 24978,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "cd0f493be64b7f7841d5f5593b5da8bdfa5d8cdd966e2ab45b1f6af7e84261b6",
-
+  "source_tree_sha256": "4c48108597e25b8afb8eea9bdadad21c54c9ee81aaac3491e20b696426eea9e5",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 102,
+    "assertless_total_candidates": 94,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2320,8 +2200,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2364,
-    "test_python_file_count": 2592,
+    "test_glob_file_count": 2366,
+    "test_python_file_count": 2594,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2360,9 +2240,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2364,
-  "total_test_functions": 24967,
-
+  "total_test_files": 2366,
+  "total_test_functions": 24978,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
