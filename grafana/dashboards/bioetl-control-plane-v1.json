@@ -5163,10 +5163,6 @@
                     "value": "right"
                   },
                   {
-                    "id": "custom.width",
-                    "value": 110
-                  },
-                  {
                     "id": "noValue",
                     "value": "UNKNOWN"
                   },
@@ -5245,10 +5241,6 @@
                   "options": "count"
                 },
                 "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 70
-                  },
                   {
                     "id": "custom.align",
                     "value": "right"
