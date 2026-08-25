@@ -199,10 +199,6 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 220
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -759,10 +755,6 @@
                 "value": "Why"
               },
               {
-                "id": "custom.width",
-                "value": 45
-              },
-              {
                 "id": "mappings",
                 "value": [
                   {
@@ -1088,10 +1080,6 @@
                     }
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 110
               },
               {
                 "id": "custom.cellOptions",
@@ -3795,10 +3783,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 165
                   }
                 ]
               },

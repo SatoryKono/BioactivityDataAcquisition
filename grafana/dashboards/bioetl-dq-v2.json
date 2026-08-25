@@ -635,10 +635,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 165
                   }
                 ]
               },
@@ -1189,10 +1185,6 @@
               "options": "reason"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 220
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -1963,12 +1955,7 @@
                   "id": "byName",
                   "options": "reason_code"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 200
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2096,12 +2083,7 @@
                   "id": "byName",
                   "options": "field"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 200
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2230,12 +2212,7 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 200
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
@@ -2363,12 +2340,7 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 140
-                  }
-                ]
+                "properties": []
               },
               {
                 "matcher": {
