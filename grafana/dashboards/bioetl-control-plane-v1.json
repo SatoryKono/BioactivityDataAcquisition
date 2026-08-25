@@ -333,10 +333,6 @@
                 "value": "reasons"
               },
               {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
@@ -496,10 +492,6 @@
               "options": "reason"
             },
             "properties": [
-              {
-                "id": "custom.width",
-                "value": 150
-              },
               {
                 "id": "custom.cellOptions",
                 "value": {
@@ -4957,10 +4949,6 @@
                     "value": {
                       "type": "color-text"
                     }
-                  },
-                  {
-                    "id": "custom.width",
-                    "value": 165
                   }
                 ]
               },
