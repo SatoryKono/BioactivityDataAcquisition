@@ -73,6 +73,7 @@ class PipelineRun(_PipelineRunLifecycleMixin):
             pipeline_name: Human-readable pipeline name (e.g., 'chembl_activity'). Defaults to ''.
             metadata: Optional key-value metadata to attach to the run.
         """
+        super().__init__()
         self._run_id = run_id
         self._run_type = run_type
         self._pipeline_name = pipeline_name
