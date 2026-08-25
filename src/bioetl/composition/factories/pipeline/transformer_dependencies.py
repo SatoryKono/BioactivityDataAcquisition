@@ -27,7 +27,7 @@ from bioetl.domain.ports import (
 from bioetl.domain.ports.noop import NoOpPiiHasher
 from bioetl.infrastructure.security.pii_hasher import Sha256PiiHasher
 
-from bioetl.application.ports.pipeline import ContractPolicyLoader
+from bioetl.application.ports.pipeline import ContractPolicyLoaderProtocol
 
 
 def _default_pii_hasher() -> PiiHasherPort:
@@ -50,7 +50,7 @@ def build_transformer_dependencies(
     contract_policy: ContractPolicyProtocol | None = None,
     content_hash_include_fields: Collection[str] | None = None,
     content_hash_exclude_fields: Collection[str] | None = None,
-    contract_policy_loader: ContractPolicyLoader | None = None,
+    contract_policy_loader: ContractPolicyLoaderProtocol | None = None,
     structural_policy: StructuralPolicyProtocol | None = None,
 ) -> TransformerDependencyContext:
     """Build explicit collaborator bundle for transformer construction in composition."""
@@ -95,7 +95,7 @@ def _load_contract_policy(
     *,
     provider: str,
     entity_type: str | None,
-    contract_policy_loader: ContractPolicyLoader | None,
+    contract_policy_loader: ContractPolicyLoaderProtocol | None,
 ) -> ContractPolicyProtocol:
     """Load configured contract policy or degrade to the canonical fallback."""
 

@@ -19,7 +19,7 @@ from bioetl.domain.ports import (
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
-from bioetl.application.ports.storage import StorageContextLike as _StorageContextLike
+from bioetl.application.ports.storage import StorageContextProtocol as _StorageContextLike
 
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpointAdapter

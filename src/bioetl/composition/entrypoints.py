@@ -13,16 +13,6 @@ from typing import cast
 from bioetl.composition._pipeline_execution import (
     ensure_metrics_server_started as ensure_metrics_server_started,
 )
-from bioetl.composition._resource_management import (
-    MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
-)
-from bioetl.composition._resource_management import (
-    get_lifecycle_service as get_lifecycle_service,
-)
-from bioetl.composition._resource_management import preview_cleanup as preview_cleanup
-from bioetl.composition._services import (
-    get_bronze_cleanup_service as get_bronze_cleanup_service,
-)
 from bioetl.composition._services import (
     get_contract_migration_service as get_contract_migration_service,
 )
@@ -30,11 +20,17 @@ from bioetl.composition._services import (
     get_pipeline_runner_service as get_pipeline_runner_service,
 )
 from bioetl.composition._services import get_vacuum_service as get_vacuum_service
+from bioetl.composition.contracts import (
+    MedallionLifecycleServiceProtocol as MedallionLifecycleServiceProtocol,
+)
+from bioetl.composition.resources_runtime import (
+    get_lifecycle_service as get_lifecycle_service,
+)
+from bioetl.composition.resources_runtime import preview_cleanup as preview_cleanup
 
 __all__ = [
     "MedallionLifecycleServiceProtocol",
     "ensure_metrics_server_started",
-    "get_bronze_cleanup_service",
     "get_contract_migration_service",
     "get_lifecycle_service",
     "get_pipeline_runner_service",

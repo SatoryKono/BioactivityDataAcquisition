@@ -8,12 +8,12 @@ from bioetl.composition.factories.pipeline.entity_type_extractor import (
 )
 
 from bioetl.domain.ports import DomainConfigMapper
-from bioetl.application.ports.pipeline import ContractPolicyLoader
+from bioetl.application.ports.pipeline import ContractPolicyLoaderProtocol
 from bioetl.application.ports.pipeline import SchemaBuilderProtocol as _SchemaBuilder
 
 
 __all__ = [
-    "ContractPolicyLoader",
+    "ContractPolicyLoaderProtocol",
     "DomainConfigMapper",
     "EntityTypeExtractor",
     "_SchemaBuilder",

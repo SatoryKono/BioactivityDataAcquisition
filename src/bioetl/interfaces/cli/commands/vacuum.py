@@ -29,7 +29,7 @@ from bioetl.interfaces.cli.formatters import (
 
 if TYPE_CHECKING:
     from bioetl.application.services.ops.vacuum_service import VacuumService
-    from bioetl.composition._resource_management import (
+    from bioetl.composition.contracts import (
         MedallionLifecycleServiceProtocol,
     )
 

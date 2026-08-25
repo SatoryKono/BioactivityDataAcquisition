@@ -1,12 +1,12 @@
 {
-  "snapshot_date": "2026-08-12",
+  "snapshot_date": "2026-08-25",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
   "control_plane_root_facade_source": "configs/quality/application_control_plane_root_facade_inventory.yaml",
   "summary": {
     "retained_entrypoint_count": 12,
-    "retained_public_entrypoint_burden": 0,
+    "retained_public_entrypoint_burden": 1,
     "removed_compatibility_surface_count": 23,
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
@@ -21,7 +21,7 @@
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0,
-    "retained_public_export_facades_with_wrapper_contract_drift": 0
+    "retained_public_export_facades_with_wrapper_contract_drift": 1
   },
   "retained_entrypoints": [
     {
@@ -154,50 +154,34 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 5,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "max_public_exports": 13,
       "public_exports": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
+        "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
+        "get_contract_migration_service",
+        "get_lifecycle_service",
+        "get_pipeline_runner_service",
+        "get_vacuum_service",
+        "preview_cleanup",
+        "register",
+        "registered_ports",
+        "resolve"
       ],
-      "public_export_count": 13,
+      "public_export_count": 10,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
-      "lazy_export_keys": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
-        "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
-      ],
+      "lazy_export_keys": [],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
@@ -207,11 +191,19 @@
         "start_metrics_server"
       ],
       "retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
+      "missing_retained_wrappers_outside_all": [
         "load_pipeline_config",
         "start_metrics_server"
       ],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
       "resolution_conflicts": {}
     },
     {
@@ -279,16 +271,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
+      ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 1,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing",
+      "sunset_status": "first-party-active",
       "max_public_exports": 4,
       "public_exports": [
         "cleanup_bronze",
@@ -603,50 +597,34 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
+        "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 5,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "max_public_exports": 13,
       "public_exports": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
+        "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
+        "get_contract_migration_service",
+        "get_lifecycle_service",
+        "get_pipeline_runner_service",
+        "get_vacuum_service",
+        "preview_cleanup",
+        "register",
+        "registered_ports",
+        "resolve"
       ],
-      "public_export_count": 13,
+      "public_export_count": 10,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
-      "lazy_export_keys": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
-        "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
-      ],
+      "lazy_export_keys": [],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
@@ -656,11 +634,19 @@
         "start_metrics_server"
       ],
       "retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
+      "missing_retained_wrappers_outside_all": [
         "load_pipeline_config",
         "start_metrics_server"
       ],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
       "resolution_conflicts": {}
     },
     {
@@ -728,16 +714,18 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [],
+      "src_importers": [
+        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
+      ],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
-      "src_importer_count": 0,
+      "src_importer_count": 1,
       "test_importer_count": 2,
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing",
+      "sunset_status": "first-party-active",
       "max_public_exports": 4,
       "public_exports": [
         "cleanup_bronze",
@@ -928,38 +916,21 @@
       "canonical_target": "bioetl.composition.entrypoints",
       "max_public_exports": 13,
       "public_exports": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
+        "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
+        "get_contract_migration_service",
+        "get_lifecycle_service",
+        "get_pipeline_runner_service",
+        "get_vacuum_service",
+        "preview_cleanup",
+        "register",
+        "registered_ports",
+        "resolve"
       ],
-      "public_export_count": 13,
+      "public_export_count": 10,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
-      "lazy_export_keys": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
-        "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
-      ],
+      "lazy_export_keys": [],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
@@ -969,11 +940,19 @@
         "start_metrics_server"
       ],
       "retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
+      "missing_retained_wrappers_outside_all": [
         "load_pipeline_config",
         "start_metrics_server"
       ],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -984,7 +963,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 4
+      "test_importer_count": 5
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1080,10 +1059,10 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing",
-      "src_importer_count": 0,
+      "sunset_status": "first-party-active",
+      "src_importer_count": 1,
       "test_importer_count": 2
     },
     {
@@ -1149,38 +1128,21 @@
       "canonical_target": "bioetl.composition.entrypoints",
       "max_public_exports": 13,
       "public_exports": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
+        "MedallionLifecycleServiceProtocol",
         "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
+        "get_contract_migration_service",
+        "get_lifecycle_service",
+        "get_pipeline_runner_service",
+        "get_vacuum_service",
+        "preview_cleanup",
+        "register",
+        "registered_ports",
+        "resolve"
       ],
-      "public_export_count": 13,
+      "public_export_count": 10,
       "duplicate_public_exports": [],
       "lazy_export_table": "_PUBLIC_SYMBOL_TARGETS",
-      "lazy_export_keys": [
-        "ArchiveOptions",
-        "PipelineRunResult",
-        "RunOptions",
-        "RunResult",
-        "VacuumOptions",
-        "bootstrap_composite_runner",
-        "build_pipeline_context",
-        "create_pipeline_runner",
-        "ensure_metrics_server_started",
-        "load_composite_config",
-        "maybe_start_metrics_server",
-        "push_metrics_to_gateway",
-        "run_pipeline"
-      ],
+      "lazy_export_keys": [],
       "duplicate_lazy_export_keys": [],
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
@@ -1190,11 +1152,19 @@
         "start_metrics_server"
       ],
       "retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
+      "missing_retained_wrappers_outside_all": [
         "load_pipeline_config",
         "start_metrics_server"
       ],
-      "missing_retained_wrappers_outside_all": [],
-      "unexpected_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [
+        "register",
+        "registered_ports",
+        "resolve"
+      ],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -1205,7 +1175,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 4
+      "test_importer_count": 5
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1301,10 +1271,10 @@
       "external_breaking_change_required": true,
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "external-facing",
+      "surface_classification": "first-party-active",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "external-facing",
-      "src_importer_count": 0,
+      "sunset_status": "first-party-active",
+      "src_importer_count": 1,
       "test_importer_count": 2
     },
     {

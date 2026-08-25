@@ -40,12 +40,14 @@ facades:
     path: src/bioetl/composition/maintenance_api.py
     lifecycle: retained_external_composition_api
     owner: "@bioetl-composition"
-    disposition: retain_external_public_api_zero_first_party_src
-    max_src_importer_count: 0
-    allowed_src_importers: []
+    disposition: retain_external_public_api_reviewed_first_party_cli_seam
+    max_src_importer_count: 1
+    allowed_src_importers:
+      - src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py
     rationale: >-
-      Maintenance facade remains stable externally; first-party source imports
-      are currently zero and must not regrow without review.
+      Maintenance facade remains the sanctioned CLI composition seam. The
+      owner-only maintenance service_access module is the reviewed first-party
+      importer; other src callers must not regrow without #5567 review.
   - module: bioetl.application.services.control_plane
     path: src/bioetl/application/services/control_plane/__init__.py
     lifecycle: retained_package_root_lazy_facade

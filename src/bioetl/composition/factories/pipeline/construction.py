@@ -7,7 +7,7 @@ module remains the sanctioned aggregate seam for construction helpers.
 from __future__ import annotations
 
 from bioetl.composition.factories.pipeline.construction_types import (
-    ContractPolicyLoader,
+    ContractPolicyLoaderProtocol,
     DomainConfigMapper,
 )
 from bioetl.composition.factories.pipeline.entity_type_extractor import (
@@ -28,7 +28,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
 # ``transformer_class(...)`` inside ``TransformerBuilder.build``.
 
 __all__ = [
-    "ContractPolicyLoader",
+    "ContractPolicyLoaderProtocol",
     "DomainConfigMapper",
     "DomainConfigResolver",
     "EntityTypeExtractor",

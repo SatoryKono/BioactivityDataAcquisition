@@ -22,7 +22,9 @@ metric_coverage_classes:
   bioetl_control_plane_integrity_pair_present: required_current
   bioetl_control_plane_last_observed_timestamp_seconds: required_current
   bioetl_control_plane_ledger_appends_total: event_optional
+  bioetl_control_plane_ledger_fail_severity_30m: required_when_active
   bioetl_control_plane_ledger_present: required_current
+  bioetl_control_plane_manifest_fail_severity_30m: required_when_active
   bioetl_control_plane_manifest_present: required_current
   bioetl_control_plane_manifest_writes_total: event_optional
   bioetl_control_plane_read_duration_seconds_bucket: event_optional
@@ -37,6 +39,7 @@ metric_coverage_classes:
   bioetl_dq_check_duration_ms_bucket: event_optional
   bioetl_dq_current_reason: required_current
   bioetl_dq_current_status: required_current
+  bioetl_dq_first_window_reason: required_current
   bioetl_dq_records_quarantined_total: event_optional
   bioetl_dq_soft_threshold_exceeded_total: event_optional
   bioetl_dq_validation_failures_total: event_optional
@@ -127,6 +130,8 @@ metric_coverage_classes:
   bioetl_stage_backlog_records: required_current
   bioetl_stage_lag_seconds: required_current
   bioetl_stage_records_total: event_optional
+  bioetl_trust_replay_blocker_events_total: event_optional
+  bioetl_trust_replay_blocker_integrity: required_current
   bioetl_workflow_runs_total: event_optional
   bioetl_workflow_step_events_total: event_optional
   bioetl_workflow_universe: required_current

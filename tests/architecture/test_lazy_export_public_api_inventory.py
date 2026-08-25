@@ -40,7 +40,6 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),
     "src/bioetl/composition/bootstrap/runtime/composite.py": "compatibility_facade",
-    "src/bioetl/composition/entrypoints.py": "public_facade",
     "src/bioetl/composition/execution_api.py": "public_facade",
     "src/bioetl/composition/factories/__init__.py": "public_package_facade",
     "src/bioetl/composition/factories/dq/__init__.py": "public_package_facade",
@@ -55,6 +54,7 @@ EXPECTED_LAZY_EXPORT_FACADES = {
         "compatibility_facade"
     ),
     "src/bioetl/composition/runtime_builders/inputs_resolver.py": "public_facade",
+    "src/bioetl/domain/aggregates/batch.py": "compatibility_facade",
     "src/bioetl/domain/__init__.py": "public_package_facade",
     "src/bioetl/domain/behavior/__init__.py": "public_package_facade",
     "src/bioetl/domain/config/__init__.py": "public_package_facade",

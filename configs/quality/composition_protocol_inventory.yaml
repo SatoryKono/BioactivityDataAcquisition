@@ -116,31 +116,31 @@ protocols:
   path: src/bioetl/application/ports/dq.py
   line: 27
   target_tier: application
-- name: DQReportServiceFactory
+- name: DQReportServiceFactoryProtocol
   path: src/bioetl/application/ports/dq.py
   line: 33
   target_tier: application
-- name: WorkflowMetricsFactory
+- name: WorkflowMetricsFactoryProtocol
   path: src/bioetl/application/ports/metrics.py
   line: 15
   target_tier: application
-- name: MetricsFactory
+- name: MetricsFactoryProtocol
   path: src/bioetl/application/ports/metrics.py
   line: 21
   target_tier: application
 - name: MetricsService
   path: src/bioetl/application/ports/metrics.py
-  line: 25
+  line: 26
   target_tier: application
 - name: ObservabilitySettingsProtocol
   path: src/bioetl/application/ports/observability.py
   line: 8
   target_tier: application
-- name: ContractPolicyLoader
+- name: ContractPolicyLoaderProtocol
   path: src/bioetl/application/ports/pipeline.py
   line: 28
   target_tier: application
-- name: SchemaBuilder
+- name: SchemaBuilderProtocol
   path: src/bioetl/application/ports/pipeline.py
   line: 34
   target_tier: application
@@ -198,53 +198,53 @@ protocols:
   target_tier: application
 - name: CompositeRuntimeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 29
+  line: 28
   target_tier: application
-- name: CompositeMergeStorage
+- name: CompositeMergeStorageProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 33
+  line: 32
   target_tier: application
 - name: SilverMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 37
+  line: 36
   target_tier: application
 - name: GoldMergedWriteProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 53
+  line: 52
   target_tier: application
-- name: StorageContextLike
+- name: StorageContextProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 70
+  line: 69
   target_tier: application
 - name: StorageFactoryProtocol
   path: src/bioetl/application/ports/storage.py
-  line: 77
+  line: 76
   target_tier: application
 - name: EntityTypeExtractor
   path: src/bioetl/domain/ports/entity_type.py
-  line: 8
+  line: 9
   target_tier: domain
 - name: TransformCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 14
+  line: 15
   target_tier: domain
 - name: GoldFilterCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 27
+  line: 29
   target_tier: domain
 - name: GoldTransformCallback
   path: src/bioetl/domain/ports/pipeline_callbacks.py
-  line: 35
+  line: 38
   target_tier: domain
 - name: PaginationConfigLike
   path: src/bioetl/domain/ports/source_config.py
-  line: 8
+  line: 9
   target_tier: domain
 - name: SourceConfigLike
   path: src/bioetl/domain/ports/source_config.py
-  line: 12
+  line: 16
   target_tier: domain
 - name: DomainConfigMapper
   path: src/bioetl/domain/ports/config_mapper.py
-  line: 14
+  line: 15
   target_tier: domain

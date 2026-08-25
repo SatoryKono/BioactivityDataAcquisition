@@ -39,7 +39,9 @@ GOLD_FACTORY = (
 STORAGE_ASSEMBLY = (
     ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "assembly" / "storage.py"
 )
-WORKFLOW_SERVICES = ROOT / "src" / "bioetl" / "composition" / "_workflow_services.py"
+WORKFLOW_TRANSFORM_REGISTRY = (
+    ROOT / "src" / "bioetl" / "composition" / "_workflow_transform_registry.py"
+)
 SILVER_FINALIZATION_MODELS = (
     ROOT
     / "src"
@@ -198,7 +200,7 @@ def test_gold_composition_wiring_passes_grouped_runtime_services() -> None:
 def test_silver_composition_wiring_passes_grouped_runtime_services() -> None:
     """Production Silver composition must not use direct collaborator kwargs."""
     assembly_calls = _named_calls(_parse(STORAGE_ASSEMBLY), "SilverWriter")
-    workflow_calls = _named_calls(_parse(WORKFLOW_SERVICES), "SilverWriter")
+    workflow_calls = _named_calls(_parse(WORKFLOW_TRANSFORM_REGISTRY), "SilverWriter")
 
     assert assembly_calls
     assert workflow_calls

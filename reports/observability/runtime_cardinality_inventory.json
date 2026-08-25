@@ -3790,6 +3790,12 @@
       "approved_max_series=500",
       "runtime_emitter_count=3",
       "label_keys=provider"
+    ],
+    "bioetl_pipeline_runs_total": [
+      "observed_series_count=0",
+      "approved_max_series=0",
+      "runtime_emitter_count=3",
+      "label_keys=pipeline,run_type,status"
     ]
   },
   "runtime_cardinality_observed_series": {
@@ -4307,9 +4313,12 @@
   "runtime_cardinality_review_candidates": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
-    "bioetl_health_check_latency_seconds"
+    "bioetl_health_check_latency_seconds",
+    "bioetl_pipeline_runs_total"
   ],
-  "runtime_cardinality_review_required": [],
+  "runtime_cardinality_review_required": [
+    "bioetl_pipeline_runs_total"
+  ],
   "runtime_cardinality_reviewed": [
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_saved_at_seconds",
@@ -4657,6 +4666,7 @@
     ],
     "bioetl_pipeline_runs_total": [
       "src/bioetl/application/composite/_lifecycle_observer_event_metrics.py",
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/observability/observer_context_mixin.py"
     ],
     "bioetl_pipeline_stage_expected": [

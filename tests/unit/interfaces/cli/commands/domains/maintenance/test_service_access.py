@@ -68,7 +68,7 @@ async def test_service_access_preview_cleanup_delegates_async(
     async def _preview_cleanup(pipeline: str) -> str:
         return f"preview:{pipeline}"
 
-    fake_access = ModuleType("bioetl.composition._resource_management")
+    fake_access = ModuleType("bioetl.composition.maintenance_api")
     fake_access.preview_cleanup = _preview_cleanup
     monkeypatch.setitem(__import__("sys").modules, fake_access.__name__, fake_access)
 

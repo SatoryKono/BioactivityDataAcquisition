@@ -47,7 +47,7 @@ def test_pipeline_construction_protocols_expose_expected_public_contracts() -> N
     """Construction protocol module should expose stable callable contracts."""
     assert issubclass(EntityTypeExtractor, Protocol)
     assert issubclass(construction_types.DomainConfigMapper, Protocol)
-    assert issubclass(construction_types.ContractPolicyLoader, Protocol)
+    assert issubclass(construction_types.ContractPolicyLoaderProtocol, Protocol)
     assert issubclass(construction_types._SchemaBuilder, Protocol)
 
 

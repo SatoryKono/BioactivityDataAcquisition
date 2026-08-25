@@ -48,17 +48,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
         self._started_at = started_at
 
     def record_stage_start(self, stage: str, started_at: datetime) -> None:
-        """Record the start of a pipeline stage.
-
-        Compatibility path (P2-9):
-            Prefer application.services.PipelineRunLifecycleService for orchestration
-            call-sites. Domain aggregate API remains temporarily stable through
-            2026-06-30 for migration safety.
-
-        Args:
-            stage: Name of the pipeline stage being started (e.g., 'bronze', 'silver').
-            started_at: Explicit stage start timestamp.
-        """
+        """Record the start of a pipeline stage (compat P2-9 until 2026-06-30)."""
         self._assert_running("record_stage_start")
         self._stages.append(
             StageResult(

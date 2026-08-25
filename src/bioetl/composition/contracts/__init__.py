@@ -4,6 +4,8 @@ Modules in this package MUST NOT import ``bioetl.composition.*``.
 They may expose Protocol/TypedDict only.
 """
 
+from __future__ import annotations
+
 from bioetl.composition.contracts.health import (
     BronzeCleanupServiceProtocol,
     HealthListenerDependenciesProtocol,
