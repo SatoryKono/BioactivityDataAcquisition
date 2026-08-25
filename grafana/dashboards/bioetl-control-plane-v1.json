@@ -1183,7 +1183,17 @@
             }
           ],
           "title": "Review Lineage Validation",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -2364,7 +2374,17 @@
             }
           ],
           "title": "Review Checkpoint Validation",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         }
       ],
       "description": "Expand only when replay or checkpoint readiness needs forensic evidence."
@@ -3023,7 +3043,17 @@
             }
           ],
           "title": "Review Manifest Validation",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         }
       ],
       "description": "Expand only when the current trust verdict requires manifest or ledger localization."
@@ -4315,7 +4345,17 @@
             }
           ],
           "title": "Inspect Identity Values",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": null,
@@ -4464,7 +4504,17 @@
             }
           ],
           "title": "Review Identity Gaps",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": "BioETL Ops HTTP",
@@ -4553,7 +4603,17 @@
             }
           ],
           "title": "Compare Checkpoint Anchors",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": "BioETL Ops HTTP",
@@ -4642,7 +4702,17 @@
             }
           ],
           "title": "Review Required Replay Anchors",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": "BioETL Ops HTTP",
@@ -4731,7 +4801,17 @@
             }
           ],
           "title": "Review Additional Forensic Anchors",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         },
         {
           "gridPos": {
@@ -5357,7 +5437,17 @@
             }
           ],
           "title": "Review Bounded Failure Reasons",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ]
         }
       ]
     }

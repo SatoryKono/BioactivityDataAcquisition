@@ -596,6 +596,14 @@
             {
               "id": "merge",
               "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
             }
           ]
         },
@@ -949,7 +957,7 @@
             "defaults": {
               "custom": {
                 "align": "left",
-                "inspect": false
+                "inspect": true
               },
               "noValue": "VALID EMPTY — selected run report has no stage funnel rows. Backend failure renders as QUERY ERROR."
             },
@@ -1019,7 +1027,8 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "removals": true
+                  "removals": true,
+                  "Time": true
                 },
                 "indexByName": {
                   "stage_id": 0,
@@ -1125,6 +1134,16 @@
                 "method": "GET"
               },
               "expr": ""
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                }
+              }
             }
           ]
         },
