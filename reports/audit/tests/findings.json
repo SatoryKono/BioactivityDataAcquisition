@@ -1,4 +1,30 @@
 {
-  "source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
-  "surface_score": 2
+  "source_run": "20260825T164939Z-tests-cycle-80651be4d1",
+  "previous_source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
+  "surface_score": 1,
+  "findings": [
+    {
+      "id": "FAIL-COVERAGE-INVENTORY-FRESHNESS",
+      "severity": "High",
+      "priority": "P1",
+      "path": "reports/quality/module-coverage-inventory.json",
+      "symbol_or_lines": "source_tree_sha256; summary.unmeasured_module_count",
+      "claim": "Материализованный coverage inventory не соответствует текущему дереву src/bioetl, что снижает live architecture quality scorecard до 7.41 и делает unit-fast lane красной.",
+      "evidence": [
+        "tests/architecture/test_module_coverage_inventory_freshness.py:63",
+        "reports/audit/test-cycle/20260825T164939Z-80651be4d1-test/cycle-1/coverage-freshness.log:9-15",
+        "reports/audit/test-cycle/20260825T164939Z-80651be4d1-test/cycle-1/scorecard-live-metrics.json:2-8",
+        "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py:52-67"
+      ],
+      "status": "PROVEN",
+      "classification": "fixture",
+      "action": "block",
+      "required_remediation": "Выполнить канонический coverage-verify на чистом src/bioetl, затем обновить module-coverage-inventory из полученного coverage.xml и повторно подтвердить freshness и scorecard gates.",
+      "github_tracking": {
+        "search_command": "gh issue list --repo SatoryKono/BioactivityDataAcquisition --state open --search coverage inventory freshness scorecard --limit 20 --json number,title,labels,url",
+        "result": "no_matching_open_issue",
+        "write_allowed": false
+      }
+    }
+  ]
 }
