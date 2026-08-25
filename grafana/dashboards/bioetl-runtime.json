@@ -3300,7 +3300,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "decimals": 0,
               "unit": "none",
@@ -3533,7 +3533,8 @@
               "options": {
                 "excludeByName": {
                   "row_status": true,
-                  "percintage": true
+                  "percintage": true,
+                  "Time": true
                 },
                 "indexByName": {
                   "parameter": 0,
