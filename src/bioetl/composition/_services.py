@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module
 from pathlib import Path
+from types import ModuleType
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.ports.control_plane import (
@@ -28,13 +29,13 @@ from bioetl.application.ports.operations import (
 )
 from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_registry import resolve as _resolve
+from bioetl.composition import registry_api
 from bioetl.composition.contracts.factories import (
     HealthServerDependenciesFactoryProtocol,
     PipelineRunnerServiceFactoryProtocol,
     QuarantineServiceFactoryProtocol,
 )
 from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
-from bioetl.composition.registry_api import create_registry
 from bioetl.domain.ports.adr import AdrServicePort
 from bioetl.domain.ports.quality.quarantine import QuarantinePort
 
@@ -74,7 +75,7 @@ def _ensure_pipeline_registrations(
 ) -> PipelineRegistry:
     """Return an explicit registry with provider and pipeline registrations."""
     if registry is None:
-        registry = create_registry()
+        registry = registry_api.create_registry()
     _ensure_registrations(registry=registry, scope="pipelines")
     return registry
 
@@ -139,14 +140,19 @@ def get_workflow_runner_service(
     return _workflow_services.get_workflow_runner_service(registry=registry)
 
 
+def _workflow_services_module() -> ModuleType:
+    """Resolve the workflow composition module through one lazy boundary."""
+    from bioetl.composition import _workflow_services
+
+    return _workflow_services
+
+
 def get_workflow_execution_service(
     registry: PipelineRegistry | None = None,
     workflow_lock_port: LockPort | None = None,
 ) -> WorkflowExecutionService:
     """Build workflow execution service via the canonical workflow seam."""
-    from bioetl.composition import _workflow_services
-
-    return _workflow_services.get_workflow_execution_service(
+    return _workflow_services_module().get_workflow_execution_service(
         registry=registry,
         workflow_lock_port=workflow_lock_port,
     )
@@ -159,9 +165,7 @@ def get_workflow_inspection_service() -> WorkflowInspectionServiceProtocol:
 
 def load_workflow_config(name: str) -> WorkflowConfig:
     """Load workflow YAML through the canonical workflow seam."""
-    from bioetl.composition import _workflow_services
-
-    return _workflow_services.load_workflow_config(name)
+    return _workflow_services_module().load_workflow_config(name)
 
 
 def get_contract_migration_service() -> ContractMigrationServiceProtocol:

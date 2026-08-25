@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import ast
-import importlib
 from pathlib import Path
 
 import pytest
@@ -25,9 +24,21 @@ ENTRYPOINTS_FILE = SRC_ROOT / "composition" / "entrypoints.py"
 
 
 def _legacy_entrypoint_symbols() -> set[str]:
-    module = importlib.import_module(ENTRYPOINTS_MODULE)
-    legacy_targets = getattr(module, "_LEGACY_SYMBOL_TARGETS", None)
-    return set() if legacy_targets is None else set(legacy_targets)
+    tree = ast.parse(ENTRYPOINTS_FILE.read_text(encoding="utf-8"))
+    names: set[str] = set()
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            names.add(node.target.id)
+        elif (
+            isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+            and node.name == "_LEGACY_SYMBOL_TARGETS"
+        ):
+            names.add(node.name)
+    return {"_LEGACY_SYMBOL_TARGETS"} if "_LEGACY_SYMBOL_TARGETS" in names else set()
 
 
 def _iter_python_files() -> list[Path]:

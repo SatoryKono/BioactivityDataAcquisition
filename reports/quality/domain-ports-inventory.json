@@ -531,7 +531,7 @@
       "runtime_checkable": true
     },
     {
-      "line": 191,
+      "line": 30,
       "name": "ForeignKeyReconciliationPort",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
       "runtime_checkable": true

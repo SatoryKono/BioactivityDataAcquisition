@@ -53,12 +53,14 @@ def test_service_access_delegates_sync_accessors(
     entrypoints.get_contract_migration_service = lambda: (
         calls.append("contract") or "contract"
     )
-    services = ModuleType("bioetl.composition._services")
-    services.get_bronze_cleanup_service = (
+    health_access = ModuleType("bioetl.composition.health_service_access")
+    health_access.get_bronze_cleanup_service = (
         lambda: calls.append("bronze") or "bronze"
     )
     monkeypatch.setitem(__import__("sys").modules, entrypoints.__name__, entrypoints)
-    monkeypatch.setitem(__import__("sys").modules, services.__name__, services)
+    monkeypatch.setitem(
+        __import__("sys").modules, health_access.__name__, health_access
+    )
 
     assert subject.get_lifecycle_service() == "lifecycle"
     assert subject.get_vacuum_service() == "vacuum"

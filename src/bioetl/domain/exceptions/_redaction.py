@@ -70,6 +70,11 @@ def _redact_url(value: str) -> str:
     return urlunsplit((parsed.scheme, hostname, parsed.path, query, ""))
 
 
+def redact_string(value: str) -> str:
+    """Redact secrets from string values."""
+    return _redact_string(value)
+
+
 def _redact_string(value: str) -> str:
     """Redact secrets from string values."""
     redacted = _redact_embedded_urls(value)

@@ -7,13 +7,13 @@ together. No business logic lives here — only assembly, factory, and registrat
 
 ```
 composition/
-├── entrypoints.py              # Retained execution-first seam (+ deprecated legacy lookups)
-├── execution_api.py            # Canonical execution API
+├── entrypoints.py              # First-party runtime seam (run/create/resolve)
+├── execution_api.py            # External compatibility shim → entrypoints / _pipeline_execution
 ├── control_plane_runtime.py    # Control-plane runtime seam (not *_api)
-├── health_api.py               # Canonical health/quarantine service API
-├── maintenance_api.py          # Canonical maintenance service API
+├── health_api.py               # External compatibility shim → health_service_access / _services
+├── maintenance_api.py          # External compatibility shim → owner CLI / _services
 ├── resources_runtime.py        # Resource-management runtime seam (not *_api)
-├── registry_api.py             # PipelineRegistry — maps (provider, entity) → pipeline class
+├── registry_api.py             # Typed PipelineRegistry contract (lazy re-export of registry_core)
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition
 ├── observability.py            # ObservabilityBundle dataclass
@@ -73,8 +73,8 @@ compatibility instance.
 | What you want to do                             | Start here                                                                                                                           |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Run a single pipeline                           | `entrypoints.run_pipeline()`                                                                                                         |
+| Look up a pipeline by provider+entity           | `registry_api.PipelineRegistry` (typed registry contract; first-party also uses `entrypoints`)                                      |
 | Bootstrap a composite pipeline runtime          | `entrypoints.load_composite_config()` (stable access seam over `infrastructure.config`) + `entrypoints.bootstrap_composite_runner()` |
-| Look up a pipeline by provider+entity           | `registry_api.PipelineRegistry`                                                                                                      |
 | Create an HTTP adapter for a provider           | `providers.provider_registry.ProviderRegistry`                                                                                       |
 | Wire storage (Bronze/Silver/Gold)               | `factories/storage/storage_factory.StorageFactory`                                                                                   |
 | Wire DQ services                                | `factories/dq/dq_services_factory.DQServicesFactory`                                                                                 |
@@ -149,15 +149,15 @@ currently **12**) without an explicit scorecard / inventory review
 
 | Public seam | Primary symbols / role | Factories / builders / internal owners |
 | --- | --- | --- |
-| `execution_api` | `run_pipeline`, `create_pipeline_runner`, `build_pipeline_context`, metrics server helpers | `_pipeline_execution` → `bootstrap/runtime/pipeline.bootstrap_pipeline_runner`, `bootstrap/runtime/pipeline_context_builder`, `factories/pipeline/runner.create_metrics_extractor`, `_services.get_pipeline_runner_service`, `bootstrap/runtime/observability.maybe_start_metrics_server` |
-| `entrypoints` | Stable execution-first re-export of `execution_api` + composite bootstrap | Lazy targets: `execution_api`, `composite_api` (no extra factories) |
-| `composite_api` | `load_composite_config`, `bootstrap_composite_runner`, `list_configured_pipeline_names` | `bootstrap/runtime/composite` (+ plan/support helpers), `infrastructure.config.composite_config_api` / `pipeline_config_api` |
-| `registry_api` | `PipelineRegistry`, `create_registry`, `get_default_registry`, `register_all_pipelines` | `factories/pipeline/registry_core`, `factories/pipeline/registry` |
-| `control_plane_api` | Workflow / forensic / ADR / config / export / lock / manifest services | `_services` and `_workflow_services` bootstrap facades → `bootstrap/cli/*` (config, lock, run_manifest, checkpoint, storage), `bootstrap/cli` lifecycle store, `config_catalog` |
-| `health_api` | Health server deps, health/quarantine services, quarantine port | `_services` → `bootstrap/cli/health`, `bootstrap/assembly/checkpoint` (quarantine adapter), `_resource_management` for runtime quarantine |
-| `maintenance_api` | Bronze cleanup, vacuum, contract migration | `_services` → `bootstrap/cli/storage` (cleanup / vacuum / migration bootstraps) |
-| `resources_api` | Archive/vacuum table, lifecycle, checkpoint/quarantine inspect | `_resource_management`, `_pipeline_execution` option types |
-| `observability_api` | Metrics gateway, audit/checkpoint/metrics/lineage/health inspection bundle | `_services` + `bootstrap/cli/{metrics,checkpoint,health}`, `runtime_builders` / observability bootstrap as needed |
+| `entrypoints` | First-party run/create/resolve, vacuum, contract migration, composite bootstrap | `_pipeline_execution`, `_service_registry`, `_services`, `composite_catalog`, `resources_runtime` |
+| `execution_api` | External shim: `run_pipeline`, `create_pipeline_runner`, metrics helpers | `_pipeline_execution`, `_services.get_pipeline_runner_service` |
+| `health_api` | External shim: health/quarantine getters | `_services`, `_resource_management` |
+| `maintenance_api` | External shim: bronze cleanup, vacuum, contract migration | `_services` |
+| `registry_api` | Typed `PipelineRegistry` contract | `factories/pipeline/registry_core` |
+| `health_service_access` | First-party health/quarantine/bronze-cleanup | `_services`, `_resource_management` |
+| `control_plane_service_access` | First-party workflow / forensic / ADR / config / lock / manifest | `_services`, `_workflow_services`, `bootstrap/cli` |
+| `resources_runtime` | First-party archive/vacuum/lifecycle/checkpoint | `_resource_management` |
+| `observability_runtime` | First-party metrics/audit/checkpoint inspection | `_services`, `bootstrap/cli` |
 
 Supporting (not package-root freezes, still composition-owned):
 
@@ -175,31 +175,21 @@ Supporting (not package-root freezes, still composition-owned):
 
 ## Retained Entrypoint Policy
 
-- `composition.entrypoints` is a sanctioned public seam with execution-focused `__all__`.
-- Runtime execution helpers should come from `composition.execution_api`.
-- Health and quarantine helpers should come from `composition.health_api`.
-- Maintenance helpers should come from `composition.maintenance_api`.
-- Administrative and inspection helpers should come from
-  `composition.control_plane_api`.
-- Resource helpers should come from `composition.resources_api`.
-- Observability helpers should come from `composition.observability_api`.
-- Registry consumers should use `composition.registry_api` instead of importing
-  the `composition` package root.
-- Interfaces must not import the retired `composition.registry` module;
-  `composition.registry_api` is the only sanctioned registry seam outside
-  composition internals.
-- Pipeline registration from interface entrypoints must also go through
-  `composition.registry_api.register_all_pipelines`, not
-  `composition.factories.pipeline.registry`.
-- Provider-only administrative service entrypoints must use the provider registration
-  scope from `composition._registration.ensure_runtime_registrations`; only runtime
-  runner entrypoints should request full pipeline registration.
-- Internal modules such as `_pipeline_execution`, `_resource_management`, and `_services`
-  stay private to `composition/` plus dedicated entrypoint tests.
-- New first-party integration surfaces SHOULD prefer specialized `*_api.py`
-  seams over growing `entrypoints.py`; the retired `composition.services_api`
-  umbrella must stay absent;
-  expand `entrypoints.py` only for explicit backward-compatibility reasons.
+- First-party runtime uses `composition.entrypoints` plus owner modules
+  (`health_service_access`, `control_plane_service_access`, CLI registry helpers).
+  Bronze cleanup is on `health_service_access` (ops contract lives under
+  `composition.contracts.health`); it is not re-exported from `entrypoints`.
+- `execution_api`, `health_api`, and `maintenance_api` are logic-free lazy
+  re-export shims for **external** compatibility only. Do not add new first-party
+  imports of those modules in `src/`.
+- `registry_api` is the typed `PipelineRegistry` contract (lazy re-export of
+  `factories.pipeline.registry_core`). First-party registry consumers use this
+  seam; do not import retired `composition.registry`.
+- Retired package-root names `control_plane_api`, `resources_api`,
+  `observability_api`, and `services_api` must stay absent.
+- Internal modules such as `_pipeline_execution`, `_resource_management`, and
+  `_services` stay private to `composition/` plus dedicated entrypoint tests.
+- Do not add an 11th `*_api.py`. Architecture freeze is the four files above.
 - Composite runtime flows should use `load_composite_config()` as the stable
   public access seam over the canonical owner
   `bioetl.infrastructure.config.composite_config_api`, and

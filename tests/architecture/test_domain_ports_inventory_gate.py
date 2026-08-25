@@ -129,3 +129,23 @@ def test_domain_ports_inventory_summary_metrics_are_ints(metric: str) -> None:
     assert isinstance(summary, dict)
     assert isinstance(summary[metric], int)
     assert summary[metric] >= 0
+
+
+def test_foreign_key_reconciliation_vo_lives_in_domain_workflow() -> None:
+    """#9628: ports keep the Protocol; Request/Result/guards live in domain.workflow."""
+    ports = (
+        PROJECT_ROOT / "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py"
+    ).read_text(encoding="utf-8")
+    workflow = (
+        PROJECT_ROOT / "src/bioetl/domain/workflow/foreign_key_reconciliation.py"
+    ).read_text(encoding="utf-8")
+    assert "class ForeignKeyReconciliationPort" in ports
+    assert "class ForeignKeyReconciliationRequest" not in ports
+    assert "class ForeignKeyReconciliationResult" not in ports
+    assert "workflow._foreign_key_reconciliation_guards" not in ports
+    assert "class ForeignKeyReconciliationRequest" in workflow
+    assert "class ForeignKeyReconciliationResult" in workflow
+    assert "def normalize_layer" in workflow
+    assert not (
+        PROJECT_ROOT / "src/bioetl/domain/workflow/_foreign_key_reconciliation_guards.py"
+    ).exists()
