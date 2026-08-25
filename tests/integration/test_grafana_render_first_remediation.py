@@ -941,7 +941,9 @@ def test_runtime_multi_query_tables_expose_semantic_fields_only() -> None:
 
 def test_run_explorer_drops_reconciliation_panel() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
-    assert all(panel.get("id") != 3015 for panel in _iter_panels(explorer.get("panels") or []))
+    assert all(
+        panel.get("id") != 3015 for panel in _iter_panels(explorer.get("panels") or [])
+    )
 
 
 def test_run_explorer_novalue_has_no_uninterpolated_variables() -> None:
