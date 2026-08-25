@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Architecture-full point ratchets (#9643):** `PublicationTermSchema`
+  composite uniqueness is an immutable tuple so `ruff_error_count` stays
+  at budget 0. No LOC/hotspot/Any caps were raised.
+
 - **Medallion / replay fail-closed (#9631, #9632-#9635):** Bronze same-batch
   overwrite is idempotent only for identical payload and fail-closed on
   conflict; SilverWriter requires an explicit `SilverValidatorPort` instead of
