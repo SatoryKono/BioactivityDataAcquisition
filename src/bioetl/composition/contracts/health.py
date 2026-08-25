@@ -39,7 +39,6 @@ class HealthListenerDependenciesProtocol(Protocol):
     metrics_exposition: object
 
 
-
 class BronzeCleanupServiceProtocol(Protocol):
     """Typed view of the Bronze cleanup service used by the facade."""
 
