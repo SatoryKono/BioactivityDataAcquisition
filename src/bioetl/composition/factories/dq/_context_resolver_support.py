@@ -24,8 +24,7 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-class ModelDumpable(Protocol):
-    def model_dump(self) -> dict[str, object]: ...
+from bioetl.composition.contracts.structural import ModelDumpable
 
 
 class DQReportServiceFactory(Protocol):

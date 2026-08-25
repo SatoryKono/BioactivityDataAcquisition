@@ -9,7 +9,7 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, cast
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -18,19 +18,10 @@ if TYPE_CHECKING:
 __all__ = ["normalize_snapshot", "to_serializable_mapping"]
 
 
-@runtime_checkable
-class _ModelDumpHost(Protocol):
-    def model_dump(
-        self,
-        *,
-        mode: str = "python",
-        exclude_none: bool = False,
-    ) -> Mapping[str, object]: ...
-
-
-@runtime_checkable
-class _DictHost(Protocol):
-    def dict(self, *, exclude_none: bool = False) -> Mapping[str, object]: ...
+from bioetl.composition.contracts.structural import (
+    DictHost as _DictHost,
+    ModelDumpHost as _ModelDumpHost,
+)
 
 
 def normalize_snapshot(value: object) -> object:
