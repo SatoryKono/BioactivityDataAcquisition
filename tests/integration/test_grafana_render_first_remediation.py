@@ -760,13 +760,12 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         ("bioetl-dq-v2.json", 121, "Reject Reason"),
         ("bioetl-dq-v2.json", 122, "Reject Field"),
         ("bioetl-control-plane-v1.json", 9404, "value_full"),
-        ("bioetl-overview-v2.json", 9300, "value"),
-        ("bioetl-runtime.json", 9402, "value"),
-        ("bioetl-dq-v2.json", 9402, "value"),
-        ("bioetl-provider-health-v2.json", 9402, "value"),
-        ("bioetl-control-plane-v1.json", 9402, "value"),
-        ("bioetl-run-explorer-v1.json", 3022, "value"),
         ("bioetl-overview-v2.json", 9301, "parameter"),
+        ("bioetl-dq-v2.json", 9403, "parameter"),
+        ("bioetl-provider-health-v2.json", 9403, "parameter"),
+        ("bioetl-runtime.json", 9403, "parameter"),
+        ("bioetl-control-plane-v1.json", 9403, "parameter"),
+        ("bioetl-run-explorer-v1.json", 3023, "parameter"),
     )
     for dashboard_name, panel_id, field in cases:
         panel = _panel(_load(dashboard_name), panel_id)
