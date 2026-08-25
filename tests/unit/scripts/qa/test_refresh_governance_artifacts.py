@@ -10,6 +10,8 @@ import pytest
 
 from scripts.engineering.qa import refresh_governance_artifacts as refresh
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_routes_every_governed_artifact_through_fail_closed_runner(
     monkeypatch: pytest.MonkeyPatch,

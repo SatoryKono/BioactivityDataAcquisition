@@ -2135,8 +2135,7 @@
       "decision_path": "docs/02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md",
       "enforcement_owner_paths": [
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_source_config_usage.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_source_config_usage.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2147,8 +2146,7 @@
         "docs/01-requirements/REQUIREMENTS.md",
         "src/bioetl/infrastructure/config/_base.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_source_config_usage.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_source_config_usage.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2197,15 +2195,18 @@
       "enforcement_owner_paths": [
         "configs/quality/public_lazy_facade_inventory.yaml",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_arch_s4_s9_gates.py"
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/public_lazy_facade_inventory.yaml",
         "docs/00-project/RULES.md",
+        "docs/00-project/architecture-index.md",
         "src/bioetl/domain/aggregates/batch.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_arch_s4_s9_gates.py"
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
