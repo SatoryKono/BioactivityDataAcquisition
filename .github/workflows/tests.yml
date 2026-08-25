@@ -1147,6 +1147,10 @@ jobs:
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
           cp .coverage "reports/coverage/.coverage.${{ matrix.test-group.name }}" 2>/dev/null || true
+          if [ ! -s "reports/coverage/.coverage.${{ matrix.test-group.name }}" ]; then
+            echo "::error::Test matrix coverage shard was not produced."
+            exit 1
+          fi
           ls -la reports/coverage/ 2>/dev/null || true
           exit $TEST_EXIT
 
@@ -1283,6 +1287,7 @@ jobs:
 
   # Final coverage verification (combine shard coverage + serial-only pass)
   coverage-verify:
+    if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
     needs:
       - smoke-check
@@ -1352,14 +1357,10 @@ jobs:
             --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
             --skip-serial-pass
 
-      - name: Combine coverage shards and enforce threshold
+      - name: Combine coverage shards and build SHA-bound candidate
         run: |
           uv run --frozen --no-build python -m coverage combine --keep reports/coverage
-          uv run --frozen --no-build python -m coverage report --show-missing --fail-under=85
           uv run --frozen --no-build python -m coverage xml -o reports/coverage/coverage.xml
-          uv run --frozen --no-build python -m scripts.engineering.qa check-branch-coverage \
-            --coverage-xml reports/coverage/coverage.xml \
-            --min-percent 85
           uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
             --coverage-xml reports/coverage/coverage.xml \
             --json-out reports/quality/module-coverage-inventory.candidate.json \
@@ -1367,6 +1368,13 @@ jobs:
             --refresh-from-coverage-xml \
             --enforce-module-thresholds block-regression \
             --fail-on-regression
+
+      - name: Enforce hard coverage thresholds
+        run: |
+          uv run --frozen --no-build python -m coverage report --show-missing --fail-under=85
+          uv run --frozen --no-build python -m scripts.engineering.qa check-branch-coverage \
+            --coverage-xml reports/coverage/coverage.xml \
+            --min-percent 85
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
