@@ -754,6 +754,23 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         )
 
 
+def test_cycle4_named_text_columns_wrap_below_fold() -> None:
+    """#9570 #9568 #9571 #9569 #9567: wrap long text without table-default wrap."""
+    cases = (
+        ("bioetl-dq-v2.json", 121, "Reject Reason"),
+        ("bioetl-dq-v2.json", 122, "Reject Field"),
+        ("bioetl-control-plane-v1.json", 9404, "value_full"),
+        ("bioetl-overview-v2.json", 9300, "value"),
+        ("bioetl-runtime.json", 9402, "value"),
+    )
+    for dashboard_name, panel_id, field in cases:
+        panel = _panel(_load(dashboard_name), panel_id)
+        custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+        assert custom.get("cellOptions", {}).get("wrapText") is not True
+        wrapped = _wrapped_field_names(panel)
+        assert field in wrapped, (dashboard_name, panel_id, wrapped)
+
+
 def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     panel = _panel(_load("bioetl-control-plane-v1.json"), 9416)
     assert _limit_field(panel) == 5
