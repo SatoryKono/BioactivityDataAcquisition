@@ -1,0 +1,6 @@
+id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority,status,issue
+TECH-DEBT-001,configs/quality/technical_debt_audit_registry.yaml,8,governance-pin,validate-technical-debt-audit ok=false then ok=true after re-pin,hours,medium,closeout SSOT,S,@bioetl-architecture,P2,PROVEN,#9646
+TECH-DEBT-002,reports/quality/architecture-debt-remote-main-baseline.json,9,generated-artifact-drift,gates --check generated_artifact_drift remote_main_baseline,hours,high,release --check,S,@bioetl-architecture,P1,PROVEN,#9647
+RESIDUAL-WAIVER,configs/quality/constructor_waivers.yaml,6,intentional_exception,QuarantineEntry max_args=9 ADR-051,governed,low,domain aggregate ctor,n/a,@bioetl-domain,P3,intentional,#6685
+RESIDUAL-ENTRYPOINTS,src/bioetl/composition/entrypoints.py,31,wrapper_contract_drift,census wrapper_contract_drift=1,days,medium,public composition API,M,@bioetl-platform,P2,tracked,#9643
+RESIDUAL-CONTROL-PLANE,src/bioetl/application/services/control_plane/,1,hotspot-at-budget,families_at_budget application_services_control_plane,weeks,medium,replay/manifest,L,@bioetl-platform,P2,tracked,#9618
