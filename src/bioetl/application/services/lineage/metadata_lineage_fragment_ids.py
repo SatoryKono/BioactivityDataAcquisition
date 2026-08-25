@@ -6,8 +6,12 @@ import hashlib
 import json
 from datetime import datetime
 
-from bioetl.domain.lineage import LineageEdge, LineageNodeRef, LineageNodeType
-from bioetl.domain.lineage._shared import mapping_to_plain
+from bioetl.domain.lineage import (
+    LineageEdge,
+    LineageNodeRef,
+    LineageNodeType,
+    mapping_to_plain,
+)
 
 
 def fragment_timestamp(*values: datetime | None) -> datetime:

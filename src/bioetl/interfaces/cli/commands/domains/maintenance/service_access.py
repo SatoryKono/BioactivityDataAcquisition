@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 _ENTRYPOINTS_MODULE = "bioetl.composition.entrypoints"
-_SERVICES_MODULE = "bioetl.composition._services"
+_HEALTH_ACCESS_MODULE = "bioetl.composition.health_service_access"
 
 
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
@@ -47,7 +47,7 @@ def get_vacuum_service() -> VacuumService:
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Load the bronze cleanup service through composition on demand."""
-    _impl = import_module(_SERVICES_MODULE).get_bronze_cleanup_service
+    _impl = import_module(_HEALTH_ACCESS_MODULE).get_bronze_cleanup_service
     return _impl()
 
 

@@ -18,8 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel, ConfigDict
-from pydantic import Field as PydanticField
+from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain.immutability import freeze_fields
@@ -48,83 +47,83 @@ class ArticleRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED)
-    pmid: str = PydanticField(description="PubMed ID")
+    pmid: str = Field(description="PubMed ID")
 
     # Other identifiers
-    doi: str | None = PydanticField(
+    doi: str | None = Field(
         default=None, description="Digital Object Identifier"
     )
-    pmc_id: str | None = PydanticField(default=None, description="PubMed Central ID")
+    pmc_id: str | None = Field(default=None, description="PubMed Central ID")
 
     # Title and abstract
-    title: str | None = PydanticField(default=None, description="Article title")
-    abstract: str | None = PydanticField(default=None, description="Abstract text")
+    title: str | None = Field(default=None, description="Article title")
+    abstract: str | None = Field(default=None, description="Abstract text")
 
     # Journal information
-    journal: str | None = PydanticField(default=None, description="Full journal title")
-    journal_abbrev: str | None = PydanticField(
+    journal: str | None = Field(default=None, description="Full journal title")
+    journal_abbrev: str | None = Field(
         default=None, description="Journal abbreviation (ISO)"
     )
-    issn: str | None = PydanticField(default=None, description="ISSN")
-    volume: str | None = PydanticField(default=None, description="Volume number")
-    issue: str | None = PydanticField(default=None, description="Issue number")
-    pages: str | None = PydanticField(
+    issn: str | None = Field(default=None, description="ISSN")
+    volume: str | None = Field(default=None, description="Volume number")
+    issue: str | None = Field(default=None, description="Issue number")
+    pages: str | None = Field(
         default=None, description="Page numbers (medline_pgn)"
     )
-    first_page: str | None = PydanticField(
+    first_page: str | None = Field(
         default=None, description="First page (unified)"
     )
-    last_page: str | None = PydanticField(
+    last_page: str | None = Field(
         default=None, description="Last page (unified)"
     )
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
     # affiliations excluded per user request
-    authors: str | None = PydanticField(
+    authors: str | None = Field(
         default=None, description="Author names (JSON array, hashed for PII)"
     )
 
     # Dates (ISO format: YYYY-MM-DD or partial)
-    pub_date: str | None = PydanticField(
+    pub_date: str | None = Field(
         default=None, description="Publication date (ISO format)"
     )
-    year: int | None = PydanticField(
+    year: int | None = Field(
         default=None, description="Publication year (1500-2100)"
     )
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
 
     # Classification
-    publication_types: list[str] = PydanticField(
+    publication_types: list[str] = Field(
         default_factory=list, description="Publication types"
     )
-    keywords: list[str] = PydanticField(default_factory=list, description="Keywords")
-    mesh_terms: list[str] = PydanticField(
+    keywords: list[str] = Field(default_factory=list, description="Keywords")
+    mesh_terms: list[str] = Field(
         default_factory=list, description="MeSH terms"
     )
 
     # Chemical and genetic data
-    chemicals: list[str] = PydanticField(
+    chemicals: list[str] = Field(
         default_factory=list, description="Chemical substance names from ChemicalList"
     )
-    gene_symbols: list[str] = PydanticField(
+    gene_symbols: list[str] = Field(
         default_factory=list, description="Gene symbols from GeneSymbolList"
     )
-    databanks: list[JsonDict] = PydanticField(
+    databanks: list[JsonDict] = Field(
         default_factory=list,
         description="Data bank references (list of {databank_name, accession_numbers})",
     )
 
     # Additional metadata
-    language: str | None = PydanticField(
+    language: str | None = Field(
         default=None, description="Primary language code"
     )
-    country: str | None = PydanticField(
+    country: str | None = Field(
         default=None, description="Country of publication"
     )
 
     # Raw data for forensic (optional)
-    raw_xml: str | None = PydanticField(
+    raw_xml: str | None = Field(
         default=None, description="Raw XML content (forensic)"
     )
 

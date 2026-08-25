@@ -6,6 +6,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.postrun import (
+    DEFAULT_METADATA_VERSION_ALLOWLIST,
+    DEFAULT_POSTRUN_WARNING_ALLOWLIST,
     PostrunCleanupService,
     PostrunCompactService,
     PostrunDependencyContext,
@@ -13,10 +15,6 @@ from bioetl.application.core.postrun import (
     PostrunMetadataVersionResolver,
     PostrunMetadataWriteService,
     PostrunService,
-)
-from bioetl.application.core.postrun._failure_policy import (
-    DEFAULT_METADATA_VERSION_ALLOWLIST,
-    DEFAULT_POSTRUN_WARNING_ALLOWLIST,
 )
 from bioetl.application.services.quality.data_quality_service import DataQualityService
 from bioetl.application.services.medallion.medallion_lifecycle import (

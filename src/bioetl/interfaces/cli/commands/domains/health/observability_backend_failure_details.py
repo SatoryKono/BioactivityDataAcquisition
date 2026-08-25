@@ -8,7 +8,7 @@ from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
-from bioetl.domain.exceptions._redaction import _redact_string
+from bioetl.domain.exceptions import redact_string
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
     _HttpProbeResponse,
     _UrlOpenFn,
@@ -64,7 +64,7 @@ def _read_backend_startup_log_excerpt(
     nonempty_lines = [line.strip() for line in content.splitlines() if line.strip()]
     if not nonempty_lines:
         return None
-    excerpt = _redact_string(" || ".join(nonempty_lines[-max_lines:]))
+    excerpt = redact_string(" || ".join(nonempty_lines[-max_lines:]))
     if len(excerpt) > max_chars:
         excerpt = f"...{excerpt[-max_chars:]}"
     return excerpt

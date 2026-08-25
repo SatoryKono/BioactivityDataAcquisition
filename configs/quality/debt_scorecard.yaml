@@ -514,7 +514,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 3970
+      total_loc: 3968
       files_ge_250_loc: 0
       helper_function_ratio: 0.358
       max_internal_fan_in: 2
@@ -689,18 +689,18 @@ oversized_source_module_inventory:
   - issue: '#4679'
     source: src/bioetl/domain/ports/__init__.py
     extracted_surface: src/bioetl/domain/ports/__init__.pyi
-    source_lines_after_split: 209
+    source_lines_after_split: 219
     extracted_surface_lines: 411
     rationale: Runtime lazy export resolution remains in the Python module while static re-export type
       declarations live in the adjacent stub, preserving the public API and reducing the governed source
-      module from 579 to 203 lines.
+      module from 579 to 219 lines.
   - issue: '#6478'
     source: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
     extracted_surface: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
-    source_lines_after_split: 62
-    extracted_surface_lines: 62
+    source_lines_after_split: 51
+    extracted_surface_lines: 51
     rationale: Active top-list entry retired after prior extractions left the module well under the practical
-      split threshold (62 lines); no further split required.
+      split threshold (51 lines); no further split required.
   - issue: '#6478'
     source: src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py
     extracted_surface: src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py
