@@ -525,7 +525,9 @@
                 "align": "left",
                 "inspect": true,
                 "wrapText": true,
-                "cellOptions": {}
+                "cellOptions": {
+                  "type": "auto"
+                }
               },
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
