@@ -766,6 +766,11 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         ("bioetl-runtime.json", 9403, "parameter"),
         ("bioetl-control-plane-v1.json", 9403, "parameter"),
         ("bioetl-run-explorer-v1.json", 3023, "parameter"),
+        ("bioetl-control-plane-v1.json", 9417, "reason"),
+        ("bioetl-run-explorer-v1.json", 3014, "value"),
+        ("bioetl-dq-v2.json", 118, "Pipeline"),
+        ("bioetl-control-plane-v1.json", 9404, "value_short"),
+        ("bioetl-dq-v2.json", 156, "Pipeline"),
     )
     for dashboard_name, panel_id, field in cases:
         panel = _panel(_load(dashboard_name), panel_id)

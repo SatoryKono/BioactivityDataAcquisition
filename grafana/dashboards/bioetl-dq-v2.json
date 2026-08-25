@@ -2288,7 +2288,15 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": []
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               },
               {
                 "matcher": {
@@ -2299,6 +2307,21 @@
                   {
                     "id": "custom.width",
                     "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -2417,7 +2440,15 @@
                   "id": "byName",
                   "options": "pipeline"
                 },
-                "properties": []
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               },
               {
                 "matcher": {
@@ -2440,6 +2471,21 @@
                   {
                     "id": "custom.width",
                     "value": 70
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pipeline"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
