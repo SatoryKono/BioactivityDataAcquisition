@@ -39,12 +39,16 @@ coverage_aggregation:
     - contract-confidence
     - repo-backed-unit
     - unit-scripts-tooling
+    - unit-filesystem-contracts
+    - unit-subprocess-backed
     - test-matrix
   required_blocking_lane_shards:
     - reports/coverage/.coverage.smoke
     - reports/coverage/.coverage.contract-confidence
     - reports/coverage/.coverage.repo-backed-unit
     - reports/coverage/.coverage.unit-scripts-tooling
+    - reports/coverage/.coverage.unit-filesystem-contracts
+    - reports/coverage/.coverage.unit-subprocess-backed
     - reports/coverage/.coverage.unit-domain
     - reports/coverage/.coverage.unit-application
     - reports/coverage/.coverage.unit-infrastructure
@@ -171,6 +175,28 @@ lanes:
     notes: >-
       Serial scripts/tooling tests remain isolated from the parallel unit matrix
       and contribute any product-code coverage reached by their real execution.
+  - job: unit-filesystem-contracts
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-unit-filesystem-contracts
+    coverage_file: reports/coverage/.coverage.unit-filesystem-contracts
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: filesystem_contract_execution
+    notes: >-
+      Serial filesystem-contract tests remain isolated from the parallel unit
+      matrix and contribute their product-code coverage to coverage-verify.
+  - job: unit-subprocess-backed
+    lane_type: coverage_shard
+    emits_coverage_artifact: true
+    coverage_artifact: coverage-data-unit-subprocess-backed
+    coverage_file: reports/coverage/.coverage.unit-subprocess-backed
+    participates_in_hard_threshold: true
+    threshold_enforced_in_job: false
+    execution_confidence_role: subprocess_backed_execution
+    notes: >-
+      Serial subprocess-backed unit tests remain isolated from the parallel
+      unit matrix and contribute their product-code coverage to coverage-verify.
   - job: test-matrix
     lane_type: coverage_shard
     emits_coverage_artifact: true
