@@ -66,3 +66,4 @@ class PublicationTermSchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = True
+        unique = ["publication_id", "term_type", "term"]

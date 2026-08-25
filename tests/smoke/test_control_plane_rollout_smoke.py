@@ -82,6 +82,7 @@ def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
         manifest_id=manifest.manifest_id,
         run_id=run_id,
         _entry_id_factory=_entry_id_factory,
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     ledger_service.record_manifest_created(manifest)
     ledger_service.record_run_started()

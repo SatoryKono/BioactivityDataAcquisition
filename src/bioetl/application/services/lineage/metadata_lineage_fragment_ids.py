@@ -6,7 +6,6 @@ import hashlib
 import json
 from datetime import datetime
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.lineage import LineageEdge, LineageNodeRef, LineageNodeType
 from bioetl.domain.lineage._shared import mapping_to_plain
 
@@ -16,7 +15,9 @@ def fragment_timestamp(*values: datetime | None) -> datetime:
     for value in values:
         if value is not None:
             return value
-    return current_utc_time()
+    raise RuntimeError(
+        "fragment timestamp is required; wall-clock fallback is not allowed"
+    )
 
 
 def build_fragment_id(prefix: str, *parts: object) -> str:

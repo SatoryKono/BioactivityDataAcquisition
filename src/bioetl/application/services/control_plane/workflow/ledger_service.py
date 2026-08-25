@@ -6,7 +6,6 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.ledger.idempotency import (
     build_control_plane_idempotency_key,
 )
@@ -48,6 +47,12 @@ def _missing_entry_id_factory() -> str:
     )
 
 
+def _missing_occurred_at_factory() -> datetime:
+    raise RuntimeError(
+        "workflow ledger occurred_at_factory must be supplied by composition root"
+    )
+
+
 def _build_workflow_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
     return build_control_plane_idempotency_key(
         payload,
@@ -66,7 +71,9 @@ class WorkflowLedgerService:
     _entry_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_entry_id_factory
     )
-    _occurred_at_factory: Callable[[], datetime] = current_utc_time
+    _occurred_at_factory: Callable[[], datetime] = field(
+        default_factory=lambda: _missing_occurred_at_factory
+    )
 
     def record_manifest_created(
         self, manifest: WorkflowManifest

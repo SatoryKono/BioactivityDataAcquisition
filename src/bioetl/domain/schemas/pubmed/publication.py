@@ -60,6 +60,7 @@ class PubMedPublicationSchema(_PublicationBaseSchema):
     # === Primary Key (str for cross-provider consistency) ===
     pmid: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=r"^[1-9]\d{0,9}$",
         description="PubMed ID (PK, numeric string < 10^10)",
     )

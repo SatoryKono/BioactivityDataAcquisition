@@ -22,7 +22,7 @@ class TargetComponentSchema(ETLRecordSchema):
 
     # === Primary Key ===
     component_id: Series[int] = pa.Field(
-        nullable=False, description="Component ID (primary key)."
+        nullable=False, unique=True, description="Component ID (primary key)."
     )
 
     # === Core Metadata ===

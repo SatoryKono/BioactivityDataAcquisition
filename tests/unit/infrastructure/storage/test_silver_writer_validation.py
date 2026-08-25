@@ -173,10 +173,13 @@ def valid_records():
 class TestSilverWriterSilverValidatorInit:
     """Tests for SilverWriter initialization with Silver validator."""
 
-    def test_init_with_default_validator(self, noop_logger):
-        """Test SilverWriter creates NoOpValidator when not provided."""
-        writer = make_silver_writer(logger=noop_logger)
-        assert isinstance(writer._silver_validator, NoOpValidator)
+    @pytest.mark.require_silver_validator
+    def test_init_without_validator_raises(self, noop_logger):
+        """SilverWriter must not default to NoOpValidator."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        with pytest.raises(ValueError, match="SilverValidatorPort is required"):
+            SilverWriter(base_path="/tmp/silver", logger=noop_logger)
 
     def test_init_with_custom_validator(self, noop_logger):
         """Test SilverWriter accepts custom SilverValidatorPort."""

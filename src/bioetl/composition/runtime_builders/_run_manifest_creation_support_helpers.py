@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
+from bioetl.infrastructure.time import SystemClock
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
@@ -172,6 +173,7 @@ def create_ledger_service(
         manifest_id="pending",
         run_id=ctx.run_id,
         _entry_id_factory=lambda: create_runtime_occurrence_id("run_ledger_entry"),
+        _occurred_at_factory=SystemClock().now,
     )
 
 

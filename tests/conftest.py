@@ -1193,3 +1193,73 @@ def minimal_crossref_publication_df():
     return _create_minimal_df(
         CROSSREF_SPECIFIC, "crossref", "10.1001/test", "doi", "10.1001/test"
     )
+
+
+@pytest.fixture(autouse=True)
+def _bioetl_test_silver_validator(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests construct SilverWriter without a schema; inject explicit NoOp.
+
+    Production resolve_silver_writer_runtime remains fail-closed. Opt out with
+    @pytest.mark.require_silver_validator.
+    """
+    if request.node.get_closest_marker("require_silver_validator") is not None:
+        return
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServicesRequest,
+    )
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
+
+    original_init = SilverWriter.__init__
+
+    def _init(
+        self: object,
+        base_path: object,
+        logger: object,
+        transform_version: object = None,
+        transform_steps: object = None,
+        runtime_services: object = None,
+        flat_structure: bool = False,
+        pipeline_name: object = None,
+        runtime_request: object = None,
+    ) -> None:
+        if runtime_services is None:
+            request_obj = runtime_request
+            if request_obj is None or getattr(request_obj, "silver_validator", None) is None:
+                if request_obj is None:
+                    runtime_request = SilverWriterRuntimeServicesRequest(
+                        logger=logger,  # type: ignore[arg-type]
+                        silver_validator=NoOpValidator(),
+                    )
+                else:
+                    runtime_request = SilverWriterRuntimeServicesRequest(
+                        csv_exporter=request_obj.csv_exporter,
+                        tracing=request_obj.tracing,
+                        write_policy=request_obj.write_policy,
+                        metrics=request_obj.metrics,
+                        audit=request_obj.audit,
+                        logger=request_obj.logger or logger,  # type: ignore[arg-type]
+                        silver_validator=NoOpValidator(),
+                        metadata_writer=request_obj.metadata_writer,
+                        metadata_coordinator=request_obj.metadata_coordinator,
+                        lineage_store=request_obj.lineage_store,
+                        dq_calculator=request_obj.dq_calculator,
+                        merge_resilience_policy=request_obj.merge_resilience_policy,
+                        contract_rollout_policy=request_obj.contract_rollout_policy,
+                        base_path=request_obj.base_path,
+                        pipeline_name=request_obj.pipeline_name,
+                        delta_module_loader=request_obj.delta_module_loader,
+                    )
+        original_init(
+            self,
+            base_path,
+            logger,
+            transform_version=transform_version,
+            transform_steps=transform_steps,
+            runtime_services=runtime_services,
+            flat_structure=flat_structure,
+            pipeline_name=pipeline_name,
+            runtime_request=runtime_request,
+        )
+
+    monkeypatch.setattr(SilverWriter, "__init__", _init)

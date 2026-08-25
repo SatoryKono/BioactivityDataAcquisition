@@ -371,6 +371,7 @@ def _build_ledger_entries(
         manifest_id=manifest.manifest_id,
         run_id=manifest.run_id,
         _entry_id_factory=_entry_id_factory,
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     service.record_manifest_created(manifest)
     service.record_run_started()

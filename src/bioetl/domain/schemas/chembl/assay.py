@@ -43,6 +43,7 @@ class AssaySchema(ETLRecordSchema):
     # === Identifiers ===
     assay_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
     )

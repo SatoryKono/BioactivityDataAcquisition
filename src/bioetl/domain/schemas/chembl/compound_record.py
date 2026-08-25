@@ -32,6 +32,7 @@ class CompoundRecordSchema(ETLRecordSchema):
     # === Primary Key ===
     record_id: Series[int] = pa.Field(
         nullable=False,
+        unique=True,
         ge=1,
         description="ChEMBL record ID (PK).",
     )
