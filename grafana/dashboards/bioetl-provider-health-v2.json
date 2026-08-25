@@ -1206,7 +1206,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {

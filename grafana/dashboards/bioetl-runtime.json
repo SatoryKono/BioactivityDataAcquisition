@@ -1571,7 +1571,8 @@
                 "showPoints": "never",
                 "spanNulls": true,
                 "align": "auto",
-                "displayMode": "auto"
+                "displayMode": "auto",
+                "inspect": true
               },
               "mappings": [
                 {
@@ -1790,7 +1791,9 @@
               },
               "unit": "short",
               "decimals": 0,
-              "custom": {}
+              "custom": {
+                "inspect": true
+              }
             },
             "overrides": [
               {
