@@ -26,13 +26,17 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
-"""Owner tests for pipeline run-report coverage helpers (#9400)."""
+"""Owner tests for pipeline run-report coverage helpers (#9400).
+
+Helpers live in `_processed_records_value_support` after origin/main
+removed `_pipeline_run_report_coverage.py` (unmeasured residual closed).
+"""
 
 from __future__ import annotations
 
 import pytest
 
-from bioetl.interfaces.http._pipeline_run_report_coverage import (
+from bioetl.interfaces.http._processed_records_value_support import (
     _coverage_chip,
     _coverage_fields,
     _coverage_offset_outside,
