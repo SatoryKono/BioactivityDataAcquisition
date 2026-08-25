@@ -225,7 +225,7 @@
       },
       "options": {
         "mode": "html",
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0\">First action: open the top Ranked Suspect.</div>"
+        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: open the top Ranked Suspect.</div>"
       },
       "links": []
     },
@@ -288,10 +288,23 @@
               "Value": true,
               "Value #A": true,
               "Value #B": true,
-              "Value #C": true
+              "Value #C": true,
+              "reason": true,
+              "cause": true,
+              "run_type": true
             },
-            "indexByName": {},
-            "renameByName": {}
+            "indexByName": {
+              "domain": 0,
+              "pipeline": 1,
+              "provider": 2,
+              "signal": 3
+            },
+            "renameByName": {
+              "domain": "Domain",
+              "pipeline": "Pipeline",
+              "provider": "Provider",
+              "signal": "Signal"
+            }
           }
         }
       ],
@@ -302,7 +315,7 @@
             "align": "left",
             "cellOptions": {
               "type": "auto",
-              "wrapText": true
+              "wrapText": false
             },
             "inspect": true
           },
@@ -417,6 +430,82 @@
               {
                 "id": "displayName",
                 "value": "Signal"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "domain"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "signal"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 250
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
               }
             ]
           }
