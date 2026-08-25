@@ -54,7 +54,7 @@ def _start_metrics_server_via_interface(
     logger: LoggerPort | None,
 ) -> bool:
     """Start the metrics server through the observability composition seam."""
-    from bioetl.composition.observability_api import start_metrics_server as _impl
+    from bioetl.composition.observability_runtime import start_metrics_server as _impl
 
     starter = cast("Callable[..., bool]", _impl)
     return starter(

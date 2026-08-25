@@ -6,7 +6,7 @@ from pathlib import Path
 
 __all__ = ["list_configured_pipeline_names"]
 
-from bioetl.composition.composite_api import list_configured_pipeline_names as _impl
+from bioetl.composition.composite_catalog import list_configured_pipeline_names as _impl
 
 
 def list_configured_pipeline_names(*, configs_root: Path | None = None) -> list[str]:

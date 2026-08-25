@@ -17,11 +17,12 @@ from collections import defaultdict
 from pathlib import Path
 
 import pytest
+from tests.architecture.quality_artifacts import load_quality_json, quality_artifact_path
 
 pytestmark = pytest.mark.architecture
 
 _REPO = Path(__file__).resolve().parents[2]
-_INV = _REPO / "reports/quality/test-basename-collision-inventory.json"
+_INV = quality_artifact_path("test-basename-collision-inventory.json")
 _ADAPTERS = _REPO / "tests/unit/infrastructure/adapters"
 
 

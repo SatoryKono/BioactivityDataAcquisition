@@ -79,7 +79,7 @@ def test_get_metrics_service_runtime_cast_is_bound(
             },
         ),
         (
-            "bioetl.composition.control_plane_api",
+            "bioetl.composition.control_plane_runtime",
             {
                 "get_adr_service",
                 "get_config_service",
@@ -137,7 +137,7 @@ def test_get_metrics_service_runtime_cast_is_bound(
             },
         ),
         (
-            "bioetl.composition.observability_api",
+            "bioetl.composition.observability_runtime",
             {
                 "get_audit_service",
                 "get_checkpoint_service",

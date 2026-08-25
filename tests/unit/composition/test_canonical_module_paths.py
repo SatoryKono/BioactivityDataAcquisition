@@ -155,13 +155,13 @@ def test_execution_api_exposes_runner_and_metrics_seams() -> None:
 
 def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
     """Control-plane API should expose canonical admin and inspection seams."""
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_runtime import (
         get_adr_service as canonical_get_adr_service,
         get_checkpoint_runtime_service as canonical_get_checkpoint_runtime_service,
         get_config_service as canonical_get_config_service,
     )
     from bioetl.composition._services import get_adr_service, get_config_service
-    from bioetl.composition.resources_api import get_checkpoint_runtime_service
+    from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
 
     assert canonical_get_adr_service is get_adr_service
     assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
@@ -171,7 +171,7 @@ def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
 def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
     """First-party control-plane access should bind directly to owner seams."""
     from bioetl.composition._services import get_config_service
-    from bioetl.composition.control_plane_api import (
+    from bioetl.composition.control_plane_runtime import (
         get_workflow_execution_service,
         load_workflow_config,
     )
@@ -183,7 +183,7 @@ def test_control_plane_service_access_routes_to_canonical_owner_seams() -> None:
         load_workflow_config as canonical_load_workflow_config,
     )
     from bioetl.composition.config_catalog import list_configured_pipeline_names
-    from bioetl.composition.resources_api import get_checkpoint_runtime_service
+    from bioetl.composition.resources_runtime import get_checkpoint_runtime_service
 
     assert canonical_get_checkpoint_runtime_service is get_checkpoint_runtime_service
     # control_plane_service_access delegates to _services, so we check behavior not identity
@@ -207,7 +207,7 @@ def test_health_api_reexports_canonical_health_services() -> None:
         get_quarantine_service as canonical_get_quarantine_service,
     )
     from bioetl.composition._services import get_health_service, get_quarantine_service
-    from bioetl.composition.resources_api import get_quarantine_runtime_service
+    from bioetl.composition.resources_runtime import get_quarantine_runtime_service
 
     assert HealthServerDependencies is CanonicalHealthServerDependencies
     assert canonical_get_health_service is get_health_service

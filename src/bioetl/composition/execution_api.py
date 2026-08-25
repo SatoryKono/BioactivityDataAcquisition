@@ -96,7 +96,7 @@ def push_metrics_to_gateway(
     metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push metrics through the composition-owned observability seam."""
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         push_metrics_to_gateway as _impl,
     )
 

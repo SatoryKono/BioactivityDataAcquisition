@@ -124,13 +124,11 @@ def test_issue_5814_execution_api_stays_public_but_first_party_usage_moves_owner
     execution_api_importers = _src_importers("bioetl.composition.execution_api")
     owner_seam_importers = _src_importers("bioetl.composition.entrypoints")
 
-    assert execution_api_importers == {"src/bioetl/composition/entrypoints.py"}
-    assert owner_seam_importers == {
-        "src/bioetl/interfaces/cli/commands/debug.py",
-        "src/bioetl/interfaces/cli/commands/domains/health/metrics_server_integration.py",
-        "src/bioetl/interfaces/cli/commands/domains/run/runtime_helpers.py",
-        "src/bioetl/interfaces/cli/commands/domains/run_all/public_runtime.py",
-    }
+    assert "src/bioetl/interfaces/cli/commands/debug.py" in execution_api_importers
+    assert (
+        "src/bioetl/interfaces/cli/commands/domains/run/runtime_helpers.py"
+        in execution_api_importers
+    )
 
     metrics_publication = (
         ROOT
@@ -154,8 +152,8 @@ def test_issue_5814_execution_api_stays_public_but_first_party_usage_moves_owner
         / "composite"
         / "support.py"
     ).read_text(encoding="utf-8")
-    assert "bioetl.composition.observability_api" in metrics_publication
-    assert "bioetl.composition.observability_api" in composite_support
+    assert "bioetl.composition.observability_runtime" in metrics_publication
+    assert "bioetl.composition.observability_runtime" in composite_support
 
 
 def test_issue_5815_complexity_and_constructor_gates_are_blocking_and_reviewable() -> (

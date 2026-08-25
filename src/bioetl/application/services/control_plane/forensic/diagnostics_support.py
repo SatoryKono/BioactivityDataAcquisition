@@ -10,9 +10,12 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 )
 
 
-def _dict_or_empty(value: object) -> dict[str, object]:
+def dict_or_empty(value: object) -> dict[str, object]:
     """Return a plain dict for JSON-safe nested diagnostics."""
     return dict(value) if isinstance(value, Mapping) else {}
+
+
+_dict_or_empty = dict_or_empty
 
 
 def artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
@@ -27,7 +30,7 @@ def artifact_refs(diagnostics: dict[str, object]) -> list[dict[str, object]]:
 _artifact_refs = artifact_refs
 
 
-def _coerce_int(value: object) -> int:
+def coerce_int(value: object) -> int:
     """Return a stable integer view for loosely-typed diagnostics payloads."""
     if isinstance(value, bool):
         return int(value)
@@ -43,11 +46,11 @@ def _coerce_int(value: object) -> int:
     return 0
 
 
-def _metadata_sidecar_missing_count(diagnostics: dict[str, object]) -> int:
+def metadata_sidecar_missing_count(diagnostics: dict[str, object]) -> int:
     return sum(1 for ref in _artifact_refs(diagnostics) if not ref.get("metadata_path"))
 
 
-def _trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ...]:
+def trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ...]:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
     missing = trace.get("missing_requirements")
     if not isinstance(missing, list):
@@ -55,7 +58,7 @@ def _trace_missing_requirements(diagnostics: dict[str, object]) -> tuple[str, ..
     return tuple(str(item) for item in missing)
 
 
-def _string_list_or_empty(value: object) -> list[str]:
+def string_list_or_empty(value: object) -> list[str]:
     """Return a stringified list view for loosely typed diagnostics payloads."""
     if not isinstance(value, list):
         return []
@@ -70,7 +73,7 @@ def string_list(value: tuple[str, ...]) -> list[str]:
 _string_list = string_list
 
 
-def _trace_complete(diagnostics: dict[str, object]) -> bool:
+def trace_complete(diagnostics: dict[str, object]) -> bool:
     trace = _dict_or_empty(diagnostics.get("produced_artifact_trace"))
     return bool(trace.get("complete", False))
 
@@ -93,7 +96,7 @@ def lineage_closure_payload(result: RunManifestInspectionResult) -> dict[str, ob
     }
 
 
-def _artifact_completeness(result: RunManifestInspectionResult) -> dict[str, object]:
+def artifact_completeness(result: RunManifestInspectionResult) -> dict[str, object]:
     diagnostics = result.diagnostics
     artifact_refs = _artifact_refs(diagnostics)
     missing_sidecars = _metadata_sidecar_missing_count(diagnostics)
@@ -118,7 +121,7 @@ def _artifact_completeness(result: RunManifestInspectionResult) -> dict[str, obj
     }
 
 
-def _replay_capability_payload(
+def replay_capability_payload(
     *,
     left: RunManifestInspectionResult,
     right: RunManifestInspectionResult,
@@ -145,7 +148,7 @@ def _replay_capability_payload(
     }
 
 
-def _checkpoint_compatibility_payload(
+def checkpoint_compatibility_payload(
     forensic_diff: dict[str, object],
 ) -> dict[str, object]:
     anchors = _dict_or_empty(forensic_diff.get("checkpoint_anchors"))
@@ -157,7 +160,7 @@ def _checkpoint_compatibility_payload(
     }
 
 
-def _resolve_forensic_verdict(
+def resolve_forensic_verdict(
     *,
     manifest_diff: RunManifestDiffResult,
     forensic_diff: dict[str, object],
@@ -172,7 +175,7 @@ def _resolve_forensic_verdict(
     return "semantic_equivalent_replay"
 
 
-def _forensic_diff_payload(manifest_diff: RunManifestDiffResult) -> dict[str, object]:
+def forensic_diff_payload(manifest_diff: RunManifestDiffResult) -> dict[str, object]:
     payload = _dict_or_empty(manifest_diff.cross_surface_replay_diff)
     verdict = payload.get("verdict")
     if not isinstance(verdict, str):
@@ -183,7 +186,7 @@ def _forensic_diff_payload(manifest_diff: RunManifestDiffResult) -> dict[str, ob
     return payload
 
 
-def _diagnostic_snapshot(result: RunManifestInspectionResult) -> dict[str, object]:
+def diagnostic_snapshot(result: RunManifestInspectionResult) -> dict[str, object]:
     """Return the bounded diagnostic fields used by forensic diff reports."""
     diagnostics = result.diagnostics
     return {
@@ -200,7 +203,7 @@ def _diagnostic_snapshot(result: RunManifestInspectionResult) -> dict[str, objec
     }
 
 
-def _missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
+def missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
     """Classify optional forensic evidence gaps instead of hiding them."""
     diagnostics = result.diagnostics
     missing: list[str] = []
@@ -222,11 +225,17 @@ def _missing_evidence(result: RunManifestInspectionResult) -> tuple[str, ...]:
     return tuple(missing)
 
 
-# Public shared API for forensic consumers (cross-module intentional surface).
-artifact_completeness = _artifact_completeness
-checkpoint_compatibility_payload = _checkpoint_compatibility_payload
-diagnostic_snapshot = _diagnostic_snapshot
-forensic_diff_payload = _forensic_diff_payload
-missing_evidence = _missing_evidence
-replay_capability_payload = _replay_capability_payload
+# Private aliases kept for in-module call sites.
+_coerce_int = coerce_int
+_metadata_sidecar_missing_count = metadata_sidecar_missing_count
+_trace_missing_requirements = trace_missing_requirements
+_string_list_or_empty = string_list_or_empty
+_trace_complete = trace_complete
+_artifact_completeness = artifact_completeness
+_replay_capability_payload = replay_capability_payload
+_checkpoint_compatibility_payload = checkpoint_compatibility_payload
+_resolve_forensic_verdict = resolve_forensic_verdict
+_forensic_diff_payload = forensic_diff_payload
+_diagnostic_snapshot = diagnostic_snapshot
+_missing_evidence = missing_evidence
 _lineage_closure_payload = lineage_closure_payload
