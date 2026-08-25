@@ -53,6 +53,26 @@ first_window_inspect_tables:
       Compact status-reason companion to first-window Monitor Fleet Severity
       (9101); not a forensic row group.
     retire_when: reason text is inlined into 9101
+  - dashboard: bioetl-provider-health-v2.json
+    id: 9101
+    owner: "@bioetl-observability"
+    rationale: First-window worst-four fleet severity table.
+    retire_when: 9101 is no longer a first-window table
+  - dashboard: bioetl-overview-v2.json
+    id: 215
+    owner: "@bioetl-observability"
+    rationale: Overview next-action table (Review First Action).
+    retire_when: 215 leaves the first window
+  - dashboard: bioetl-overview-v2.json
+    id: 9002
+    owner: "@bioetl-observability"
+    rationale: Overview domain-status answer table.
+    retire_when: 9002 leaves the first window
+  - dashboard: bioetl-runtime.json
+    id: 9101
+    owner: "@bioetl-observability"
+    rationale: First-window runtime blockers table.
+    retire_when: 9101 leaves the first window
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     owner: "@bioetl-observability"
