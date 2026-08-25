@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `ad02e832ef3bfd834e6dca1fd99a54331db3ab53`
+Audited commit SHA: `83b708b70ac8bba65bf5a2233aa211cde3625ad6`
 
-Evidence surface SHA-256: `417446b7f9bb077d1001b9ee7c9b9c4c3e7eb70d9776796fea73ea21a55ca42b`
+Evidence surface SHA-256: `71ad3376850b214bfe02ab73ff53f5b217dc37db249546e42a79cef44153c6ad`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "ad02e832ef3bfd834e6dca1fd99a54331db3ab53",
-  "evidence_surface_sha256": "417446b7f9bb077d1001b9ee7c9b9c4c3e7eb70d9776796fea73ea21a55ca42b",
+  "audited_commit_sha": "83b708b70ac8bba65bf5a2233aa211cde3625ad6",
+  "evidence_surface_sha256": "71ad3376850b214bfe02ab73ff53f5b217dc37db249546e42a79cef44153c6ad",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -47,7 +47,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `ad02e832ef` for #9337 after remote-main baseline refresh (#9399); unmeasured=0 on main (#9400); no budget growth.
+Refresh reason: Re-pin to origin/main `83b708b70a` for #9337 after remote-main baseline refresh; no budget growth.
 
 ## Executive summary
 
