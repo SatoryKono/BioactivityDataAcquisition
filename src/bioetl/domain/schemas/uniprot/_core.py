@@ -39,6 +39,7 @@ class UniprotCoreSchema(ETLRecordSchema):
     # === Primary Key & Core Identifiers ===
     accession: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         description="UniProt primary accession (PK)",
     )
 

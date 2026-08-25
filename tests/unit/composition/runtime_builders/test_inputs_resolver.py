@@ -211,6 +211,7 @@ def test_prepare_runner_inputs_auto_resolves_cached_bronze_for_exact_replay_pare
         manifest_id=parent_manifest.manifest_id,
         run_id=parent_manifest.run_id,
         _entry_id_factory=lambda: "entry-input-snapshot",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     # This resolver test needs ledger contents, not durable flush semantics.
     # Avoid WSL /mnt fsync latency causing sharded timeout noise.

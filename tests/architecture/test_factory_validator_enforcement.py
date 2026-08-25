@@ -47,3 +47,10 @@ class TestFactoryValidatorEnforcement:
             "Composition factories must not reference NoOp validators.\n"
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )
+
+    def test_silver_runtime_helpers_do_not_default_to_noop(self, src_dir: Path) -> None:
+        path = src_dir / "bioetl" / "infrastructure" / "storage" / "silver" / "runtime_helpers.py"
+        content = path.read_text(encoding="utf-8")
+        assert "or NoOpValidator()" not in content
+        assert "silver_validator or NoOpValidator" not in content
+

@@ -1064,6 +1064,7 @@ async def test_reproducibility_contract_forensic_grade_artifact_publication_reco
         manifest_id=manifest.manifest_id,
         run_id=run_id,
         _entry_id_factory=_repro_contract_entry_id_factory("entry-artifact-closure"),
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     ledger_service.record_manifest_created(manifest)
 

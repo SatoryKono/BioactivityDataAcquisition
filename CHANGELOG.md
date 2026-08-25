@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Medallion / replay fail-closed (#9631, #9632-#9635):** Bronze same-batch
+  overwrite is idempotent only for identical payload and fail-closed on
+  conflict; SilverWriter requires an explicit `SilverValidatorPort` instead of
+  implicit `NoOpValidator`; replay-critical clocks no longer default to wall
+  time; Pandera `unique=True` is declared on entity primary and business keys.
+
 - **Explicit pipeline registry wiring (#9636):** production composition no
   longer falls back to the process-wide compatibility registry.
   `register_all_pipelines()` and `reset_registration()` now require an explicit

@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 import bioetl.application.services.control_plane.ledger.core_events as _core_events
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.ledger.entry_support import (
     RunLedgerEntryRequest,
     append_run_ledger_entry,
@@ -37,6 +36,12 @@ def _missing_entry_id_factory() -> str:
     raise RuntimeError("ledger entry_id_factory must be supplied by composition root")
 
 
+def _missing_occurred_at_factory() -> datetime:
+    raise RuntimeError(
+        "ledger occurred_at_factory must be supplied by composition root"
+    )
+
+
 @dataclass(slots=True)
 class RunLedgerService(RunLedgerRichEventRecordingMixin):
     """Append immutable control-plane lifecycle entries for one manifest."""
@@ -60,7 +65,9 @@ class RunLedgerService(RunLedgerRichEventRecordingMixin):
     _entry_id_factory: Callable[[], str] = field(
         default_factory=lambda: _missing_entry_id_factory
     )
-    _occurred_at_factory: Callable[[], datetime] = current_utc_time
+    _occurred_at_factory: Callable[[], datetime] = field(
+        default_factory=lambda: _missing_occurred_at_factory
+    )
 
     def record_manifest_created(self, manifest: RunManifest) -> RunLedgerEntry:
         """Record manifest creation as the first control-plane event."""

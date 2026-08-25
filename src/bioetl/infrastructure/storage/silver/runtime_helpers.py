@@ -58,7 +58,6 @@ from bioetl.infrastructure.storage.silver.validation_operations import (
     _validate_write_mode_impl,
 )
 from bioetl.infrastructure.storage.support.retention import RetentionPolicy
-from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -129,10 +128,14 @@ def resolve_silver_writer_runtime(
     SilverMergeResiliencePolicy,
 ]:
     """Resolve default runtime collaborators for ``SilverWriter``."""
+    if silver_validator is None:
+        raise ValueError(
+            "SilverValidatorPort is required; implicit NoOpValidator is not allowed"
+        )
     return (
         tracing,
         write_policy or WriteModePolicy(),
-        silver_validator or NoOpValidator(),
+        silver_validator,
         metadata_writer or NoOpMetadataWriter(),
         dq_calculator or DQMetricsCalculator(),
         merge_resilience_policy or DEFAULT_SILVER_MERGE_POLICY,

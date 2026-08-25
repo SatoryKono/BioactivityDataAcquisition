@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
-from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.lineage.metadata_lineage_anchor_nodes import (
     manifest_edges,
     manifest_node,
@@ -24,21 +21,13 @@ from bioetl.application.services.lineage.metadata_lineage_fragment_ids import (
     build_fragment_id,
     build_semantic_fragment_id,
     dedupe_nodes,
+    fragment_timestamp,
 )
 from bioetl.application.services.lineage.metadata_lineage_transform_nodes import (
     resolve_transform_metadata,
     transform_edges,
     transform_nodes,
 )
-
-
-def fragment_timestamp(*values: datetime | None) -> datetime:
-    """Resolve one stable fragment timestamp through the legacy facade seam."""
-    for value in values:
-        if value is not None:
-            return value
-    return current_utc_time()
-
 
 __all__ = [
     "bronze_batch_node_from_input",

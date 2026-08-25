@@ -55,6 +55,7 @@ class SemanticScholarPublicationSchema(PublicationBaseSchema):
     # === Primary Key (SemanticScholar-specific) ===
     paper_id: Series[str] = pa.Field(
         nullable=False,
+        unique=True,
         str_matches=r"^[a-f0-9]{40}$",
         description="Semantic Scholar Paper ID (40-char hex)",
     )

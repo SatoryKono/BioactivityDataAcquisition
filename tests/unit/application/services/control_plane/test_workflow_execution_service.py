@@ -114,6 +114,7 @@ def _create_workflow_ledger_service(
         workflow_run_id=manifest.workflow_run_id,
         workflow_name=manifest.workflow_name,
         _entry_id_factory=lambda: f"workflow-entry-{len(ledger_port.entries) + 1}",
+        _occurred_at_factory=lambda: FIXED_TEST_TIME,
     )
 
 

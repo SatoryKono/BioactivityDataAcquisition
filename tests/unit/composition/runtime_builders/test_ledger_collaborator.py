@@ -123,6 +123,7 @@ async def test_artifact_recorder_publishes_bronze_input_snapshot_events(
         manifest_id="manifest-1",
         run_id=run_id,
         _entry_id_factory=lambda: "entry-bronze-input-snapshot",
+        _occurred_at_factory=lambda: datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
     )
     writer = MetadataWriter(logger=NoOpLogger())
     runner = _Runner(writer)
