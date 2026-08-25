@@ -38,14 +38,14 @@
       "evidence_metrics": {
         "layer_violations": 0,
         "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 1,
+        "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 8.0,
+      "score": 9.0,
       "weight": 0.1,
-      "weighted_score": 0.8
+      "weighted_score": 0.9
     },
     {
       "evidence_metrics": {
@@ -114,7 +114,7 @@
         "expired_compat_count": 0,
         "hotspot_budget_warning_count": 0,
         "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 1,
+        "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "sunset_compat_count": 0,
@@ -123,9 +123,9 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 9.4,
+      "score": 9.9,
       "weight": 0.06,
-      "weighted_score": 0.564
+      "weighted_score": 0.594
     }
   ],
   "debt_budget_policy": {
@@ -178,7 +178,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.28,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
@@ -198,7 +198,7 @@
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "public_entrypoint_growth_count": 0,
-    "public_export_facade_conflict_count": 1,
+    "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "retained_entrypoint_count": 12,
@@ -241,7 +241,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "4b37c24a479d2ef719f62284663dc83ed6b1acceb48868f8ef95195dbe74220b"
+      "source_fingerprint": "df3cb196980efba05a52b5d55de529e7b33e85babeb78042b9693a3fcdaef789"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -260,7 +260,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "c29e1fcf6c649dd964df11edb767b5b268207597600584fc165e5794b0bf1411",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "573845497e70d53dffb66ad80df7ae26997609ed6c56cd5e72760f83cc2c55d4"
+      "source_tree_sha256": "0c4b2810a627ed40893d829cff7aa4ba0d39d2ca69e1e14ad9fb894ab48f105a"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
