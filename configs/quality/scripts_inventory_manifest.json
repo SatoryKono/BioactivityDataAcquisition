@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T17:48:21.118283+00:00",
+  "generated_at": "2026-08-25T18:51:34.410443+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -12092,7 +12092,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 374,
+      "reference_count": 373,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14442,7 +14442,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -14467,6 +14467,12 @@
           "line": 47,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"refresh_governance_artifacts.py\""
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_refresh_governance_artifacts.py",
+          "line": 11,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import refresh_governance_artifacts as refresh"
         }
       ]
     },
