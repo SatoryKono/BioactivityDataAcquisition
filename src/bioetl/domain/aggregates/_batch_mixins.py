@@ -28,6 +28,31 @@ if TYPE_CHECKING:
     )
 
 
+def _owned_record_id(record: BatchRecord) -> str | None:
+    entity_id = record.entity_id
+    if entity_id is None:
+        return None
+    return str(entity_id)
+
+
+def _validate_seal_counts(
+    *, record_count: int, valid_count: int, quarantined_count: int
+) -> None:
+    """Validate the externally computed record partition for a seal event."""
+    if record_count < 0 or valid_count < 0 or quarantined_count < 0:
+        raise ValueError(
+            "seal counts must be non-negative: "
+            f"record_count={record_count}, valid_count={valid_count}, "
+            f"quarantined_count={quarantined_count}"
+        )
+    if valid_count + quarantined_count != record_count:
+        raise ValueError(
+            "seal counts are inconsistent: "
+            f"valid_count ({valid_count}) + quarantined_count "
+            f"({quarantined_count}) != record_count ({record_count})"
+        )
+
+
 class _BatchMutationMixin(_BatchReadModelMixin):
     """Record append/quarantine behavior for Batch."""
 
@@ -66,13 +91,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
     ) -> BatchRecord:
         """Mark a batch-owned record as quarantined and emit its event once."""
         self._assert_open("quarantine_record")
-        position = record.index - self._start_index
-        if position < 0 or position >= len(self._records):
-            raise ValueError("Record does not belong to this batch")
-        owned = self._records[position]
-        # Reject foreign records that only share an index with a batch-owned row.
-        if owned != record:
-            raise ValueError("Record does not belong to this batch")
+        position, owned = self._owned_record(record)
         # Idempotent quarantine: already-invalid owned records must not
         # duplicate the quarantine projection or RecordQuarantined events.
         if not owned.is_valid:
@@ -87,15 +106,24 @@ class _BatchMutationMixin(_BatchReadModelMixin):
                 occurred_at=quarantined_at,
                 run_id=self._run_id,
                 batch_id=self._batch_id,
-                record_id=str(record.entity_id)
-                if record.entity_id is not None
-                else None,
+                record_id=_owned_record_id(record),
                 error_code=error_code,
                 error_message=error,
                 content_hash=record.content_hash,
             )
         )
         return quarantined
+
+    def _owned_record(self, record: BatchRecord) -> tuple[int, BatchRecord]:
+        """Return the local position and record, rejecting foreign records."""
+        position = record.index - self._start_index
+        if position < 0 or position >= len(self._records):
+            raise ValueError("Record does not belong to this batch")
+        owned = self._records[position]
+        # Reject foreign records that only share an index with a batch-owned row.
+        if owned != record:
+            raise ValueError("Record does not belong to this batch")
+        return position, owned
 
     def _assert_open(self, operation: str) -> None:
         if not self._status.is_modifiable():
@@ -141,18 +169,11 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         Counts must be non-negative and satisfy
         valid_count + quarantined_count == record_count.
         """
-        if record_count < 0 or valid_count < 0 or quarantined_count < 0:
-            raise ValueError(
-                "seal counts must be non-negative: "
-                f"record_count={record_count}, valid_count={valid_count}, "
-                f"quarantined_count={quarantined_count}"
-            )
-        if valid_count + quarantined_count != record_count:
-            raise ValueError(
-                "seal counts are inconsistent: "
-                f"valid_count ({valid_count}) + quarantined_count "
-                f"({quarantined_count}) != record_count ({record_count})"
-            )
+        _validate_seal_counts(
+            record_count=record_count,
+            valid_count=valid_count,
+            quarantined_count=quarantined_count,
+        )
         if not self._status.is_modifiable():
             raise InvalidStateError(
                 f"Cannot seal: batch is in status {self._status.value}",

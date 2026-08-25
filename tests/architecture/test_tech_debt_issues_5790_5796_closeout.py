@@ -19,6 +19,10 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.architecture.quality_artifacts import (
+    assert_retained_entrypoint_src_importers,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -160,7 +164,7 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
 
     assert census["summary"]["retained_entrypoint_count"] == 12
     assert census["summary"]["retained_public_export_facade_count"] == 4
-    assert census["summary"]["retained_public_entrypoint_burden"] == 0
+    assert census["summary"]["retained_public_entrypoint_burden"] == 1
     assert (
         census["summary"]["retained_public_export_facades_with_duplicate_exports"] == 0
     )
@@ -176,7 +180,7 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
     for entry in census["retained_entrypoints"]:
         assert entry["consumer_class"]
         assert entry["sunset_status"]
-        assert entry["src_importer_count"] == 0
+        assert_retained_entrypoint_src_importers(entry)
 
     for facade in census["retained_public_export_facades"]:
         assert facade["consumer_class"]

@@ -21,6 +21,9 @@ from typing import Any
 import pytest
 import yaml
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
+from tests.architecture.quality_artifacts import (
+    assert_retained_entrypoint_src_importers,
+)
 
 pytestmark = pytest.mark.architecture
 REFERENCE_TODAY = date(2026, 7, 6)
@@ -157,7 +160,7 @@ def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> Non
 
     assert summary["retained_entrypoint_count"] == 12
     assert summary["retained_public_export_facade_count"] == 4
-    assert summary["retained_public_entrypoint_burden"] == 0
+    assert summary["retained_public_entrypoint_burden"] == 1
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
     assert {facade["path"] for facade in public_facades} == PUBLIC_EXPORT_FACADE_PATHS
@@ -170,7 +173,7 @@ def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> Non
         assert date.fromisoformat(str(row["review_date"])) >= today
 
     for entry in retained:
-        assert entry["src_importer_count"] == 0
+        assert_retained_entrypoint_src_importers(entry)
 
     for facade in public_facades:
         assert facade["public_export_count"] <= facade["max_public_exports"]

@@ -157,7 +157,7 @@
     },
     "5712": {
       "retained_entrypoint_count": 12,
-      "retained_public_entrypoint_burden": 0,
+      "retained_public_entrypoint_burden": 1,
       "retained_public_export_facade_count": 4,
       "retained_public_export_facades_with_duplicate_exports": 0,
       "retained_public_export_facades_with_resolution_conflicts": 0,
@@ -174,10 +174,10 @@
     },
     "5714": {
       "repo_wide_candidates_without_owner_tests_count": 0,
-      "repo_wide_classified_zero_import_candidate_count": 4,
-      "repo_wide_owner_test_anchored_candidate_count": 4,
+      "repo_wide_classified_zero_import_candidate_count": 3,
+      "repo_wide_owner_test_anchored_candidate_count": 3,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_zero_import_candidate_count": 4,
+      "repo_wide_zero_import_candidate_count": 3,
       "review_window_next_review_by": "2026-10-30"
     },
     "5715": {

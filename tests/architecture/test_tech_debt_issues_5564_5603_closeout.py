@@ -19,6 +19,11 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.architecture.quality_artifacts import (
+    MAINTENANCE_API_PATH,
+    REVIEWED_MAINTENANCE_CLI_SEAM,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 COMPATIBILITY_CENSUS = ROOT / "reports/quality/compatibility-importer-census.json"
 COMPATIBILITY_REGISTRY = ROOT / "configs/quality/compatibility_facade_inventory.yaml"
@@ -99,9 +104,14 @@ def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
         assert row["exit_criteria"]
 
     for row in census["retained_entrypoints"]:
-        assert row["surface_classification"] == "external-facing"
-        if row["internal_callers_zero"]:
-            assert row["src_importer_count"] == 0
+        if row["path"] == MAINTENANCE_API_PATH:
+            assert row["surface_classification"] == "first-party-active"
+            assert row["src_importer_count"] == 1
+            assert row["src_importers"] == [REVIEWED_MAINTENANCE_CLI_SEAM]
+        else:
+            assert row["surface_classification"] == "external-facing"
+            if row["internal_callers_zero"]:
+                assert row["src_importer_count"] == 0
 
 
 @pytest.mark.architecture

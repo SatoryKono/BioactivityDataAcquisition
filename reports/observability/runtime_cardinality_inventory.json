@@ -321,28 +321,19 @@
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
-    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
     "bioetl_runtime_alert_condition_dq_hard_fail_15m",
     "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
     "bioetl_runtime_alert_condition_gold_write_missing_15m",
     "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
-    "bioetl_runtime_alert_condition_ledger_append_failed_15m",
-    "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
-    "bioetl_runtime_alert_condition_manifest_write_failed_15m",
     "bioetl_runtime_alert_condition_no_terminal_run_30m",
     "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
     "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
     "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
     "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
     "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
-    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
-    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
     "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
-    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
     "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
-    "bioetl_runtime_alert_condition_replay_drift_detected_30m",
-    "bioetl_runtime_alert_condition_replay_lag_high_15m",
     "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
     "bioetl_runtime_alert_condition_silver_validation_failures_30m",
     "bioetl_runtime_alert_condition_stage_backlog_active_15m",
@@ -1304,6 +1295,7 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_control_plane_ledger_fail_severity_30m": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -1323,6 +1315,7 @@
       "docs/05-operations/control-plane-lifecycle.md"
     ],
     "bioetl_control_plane_manifest_fail_severity_30m": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
@@ -1477,6 +1470,7 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_first_window_reason": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_monitor_disabled_total": [
@@ -1783,7 +1777,6 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_manifest_ledger_integrity_ratio": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2087,7 +2080,6 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_replay_duplicate_overwrite_risk_total": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
@@ -2111,9 +2103,6 @@
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
-    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
@@ -2134,15 +2123,6 @@
     "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
-    ],
-    "bioetl_runtime_alert_condition_ledger_append_failed_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
-    "bioetl_runtime_alert_condition_lineage_refs_missing_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
-    "bioetl_runtime_alert_condition_manifest_write_failed_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_no_terminal_run_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2167,35 +2147,18 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md"
-    ],
-    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
-    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
-    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
     "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
-    "bioetl_runtime_alert_condition_replay_drift_detected_30m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
-    "bioetl_runtime_alert_condition_replay_lag_high_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json"
-    ],
     "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md"
     ],
     "bioetl_runtime_alert_condition_silver_validation_failures_30m": [
@@ -2213,6 +2176,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_control_plane_alert_count": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
@@ -2251,6 +2215,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_pipeline_alert_count": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
@@ -2267,6 +2232,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_provider_alert_count": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
@@ -2411,10 +2377,12 @@
       "grafana/README.md"
     ],
     "bioetl_trust_replay_blocker_events_total": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_trust_replay_blocker_integrity": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],

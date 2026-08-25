@@ -541,11 +541,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 142
-      total_loc: 16452
+      total_loc: 16438
       files_ge_250_loc: 0
       helper_function_ratio: 0.402
       max_internal_fan_in: 2
-      max_internal_fan_in_module: bioetl.application.services.control_plane.replay.reproducibility_score_cards_types
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-08-13_issue_8719_fan_in_headroom
       next_action: '2026-08-13 #8719 rerouted family-internal hubs so max_internal_fan_in dropped from
@@ -906,21 +906,20 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration updates the tracked
         debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 4
-      max_count: 4
+      current_count: 3
+      max_count: 3
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: 'Reviewed 2026-08-10 after RF-005: four fully classified zero-import surfaces (stage_accounting,
-        two diagnostics dynamic loaders, maintenance.py external re-export). Not actionable dead-code
-        debt.'
+      rationale: 'Reviewed 2026-08-25: three fully classified zero-import surfaces (stage_accounting,
+        diagnostics dynamic loader, maintenance.py external re-export). Not actionable dead-code debt.'
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh updates the classified
         candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 4
-      max_count: 4
+      current_count: 3
+      max_count: 3
       linked_issue: '#6791'
       owner: '@bioetl-architecture'
-      rationale: All four repo-wide zero-import candidates remain covered by explicit disposition ledger
+      rationale: All three repo-wide zero-import candidates remain covered by explicit disposition ledger
         entries.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger is intentionally
         rebaselined during review.
@@ -932,11 +931,11 @@ retirement_governance_metrics:
       rationale: All repo-wide zero-import candidates are now classified.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 4
-      max_count: 4
+      current_count: 3
+      max_count: 3
       linked_issue: '#6353'
       owner: '@bioetl-architecture'
-      rationale: All four repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability
+      rationale: All three repo-wide zero-import candidates are anchored by explicit owner-test or runtime-reachability
         evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         the owner-test evidence is regenerated in lockstep.
@@ -950,11 +949,11 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally shrinks and
         owner-test evidence is added.
     repo_wide_non_static_reachability_candidate_count:
-      current_count: 3
-      max_count: 3
+      current_count: 2
+      max_count: 2
       linked_issue: '#6786'
       owner: '@bioetl-architecture'
-      rationale: Non-static reachability residue is the two dynamic diagnostics loaders and the maintenance
+      rationale: Non-static reachability residue is the dynamic diagnostics loader and the maintenance
         public re-export; must not grow silently.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh intentionally
         expands the classified non-static residue.

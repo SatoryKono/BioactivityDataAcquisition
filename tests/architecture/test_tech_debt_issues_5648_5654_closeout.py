@@ -21,6 +21,9 @@ import pytest
 import yaml
 
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
+from tests.architecture.quality_artifacts import (
+    assert_retained_entrypoint_src_importers,
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -155,7 +158,7 @@ def test_issue_5651_public_compatibility_surfaces_are_fully_justified() -> None:
 
     assert registry["transition_debt"] == []
     assert summary["retained_entrypoint_count"] == 12
-    assert summary["retained_public_entrypoint_burden"] == 0
+    assert summary["retained_public_entrypoint_burden"] == 1
     assert summary["twin_pair_count"] == 0
     assert summary["retained_public_export_facade_count"] == 4
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
@@ -170,7 +173,7 @@ def test_issue_5651_public_compatibility_surfaces_are_fully_justified() -> None:
         assert entry["exit_criteria"]
 
     for entry in census["retained_entrypoints"]:
-        assert entry["src_importer_count"] == 0
+        assert_retained_entrypoint_src_importers(entry)
 
     for facade in public_facades:
         assert facade["public_export_count"] <= facade["max_public_exports"]

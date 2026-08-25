@@ -43,9 +43,9 @@
     },
     "6165": {
       "debt_type": "dead_code_zero_import_review",
-      "repo_wide_owner_test_anchored_candidate_count": 4,
+      "repo_wide_owner_test_anchored_candidate_count": 3,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_zero_import_candidate_count": 4
+      "repo_wide_zero_import_candidate_count": 3
     },
     "6166": {
       "config_inconsistent_parameter_count": 0,
