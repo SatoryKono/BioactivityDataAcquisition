@@ -34,7 +34,7 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
     _next_incremental_start_offset,
     _offset_from_successful_state,

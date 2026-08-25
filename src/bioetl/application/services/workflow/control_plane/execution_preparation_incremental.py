@@ -1,4 +1,4 @@
-"""Incremental-offset helpers for workflow execution preparation."""
+"""Workflow-owned incremental-offset preparation helpers."""
 
 from __future__ import annotations
 

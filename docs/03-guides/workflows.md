@@ -23,8 +23,8 @@ It connects:
 - the accepted control-plane boundary in
   [ADR-044](../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md);
 - the current declarative workflow code in `src/bioetl/domain/workflow/` and
-  `src/bioetl/application/services/workflow_runner_service.py`;
-- the shipped workflow control-plane services in
+  `src/bioetl/application/services/workflow/`;
+- the immutable manifest, append-only ledger, and inspection services in
   `src/bioetl/application/services/control_plane/workflow/`.
 
 Use this guide when you need one stable explanation of what a workflow is, what

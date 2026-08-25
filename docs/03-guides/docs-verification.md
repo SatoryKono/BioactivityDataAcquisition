@@ -315,6 +315,7 @@ uv run python -m scripts.docs build-site --strict
 
 - **Source of truth**: `src/bioetl/interfaces/**`,
   `src/bioetl/domain/workflow/**`,
+  `src/bioetl/application/services/workflow/**`,
   `src/bioetl/application/services/control_plane/workflow/**`
 - **Docs to review**: `README.md`,
   `docs/03-guides/workflows.md`,

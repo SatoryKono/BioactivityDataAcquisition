@@ -36,8 +36,8 @@ from uuid import UUID
 
 import pytest
 
-from bioetl.application.services.control_plane.workflow import execution_recording
-from bioetl.application.services.control_plane.workflow.execution_recording import (
+from bioetl.application.services.workflow.control_plane import execution_recording
+from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
 )
 from bioetl.application.services.workflow.workflow_runner_models import (

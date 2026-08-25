@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         HistoricalReplayUniverseClosureReport,
         HistoricalReplayUniverseService,
     )
-    from bioetl.application.services.control_plane.workflow.execution_service import (
+    from bioetl.application.services.workflow.control_plane.execution_service import (
         WorkflowExecutionService,
     )
     from bioetl.application.services.control_plane.workflow.inspection_service import (

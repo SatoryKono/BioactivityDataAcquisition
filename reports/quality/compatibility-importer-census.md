@@ -15,7 +15,7 @@
 - retained_public_export_facade_count: 4
 - retained_public_export_facades_with_duplicate_exports: 0
 - retained_public_export_facades_with_resolution_conflicts: 0
-- retained_public_export_facades_with_wrapper_contract_drift: 0
+- retained_public_export_facades_with_wrapper_contract_drift: 1
 - purpose: measure sanctioned public seams and underscore/public twin usage
 
 ## Retained Entrypoints
@@ -56,7 +56,7 @@
 
 | Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |
 | --- | ---: | ---: | --- | --- | --- |
-| `src/bioetl/composition/entrypoints.py` | 10 | 0 | register, registered_ports, resolve | none | none |
+| `src/bioetl/composition/entrypoints.py` | 10 | 0 | none (drift: register, registered_ports, resolve) | none | none |
 | `src/bioetl/composition/health_api.py` | 7 | 7 | get_runtime_settings | none | none |
 | `src/bioetl/composition/maintenance_api.py` | 4 | 4 | archive_table, get_lifecycle_service, preview_cleanup, vacuum_table | none | none |
 | `src/bioetl/infrastructure/config/__init__.py` | 18 | 5 | none | none | none |
@@ -97,9 +97,9 @@ Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`:
 | `bioetl.application.services.control_plane.run_manifest_diagnostics` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.diagnostics` |
 | `bioetl.application.services.control_plane.run_manifest_inspection_service` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.inspection_service` |
 | `bioetl.application.services.control_plane.run_manifest_replay_taxonomy` | no | 0 | 0 | `bioetl.application.services.control_plane.manifest.replay_taxonomy` |
-| `bioetl.application.services.control_plane.workflow_execution_preparation` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_preparation` |
-| `bioetl.application.services.control_plane.workflow_execution_recording` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_recording` |
-| `bioetl.application.services.control_plane.workflow_execution_service` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.execution_service` |
+| `bioetl.application.services.control_plane.workflow_execution_preparation` | no | 0 | 0 | `bioetl.application.services.workflow.control_plane.execution_preparation` |
+| `bioetl.application.services.control_plane.workflow_execution_recording` | no | 0 | 0 | `bioetl.application.services.workflow.control_plane.execution_recording` |
+| `bioetl.application.services.control_plane.workflow_execution_service` | no | 0 | 0 | `bioetl.application.services.workflow.control_plane.execution_service` |
 | `bioetl.application.services.control_plane.workflow_inspection_service` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.inspection_service` |
 | `bioetl.application.services.control_plane.workflow_ledger_service` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.ledger_service` |
 | `bioetl.application.services.control_plane.workflow_manifest_models` | no | 0 | 0 | `bioetl.application.services.control_plane.workflow.manifest_models` |
