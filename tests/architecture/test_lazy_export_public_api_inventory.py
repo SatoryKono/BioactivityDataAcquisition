@@ -33,6 +33,9 @@ EXPECTED_LAZY_EXPORT_FACADES = {
     "src/bioetl/application/services/control_plane/replay/__init__.py": (
         "public_package_facade"
     ),
+    "src/bioetl/application/services/control_plane/workflow/manifest_service.py": (
+        "compatibility_facade"
+    ),
     "src/bioetl/composition/bootstrap/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/cli/__init__.py": "public_package_facade",
     "src/bioetl/composition/bootstrap/runtime/__init__.py": ("public_package_facade"),
