@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Layered port registries (ADR-058 / #9599):** `bioetl.application.ports`
+  is the public entry for application-service Protocols. First migration wave
+  moves 12 composition Protocol declarations into `domain/ports`,
+  `application/ports`, or `composition/contracts`. Remaining composition
+  declarations outside `contracts/` are shrink-only (max 43).
+
 ### Changed
 
 - **Entity ID scheme v2 documented (#7777):** publication-term term types are

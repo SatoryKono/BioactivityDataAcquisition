@@ -9,8 +9,10 @@ if TYPE_CHECKING:
         BronzeCleanupResult,
     )
     from bioetl.domain.ports import (
+        CheckpointPort,
         HealthMonitorPort,
         MetricsPort,
+        RunLedgerPort,
         RunManifestPort,
         WorkflowManifestPort,
     )
@@ -23,6 +25,18 @@ class HealthServerDependenciesProtocol(Protocol):
     metrics: MetricsPort
     run_manifest_port: RunManifestPort
     workflow_manifest_port: WorkflowManifestPort
+
+
+class HealthListenerDependenciesProtocol(Protocol):
+    """Typed view of health-listener dependencies exposed through health_api."""
+
+    health_monitor: HealthMonitorPort
+    metrics: MetricsPort
+    checkpoint_port: CheckpointPort
+    run_manifest_port: RunManifestPort
+    run_ledger_port: RunLedgerPort
+    workflow_manifest_port: WorkflowManifestPort
+    metrics_exposition: object
 
 
 class BronzeCleanupServiceProtocol(Protocol):

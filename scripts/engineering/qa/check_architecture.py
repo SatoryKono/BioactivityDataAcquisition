@@ -92,6 +92,23 @@ def check_composition_contracts_isolation(base_path: Path) -> list[str]:
     return violations
 
 
+def check_composition_protocol_placement(base_path: Path) -> list[str]:
+    """Shrink-only remaining Protocol declarations outside composition/contracts."""
+    from scripts.engineering.qa.report_composition_protocol_inventory import (
+        collect_scoped_protocols,
+        evaluate,
+    )
+    import yaml
+
+    config_path = (
+        base_path / "configs" / "quality" / "composition_protocol_inventory.yaml"
+    )
+    if not config_path.exists():
+        return [f"missing {config_path}"]
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    return evaluate(config, collect_scoped_protocols())
+
+
 def check_no_circular_imports(base_path: Path) -> list[str]:
     """Basic check for infrastructure -> application import violations."""
     violations: list[str] = []
@@ -135,6 +152,7 @@ def main() -> int:
 
     all_violations.extend(check_no_circular_imports(base_path))
     all_violations.extend(check_composition_contracts_isolation(base_path))
+    all_violations.extend(check_composition_protocol_placement(base_path))
     all_violations.extend(_collect_adapter_violations(base_path))
 
     if all_violations:

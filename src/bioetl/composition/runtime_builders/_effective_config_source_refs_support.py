@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Protocol
 
 from bioetl.domain.control_plane.config_source_hashing import (
     ConfigSourceHashStrategy,
@@ -12,14 +11,9 @@ from bioetl.domain.control_plane.config_source_hashing import (
 from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 
-class _CandidatePathsFactory(Protocol):
-    def __call__(
-        self,
-        *,
-        provider: str,
-        entity: str,
-        repo_root: Path,
-    ) -> list[str]: ...
+from bioetl.composition.contracts.structural import (
+    CandidatePathsFactory as _CandidatePathsFactory,
+)
 
 
 def _compute_file_hashes(

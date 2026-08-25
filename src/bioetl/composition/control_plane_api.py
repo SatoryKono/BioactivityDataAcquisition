@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.composition.lazy_exports import install_cached_public_exports
 
@@ -42,28 +42,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.workflow.workflow_runner_service import (
         WorkflowRunnerService,
     )
-    from bioetl.domain.control_plane import (
-        ControlPlaneArtifactLifecycleApplyResult,
-        ControlPlaneArtifactLifecyclePlan,
-        ControlPlaneArtifactLifecyclePolicy,
-    )
     from bioetl.domain.ports import AdrServicePort
     from bioetl.domain.workflow import WorkflowConfig
 
     from bioetl.composition.registry_api import PipelineRegistry
 
-    class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
-        def plan(
-            self,
-            policy: ControlPlaneArtifactLifecyclePolicy,
-            *,
-            dry_run: bool,
-        ) -> ControlPlaneArtifactLifecyclePlan: ...
-
-        def apply(
-            self,
-            plan: ControlPlaneArtifactLifecyclePlan,
-        ) -> ControlPlaneArtifactLifecycleApplyResult: ...
+    from bioetl.application.ports import ControlPlaneArtifactLifecycleStoreProtocol
 
     def get_adr_service() -> AdrServicePort: ...
 
