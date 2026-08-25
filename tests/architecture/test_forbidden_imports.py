@@ -586,28 +586,26 @@ class TestInterfacesBootstrapIsolation:
             "Violations:\n" + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_interfaces_no_direct_entrypoints_imports(self, src_dir: Path) -> None:
-        """Interfaces must consume narrow composition APIs, not entrypoints façade."""
+    def test_interfaces_no_legacy_execution_or_maintenance_api_imports(
+        self, src_dir: Path
+    ) -> None:
+        """Interfaces use canonical entrypoints, not legacy execution/maintenance APIs."""
         violations: list[str] = []
         for py_file in _python_files(_interfaces_path(src_dir)):
             violations.extend(
                 _module_import_violations(
                     py_file,
                     src_dir,
-                    exact_modules={"bioetl.composition.entrypoints"},
+                    exact_modules={
+                        "bioetl.composition.execution_api",
+                        "bioetl.composition.maintenance_api",
+                    },
                 )
             )
 
         assert not violations, (
-            "Interfaces layer must not import bioetl.composition.entrypoints.\n"
-            "Use sanctioned modules such as:\n"
-            "  - bioetl.composition.execution_api\n"
-            "  - bioetl.composition.registry_api\n"
-            "  - bioetl.composition.control_plane_service_access\n"
-            "  - bioetl.composition.health_api\n"
-            "  - bioetl.composition.maintenance_api\n"
-            "  - bioetl.composition.composite_catalog\n"
-            "  - bioetl.composition.observability_runtime\n\n"
+            "Interfaces layer must use bioetl.composition.entrypoints instead of "
+            "legacy execution_api/maintenance_api facades.\n"
             "Violations:\n" + "\n".join(f"  - {item}" for item in violations)
         )
 

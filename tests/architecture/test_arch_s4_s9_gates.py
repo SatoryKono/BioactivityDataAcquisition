@@ -124,6 +124,16 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         "maintenance_api.py",
         "registry_api.py",
     ]
+    for api_file in api_files:
+        tree = ast.parse(api_file.read_text(encoding="utf-8"))
+        executable_bodies = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+        ]
+        assert executable_bodies == [], (
+            f"{api_file.name} must remain a logic-free lazy re-export facade"
+        )
 
 
 def test_s7_package_cohesion_budgets_are_not_exceeded() -> None:

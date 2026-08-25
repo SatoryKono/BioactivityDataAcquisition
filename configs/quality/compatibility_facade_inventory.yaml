@@ -179,14 +179,11 @@ retained_entrypoints:
     public_export_contract:
       max_public_exports: 10
       lazy_export_table: _PUBLIC_SYMBOL_TARGETS
-      retained_wrappers_outside_all:
-        - register
-        - registered_ports
-        - resolve
+      retained_wrappers_outside_all: []
   - path: src/bioetl/composition/health_api.py
     compatibility_role:
-      Permanent public health composition facade that intentionally shields split services/bootstrap/resource
-      seams while keeping a reviewed export budget.
+      Permanent logic-free public health lazy re-export facade that shields split services/bootstrap/resource
+      owners while keeping a reviewed export budget.
     canonical_target: bioetl.composition.health_api
     status: public-entrypoint
     owner: bioetl.composition
@@ -202,20 +199,18 @@ retained_entrypoints:
       boundary tests. `tests`: public facade imports may appear in CLI/composition coverage only when validating the public seam
       itself."
     migration_path:
-      Use `bioetl.composition.health_api` as the sanctioned health-facing composition seam; do not add new first-party
-      imports from `bioetl.composition._services`, `bioetl.composition._resource_management`, or `bioetl.composition.bootstrap.cli.health`
-      when the public facade export already exists.
+      External consumers use `bioetl.composition.health_api` as the single supported health import path; first-party
+      runtime callers use `bioetl.composition.health_service_access`, while executable behavior remains in owner modules.
     exit_criteria:
-      The public health facade remains the sanctioned external import seam, its reviewed export budget stays bounded,
+      The public health facade contains no executable wrapper bodies, remains the sanctioned external import seam,
       and first-party runtime callers remain at zero behind the owner-only `health_service_access` seam.
     public_export_contract:
       max_public_exports: 7
       lazy_export_table: _PUBLIC_EXPORTS
-      retained_wrappers_outside_all:
-        - get_runtime_settings
+      retained_wrappers_outside_all: []
   - path: src/bioetl/composition/maintenance_api.py
     compatibility_role:
-      Permanent public maintenance composition facade that intentionally shields maintenance/resource wiring
+      Permanent logic-free public maintenance lazy re-export facade that shields maintenance/resource owners
       behind a reviewed export budget.
     canonical_target: bioetl.composition.maintenance_api
     status: public-entrypoint
@@ -225,27 +220,21 @@ retained_entrypoints:
     introduced_in: 2026-05 public export review
     review_date: "2026-09-30"
     external_breaking_change_required: true
-    internal_callers_zero: false
+    internal_callers_zero: true
     allowed_call_sites:
-      "`src`: import maintenance lifecycle/archive/cleanup/vacuum helpers only through `bioetl.composition.maintenance_api`;
-      direct imports from `_resource_management` and `_services` stay confined to owner implementation paths. `tests`: public
-      facade imports may appear in CLI/composition coverage, while direct internal patch targets stay confined to dedicated
-      boundary tests."
+      "`src`: do not add first-party imports of `bioetl.composition.maintenance_api`; the maintenance CLI owner seam
+      routes through `bioetl.composition.entrypoints` and the reviewed `_services` owner. `tests`: public facade imports may
+      appear in composition coverage only when validating the external seam itself."
     migration_path:
-      Use `bioetl.composition.maintenance_api` as the sanctioned maintenance-facing composition seam; do not add
-      new first-party imports from `bioetl.composition._resource_management` or `bioetl.composition._services` when the public
-      facade export already exists.
+      External consumers use `bioetl.composition.maintenance_api` as the single supported maintenance import path;
+      first-party runtime callers use the reviewed owner seam and executable behavior remains in owner modules.
     exit_criteria:
-      The public maintenance facade remains the sanctioned import seam, its reviewed export budget stays bounded,
-      and internal owner modules remain hidden behind the facade for ordinary first-party callers.
+      The public maintenance facade contains no executable wrapper bodies, remains the sanctioned external import seam,
+      and its reviewed export budget stays bounded.
     public_export_contract:
       max_public_exports: 4
       lazy_export_table: _PUBLIC_EXPORTS
-      retained_wrappers_outside_all:
-        - archive_table
-        - get_lifecycle_service
-        - preview_cleanup
-        - vacuum_table
+      retained_wrappers_outside_all: []
   - path: src/bioetl/infrastructure/config/__init__.py
     compatibility_role:
       Permanent public infrastructure config package-root convenience facade that intentionally shields split
@@ -469,15 +458,14 @@ retained_entrypoint_burn_down_plan:
         Keep the public health facade stable for external consumers, hold first-party `src/` imports at zero,
         and route owner-only runtime callers through `bioetl.composition.health_service_access`.
     - path: src/bioetl/composition/maintenance_api.py
-      phase: narrow-first-party-callers
-      target_state: narrow_first_party_callers
+      phase: enforce
+      target_state: retain_as_stable_public_api
       rationale:
-        Public composition maintenance facade stays stable, but ordinary first-party CLI/runtime callers should narrow
-        to one owner seam instead of importing the facade broadly.
+        Public composition maintenance facade stays stable and logic-free while first-party callers use canonical
+        entrypoints or the reviewed owner seam.
       completion_gate:
-        Keep the public maintenance facade stable while confining first-party runtime imports to
-        `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py` and preventing growth of ad hoc
-        maintenance-api callers.
+        Keep the public maintenance facade stable while holding first-party runtime imports at zero and preventing
+        growth of ad hoc maintenance-api callers.
     - path: src/bioetl/infrastructure/config/__init__.py
       phase: enforce
       target_state: retain_as_stable_public_api
