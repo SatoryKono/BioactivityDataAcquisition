@@ -2042,7 +2042,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
@@ -2170,7 +2170,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "unit": "none",
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)"
@@ -2440,7 +2440,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -2631,7 +2631,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -2822,7 +2822,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -3013,7 +3013,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -3204,7 +3204,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
@@ -3395,7 +3395,7 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": false
+                "inspect": true
               },
               "mappings": [
                 {
