@@ -108,7 +108,8 @@ List responses also expose the backward-compatible `report_root`, `marker`, and
 `marker_status` fields plus bounded `source_identity*` diagnostics and
 `index_state` (`ok`, `valid_empty`, `tree_missing`, `layout_unhealthy`,
 `identity_unhealthy`). Pipeline index items include identity peeks
-`started_at` and `workflow_run_id` (empty `workflow_run_id` is `—`). Grafana
+`started_at`, `run_type`, and `workflow_run_id` (empty `workflow_run_id` is
+`—`; missing `run_type` is JSON `null`). Grafana
 **Inspect Recent Runs** shows `VALID EMPTY` only
 for `valid_empty`. A `TREE_MISSING` row means the container has no
 `run-reports/<kind>/` tree — not a selector miss. `/health/ready` green is

@@ -1031,6 +1031,8 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
     assert first_links
     assert any("var-run_id=${__value.raw}" in url for url in first_links)
     assert any("var-pipeline=${__data.fields.Pipeline}" in url for url in first_links)
+    assert any("var-run_type=${__data.fields.run_type}" in url for url in first_links)
+    assert all("var-run_type=$run_type" not in url for url in first_links)
     assert all("viewPanel=" not in url for url in first_links)
     assert "viewPanel" not in str(first_screen.get("description") or "")
     hidden = {
@@ -1044,6 +1046,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
         )
     }
     assert "Pipeline" in hidden
+    assert "run_type" in hidden
     target_url = str((first_screen.get("targets") or [{}])[0].get("url") or "")
     assert "run_id=${run_id}" in target_url
     selected = [
@@ -1158,6 +1161,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
         )
     }
     assert "Pipeline" in hidden
+    assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
     assert int(grid.get("h") or 0) == 12

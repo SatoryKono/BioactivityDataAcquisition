@@ -22,9 +22,10 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
 - **Type:** Table (compact first-screen index)
 - **Purpose:** Last 10 pipeline-run reports for the selected pipeline. The
   dashboard time picker does not filter this table. The Run column data link
-  writes `var-run_id` and `var-pipeline` and stays on this dashboard so the
-  operator can expand Selected Run Details (panel header link). The Pipeline
-  column is hidden (already the selector) so the UUID stays readable. The
+  writes `var-run_id`, `var-pipeline`, and `var-run_type` from that row and
+  stays on this dashboard so the operator can expand Selected Run Details
+  (panel header link). Pipeline and `run_type` are hidden (already selectors)
+  so the UUID stays readable. The
   matching `$run_id` row is marked via Ops HTTP `selected`. Started is
   `identity.started_at`. Workflow is `identity.workflow_id` from that
   pipeline report (not the workflow-run catalog). Workflow run is

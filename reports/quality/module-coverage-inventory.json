@@ -48811,6 +48811,7 @@
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "source_tree_sha256": "1d3e7673724cf2b72ce81b063f3a45b7845c753edfdcde88007ed0bcd9aad16f",
 ||||||| 9136bd376e
   "source_tree_sha256": "b27c02a46ae6be2e05c48caa1ee016f0a8709e2dac6a256f60680073609fa7f2",
@@ -48835,6 +48836,11 @@
   "source_tree_sha256": "1d3e7673724cf2b72ce81b063f3a45b7845c753edfdcde88007ed0bcd9aad16f",
 >>>>>>> fix/arch-s5-s9-residuals
 >>>>>>> master20260825-12
+||||||| 09ccaa7e54
+  "source_tree_sha256": "1d3e7673724cf2b72ce81b063f3a45b7845c753edfdcde88007ed0bcd9aad16f",
+=======
+  "source_tree_sha256": "0ccca5f03fb6c0f756bb2a0d7c49f07bd0efde1c4e1e6acc1afca087c18f4f2d",
+>>>>>>> fix/run-explorer-select-handoff
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

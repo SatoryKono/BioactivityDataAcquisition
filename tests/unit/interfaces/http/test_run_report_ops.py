@@ -164,6 +164,7 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
                     "started_at": "2026-08-25T01:00:00Z",
                     "workflow_id": "chembl_baseline",
                     "workflow_run_id": "wf-run-1",
+                    "run_type": "backfill",
                 },
             }
         ),
@@ -194,6 +195,7 @@ def test_list_pipeline_payloads_includes_report_root_diagnostics(
     assert payload["items"][0]["workflow_id"] == "chembl_baseline"
     assert payload["items"][0]["started_at"] == "2026-08-25T01:00:00Z"
     assert payload["items"][0]["workflow_run_id"] == "wf-run-1"
+    assert payload["items"][0]["run_type"] == "backfill"
 
     marked = list_pipeline_run_report_payloads(
         pipeline_name="chembl_assay",
@@ -472,6 +474,7 @@ def test_list_pipeline_run_reports(tmp_path: Path) -> None:
     assert payload["items"][0]["workflow_id"] == "—"
     assert payload["items"][0]["workflow_run_id"] == "—"
     assert payload["items"][0]["started_at"] is None
+    assert payload["items"][0]["run_type"] is None
 
 
 def test_list_pipeline_run_reports_distinguishes_no_artifacts(
@@ -496,6 +499,7 @@ def test_list_pipeline_run_reports_distinguishes_no_artifacts(
             "workflow_run_id": "—",
             "status": "TREE_MISSING",
             "started_at": None,
+            "run_type": None,
             "completed_at": None,
             "selected": 0,
             "json_path": None,
