@@ -990,8 +990,9 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto",
-                      "mode": "basic"
+                      "type": "color-background",
+                      "mode": "basic",
+                      "wrapText": false
                     }
                   },
                   {
@@ -1039,6 +1040,29 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 80
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "provider"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 200
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
@@ -1087,7 +1111,26 @@
             }
           ],
           "title": "Inspect Non-OK Providers",
-          "type": "table"
+          "type": "table",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "provider": 0,
+                  "Value": 1
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "Value": "Severity"
+                }
+              }
+            }
+          ]
         },
         {
           "datasource": {

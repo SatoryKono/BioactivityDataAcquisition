@@ -100,6 +100,20 @@ first_screen_shell_panels:
       Native title omitted so h=3 Start Pipeline Triage body fits DASH-FIT-004.
       Display title stays in bioetlDisplayTitle.
     retire_when: the CTA can keep a native title without overflowing at 200%
+  - dashboard: bioetl-control-plane-v1.json
+    id: 906
+    owner: "@bioetl-observability"
+    rationale: >-
+      Next-step rail; native title omitted so h=2 does not scroll. Instruction
+      copy, not a data-bearing or nav panel.
+    retire_when: rail is merged into panel 9400 or moved to y >= first_window_y
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 1
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the banner can keep a native title without overflowing at 200%
 
 min_height:
   root:
@@ -195,6 +209,11 @@ first_window_summary_tables:
   - dashboard: bioetl-runtime.json
     id: 9101
     max_rows: 3
+    owner: "@bioetl-observability"
+    bind: topk
+  - dashboard: bioetl-dq-v2.json
+    id: 9102
+    max_rows: 5
     owner: "@bioetl-observability"
     bind: topk
   - dashboard: bioetl-provider-health-v2.json
