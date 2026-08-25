@@ -48710,6 +48710,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-21",
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 <<<<<<< HEAD
   "source_tree_sha256": "79a2e79c4f3e571b07cc37a83386ac222359a8b57d32227fed67b237d726d887",
@@ -48723,6 +48724,11 @@
 =======
   "source_tree_sha256": "d2e1722520d66ee687b260c80160d62bd2deaf79846e9357b9e717edac2a3e16",
 >>>>>>> fix/architecture-audit-cycle-9624
+||||||| Stash base
+  "source_tree_sha256": "1919669ceaca9c436116c44aca40f457719c2b5a8492972531e034806defc3ea",
+=======
+  "source_tree_sha256": "dec2a2a67aea3be2cc605fc9cc358db8005aff32b4c07272e13b14b1cdebebcc",
+>>>>>>> Stashed changes
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
