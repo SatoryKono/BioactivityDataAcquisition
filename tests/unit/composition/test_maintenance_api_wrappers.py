@@ -32,7 +32,7 @@ from types import SimpleNamespace
 import pytest
 
 from bioetl.composition import maintenance_api
-from bioetl.composition import resources_api
+from bioetl.composition import resources_runtime
 
 pytestmark = pytest.mark.unit
 
@@ -56,9 +56,9 @@ async def test_async_maintenance_wrappers_delegate(
         assert (table, options) == ("table", vacuum_options)
         return 3
 
-    monkeypatch.setattr(resources_api, "archive_table", archive)
-    monkeypatch.setattr(resources_api, "preview_cleanup", preview)
-    monkeypatch.setattr(resources_api, "vacuum_table", vacuum)
+    monkeypatch.setattr(resources_runtime, "archive_table", archive)
+    monkeypatch.setattr(resources_runtime, "preview_cleanup", preview)
+    monkeypatch.setattr(resources_runtime, "vacuum_table", vacuum)
 
     assert await maintenance_api.archive_table("table", archive_options) == 2
     assert await maintenance_api.preview_cleanup("pipeline") == "preview"
@@ -67,6 +67,10 @@ async def test_async_maintenance_wrappers_delegate(
 
 def test_get_lifecycle_service_delegates(monkeypatch: pytest.MonkeyPatch) -> None:
     sentinel = object()
-    monkeypatch.setattr(resources_api, "get_lifecycle_service", lambda: sentinel)
+    monkeypatch.setattr(
+        resources_runtime,
+        "get_lifecycle_service",
+        lambda: sentinel,
+    )
 
     assert maintenance_api.get_lifecycle_service() is sentinel

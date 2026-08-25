@@ -5,6 +5,4 @@ This module must not import ``bioetl.composition`` implementation packages.
 
 from __future__ import annotations
 
-from typing import Any
-
-JsonDict = dict[str, Any]
+from bioetl.domain.types import JsonDict as JsonDict

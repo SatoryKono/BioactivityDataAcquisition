@@ -36,39 +36,38 @@ FORBIDDEN_AGGREGATE_TYPES = {"Batch", "PipelineRun", "QuarantineEntry"}
 ALLOWED_AGGREGATE_ID_TYPES = {"BatchID", "RunID", "EntityID", "ContentHash"}
 
 
-def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
-    """Read aggregate content including sub-module facades.
-
-    If a file is a re-export facade (e.g., batch.py), also reads the
-    corresponding private sub-modules (_batch_*.py) and concatenates
-    their content for architecture checks.
-    """
+def _aggregate_source_paths(aggregates_dir: Path, filename: str) -> list[Path]:
+    """Return the public aggregate module and its private implementation parts."""
     file_path = aggregates_dir / filename
     if not file_path.exists():
-        return ""
-    content = file_path.read_text(encoding="utf-8")
-    # If the file is a facade (contains 'Re-export facade'), also read sub-modules
-    if "Re-export facade" in content:
-        stem = file_path.stem  # e.g., "batch" or "quarantine_entry"
-        for sub_module in sorted(aggregates_dir.glob(f"_{stem}*.py")):
-            content += "\n" + sub_module.read_text(encoding="utf-8")
-        # Also check for alternate naming pattern (e.g., _quarantine_value_objects)
-        alt_stem = stem.split("_")[0] if "_" in stem else stem
-        if alt_stem != stem:
-            for sub_module in sorted(aggregates_dir.glob(f"_{alt_stem}*.py")):
-                sub_content = sub_module.read_text(encoding="utf-8")
-                if sub_content not in content:
-                    content += "\n" + sub_content
-    return content
+        return []
+    stem = file_path.stem
+    private_parts = set(aggregates_dir.glob(f"_{stem}*.py"))
+    alt_stem = stem.split("_")[0] if "_" in stem else stem
+    if alt_stem != stem:
+        private_parts.update(aggregates_dir.glob(f"_{alt_stem}*.py"))
+    return [file_path, *sorted(private_parts)]
+
+
+def _read_aggregate_content(aggregates_dir: Path, filename: str) -> str:
+    """Read aggregate content including private implementation modules."""
+    return "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in _aggregate_source_paths(aggregates_dir, filename)
+    )
 
 
 def _aggregate_tree(aggregates_dir: Path, file_path: Path) -> ast.Module | None:
-    """Parse the aggregate file (and sub-modules for facades) into one AST."""
-    content = _read_aggregate_content(aggregates_dir, file_path.name)
-    if not content:
+    """Parse aggregate implementation modules and combine their AST bodies."""
+    source_paths = _aggregate_source_paths(aggregates_dir, file_path.name)
+    if not source_paths:
         return None
     try:
-        return ast.parse(content, filename=str(file_path))
+        bodies: list[ast.stmt] = []
+        for source_path in source_paths:
+            source = source_path.read_text(encoding="utf-8")
+            bodies.extend(ast.parse(source, filename=str(source_path)).body)
+        return ast.Module(body=bodies, type_ignores=[])
     except SyntaxError:
         return None
 

@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 2
+    "budget_review_notes": 1
   },
   "families": [
     {
@@ -64,9 +64,9 @@
       ],
       "duplication_clusters": 0,
       "files": 33,
-      "total_loc": 3964,
-      "files_ge_250_loc": 2,
-      "helper_function_ratio": 0.364,
+      "total_loc": 3830,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.359,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.transformer_builder",
       "bounded_growth_budgets": {
@@ -74,9 +74,7 @@
         "max_internal_fan_in": 3
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "at_budget:files_ge_250_loc=2/2"
-      ]
+      "budget_review_notes": []
     },
     {
       "name": "application_services_control_plane",
@@ -89,11 +87,11 @@
       ],
       "duplication_clusters": 0,
       "files": 143,
-      "total_loc": 16428,
+      "total_loc": 16463,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.424,
+      "helper_function_ratio": 0.402,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.ledger_service",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2

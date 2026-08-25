@@ -109,7 +109,10 @@ class TestCreateSilverValidator:
         result = _create_silver_validator(None)
         assert result is None
 
-    @patch("bioetl.infrastructure.validation.ContractAwareSilverValidator")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_metadata."
+        "ContractAwareSilverValidator"
+    )
     def test_creates_validator_with_schema(self, mock_validator_cls: MagicMock) -> None:
         """Creates ContractAwareSilverValidator when schema is provided."""
         schema = MagicMock()
@@ -138,8 +141,10 @@ class TestCreatePipelineWithServicesImpl:
     @patch(
         "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
     )
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
+    @patch("bioetl.composition.factories.pipeline._creation_metadata.RunContextFactory")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_metadata.MetadataCoordinator"
+    )
     def test_creates_pipeline(
         self,
         mock_meta_coord: MagicMock,
@@ -211,8 +216,10 @@ class TestCreatePipelineWithServicesImpl:
     @patch(
         "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
     )
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
+    @patch("bioetl.composition.factories.pipeline._creation_metadata.RunContextFactory")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_metadata.MetadataCoordinator"
+    )
     def test_uses_explicit_config_and_forwards_optional_dependencies(
         self,
         mock_metadata_coordinator: MagicMock,
@@ -316,8 +323,10 @@ class TestCreatePipelineWithServicesImpl:
     @patch(
         "bioetl.composition.factories.pipeline._creation_wiring.resolve_domain_pipeline_config"
     )
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.RunContextFactory")
-    @patch("bioetl.composition.factories.pipeline._creation_wiring.MetadataCoordinator")
+    @patch("bioetl.composition.factories.pipeline._creation_metadata.RunContextFactory")
+    @patch(
+        "bioetl.composition.factories.pipeline._creation_metadata.MetadataCoordinator"
+    )
     def test_loads_config_when_inputs_config_missing(
         self,
         mock_metadata_coordinator: MagicMock,

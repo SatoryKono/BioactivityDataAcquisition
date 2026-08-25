@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "contract-tests.yml"
 CODERABBIT_WORKFLOW = ROOT / ".github" / "workflows" / "coderabbit.yml"
 NIGHTLY_REPLAY_WORKFLOW = ROOT / ".github" / "workflows" / "nightly-replay-parity.yml"
+ARCHITECTURE_WORKFLOW = ROOT / ".github" / "workflows" / "architecture.yml"
 TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 RELEASE_WORKFLOW = ROOT / ".github" / "workflows" / "release.yml"
 DOCS_WORKFLOW = ROOT / ".github" / "workflows" / "docs.yml"
@@ -41,6 +42,7 @@ SHA_OR_PR_CONCURRENCY_GROUP = (
 )
 PR_ONLY_CANCEL_IN_PROGRESS = "${{ github.event_name == 'pull_request' }}"
 MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS = (
+    ARCHITECTURE_WORKFLOW,
     TESTS_WORKFLOW,
     ALWAYS_ON_REQUIRED_CHECKS["checks-complete"],
     ROOT / ".github" / "workflows" / "codeql.yml",
