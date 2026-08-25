@@ -588,10 +588,10 @@ def test_audit_followup_action_first_layout_contracts() -> None:
         "Selected Range · Validation Diagnostics",
     ]
     assert [panel.get("gridPos", {}).get("y") for panel in dq_rows] == [
-        15,
         16,
         17,
         18,
+        19,
     ]
     assert all(panel.get("collapsed") is True for panel in dq_rows)
 

@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "6164323bb11099b0fca54cc31e750419ec6db6cdd076f5106af7108b920479ca",
-    "bioetl-dq-v2": "908875af5c96d9fab3a6fbb251df0f0504da52906566ce330614f63b5650333c",
+    "bioetl-control-plane-v1": "22bf6df872d81f8337d49e67e3d4e444884a99cda89ebf505221b8b7724d6e35",
+    "bioetl-dq-v2": "2bb7534011acda103aa71ad7ec3068b022c6998b8800382d0bb7484ef212c029",
     "bioetl-incident-v1": "360018ea0a29a29de6194c043ec40f6ffaf4ab5dea365d9fe6afcff39cc4e2c4",
-    "bioetl-overview-v2": "66e4190b565950a148de8649d7c04d4416db74edf99b10fce77e0a394ceeee85",
-    "bioetl-provider-health-v2": "8be2ea194681026ec07649e9889ae6d4b4c6df377cf6459c53bf5dce9b8bcc7f",
+    "bioetl-overview-v2": "3d32fe10b9ea8e46899866ed8772a018ebe48f366388e4dbe73f8a34bbfcd137",
+    "bioetl-provider-health-v2": "419cd310d4643d9bf11c316f76c21a2e7dd1bc382c07e7495de6b3d28d83f352",
     "bioetl-run-explorer-v1": "401db1f327b13a2bd75f9bf68ba5635c3cc28228d43987b7ece6e13e6033c08f",
-    "bioetl-runtime": "71ea994e3dad8bc8b2caec145dc5def48076289a70e2a51f95a6dd81bf4fc66f"
+    "bioetl-runtime": "19ac401ac1a381f766473ca571e7ca25cc9dda1f9bc0e4fa01af6d5752d1bb6b"
   },
   "panels": [
     {
@@ -122,6 +122,23 @@
     },
     {
       "basis": "preserved-from-json",
+      "component": "Context Bar",
+      "dashboard_uid": "bioetl-control-plane-v1",
+      "disposition": "route-primary",
+      "empty_semantics": "preserved-from-json",
+      "json_fallback": "/d/bioetl-control-plane-v1",
+      "panel_id": 906,
+      "panel_title": "Review Recovery Action",
+      "route": "data-trust-recovery",
+      "source": {
+        "datasource_type": null,
+        "datasource_uid": null,
+        "expressions": [],
+        "target_count": 0
+      }
+    },
+    {
+      "basis": "preserved-from-json",
       "component": "JSON fallback",
       "dashboard_uid": "bioetl-control-plane-v1",
       "disposition": "advanced-evidence",
@@ -194,23 +211,6 @@
           "max(bioetl_control_plane_telemetry_missing_5m{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})"
         ],
         "target_count": 1
-      }
-    },
-    {
-      "basis": "preserved-from-json",
-      "component": "Context Bar",
-      "dashboard_uid": "bioetl-control-plane-v1",
-      "disposition": "route-primary",
-      "empty_semantics": "preserved-from-json",
-      "json_fallback": "/d/bioetl-control-plane-v1",
-      "panel_id": 906,
-      "panel_title": "Review Recovery Action",
-      "route": "data-trust-recovery",
-      "source": {
-        "datasource_type": null,
-        "datasource_uid": null,
-        "expressions": [],
-        "target_count": 0
       }
     },
     {

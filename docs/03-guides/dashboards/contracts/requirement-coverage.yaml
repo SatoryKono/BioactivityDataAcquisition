@@ -101,6 +101,13 @@ allowlists:
         current status reason for the worst providers, not a collapsed forensic
         row.
       retire_when: status-reason table moves into a collapsed row at y >= first_window_y
+    - dashboard: bioetl-dq-v2.json
+      id: 9102
+      owner: "@bioetl-observability"
+      rationale: >-
+        NOW-lane current DQ reasons. First-window Inspect table, not a collapsed
+        range forensic dump.
+      retire_when: 9102 leaves the first window
   answer_panels_without_cta:
     - dashboard: bioetl-run-explorer-v1.json
       id: 3010
