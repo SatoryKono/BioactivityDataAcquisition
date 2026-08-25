@@ -5,7 +5,7 @@ Extracted from BaseServicesFactory to keep factory.py within LOC limits.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 from bioetl.domain.ports import (
@@ -15,9 +15,6 @@ from bioetl.domain.ports import (
     QuarantinePort,
     SettingsPort,
 )
-
-if TYPE_CHECKING:
-    from bioetl.infrastructure.config.settings_api import Settings
 
 from bioetl.application.ports.storage import StorageContextProtocol as _StorageContextLike
 
@@ -69,7 +66,7 @@ def create_metrics(settings: SettingsPort) -> MetricsPort:
     """Create metrics port based on settings."""
     metrics: object = resolve_metrics_port(
         metrics=None,
-        settings=cast("Settings", settings),
+        settings=settings,  # type: ignore[arg-type]
     )
 
     if isinstance(metrics, MetricsPort):

@@ -22,16 +22,16 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2450` with
-`source_tree_sha256=9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08`.
+`source_module_count=2435` with
+`source_tree_sha256=56da800dcb6f10e992f5564c07e87bbf4ec3155c58bd3686aa09e53db96900cc`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
 and related module-coverage inventory hash-only reconcile.
 
-Refresh note (2026-08-17): remeasured after the validation-helper and
-service-invocation refactors. Source baseline remains
-`source_module_count=2450` with the updated `source_tree_sha256` above; the
+Refresh note (2026-08-25): ARCH-VG hash-only reconcile after composition/domain
+facade closeout. Source baseline is
+`source_module_count=2435` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -68,7 +68,7 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2450`, including two
+- Current Python file count under `src/bioetl` is `2435`, including two
   top-level package modules outside the five first-order architecture layers.
 - Current layer file counts are: `domain=609`, `application=750`,
   `infrastructure=626`, `composition=283`, `interfaces=157`.
@@ -90,6 +90,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08`
+- source_tree_sha256: `56da800dcb6f10e992f5564c07e87bbf4ec3155c58bd3686aa09e53db96900cc`
 
-`source_module_count=2450`
+`source_module_count=2435`

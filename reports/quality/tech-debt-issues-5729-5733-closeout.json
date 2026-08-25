@@ -72,7 +72,7 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 102,
+      "assertless_total_candidates": 87,
       "intentional_no_exception_contract": 86,
       "target_file_family_counts": {
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10
@@ -88,7 +88,7 @@
   },
   "ratchets": {
     "assertless_total_candidates": {
-      "current": 105,
+      "current": 87,
       "max": 113
     },
     "coverage_tail_modules": {

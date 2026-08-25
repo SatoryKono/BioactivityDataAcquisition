@@ -86,7 +86,7 @@ def test_issue_5492_public_export_budgets_stay_reduced() -> None:
         if isinstance(row, dict) and "public_export_contract" in row
     }
     ceilings = {
-        "src/bioetl/composition/entrypoints.py": 13,
+        "src/bioetl/composition/entrypoints.py": 10,
         "src/bioetl/composition/health_api.py": 7,
         "src/bioetl/composition/maintenance_api.py": 4,
     }

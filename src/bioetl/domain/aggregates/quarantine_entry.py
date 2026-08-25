@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import importlib
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING
 
 from bioetl.domain.aggregates._quarantine_value_objects import (
     QuarantineStatus,
@@ -13,7 +12,6 @@ from bioetl.domain.aggregates._quarantine_value_objects import (
 from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
-    from bioetl.domain.aggregates._quarantine_aggregate import QuarantineEntry
     from bioetl.domain.aggregates.events import DomainEvent
     from bioetl.domain.types import MetaDict, RunID
 
@@ -23,12 +21,12 @@ __all__ = ["QuarantineEntry", "QuarantineStatus", "ResolutionInfo"]
 class QuarantineEntryTransitionsMixin:
     """Host mixin implementing state machine and event collection."""
 
-    _entry_id: str = cast(Any, None)
-    _run_id: RunID = cast(Any, None)
-    _status: QuarantineStatus = cast(Any, None)
-    _resolution_info: ResolutionInfo | None = cast(Any, None)
-    _metadata: MetaDict = cast(Any, None)
-    _events: list[DomainEvent] = cast(Any, None)
+    _entry_id: str
+    _run_id: RunID
+    _status: QuarantineStatus
+    _resolution_info: ResolutionInfo | None
+    _metadata: MetaDict
+    _events: list[DomainEvent]
 
     def start_review(self) -> None:
         if self._status != QuarantineStatus.NEW:
@@ -130,10 +128,6 @@ class QuarantineEntryTransitionsMixin:
             )
 
 
-def __getattr__(name: str) -> object:
-    if name == "QuarantineEntry":
-        module = importlib.import_module(
-            "bioetl.domain.aggregates._quarantine_aggregate"
-        )
-        return module.QuarantineEntry
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+from bioetl.domain.aggregates._quarantine_aggregate import (
+    QuarantineEntry as QuarantineEntry,
+)

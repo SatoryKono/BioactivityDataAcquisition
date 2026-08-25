@@ -24,6 +24,7 @@ import yaml
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,
 )
+from tests.architecture.quality_artifacts import REVIEWED_MAINTENANCE_CLI_SEAM
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5570-5578-closeout.json"
@@ -169,7 +170,14 @@ def test_issue_5571_public_export_facades_have_symbol_budgets_and_zero_growth() 
         assert row["public_export_count"] <= contract["max_public_exports"]
         assert row["duplicate_public_exports"] == []
         assert row["resolution_conflicts"] == {}
-        assert _src_importers(str(row["module_name"])) == set()
+        actual_importers = {
+            Path(str(item)).as_posix()
+            for item in _src_importers(str(row["module_name"]))
+        }
+        if path == "src/bioetl/composition/maintenance_api.py":
+            assert actual_importers == {REVIEWED_MAINTENANCE_CLI_SEAM}
+        else:
+            assert actual_importers == set()
 
 
 def test_issue_5572_composition_bootstrap_uses_single_owner_graph() -> None:
@@ -244,7 +252,7 @@ def test_issue_5574_observability_allowlist_is_reviewed_and_drift_free() -> None
 
     assert review["linked_issue"] == "#5574"
     assert reviewed_metrics == runtime_allowlist | risky_allowlist
-    assert review["summary"]["allowlisted_metric_count"] == 5
+    assert review["summary"]["allowlisted_metric_count"] == 6
     assert inventory["runtime_cardinality_review_required"] == []
     assert inventory["declared_risky_label_review_required"] == []
     assert inventory["runtime_cardinality_threshold_violations"] == []

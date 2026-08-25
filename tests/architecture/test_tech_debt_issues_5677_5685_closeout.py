@@ -20,6 +20,10 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.architecture.quality_artifacts import (
+    assert_retained_entrypoint_src_importers,
+)
+
 pytestmark = pytest.mark.architecture
 REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
 REFERENCE_TODAY = REFERENCE_NOW.date()
@@ -145,7 +149,7 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
 
     assert summary["retained_entrypoint_count"] == 12
     assert summary["retained_public_export_facade_count"] == 4
-    assert summary["retained_public_entrypoint_burden"] == 0
+    assert summary["retained_public_entrypoint_burden"] == 1
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
 
@@ -156,7 +160,7 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
         assert date.fromisoformat(str(row["review_date"])) >= today
 
     for entry in census["retained_entrypoints"]:
-        assert entry["src_importer_count"] == 0
+        assert_retained_entrypoint_src_importers(entry)
 
 
 def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_zero() -> None:

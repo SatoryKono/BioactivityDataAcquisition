@@ -87,11 +87,11 @@
       ],
       "duplication_clusters": 0,
       "files": 142,
-      "total_loc": 16452,
+      "total_loc": 16438,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.402,
       "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.replay.reproducibility_score_cards_types",
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 2
