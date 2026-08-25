@@ -1147,6 +1147,10 @@ jobs:
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
           cp .coverage "reports/coverage/.coverage.${{ matrix.test-group.name }}" 2>/dev/null || true
+          if [ ! -s "reports/coverage/.coverage.${{ matrix.test-group.name }}" ]; then
+            echo "::error::Test matrix coverage shard was not produced."
+            exit 1
+          fi
           ls -la reports/coverage/ 2>/dev/null || true
           exit $TEST_EXIT
 
