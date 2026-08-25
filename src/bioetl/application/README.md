@@ -9,6 +9,7 @@ The application layer coordinates use cases and runtime flows. It may depend on
 | ---------------- | ----------------------------------------------------------------------------------- |
 | `core/`          | Core pipeline orchestration, runner behavior, shared execution services             |
 | `composite/`     | Composite-pipeline coordination and merge-oriented workflows                        |
+| `ports/`         | Application-layer port protocols (ADR-058); supported entry `bioetl.application.ports` |
 | `services/`      | Service objects for lifecycle, export, metadata, DQ, health, and runtime management |
 | `observability/` | Application-facing observer abstractions and tracing helpers                        |
 | `pipelines/`     | Pipeline-specific application flows and package-level execution seams               |
@@ -17,6 +18,7 @@ The application layer coordinates use cases and runtime flows. It may depend on
 
 - Use-case orchestration
 - Cross-entity or cross-provider execution flows
+- Application-layer port protocols (`ports/`, ADR-058)
 - Service-level coordination over domain ports
 - Application models used to drive pipeline runs
 
@@ -30,5 +32,7 @@ The application layer coordinates use cases and runtime flows. It may depend on
 
 - Start with `core/` for single-pipeline execution behavior.
 - Start with `composite/` for multi-source or merged-runtime behavior.
+- Start with `ports/` for application-layer protocols (ADR-058); do not import
+  these from `domain/ports`.
 - Start with `services/` when you are tracing runtime lifecycle, metadata,
   DQ, export, or shutdown flows.

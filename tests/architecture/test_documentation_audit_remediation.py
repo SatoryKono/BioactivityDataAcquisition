@@ -169,3 +169,18 @@ def test_source_tree_readme_maps_entrypoints_and_ownership() -> None:
     )
     missing = [fragment for fragment in expected_fragments if fragment not in text]
     assert not missing, f"src/bioetl/README.md is missing source-map anchors: {missing}"
+
+
+def test_application_readme_documents_layered_port_registries() -> None:
+    """Application navigation must name ports/ and ADR-058 (#9624)."""
+    text = (PROJECT_ROOT / "src/bioetl/application/README.md").read_text(
+        encoding="utf-8"
+    )
+    missing = [
+        fragment
+        for fragment in ("`ports/`", "ADR-058", "bioetl.application.ports")
+        if fragment not in text
+    ]
+    assert not missing, (
+        f"src/bioetl/application/README.md is missing ADR-058 port anchors: {missing}"
+    )
