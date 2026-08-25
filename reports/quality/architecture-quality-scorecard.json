@@ -25,14 +25,14 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2465,
+        "source_module_count": 2466,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 9.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.81
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 76
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 9.9,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.188
     },
     {
       "evidence_metrics": {
@@ -161,9 +161,25 @@
       }
     }
   },
+  "diagnostics": {
+    "composition_module_cap": 300,
+    "composition_module_count": 295,
+    "families_at_budget": [
+      "application_services_control_plane"
+    ],
+    "families_at_budget_count": 1,
+    "grade_kind": "diagnostic_proxy",
+    "lazy_import_cap": 101,
+    "lazy_import_observed_count": 113,
+    "program_gate_policy": "external_unchanged",
+    "proxy_notes": {
+      "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
+      "module_boundaries_coupling": "hotspot budget warnings and duplicate clusters proxy; at-budget families remain visible but non-blocking"
+    }
+  },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 7.28,
-  "interpretation": "satisfactory_system_refactoring_required",
+  "integral_score": 9.28,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
     "adr_enforcement_blocking_gap_count": 0,
@@ -189,13 +205,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2465,
+    "source_module_count": 2466,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 76
+    "unmeasured_module_count": 0
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -227,6 +243,10 @@
       "path": "docs/02-architecture/generated/module-dependency-map.json",
       "source_fingerprint": "a50954d45b6243f8f740de3e227cdf6ee1bf9072d882772260056c14985b2fd0"
     },
+    "diagnostic_policy": {
+      "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
+      "package_cohesion_budget": "configs/quality/package_cohesion_budget.yaml"
+    },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
       "snapshot_date": "2026-07-27",
@@ -238,9 +258,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
+      "coverage_xml_sha256": "c29e1fcf6c649dd964df11edb767b5b268207597600584fc165e5794b0bf1411",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2"
+      "source_tree_sha256": "840ce03820ddf19376b50391896ced3a1dc983a76e378612b876f9a91431f51b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

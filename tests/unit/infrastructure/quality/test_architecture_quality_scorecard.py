@@ -32,6 +32,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
+from scripts.engineering.qa.report_lazy_import_inventory import collect_lazy_imports
 
 from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     _build_categories,
@@ -86,6 +88,46 @@ def test_architecture_quality_scorecard_carries_live_evidence_metrics(
     assert metrics["total_duplicate_clusters"] >= 0
     assert metrics["hotspot_budget_warning_count"] >= 0
     assert metrics["compatibility_test_file_count"] >= 0
+
+
+def test_architecture_quality_scorecard_separates_diagnostics_from_program_gate(
+    architecture_quality_scorecard_payload: dict[str, object],
+) -> None:
+    payload = architecture_quality_scorecard_payload
+    metrics = payload["metrics"]
+    diagnostics = payload["diagnostics"]
+    composition_root = ROOT / "src" / "bioetl" / "composition"
+    lazy_import_ratchet = yaml.safe_load(
+        (ROOT / "configs/quality/lazy_import_ratchet.yaml").read_text(encoding="utf-8")
+    )
+    package_cohesion_budget = yaml.safe_load(
+        (ROOT / "configs/quality/package_cohesion_budget.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    composition_budget = next(
+        package
+        for package in package_cohesion_budget["packages"]
+        if package["path"] == "src/bioetl/composition"
+    )
+
+    assert diagnostics["grade_kind"] == "diagnostic_proxy"
+    assert diagnostics["program_gate_policy"] == "external_unchanged"
+    assert (
+        diagnostics["families_at_budget_count"] == metrics["families_at_budget_count"]
+    )
+    assert diagnostics["families_at_budget"] == metrics["families_at_budget"]
+    assert diagnostics["lazy_import_observed_count"] == len(
+        collect_lazy_imports(composition_root)
+    )
+    assert diagnostics["lazy_import_cap"] == lazy_import_ratchet["max_count"]
+    assert diagnostics["composition_module_count"] == len(
+        list(composition_root.rglob("*.py"))
+    )
+    assert diagnostics["composition_module_cap"] == composition_budget["max_modules"]
+    assert (
+        "not a count of DDD aggregates" in diagnostics["proxy_notes"]["ddd_invariants"]
+    )
 
 
 def test_architecture_quality_scorecard_integral_score_improves_with_debt_reduction() -> (
