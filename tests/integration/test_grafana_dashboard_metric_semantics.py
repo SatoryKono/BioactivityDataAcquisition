@@ -771,10 +771,10 @@ def test_count_like_summary_panels_use_rounding_or_boolean_conditions() -> None:
             "Monitor Silver Validation Failures": "round(",
         },
         "bioetl-runtime.json": {
-            "Monitor Pipeline Alert Conditions": "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+            "Monitor Pipeline Alert Conditions": "bioetl_runtime_pipeline_alert_count",
             "Inspect DQ Alert Conditions": "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
-            "Inspect Control Plane Alert Conditions": "bioetl_runtime_alert_condition_manifest_write_failed_15m",
-            "Inspect Provider Alert Conditions": "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+            "Inspect Control Plane Alert Conditions": "bioetl_runtime_control_plane_alert_count",
+            "Inspect Provider Alert Conditions": "bioetl_runtime_provider_alert_count",
             "Inspect Global Provider Alert Conditions": (
                 "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m"
             ),

@@ -1217,15 +1217,13 @@ def test_control_plane_has_replay_resume_blockers_panel() -> None:
         for target in panel.get("targets", [])
         if isinstance(target.get("expr"), str)
     )
-    for metric in (
-        "bioetl_control_plane_manifest_writes_total",
-        "bioetl_control_plane_ledger_appends_total",
-        "bioetl_checkpoint_compatibility_events_total",
-        "bioetl_replay_reconstructability_events_total",
-        "bioetl_replay_drift_events_total",
-        "bioetl_lineage_refs_missing_total",
-    ):
-        assert metric in expr
+    assert "bioetl_trust_replay_blocker_events_total" in expr
+    assert "bioetl_trust_replay_blocker_integrity" in expr
+    assert "[$__range]" in expr
+    assert "increase(" in expr
+    assert "max_over_time(" in expr
+    assert "bioetl_control_plane_manifest_writes_total" not in expr
+    assert len(expr) < 400
 
 
 def test_control_plane_lookup_panels_disclose_global_scope() -> None:
@@ -1610,10 +1608,11 @@ def test_runtime_provider_alert_conditions_local_panel_scopes_all_addends_to_pro
     )
     assert panel is not None
     expr = panel["targets"][0]["expr"]
-    assert expr.count('provider=~"$provider_hint"') >= 6
-    assert 'provider_adapter_latency_high_30m{provider=~"$provider_hint"}' in expr
-    assert 'provider_rate_limiter_wait_high_30m{provider=~"$provider_hint"}' in expr
+    assert "bioetl_runtime_provider_alert_count" in expr
+    assert expr.count('provider=~"$provider_hint"') == 2
+    assert "bioetl_provider_current_status" in expr
     assert "unless on()" not in expr
+    assert "bioetl_runtime_alert_condition_provider_" not in expr
 
 
 def test_workflow_step_panels_apply_status_variable() -> None:

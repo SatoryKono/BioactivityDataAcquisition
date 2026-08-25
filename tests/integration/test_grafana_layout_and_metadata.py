@@ -850,8 +850,12 @@ def test_control_plane_failure_ratio_thresholds_match_descriptions() -> None:
         if title == "Monitor Global Read Failures (30m)":
             assert "> bool 0.05" in expr
             assert "> bool 0.10" in expr
+        elif title == "Monitor Manifest Failures (30m)":
+            assert "bioetl_control_plane_manifest_fail_severity_30m" in expr
+            assert "> bool 0.1" not in expr
         else:
-            assert "> bool 0.1" in expr
+            assert "bioetl_control_plane_ledger_fail_severity_30m" in expr
+            assert "> bool 0.1" not in expr
         steps = (
             panel.get("fieldConfig", {})
             .get("defaults", {})

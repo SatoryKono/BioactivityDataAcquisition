@@ -153,7 +153,7 @@ used.
 ### 26. Monitor Pipeline Alert Conditions
 - **Type:** Stat
 - **Purpose:** Show pipeline alert condition status.
-- **Data sources:** `bioetl_runtime_alert_condition_pipeline_precondition`
+- **Data sources:** `bioetl_runtime_pipeline_alert_count`
 
 ### 27. Monitor No-Records Runs
 - **Type:** Stat
@@ -178,12 +178,12 @@ used.
 ### 31. Inspect Control Plane Alert Conditions
 - **Type:** Stat
 - **Purpose:** Show control-plane alert conditions.
-- **Data sources:** `bioetl_runtime_alert_condition_manifest_write_conflict`
+- **Data sources:** `bioetl_runtime_control_plane_alert_count`
 
 ### 32. Inspect Provider Alert Conditions
 - **Type:** Stat
 - **Purpose:** Show provider alert conditions.
-- **Data sources:** `bioetl_runtime_alert_condition_provider_failure`
+- **Data sources:** `bioetl_runtime_provider_alert_count`
 - **No-data semantics:** A zero is shown only when the selected provider anchor
   and diagnostic condition series exist. Missing diagnostic evidence remains
   `UNKNOWN`; the query does not synthesize a healthy zero.
