@@ -141,6 +141,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
         if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
+        "Time": True,
         "reasons": True,
         "reasons_truncated": True,
         "scope_kind": True,
@@ -218,6 +219,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
         if transform.get("id") == "organize"
     ).get("options", {})
     assert organize.get("excludeByName") == {
+        "Time": True,
         "detail": True,
         "endpoint": True,
         "retryable": True,
