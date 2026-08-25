@@ -1497,7 +1497,9 @@ def test_dq_current_status_splits_hard_failures_from_degraded_warnings() -> None
 def test_dq_first_window_reason_record_keeps_status_gap_fallback() -> None:
     """#9561: first-window DQ reasons stay short in Grafana; fallback lives in rules."""
     payload = _load_rules()
-    expr = str(_build_record_map(payload)["bioetl_dq_first_window_reason"].get("expr", ""))
+    expr = str(
+        _build_record_map(payload)["bioetl_dq_first_window_reason"].get("expr", "")
+    )
     compact = expr.replace(" ", "").replace("\n", "")
     assert "bioetl_dq_current_reason" in compact
     assert "bioetl_dq_current_status" in compact
