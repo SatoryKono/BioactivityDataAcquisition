@@ -99,6 +99,7 @@
     "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
     "bioetl_runtime_alert_condition_replay_drift_detected_30m",
     "bioetl_runtime_alert_condition_replay_lag_high_15m",
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
     "bioetl_runtime_alert_condition_silver_validation_failures_30m",
     "bioetl_runtime_alert_condition_stage_backlog_active_15m",
     "bioetl_runtime_alert_condition_stage_lag_high_15m",
@@ -185,10 +186,12 @@
     "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_fail_severity_30m",
     "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_fail_severity_30m",
     "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
@@ -213,6 +216,7 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
+    "bioetl_dq_first_window_reason",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
@@ -343,13 +347,16 @@
     "bioetl_runtime_alert_condition_silver_validation_failures_30m",
     "bioetl_runtime_alert_condition_stage_backlog_active_15m",
     "bioetl_runtime_alert_condition_stage_lag_high_15m",
+    "bioetl_runtime_control_plane_alert_count",
     "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_trusted",
     "bioetl_runtime_error_rate_30m",
+    "bioetl_runtime_pipeline_alert_count",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
+    "bioetl_runtime_provider_alert_count",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_status_10m",
     "bioetl_shutdown_completed_total",
@@ -379,6 +386,8 @@
     "bioetl_traced_runs_total",
     "bioetl_transform_duration_seconds",
     "bioetl_transform_errors_total",
+    "bioetl_trust_replay_blocker_events_total",
+    "bioetl_trust_replay_blocker_integrity",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
     "bioetl_workflow_expected",
@@ -528,10 +537,12 @@
     "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_fail_severity_30m",
     "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_fail_severity_30m",
     "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
@@ -559,6 +570,7 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
+    "bioetl_dq_first_window_reason",
     "bioetl_dq_monitor_disabled_current",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
@@ -711,6 +723,7 @@
     "bioetl_runtime_alert_condition_stage_backlog_active_15m",
     "bioetl_runtime_alert_condition_stage_lag_high_15m",
     "bioetl_runtime_alert_condition_validation_backlog_active_15m",
+    "bioetl_runtime_control_plane_alert_count",
     "bioetl_runtime_current_activity_15m",
     "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
@@ -720,8 +733,10 @@
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
     "bioetl_runtime_error_rate_30m",
+    "bioetl_runtime_pipeline_alert_count",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
+    "bioetl_runtime_provider_alert_count",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_active_10m",
     "bioetl_runtime_trust_gap_status_10m",
@@ -755,6 +770,8 @@
     "bioetl_traced_runs_total",
     "bioetl_transform_duration_seconds",
     "bioetl_transform_errors_total",
+    "bioetl_trust_replay_blocker_events_total",
+    "bioetl_trust_replay_blocker_integrity",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
     "bioetl_workflow_expected",
@@ -1286,6 +1303,10 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_control_plane_ledger_fail_severity_30m": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_control_plane_ledger_present": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
@@ -1300,6 +1321,10 @@
     "bioetl_control_plane_lifecycle_deleted_total": [
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/control-plane-lifecycle.md"
+    ],
+    "bioetl_control_plane_manifest_fail_severity_30m": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_control_plane_manifest_present": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1450,6 +1475,9 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_dq_first_window_reason": [
+      "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_monitor_disabled_total": [
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1758,8 +1786,7 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_memory_batch_resize_events_total": [
       "docs/04-reference/contracts/observability.md",
@@ -2063,8 +2090,7 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json"
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_replay_lag_seconds": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2086,8 +2112,7 @@
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2111,16 +2136,13 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_alert_condition_ledger_append_failed_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_lineage_refs_missing_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_manifest_write_failed_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_no_terminal_run_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2146,16 +2168,13 @@
     ],
     "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/04-reference/observability/alerting-guide.md",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/04-reference/observability/alerting-guide.md"
     ],
     "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2163,25 +2182,21 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_alert_condition_replay_drift_detected_30m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_replay_lag_high_15m": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/03-guides/dashboards/panel-contract-inventory.json"
     ],
     "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/04-reference/observability/alerting-guide.md",
-      "grafana/dashboards/bioetl-runtime.json"
+      "docs/04-reference/observability/alerting-guide.md"
     ],
     "bioetl_runtime_alert_condition_silver_validation_failures_30m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -2195,6 +2210,10 @@
     "bioetl_runtime_alert_condition_stage_lag_high_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_control_plane_alert_count": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_current_blocker_reason": [
@@ -2231,6 +2250,10 @@
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_runtime_pipeline_alert_count": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
     "bioetl_runtime_pipeline_run_type_universe": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/contracts/selector-contracts.yaml",
@@ -2241,6 +2264,10 @@
     ],
     "bioetl_runtime_pipeline_run_type_universe_scoped": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_provider_alert_count": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_status": [
@@ -2382,6 +2409,14 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
+    ],
+    "bioetl_trust_replay_blocker_events_total": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
+    "bioetl_trust_replay_blocker_integrity": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_vacuum_files_removed_total": [
       "docs/03-guides/metrics-monitoring.md",
@@ -3075,10 +3110,12 @@
     "bioetl_control_plane_last_observed_timestamp_seconds",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
+    "bioetl_control_plane_ledger_fail_severity_30m",
     "bioetl_control_plane_ledger_present",
     "bioetl_control_plane_lifecycle_apply_total",
     "bioetl_control_plane_lifecycle_delete_candidates",
     "bioetl_control_plane_lifecycle_deleted_total",
+    "bioetl_control_plane_manifest_fail_severity_30m",
     "bioetl_control_plane_manifest_present",
     "bioetl_control_plane_manifest_write_duration_seconds",
     "bioetl_control_plane_manifest_writes_total",
@@ -3106,6 +3143,7 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
+    "bioetl_dq_first_window_reason",
     "bioetl_dq_monitor_disabled_current",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
@@ -3258,6 +3296,7 @@
     "bioetl_runtime_alert_condition_stage_backlog_active_15m",
     "bioetl_runtime_alert_condition_stage_lag_high_15m",
     "bioetl_runtime_alert_condition_validation_backlog_active_15m",
+    "bioetl_runtime_control_plane_alert_count",
     "bioetl_runtime_current_activity_15m",
     "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
@@ -3267,8 +3306,10 @@
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
     "bioetl_runtime_error_rate_30m",
+    "bioetl_runtime_pipeline_alert_count",
     "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
+    "bioetl_runtime_provider_alert_count",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_active_10m",
     "bioetl_runtime_trust_gap_status_10m",
@@ -3302,6 +3343,8 @@
     "bioetl_traced_runs_total",
     "bioetl_transform_duration_seconds",
     "bioetl_transform_errors_total",
+    "bioetl_trust_replay_blocker_events_total",
+    "bioetl_trust_replay_blocker_integrity",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
     "bioetl_workflow_expected",
@@ -3640,6 +3683,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_alert_condition_replay_lag_high_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_alert_condition_silver_validation_failures_30m": [
