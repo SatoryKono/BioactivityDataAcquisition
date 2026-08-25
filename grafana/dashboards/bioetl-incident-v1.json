@@ -4,7 +4,6 @@
   },
   "description": "Incident Workspace — read-only triage. First screen answers the highest-confidence active suspect. Current alerts, alert history, and impact notes sit in collapsed Review Alert Evidence. Not a lifecycle/working record.",
   "editable": true,
-  "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
   "links": [],
