@@ -49,7 +49,6 @@ __all__ = [
     "get_workflow_runner_service",
     "load_workflow_config",
 ]
-
 _workflow_memory_lock: LockPort | None = None
 
 

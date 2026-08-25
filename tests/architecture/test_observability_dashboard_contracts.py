@@ -222,6 +222,17 @@ def test_pipeline_summary_dashboards_apply_run_type_to_labelled_metrics() -> Non
     assert not offenders, "\n".join(offenders[:20])
 
 
+def _panel_display_title(panel: object) -> str:
+    if not isinstance(panel, dict):
+        return ""
+    options = panel.get("options")
+    if isinstance(options, dict):
+        custom_title = options.get("bioetlDisplayTitle")
+        if isinstance(custom_title, str) and custom_title.strip():
+            return custom_title.strip()
+    return str(panel.get("title") or "")
+
+
 def test_provider_health_provenance_documents_provider_global_scope() -> None:
     dashboard = json.loads(
         (DASHBOARD_DIR / "bioetl-provider-health-v2.json").read_text(encoding="utf-8")
@@ -230,7 +241,7 @@ def test_provider_health_provenance_documents_provider_global_scope() -> None:
         (
             panel
             for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Understand Evidence Scope"
+            if _panel_display_title(panel) == "Understand Evidence Scope"
         ),
         None,
     )
