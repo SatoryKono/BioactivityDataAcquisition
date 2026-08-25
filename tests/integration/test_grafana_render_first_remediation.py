@@ -1268,7 +1268,9 @@ def test_all_shipped_table_panels_enable_inspect() -> None:
         for panel in _iter_panels(list(dashboard.get("panels") or [])):
             if panel.get("type") != "table":
                 continue
-            custom = (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+            custom = (
+                (panel.get("fieldConfig") or {}).get("defaults", {}).get("custom", {})
+            )
             if custom.get("inspect") is True:
                 continue
             missing.append(f"{path.name}:{panel.get('id')}:{panel.get('title')}")
