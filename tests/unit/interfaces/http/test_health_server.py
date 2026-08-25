@@ -135,7 +135,9 @@ class TestHealthServer:
         assert refresher.calls == 1
         _ = server._handle_metrics()
         assert refresher.calls == 1
-        await asyncio.sleep(0.025)
+        async with asyncio.timeout(1.0):
+            while refresher.calls < 2:
+                await asyncio.sleep(0.01)
         assert refresher.calls >= 2
 
         await server.stop()
