@@ -93,8 +93,8 @@ row_templates:
     exit_criteria: "Retain while the package root is the reviewed owner import surface."
 facades:
   - {
-      path: src/bioetl/composition/control_plane_api.py,
-      module: bioetl.composition.control_plane_api,
+      path: src/bioetl/composition/control_plane_runtime.py,
+      module: bioetl.composition.control_plane_runtime,
       markers: [_PUBLIC_EXPORTS],
       <<: *composition_external,
     }
@@ -129,8 +129,8 @@ facades:
       <<: *composition_external,
     }
   - {
-      path: src/bioetl/composition/resources_api.py,
-      module: bioetl.composition.resources_api,
+      path: src/bioetl/composition/resources_runtime.py,
+      module: bioetl.composition.resources_runtime,
       markers: [_PUBLIC_EXPORTS],
       <<: *composition_external,
     }

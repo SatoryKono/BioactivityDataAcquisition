@@ -550,7 +550,7 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
         {
             ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
             ROOT / "tests" / "unit" / "composition" / "test_services_entrypoints.py",
-            ROOT / "tests" / "unit" / "composition" / "test_observability_api.py",
+            ROOT / "tests" / "unit" / "composition" / "test_observability_runtime.py",
             ROOT
             / "tests"
             / "unit"
@@ -1574,15 +1574,15 @@ def test_package_level_lazy_proxy_surfaces_stay_frozen() -> None:
     assert _literal_assignment_names(
         COMPOSITION_PACKAGE_INIT_PATH, "_LAZY_MODULE_EXPORTS"
     ) == {
-        "composite_api",
-        "control_plane_api",
+        "composite_catalog",
+        "control_plane_runtime",
         "entrypoints",
         "execution_api",
         "health_api",
         "maintenance_api",
-        "observability_api",
+        "observability_runtime",
         "registry_api",
-        "resources_api",
+        "resources_runtime",
         "types",
     }
     assert _literal_assignment_names(

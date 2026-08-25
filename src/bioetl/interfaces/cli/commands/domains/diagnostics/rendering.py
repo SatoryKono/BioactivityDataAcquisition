@@ -6,7 +6,7 @@ from collections.abc import Iterable
 
 import click
 
-from bioetl.composition.observability_api import MetricsOperatorProfile
+from bioetl.composition.observability_runtime import MetricsOperatorProfile
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     all_health_results_healthy,
     build_health_result_lines,

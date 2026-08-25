@@ -161,7 +161,7 @@ def test_source_tree_readme_maps_entrypoints_and_ownership() -> None:
     expected_fragments = (
         "interfaces/cli/main.py",
         "composition/execution_api.py",
-        "composition/control_plane_api.py",
+        "composition/control_plane_runtime.py",
         "application/services/control_plane/",
         "domain/medallion.py",
         "Canonical Ownership",

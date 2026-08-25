@@ -44,7 +44,7 @@ pytestmark = pytest.mark.unit
 
 def test_publish_metrics_safely_delegates_to_observability_api() -> None:
     with patch(
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         return_value=True,
     ) as mock_push:
         result = publish_metrics_safely(
@@ -67,7 +67,7 @@ def test_publish_metrics_safely_delegates_to_observability_api() -> None:
 
 def test_publish_metrics_safely_swallows_observability_failures() -> None:
     with patch(
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         side_effect=RuntimeError("push failed"),
     ):
         result = publish_metrics_safely(
@@ -80,7 +80,7 @@ def test_publish_metrics_safely_swallows_observability_failures() -> None:
 
 def test_publish_metrics_safely_propagates_failed_publication_result() -> None:
     with patch(
-        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_runtime.push_metrics_to_gateway",
         return_value=False,
     ):
         result = publish_metrics_safely(
@@ -104,7 +104,7 @@ def test_publish_metrics_safely_swallows_deferred_import_failure(
         fromlist: object = (),
         level: int = 0,
     ) -> object:
-        if name == "bioetl.composition.observability_api":
+        if name == "bioetl.composition.observability_runtime":
             raise ImportError("observability import failed")
         return original_import(name, globals, locals, fromlist, level)
 

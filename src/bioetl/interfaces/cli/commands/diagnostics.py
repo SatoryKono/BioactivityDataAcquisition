@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
     )
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         MetricsOperatorProfile,
         ObservabilityDiagnosticsBundle,
     )
@@ -80,7 +80,7 @@ SILVER_FILTER_ALIAS_HELP = (
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
     """Load the canonical operator diagnostics bundle on demand."""
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         get_observability_diagnostics_bundle as _impl,
     )
 
@@ -89,7 +89,7 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
     """Load the canonical operator-facing metrics diagnostics profile."""
-    from bioetl.composition.observability_api import (
+    from bioetl.composition.observability_runtime import (
         get_metrics_operator_profile as _impl,
     )
 

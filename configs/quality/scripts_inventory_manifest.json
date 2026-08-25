@@ -18,7 +18,6 @@
       "scripts": 505,
       "skills": 12,
       "tests": 406
-
     }
   },
   "scripts": [
@@ -1569,7 +1568,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 253,
+          "line": 254,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/setup.ps1\""
         },
@@ -2509,7 +2508,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 335,
+          "line": 336,
           "source_group": "tests",
           "text": "\"scripts/ai/gemini/setup-bash-alias.sh\": \"legacy_manual_utility\","
         }
@@ -5121,7 +5120,7 @@
           "path": "docs/02-architecture/05-composition-layer.md",
           "line": 152,
           "source_group": "docs",
-          "text": "`observability_api.py`, `observability.py`, `registry.py`, `types.py`,"
+          "text": "`observability_runtime.py`, `observability.py`, `registry.py`, `types.py`,"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
@@ -7852,7 +7851,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 148,
+          "line": 149,
           "source_group": "tests",
           "text": "\"scripts/docs/build/generate_docs_export.py\","
         }
@@ -8557,7 +8556,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 337,
+          "line": 338,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/enrich_normalization_details.py\": \"compatibility_wrapper\","
         }
@@ -8594,7 +8593,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 338,
+          "line": 339,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/export_structural_contract.py\": \"compatibility_wrapper\","
         }
@@ -8631,7 +8630,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 339,
+          "line": 340,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/filter_rows.py\": \"compatibility_wrapper\","
         }
@@ -8668,7 +8667,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 340,
+          "line": 341,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/generate_field_matrix.py\": \"compatibility_wrapper\","
         },
@@ -8891,7 +8890,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 336,
+          "line": 337,
           "source_group": "tests",
           "text": "\"scripts/docs/matrix/structural_contract.py\": \"shared_helper_module\","
         },
@@ -9591,7 +9590,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 341,
+          "line": 342,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/apply-ci-optimizations-fixed.ps1\": ("
         }
@@ -9616,7 +9615,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 344,
+          "line": 345,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/apply-ci-optimizations.ps1\": (\"legacy_manual_utility\"),"
         }
@@ -9647,7 +9646,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 340,
+          "line": 341,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -9800,7 +9799,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 222,
+          "line": 223,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
@@ -9857,7 +9856,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -9908,7 +9907,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 216,
+          "line": 217,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -9956,7 +9955,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 150,
+          "line": 151,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -9977,7 +9976,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 151,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
@@ -10061,7 +10060,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 152,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -10106,7 +10105,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 153,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         },
@@ -10194,7 +10193,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 147,
+          "line": 148,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/file_merger.py\","
         },
@@ -10267,7 +10266,6 @@
       "status": "supporting",
       "agent_usage": [],
       "reference_count": 257,
-
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -12097,7 +12095,6 @@
       "status": "active",
       "agent_usage": [],
       "reference_count": 370,
-
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13689,7 +13686,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 424,
+          "line": 425,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14430,7 +14427,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 427,
+          "line": 428,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -15230,7 +15227,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 154,
+          "line": 155,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -15349,7 +15346,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 155,
+          "line": 156,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         },
@@ -15850,7 +15847,6 @@
           "line": 33,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.report_source_tree_manifest import ("
-
         }
       ]
     },
@@ -16004,7 +16000,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 409,
+          "line": 410,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -16695,7 +16691,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 207,
+          "line": 208,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         }
@@ -16874,7 +16870,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_6159_6169_closeout.py",
-          "line": 345,
+          "line": 346,
           "source_group": "tests",
           "text": "\"scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh\": ("
         }
@@ -19022,13 +19018,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 410,
+          "line": 411,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 460,
+          "line": 461,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -19354,7 +19350,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 289,
+          "line": 290,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -19406,7 +19402,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 308,
+          "line": 309,
           "source_group": "tests",
           "text": "/ \"check_dashboard_panel_fill.py\""
         },
@@ -19865,7 +19861,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 274,
+          "line": 275,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
@@ -21832,7 +21828,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 64,
+          "line": 65,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
@@ -22432,7 +22428,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 149,
+          "line": 150,
           "source_group": "tests",
           "text": "\"scripts/schema/generation/generate_schema_artifacts.py\","
         },
