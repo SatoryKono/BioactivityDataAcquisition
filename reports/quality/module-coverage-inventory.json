@@ -49310,13 +49310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
-<<<<<<< HEAD
   "source_tree_sha256": "69687c5da3dd5127a3921e416fdbe615dad11ef6206a481abacbecab6f4d0a1e",
-||||||| eb26f42b46
-  "source_tree_sha256": "52f9fc36ff282850389afa5dd3ed93881df84bac628f4ca07319afdebb61b11c",
-=======
-  "source_tree_sha256": "1fd56ef1b0b96dcb491de1ad546d34f7769dcaa4a66007cae0666e08aff613a7",
->>>>>>> master20260825-14
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

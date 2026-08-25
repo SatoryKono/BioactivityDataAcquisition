@@ -44,9 +44,6 @@ if TYPE_CHECKING:
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
-from bioetl.composition._workflow_transform_registry import (
-    build_workflow_transform_registry,
-)
 from bioetl.composition.factories.services.port_factories import (
     WorkflowMetricsFactoryProtocol as _WorkflowMetricsFactory,
 )
@@ -78,7 +75,7 @@ def load_workflow_config(name: str) -> WorkflowConfig:
         "bioetl.infrastructure.config.workflow_config_api"
     )
 
-    return load_workflow_config_impl(
+    return workflow_config_api.load_workflow_config(
         name,
         configs_root=resolve_configs_root(),
     )
@@ -108,6 +105,9 @@ def get_workflow_runner_service(
     workflow_transform_service = import_module(
         "bioetl.application.services.workflow.workflow_transform_service"
     )
+    workflow_transform_registry = import_module(
+        "bioetl.composition._workflow_transform_registry"
+    )
     control_plane = import_module("bioetl.infrastructure.control_plane")
     infrastructure_time = import_module("bioetl.infrastructure.time")
 
@@ -118,7 +118,7 @@ def get_workflow_runner_service(
         base_path=output_root / "workflow_transform_results",
         clock=infrastructure_time.SystemClock(),
     )
-    transform_registry = build_workflow_transform_registry(
+    transform_registry = workflow_transform_registry.build_workflow_transform_registry(
         settings,
         metrics,
         artifact_sink=artifact_sink,
