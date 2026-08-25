@@ -91,10 +91,18 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
         1.0,
         {"pipeline": "chembl_assay", "run_type": "backfill"},
     )
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_pipeline_runs_total",
+        0,
+        {
+            "pipeline": "chembl_assay",
+            "run_type": "backfill",
+            "status": "success",
+        },
+    )
     counter_names = [
         call.args[0] for call in metrics.increment_counter.call_args_list if call.args
     ]
-    assert "bioetl_pipeline_runs_total" not in counter_names
     assert "bioetl_health_check_success_total" not in counter_names
 
 
@@ -117,10 +125,20 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
         1.0,
         {"provider": "chembl"},
     )
-    counter_names = [
-        call.args[0] for call in metrics.increment_counter.call_args_list if call.args
+    counter_calls = [
+        call.args for call in metrics.increment_counter.call_args_list if call.args
     ]
-    assert counter_names == []
+    assert counter_calls == [
+        (
+            "bioetl_pipeline_runs_total",
+            0,
+            {
+                "pipeline": "chembl_assay",
+                "run_type": "backfill",
+                "status": "success",
+            },
+        )
+    ]
 
 
 def test_reconciliation_reports_gap_when_success_lacks_scrape_sample(
@@ -175,6 +193,22 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
     body = build_health_server_metrics_exposition()
     assert "bioetl_provider_observed_universe" in body
     assert 'provider="chembl"' in body
+    sample_lines = [
+        line
+        for line in body.splitlines()
+        if line.startswith("bioetl_pipeline_runs_total{")
+        and 'pipeline="obs_fill_rehydrate_probe"' in line
+    ]
+    assert len(sample_lines) == 1
+    assert 'run_type="backfill"' in sample_lines[0]
+    assert 'status="success"' in sample_lines[0]
+    assert sample_lines[0].rsplit("}", 1)[-1].strip() in {"0", "0.0"}
+    aligned = reconcile_current_metrics_with_run_reports(
+        root=tmp_path,
+        exposition=body,
+    )
+    assert aligned.status == "healthy"
+    assert aligned.state == "aligned"
     assert _health_check_samples(body) == before_health
 
 

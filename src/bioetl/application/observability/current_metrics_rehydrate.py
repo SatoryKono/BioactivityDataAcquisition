@@ -6,8 +6,10 @@ and otherwise emits HELP/TYPE without samples, which trips
 ``absent_over_time(bioetl_pipeline_runs_total[10m])``.
 
 This module publishes CURRENT gauges from the latest terminal pipeline-run
-reports. It never increments RANGE event counters and does not invent
-``run_id`` labels.
+reports. It never increments RANGE event counters by a positive amount and
+does not invent ``run_id`` labels. Presence-only ``0`` samples of
+``bioetl_pipeline_runs_total`` are allowed so scrape is not HELP/TYPE-only
+and ``increase()`` stays zero until a real in-process run.
 """
 
 from __future__ import annotations
@@ -176,6 +178,16 @@ def _seed_pipeline_runs_total(metrics: MetricsPort, anchor: PipelineRunSnapshot)
         "bioetl_control_plane_last_observed_timestamp_seconds",
         float(anchor.observed_unix),
         labels,
+    )
+    # Presence-only: labeled scrape sample without faking increase().
+    metrics.increment_counter(
+        "bioetl_pipeline_runs_total",
+        0,
+        {
+            "pipeline": anchor.pipeline,
+            "run_type": anchor.run_type,
+            "status": anchor.status,
+        },
     )
     _SEEDED_RUN_KEYS.add(key)
     return 1
