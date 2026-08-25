@@ -2,10 +2,17 @@
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $scriptDir '..\..\..')).Path
+$explicitMemoryMode = $null
+if (Test-Path Env:BIOETL_AI_MEMORY_MODE) {
+    $explicitMemoryMode = $env:BIOETL_AI_MEMORY_MODE
+}
 . (Join-Path $scriptDir 'support\load_repo_env.ps1')
 $env:BIOETL_SKIP_ENV_LOCAL = '1'
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+if ($null -ne $explicitMemoryMode) {
+    $env:BIOETL_AI_MEMORY_MODE = $explicitMemoryMode
+}
 . (Join-Path $scriptDir 'support\token_validation.ps1')
 
 Exit-McpValidateOnly -ServerName 'memory'
@@ -32,12 +39,23 @@ if (-not $env:NPM_CONFIG_CACHE) {
     $env:NPM_CONFIG_CACHE = Join-Path $repoRoot '.cache\npm-cache'
 }
 New-Item -ItemType Directory -Force -Path $env:NPM_CONFIG_CACHE | Out-Null
+
+$venvWinPython = Join-Path $repoRoot '.venv-win\Scripts\python.exe'
+$venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
+if (Test-Path $venvWinPython) {
+    $memoryPython = $venvWinPython
+} elseif (Test-Path $venvPython) {
+    $memoryPython = $venvPython
+} else {
+    $memoryPython = 'python'
+}
+
+$env:PYTHONPATH = "$repoRoot\src" + $(if ($env:PYTHONPATH) { ";$env:PYTHONPATH" } else { '' })
 if ([string]::IsNullOrWhiteSpace($env:MEMORY_FILE_PATH)) {
-    $env:PYTHONPATH = "$repoRoot\src" + $(if ($env:PYTHONPATH) { ";$env:PYTHONPATH" } else { '' })
-    $env:MEMORY_FILE_PATH = (& python -m memory.mcp_scope `
+    $env:MEMORY_FILE_PATH = (& $memoryPython -m memory.mcp_scope `
         --repo-root $repoRoot `
         --seed (Join-Path $repoRoot 'docs\00-project\ai\memory\mcp-memory.json')).Trim()
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
-& python -m memory.mcp_server @args
+& $memoryPython -m memory.mcp_server @args
 exit $LASTEXITCODE

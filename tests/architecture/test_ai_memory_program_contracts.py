@@ -35,6 +35,9 @@ def test_shared_mcp_memory_requires_explicit_write_enablement() -> None:
     assert "'off'" in powershell_wrapper
     assert "read-write" in bash_wrapper
     assert "read-write" in powershell_wrapper
+    assert r".venv-win\Scripts\python.exe" in powershell_wrapper
+    assert "$explicitMemoryMode" in powershell_wrapper
+    assert r"$repoRoot\src" in powershell_wrapper
 
 
 def test_memory_workflow_helper_prefers_windows_venv() -> None:

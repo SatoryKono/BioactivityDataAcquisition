@@ -7,7 +7,7 @@ import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from bioetl.application.services.run_reports.paths import resolve_report_root
 from bioetl.application.services.run_reports.writer import _safe_segment
@@ -23,9 +23,11 @@ class ReportIndexEntry:
     json_path: Path
     markdown_path: Path | None
     status: str | None
+    started_at: str | None
     completed_at: str | None
     mtime: float
     workflow_id: str | None = None
+    workflow_run_id: str | None = None
 
 
 def _root(root: Path | None) -> Path:
@@ -201,7 +203,7 @@ def _build_report_index_entry(
     json_path: Path,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    status, completed_at, workflow_id = _read_identity_meta(json_path)
+    meta = _read_identity_meta(json_path)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
         kind=kind,
@@ -209,10 +211,12 @@ def _build_report_index_entry(
         run_id=run_dir.name,
         json_path=json_path,
         markdown_path=md_path if md_path.is_file() else None,
-        status=status,
-        completed_at=completed_at,
+        status=meta.status,
+        started_at=meta.started_at,
+        completed_at=meta.completed_at,
         mtime=mtime,
-        workflow_id=workflow_id if kind == "pipeline" else None,
+        workflow_id=meta.workflow_id if kind == "pipeline" else None,
+        workflow_run_id=meta.workflow_run_id if kind == "pipeline" else None,
     )
 
 
@@ -361,24 +365,38 @@ def _remove_report_directories(
     return removed
 
 
-def _read_identity_meta(
-    path: Path,
-) -> tuple[str | None, str | None, str | None]:
+class IdentityIndexMeta(NamedTuple):
+    """Bounded identity peek for run-report index rows."""
+
+    status: str | None
+    started_at: str | None
+    completed_at: str | None
+    workflow_id: str | None
+    workflow_run_id: str | None
+
+
+def _optional_identity_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _read_identity_meta(path: Path) -> IdentityIndexMeta:
+    empty = IdentityIndexMeta(None, None, None, None, None)
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
-        return None, None, None
+        return empty
     identity = payload.get("identity") if isinstance(payload, dict) else None
     if not isinstance(identity, dict):
-        return None, None, None
-    status = identity.get("status")
-    completed = identity.get("completed_at")
-    workflow_raw = identity.get("workflow_id")
-    workflow_id = str(workflow_raw).strip() if workflow_raw is not None else ""
-    return (
-        str(status) if status is not None else None,
-        str(completed) if completed is not None else None,
-        workflow_id or None,
+        return empty
+    return IdentityIndexMeta(
+        status=_optional_identity_text(identity.get("status")),
+        started_at=_optional_identity_text(identity.get("started_at")),
+        completed_at=_optional_identity_text(identity.get("completed_at")),
+        workflow_id=_optional_identity_text(identity.get("workflow_id")),
+        workflow_run_id=_optional_identity_text(identity.get("workflow_run_id")),
     )
 
 
