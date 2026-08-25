@@ -1,0 +1,1 @@
+{"cmd":"python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update","exit":0}
