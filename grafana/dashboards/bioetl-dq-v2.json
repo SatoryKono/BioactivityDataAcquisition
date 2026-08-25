@@ -1297,7 +1297,6 @@
       "description": "Expand after selecting an exact Run ID for HTTP-backed identity and accounting evidence."
     },
     {
-
       "type": "row",
       "title": "Selected Range · Impact & Freshness",
       "collapsed": true,
@@ -2206,7 +2205,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "inspect": true
               },
               "mappings": [
                 {
@@ -2334,7 +2334,8 @@
                 },
                 "thresholdsStyle": {
                   "mode": "off"
-                }
+                },
+                "inspect": true
               },
               "mappings": [
                 {
