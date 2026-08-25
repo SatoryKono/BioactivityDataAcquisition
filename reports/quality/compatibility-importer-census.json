@@ -6,7 +6,7 @@
   "control_plane_root_facade_source": "configs/quality/application_control_plane_root_facade_inventory.yaml",
   "summary": {
     "retained_entrypoint_count": 12,
-    "retained_public_entrypoint_burden": 1,
+    "retained_public_entrypoint_burden": 0,
     "removed_compatibility_surface_count": 23,
     "removed_compatibility_surfaces_with_src_importers": 0,
     "removed_compatibility_surfaces_with_test_importers": 0,
@@ -21,7 +21,7 @@
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
     "retained_public_export_facades_with_resolution_conflicts": 0,
-    "retained_public_export_facades_with_wrapper_contract_drift": 1
+    "retained_public_export_facades_with_wrapper_contract_drift": 0
   },
   "retained_entrypoints": [
     {
@@ -158,10 +158,11 @@
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
-        "tests/unit/composition/test_entrypoints.py"
+        "tests/unit/composition/test_entrypoints.py",
+        "tests/unit/composition/test_entrypoints_public_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 5,
+      "test_importer_count": 6,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -186,17 +187,9 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "retained_wrapper_contract": [],
       "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
@@ -246,12 +239,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "get_runtime_settings"
-      ],
-      "retained_wrappers_outside_all": [
-        "get_runtime_settings"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
@@ -263,20 +252,18 @@
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-      ],
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 2,
-      "surface_classification": "first-party-active",
-      "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "first-party-active",
+      "surface_classification": "external-facing",
+      "consumer_class": "stable_public_api_zero_first_party_src",
+      "sunset_status": "external-facing",
       "max_public_exports": 4,
       "public_exports": [
         "cleanup_bronze",
@@ -297,18 +284,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
-      "retained_wrappers_outside_all": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
@@ -595,10 +572,11 @@
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
-        "tests/unit/composition/test_entrypoints.py"
+        "tests/unit/composition/test_entrypoints.py",
+        "tests/unit/composition/test_entrypoints_public_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 5,
+      "test_importer_count": 6,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -623,17 +601,9 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "retained_wrapper_contract": [],
       "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
@@ -683,12 +653,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "get_runtime_settings"
-      ],
-      "retained_wrappers_outside_all": [
-        "get_runtime_settings"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
@@ -700,20 +666,18 @@
       "canonical_target": "bioetl.composition.maintenance_api",
       "owner": "bioetl.composition",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "src_importers": [
-        "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-      ],
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "src_importers": [],
       "test_importers": [
         "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_maintenance_api_wrappers.py"
       ],
-      "src_importer_count": 1,
+      "src_importer_count": 0,
       "test_importer_count": 2,
-      "surface_classification": "first-party-active",
-      "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "first-party-active",
+      "surface_classification": "external-facing",
+      "consumer_class": "stable_public_api_zero_first_party_src",
+      "sunset_status": "external-facing",
       "max_public_exports": 4,
       "public_exports": [
         "cleanup_bronze",
@@ -734,18 +698,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
-      "retained_wrappers_outside_all": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
@@ -923,17 +877,9 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "retained_wrapper_contract": [],
       "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
@@ -945,7 +891,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 5
+      "test_importer_count": 6
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -977,12 +923,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "get_runtime_settings"
-      ],
-      "retained_wrappers_outside_all": [
-        "get_runtime_settings"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
@@ -1021,30 +963,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
-      "retained_wrappers_outside_all": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "first-party-active",
-      "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "first-party-active",
-      "src_importer_count": 1,
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "surface_classification": "external-facing",
+      "consumer_class": "stable_public_api_zero_first_party_src",
+      "sunset_status": "external-facing",
+      "src_importer_count": 0,
       "test_importer_count": 2
     },
     {
@@ -1129,17 +1061,9 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "retained_wrapper_contract": [],
       "retained_wrappers_outside_all": [],
-      "missing_retained_wrappers_outside_all": [
-        "register",
-        "registered_ports",
-        "resolve"
-      ],
+      "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
@@ -1151,7 +1075,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 5
+      "test_importer_count": 6
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1183,12 +1107,8 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "get_runtime_settings"
-      ],
-      "retained_wrappers_outside_all": [
-        "get_runtime_settings"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
@@ -1227,30 +1147,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
-      "retained_wrapper_contract": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
-      "retained_wrappers_outside_all": [
-        "archive_table",
-        "get_lifecycle_service",
-        "preview_cleanup",
-        "vacuum_table"
-      ],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
       "missing_retained_wrappers_outside_all": [],
       "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
       "external_breaking_change_required": true,
-      "internal_callers_zero": false,
-      "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
-      "surface_classification": "first-party-active",
-      "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
-      "sunset_status": "first-party-active",
-      "src_importer_count": 1,
+      "internal_callers_zero": true,
+      "usage_classification": "stable_public_api_zero_first_party_src",
+      "surface_classification": "external-facing",
+      "consumer_class": "stable_public_api_zero_first_party_src",
+      "sunset_status": "external-facing",
+      "src_importer_count": 0,
       "test_importer_count": 2
     },
     {
