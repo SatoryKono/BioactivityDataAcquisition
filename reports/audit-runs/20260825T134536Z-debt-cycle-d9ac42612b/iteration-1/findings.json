@@ -1,0 +1,86 @@
+{
+  "findings": [
+    {
+      "id": "TECH-DEBT-001",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "governance-pin-drift",
+      "path": "configs/quality/technical_debt_audit_registry.yaml",
+      "observation": "Current tech-debt audit pin is stale versus live evidence on origin/main d9ac42612b.",
+      "method": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+      "expected": "audited_commit_sha and evidence_surface_sha256 match origin/main live evidence; headline markers match committed gates/inventory.",
+      "actual": "Pin SHA 9f57924063 / hash 3d8fc076…; live SHA d9ac42612b / hash f47d5a3a…; report still claims 45/0 pass and 2450/1548 modules.",
+      "impact": "Release closeout reads a false-green audit report while committed gates are already 43/2 failing.",
+      "root_cause": "Evidence files moved after last re-pin (#9337) without registry/report sync.",
+      "remediation": "Re-pin registry + current report to live evidence hash; do not raise budgets.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa validate-technical-debt-audit --json"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9646,
+      "evidence": [
+        {
+          "path": "configs/quality/technical_debt_audit_registry.yaml",
+          "line": 8,
+          "command": "python -m scripts.engineering.qa validate-technical-debt-audit --json",
+          "observation": "ok=false; evidence_surface_sha256 is stale"
+        },
+        {
+          "path": "reports/quality/total-tech-debt-audit-main-current.md",
+          "line": 11,
+          "command": "python -m scripts.engineering.qa validate-technical-debt-audit --print-evidence-hash",
+          "observation": "live hash f47d5a3a6309022172d5d6ce6b0cc47637da882d61ab83f3b6c42df9e74be14a"
+        }
+      ]
+    },
+    {
+      "id": "TECH-DEBT-002",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "generated-artifact-drift",
+      "path": "reports/quality/debt-governance-gates.json",
+      "observation": "Live debt-governance gates fail on scorecard/inventory hash mismatch and three stale quality artifacts.",
+      "method": "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main",
+      "expected": "0 failing gates; generated_artifact_drift count=0; remote_main_sha equals origin/main.",
+      "actual": "fail: module_coverage_scorecard_coherence (inventory ff484c55… vs scorecard 016ca2f6…); generated_artifact_drift artifacts=[architecture_quality_scorecard, hotspot_family_baseline, remote_main_baseline]; remote_main_sha=705479368b.",
+      "impact": "Release gate status is failing; closeout cannot claim non-growth with stale baselines.",
+      "root_cause": "Quality artifacts not regenerated after origin/main advanced past 705479368b / 9f57924063.",
+      "remediation": "Canonical refresh_governance_artifacts + remote-main baseline --update + gates --update. Never raise max_count.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": true,
+      "github_issue": 9647,
+      "evidence": [
+        {
+          "path": "reports/quality/module-coverage-inventory.json",
+          "command": "python -c inventory source_tree_sha256",
+          "observation": "ff484c55068f91684053eb2e32ee21b16f6935cb3d5a745583b6cc4a96cb129d"
+        },
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 243,
+          "command": "read source_artifacts.module_coverage_inventory.source_tree_sha256",
+          "observation": "016ca2f6348df61322d28fa86d5e6cfbfc052c1a06dfe4d992c9cf350527e958"
+        },
+        {
+          "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+          "command": "read remote_main_sha",
+          "observation": "705479368b037d4773bfab3a7c14acefa1c5fe41 != origin/main d9ac42612b"
+        }
+      ]
+    }
+  ]
+}

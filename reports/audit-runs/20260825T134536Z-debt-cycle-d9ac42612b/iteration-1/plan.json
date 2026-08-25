@@ -1,0 +1,12 @@
+{
+  "iteration": 1,
+  "phase": "register+issues",
+  "paydown_next": [
+    "python -m scripts.engineering.qa.refresh_governance_artifacts",
+    "python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update",
+    "python -m scripts.engineering.qa report-debt-governance-gates --update",
+    "re-pin configs/quality/technical_debt_audit_registry.yaml + reports/quality/total-tech-debt-audit-main-current.md"
+  ],
+  "issues": [9646, 9647],
+  "budget_policy": "no_increase"
+}

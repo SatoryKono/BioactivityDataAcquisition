@@ -1,0 +1,23 @@
+{
+  "run_id": "20260825T134536Z-debt-cycle-d9ac42612b",
+  "prompt_id": "prompt.audit.cycle.tech-debt",
+  "prompt_version": "1.1.0",
+  "mode": "full",
+  "audit_mode": "full",
+  "language": "ru",
+  "n": 10,
+  "scope": ["src/bioetl/", "configs/quality/"],
+  "base_branch": "main",
+  "work_branch": "fix/audit-cycle-tech-debt-d9ac42612b",
+  "work_branch_note": "Named WORK_BRANCH fix/audit-cycle-tech-debt is occupied by dirty worktree E:/github/wt-audit-cycle-tech-debt @ 27105f8536; left untouched.",
+  "repo": "SatoryKono/BioactivityDataAcquisition",
+  "origin_main_sha": "d9ac42612b6e0fd0f7efde5427dce70b413a5882",
+  "allow_issue_write": true,
+  "allow_push": true,
+  "allow_merge": false,
+  "allow_close": true,
+  "max_issues_per_iteration": 5,
+  "monitoring": true,
+  "started_utc": "20260825T134536Z",
+  "python": "E:\\\\github\\\\wt-manus-grok-cycles-27cf56291c\\\\.venv-win\\\\Scripts\\\\python.exe"
+}
