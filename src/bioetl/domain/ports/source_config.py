@@ -7,13 +7,13 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class PaginationConfigLike(Protocol):
-    """Structural pagination settings used by source extractors."""
+    """Structural pagination settings consumed by source adapters."""
 
     id_batch_size: object
 
 
 @runtime_checkable
 class SourceConfigLike(Protocol):
-    """Structural source config surface exposing pagination settings."""
+    """Structural source config that exposes pagination settings."""
 
     pagination: PaginationConfigLike

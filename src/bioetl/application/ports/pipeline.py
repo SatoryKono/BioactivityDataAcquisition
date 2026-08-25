@@ -31,6 +31,9 @@ class ContractPolicyLoaderProtocol(Protocol):
     def __call__(self, provider: str, entity: str) -> ContractPolicyProtocol: ...
 
 
+ContractPolicyLoader = ContractPolicyLoaderProtocol
+
+
 class SchemaBuilderProtocol(Protocol):
     """Protocol for schema classes that can materialize a runtime schema."""
 
