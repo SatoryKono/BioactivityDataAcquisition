@@ -96,7 +96,7 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Understand Incident Scope",
+      "title": "",
       "description": "Explains the incident-triage question and the evidence scopes used on this read-only dashboard. CURRENT ranks suspects from current fleet telemetry using the active filters. SELECTED RUN uses HTTP-backed evidence for one exact run; run_id never filters Prometheus. No suspects means none were found in the current scope and does not prove the fleet is healthy Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: provider=${provider}.",
       "gridPos": {
         "h": 4,
@@ -106,6 +106,7 @@
       },
       "options": {
         "mode": "html",
+        "bioetlDisplayTitle": "Understand Incident Scope",
         "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">What is the highest-confidence active suspect? CURRENT = suspects. SELECTED RUN = proof. EMPTY DOMAIN is not a healthy-fleet verdict.</div></div>"
       },
       "links": []

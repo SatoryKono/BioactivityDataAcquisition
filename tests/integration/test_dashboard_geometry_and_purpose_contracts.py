@@ -429,10 +429,10 @@ def test_first_screen_budget_excludes_nav_and_named_shell() -> None:
         "gridPos": {"x": 0, "y": 0, "w": 24, "h": 4},
     }
     extra_shell = {
-        "id": 906,
+        "id": 9400,
         "type": "text",
         "title": "",
-        "gridPos": {"x": 0, "y": 13, "w": 24, "h": 2},
+        "gridPos": {"x": 0, "y": 4, "w": 18, "h": 4},
     }
     data = {
         "id": 9401,

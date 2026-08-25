@@ -106,7 +106,7 @@
     {
       "id": 9400,
       "type": "text",
-      "title": "Understand Pipeline Scope",
+      "title": "",
       "gridPos": {
         "h": 4,
         "w": 16,
@@ -116,6 +116,7 @@
       "description": "Distinguishes CURRENT Prometheus state, SELECTED RUN HTTP evidence, and selected-range history for Pipeline and Run Type. Run ID never filters Prometheus; Stage and collection states are context, not delivery proof. UNKNOWN means evidence is incomplete Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser. Effective filters: stage=${stage} · provider_hint=${provider_hint}.",
       "options": {
         "mode": "html",
+        "bioetlDisplayTitle": "Understand Pipeline Scope",
         "content": "<div style=\"padding:4px 10px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);font-size:16px;line-height:1.2;white-space:normal;overflow-wrap:anywhere\"><div style=\"max-width:96ch\">Is the pipeline progressing, and what is blocking delivery? CURRENT = health/phase/blockers. SELECTED RUN = ID. SCRAPING is not delivery OK.</div></div>"
       },
       "links": []
