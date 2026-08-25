@@ -22,24 +22,29 @@ BioETL использует structured logging с JSON форматом:
   "level": "INFO",
   "logger": "bioetl.application.services.pipeline",
   "message": "Pipeline started",
-  "context": {
-    "pipeline_name": "chembl",
-    "run_id": "run-123",
-    "provider": "chembl"
-  }
+  "pipeline": "chembl",
+  "run_id": "6f9a5182-7d48-5aa7-99a0-19da16d70e23",
+  "provider": "chembl",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7"
 }
 ```
 
 ## Log Correlation
 
-Logs коррелируются с traces через `trace_id` и `span_id`:
+`run_id` — основной correlation identifier запуска. Он выдаётся control-plane и
+связывает logs с manifest/ledger и replay evidence. Logger bootstrap должен
+получать его явно. До появления `run_id` bootstrap может использовать только
+локальный deterministic occurrence fallback; этот fallback не является replay
+identity и не зависит от PID.
+
+При активном OpenTelemetry span `trace_context_processor` автоматически
+добавляет `trace_id` и `span_id` в lowercase hex. Без активного span эти поля не
+добавляются. Не создавайте `trace_id` вручную и не подменяйте им `run_id`:
 
 ```python
-logger.info("Processing record", extra={
-    "trace_id": trace_id,
-    "span_id": span_id,
-    "record_id": record_id
-})
+run_logger = logger.bind(run_id=str(run_id), pipeline=pipeline_name)
+run_logger.info("Processing record", record_id=record_id)
 ```
 
 ## Key Loggers
