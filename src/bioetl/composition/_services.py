@@ -6,13 +6,13 @@ from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.ports.health import HealthServiceProtocol
 from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_invocation import invoke_bootstrap as _invoke_bootstrap
 from bioetl.composition._service_registry import resolve as _resolve
 from bioetl.composition.registry_api import create_registry
 
 if TYPE_CHECKING:
+    from bioetl.application.ports.health import HealthServiceProtocol
     from bioetl.composition._service_types import (
         AdrServicePort,
         AuditInspectionService,
@@ -215,7 +215,8 @@ def get_contract_migration_service() -> ContractMigrationService:
 def get_health_service() -> HealthServiceProtocol:
     """Get provider health service."""
     _ensure_provider_registrations()
-    return _resolve(HealthServiceProtocol)
+    health_ports = import_module("bioetl.application.ports.health")
+    return _resolve(health_ports.HealthServiceProtocol)
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:

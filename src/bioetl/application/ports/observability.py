@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 
+@runtime_checkable
 class ObservabilitySettingsProtocol(Protocol):
     """Typed view of metrics exposition settings used by health composition."""
 

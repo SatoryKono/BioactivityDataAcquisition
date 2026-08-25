@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import cast
+from importlib import import_module
+from typing import TYPE_CHECKING, cast
 
-from bioetl.application.ports.health import HealthServiceProtocol
+if TYPE_CHECKING:
+    from bioetl.application.ports.health import HealthServiceProtocol
 
 _REGISTRY: dict[type[object], Callable[[], object]] = {}
 
@@ -35,4 +37,7 @@ def _build_health_service() -> HealthServiceProtocol:
     return bootstrap_health_service()
 
 
-register(HealthServiceProtocol, _build_health_service)
+register(
+    import_module("bioetl.application.ports.health").HealthServiceProtocol,
+    _build_health_service,
+)
