@@ -64,6 +64,34 @@ def _infrastructure_import_violation(py_file: Path) -> str | None:
     return None
 
 
+def check_composition_contracts_isolation(base_path: Path) -> list[str]:
+    """composition/contracts must not import composition implementation modules."""
+    violations: list[str] = []
+    contracts_dir = base_path / "src" / "bioetl" / "composition" / "contracts"
+    if not contracts_dir.exists():
+        return []
+    for py_file in contracts_dir.rglob("*.py"):
+        tree = _parse_file_tree(py_file)
+        if tree is None:
+            violations.append(f"{py_file}: syntax error")
+            continue
+        for node in ast.walk(tree):
+            modules: list[str] = []
+            if isinstance(node, ast.Import):
+                modules.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                modules.append(node.module)
+            for module in modules:
+                if not module.startswith("bioetl.composition"):
+                    continue
+                if module == "bioetl.composition.contracts" or module.startswith(
+                    "bioetl.composition.contracts."
+                ):
+                    continue
+                violations.append(f"{py_file}: composition/contracts imports {module}")
+    return violations
+
+
 def check_no_circular_imports(base_path: Path) -> list[str]:
     """Basic check for infrastructure -> application import violations."""
     violations: list[str] = []
@@ -106,6 +134,7 @@ def main() -> int:
     all_violations: list[str] = []
 
     all_violations.extend(check_no_circular_imports(base_path))
+    all_violations.extend(check_composition_contracts_isolation(base_path))
     all_violations.extend(_collect_adapter_violations(base_path))
 
     if all_violations:
