@@ -5,6 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 OUT = Path(".grok/workflows")
+REPOSITORY_SLUG = "SatoryKono/BioactivityDataAcquisition"
+DASHBOARD_SCOPE = "grafana/dashboards"
+TEST_SCOPE = "tests/"
 
 # prompt_id, workflow name, description, baked defaults (card tables).
 CARDS: list[tuple[str, str, str, dict[str, str]]] = [
@@ -28,7 +31,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "MAX_ISSUES_PER_ITERATION": "5",
             "MAX_WAVES_PER_ITERATION": "3",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/architecture-audit-cycle",
         },
     ),
@@ -53,7 +56,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_MERGE": "false",
             "ALLOW_CLOSE": "true",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/coderabbit-project-cycle",
         },
     ),
@@ -74,7 +77,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-agents-memory",
         },
     ),
@@ -98,7 +101,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "MAX_ISSUES_PER_ITERATION": "5",
             "MAX_WAVES_PER_ITERATION": "3",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/architecture-audit-cycle",
         },
     ),
@@ -123,7 +126,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_MERGE": "false",
             "ALLOW_CLOSE": "true",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/coderabbit-project-cycle",
         },
     ),
@@ -143,7 +146,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-configs",
         },
     ),
@@ -153,7 +156,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "Canonical cyclic dashboard render/design card (cycle pack #9)",
         {
             "N": "10",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "MODE": "full",
             "LANGUAGE": "ru",
             "DEPTH": "full",
@@ -171,7 +174,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/dashboard-audit-cycle",
         },
     ),
@@ -191,7 +194,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-diagrams",
         },
     ),
@@ -212,7 +215,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-docs",
         },
     ),
@@ -232,7 +235,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-tech-debt",
         },
     ),
@@ -253,7 +256,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-telemetry",
         },
     ),
@@ -274,7 +277,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-cycle-tests",
         },
     ),
@@ -295,7 +298,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-docs-cycle",
         },
     ),
@@ -317,7 +320,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_MERGE": "false",
             "ALLOW_CLOSE": "true",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-dual-agent-cycle",
         },
     ),
@@ -339,7 +342,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-repo-tree-cycle",
         },
     ),
@@ -348,7 +351,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "audit-sequential-run",
         "Sequential 1-10 cycle-pack run with ISSUE/FIX/CLOSE after each card",
         {
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE_BRANCH": "main",
             "WORK_BRANCH": "fix/audit-seq",
             "LANGUAGE": "ru",
@@ -382,7 +385,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-tech-debt-cycle",
         },
     ),
@@ -392,7 +395,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "Legacy cyclic tests audit (prefer audit-cycle-tests)",
         {
             "N": "10",
-            "SCOPE": "tests/",
+            "SCOPE": TEST_SCOPE,
             "MODE": "full",
             "LANGUAGE": "ru",
             "LANE": "unit",
@@ -403,7 +406,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
             "ALLOW_CLOSE": "true",
             "MAX_ISSUES_PER_ITERATION": "5",
             "BASE_BRANCH": "main",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "WORK_BRANCH": "fix/audit-tests-cycle",
         },
     ),
@@ -413,10 +416,10 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "Cyclic Grafana audit contours then issues then fix/re-verify",
         {
             "N": "20",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE_BRANCH": "main",
             "WORK_BRANCH": "fix/dashboard-audit-cycle",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "MODE": "full",
             "DEPTH": "full",
             "AUDIT_MODE": "full",
@@ -442,7 +445,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         {
             "TASK": "ultimate first-window no-scroll on seven UIDs",
             "MODE": "full",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "WORK_BRANCH": "fix/dash-first-window-noscroll",
             "LANGUAGE": "ru",
             "MONITORING": "true",
@@ -463,10 +466,10 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "Unified N=10 dashboard audit then GH issues then fix-to-close",
         {
             "N": "10",
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE_BRANCH": "main",
             "WORK_BRANCH": "fix/dash-full-cycle",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "MODE": "full",
             "DEPTH": "full",
             "LANGUAGE": "ru",
@@ -487,10 +490,10 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "dashboard-panel-audit",
         "Five-phase panel audit: inventory, render, issues, fix, closeout",
         {
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE": "main",
             "WORK_BRANCH": "fix/dashboard-panel-audit",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "MODE": "full",
             "CYCLE_COUNT": "1",
             "PHASES": "5",
@@ -509,10 +512,10 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "observability-sequential-run",
         "Sequential observability folder run with issue/close gates",
         {
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE": "origin/main",
             "WORK_BRANCH": "fix/observability-seq",
-            "SCOPE": "grafana/dashboards",
+            "SCOPE": DASHBOARD_SCOPE,
             "LANGUAGE": "ru",
             "MODE": "full",
             "MONITORING": "true",
@@ -529,7 +532,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "tests-cycle",
         "Cyclic pytest run, triage, fix, retest, delta",
         {
-            "REPO": "SatoryKono/BioactivityDataAcquisition",
+            "REPO": REPOSITORY_SLUG,
             "BASE": "main",
             "WORK_BRANCH": "fix/test-cycle",
             "SCOPE": "all",
@@ -552,7 +555,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "tests-fix-retest",
         "Narrow failing-test loop: run, fix, retest until green or blocked",
         {
-            "SCOPE": "tests/",
+            "SCOPE": TEST_SCOPE,
             "LANE": "unit",
             "LANGUAGE": "ru",
             "MODE": "full",
@@ -570,7 +573,7 @@ CARDS: list[tuple[str, str, str, dict[str, str]]] = [
         "tests-speed-optimization",
         "Cyclic test-speed loop: measure, shrink, retest, no coverage loss",
         {
-            "SCOPE": "tests/",
+            "SCOPE": TEST_SCOPE,
             "LANGUAGE": "ru",
             "MODE": "full",
             "WORK_BRANCH": "fix/tests-speed",
@@ -594,7 +597,7 @@ def normalize_defaults(defaults: dict[str, str]) -> dict[str, str]:
     out["ALLOW_PUSH"] = "true"
     out["ALLOW_CLOSE"] = "true"
     out["ALLOW_MERGE"] = "false"
-    for key in list(out):
+    for key in out:
         if key.startswith("ALLOW_") and key != "ALLOW_MERGE":
             out[key] = "true"
     return out
