@@ -177,6 +177,15 @@ def _run_check_only() -> None:
 
 
 def _run_refresh() -> None:
+    # 0) Unified source-tree manifest (S6 / #9602)
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_source_tree_manifest",
+        ]
+    )
+
     # 1) Module coverage inventory (hash path; allow missing coverage.xml)
     _run(
         [

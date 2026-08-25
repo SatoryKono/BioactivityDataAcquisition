@@ -28,6 +28,8 @@ from bioetl.domain.ports import (
 )
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 
+from bioetl.application.services.quality.config_dq_service import DQConfigLoaderProtocol
+
 
 def create_registered_pipeline_registry(
     registry: PipelineRegistry | None = None,
@@ -45,10 +47,6 @@ def bootstrap_config_service(
     resolved_configs_root = resolve_configs_root(configs_root)
     pipeline_config_loader = create_pipeline_config_loader(resolved_configs_root)
     dq_config_loader = create_dq_config_loader(resolved_configs_root)
-
-    from bioetl.application.services.quality.config_dq_service import (
-        DQConfigLoaderProtocol,
-    )
 
     return build_cli_config_service(
         registry=create_registered_pipeline_registry(registry),

@@ -142,19 +142,15 @@ def test_execution_api_reexports_pipeline_runner_service() -> None:
     assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
 
 
-def test_execution_service_access_routes_to_owner_seams() -> None:
-    """First-party execution access should bypass the retained public facade."""
+def test_execution_api_exposes_runner_and_metrics_seams() -> None:
+    """Execution API remains the sanctioned CLI seam after access-module removal."""
     from bioetl.composition.execution_api import (
         ensure_metrics_server_started,
         get_pipeline_runner_service,
     )
-    from bioetl.composition.execution_service_access import (
-        ensure_metrics_server_started as canonical_ensure_metrics_server_started,
-        get_pipeline_runner_service as canonical_get_pipeline_runner_service,
-    )
 
-    assert canonical_ensure_metrics_server_started is ensure_metrics_server_started
-    assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
+    assert callable(ensure_metrics_server_started)
+    assert callable(get_pipeline_runner_service)
 
 
 def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
@@ -234,16 +230,12 @@ def test_maintenance_api_reexports_canonical_maintenance_services() -> None:
     assert canonical_get_vacuum_service is get_vacuum_service
 
 
-def test_maintenance_service_access_routes_to_canonical_owner_seams() -> None:
-    """First-party maintenance access should bypass the retained public facade."""
-    from bioetl.composition.maintenance_service_access import (
-        get_bronze_cleanup_service as canonical_get_bronze_cleanup_service,
-        get_vacuum_service as canonical_get_vacuum_service,
-    )
-    from bioetl.composition._services import (
+def test_maintenance_api_exposes_cleanup_and_vacuum_seams() -> None:
+    """Maintenance API remains the sanctioned CLI seam after access-module removal."""
+    from bioetl.composition.maintenance_api import (
         get_bronze_cleanup_service,
         get_vacuum_service,
     )
 
-    assert canonical_get_bronze_cleanup_service is get_bronze_cleanup_service
-    assert canonical_get_vacuum_service is get_vacuum_service
+    assert callable(get_bronze_cleanup_service)
+    assert callable(get_vacuum_service)

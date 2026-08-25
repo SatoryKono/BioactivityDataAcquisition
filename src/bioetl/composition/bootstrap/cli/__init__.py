@@ -26,6 +26,11 @@ from __future__ import annotations
 from importlib import import_module
 from typing import TYPE_CHECKING
 
+from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
+from bioetl.domain.ports.noop import NoOpMetrics
+from bioetl.infrastructure.control_plane import FileControlPlaneArtifactLifecycleStore
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import AdrServicePort
     from bioetl.composition.bootstrap.cli.health import (
@@ -76,8 +81,6 @@ def bootstrap_adr_service() -> AdrServicePort:
     """Bootstrap ADR service using the default filesystem-backed catalog."""
     from typing import cast
 
-    from bioetl.infrastructure.adr.fs_adr_service import FilesystemAdrCatalog
-
     service = FilesystemAdrCatalog()
     return cast("AdrServicePort", service)
 
@@ -87,11 +90,6 @@ def bootstrap_control_plane_lifecycle_store() -> FileControlPlaneArtifactLifecyc
     from pathlib import Path
 
     from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.domain.ports.noop import NoOpMetrics
-    from bioetl.infrastructure.control_plane import (
-        FileControlPlaneArtifactLifecycleStore,
-    )
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     settings = get_settings()
     output_root = Path(settings.data_dir) / "output"

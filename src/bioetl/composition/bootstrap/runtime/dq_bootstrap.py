@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.ports import DQMonitorPort, LoggerPort
 
@@ -11,25 +11,10 @@ if TYPE_CHECKING:
 
     from bioetl.infrastructure.config.settings_api import Settings
 
+from bioetl.application.ports.dq import ConfigurableDQMonitor as _ConfigurableDQMonitor
 
-class _ConfigurableDQMonitor(DQMonitorPort, Protocol):
-    """DQ monitor contract with detector configuration support."""
-
-    detector: _DQDetectorConfig
-
-
-class _DQDetectorConfig(Protocol):
-    """Configuration surface used by bootstrap when wiring DQ thresholds."""
-
-    min_baseline_samples: int
-
-    def set_threshold(
-        self,
-        metric_name: str,
-        *,
-        min_value: float,
-        max_value: float,
-    ) -> None: ...
+from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 
 __all__ = [
@@ -44,7 +29,6 @@ def _default_monitor_factory(
     z_score_threshold: float,
 ) -> DQMonitorPort:
     """Create the DQ monitor adapter only when DQ monitoring is enabled."""
-    from bioetl.infrastructure.observability.anomaly import DataQualityMonitor
 
     return DataQualityMonitor(
         logger=logger,
@@ -55,7 +39,6 @@ def _default_monitor_factory(
 
 def _default_noop_logger_factory() -> LoggerPort:
     """Create the infrastructure no-op logger only when needed."""
-    from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
     return NoOpLogger()
 

@@ -6,13 +6,12 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol, cast
+from typing import cast
 
 import pyarrow as pa
 
 from bioetl.application.core.wiring.factory import (
     BasePipeline,
-    PipelineService,
     ShutdownSignal,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
@@ -47,47 +46,28 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config.domain_config_resolver import (
-    DomainConfigMapper,
     resolve_domain_pipeline_config,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
+from bioetl.composition.contracts.factories import (
+    ServiceBundleDeps as _ServiceBundleDeps,
+)
+from bioetl.composition.contracts.factories import (
+    BuildPipelineServicesFn as _BuildPipelineServicesFn,
+)
 
-class _ServiceBundleDeps(Protocol):
-    """Subset of dependencies required by pipeline creation internals."""
-
-    @property
-    def load_pipeline_config(self) -> Callable[[str], PipelineYamlConfig]: ...
-
-    @property
-    def yaml_config_to_domain(self) -> DomainConfigMapper: ...
-
-    @property
-    def compute_config_hash(
-        self,
-    ) -> Callable[[PipelineYamlConfig | dict[str, object]], str]: ...
-
-
-class _BuildPipelineServicesFn(Protocol):
-    """Typed callback for constructing the service bundle."""
-
-    def __call__(
-        self,
-        pipeline_name: str,
-        create_data_source_fn: DataSourceCreatorProtocol,
-        settings: Settings,
-        logger: LoggerPort,
-        audit: AuditPort | None,
-        config: PipelineYamlConfig | None = None,
-        filter_config: InputFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        dq_monitor: DQMonitorPort | None = None,
-        metadata_coordinator: MetadataCoordinator | None = None,
-        cached_bronze: CachedBronzeContext | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-    ) -> PipelineService: ...
+from bioetl.infrastructure.config.contract_policy_loader import (
+    load_pipeline_contract_policy,
+)
+from bioetl.application.core.pipeline_service_protocols import (
+    PipelineServicesProtocol,
+)
+from bioetl.infrastructure.validation import (
+    ContractAwareSilverValidator,
+)
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -183,9 +163,6 @@ def _build_pipeline_transformer(
     extract_entity_type: Callable[[str], str | None],
 ) -> BaseTransformer | None:
     """Build the runtime transformer while preserving the public factory seam."""
-    from bioetl.infrastructure.config.contract_policy_loader import (
-        load_pipeline_contract_policy,
-    )
 
     request = inputs.request
     return TransformerBuilder(
@@ -263,10 +240,6 @@ def _create_pipeline_with_services_impl(
         extract_entity_type=extract_entity_type,
     )
 
-    from bioetl.application.core.pipeline_service_protocols import (
-        PipelineServicesProtocol,
-    )
-
     return inputs.pipeline_class.create(
         run_id=request.run_id,
         runtime=request.runtime,
@@ -293,10 +266,6 @@ def _create_silver_validator(
     """
     if pandera_silver_schema is None:
         return None
-
-    from bioetl.infrastructure.validation import (
-        ContractAwareSilverValidator,
-    )
 
     schema_builder = cast(_SchemaBuilder, pandera_silver_schema)
     typed_schema = cast("pa.DataFrameSchema | None", schema_builder.to_schema())

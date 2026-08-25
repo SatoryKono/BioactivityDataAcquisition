@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
 
+from bioetl.domain.behavior import DataNormalizationConfig, DefaultDataNormalizer
+
 if TYPE_CHECKING:
     from bioetl.application.core.wiring.runtime import (
         BasePipeline,
@@ -64,9 +66,5 @@ def create_data_normalization_service(
     config: DataNormalizationConfig | None = None,
 ) -> DataNormalizationPort:
     """Create the canonical data normalizer with optional configuration."""
-    from bioetl.domain.behavior import (
-        DataNormalizationConfig,
-        DefaultDataNormalizer,
-    )
 
     return DefaultDataNormalizer(config=config or DataNormalizationConfig())

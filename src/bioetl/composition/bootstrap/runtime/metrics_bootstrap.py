@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.domain.ports import MetricsPort
 from bioetl.domain.ports.noop import NoOpMetrics
@@ -11,24 +11,16 @@ from bioetl.domain.ports.noop import NoOpMetrics
 if TYPE_CHECKING:
     from bioetl.application.services.ops.metrics_service import (
         MetricsService,
-        StartResult,
     )
     from bioetl.domain.ports import LoggerPort, TracingPort
     from bioetl.infrastructure.config.settings_api import Settings
 
+from bioetl.application.ports.metrics import MetricsService as _MetricsService
+
+from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
+
+
 MetricsFactory = Callable[[], MetricsPort]
-
-
-class _MetricsService(Protocol):
-    def start(
-        self,
-        port: int,
-        addr: str,
-        *,
-        fail_fast: bool,
-        retry_count: int,
-        retry_delay: float,
-    ) -> StartResult: ...
 
 
 MetricsServiceFactory = Callable[[], _MetricsService]
@@ -43,7 +35,6 @@ __all__ = [
 
 def _default_metrics_factory() -> MetricsPort:
     """Create the Prometheus metrics adapter only when metrics are enabled."""
-    from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
     return PrometheusMetrics()
 

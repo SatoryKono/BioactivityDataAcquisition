@@ -7,35 +7,20 @@ from __future__ import annotations
 from collections.abc import Callable
 from functools import wraps
 from importlib import import_module
-from typing import TYPE_CHECKING, Protocol, Self, TypeVar, cast, overload
+from typing import TYPE_CHECKING, TypeVar, cast, overload
 
 if TYPE_CHECKING:
     from bioetl.composition.providers._models import ProviderConfig
 
+from bioetl.composition.contracts.providers import (
+    SupportsDefaultRegistry as _SupportsDefaultRegistry,
+)
+from bioetl.composition.contracts.providers import (
+    SupportsProviderRegistryStore as _SupportsProviderRegistryStore,
+)
+
+
 R = TypeVar("R")
-
-
-class _SupportsDefaultRegistry(Protocol):
-    @classmethod
-    def _get_default(cls) -> Self:
-        """Return the lazy default registry instance."""
-        ...
-
-
-class _SupportsProviderStore(Protocol):
-    _providers: dict[str, ProviderConfig]
-
-
-class _SupportsProviderRegistryStore(_SupportsDefaultRegistry, Protocol):
-    _store: _SupportsProviderStore
-
-    def register(self, name: str, config: ProviderConfig) -> None: ...
-
-    def is_registered(self, name: str) -> bool: ...
-
-    def list_providers(self) -> list[str]: ...
-
-    def clear(self) -> None: ...
 
 
 RegistryT = TypeVar("RegistryT", bound=_SupportsDefaultRegistry)

@@ -16,13 +16,17 @@ This module enforces the Unified Observability Contract:
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
 from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import DQMonitorPort
+
+from bioetl.composition.contracts.factories import (
+    LoggerBindableObservability as _LoggerBindableObservability,
+)
 
 
 class ObservabilityContractError(Exception):
@@ -142,10 +146,6 @@ class ObservabilityBundle:
             audit=self.audit,
             dq_monitor=self.dq_monitor,
         )
-
-
-class _LoggerBindableObservability(Protocol):
-    logger: object
 
 
 def _require_runner_inputs(value: object) -> RunnerInputs:

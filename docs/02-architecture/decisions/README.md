@@ -76,6 +76,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-055](ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow Reconciliation Data-Step Ownership | Accepted | Architecture | 2026-07-29 |
 | [ADR-056](ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop Lifecycle Control | Accepted | Governance | 2026-08-09 |
 | [ADR-057](ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | Configuration | 2026-08-10 |
+| [ADR-058](ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | Architecture | 2026-08-25 |
+| [ADR-059](ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | Architecture | 2026-08-25 |
 
 ## ADRs by Category
 
@@ -94,6 +96,8 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-049](ADR-049-context-aware-loc-target-policy.md): Context-Aware LOC Target Policy
 - [ADR-051](ADR-051-quarantine-entry-aggregate-surface.md): QuarantineEntry Wide Constructor as Intentional Aggregate Surface
 - [ADR-052](ADR-052-infrastructure-config-package-root-public-api.md): Infrastructure Config Package Root as Permanent Public API
+- [ADR-058](ADR-058-layered-port-registries.md): Layered Port Registries
+- [ADR-059](ADR-059-package-cohesion-budgets.md): Package Cohesion Budgets
 
 ### Storage
 

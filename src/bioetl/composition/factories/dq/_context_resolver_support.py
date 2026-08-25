@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap_contexts import DQConfigsContext, DQOutputPathsContext
 from bioetl.domain.value_objects.dq_report import SilverDQCheckType
@@ -26,18 +26,13 @@ if TYPE_CHECKING:
 
 from bioetl.composition.contracts.structural import ModelDumpable
 
+from bioetl.application.ports.dq import DQReportServiceFactory
 
-class DQReportServiceFactory(Protocol):
-    def __call__(
-        self,
-        *,
-        logger: LoggerPort,
-        bronze_analyzer: object,
-        silver_analyzer: object,
-        gold_analyzer: object,
-        report_writer: object,
-        metrics: MetricsPort | None,
-    ) -> object: ...
+from bioetl.infrastructure.schemas.dq_report_config import (
+    BronzeSinkConfig,
+    GoldSinkConfig,
+    SilverSinkConfig,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,11 +75,6 @@ def extract_dq_configs_impl(
     extract_single_dq_config_fn: Callable[..., object],
     relaxed_dq: bool = False,
 ) -> DQConfigsContext:
-    from bioetl.infrastructure.schemas.dq_report_config import (
-        BronzeSinkConfig,
-        GoldSinkConfig,
-        SilverSinkConfig,
-    )
 
     if yaml_config is None:
         return DQConfigsContext(bronze=None, silver=None, gold=None)

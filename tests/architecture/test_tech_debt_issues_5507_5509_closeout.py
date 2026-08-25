@@ -86,7 +86,7 @@ def test_issue_5507_cli_config_bootstrap_uses_owner_config_access_seam() -> None
 
 def test_issue_5508_maintenance_cli_chain_no_longer_imports_retained_facade() -> None:
     imported_modules = _imports(MAINTENANCE_SERVICE_ACCESS)
-    assert "bioetl.composition.maintenance_service_access" in imported_modules
+    assert "bioetl.composition.entrypoints" in imported_modules
     assert "bioetl.composition.maintenance_api" not in imported_modules
     assert _collect_exact_importers("bioetl.composition.maintenance_api") == set()
 

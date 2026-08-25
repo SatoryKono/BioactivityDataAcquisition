@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.application.composite.runtime_wiring_api import (
     JoinHow,
@@ -15,7 +15,6 @@ from bioetl.composition.bootstrap.runtime.composite_support_service_builders imp
 )
 from bioetl.domain.composite.strategy import MergeStrategy
 from bioetl.domain.normalization.join_keys import JoinKeyNormalizationPolicy
-from bioetl.domain.ports import MergedStoragePort, SilverStoragePort
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -28,9 +27,9 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import ClockPort, LoggerPort
     from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
-
-class _CompositeMergeStorage(MergedStoragePort, SilverStoragePort, Protocol):
-    """Storage capabilities required by composite merge assembly."""
+from bioetl.application.ports.storage import (
+    CompositeMergeStorage as _CompositeMergeStorage,
+)
 
 
 def _resolve_join_how(strategy: MergeStrategy) -> JoinHow:

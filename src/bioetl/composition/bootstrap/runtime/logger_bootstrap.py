@@ -10,6 +10,8 @@ from uuid import NAMESPACE_OID, UUID, uuid5
 
 from bioetl.domain.ports import LoggerPort
 
+from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
+
 if TYPE_CHECKING:
     LoggerFactory = Callable[[str, UUID, str], LoggerPort]
 
@@ -28,7 +30,6 @@ def _fallback_log_correlation_run_id() -> UUID:
 
 def _default_logger_factory(pipeline: str, run_id: UUID, log_level: str) -> LoggerPort:
     """Create a UnifiedLogger with standard runtime settings."""
-    from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
     return UnifiedLogger(
         pipeline=pipeline,

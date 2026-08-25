@@ -3,22 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
 
 from bioetl.domain.ports import (
     ClockPort,
     LockPort,
     LoggerPort,
-    MergedStoragePort,
     MetricsPort,
-    SilverStoragePort,
     TracingPort,
 )
 from bioetl.infrastructure.config.settings_api import Settings
 
-
-class CompositeRuntimeStorageProtocol(MergedStoragePort, SilverStoragePort, Protocol):
-    """Storage capabilities required by composite runtime bootstrap."""
+from bioetl.application.ports.storage import CompositeRuntimeStorageProtocol
 
 
 @dataclass(frozen=True, slots=True)

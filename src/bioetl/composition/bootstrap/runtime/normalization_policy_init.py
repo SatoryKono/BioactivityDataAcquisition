@@ -9,15 +9,16 @@ from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     ChemblPolicyRegistryData,
 )
 
+from bioetl.infrastructure.config.chembl_policy_registry_loader import (
+    ChemblPolicyRegistryLoader,
+)
+
 
 @cache
 def _load_chembl_policy_registry_data(
     configs_root_key: str,
 ) -> ChemblPolicyRegistryData:
     """Load immutable ChEMBL policy registry data once per configs root key."""
-    from bioetl.infrastructure.config.chembl_policy_registry_loader import (
-        ChemblPolicyRegistryLoader,
-    )
 
     loader = ChemblPolicyRegistryLoader(Path(configs_root_key))
     return loader.load()

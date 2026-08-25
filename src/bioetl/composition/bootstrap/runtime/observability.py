@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from bioetl.composition.observability import ObservabilityBundle
@@ -32,6 +32,7 @@ from .tracing_bootstrap import bootstrap_tracer as _bootstrap_tracer_impl
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
 
+
 __all__ = [
     "MetricsServerError",
     "bootstrap_dq_monitor",
@@ -42,23 +43,6 @@ __all__ = [
     "maybe_start_metrics_server",
     "validate_observability_preflight",
 ]
-
-
-class _ObservabilityApiModule(Protocol):
-    """Typed subset of the public observability API used by this module."""
-
-    def start_metrics_server(
-        self,
-        port: int = 8000,
-        addr: str = "0.0.0.0",
-        *,
-        fail_fast: bool = False,
-        retry_count: int = 3,
-        retry_delay: float = 1.0,
-        logger: LoggerPort | None = None,
-    ) -> bool:
-        """Start the public metrics server."""
-        ...
 
 
 def _create_runtime_audit_port(

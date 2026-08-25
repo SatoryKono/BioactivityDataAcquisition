@@ -60,6 +60,8 @@ from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
 
+from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -87,8 +89,6 @@ ValidationError = _ValidationError
 
 def __getattr__(name: str) -> object:
     if name == "CompositeRuntimeConfig":
-        from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
-
         return CompositeRuntimeConfig
     if name == "create_composite_runner_service":
         from bioetl.composition.bootstrap.runtime.runner_assembly import (

@@ -122,7 +122,7 @@ def test_issue_5814_execution_api_stays_public_but_first_party_usage_moves_owner
     None
 ):
     execution_api_importers = _src_importers("bioetl.composition.execution_api")
-    owner_seam_importers = _src_importers("bioetl.composition.execution_service_access")
+    owner_seam_importers = _src_importers("bioetl.composition.entrypoints")
 
     assert execution_api_importers == {"src/bioetl/composition/entrypoints.py"}
     assert owner_seam_importers == {
