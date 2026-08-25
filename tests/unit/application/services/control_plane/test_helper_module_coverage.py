@@ -56,10 +56,10 @@ from bioetl.application.services.control_plane.replay._historical_snapshot_mater
     MIXED_POST_MANIFEST_SNAPSHOT_MATERIALIZATION,
     POST_MANIFEST_SNAPSHOT_MATERIALIZATION_MODES,
 )
-from bioetl.application.services.control_plane.workflow.execution_incremental_metadata import (
+from bioetl.application.services.workflow.control_plane.execution_incremental_metadata import (
     extract_incremental_metadata,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording import (
+from bioetl.application.services.workflow.control_plane.execution_recording import (
     WorkflowExecutionRecorder,
 )
 from bioetl.domain.control_plane import RunLedgerEntry, WorkflowExecutionState

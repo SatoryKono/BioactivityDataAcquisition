@@ -1,4 +1,4 @@
-"""Resume-state helpers for workflow execution preparation."""
+"""Workflow-owned resume-state helpers for execution preparation."""
 
 from __future__ import annotations
 

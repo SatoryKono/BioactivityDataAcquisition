@@ -116,7 +116,7 @@ def _source_revision() -> str:
             "configs/contracts",
             "src/bioetl/composition/factories/pipeline",
             "src/bioetl/application/composite",
-            "src/bioetl/application/services/workflow_runner_service.py",
+            "src/bioetl/application/services/workflow",
             "src/bioetl/application/services/control_plane/workflow",
             "src/bioetl/application/workflow/transforms",
             "src/bioetl/infrastructure/config",

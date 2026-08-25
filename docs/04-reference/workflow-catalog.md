@@ -29,8 +29,9 @@ Runtime model evidence:
 - Domain config: `src/bioetl/domain/workflow/config.py`
 - Strict schema: `src/bioetl/infrastructure/schemas/workflow_config.py`
 - DAG validation: `src/bioetl/domain/workflow/dag.py`
-- Runner: `src/bioetl/application/services/workflow_runner_service.py`
-- Workflow control plane:
+- Runner and execution-state transitions:
+  `src/bioetl/application/services/workflow/`
+- Workflow manifest, ledger, and inspection:
   `src/bioetl/application/services/control_plane/workflow/`
 
 For current workflow lifecycle semantics, statuses, and repair/force behavior,

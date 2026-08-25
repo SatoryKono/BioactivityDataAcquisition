@@ -1,4 +1,4 @@
-"""State mutation helpers for workflow execution recording."""
+"""Workflow-owned state mutation helpers for execution recording."""
 
 from __future__ import annotations
 

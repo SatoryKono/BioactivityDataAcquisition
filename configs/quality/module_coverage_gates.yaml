@@ -35,7 +35,7 @@ coverage_tail:
         - tests/unit/application/core/test_wiring_api_facades.py
       status: focused_owner_tests_added
     - rank: 2
-      path: src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py
+      path: src/bioetl/application/services/workflow/control_plane/execution_preparation_incremental.py
       risk: incremental_workflow_replay_offset_determinism
       target_test_type: focused_unit_control_plane_replay_paths
       owner_tests:
@@ -86,8 +86,8 @@ replay_sensitive_coverage_floors:
   mode: fail-fast
   authoritative_artifact: reports/quality/module-coverage-inventory.json
   modules:
-    - module: bioetl.application.services.control_plane.workflow.execution_preparation_incremental
-      path: src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py
+    - module: bioetl.application.services.workflow.control_plane.execution_preparation_incremental
+      path: src/bioetl/application/services/workflow/control_plane/execution_preparation_incremental.py
       min_coverage_percent: 100.0
       owner_tests:
         - tests/unit/application/services/control_plane/workflow/test_execution_preparation_incremental.py

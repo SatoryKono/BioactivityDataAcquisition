@@ -199,7 +199,7 @@ def _install_workflow_execution_service_dependencies(
     execution_module.WorkflowExecutionService = _WorkflowExecutionService
     monkeypatch.setitem(
         sys.modules,
-        "bioetl.application.services.control_plane.workflow.execution_service",
+        "bioetl.application.services.workflow.control_plane.execution_service",
         execution_module,
     )
 

@@ -1,4 +1,4 @@
-"""Payload helpers for workflow execution recording."""
+"""Workflow-owned payload helpers for execution recording."""
 
 from __future__ import annotations
 

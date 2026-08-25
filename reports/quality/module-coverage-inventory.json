@@ -6201,8 +6201,8 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
-      "module": "bioetl.application.services.control_plane.workflow._execution_recording_finish",
-      "path": "src/bioetl/application/services/control_plane/workflow/_execution_recording_finish.py",
+      "module": "bioetl.application.services.workflow.control_plane._execution_recording_finish",
+      "path": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
       "source_lines": 101
     },
     {
@@ -6211,8 +6211,8 @@
       "covered_lines": 82,
       "executable_lines": 90,
       "missing_lines": 8,
-      "module": "bioetl.application.services.control_plane.workflow._execution_resume_support",
-      "path": "src/bioetl/application/services/control_plane/workflow/_execution_resume_support.py",
+      "module": "bioetl.application.services.workflow.control_plane._execution_resume_support",
+      "path": "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py",
       "source_lines": 239
     },
     {
@@ -6221,8 +6221,8 @@
       "covered_lines": 9,
       "executable_lines": 9,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_incremental_metadata",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_incremental_metadata.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_incremental_metadata",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_incremental_metadata.py",
       "source_lines": 19
     },
     {
@@ -6231,8 +6231,8 @@
       "covered_lines": 45,
       "executable_lines": 45,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_preparation",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_preparation.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_preparation",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
       "source_lines": 192
     },
     {
@@ -6241,8 +6241,8 @@
       "covered_lines": 22,
       "executable_lines": 22,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_preparation_incremental",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation_incremental.py",
       "source_lines": 81
     },
     {
@@ -6251,8 +6251,8 @@
       "covered_lines": 52,
       "executable_lines": 52,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "source_lines": 203
     },
     {
@@ -6261,8 +6261,8 @@
       "covered_lines": 67,
       "executable_lines": 70,
       "missing_lines": 3,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording_payloads",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_payloads.py",
       "source_lines": 159
     },
     {
@@ -6271,8 +6271,8 @@
       "covered_lines": 40,
       "executable_lines": 40,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording_state",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_state.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording_state",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_state.py",
       "source_lines": 124
     },
     {
@@ -6281,8 +6281,8 @@
       "covered_lines": 63,
       "executable_lines": 65,
       "missing_lines": 2,
-      "module": "bioetl.application.services.control_plane.workflow.execution_service",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_service.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_service",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_service.py",
       "source_lines": 244
     },
     {
@@ -30833,8 +30833,8 @@
       "covered_lines": null,
       "executable_lines": null,
       "missing_lines": null,
-      "module": "bioetl.application.services.control_plane.workflow._execution_recording_finish",
-      "path": "src/bioetl/application/services/control_plane/workflow/_execution_recording_finish.py",
+      "module": "bioetl.application.services.workflow.control_plane._execution_recording_finish",
+      "path": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
       "source_lines": 101
     },
     {
@@ -30843,8 +30843,8 @@
       "covered_lines": 82,
       "executable_lines": 90,
       "missing_lines": 8,
-      "module": "bioetl.application.services.control_plane.workflow._execution_resume_support",
-      "path": "src/bioetl/application/services/control_plane/workflow/_execution_resume_support.py",
+      "module": "bioetl.application.services.workflow.control_plane._execution_resume_support",
+      "path": "src/bioetl/application/services/workflow/control_plane/_execution_resume_support.py",
       "source_lines": 239
     },
     {
@@ -30853,8 +30853,8 @@
       "covered_lines": 9,
       "executable_lines": 9,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_incremental_metadata",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_incremental_metadata.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_incremental_metadata",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_incremental_metadata.py",
       "source_lines": 19
     },
     {
@@ -30863,8 +30863,8 @@
       "covered_lines": 45,
       "executable_lines": 45,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_preparation",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_preparation.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_preparation",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation.py",
       "source_lines": 192
     },
     {
@@ -30873,8 +30873,8 @@
       "covered_lines": 22,
       "executable_lines": 22,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_preparation_incremental",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_preparation_incremental.py",
       "source_lines": 81
     },
     {
@@ -30883,8 +30883,8 @@
       "covered_lines": 52,
       "executable_lines": 52,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording.py",
       "source_lines": 203
     },
     {
@@ -30893,8 +30893,8 @@
       "covered_lines": 67,
       "executable_lines": 70,
       "missing_lines": 3,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording_payloads",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_payloads.py",
       "source_lines": 159
     },
     {
@@ -30903,8 +30903,8 @@
       "covered_lines": 40,
       "executable_lines": 40,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.workflow.execution_recording_state",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_state.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_recording_state",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_recording_state.py",
       "source_lines": 124
     },
     {
@@ -30913,8 +30913,8 @@
       "covered_lines": 63,
       "executable_lines": 65,
       "missing_lines": 2,
-      "module": "bioetl.application.services.control_plane.workflow.execution_service",
-      "path": "src/bioetl/application/services/control_plane/workflow/execution_service.py",
+      "module": "bioetl.application.services.workflow.control_plane.execution_service",
+      "path": "src/bioetl/application/services/workflow/control_plane/execution_service.py",
       "source_lines": 244
     },
     {
@@ -49270,7 +49270,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
-  "source_tree_sha256": "52f9fc36ff282850389afa5dd3ed93881df84bac628f4ca07319afdebb61b11c",
+  "source_tree_sha256": "69687c5da3dd5127a3921e416fdbe615dad11ef6206a481abacbecab6f4d0a1e",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49310,20 +49310,20 @@
       "application_services_control_plane": {
         "allowlisted_unmeasured_module_count": 0,
         "allowlisted_unmeasured_modules": [],
-        "coverage_percent_avg": 97.27,
+        "coverage_percent_avg": 97.23,
         "coverage_percent_min": 54.55,
-        "covered_line_percent": 96.32,
-        "covered_module_count": 138,
-        "measured_module_count": 138,
-        "measured_percent": 97.18,
-        "module_count": 142,
+        "covered_line_percent": 96.28,
+        "covered_module_count": 130,
+        "measured_module_count": 130,
+        "measured_percent": 97.74,
+        "module_count": 133,
         "status_counts": {
           "coverage_xml_missing": 0,
-          "fully_covered": 84,
+          "fully_covered": 79,
           "no_executable_lines": 0,
-          "partially_covered": 54,
+          "partially_covered": 51,
           "uncovered": 0,
-          "unmeasured": 4
+          "unmeasured": 3
         },
         "threshold_status": "fail",
         "thresholds": {
@@ -49333,14 +49333,13 @@
           "min_covered_module_count": 124,
           "min_measured_module_count": 124
         },
-        "unexpected_unmeasured_module_count": 4,
+        "unexpected_unmeasured_module_count": 3,
         "unexpected_unmeasured_modules": [
           "src/bioetl/application/services/control_plane/manifest/_inspection_json.py",
           "src/bioetl/application/services/control_plane/manifest/contract_evidence.py",
-          "src/bioetl/application/services/control_plane/replay/_historical_claim_reason.py",
-          "src/bioetl/application/services/control_plane/workflow/_execution_recording_finish.py"
+          "src/bioetl/application/services/control_plane/replay/_historical_claim_reason.py"
         ],
-        "unmeasured_module_count": 4
+        "unmeasured_module_count": 3
       },
       "composition_bootstrap_runtime": {
         "allowlisted_unmeasured_module_count": 0,
@@ -49603,8 +49602,8 @@
         "reason": "coverage_xml_has_no_class_entry"
       },
       {
-        "module": "bioetl.application.services.control_plane.workflow._execution_recording_finish",
-        "path": "src/bioetl/application/services/control_plane/workflow/_execution_recording_finish.py",
+        "module": "bioetl.application.services.workflow.control_plane._execution_recording_finish",
+        "path": "src/bioetl/application/services/workflow/control_plane/_execution_recording_finish.py",
         "reason": "coverage_xml_has_no_class_entry"
       },
       {

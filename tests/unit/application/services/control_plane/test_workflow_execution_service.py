@@ -39,16 +39,16 @@ from bioetl.application.services.control_plane import (
     WorkflowLedgerService,
     WorkflowManifestService,
 )
-from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
+from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
     _next_incremental_start_offset,
     _offset_from_successful_state,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
+from bioetl.application.services.workflow.control_plane.execution_recording_payloads import (
     _build_result_summary,
     _resolve_result_fingerprint,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_state import (
+from bioetl.application.services.workflow.control_plane.execution_recording_state import (
     _apply_completed_step_state,
 )
 from bioetl.application.services.workflow.workflow_runner_service import (

@@ -7,11 +7,16 @@ schema_version: 1
 linked_issues:
   - "7605"
   - "7608"
+  - "9618"
+  - "9623"
 path: src/bioetl/application/services
 subdomains:
   control_plane:
     owner: "@bioetl-platform"
-    responsibility: "Run manifests, ledgers, workflow state, resume/replay orchestration"
+    responsibility: "Run manifests, ledgers, inspection, and replay evidence"
+  workflow:
+    owner: "@bioetl-platform"
+    responsibility: "Workflow state-transition orchestration and observability coordination"
   lineage:
     owner: "@bioetl-platform"
     responsibility: "Lineage graph assembly and persistence collaborators"
@@ -35,8 +40,16 @@ subdomains:
     responsibility: "Transitional root-level services pending rehome"
 
 # Hard-forbidden cross-subdomain imports (module prefix -> forbidden target prefixes).
-# Empty list means no hard ban beyond layer rules; reserved for future ratchets.
-forbidden_cross_subdomain_imports: {}
+# Prefixes are deliberately explicit so package moves cannot silently weaken the gate.
+forbidden_cross_subdomain_imports:
+  bioetl.application.services.dq:
+    - bioetl.application.services.control_plane
+    - bioetl.application.services.execution
+    - bioetl.application.services.run_reports
+  bioetl.application.services.protein:
+    - bioetl.application.services.control_plane
+    - bioetl.application.services.execution
+    - bioetl.application.services.run_reports
 
 # Prefer: new code in subdomains; root only for permanent entrypoints listed in README.
 policy:

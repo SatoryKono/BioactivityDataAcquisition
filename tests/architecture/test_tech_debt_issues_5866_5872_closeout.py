@@ -116,7 +116,7 @@ def test_issue_5869_replay_sensitive_coverage_floors_hold() -> None:
 
     execution_row = _module_row(
         inventory,
-        "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
+        "bioetl.application.services.workflow.control_plane.execution_preparation_incremental",
     )
     runtime_row = _module_row(
         inventory, "bioetl.composition.bootstrap.runtime.runtime_basics"
