@@ -598,7 +598,7 @@ def test_reports_for_prune_is_unbounded(tmp_path: Path, monkeypatch) -> None:
 def test_identity_metadata_handles_os_error_and_non_mapping_payloads(
     tmp_path: Path,
 ) -> None:
-    empty = IdentityIndexPreview(None, None, None, None, None)
+    empty = IdentityIndexPreview(None, None, None, None, None, None)
     assert read_identity_preview(tmp_path) == empty
 
     payload_path = tmp_path / "report.json"
@@ -619,7 +619,8 @@ def test_identity_metadata_reads_started_at_and_workflow_run_id(
             '"started_at": "2026-08-25T01:00:00Z", '
             '"completed_at": "2026-08-25T01:05:00Z", '
             '"workflow_id": "chembl_baseline", '
-            '"workflow_run_id": "wf-run-1"}}'
+            '"workflow_run_id": "wf-run-1", '
+            '"run_type": "backfill"}}'
         ),
         encoding="utf-8",
     )
@@ -629,4 +630,5 @@ def test_identity_metadata_reads_started_at_and_workflow_run_id(
         "2026-08-25T01:05:00Z",
         "chembl_baseline",
         "wf-run-1",
+        "backfill",
     )

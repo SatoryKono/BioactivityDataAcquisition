@@ -122,7 +122,7 @@
       "id": 3010,
       "type": "table",
       "title": "Inspect Recent Runs (last 10)",
-      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id and var-pipeline, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline is already the selector, so it is hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id, var-pipeline, and var-run_type from that row, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline and run_type are already selectors, so they are hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
         "h": 12,
         "w": 24,
@@ -255,7 +255,7 @@
                 "value": [
                   {
                     "title": "Select this run (then expand Selected Run Details below)",
-                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=${__data.fields.Pipeline}&var-run_type=$run_type&var-run_id=${__value.raw}&${__url_time_range}",
+                    "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=${__data.fields.Pipeline}&var-run_type=${__data.fields.run_type}&var-run_id=${__value.raw}&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   }
@@ -275,6 +275,18 @@
             "matcher": {
               "id": "byName",
               "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "run_type"
             },
             "properties": [
               {
@@ -483,7 +495,7 @@
       "links": [
         {
           "title": "Expand Selected Run Details below",
-          "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "url": "/d/bioetl-run-explorer-v1/6-run-explorer?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=${run_type:csv}&var-run_id=$run_id&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false
         },

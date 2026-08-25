@@ -306,6 +306,7 @@ class IdentityIndexPreview(NamedTuple):
     completed_at: str | None
     workflow_id: str | None
     workflow_run_id: str | None
+    run_type: str | None
 
 
 def _optional_identity_text(value: object) -> str | None:
@@ -317,7 +318,7 @@ def _optional_identity_text(value: object) -> str | None:
 
 def read_identity_preview(path: Path) -> IdentityIndexPreview:
     """Read identity fields from a run-report JSON file."""
-    empty = IdentityIndexPreview(None, None, None, None, None)
+    empty = IdentityIndexPreview(None, None, None, None, None, None)
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
@@ -331,4 +332,5 @@ def read_identity_preview(path: Path) -> IdentityIndexPreview:
         completed_at=_optional_identity_text(identity.get("completed_at")),
         workflow_id=_optional_identity_text(identity.get("workflow_id")),
         workflow_run_id=_optional_identity_text(identity.get("workflow_run_id")),
+        run_type=_optional_identity_text(identity.get("run_type")),
     )
