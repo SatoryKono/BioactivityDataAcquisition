@@ -9,15 +9,29 @@ from typing import cast
 from bioetl.application.services.control_plane.workflow.execution_recording_context import (
     WorkflowExecutionRecorder,
 )
-from bioetl.application.services.control_plane.workflow.execution_recording_payloads import (
-    _find_failed_step,
-    _workflow_failure_message,
-)
 from bioetl.application.services.workflow.workflow_runner_service import (
     WorkflowRunExecutionResult,
+    WorkflowStepExecutionResult,
 )
 
 _UNSET_CURSOR = object()
+
+
+def _find_failed_step(
+    result: WorkflowRunExecutionResult,
+) -> WorkflowStepExecutionResult | None:
+    for step in result.steps:
+        if step.status == "failed":
+            return step
+    return None
+
+
+def _workflow_failure_message(
+    failed_step: WorkflowStepExecutionResult | None,
+) -> str:
+    if failed_step is not None and failed_step.error_message:
+        return failed_step.error_message
+    return "Workflow execution failed"
 
 
 def _record_workflow_success(

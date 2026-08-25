@@ -178,6 +178,11 @@ allowed:
       reason: "Health-check latency has provider, observer, and HTTP monitor emitters by design."
       review_date: "2026-09-30"
       approved_max_series: 500
+    - metric: bioetl_pipeline_runs_total
+      owner: "@bioetl-observability"
+      reason: "Pipeline run outcomes are emitted by ordinary, composite, and current-metric rehydration paths with bounded pipeline, run_type, and status labels."
+      review_date: "2026-09-30"
+      approved_max_series: 500
   declared_risky_label_review_required:
     - metric: bioetl_publication_raw_vocab_unknown_total
       owner: "@bioetl-observability"
