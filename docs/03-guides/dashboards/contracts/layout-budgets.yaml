@@ -37,6 +37,20 @@ first_screen_shell_panels:
       Native title omitted so h=3 Inspect Scope & Evidence body fits DASH-FIT-004.
       Display title stays in bioetlDisplayTitle.
     retire_when: the banner can keep a native title without overflowing at 200%
+  - dashboard: bioetl-run-explorer-v1.json
+    id: 1
+    owner: "@bioetl-observability"
+    rationale: >-
+      Native title omitted so h=3 Understand Run Scope body fits DASH-FIT-004.
+      Display title stays in bioetlDisplayTitle.
+    retire_when: the banner can keep a native title without overflowing at 200%
+  - dashboard: bioetl-control-plane-v1.json
+    id: 906
+    owner: "@bioetl-observability"
+    rationale: >-
+      First-window next-step rail; native title omitted so h=2 Review Recovery
+      Action fits DASH-FIT-004 without pushing KPI stats past viewport_rows.
+    retire_when: the CTA can use h=3 without folding KPI stats past row 18
   - dashboard: bioetl-control-plane-v1.json
     id: 9400
     owner: "@bioetl-observability"
@@ -215,9 +229,13 @@ first_window_summary_tables:
   - dashboard: bioetl-run-explorer-v1.json
     id: 3010
     max_rows: 10
-
     owner: "@bioetl-observability"
     bind: limit
+  - dashboard: bioetl-dq-v2.json
+    id: 9102
+    max_rows: 5
+    owner: "@bioetl-observability"
+    bind: topk
   - dashboard: bioetl-control-plane-v1.json
     id: 9418
     max_rows: 1
