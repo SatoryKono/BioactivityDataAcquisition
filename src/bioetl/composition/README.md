@@ -13,7 +13,7 @@ composition/
 ├── health_api.py               # Canonical health/quarantine service API
 ├── maintenance_api.py          # Canonical maintenance service API
 ├── resources_runtime.py        # Resource-management runtime seam (not *_api)
-├── registry.py                 # PipelineRegistry — maps (provider, entity) → pipeline class
+├── registry_api.py             # PipelineRegistry — maps (provider, entity) → pipeline class
 ├── builders.py                 # High-level builder helpers for CLI/orchestration
 ├── types.py                    # Shared type aliases for composition
 ├── observability.py            # ObservabilityBundle dataclass
@@ -73,7 +73,7 @@ export. Production CLI must not call it as the primary path (guarded by
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | Run a single pipeline                           | `entrypoints.run_pipeline()`                                                                                                         |
 | Bootstrap a composite pipeline runtime          | `entrypoints.load_composite_config()` (stable access seam over `infrastructure.config`) + `entrypoints.bootstrap_composite_runner()` |
-| Look up a pipeline by provider+entity           | `registry.PipelineRegistry`                                                                                                          |
+| Look up a pipeline by provider+entity           | `registry_api.PipelineRegistry`                                                                                                      |
 | Create an HTTP adapter for a provider           | `providers.provider_registry.ProviderRegistry`                                                                                       |
 | Wire storage (Bronze/Silver/Gold)               | `factories/storage/storage_factory.StorageFactory`                                                                                   |
 | Wire DQ services                                | `factories/dq/dq_services_factory.DQServicesFactory`                                                                                 |

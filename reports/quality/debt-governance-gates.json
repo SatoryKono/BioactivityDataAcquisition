@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "7bcbec5a2c5dece253b446261cf2f49fb0cd771cc8d473063c278db9017e9dcf",
+      "current": "42bb97c9e5e52474e821c4e75ccbed2c78c4e09439dea7a8c26f79d6d49f94a7",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -427,7 +427,7 @@
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix, remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -458,7 +458,7 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
     "fail": 2,
