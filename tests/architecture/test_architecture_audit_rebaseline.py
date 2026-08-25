@@ -31,7 +31,7 @@ CURRENT_RUNTIME_SURFACES = (
     / "checkpoint_compatibility_service.py",
     ROOT / "src" / "bioetl" / "domain" / "transformations" / "hashing.py",
     ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_pipeline_run_mixins.py",
-    ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_batch_lifecycle.py",
+    ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_batch_mixins.py",
 )
 
 STALE_ASSUMPTION_PATHS = (

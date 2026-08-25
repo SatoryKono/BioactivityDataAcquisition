@@ -137,7 +137,9 @@ class PipelineRun(_PipelineRunLifecycleMixin):
 
     @property
     def failed_stages(self) -> tuple[StageResult, ...]:
-        return tuple(stage for stage in self._stages if stage.status == StageStatus.FAILED)
+        return tuple(
+            stage for stage in self._stages if stage.status == StageStatus.FAILED
+        )
 
     @property
     def successful_stages(self) -> tuple[StageResult, ...]:

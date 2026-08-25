@@ -14,7 +14,6 @@ from bioetl.domain.aggregates.quarantine_entry import (
     QuarantineStatus,
     ResolutionInfo,
 )
-from bioetl.domain.aggregates._batch_lifecycle import emit_record_quarantined
 from bioetl.domain.types import BatchID, EntityID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
@@ -75,17 +74,13 @@ def test_stage_result_duration_only_for_completed_stages() -> None:
 
 
 def test_emit_record_quarantined_preserves_empty_entity_id() -> None:
-    events: list = []
-    emit_record_quarantined(
-        events,
-        _run_id(),
-        _batch_id(),
-        EntityID(""),
-        "ERR",
-        "boom",
-        None,
-        _ts(1),
+    batch = Batch.create(
+        run_id=_run_id("unit.aggregates.residuals.empty-entity"), created_at=_ts(0)
     )
+    record = batch.add_record({"id": "empty"}, entity_id=EntityID(""))
+    batch.collect_events()
+    batch.quarantine_record(record, "boom", "ERR", quarantined_at=_ts(1))
+    events = batch.collect_events()
     assert events[0].record_id == ""
 
 

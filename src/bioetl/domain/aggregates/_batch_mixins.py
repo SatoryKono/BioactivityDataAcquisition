@@ -87,7 +87,9 @@ class _BatchMutationMixin(_BatchReadModelMixin):
                 occurred_at=quarantined_at,
                 run_id=self._run_id,
                 batch_id=self._batch_id,
-                record_id=str(record.entity_id) if record.entity_id is not None else None,
+                record_id=str(record.entity_id)
+                if record.entity_id is not None
+                else None,
                 error_code=error_code,
                 error_message=error,
                 content_hash=record.content_hash,

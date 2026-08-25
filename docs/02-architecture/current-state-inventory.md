@@ -110,7 +110,7 @@ Full pipeline catalog: [Pipeline Catalog](../04-reference/pipeline-catalog.md).
 | Aggregate | Source files | Purpose | Key dependencies | Layer |
 | --- | --- | --- | --- | --- |
 | `Batch` | `src/bioetl/domain/aggregates/_batch_aggregate.py`, `batch.py` | Batch lifecycle and batch-level record accounting. | `BatchRecord`, `BatchStatus`, domain events. | Domain |
-| `PipelineRun` | `src/bioetl/domain/aggregates/pipeline_run.py`, `_pipeline_run_mixins.py`, `_pipeline_run_read_model_mixin.py` | Pipeline run state machine and stage result projection. | `PipelineRunState`, `StageResult`, `StageStatus`. | Domain |
+| `PipelineRun` | `src/bioetl/domain/aggregates/pipeline_run.py`, `_pipeline_run_mixins.py` | Pipeline run state machine and stage result projection. | `PipelineRunState`, `StageResult`, `StageStatus`. | Domain |
 | `QuarantineEntry` | `src/bioetl/domain/aggregates/_quarantine_aggregate.py`, `quarantine_entry.py` | Quarantine lifecycle, review, ignore, reprocess, and expiry transitions. | `QuarantineStatus`, `ResolutionInfo`. | Domain |
 
 ### Domain Events
