@@ -4,14 +4,14 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- baseline_artifact_fingerprint: `80135b169a5ab1a7f280efff6427860ca3ea2a48cbde01ad7564e1f68bc3c548`
+- baseline_artifact_fingerprint: `2d7a69883cd8953de229bc9b98fa9cf9e2392008f557a56c4fbeeca6ee9efda0`
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `7eb270df1599d824c9d9b1c20a9a29a05bb3f0ea93340b8f505b9d2bf8460ef5` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `2087e30be7280a5c788d1669615cbffad9a8b005116627f1e31e2c8e0190af46` | `True` | `True` | `False` |
-| `reports/quality/compatibility-importer-census.json` | `c43a2beca1a09e72e0b6223375cf37210245696885c66d3ca4162d53c79169ca` | `True` | `True` | `False` |
-| `reports/quality/dead-code-inventory.json` | `e833ed038d53cbde03793bc6de5e40495a181de8971fe058cbd1d91e6594b121` | `True` | `True` | `False` |
+| `reports/quality/architecture-quality-scorecard.json` | `b7ca85d4ec0cf6c905ac7f5cf79d91988f4cd056b87ebb98f3b2c72a732a6110` | `True` | `True` | `False` |
+| `reports/quality/module-coverage-inventory.json` | `b554df984c19a4934a7749c2e602a5d074530ee9ba869513ae71547e62895ba5` | `True` | `True` | `False` |
+| `reports/quality/compatibility-importer-census.json` | `dfc7ea0eb9d8499c8019c4bb342491b50c948bfbd0e55cbfe4155904b8bc86d2` | `True` | `True` | `False` |
+| `reports/quality/dead-code-inventory.json` | `e7c3a87120cdb2f4bdc499764839bd18d33dd32c78d17995e4b36b61f8118385` | `True` | `True` | `False` |
 | `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
-| `reports/observability/runtime_cardinality_inventory.json` | `b7be8eb40c43181cc946006e1ca5daf17d00da40b7126969198a58bffe96a550` | `True` | `False` | `False` |
+| `reports/observability/runtime_cardinality_inventory.json` | `4f1d007b23f29c148ac6a1e7a7268bef771fe1b141c6cad5013f3a3ea0561acb` | `True` | `False` | `False` |

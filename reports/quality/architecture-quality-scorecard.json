@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2463,
+        "source_module_count": 2465,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -74,7 +74,7 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 74
+        "unmeasured_module_count": 76
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
@@ -189,13 +189,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2463,
+    "source_module_count": 2465,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 74
+    "unmeasured_module_count": 76
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -225,7 +225,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "edc808ddeb370bbcb3e8bf48d1d3de237980a56f0438002cc4687c176b306de9"
+      "source_fingerprint": "a50954d45b6243f8f740de3e227cdf6ee1bf9072d882772260056c14985b2fd0"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -240,7 +240,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "69687c5da3dd5127a3921e416fdbe615dad11ef6206a481abacbecab6f4d0a1e"
+      "source_tree_sha256": "954d3e22139afbd00d836d4203b929b9547f59c008c3a8368e39e72ad14119c2"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
