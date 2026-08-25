@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.ports.control_plane import (
     ForensicRunDiffServiceProtocol,
@@ -27,8 +27,12 @@ from bioetl.application.ports.operations import (
     VacuumServiceProtocol,
 )
 from bioetl.composition._registration import ensure_runtime_registrations
-from bioetl.composition._service_invocation import invoke_bootstrap as _invoke_bootstrap
 from bioetl.composition._service_registry import resolve as _resolve
+from bioetl.composition.contracts.factories import (
+    HealthServerDependenciesFactoryProtocol,
+    PipelineRunnerServiceFactoryProtocol,
+    QuarantineServiceFactoryProtocol,
+)
 from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
 from bioetl.composition.registry_api import create_registry
 from bioetl.domain.ports.adr import AdrServicePort
@@ -49,32 +53,6 @@ if TYPE_CHECKING:
     from bioetl.composition.bootstrap.assembly.health_server import (
         HealthServerDependencies,
     )
-
-
-_BOOTSTRAP_CHECKPOINT_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
-_RUN_MANIFEST_BOOTSTRAP = "bioetl.composition.bootstrap.cli.run_manifest"
-
-
-_BOOTSTRAP_EXPORTS: dict[str, str] = {
-    "bootstrap_forensic_run_diff_service": _RUN_MANIFEST_BOOTSTRAP,
-    "bootstrap_historical_replay_corpus_service": _RUN_MANIFEST_BOOTSTRAP,
-    "bootstrap_historical_replay_closure_service": _RUN_MANIFEST_BOOTSTRAP,
-    "bootstrap_historical_replay_universe_service": _RUN_MANIFEST_BOOTSTRAP,
-    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
-    "bootstrap_lineage_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
-    "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
-    "bootstrap_quarantine_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
-    "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
-}
-
-
-def resolve_bootstrap_attr(name: str) -> object:
-    """Resolve one public bootstrap export lazily without invoking it."""
-    export = _BOOTSTRAP_EXPORTS.get(name)
-    if export is None:
-        raise AttributeError(f"Unknown bootstrap export: {name!r}")
-    bootstrap_attr: object = getattr(import_module(export), name)
-    return bootstrap_attr
 
 
 def _ensure_registrations(
@@ -115,9 +93,8 @@ def get_audit_service() -> AuditInspectionServiceProtocol:
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
-    if data_root is None:
-        return _invoke_bootstrap("bootstrap_quarantine_service")
-    return _invoke_bootstrap("bootstrap_quarantine_service", data_root=data_root)
+    factory = _resolve(QuarantineServiceFactoryProtocol)
+    return factory(data_root=data_root)
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupServiceProtocol:
@@ -149,10 +126,8 @@ def get_pipeline_runner_service(
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     effective_registry = _ensure_pipeline_registrations(registry=registry)
-    return _invoke_bootstrap(
-        "bootstrap_pipeline_runner_service",
-        registry=effective_registry,
-    )
+    factory = _resolve(PipelineRunnerServiceFactoryProtocol)
+    return factory(registry=effective_registry)
 
 
 def get_workflow_runner_service(
@@ -213,11 +188,10 @@ def get_health_server_dependencies(
     data_root: Path | None = None,
 ) -> HealthServerDependencies:
     """Get health-server dependencies without pipeline registration."""
-    if data_root is None:
-        return _invoke_bootstrap("bootstrap_health_server_dependencies")
-    return _invoke_bootstrap(
-        "bootstrap_health_server_dependencies",
-        data_root=data_root,
+    factory = _resolve(HealthServerDependenciesFactoryProtocol)
+    return cast(
+        "HealthServerDependencies",
+        cast(object, factory(data_root=data_root)),
     )
 
 

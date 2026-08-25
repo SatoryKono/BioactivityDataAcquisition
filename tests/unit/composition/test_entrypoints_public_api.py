@@ -74,8 +74,8 @@ def test_entrypoints_removed_compatibility_wrappers_fail_fast(name: str) -> None
 
 
 @pytest.mark.unit
-def test_entrypoints_register_zero_argument_service_ports() -> None:
-    """Production registry exposes all migrated zero-argument service keys."""
+def test_entrypoints_register_service_and_contextual_factory_ports() -> None:
+    """Production registry exposes all migrated service and factory keys."""
     from bioetl.application.ports import (
         AuditInspectionServiceProtocol,
         CheckpointServiceProtocol,
@@ -96,6 +96,11 @@ def test_entrypoints_register_zero_argument_service_ports() -> None:
         WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
     from bioetl.composition.entrypoints import registered_ports
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
@@ -109,6 +114,7 @@ def test_entrypoints_register_zero_argument_service_ports() -> None:
         ExportServiceProtocol,
         ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HealthServerDependenciesFactoryProtocol,
         HistoricalReplayClosureServiceProtocol,
         HistoricalReplayCorpusServiceProtocol,
         HistoricalReplayUniverseServiceProtocol,
@@ -116,7 +122,9 @@ def test_entrypoints_register_zero_argument_service_ports() -> None:
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        PipelineRunnerServiceFactoryProtocol,
         QuarantinePort,
+        QuarantineServiceFactoryProtocol,
         RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
         WorkflowInspectionServiceProtocol,
@@ -169,6 +177,39 @@ def test_entrypoints_register_e2_ports_with_canonical_lazy_targets() -> None:
         WorkflowInspectionServiceProtocol: (
             "bioetl.composition._workflow_services",
             "get_workflow_inspection_service",
+        ),
+    }
+
+    factories = registered_ports()
+    assert {
+        port: (factory.module_name, factory.attribute_name)
+        for port, factory in factories.items()
+        if port in expected
+    } == expected
+
+
+@pytest.mark.unit
+def test_entrypoints_register_e3_factories_with_canonical_lazy_targets() -> None:
+    """E3 contextual factory keys retain canonical lazy target metadata."""
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
+    from bioetl.composition.entrypoints import registered_ports
+
+    expected = {
+        QuarantineServiceFactoryProtocol: (
+            "bioetl.composition.bootstrap.cli.checkpoint",
+            "bootstrap_quarantine_service",
+        ),
+        PipelineRunnerServiceFactoryProtocol: (
+            "bioetl.composition.bootstrap.runtime.runner",
+            "bootstrap_pipeline_runner_service",
+        ),
+        HealthServerDependenciesFactoryProtocol: (
+            "bioetl.composition.bootstrap.cli.health",
+            "bootstrap_health_server_dependencies",
         ),
     }
 

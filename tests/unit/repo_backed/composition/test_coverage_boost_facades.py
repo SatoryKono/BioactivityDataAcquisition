@@ -364,24 +364,6 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
 ) -> None:
     from bioetl.application.ports import MetricsService
 
-    fake_module = ModuleType("fake_bootstrap")
-    fake_module.bootstrap_forensic_run_diff_service = lambda: (
-        mock.sentinel.forensic_diff
-    )
-    fake_module.bootstrap_run_manifest_service = lambda: mock.sentinel.run_manifest
-    monkeypatch.setattr(_services, "import_module", lambda _: fake_module)
-
-    assert (
-        _services.resolve_bootstrap_attr("bootstrap_forensic_run_diff_service")
-        is fake_module.bootstrap_forensic_run_diff_service
-    )
-    assert (
-        _services._invoke_bootstrap("bootstrap_run_manifest_service")
-        is mock.sentinel.run_manifest
-    )
-    with pytest.raises(AttributeError):
-        _services.resolve_bootstrap_attr("missing_export")
-
     calls: list[tuple[object | None, str]] = []
     monkeypatch.setattr(
         _services,
@@ -431,11 +413,15 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
     provider_calls: list[str] = []
     pipeline_calls: list[object | None] = []
-    bootstrap_calls: list[tuple[str, tuple[object, ...], dict[str, object]]] = []
     resolve_calls: list[type[object]] = []
 
     monkeypatch.setattr(
@@ -448,22 +434,28 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         "_ensure_pipeline_registrations",
         lambda registry=None: pipeline_calls.append(registry) or registry,
     )
-    monkeypatch.setattr(
-        _services,
-        "_invoke_bootstrap",
-        lambda name, *args, **kwargs: (
-            bootstrap_calls.append((name, args, kwargs)) or (name, args, kwargs)
-        ),
-    )
+    def resolve(port: type[object]) -> object:
+        resolve_calls.append(port)
+        if port is QuarantineServiceFactoryProtocol:
+            return lambda *, data_root=None: (port, (), {"data_root": data_root})
+        if port is PipelineRunnerServiceFactoryProtocol:
+            return lambda *, registry: (port, (), {"registry": registry})
+        if port is HealthServerDependenciesFactoryProtocol:
+            return lambda *, data_root=None: (port, (), {"data_root": data_root})
+        return (port, (), {})
+
     monkeypatch.setattr(
         _services,
         "_resolve",
-        lambda port: resolve_calls.append(port) or (port, (), {}),
+        resolve,
     )
 
     assert _services.get_checkpoint_service()[0] is CheckpointServiceProtocol
     assert _services.get_audit_service()[0] is AuditInspectionServiceProtocol
-    assert _services.get_quarantine_service()[0] == "bootstrap_quarantine_service"
+    assert (
+        _services.get_quarantine_service()[0]
+        is QuarantineServiceFactoryProtocol
+    )
     assert _services.get_bronze_cleanup_service()[0] is BronzeCleanupServiceProtocol
     assert _services.get_vacuum_service()[0] is VacuumServiceProtocol
     assert _services.get_export_service()[0] is ExportServiceProtocol
@@ -506,7 +498,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     )
     assert (
         _services.get_health_server_dependencies()[0]
-        == "bootstrap_health_server_dependencies"
+        is HealthServerDependenciesFactoryProtocol
     )
     assert _services.get_metrics_service()[0] is MetricsService
     assert _services.get_adr_service()[0] is AdrServicePort
@@ -526,19 +518,17 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         HistoricalReplayClosureServiceProtocol,
         HistoricalReplayCorpusServiceProtocol,
         HistoricalReplayUniverseServiceProtocol,
+        HealthServerDependenciesFactoryProtocol,
         LineageInspectionServiceProtocol,
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        PipelineRunnerServiceFactoryProtocol,
         QuarantinePort,
+        QuarantineServiceFactoryProtocol,
         RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
         WorkflowInspectionServiceProtocol,
-    }
-    assert {name for name, _, _ in bootstrap_calls} == {
-        "bootstrap_health_server_dependencies",
-        "bootstrap_pipeline_runner_service",
-        "bootstrap_quarantine_service",
     }
 
 

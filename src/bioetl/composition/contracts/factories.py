@@ -3,15 +3,25 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
+    from bioetl.application.ports.pipeline_registry import PipelineRegistryProtocol
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        PipelineRunnerService,
+    )
+    from bioetl.application.services.quality.quarantine_service import (
+        QuarantineService,
+    )
     from bioetl.domain.ports import (
         AuditPort,
         DQMonitorPort,
         LoggerPort,
         TracingPort,
     )
+
+    from .health import HealthListenerDependenciesProtocol
 
     CachedBronzeContext = object
     DataSourceCreatorProtocol = object
@@ -102,3 +112,32 @@ class FactoryLike(Protocol):
 
 class LoggerBindableObservability(Protocol):
     logger: object
+
+
+class QuarantineServiceFactoryProtocol(Protocol):
+    """Build the quarantine administration service for one data root."""
+
+    def __call__(
+        self,
+        *,
+        data_root: Path | None = None,
+    ) -> QuarantineService: ...
+
+
+class PipelineRunnerServiceFactoryProtocol(Protocol):
+    """Build the pipeline runner service from an explicit registry."""
+
+    def __call__(
+        self,
+        registry: PipelineRegistryProtocol,
+    ) -> PipelineRunnerService: ...
+
+
+class HealthServerDependenciesFactoryProtocol(Protocol):
+    """Build health-server dependencies for one data root."""
+
+    def __call__(
+        self,
+        *,
+        data_root: Path | None = None,
+    ) -> HealthListenerDependenciesProtocol: ...

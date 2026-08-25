@@ -76,6 +76,11 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         WorkflowInspectionServiceProtocol,
     )
     from bioetl.composition.contracts import BronzeCleanupServiceProtocol
+    from bioetl.composition.contracts.factories import (
+        HealthServerDependenciesFactoryProtocol,
+        PipelineRunnerServiceFactoryProtocol,
+        QuarantineServiceFactoryProtocol,
+    )
     from bioetl.composition.entrypoints import resolve, register, registered_ports
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
@@ -90,6 +95,7 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         ExportServiceProtocol,
         ForensicRunDiffServiceProtocol,
         HealthServiceProtocol,
+        HealthServerDependenciesFactoryProtocol,
         HistoricalReplayClosureServiceProtocol,
         HistoricalReplayCorpusServiceProtocol,
         HistoricalReplayUniverseServiceProtocol,
@@ -97,11 +103,20 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         LockServiceProtocol,
         MetricsService,
         ObservabilityWorkflowServiceProtocol,
+        PipelineRunnerServiceFactoryProtocol,
         QuarantinePort,
+        QuarantineServiceFactoryProtocol,
         RunManifestInspectionServiceProtocol,
         VacuumServiceProtocol,
         WorkflowInspectionServiceProtocol,
     }
+    services_source = (
+        ROOT / "src/bioetl/composition/_services.py"
+    ).read_text(encoding="utf-8")
+    assert "invoke_bootstrap" not in services_source
+    assert "_BOOTSTRAP_EXPORTS" not in services_source
+    assert "resolve_bootstrap_attr" not in services_source
+    assert not (ROOT / "src/bioetl/composition/_service_invocation.py").exists()
     api_files = sorted((ROOT / "src/bioetl/composition").glob("*_api.py"))
     assert [path.name for path in api_files] == [
         "execution_api.py",
