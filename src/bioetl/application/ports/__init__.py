@@ -13,6 +13,7 @@ from bioetl.application.ports.dq import (
     DQDetectorConfig,
     DQReportServiceFactoryProtocol,
 )
+from bioetl.application.ports.health import HealthServiceProtocol
 from bioetl.application.ports.metrics import (
     MetricsFactoryProtocol,
     MetricsService,
@@ -59,6 +60,7 @@ __all__ = [
     "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
     "GoldMergedWriteProtocol",
+    "HealthServiceProtocol",
     "MetricsFactoryProtocol",
     "MetricsService",
     "ObservabilitySettingsProtocol",

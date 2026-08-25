@@ -6,7 +6,11 @@ from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.ports.health import HealthServiceProtocol
+from bioetl.composition._registration import ensure_runtime_registrations
 from bioetl.composition._service_invocation import invoke_bootstrap as _invoke_bootstrap
+from bioetl.composition._service_registry import resolve as _resolve
+from bioetl.composition.registry_api import create_registry
 
 if TYPE_CHECKING:
     from bioetl.composition._service_types import (
@@ -19,7 +23,6 @@ if TYPE_CHECKING:
         ContractMigrationService,
         ExportService,
         ForensicRunDiffService,
-        HealthService,
         HistoricalReplayClosureService,
         HistoricalReplayCorpusService,
         HistoricalReplayUniverseService,
@@ -95,8 +98,6 @@ def _ensure_registrations(
     scope: str = "pipelines",
 ) -> None:
     """Ensure the requested runtime registration scope lazily."""
-    from bioetl.composition._registration import ensure_runtime_registrations
-
     ensure_runtime_registrations(registry=registry, scope=scope)
 
 
@@ -110,8 +111,6 @@ def _ensure_pipeline_registrations(
 ) -> PipelineRegistry:
     """Return an explicit registry with provider and pipeline registrations."""
     if registry is None:
-        from bioetl.composition.registry_api import create_registry
-
         registry = create_registry()
     _ensure_registrations(registry=registry, scope="pipelines")
     return registry
@@ -213,10 +212,10 @@ def get_contract_migration_service() -> ContractMigrationService:
     return _invoke_bootstrap("bootstrap_contract_migration_service")
 
 
-def get_health_service() -> HealthService:
+def get_health_service() -> HealthServiceProtocol:
     """Get provider health service."""
     _ensure_provider_registrations()
-    return _invoke_bootstrap("bootstrap_health_service")
+    return _resolve(HealthServiceProtocol)
 
 
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
