@@ -6,6 +6,7 @@ import pytest
 
 from tests.integration._grafana_test_support import (
     get_dashboard_panels,
+    index_panels_by_base_title,
     load_dashboard,
 )
 
@@ -29,11 +30,7 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
     assert "empty blockers are valid empty" in description
     assert "telemetry confidence" in description
 
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
+    panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
     expected_tokens = {
         "Track Failed Workflow Runs": ("selected range", "not current workflow"),
         "Track Failed Workflow Steps": ("selected range", "not stage success"),

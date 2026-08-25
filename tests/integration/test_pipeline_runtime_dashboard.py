@@ -26,6 +26,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_prometheus_queries,
     get_metric_label_sets,
     load_dashboard,
+    panel_display_title,
 )
 
 pytestmark = pytest.mark.integration
@@ -543,9 +544,9 @@ def test_runtime_first_action_cta_contract() -> None:
     assert first_action_panel is not None, (
         "Runtime dashboard missing First Action panel (id=9991)"
     )
-    assert first_action_panel.get("title") == "Start Pipeline Triage", (
+    assert panel_display_title(first_action_panel) == "Start Pipeline Triage", (
         "Panel 9991 must have title 'Start Pipeline Triage', "
-        f"got {first_action_panel.get('title')!r}"
+        f"got {panel_display_title(first_action_panel)!r}"
     )
     content = str(first_action_panel.get("options", {}).get("content", ""))
     description = str(first_action_panel.get("description", ""))

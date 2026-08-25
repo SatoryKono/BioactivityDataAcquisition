@@ -344,7 +344,7 @@ def get_row_child_panels(dashboard: dict, row_title: str) -> list[dict]:
     """Return panels that belong to a row in nested or expanded Grafana JSON."""
     panels = list(dashboard.get("panels", []))
     for index, panel in enumerate(panels):
-        if panel.get("type") != "row" or panel.get("title") != row_title:
+        if panel.get("type") != "row" or panel_display_title(panel) != row_title:
             continue
         nested = panel.get("panels")
         if isinstance(nested, list) and nested:

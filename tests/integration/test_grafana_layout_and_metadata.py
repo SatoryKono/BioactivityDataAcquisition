@@ -19,6 +19,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     get_row_child_panels,
+    index_panels_by_base_title,
     load_dashboard,
     panel_display_title,
 )
@@ -194,11 +195,9 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     """Runtime First Action stays on first paint; ID/Processed Records stay below triage."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
-    root_panels = {
-        panel.get("title"): panel
-        for panel in dashboard.get("panels", [])
-        if isinstance(panel.get("title"), str)
-    }
+    root_panels = index_panels_by_base_title(
+        [panel for panel in dashboard.get("panels", []) if isinstance(panel, dict)]
+    )
 
     first_action_grid = root_panels["Start Pipeline Triage"]["gridPos"]
     assert first_action_grid["y"] <= 8
@@ -209,7 +208,7 @@ def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
     assert context_row.get("collapsed") is True
     assert context_row["gridPos"]["y"] > first_action_grid["y"]
     context_titles = {
-        panel.get("title")
+        panel_display_title(panel)
         for panel in get_row_child_panels(dashboard, "Inspect Run Context")
     }
     assert {"Inspect Pipeline Identity", "Inspect Processed Records"}.issubset(
@@ -412,11 +411,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
 def test_control_plane_trust_panels_follow_reference_widths() -> None:
     """Trust panels should align with the 18/6 scope and readiness columns."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
-    }
+    panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
 
     scope = panels["Inspect Scope & Evidence"]["gridPos"]
     readiness = panels["Monitor Replay Readiness"]["gridPos"]

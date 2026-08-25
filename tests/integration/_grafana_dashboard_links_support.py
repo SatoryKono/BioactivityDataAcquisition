@@ -287,8 +287,7 @@ def _find_status_header_panel(
         (
             candidate
             for candidate in get_dashboard_panels(dashboard)
-            if isinstance(candidate.get("title"), str)
-            and row_re.search(candidate["title"]) is not None
+            if row_re.search(panel_display_title(candidate)) is not None
         ),
         None,
     )

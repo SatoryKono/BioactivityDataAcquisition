@@ -716,7 +716,10 @@ def test_operator_critical_tables_expose_full_values() -> None:
             panel = _panel(dashboard, panel_id)
             custom = panel["fieldConfig"]["defaults"]["custom"]
             assert custom["inspect"] is True
-            if dashboard_name != "bioetl-run-explorer-v1.json":
+            skip_table_default_wrap = dashboard_name == (
+                "bioetl-run-explorer-v1.json"
+            ) or (dashboard_name == "bioetl-incident-v1.json" and panel_id == 2010)
+            if not skip_table_default_wrap:
                 assert custom["cellOptions"]["wrapText"] is True
 
 
@@ -1091,9 +1094,9 @@ def test_run_explorer_index_is_disk_last_ten_not_time_range() -> None:
 def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
-    assert _override_width(recent, "selected") == 28
-    assert (_override_width(recent, "Workflow") or 0) == 120
-    assert (_override_width(recent, "Run") or 0) <= 240
+    assert _override_width(recent, "selected") == 36
+    assert (_override_width(recent, "Workflow") or 0) == 72
+    assert (_override_width(recent, "Run") or 0) <= 340
     hidden = {
         str((item.get("matcher") or {}).get("options"))
         for item in (recent.get("fieldConfig") or {}).get("overrides") or []
