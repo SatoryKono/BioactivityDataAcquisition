@@ -1011,9 +1011,9 @@ def test_all_table_panels_use_uniform_cell_height() -> None:
                     f"{dashboard_path.name} panel {panel_id} ({title!r}) "
                     f"cellHeight={cell_height!r}"
                 )
-            custom = (
-                (panel.get("fieldConfig") or {}).get("defaults") or {}
-            ).get("custom") or {}
+            custom = ((panel.get("fieldConfig") or {}).get("defaults") or {}).get(
+                "custom"
+            ) or {}
             wrap_default = (custom.get("cellOptions") or {}).get("wrapText")
             if wrap_default is True:
                 violations.append(
