@@ -239,7 +239,7 @@
       "type": "table",
       "title": "Review Selected-Run Trust",
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 12,
         "x": 0,
         "y": 8
@@ -564,7 +564,7 @@
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 12,
         "x": 12,
         "y": 8
@@ -657,6 +657,50 @@
           }
         }
       ]
+    },
+    {
+      "id": 906,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "options": {
+        "bioetlDisplayTitle": "Review Recovery Action",
+        "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. This-screen tables: <em>Review Selected-Run Trust</em> and <em>Review Retention Compliance</em>. Then expand the row <em>Review Lineage Validation</em>.</div>",
+        "mode": "html",
+        "dataLinks": [
+          {
+            "title": "Open Replay Safety Diagnostics",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=130&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Selected-Run Trust",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9418&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Lineage Validation",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9415&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open Retention Compliance",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9416&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
+      },
+      "transparent": false,
+      "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -1084,50 +1128,6 @@
       "type": "row",
       "description": "Expand for the Review Lineage Validation table (9415). This row is named after that table; it is not Inspect Audit & Lineage Evidence.",
       "panels": [
-        {
-          "id": 906,
-          "type": "text",
-          "title": "",
-          "gridPos": {
-            "h": 2,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "options": {
-            "bioetlDisplayTitle": "Review Recovery Action",
-            "content": "<div style=\"padding:4px 8px;line-height:1.3;font-size:16px;white-space:normal;overflow-wrap:anywhere\">Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. This-screen tables: <em>Review Selected-Run Trust</em> and <em>Review Retention Compliance</em>. Then expand the row <em>Review Lineage Validation</em>.</div>",
-            "mode": "html",
-            "dataLinks": [
-              {
-                "title": "Open Replay Safety Diagnostics",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=130&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              },
-              {
-                "title": "Open Selected-Run Trust",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9418&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              },
-              {
-                "title": "Open Lineage Validation",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&viewPanel=9415&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              },
-              {
-                "title": "Open Retention Compliance",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=9416&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              }
-            ]
-          },
-          "transparent": false,
-          "description": "Next-step rail (native title omitted so h=2 does not scroll). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
-        },
         {
           "datasource": "BioETL Ops HTTP",
           "description": "TIME RANGE · SELECTED RUN lineage closure, identity consistency, cycle freedom, and persistence profile. Lives in the collapsed row titled Review Lineage Validation (not Inspect Audit & Lineage Evidence). UNKNOWN is not a healthy zero. No matching rows are a valid empty result; backend unavailable means the query could not be evaluated. SELECT RUN / VALID EMPTY is not OK.",

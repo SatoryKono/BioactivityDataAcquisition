@@ -123,7 +123,7 @@ def test_trust_9418_wraps_only_bounded_reasons_without_moving_fold() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9418)
 
-    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 0, "y": 8}
+    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 0, "y": 8}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("inspect") is True
@@ -203,7 +203,7 @@ def test_trust_9416_hides_forensic_columns_without_wrapping_detail() -> None:
     dashboard = load_dashboard(dashboard_path)
     panel = next(item for item in _root_panels(dashboard) if item.get("id") == 9416)
 
-    assert panel.get("gridPos") == {"h": 7, "w": 12, "x": 12, "y": 8}
+    assert panel.get("gridPos") == {"h": 5, "w": 12, "x": 12, "y": 8}
     assert panel.get("options", {}).get("cellHeight") == "sm"
     defaults = panel.get("fieldConfig", {}).get("defaults", {}).get("custom", {})
     assert defaults.get("inspect") is True
@@ -339,7 +339,7 @@ def test_overview_215_9002_fit_first_window_without_raising_fold() -> None:
 
     assert fleet.get("title") == "Monitor Fleet Health"
     assert fleet.get("type") == "stat"
-    assert fleet.get("gridPos") == {"h": 4, "w": 8, "x": 0, "y": 12}
+    assert fleet.get("gridPos") == {"h": 6, "w": 8, "x": 0, "y": 12}
 
     assert action.get("title") == "Review First Action"
     assert action.get("type") == "table"
