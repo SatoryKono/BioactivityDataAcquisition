@@ -4122,7 +4122,8 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "auto"
+                      "type": "auto",
+                      "wrapText": true
                     }
                   }
                 ]
@@ -5409,6 +5410,13 @@
                   {
                     "id": "custom.width",
                     "value": 360
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }

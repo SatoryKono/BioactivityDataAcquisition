@@ -1338,6 +1338,13 @@
                   {
                     "id": "custom.width",
                     "value": 480
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
                   }
                 ]
               }
