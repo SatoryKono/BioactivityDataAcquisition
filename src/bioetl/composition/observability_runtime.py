@@ -12,6 +12,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 
+from bioetl.composition import _services
+from bioetl.composition.runtime_builders import config_access as _config_access
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.domain.ports import LoggerPort
 
@@ -150,7 +152,7 @@ def push_metrics_to_gateway(
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
 
-    settings = get_settings()
+    settings = _config_access.get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
     grouping_key: dict[str, str] = {}
     if pipeline_name:
@@ -180,7 +182,7 @@ def delete_metrics_from_gateway(
 ) -> bool:
     """Delete metrics through the canonical composition-owned observability seam."""
 
-    settings = get_settings()
+    settings = _config_access.get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or _PUSHGATEWAY_FALLBACK
     grouping_key: dict[str, str] = {}
     if pipeline_name:
@@ -201,25 +203,25 @@ def delete_metrics_from_gateway(
 def get_audit_service() -> AuditInspectionService:
     """Load the audit diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_audit_service()
 
 
 def get_checkpoint_service() -> CheckpointService:
     """Load the checkpoint diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_checkpoint_service()
 
 
 def get_metrics_service() -> MetricsService:
     """Load the metrics diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_metrics_service()
 
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
     """Return the canonical operator-facing metrics/admin profile."""
 
-    settings = get_settings()
+    settings = _config_access.get_settings()
     metrics_service = get_metrics_service()
     status = metrics_service.get_status()
     live_metrics_port = (
@@ -270,7 +272,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
 def get_observability_workflow_service() -> ObservabilityWorkflowService:
     """Load the canonical observability workflow service on demand."""
 
-    return _impl()
+    return _services.get_observability_workflow_service()
 
 
 async def inspect_run_dossier(
@@ -289,25 +291,25 @@ async def inspect_run_dossier(
 def get_health_service() -> HealthService:
     """Load the health diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_health_service()
 
 
 def get_quarantine_service() -> QuarantineService:
     """Load the quarantine diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_quarantine_service()
 
 
 def get_run_manifest_service() -> RunManifestInspectionService:
     """Load the run-manifest diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_run_manifest_service()
 
 
 def get_lineage_service() -> LineageInspectionService:
     """Load the lineage diagnostics service through composition on demand."""
 
-    return _impl()
+    return _services.get_lineage_service()
 
 
 def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:

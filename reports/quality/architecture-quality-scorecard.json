@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2450,
+        "source_module_count": 2448,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -84,15 +84,15 @@
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 1,
+        "adr_enforcement_blocking_gap_count": 2,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 7.7,
+      "score": 6.2,
       "weight": 0.09,
-      "weighted_score": 0.693
+      "weighted_score": 0.558
     },
     {
       "evidence_metrics": {
@@ -162,11 +162,11 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.27,
+  "integral_score": 9.14,
   "interpretation": "good_targeted_improvements",
   "metrics": {
-    "accepted_adr_count": 56,
-    "adr_enforcement_blocking_gap_count": 1,
+    "accepted_adr_count": 57,
+    "adr_enforcement_blocking_gap_count": 2,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "contract_blocking_issue_count": 0,
@@ -190,7 +190,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2450,
+    "source_module_count": 2448,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -201,8 +201,8 @@
   "schema_version": 1,
   "source_artifacts": {
     "adr_enforcement_matrix": {
-      "accepted_adr_count": 56,
-      "blocking_gap_count": 1,
+      "accepted_adr_count": 57,
+      "blocking_gap_count": 2,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -241,8 +241,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "f009797f86d9eb52d63ca55e77b7ce2bc9d8cc831e672df374e70f74260a7eb6",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "9d348f4ffc2e448c4f7d60159b1e52ab410826d27ed457ac6ef9dda053979c08"
-
+      "source_tree_sha256": "8877ea3129b6321a5c5b2ec624e2c40948ce393d646e01a6993d129c864aa51e"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

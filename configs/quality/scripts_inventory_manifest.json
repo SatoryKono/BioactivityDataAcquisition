@@ -4,8 +4,9 @@
   "summary": {
     "total_scripts": 603,
     "status_counts": {
-      "active": 342,
-      "supporting": 261
+      "active": 338,
+      "supporting": 265
+
     },
     "reference_group_coverage": {
       "agents": 7,
@@ -10569,7 +10570,7 @@
     {
       "path": "scripts/engineering/dev/pretest_guardrails.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -10579,7 +10580,11 @@
           "source_group": "scripts",
           "text": "$PreflightScript = Join-Path $ScriptDir \"pretest_guardrails.ps1\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the native-Windows compatibility facade that delegates to the canonical pretest_guardrails.sh implementation; keep the shell implementation as the governed behavior source and remove this wrapper only when Windows test launchers no longer require it."
     },
     {
       "path": "scripts/engineering/dev/pretest_guardrails.sh",
@@ -18860,7 +18865,7 @@
     {
       "path": "scripts/ops/launchers/codex/verify-setup.bat",
       "type": "bat",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -18870,12 +18875,16 @@
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.bat\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the cmd.exe compatibility facade over verify-setup.ps1; keep setup verification behavior in the canonical run-codex.ps1 check path and remove this wrapper only after batch callers are retired."
     },
     {
       "path": "scripts/ops/launchers/codex/verify-setup.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -18885,7 +18894,11 @@
           "source_group": "tests",
           "text": "root / \"scripts\" / \"ops\" / \"launchers\" / \"codex\" / \"verify-setup.ps1\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "windows_compatibility_wrapper",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the legacy PowerShell setup-verification facade over scripts/ai/codex/run-codex.ps1 check; keep the canonical launcher as the behavior owner and remove this facade after documented compatibility callers migrate."
     },
     {
       "path": "scripts/ops/maintenance/github/remove_required_status_check.sh",
@@ -21387,7 +21400,7 @@
     {
       "path": "scripts/ops/runtime/mcp/windows_tcp_relay.ps1",
       "type": "ps1",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -21397,7 +21410,11 @@
           "source_group": "scripts",
           "text": "relay_script = Path(__file__).with_name(\"windows_tcp_relay.ps1\")"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the binary-safe Windows stdio relay invoked by windows_docker_mcp_bridge.py; keep the Python bridge as the governed entrypoint and do not expose the relay as a separate operator command."
     },
     {
       "path": "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1",
