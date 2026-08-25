@@ -46,6 +46,3 @@ class DQReportServiceFactoryProtocol(Protocol):
         report_writer: object,
         metrics: MetricsPort | None,
     ) -> object: ...
-
-
-DQReportServiceFactory = DQReportServiceFactoryProtocol
