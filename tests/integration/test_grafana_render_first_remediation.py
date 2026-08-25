@@ -717,14 +717,24 @@ def test_operator_critical_tables_expose_full_values() -> None:
     for dashboard_name, panel_ids in expected_panels.items():
         dashboard = _load(dashboard_name)
         for panel_id in panel_ids:
-            panel = _panel(dashboard, panel_id)
-            custom = panel["fieldConfig"]["defaults"]["custom"]
-            assert custom["inspect"] is True
-            skip_table_default_wrap = dashboard_name == (
-                "bioetl-run-explorer-v1.json"
-            ) or (dashboard_name == "bioetl-incident-v1.json" and panel_id == 2010)
-            if not skip_table_default_wrap:
-                assert custom["cellOptions"]["wrapText"] is True
+            matches = [
+                panel
+                for panel in _iter_panels(list(dashboard.get("panels", [])))
+                if panel.get("id") == panel_id
+            ]
+            assert matches, (dashboard_name, panel_id)
+            for panel in matches:
+                custom = panel["fieldConfig"]["defaults"]["custom"]
+                assert custom["inspect"] is True
+                # Uniform row height: do not wrap at table default. Long fields
+                # wrap via named-column overrides (same pattern as #8977).
+                assert custom.get("cellOptions", {}).get("wrapText") is not True
+                if dashboard_name == "bioetl-run-explorer-v1.json" and panel_id == 3022:
+                    continue
+                wrapped = _wrapped_field_names(panel)
+                assert wrapped, (
+                    f"{dashboard_name} panel {panel_id} must wrap at least one named field"
+                )
 
 
 def test_first_window_named_text_columns_wrap_without_table_default() -> None:
