@@ -7,13 +7,13 @@ remain thin adapters. Full DI framework is intentionally not introduced
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
 from importlib import import_module
-from typing import cast
-
 from bioetl.composition._pipeline_execution import (
     ensure_metrics_server_started as ensure_metrics_server_started,
 )
+from bioetl.composition._service_registry import register as register
+from bioetl.composition._service_registry import registered_ports as registered_ports
+from bioetl.composition._service_registry import resolve as resolve
 from bioetl.composition._services import (
     get_contract_migration_service as get_contract_migration_service,
 )
@@ -41,32 +41,12 @@ __all__ = [
     "registered_ports",
     "resolve",
 ]
-
-_REGISTRY: dict[type[object], Callable[[], object]] = {}
 _COMPAT_EXPORT_TARGETS = {
     "bootstrap_composite_runner": "bioetl.composition.composite_catalog",
     "create_pipeline_runner": "bioetl.composition.execution_api",
     "load_composite_config": "bioetl.composition.composite_catalog",
     "run_pipeline": "bioetl.composition.execution_api",
 }
-
-
-def register[T](port: type[T], factory: Callable[[], T]) -> None:
-    """Register a zero-arg factory for a port/protocol type."""
-    _REGISTRY[cast(type[object], port)] = cast(Callable[[], object], factory)
-
-
-def resolve[T](port: type[T]) -> T:
-    """Resolve a registered port factory."""
-    factory = _REGISTRY.get(cast(type[object], port))
-    if factory is None:
-        raise KeyError(f"no composition factory registered for {port!r}")
-    return cast(T, factory())
-
-
-def registered_ports() -> Mapping[type[object], Callable[[], object]]:
-    """Return a snapshot of the composition factory registry."""
-    return dict(_REGISTRY)
 
 
 def __getattr__(name: str) -> object:

@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -58,6 +59,22 @@ def test_get_metrics_service_runtime_cast_is_bound(
     )
 
     assert _services.get_metrics_service() == ("bootstrap_metrics_service", (), {})
+
+
+def test_get_health_service_resolves_typed_application_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The Health pilot resolves its application port instead of a locator name."""
+    from bioetl.application.ports import HealthServiceProtocol
+    from bioetl.composition import _services
+
+    expected = object()
+    monkeypatch.setattr(_services, "_ensure_provider_registrations", lambda: None)
+    resolve = Mock(return_value=expected)
+    monkeypatch.setattr(_services, "_resolve", resolve)
+
+    assert _services.get_health_service() is expected
+    resolve.assert_called_once_with(HealthServiceProtocol)
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 61
+expected_total: 62
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -119,6 +119,10 @@ protocols:
 - name: DQReportServiceFactoryProtocol
   path: src/bioetl/application/ports/dq.py
   line: 33
+  target_tier: application
+- name: HealthServiceProtocol
+  path: src/bioetl/application/ports/health.py
+  line: 11
   target_tier: application
 - name: WorkflowMetricsFactoryProtocol
   path: src/bioetl/application/ports/metrics.py
