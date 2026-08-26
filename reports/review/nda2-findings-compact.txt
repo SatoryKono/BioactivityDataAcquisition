@@ -1,0 +1,281 @@
+
+===== P0 PROVEN n=1 =====
+AUD-TD-001|tech-debt|Critical|reports/quality/module-coverage-inventory.json:49353-49359
+  OBS: diff3 conflict на source_tree_sha256; inventory невалидный JSON.
+  FIX: регенерировать inventory, не править hash руками
+
+===== P1 PROVEN n=10 =====
+AUD-DOCS-001|docs-content|High|docs/03-guides/getting-started.md:217
+  OBS: Onboarding first-pipeline commands omit --required-persistence-profile degraded_observable while runtime default is replay_ready and the cheatsheet requires the opt-down for first live extract.
+  FIX: Add --required-persistence-profile degraded_observable to first-run examples.
+AUD-DOCS-002|docs-content|High|.github/CONTRIBUTING.md:12
+  OBS: Contributor Windows fallback uses .venv and extras [dev,tests], contradicting .venv-win and tracing extras.
+  FIX: Point CONTRIBUTING at setup_env_windows.ps1 / .venv-win.
+TEST-SYS-001|tests-system|High|pyproject.toml:216
+  OBS: Global addopts -m 'not benchmark and not slow' AND-комбинируется с CLI -m, поэтому @pytest.mark.slow не коллекционируется в Tests/E2E/architecture без -o addopts=.
+  FIX: Убрать -m из addopts или добавить slow-lane с -o addopts=; не повышать skip budgets.
+TEST-SYS-002|tests-system|High|docs/00-project/governance/05-github-policy.md:147
+  OBS: Документированный ruleset на main disabled; test workflows не required checks.
+  FIX: Maintainer: включить ruleset после проверки always-on contexts. Вне MODE=audit.
+AUD-TD-002|tech-debt|High|reports/quality/module-coverage-inventory.json:49362-49512
+  OBS: 4/5 hotspot families threshold_status=fail vs scorecard floors
+  FIX: owner-тесты на хвост; floors не снижать
+AUD-TD-004|tech-debt|High|reports/quality/debt-governance-gates.json:48-75
+  OBS: 45/45 pass и drift=0 при conflicted/stale inventory; hash adfa9f79
+  FIX: refresh + --changed-from-ref origin/main
+GHA-001|github-actions|High|.github/workflows/dashboard-render-host.yml:25
+  OBS: Self-hosted runner с GRAFANA_USERNAME/PASSWORD и checkout без persist-credentials: false.
+  FIX: persist-credentials: false; environment reviewers; document ephemeral runner.
+GHA-002|github-actions|High|docs/00-project/governance/05-github-policy.md:147
+  OBS: Политика фиксирует выключенный required-check ruleset; direct push/merge в main разрешён.
+  FIX: Enable ruleset for checks-complete + root-hygiene only.
+DIAG-001|diagrams|High|docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd:34-37
+  OBS: Local-deploy подписывает Gold как Delta/Parquet, quarantine и lineage как Parquet; в коде Gold/quarantine — Delta, lineage — JSONL.
+  FIX: Переподписать узлы под Delta/JSONL; не повышать бюджеты
+DIAG-002|diagrams|High|docs/02-architecture/diagrams/architecture/svg/INDEX.md:211-229
+  OBS: INDEX/bundle/descriptions ссылаются на 13a/13b/13c-port-contracts SVG/mmd, которых нет; live stems 13g/13h/13i.
+  FIX: Регенерировать INDEX, architecture.bundle.md и description cards
+
+===== P2 PROVEN n=78 =====
+AUD-DOCS-003|docs-content|Medium|docs/03-guides/quick-start.md:45
+  OBS: quick-start calls tracing extras canonical and also points at make install (tests_full,export).
+  FIX: Stop dual 'canonical' labels; cite TOOLS.md rows.
+AUD-DOCS-004|docs-content|Medium|Makefile:107
+  OBS: make lint is weaker than README verify and CI mypy --strict --no-incremental.
+  FIX: Tighten Makefile lint or document it as a fast subset.
+AUD-DOCS-005|docs-content|Medium|docs/04-reference/cli.md:52
+  OBS: Registered CLI group bioetl report is missing from CLI Reference and cheatsheet headings.
+  FIX: Add ### report to cli.md and cheatsheet.
+AUD-DOCS-006|docs-content|Medium|docs/04-reference/api/application.md:33
+  OBS: API package table omits application.ports required by ADR-058; Last verified 2026-03-29.
+  FIX: Add application.ports row and bump Last verified.
+AUD-DOCS-007|docs-content|Medium|docs/04-reference/environment-variables.md:26
+  OBS: Env reference marks BIOETL_OPENALEX_API_KEY Required=No; getting-started and OpenAlex provider spec say required for production-like runs.
+  FIX: Align Required column with provider spec.
+AUD-DOCS-008|docs-content|Medium|.github/SECURITY.md:7
+  OBS: Threat-model Data Sources omit production providers OpenAlex, CrossRef, Semantic Scholar.
+  FIX: Add the three providers to Data Sources and secret examples.
+AUD-DOCS-009|docs-content|Medium|docs/03-guides/testing.md:1
+  OBS: Lane-classification section precedes the document header; Last verified 2026-06-19.
+  FIX: Move lane table below header and bump Last verified.
+AUD-DOCS-010|docs-content|Medium|src/bioetl/README.md:14
+  OBS: Source map routes pipeline bootstrap to composition/execution_api.py (shim); first-party seam is entrypoints.py.
+  FIX: Retarget the row to entrypoints.py.
+TEST-SYS-003|tests-system|Medium|.github/workflows/tests.yml:840
+  OBS: CI test-fast и test-matrix используют xdist -n auto, хотя unit-fast и integration-replay в serial_or_bounded_lanes; VCR integration почти без serial.
+  FIX: Пометить VCR integration serial или перенести proven-safe subset в explicit_parallel_lanes. Без retries.
+TEST-SYS-004|tests-system|Medium|configs/quality/test_skip_inventory.yaml:8
+  OBS: Skip census (24 path, все permanent_policy) только contract/integration; tests/e2e с pytest.skip вне census.
+  FIX: Расширить census на tests/e2e; не поднимать skip budget.
+TEST-SYS-005|tests-system|Medium|configs/quality/e2e_skip_rate_slo.yaml:24
+  OBS: e2e skip-rate SLO mode=advisory (15%); blocking 15% только matrix-smoke run3.
+  FIX: 3 nightly samples → mode=blocking; не увеличивать max_skip_rate_percent.
+TEST-SYS-006|tests-system|Medium|tests/e2e/test_pipeline_matrix_e2e.py:262
+  OBS: 16 deferred pipelines вне PR e2e-smoke; chembl.publication_term owner — dedicated e2e не в e2e-smoke paths.
+  FIX: Сменить owner на unit/integration или добавить dedicated e2e в e2e-smoke.
+TEST-SYS-007|tests-system|Medium|tests/e2e/test_pipeline_matrix_e2e.py:547
+  OBS: Non-critical VCR mismatch в playback → pytest.skip INFRA_FLAKY_CASSETTE_MISMATCH, не fail.
+  FIX: Fail-closed или deferred с другим owner. Без reruns.
+AUD-TD-003|tech-debt|Medium|reports/quality/live-residual-snapshot.json:69-71
+  OBS: unmeasured_module_count=84 при inventory summary=0
+  FIX: пересобрать snapshot после починки inventory
+AUD-TD-005|tech-debt|Medium|configs/quality/lazy_import_ratchet.yaml:5-7
+  OBS: lazy-import freeze 97/97, target 60
+  FIX: снять lazy imports, затем max_count вниз
+AUD-TD-006|tech-debt|Medium|configs/quality/private_import_ratchet.yaml:6-71
+  OBS: 15/15 private-import pairs, strict_mode=false
+  FIX: public owner API, ratchet вниз
+AUD-TD-007|tech-debt|Medium|configs/quality/debt_scorecard.yaml:256-268
+  OBS: config_count 27/27 и unique_parameter_count 419/419 freeze
+  FIX: замена ключей, не max_count++
+AUD-TD-008|tech-debt|Medium|configs/quality/debt_scorecard.yaml:528-548
+  OBS: control_plane max_internal_fan_in 2/2 hard freeze
+  FIX: owner subpackages; не повышать 2
+AUD-TD-009|tech-debt|Medium|configs/quality/basedpyright_import_cycle_allowlist.json:17-199
+  OBS: 30 typing-visible import cycles, review_by 2026-10-28
+  FIX: снимать entries по одному, не расширять
+AUD-TD-010|tech-debt|Medium|configs/quality/assertless_ratchet.yaml:5-6
+  OBS: assertless 87 при target 77
+  FIX: явные assert; не путать с advisory 1149
+AUD-TD-011|tech-debt|Medium|configs/quality/duplication_complexity_exemptions.yaml:9-164
+  OBS: 15 xenon path exemptions + 4 function CC caps, expiry 2026-12-31
+  FIX: сплиты по removal_step, не продлевать expiry ростом CC
+AUD-TD-012|tech-debt|Medium|src/bioetl/application/ports/metrics.py:108-110
+  OBS: публичные deprecated aliases вне compatibility inventory
+  FIX: убрать из __all__ или зарегистрировать sunset
+AUD-TD-013|tech-debt|Medium|configs/quality/debt_scorecard.yaml:443-450
+  OBS: expected_action Hold duplication (6 clusters) при metrics=0
+  FIX: обновить expected_action, бюджеты не поднимать
+AUD-TD-014|tech-debt|Medium|reports/quality/debt-governance-gates.json:39-46
+  OBS: budget_no_growth not_evaluated_without_changed_from_ref при status=pass
+  FIX: публиковать gates только с --changed-from-ref
+AUD-TD-015|tech-debt|Medium|reports/quality/branch-coverage-gap-report.md:7-21
+  OBS: агрегат branch 86.15% при 552 files <85%
+  FIX: пересобрать gap-report; закрывать ranked tail
+AUD-TD-016|tech-debt|Medium|configs/quality/compatibility_facade_inventory.yaml:3-12
+  OBS: review cluster 2026-09-30: 12 entrypoints, ENTITY_MAPPING, 6 config clusters
+  FIX: review до даты; не silent delete, не max_count++
+TREE-001|repo-tree|Medium|.gitignore:651-654
+  OBS: Last-match игнор .claude/.vibe/.zed против catalog/policy/registry.
+  FIX: Синхронизировать gitignore last-match, catalog, 03-file-policy §0 и registry в одном PR.
+TREE-002|repo-tree|Medium|configs/quality/repo_structure_catalog.yaml:57-60
+  OBS: artifacts/ одновременно approved tracked и gitignored local.
+  FIX: Перенести в local_tolerated_root_dirs или selective un-ignore + curated live_state.
+TREE-003|repo-tree|Medium|configs/quality/repo_structure_catalog.yaml:105-106
+  OBS: .qodo untracked в catalog/policy, но gitignore un-ignore и registry про tracked qodo source.
+  FIX: Либо root_tooling_roots+allowlist файлов, либо снять un-ignore.
+TREE-004|repo-tree|Medium|scripts/engineering/repo/catalog.yaml:67-111
+  OBS: Нет catalog groups для scripts/data_quality и scripts/memory.
+  FIX: Добавить groups data_quality и memory; не mass-move.
+TREE-005|repo-tree|Medium|scripts/ci_check_docs_parity.sh:1-12
+  OBS: Два bootstrap с именем docs parity вызывают разные реализации.
+  FIX: Переименовать wrapper или свести к python -m scripts.data_quality check-entity-config-parity.
+TREE-006|repo-tree|Medium|scripts/generate_test_github_issues.py:20-27
+  OBS: Fat non-wrapper на scripts/ root с load_dotenv и GITHUB_TOKEN.
+  FIX: Rehome под scripts/ops или wrapper; allowlist не расширять; .env не трогать.
+TREE-007|repo-tree|Medium|docs/00-project/governance/documentation-update-plan.md:1-6
+  OBS: Draft-план в governance/ вне cataloged docs/plans/ (max_active_backlog=1).
+  FIX: Перенести в docs/plans/ as supporting_context или в docs/99-archive/plans/.
+TREE-008|repo-tree|Medium|docs/00-project/governance/05-github-policy.md:145-166
+  OBS: Workflow root-hygiene живой, GitHub ruleset enforcement=disabled.
+  FIX: Включить enforcement или датированная owner attestation advisory-only.
+GHA-003|github-actions|Medium|.github/workflows/tests.yml:51
+  OBS: Большинство checkout оставляют persist-credentials default true, включая jobs с issues: write.
+  FIX: Set persist-credentials: false everywhere; extend architecture test.
+GHA-004|github-actions|Medium|.github/workflows/docker.yml:160
+  OBS: Trivy SARIF upload pinned to codeql-action v2 SHA while CodeQL/Scorecard use v4.37.8.
+  FIX: Retarget upload-sarif to v4.37.8 SHA; drop v2 from ALLOWED_USES.
+GHA-005|github-actions|Medium|.github/workflows/docker.yml:216
+  OBS: GHCR publish tags :ref_name (moving :main) besides immutable SHA.
+  FIX: Drop :ref_name or require ghcr-publish reviewers.
+GHA-006|github-actions|Medium|.github/workflows/labeler.yml:8
+  OBS: Единственный pull_request_target; checkout PR HEAD нет; zizmor exception задокументирован.
+  FIX: Keep exception; do not add checkout/secrets/extra writes.
+GHA-007|github-actions|Medium|.github/workflows/vacuum.yml:37
+  OBS: Weekly VACUUM на ubuntu-latest без storage secrets/OIDC не достигает Delta lake.
+  FIX: Disable schedule or bind OIDC/environment to the lake URI.
+GHA-008|github-actions|Medium|.github/workflows/security.yml:37
+  OBS: detect-secrets ставится pip install с PyPI, не из uv.lock.
+  FIX: Use setup-python-uv and drop pip install.
+GHA-009|github-actions|Medium|.github/workflows/security.yml:57
+  OBS: pip-audit --strict игнорирует CVE-2026-3219 и PYSEC-2026-3721 без inline expiry.
+  FIX: Document package/expiry; remove when lockfile moves; do not add ignores.
+GHA-010|github-actions|Medium|.github/workflows/commit-lint.yml:12
+  OBS: commit-lint paths-ignore включает .github/workflows/**.
+  FIX: Remove .github/workflows/** from paths-ignore.
+GHA-011|github-actions|Medium|.github/workflows/contract-governance-fast-check.yml:9
+  OBS: Ряд PR/push workflow без concurrency group.
+  FIX: Add concurrency groups; SHA/PR-number for required main push workflows.
+GHA-012|github-actions|Medium|.github/workflows/reusable-setup.yml:1
+  OBS: Deprecated workflow_call helpers всё ещё callable и не используются живыми workflow.
+  FIX: Delete both files; keep composites as SSOT.
+GHA-013|github-actions|Medium|docs/00-project/governance/05-github-policy.md:460
+  OBS: Deploy environments есть в YAML, но protection ghcr-publish в политике optional.
+  FIX: Require reviewers; change policy from optional to MUST.
+AUD-001|agents-runtime|Medium|docs/00-project/ai/rules/cursor/05-agent-workflow.mdc:12
+  OBS: Always-on Cursor/Windsurf precedence = .codex/agents/ затем RULES.md; Junie/Devin/NORMATIVE_SOURCES опущены.
+  FIX: Переписать 05-agent-workflow и синхронизировать Windsurf.
+AUD-002|agents-runtime|Medium|docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md:8
+  OBS: Windsurf core-governance не текущий transform Cursor: RULES v6.1.5, ADR-050, priority с RULES.md.
+  FIX: python -m scripts.ai.sync.windsurf и drift-gate.
+AUD-003|agents-runtime|Medium|docs/00-project/ai/agents/guides/CLAUDE.md:9
+  OBS: CLAUDE stub/guide и RULES_COVERAGE_MATRIX пинят RULES v6.1.5 при живом 6.1.11.
+  FIX: Заменить баннеры на read Version: header.
+AUD-004|agents-runtime|Medium|docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py:1
+  OBS: QA wrappers объявляют docs AI scripts каноном для debt-exemptions и config-gap.
+  FIX: Перенести implementation в scripts/**; docs — thin wrappers.
+AUD-005|agents-runtime|Medium|docs/00-project/ai/agents/agents/sp-test-automator.md:21
+  OBS: docs-only sp-* с Write/sonnet, coverage >80%, escalate к отсутствующему sp-workflow-orchestrator.
+  FIX: Read-only pointers на py-*; убрать sonnet/Write; починить escalation.
+AUD-006|agents-runtime|Medium|docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md:27
+  OBS: Applies To не включает .devin/** при каноническом Devin runtime в AGENTS.md.
+  FIX: Добавить .devin/agents|skills и check_skills_mirror.sh --check.
+AUD-007|agents-runtime|Medium|.devin/agents/DEVIN-RUNTIME.md:7
+  OBS: Devin Canonical Sources ставят NORMATIVE_SOURCES/RULES выше AGENTS.md.
+  FIX: Переставить Canonical Sources во всех Devin maps.
+AUD-008|agents-runtime|Medium|AGENTS.md:86
+  OBS: Обязательный junie parity check только как bash; Windows python twin не документирован.
+  FIX: Документировать python scripts/ai/junie/check_junie_mirror.py --check.
+DIAG-003|diagrams|Medium|docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd:35
+  OBS: Объявлен только ChemblAdapter; PA/UA/CRA/OAA/SSA/PCA без подписей в .mmd и SVG.
+  FIX: Объявить labeled nodes по образцу 13a-data-storage-ports.mmd
+DIAG-004|diagrams|Medium|docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd:38-89
+  OBS: HASHED, BW, SW используются в edges/class без объявления узлов.
+  FIX: Добавить node declarations или убрать лишние id
+DIAG-005|diagrams|Medium|.github/workflows/docs.yml:496-499
+  OBS: PR drift gate и pre-commit lint не покрывают sequence/, state-machines/, providers/.
+  FIX: Добавить globs sequence/*.mmd, state-machines/*.mmd, providers/**/*.mmd
+DIAG-006|diagrams|Medium|docs/02-architecture/diagrams/architecture/09-observability-stack.mmd:72
+  OBS: Prometheus + Grafana как обязательный External System без optional; runtime local-only.
+  FIX: Пометить node optional или разделить local vs optional view
+DIAG-007|diagrams|Medium|docs/02-architecture/diagrams/foundation/01-full-system-component.mmd:3
+  OBS: Smoke/quality-gate baseline Updated 2026-03-28 = 151d > STALE-001 150d.
+  FIX: Перепроверить baseline и bump даты; порог 150d не поднимать
+DIAG-008|diagrams|Medium|docs/02-architecture/diagrams/README.md:117
+  OBS: README «48 core», таблица обрывается на 48; файлы 49-52 chembl dataflow есть и в visual-smoke.
+  FIX: Добавить таблицу 49-52 / переименовать секцию
+DOCS-PIPE-001|docs-pipeline|Medium|scripts/docs/checks/check_links.py:667-668
+  OBS: check_broken_links пропускает .png/.svg, mkdocs not_found=info — битые image-ссылки не валят CI.
+  FIX: Check tracked .svg; limit PNG skip to gitignored png/; add guardrail test.
+DOCS-PIPE-002|docs-pipeline|Medium|mkdocs.yml:3
+  OBS: site_url указывает на GitHub Pages, живой URL 404, deploy workflow отсутствует.
+  FIX: Deploy Pages or drop github.io site_url in sync with publication policy.
+DOCS-PIPE-003|docs-pipeline|Medium|mkdocs.yml:147-152
+  OBS: extra_javascript/extra_css ссылаются на docs/assets/*, каталога assets в docs/ нет.
+  FIX: Commit assets or enable/remove mermaid2 plugin; assert extra_* paths exist.
+DOCS-PIPE-004|docs-pipeline|Medium|README.md:102
+  OBS: README обещает Full API documentation with mkdocstrings; ::: bioetl нет, страницы curated.
+  FIX: Fix README; remove idle plugin or add ::: facade pages.
+DOCS-PIPE-005|docs-pipeline|Medium|.github/workflows/docs.yml:18-19
+  OBS: Path-filters docs.yml без .codex/agents, .junie, .devin/agents при runtime-mirrors в этом workflow.
+  FIX: Add equal-peer runtime trees to docs.yml path filters.
+DOCS-PIPE-006|docs-pipeline|Medium|scripts/docs/checks/verify.py:53-67
+  OBS: verify не вызывает passports check и check-drift --ai-surfaces.
+  FIX: Add passports and --ai-surfaces to verify (with skip flags).
+DOCS-PIPE-007|docs-pipeline|Medium|scripts/docs/build_docs_site.sh:30-46
+  OBS: Shell-адаптер берёт первый python с mkdocs; .venv-win не ищется.
+  FIX: Route via run_project_python.py / uv run --frozen; probe .venv-win.
+DOCS-PIPE-008|docs-pipeline|Medium|scripts/docs/checks/check_links.py:1214
+  OBS: Link-scan только docs/; README.md и AGENTS.md не проверяются.
+  FIX: Include README.md and AGENTS.md in the scanner.
+AUD-ARCH-001|architecture-review|Medium|docs/02-architecture/00-overview.md:16
+  OBS: Overview закреплён на RULES v6.1.7 и 55 ADR до ADR-057; live RULES 6.1.11 и registry 59/57 accepted, включая ADR-058/059.
+  FIX: Обновить таблицу ADR из registry.json; pin RULES 6.1.11.
+AUD-ARCH-002|architecture-review|Medium|docs/02-architecture/current-state-inventory.md:39
+  OBS: Inventory публикует score 7.41 и 1 fail gate против live scorecard 9.41 и всех pass.
+  FIX: Перегенерировать таблицу из scorecard + gates.
+AUD-ARCH-003|architecture-review|Medium|docs/02-architecture/current-state-inventory.md:164
+  OBS: Operator services указаны как несуществующие root-файлы application/services/*.py.
+  FIX: Заменить на checkpoint/checkpoint_service.py, ops/*, quality/*.
+AUD-ARCH-004|architecture-review|Medium|docs/00-project/architecture-index.md:63
+  OBS: Индекс копирует устаревшие census (2450/2448) и families_at_budget с composition_factories_pipeline 2/2.
+  FIX: Убрать скопированные integers; поправить families_at_budget.
+AUD-ARCH-005|architecture-review|Medium|docs/02-architecture/system-context.md:55
+  OBS: C4 context рисует Data API Query Service и pin RULES v6.1.3 (verified 2026-03-29).
+  FIX: Выровнять с current-state-diagrams.md.
+AUD-ARCH-006|architecture-review|Medium|docs/02-architecture/04-interfaces-layer.md:38
+  OBS: CLI-каталог от 2026-05-07 не содержит workflow и report.
+  FIX: Регенерировать таблицу из main.py.
+AUD-ARCH-007|architecture-review|Medium|reports/quality/architecture-quality-scorecard.json:172
+  OBS: Lazy-import ratchet на потолке 97/97 при target 60.
+  FIX: Burn-down facades; не поднимать max_count.
+AUD-ARCH-008|architecture-review|Medium|reports/quality/architecture-quality-scorecard.json:165
+  OBS: Composition 295/300 модулей (ADR-059 shrink-only).
+  FIX: Удалять shims, не поднимать max_modules.
+AUD-ARCH-009|architecture-review|Medium|reports/quality/hotspot-family-baseline.json:93
+  OBS: application_services_control_plane fan-in 2/2.
+  FIX: Не повышать cap; не плодить импортёров хаба.
+AUD-ARCH-010|architecture-review|Medium|configs/quality/package_cohesion_budget.yaml:7
+  OBS: domain/aggregates 11/11 модулей при target 8.
+  FIX: Слить mixins под per-file LOC cap.
+AUD-ARCH-011|architecture-review|Medium|src/bioetl/interfaces/http/_processed_records_prometheus.py:16
+  OBS: Default Prometheus probe добавляет docker DNS fallbacks (prometheus, host.docker.internal).
+  FIX: Убрать docker fallbacks из default candidate list.
+
+===== NOT_PROVEN =====
+TEST-SYS-010|P3|NOT_PROVEN|Curated flaky inventory пуст (2026-08-03); N-repeat в сессии не выполнялся — intermittency NOT_PROVEN.
+TREE-015|P2|NOT_PROVEN|git ls-files exact-root ≡ allowlist не выполнен.
+TREE-016|P3|NOT_PROVEN|git clean -n и large-file inventory не запускались.
+GHA-019|P2|NOT_PROVEN|Ephemeral vs persistent isolation label bioetl-observability в репозитории не доказана.
+GHA-020|P2|NOT_PROVEN|Live required-reviewers на pypi/testpypi/ghcr-publish/observability-render-host не читались из GitHub.
+AUD-015|P3|NOT_PROVEN|Live SHA-256 Codex↔Junie и Codex–Devin parity в этой сессии не исполнялись.
