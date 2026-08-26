@@ -49312,6 +49312,7 @@
   "snapshot_date": "2026-08-25",
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   "source_tree_sha256": "796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362",
 ||||||| aba2ded177
   "source_tree_sha256": "d561c2c978a64b9158b582a0c06de65ea75ec536b55c88784b68e0cdb3b37810",
@@ -49323,6 +49324,11 @@
 =======
   "source_tree_sha256": "ba25e20680a1420cf325e0ed20ff31324f235bfb4cf576f3c7a0022ae42ef5db",
 >>>>>>> fix/issue-9647-refresh-quality-artifacts
+||||||| aba2ded177
+  "source_tree_sha256": "d561c2c978a64b9158b582a0c06de65ea75ec536b55c88784b68e0cdb3b37810",
+=======
+  "source_tree_sha256": "796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362",
+>>>>>>> fix/composition-facade-closeout-9620-final
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

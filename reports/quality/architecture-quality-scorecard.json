@@ -264,7 +264,6 @@
 
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362"
-
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
