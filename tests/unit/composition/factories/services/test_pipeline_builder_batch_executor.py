@@ -40,6 +40,9 @@ from bioetl.composition.factories.services.pipeline_builder import (
     BatchExecutorBuildRequest,
     create_batch_executor_from_pipeline,
 )
+from bioetl.composition.factories.services.pipeline_batch_executor_builder import (
+    _resolve_gold_filter,
+)
 
 TEST_ROOT = synthetic_test_root("bioetl-pipeline-batch-executor")
 BRONZE_ROOT = str(TEST_ROOT / "bronze")
@@ -85,6 +88,15 @@ def _make_callbacks() -> SimpleNamespace:
 @pytest.mark.unit
 class TestCreateBatchExecutorFromPipeline:
     """Tests for batch-executor assembly from pipeline context."""
+
+    def test_preserves_configured_gold_filter_when_gold_is_enabled(self) -> None:
+        pipeline = _make_pipeline()
+        callbacks = _make_callbacks()
+
+        resolved = _resolve_gold_filter(pipeline=pipeline, callbacks=callbacks)
+
+        assert resolved is callbacks.gold_filter
+        pipeline.services.metrics.increment_counter.assert_not_called()
 
     @patch(
         "bioetl.composition.factories.services.pipeline_batch_executor_builder.ContractAwareGoldValidator"
