@@ -760,7 +760,7 @@ BYO tracing backend (OTLP collector / Tempo — not shipped in default monitorin
   save paths when tracing is enabled.
 - Bounded checkpoint tracing attributes are intentionally shared across these
   paths:
-  - `bioetl.pipeline`
+  - bioetl.pipeline
   - `bioetl.checkpoint.operation`
   - `bioetl.checkpoint.scope`
   - `bioetl.checkpoint.status`
