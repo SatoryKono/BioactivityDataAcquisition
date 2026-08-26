@@ -1,0 +1,398 @@
+{
+  "domain_id": "tests-system",
+  "prompt_id": "prompt.audit.tests-system",
+  "surface_score": 2,
+  "audit_date": "2026-08-26",
+  "mode": "audit",
+  "canonical_artifact_dir": "reports/audit/tests/",
+  "persisted_artifact_dir": "reports/review/tests-system-audit-2026-08-26/",
+  "findings": [
+    {
+      "id": "TEST-SYS-001",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "disabled-zone",
+      "path": "pyproject.toml:216",
+      "method": "inspection of pytest addopts vs CI -m expressions and @pytest.mark.slow sites",
+      "observation": "Global addopts -m 'not benchmark and not slow' is AND-combined with every CLI -m, so @pytest.mark.slow tests are not collected in canonical lanes or Tests/E2E/architecture jobs unless addopts is cleared.",
+      "expected": "Named slow/governance/e2e/security lanes can execute @pytest.mark.slow owners; CI has an explicit slow-lane with -o addopts= or addopts does not embed -m.",
+      "actual": "addopts includes '-m', 'not benchmark and not slow'. CI jobs pass additional -m but do not use -o addopts=. Slow owners include tests/security/test_security.py TestVCRCassetteSanitization, tests/e2e/test_full_pipeline_chain_e2e.py (module pytestmark slow), tests/architecture/test_layer_dependencies.py::test_import_linter_contracts, and live contract @pytest.mark.slow methods. Only security.yml detect-secrets and pre-commit clear addopts for one architecture test.",
+      "impact": "VCR cassette secret sanitization, full-chain e2e, and several architecture/security/contract slow tests never run on PR or monthly contract workflow; green lanes do not prove those risks.",
+      "root_cause": "pytest combines multiple -m expressions with AND; global exclusion was used as a local-speed default without a compensating slow-lane.",
+      "remediation": "Remove -m from pyproject addopts (keep exclusion in named lane marker_expression) OR add a canonical slow lane that runs with -o addopts= and attach TestVCRCassetteSanitization plus architecture/e2e slow owners. Do not raise skip budgets.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "pytest --collect-only -q -m slow  (expect empty under current addopts)",
+        "pytest --collect-only -q -o addopts= -m slow (expect slow nodes)"
+      ],
+      "automation": "architecture test: assert no -m in addopts OR every @pytest.mark.slow nodeid is owned by a CI job that passes -o addopts=",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "pyproject.toml",
+          "line": 216,
+          "command": "read [tool.pytest.ini_options].addopts",
+          "observation": "'-m', 'not benchmark and not slow'"
+        },
+        {
+          "path": "tests/security/test_security.py",
+          "line": 86,
+          "command": "rg @pytest.mark.slow tests/security/test_security.py",
+          "observation": "TestVCRCassetteSanitization marked slow"
+        },
+        {
+          "path": ".github/workflows/security.yml",
+          "line": 39,
+          "command": "read detect-secrets step",
+          "observation": "only test_no_hardcoded_secrets uses -o addopts="
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-002",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "ci-merge-gate",
+      "path": "docs/00-project/governance/05-github-policy.md:147",
+      "method": "inspection of governance SSOT for ruleset enforcement; workflows inspected; live GitHub API not re-queried this session",
+      "observation": "Documented GitHub ruleset enforcement on main is disabled; PR test workflows are recommended quality gates, not merge-blocking required checks.",
+      "expected": "Merge/release cannot land without the project-defined test/coverage/architecture required checks (RULES §4.2, ADR-042 coverage-verify).",
+      "actual": "05-github-policy.md (activated/re-verified 2026-08-19) states: no live required-check ruleset; direct push and merge to main allowed; root-hygiene-required-check enforcement=disabled. Live API this session: NOT_PROVEN.",
+      "impact": "A red Tests/coverage-verify/arch-tests workflow does not prevent merge to main; regression-detection is social, not enforced.",
+      "root_cause": "Explicit operator/ruleset policy; not a missing workflow.",
+      "remediation": "Maintainer-only: re-enable ruleset after confirming always-on contexts (checks-complete, root-hygiene) plus path-scoped coverage-verify. Do not silently treat workflow presence as merge truth. Out of MODE=audit patch scope.",
+      "effort": "S",
+      "dependencies": ["maintainer GitHub admin"],
+      "validation": [
+        "GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586",
+        "GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main"
+      ],
+      "automation": "n/a (external GitHub ruleset)",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 147,
+          "command": "read Branch Protection Verification",
+          "observation": "Updates to main are not blocked by a live required-check ruleset"
+        },
+        {
+          "path": "docs/00-project/governance/05-github-policy.md",
+          "line": 164,
+          "command": "read Final always-on required-check set",
+          "observation": "enforcement is disabled"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-003",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "isolation",
+      "path": ".github/workflows/tests.yml:840",
+      "method": "compare test_matrix.yaml parallel_execution_policy with tests.yml pytest invocations and serial markers under tests/integration",
+      "observation": "CI runs unit-fast and integration shards with xdist -n auto while test_matrix.yaml lists unit-fast and integration-replay as serial_or_bounded_lanes; VCR integration tests are almost never marked serial.",
+      "expected": "VCR-backed replay stays serial/bounded unless cassette isolation is proven xdist-safe; serial_or_bounded lanes do not inherit implicit xdist.",
+      "actual": "test-fast line 840 and test-matrix line 1144 use '-n auto --dist loadscope'. integration-replay is serial_or_bounded. rg @pytest.mark.serial under tests/integration found only tests/integration/infrastructure/storage/test_atomic.py. Many @pytest.mark.vcr integration tests exist without serial.",
+      "impact": "Order-dependent or cassette-write races can flake or skip; local serial default diverges from CI, hiding isolation bugs.",
+      "root_cause": "CI speed shortcut vs lane policy; serial marker not applied to VCR tests.",
+      "remediation": "Either mark VCR integration tests serial and keep test-matrix excluding serial, or move a proven-xdist-safe subset into explicit_parallel_lanes and document cassette isolation. Do not add retries.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg -n 'n auto' .github/workflows/tests.yml",
+        "rg -n 'serial_or_bounded_lanes' configs/quality/test_matrix.yaml"
+      ],
+      "automation": "architecture test asserting test-fast/test-matrix xdist usage matches parallel_execution_policy",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 51,
+          "command": "read serial_or_bounded_lanes",
+          "observation": "unit-fast and integration-replay listed as serial_or_bounded"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 840,
+          "command": "read test-fast pytest",
+          "observation": "-n auto --dist loadscope"
+        },
+        {
+          "path": ".github/workflows/tests.yml",
+          "line": 1144,
+          "command": "read test-matrix pytest",
+          "observation": "-n auto on tests/integration among other groups"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-004",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "skip-governance",
+      "path": "configs/quality/test_skip_inventory.yaml:8",
+      "method": "read skip inventory source_of_truth and SCAN_ROOTS; rg pytest.skip in tests/e2e",
+      "observation": "Reviewed skip census covers only tests/contract and tests/integration (24 paths, all lifecycle=permanent_policy). tests/e2e has multiple pytest.skip sites and is out of census.",
+      "expected": "Every skip/xfail/importorskip surface that can hide product regressions is inventoried with owner, category, and expiry for temporary_debt.",
+      "actual": "test_test_skip_inventory.py SCAN_ROOTS = contract, integration. E2E skips in test_pipeline_matrix_e2e.py, test_chembl_publication_term_e2e.py, tests/e2e/conftest.py, test_advanced_scenarios_e2e.py, test_full_pipeline_chain_e2e.py. No temporary_debt/expires_on rows in inventory.",
+      "impact": "E2E can skip closed without owner/expiry tracking; skip-rate SLO remains a separate advisory policy.",
+      "root_cause": "Census scoped to contract/integration by design (#9130 unit/architecture handled differently); e2e left to SLO telemetry.",
+      "remediation": "Extend census to tests/e2e or add a dedicated e2e skip inventory bound to reason_code; keep max skip rate; do not raise budgets.",
+      "effort": "M",
+      "dependencies": ["TEST-SYS-005"],
+      "validation": [
+        "rg -n 'pytest.skip' tests/e2e"
+      ],
+      "automation": "extend tests/architecture/test_test_skip_inventory.py SCAN_ROOTS or sibling e2e census test",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/test_skip_inventory.yaml",
+          "line": 8,
+          "command": "read source_of_truth",
+          "observation": "Unit and architecture suppressions are not in this census; contract_root and integration_root only"
+        },
+        {
+          "path": "tests/architecture/test_test_skip_inventory.py",
+          "line": 24,
+          "command": "read SCAN_ROOTS",
+          "observation": "SCAN_ROOTS = contract, integration"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-005",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "slo-advisory",
+      "path": "configs/quality/e2e_skip_rate_slo.yaml:24",
+      "method": "read SLO policy vs e2e-matrix-health.yml skip-rate gate",
+      "observation": "Repo-wide e2e skip-rate SLO is still advisory (15%); only matrix-smoke run3 has a blocking 15% check.",
+      "expected": "After baseline samples, skip-rate SLO is blocking on evaluation_lanes e2e / e2e-smoke / e2e-nightly-full without raising the 15% budget.",
+      "actual": "slo.mode: advisory. Promotion path in file: three nightly samples then blocking. e2e-matrix-health.yml enforces 15% only for matrix-smoke-run3.xml.",
+      "impact": "Nightly full e2e and dedicated entity e2e can skip above budget without failing merge/nightly policy gate.",
+      "root_cause": "Staged rollout T-08/#6604 not promoted.",
+      "remediation": "Collect three nightly skip-rate samples; if under 15%, set mode=blocking. Do not increase max_skip_rate_percent.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n 'mode: advisory' configs/quality/e2e_skip_rate_slo.yaml"
+      ],
+      "automation": "architecture test already allows advisory|blocking; add CI job assertion when promoting",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/e2e_skip_rate_slo.yaml",
+          "line": 24,
+          "command": "read slo.mode",
+          "observation": "mode: advisory"
+        },
+        {
+          "path": ".github/workflows/e2e-matrix-health.yml",
+          "line": 79,
+          "command": "read Enforce matrix smoke skip-rate SLO",
+          "observation": "blocking 15% for run3 only"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-006",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "critical-path-gap",
+      "path": "tests/e2e/test_pipeline_matrix_e2e.py:262",
+      "method": "compare MATRIX_REPLAY_DEFERRED_PIPELINES, e2e-smoke lane paths, and entity_test_ownership",
+      "observation": "16 pipelines are deferred from PR-blocking matrix smoke. chembl.publication_term ownership is dedicated e2e that is not in the e2e-smoke lane.",
+      "expected": "entity_test_ownership points at tests that actually run on PR, or deferred entities have explicit PR unit/integration owners.",
+      "actual": "MATRIX_REPLAY_DEFERRED includes chembl_publication_term and all composites. e2e-smoke pytest_args only test_chembl_activity_e2e.py and test_pipeline_matrix_e2e.py. entity_test_ownership.chembl.publication_term = tests/e2e/test_chembl_publication_term_e2e.py.",
+      "impact": "PR e2e-smoke does not execute publication_term (or other deferred) full cycles; transformer unit exists but is not the declared owner.",
+      "root_cause": "Matrix smoke bounded for cassette economics; ownership map not updated to PR-blocking tests.",
+      "remediation": "Retarget entity_test_ownership to PR unit/integration for deferred entities, or add dedicated e2e files to e2e-smoke. Do not skip-heal.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "rg -n 'MATRIX_REPLAY_DEFERRED_PIPELINES' tests/e2e/test_pipeline_matrix_e2e.py"
+      ],
+      "automation": "architecture test: every entity_test_ownership path must be in a PR-blocking lane or marked deferred with a replacement owner",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
+          "line": 262,
+          "command": "read MATRIX_REPLAY_DEFERRED_PIPELINES",
+          "observation": "16 pipeline names including chembl_publication_term and composites"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 564,
+          "command": "read e2e-smoke paths",
+          "observation": "only chembl_activity e2e + pipeline_matrix e2e"
+        },
+        {
+          "path": "configs/quality/test_matrix.yaml",
+          "line": 786,
+          "command": "read chembl.publication_term owner",
+          "observation": "tests/e2e/test_chembl_publication_term_e2e.py"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-007",
+      "requirement_id": "REQ-TEST-003",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "skip-as-heal",
+      "path": "tests/e2e/test_pipeline_matrix_e2e.py:547",
+      "method": "read matrix smoke exception handling for VCR mismatch",
+      "observation": "For pipelines not in CRITICAL_SMOKE_PIPELINES, VCR cassette mismatch in playback is pytest.skip (INFRA_FLAKY_CASSETTE_MISMATCH) rather than fail.",
+      "expected": "Playback mismatch is a code or cassette regression (fail-closed) or a timeboxed quarantine row; retries/skips are not used to heal flakes (e2e_skip_rate_slo policy).",
+      "actual": "CRITICAL_SMOKE_PIPELINES fail on mismatch; others skip. Deferred pipelines are already absent from ACTIVE_PIPELINE_CASES, so remaining active non-critical cases can skip on mismatch.",
+      "impact": "Adapter/pipeline regressions on non-critical active matrix rows can look green via skip (pytest skip is exit 0).",
+      "root_cause": "Intentional sparse-cassette tolerance mixed with flaky classification.",
+      "remediation": "Fail closed on mismatch, or move those rows to deferred with an owner test elsewhere. Do not add reruns.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "read tests/e2e/test_pipeline_matrix_e2e.py:537-552"
+      ],
+      "automation": "architecture test forbidding pytest.skip on VCR mismatch for ACTIVE_PIPELINE_CASES",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "tests/e2e/test_pipeline_matrix_e2e.py",
+          "line": 547,
+          "command": "read mismatch branch",
+          "observation": "pytest.skip INFRA_FLAKY_CASSETTE_MISMATCH for non-critical"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-008",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "docs-drift",
+      "path": "docs/03-guides/testing.md:106",
+      "method": "list_dir tests/; grep testing.md for tests/infrastructure",
+      "observation": "Testing guide topology table lists tests/infrastructure/** as a live family, but that directory does not exist.",
+      "expected": "Guide topology matches tests/ tree (unit/infrastructure exists; top-level tests/infrastructure does not).",
+      "actual": "docs/03-guides/testing.md line 106 references tests/infrastructure/**. list_dir tests/infrastructure → does not exist.",
+      "impact": "Operators/agents may look for a missing suite; low product risk.",
+      "root_cause": "Docs drift vs live tree.",
+      "remediation": "Remove or retarget the row to tests/unit/infrastructure and tests/integration/infrastructure.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "Test-Path tests/infrastructure"
+      ],
+      "automation": "architecture documentation_sync check for listed test families",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 106,
+          "command": "read Testing Topology Crosswalk",
+          "observation": "tests/infrastructure/** listed"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-009",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "operator-docs",
+      "path": "docs/03-guides/testing.md:1035",
+      "method": "compare documented pytest -m slow recipe with addopts AND semantics",
+      "observation": "Operator docs present slow as a selectable marker while addopts already contains not slow, so pytest -m slow collects nothing without -o addopts=.",
+      "expected": "Documented slow-run command actually collects slow tests.",
+      "actual": "testing.md shows pytest -m 'not slow' as the exclusion example and lists slow as a selectable marker. pre-commit correctly uses -o addopts=.",
+      "impact": "Contributors think they ran slow tests; they did not.",
+      "root_cause": "Same as TEST-SYS-001 plus stale docs.",
+      "remediation": "Document pytest -o addopts= -m slow (Windows: .\\.venv-win\\Scripts\\python.exe -m pytest -o addopts= -m slow).",
+      "effort": "S",
+      "dependencies": ["TEST-SYS-001"],
+      "validation": [
+        "read docs/03-guides/testing.md:1033-1036"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 1035,
+          "command": "read Test Markers",
+          "observation": "uv run python -m pytest tests/ -m 'not slow'"
+        }
+      ]
+    },
+    {
+      "id": "TEST-SYS-010",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "low",
+      "confidence_score": 0.3,
+      "status": "NOT_PROVEN",
+      "category": "flaky",
+      "path": "configs/quality/flaky_test_inventory.yaml:55",
+      "method": "static inventory read; no N-repeat pytest this session",
+      "observation": "Curated flaky inventory is empty as of 2026-08-03; this audit did not re-run suspected tests N times, so current intermittency is NOT_PROVEN.",
+      "expected": "Flaky claims include N, environment, and pass/fail counts.",
+      "actual": "reviewed_flaky_tests: []. e2e skip reason codes include INFRA_FLAKY_* but are skips, not measured flakes. flaky-telemetry CI job exists (3 seeds, 2 files) — outcomes not fetched.",
+      "impact": "Cannot treat suite as proven-stable from this session alone; also cannot invent flaky findings.",
+      "root_cause": "No shell / no suite budget in this runtime.",
+      "remediation": "On next CI artifact, inspect reports/test-telemetry/flaky-test-empirical.json; if empty, keep inventory at zero (do not raise budgets).",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "download flaky-test-empirical artifact from latest Tests workflow"
+      ],
+      "automation": "existing flaky-telemetry job",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "configs/quality/flaky_test_inventory.yaml",
+          "line": 55,
+          "command": "read reviewed_flaky_tests",
+          "observation": "[]"
+        }
+      ]
+    }
+  ]
+}

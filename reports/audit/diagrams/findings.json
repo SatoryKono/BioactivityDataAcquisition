@@ -1,139 +1,168 @@
 {
-  "schema": "prompt.fragment.finding-schema/1.2.0",
   "domain_id": "diagrams",
   "prompt_id": "prompt.audit.diagrams",
+  "surface_score": 2,
   "generated_at": "2026-08-26",
+  "mode": "audit",
   "audit_mode": "full",
   "scope": [
     "docs/02-architecture/diagrams/",
     "scripts/diagrams/"
   ],
-  "surface_score": 2,
   "debt_outcome": "unchanged",
+  "skipped_checks": [
+    "python -m scripts.diagrams lint --json",
+    "python -m scripts.diagrams lint-budget",
+    "python -m scripts.diagrams check-artifacts",
+    "python -m scripts.diagrams check-visual-smoke",
+    "python -m scripts.diagrams check-quality-gates",
+    "python -m scripts.diagrams generate-dataflows --check",
+    "bash docs/02-architecture/diagrams/tooling/render.sh",
+    "python -m memory.tooling.workflow pre-task"
+  ],
   "findings": [
     {
       "id": "DIAG-001",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DATA-007",
       "priority": "P1",
       "severity": "High",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "canonical-source-path",
-      "path": ".codex/skills/technical-designer-mermaid/SKILL.md:72",
-      "observation": "BioETL project mode of the Mermaid skill still names the retired tree docs/02-architecture/mmd-diagrams/ as the canonical source, while the live SSOT is docs/02-architecture/diagrams/ and tests forbid canonical sources under mmd-diagrams/.",
-      "method": "read_file + grep mmd-diagrams in .codex/skills, .junie/skills, tests/architecture/test_diagram_corpus_regression_guards.py",
-      "expected": "Skill BioETL mode points only to docs/02-architecture/diagrams/** and tooling/render.sh.",
-      "actual": "SKILL.md lines 72-81 and 119-121 still instruct agents to write/render under mmd-diagrams/; the same text is mirrored in .junie/skills/technical-designer-mermaid/SKILL.md. docs/02-architecture/mmd-diagrams/ is absent from the checkout.",
-      "impact": "Agents following the skill can create sources in a non-canonical tree that tests reject, or skip the live lint/render path.",
-      "root_cause": "Skill text was not updated after the mmd-diagrams -> diagrams migration.",
-      "remediation": "Replace mmd-diagrams paths in .codex/skills/technical-designer-mermaid/SKILL.md with docs/02-architecture/diagrams/ and tooling/render.sh; sync the Junie peer via the mirror gate. Do not recreate mmd-diagrams/.",
+      "category": "diagram-code-drift",
+      "path": "docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd:34-37",
+      "observation": "Local-deployment diagram labels Gold as Delta/Parquet, Quarantine as Parquet, and lineage as Parquet; live writers use Delta for Gold/quarantine and JSONL for lineage.",
+      "method": "Source inspection of the diagram plus RULES.md §2.1, UnifiedQuarantineAdapter.write_deltalake, and FileLineageStore JSONL helpers.",
+      "expected": "Gold and quarantine shown as Delta Lake; lineage shown as control-plane JSONL; raw Parquet not presented as a Gold/quarantine/lineage format.",
+      "actual": "Gold[Delta/Parquet], Quarantine[Parquet], Lineage[Parquet] in the local filesystem subgraph.",
+      "impact": "Operator or implementer following the deployment diagram can choose raw Parquet for Gold/quarantine/lineage and break Medallion/quarantine/control-plane contracts.",
+      "root_cause": "Deployment diagram labels were not re-verified against current storage adapters after Delta/JSONL paths became canonical.",
+      "remediation": "Relabel Gold to Delta Lake only, Quarantine to Delta (common.quarantine), Lineage to JSONL FileLineageStore; keep Bronze as JSONL+zstd. Do not raise any quality budget.",
       "effort": "S",
+      "automation": "Extend architecture diagram narrative/sync tests to assert forbidden 'raw Parquet' labels on Gold/quarantine nodes.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg mmd-diagrams .codex/skills/technical-designer-mermaid .junie/skills/technical-designer-mermaid",
-        "bash scripts/ai/junie/check_junie_mirror.sh --check"
+        "rg -n \"Delta/Parquet|lineage/<br/>Parquet|quarantine/<br/>Parquet\" docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd",
+        "python -m scripts.diagrams lint docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd"
       ],
-      "automation": "architecture test or skill-path grep in CI forbidding mmd-diagrams in active skills",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 72,
-          "command": "read_file SKILL.md",
-          "observation": "Canonical source diagrams: docs/02-architecture/mmd-diagrams/**.mmd"
+          "path": "docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd",
+          "line": 34,
+          "command": "read_file foundation/12-local-deployment-architecture.mmd",
+          "observation": "Gold labeled 'Delta/Parquet'; Quarantine 'Parquet'; Lineage 'Parquet'."
         },
         {
-          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
-          "line": 255,
-          "command": "grep mmd-diagrams tests/architecture",
-          "observation": "test_legacy_mmd_diagrams_tree_has_no_canonical_sources forbids .mmd/.mermaid under mmd-diagrams/"
+          "path": "docs/00-project/RULES.md",
+          "line": 238,
+          "command": "read_file RULES.md §2.1",
+          "observation": "Silver and Gold MUST be Delta Lake; raw Parquet MUST NOT."
+        },
+        {
+          "path": "src/bioetl/infrastructure/quarantine/unified.py",
+          "line": 22,
+          "command": "grep write_deltalake src/bioetl/infrastructure/quarantine",
+          "observation": "UnifiedQuarantineAdapter persists via deltalake.write_deltalake."
+        },
+        {
+          "path": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+          "line": 19,
+          "command": "read_file file_lineage_store.py",
+          "observation": "Lineage persistence is JSONL append, not Parquet."
         }
       ]
     },
     {
       "id": "DIAG-002",
-      "requirement_id": "REQ-CONTRACT-001",
+      "requirement_id": "REQ-GOV-006",
       "priority": "P1",
       "severity": "High",
       "confidence": "high",
-      "confidence_score": 0.93,
+      "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "generated-source-drift",
-      "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-http.mmd:6",
-      "observation": "Supplemental 90-pkg-*.mmd sources carry %% @date 2026-03-27 (age > 150d on 2026-08-26), which is STALE-001 ERROR in lint_diagrams.py, and generate_package_family_class_diagrams.py --check is not wired into CI.",
-      "method": "grep %% @date 2026-03-27 on class-diagrams/90-pkg-*.mmd; grep generate_package_family in .github/workflows; read generate_package_family_class_diagrams.py --check; read diagram-nightly.yml budget --max-lint-errors 0",
-      "expected": "Generated package-family diagrams are regenerated from src/bioetl and gated with --check, same pattern as generate-dataflows --check in docs.yml.",
-      "actual": "At least the 74 supplemental 90-pkg slices (class-diagrams listing) still show @date 2026-03-27. Generator has --check but no workflow reference. Nightly lint-budget uses --max-lint-errors 0, so STALE-001 on this corpus would fail the nightly budget if evaluated.",
-      "impact": "Package-family class maps can silently lag refactors (HTTP package now has many modules beyond the five listed in 90-pkg-interfaces-http.mmd). Nightly freshness/budget gates are at risk without a regenerate path.",
-      "root_cause": "Generated diagram refresh is documented as manual; unlike chembl_activity dataflows, there is no CI --check.",
-      "remediation": "Run python -m scripts.diagrams render path for generate_package_family_class_diagrams.py (or the documented generator) to refresh 90-pkg sources+SVG; add --check to docs.yml next to generate-dataflows. Do not raise lint-budget limits.",
-      "effort": "M",
+      "category": "publication-drift",
+      "path": "docs/02-architecture/diagrams/architecture/svg/INDEX.md:211-229",
+      "observation": "Generated SVG index, architecture bundle, and some description cards still point at renamed 13a/13b/13c port-contract stems whose .mmd/.svg files are absent; live sources are 13g/13h/13i.",
+      "method": "read_file on claimed 13a/13b/13c sources (absent) vs live 13g/13h/13i sources and sibling SVG; grep of INDEX.md, bundles, descriptions.",
+      "expected": "Publication indexes and bundles reference existing sibling SVG stems that match current .mmd sources.",
+      "actual": "INDEX.md and architecture.bundle.md embed 13a-port-contracts-data-sources.svg, 13b-port-contracts-storage.svg, 13c-port-contracts-observability.svg; those files do not exist. Live files are 13g/13h/13i with SVG present.",
+      "impact": "MkDocs/bundle readers hit broken images for port-contract views; descriptions still cite old source paths, so review uses the wrong filename.",
+      "root_cause": "Port-contract slices were renumbered 13a/b/c → 13g/h/i to free 13a/b/c for the operational-ports track; derived indexes/bundles were not regenerated.",
+      "remediation": "Regenerate `architecture/svg/INDEX.md`, `bundles/architecture.bundle.md`, and description cards via `python -m scripts.diagrams render-desc-indexes` and `generate_all_bundles.py --collection architecture`. Point leftover 13a/13b/13c port-contract links to 13g/13h/13i.",
+      "effort": "S",
+      "automation": "Fail docs-governance if INDEX/bundle image stems are not in the live source-stem set.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "python scripts/diagrams/render/generate_package_family_class_diagrams.py --check",
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams/class-diagrams --json"
+        "python -m scripts.diagrams render-desc-indexes",
+        "python scripts/diagrams/render/generate_all_bundles.py --collection architecture",
+        "rg -n \"13a-port-contracts-data-sources|13b-port-contracts-storage|13c-port-contracts-observability\" docs/02-architecture/diagrams"
       ],
-      "automation": "docs.yml step: generate_package_family_class_diagrams.py --check",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/class-diagrams/90-pkg-interfaces-http.mmd",
-          "line": 6,
-          "command": "read_file 90-pkg-interfaces-http.mmd",
-          "observation": "%% @date 2026-03-27; modules listed: health_server_routing_mixin, health_server_http_mixin, health_server, health_server_state_mixin, types"
+          "path": "docs/02-architecture/diagrams/architecture/svg/INDEX.md",
+          "line": 211,
+          "command": "read_file architecture/svg/INDEX.md",
+          "observation": "Markdown image 13a-port-contracts-data-sources.svg; file absent on disk."
         },
         {
-          "path": "scripts/diagrams/lint/lint_diagrams.py",
-          "line": 88,
-          "command": "read_file lint_diagrams.py ERROR_STALE_DAYS",
-          "observation": "ERROR_STALE_DAYS = 150; STALE-001 is severity ERROR; main() returns 1 if has_errors"
+          "path": "docs/02-architecture/diagrams/bundles/architecture.bundle.md",
+          "line": 753,
+          "command": "grep 13a-port-contracts-data-sources bundles/architecture.bundle.md",
+          "observation": "Bundle embeds missing SVG path."
         },
         {
-          "path": ".github/workflows/docs.yml",
-          "line": 123,
-          "command": "grep generate_package_family .github/workflows",
-          "observation": "Only generate-dataflows --check is present; package-family generator --check is absent"
+          "path": "docs/02-architecture/diagrams/descriptions/architecture/13g-port-contracts-data-sources.md",
+          "line": 16,
+          "command": "grep 13a-port-contracts-data-sources descriptions",
+          "observation": "13g description still names architecture/13a-port-contracts-data-sources.mmd as source."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd",
+          "line": 1,
+          "command": "read_file 13g-port-contracts-data-sources.mmd",
+          "observation": "Live source exists; sibling SVG 13g-port-contracts-data-sources.svg exists."
         }
       ]
     },
     {
       "id": "DIAG-003",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-ARCH-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.96,
+      "confidence_score": 0.93,
       "status": "PROVEN",
-      "category": "policy-drift",
-      "path": "docs/02-architecture/diagrams/README.md:35",
-      "observation": "Diagrams README still calls sibling png/ a tracked render baseline, contradicting DOC-GOV-02, render-retention.md, and .gitignore.",
-      "method": "read_file README.md, render-retention.md, .gitignore, NORMATIVE_SOURCES.md",
-      "expected": "Contributor docs match DOC-GOV-02: SVG tracked; PNG gitignored CI/local-only.",
-      "actual": "README.md:35 says svg/ and png/ are tracked render baselines. .gitignore:647-648 ignores /docs/02-architecture/diagrams/**/png/. architecture/png/INDEX.md is unreadable because png/ is gitignored.",
-      "impact": "Contributors may re-commit bulk PNG churn that DOC-GOV-02 explicitly forbids.",
-      "root_cause": "README source-of-truth paragraph was not updated when PNG was untracked.",
-      "remediation": "Edit docs/02-architecture/diagrams/README.md Source Of Truth section to match render-retention.md (SVG tracked, PNG not tracked). Remove png/INDEX.md from the supplementary index list or mark it local-only.",
+      "category": "diagram-accuracy",
+      "path": "docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd:35",
+      "observation": "Data-source port diagram only declares ChemblAdapter; other provider adapters appear as unlabeled ids PA/UA/CRA/OAA/SSA/PCA in source and in the rendered SVG.",
+      "method": "Read .mmd node declarations vs edge list; confirm unlabeled nodes in sibling SVG text.",
+      "expected": "Each provider adapter node has a human label matching the live adapter class (PubMedAdapter, UniProtAdapter, …).",
+      "actual": "Line `DSP --- CA & PA & UA & CRA & OAA & SSA & PCA` with only CA labeled; SVG fo-fallback text is 'PA','UA','CRA','OAA','SSA','PCA'.",
+      "impact": "Port-contract view hides six of seven adapters behind opaque ids; reviewers can conclude only ChEMBL implements DataSourcePort.",
+      "root_cause": "Chained undeclared node ids; keep-orphan only covers FDSP.",
+      "remediation": "Declare labeled nodes for PubMed/UniProt/CrossRef/OpenAlex/SemanticScholar/PubChem adapters inside the Infrastructure subgraph, same pattern as 13a-data-storage-ports.mmd.",
       "effort": "S",
+      "automation": "GRAPH/label lint: flowchart node ids used in edges must have a quoted/bracket label.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg \"tracked render\" docs/02-architecture/diagrams/README.md",
-        "rg png docs/02-architecture/diagrams/governance/render-retention.md"
+        "rg -n \"PA\\[|UA\\[|PubMedAdapter|UniProtAdapter\" docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd",
+        "python -m scripts.diagrams lint docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd"
       ],
-      "automation": "docs drift test asserting README does not claim png/ is tracked",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/README.md",
+          "path": "docs/02-architecture/diagrams/architecture/13g-port-contracts-data-sources.mmd",
           "line": 35,
-          "command": "read_file README.md",
-          "observation": "svg/ and png/ files ... are tracked render baselines used for drift review"
+          "command": "read_file 13g-port-contracts-data-sources.mmd",
+          "observation": "Only CA[ChemblAdapter] declared; PA UA CRA OAA SSA PCA used on the edge."
         },
         {
-          "path": ".gitignore",
-          "line": 647,
-          "command": "grep png .gitignore",
-          "observation": "/docs/02-architecture/diagrams/**/png/ and **/png/** are ignored"
+          "path": "docs/02-architecture/diagrams/architecture/svg/13g-port-contracts-data-sources.svg",
+          "line": 1,
+          "command": "read_file sibling SVG",
+          "observation": "Rendered labels for those nodes are the raw ids PA/UA/CRA/OAA/SSA/PCA."
         }
       ]
     },
@@ -145,435 +174,365 @@
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "catalog-overlap",
-      "path": "docs/02-architecture/diagrams/architecture/13a-data-storage-ports.mmd:1",
-      "observation": "Port-contract family 13 has two overlapping decompositions sharing the same 13a/13b/13c numeric slots.",
-      "method": "list_dir architecture/; read headers of 13*.mmd",
-      "expected": "One decomposition scheme per parent: unique NN[a] stems, @parent set, no duplicate 13a/13b/13c files.",
-      "actual": "Pairs exist: 13a-data-storage-ports.mmd (no @parent, fa:fa- icons) vs 13a-port-contracts-data-sources.mmd (@parent 13-port-protocol-contracts.mmd); 13b-operational-ports.mmd vs 13b-port-contracts-storage.mmd; 13c-validation-dq-ports.mmd vs 13c-port-contracts-observability.mmd.",
-      "impact": "Operators and lint sibling detection treat both schemes as 13* siblings; catalogs and SIZE-003 exemptions become ambiguous.",
-      "root_cause": "Legacy fa-icon port maps were kept beside the later @parent port-contracts slices without renaming.",
-      "remediation": "Pick one 13* scheme. Rename or retire the fa-icon maps (13a-data-storage-ports, 13b-operational-ports, 13c-validation-dq-ports) or move them to a non-colliding stem. Update README/index.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "ls docs/02-architecture/diagrams/architecture/13*.mmd",
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams/architecture"
-      ],
-      "automation": "lint NAME/catalog rule: unique NN[a] stem per directory",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "docs/02-architecture/diagrams/architecture/13a-data-storage-ports.mmd",
-          "line": 1,
-          "command": "read_file 13a-data-storage-ports.mmd",
-          "observation": "Title DataSource and Storage Ports; no @parent; fa:fa-plug labels"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/architecture/13a-port-contracts-data-sources.mmd",
-          "line": 8,
-          "command": "read_file 13a-port-contracts-data-sources.mmd",
-          "observation": "@parent 13-port-protocol-contracts.mmd; @view data-sources"
-        }
-      ]
-    },
-    {
-      "id": "DIAG-005",
-      "requirement_id": "REQ-ARCH-001",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.92,
-      "status": "PROVEN",
       "category": "diagram-accuracy",
-      "path": "docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd:38",
-      "observation": "Security/PII diagram references HASHED, BW, and SW in edges/class assignments without labeled node declarations.",
-      "method": "read_file 17-security-pii-audit.mmd",
-      "expected": "Every node in edges has an explicit labeled declaration (BronzeWriter/SilverWriter/hashed output).",
-      "actual": "Line 38: RAW_PII --> HASH_FN --> HASHED with no HASHED[... ] declaration. Line 71: BW & SW & GW --> AP while only GW is declared (GoldWriter). Lines 87-89 still class HASHED, BW, SW.",
-      "impact": "Rendered diagram shows unlabeled IDs; audit path for Bronze/Silver writers is incomplete versus GoldWriter.",
-      "root_cause": "Incomplete edit when GoldWriter node was labeled but Bronze/Silver/hash output were left as bare IDs.",
-      "remediation": "Declare HASHED, BW, and SW with labels matching code (hashed value, BronzeWriter, SilverWriter) or drop unused IDs and keep-orphan if intentional.",
+      "path": "docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd:38-89",
+      "observation": "Security/PII diagram uses HASHED, BW, and SW in edges and class assignments without declaring those nodes.",
+      "method": "Read 17-security-pii-audit.mmd; grep HASHED; confirm Sha256PiiHasher/FileAuditAdapter/GoldWriter exist in code.",
+      "expected": "Every node id in edges/class has an explicit labeled declaration (Hashed PII, BronzeWriter, SilverWriter).",
+      "actual": "`RAW_PII --> HASH_FN --> HASHED` and `BW & SW & GW --> AP` with class lists including HASHED,BW,SW; only GW is declared.",
+      "impact": "PII output and Bronze/Silver audit integration render as opaque ids; the security model looks incomplete even though ports exist.",
+      "root_cause": "Incomplete node declarations after classDef wiring.",
+      "remediation": "Add HASHED, BronzeWriter, and SilverWriter node declarations (or drop unused ids) and keep GoldWriter audit edge.",
       "effort": "S",
+      "automation": "Same unlabeled-id lint as DIAG-003.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd",
-        "python -m scripts.diagrams fix-orphans --check -- docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd"
+        "rg -n \"HASHED|BW\\[|SW\\[\" docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd"
       ],
-      "automation": "GRAPH-001 / render smoke on architecture/17",
-      "automated_fix_possible": true,
       "evidence": [
         {
           "path": "docs/02-architecture/diagrams/architecture/17-security-pii-audit.mmd",
           "line": 38,
           "command": "read_file 17-security-pii-audit.mmd",
-          "observation": "RAW_PII --> HASH_FN --> HASHED; BW & SW & GW --> AP; only GW has a labeled node"
+          "observation": "HASHED used in edge; BW & SW used with GW without node boxes."
+        },
+        {
+          "path": "src/bioetl/infrastructure/security/pii_hasher.py",
+          "line": 113,
+          "command": "grep class Sha256PiiHasher",
+          "observation": "PII hasher implementation exists; diagram incompleteness is labeling, not a missing class."
+        }
+      ]
+    },
+    {
+      "id": "DIAG-005",
+      "requirement_id": "REQ-GOV-006",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "ci-coverage",
+      "path": ".github/workflows/docs.yml:496-499",
+      "observation": "PR source-vs-SVG drift gate and pre-commit lint/orphan hooks omit sequence/, state-machines/, and providers/ families even though corpus tests treat them as canonical sources.",
+      "method": "Read check-diagram-drift globs and .pre-commit-config.yaml files regex; compare with test_diagram_corpus_regression_guards MMD_COLLECTIONS.",
+      "expected": "Every canonical .mmd family with sibling SVG policy is in the PR drift glob and local lint-diagrams files regex.",
+      "actual": "Drift globs: architecture/*.mmd, foundation/*.mmd, class-diagrams/*.mmd, views/*.mermaid only. Pre-commit files: architecture|foundation|class-diagrams plus views. sequence (5), state-machines (5), providers (28) excluded.",
+      "impact": "Source edits in secondary families can merge without a matching SVG update on the drift job; local hooks will not lint those paths.",
+      "root_cause": "Secondary families were added to the corpus tests without expanding CI/hook path filters.",
+      "remediation": "Add globs for sequence/*.mmd, state-machines/*.mmd, and providers/**/*.mmd to check-diagram-drift and to lint-diagrams / prune-orphan files regex. Keep PNG untracked.",
+      "effort": "S",
+      "automation": "CI glob + pre-commit files regex (already have architecture tests for sibling SVG existence).",
+      "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "rg -n \"sequence/|state-machines/|providers/\" .github/workflows/docs.yml .pre-commit-config.yaml"
+      ],
+      "evidence": [
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 496,
+          "command": "read_file docs.yml check-diagram-drift",
+          "observation": "changed_diagrams git diff globs omit sequence, state-machines, providers."
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 238,
+          "command": "read_file .pre-commit-config.yaml",
+          "observation": "lint-diagrams files regex is architecture|foundation|class-diagrams only."
+        },
+        {
+          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
+          "line": 34,
+          "command": "read_file test_diagram_corpus_regression_guards.py",
+          "observation": "MMD_COLLECTIONS includes sequence, state-machines, providers."
         }
       ]
     },
     {
       "id": "DIAG-006",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-OBS-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.9,
+      "confidence_score": 0.85,
       "status": "PROVEN",
-      "category": "ops-model-drift",
+      "category": "ops-model",
       "path": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd:72",
-      "observation": "Observability stack diagrams label external monitoring as Prometheus + Grafana without marking Grafana optional, unlike 22-data-operations-observability.mmd and ADR-010/ADR-053.",
-      "method": "read_file 09-observability-stack.mmd, 09b-observability-infra.mmd, 22-data-operations-observability.mmd; grep Grafana in diagrams",
-      "expected": "External Grafana is labeled optional; default runtime remains local-only.",
-      "actual": "09-observability-stack.mmd:72 and 09b:46 use PROM[Prometheus + Grafana]. 22-data-operations-observability.mmd:52 correctly uses optional Grafana metrics / alerts. current-state-diagrams.md states Prometheus/Grafana are not required.",
-      "impact": "Readers can treat Grafana as a required deploy dependency. Not a P0: 22 and current-state docs already correct the model.",
-      "root_cause": "09 family was not updated when Grafana became optional (ADR-010/053).",
-      "remediation": "Change 09/09b external node to Prometheus (optional Grafana) to match 22-data-operations-observability.mmd; bump @date.",
+      "observation": "Observability stack draws Prometheus + Grafana as a required External System with no optional/ADR-010 qualifier, while default runtime is local-only and Grafana is opt-in.",
+      "method": "Read 09-observability-stack.mmd External subgraph; compare ADR-010 local-only and AGENTS.md dashboard skill routing (monitoring optional).",
+      "expected": "External metrics UI labeled optional / adjunct (Prometheus scrape + optional Grafana), consistent with local-only default.",
+      "actual": "`PROM[Prometheus + Grafana]` as External Systems peer; edges PM --> MSA --> PROM and MPA --> PROM with no 'optional' note.",
+      "impact": "Readers can treat Grafana/Prometheus as mandatory deploy dependencies, contradicting local-only default and optional monitoring.",
+      "root_cause": "Observability diagram models the full optional stack without the ADR-010 optionality boundary.",
+      "remediation": "Rename the node to mark Grafana/Prometheus as optional (e.g. 'optional Prometheus / Grafana') or split a local-only vs optional-monitoring view. Keep MetricsPort/NoOpMetrics path.",
       "effort": "S",
+      "automation": "Narrative sync test that 09-observability-stack.mmd contains 'optional' near Grafana/Prometheus.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg \"Prometheus \\+ Grafana\" docs/02-architecture/diagrams"
+        "rg -n \"Grafana|optional\" docs/02-architecture/diagrams/architecture/09-observability-stack.mmd"
       ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
       "evidence": [
         {
           "path": "docs/02-architecture/diagrams/architecture/09-observability-stack.mmd",
           "line": 72,
           "command": "read_file 09-observability-stack.mmd",
-          "observation": "PROM[Prometheus + Grafana] under External Systems"
+          "observation": "PROM[Prometheus + Grafana] with no optional qualifier."
         },
         {
-          "path": "docs/02-architecture/diagrams/architecture/22-data-operations-observability.mmd",
-          "line": 52,
-          "command": "read_file 22-data-operations-observability.mmd",
-          "observation": "GRAF[optional Grafana metrics / alerts]"
+          "path": "docs/02-architecture/decisions/ADR-010-local-only-deployment.md",
+          "line": 39,
+          "command": "read_file ADR-010",
+          "observation": "Default is local filesystem + CLI; Docker/Redis not required."
         }
       ]
     },
     {
       "id": "DIAG-007",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-GOV-006",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.94,
+      "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "ci-coverage-gap",
-      "path": ".pre-commit-config.yaml:234",
-      "observation": "Pre-commit lint/orphan hooks cover architecture|foundation|class-diagrams and views, but not sequence/, state-machines/, or providers/ (38 additional .mmd sources).",
-      "method": "read_file .pre-commit-config.yaml; list_dir sequence/state-machines/providers",
-      "expected": "Local hooks cover every canonical .mmd family that CI lint scans under docs/02-architecture/diagrams/.",
-      "actual": "lint-diagrams files regex is ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\\.mmd$. sequence=5, state-machines=5, providers=28 mmd are only hit in CI when the diagrams path changes, not on local commit of those files.",
-      "impact": "Provider/sequence/state edits can land with META/COLOUR/GRAPH issues until a docs.yml mermaid job runs.",
-      "root_cause": "Secondary families were added after the pre-commit glob was written.",
-      "remediation": "Extend lint-diagrams and prune-orphan-diagram-nodes globs to include sequence|state-machines|providers (providers may need **/*.mmd).",
-      "effort": "S",
+      "category": "freshness",
+      "path": "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd:3",
+      "observation": "Quality-gate and visual-smoke baseline foundation/01-full-system-component.mmd has %% Updated: 2026-03-28, which is 151 days before 2026-08-26 and exceeds STALE-001 (150d). Several architecture sources use %% @date 2026-03-28 without a newer Updated stamp.",
+      "method": "Read metadata dates; compare scripts/diagrams/lint/lint_diagrams.py ERROR_STALE_DAYS=150 and nightly STALE-001 alert in diagram-nightly.yml.",
+      "expected": "Smoke-baseline diagrams either re-verified with a current %% Updated: date or explicitly refreshed after review.",
+      "actual": "%% Updated: 2026-03-28 on the DIAG-T013/quality-gates source; architecture 11/12/13/14/18/20/21 families still @date 2026-03-28.",
+      "impact": "Nightly freshness gate is designed to fail/open an issue at >150d; a smoke baseline can be treated as stale even if structure is still roughly correct.",
+      "root_cause": "STALE-* uses %% Updated: / %% @date, not git history; reviews that do not bump the stamp accumulate errors.",
+      "remediation": "Re-verify the smoke baseline against current composition APIs, then bump %% Updated:/%% @date. Repeat for other 2026-03-28 architecture sources after review. Do not raise ERROR_STALE_DAYS.",
+      "effort": "M",
+      "automation": "Existing nightly STALE-001 issue maintainer in diagram-nightly.yml.",
+      "automated_fix_possible": false,
       "dependencies": [],
       "validation": [
-        "python -c \"import pathlib,re; print('ok')\""
+        "python -m scripts.diagrams lint docs/02-architecture/diagrams --json",
+        "python -c \"from datetime import date; print((date(2026,8,26)-date(2026,3,28)).days)\""
       ],
-      "automation": "pre-commit glob update; existing tests/architecture/test_diagram_corpus_regression_guards.py::test_precommit_diagram_paths_cover_canonical_tree",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 238,
-          "command": "read_file .pre-commit-config.yaml",
-          "observation": "files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\\.mmd$"
+          "path": "docs/02-architecture/diagrams/foundation/01-full-system-component.mmd",
+          "line": 3,
+          "command": "read_file 01-full-system-component.mmd",
+          "observation": "%% Updated: 2026-03-28; file is listed in manifests/quality-gates.txt and visual-smoke.txt."
         },
         {
-          "path": "docs/02-architecture/diagrams/providers",
-          "line": 1,
-          "command": "list_dir providers",
-          "observation": "28 *.mmd + 28 *.svg + README"
+          "path": "scripts/diagrams/lint/lint_diagrams.py",
+          "line": 88,
+          "command": "read_file lint_diagrams.py",
+          "observation": "ERROR_STALE_DAYS = 150."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/manifests/quality-gates.txt",
+          "line": 4,
+          "command": "read_file quality-gates.txt",
+          "observation": "foundation/01-full-system-component.mmd is a hard quality-gate source."
         }
       ]
     },
     {
       "id": "DIAG-008",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-GOV-006",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.91,
+      "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "freshness",
-      "path": "docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd:5",
-      "observation": "Multiple canonical parents still have %% @date 2026-03-28 (and views/foundation copies), which is STALE-001 ERROR on audit date 2026-08-26 even when content was later revised.",
-      "method": "grep %% @date 2026-03-2 in diagrams; compare with lint ERROR_STALE_DAYS=150; note 12-bootstrap-di-container.mmd @version 1.4.0 with same old @date",
-      "expected": "@date reflects last meaningful source edit; STALE-001 corpus is empty or tracked via the nightly freshness issue only after dates are honest.",
-      "actual": "13-port-protocol-contracts.mmd @date 2026-03-28 @nodes 48; 12-bootstrap-di-container.mmd @date 2026-03-28 @version 1.4.0; foundation 01/06/28/37/38/49 and several *-full.mermaid views share 2026-03-28. 150 days before 2026-08-26 is 2026-03-29.",
-      "impact": "Lint/nightly budget can fail on date arithmetic while the diagram body may already match code. Dates cease to be a useful freshness signal.",
-      "root_cause": "Edits bumped @version without @date; no regenerate of foundation/view copies.",
-      "remediation": "Refresh @date on touched parents after review; do not mass-bump dates without content review. Keep nightly STALE-001 as a signal, do not raise ERROR_STALE_DAYS.",
-      "effort": "M",
-      "dependencies": ["DIAG-002"],
+      "category": "catalog-drift",
+      "path": "docs/02-architecture/diagrams/README.md:117",
+      "observation": "README still titles the architecture set as 48 core and the table stops at 48-effective-config; files 49-52 chembl activity dataflow/field views exist and are used as visual-smoke SVG.",
+      "method": "Read README architecture tables; list architecture/49-52*.mmd; read visual-smoke.txt first entry.",
+      "expected": "Canonical README lists every primary architecture topic including generated chembl_activity dataflow 49-52.",
+      "actual": "Heading 'Architecture Diagrams (48 core)'; no 49-chembl-pipeline-activity-dataflow (or 50-52) rows. diagrams-index.md already says 52 primary topics.",
+      "impact": "Operators miss the generated dataflow SSOT that CI drift-checks via generate-dataflows --check.",
+      "root_cause": "Chembl dataflow family added after the 24-48 expansion table; README heading not updated.",
+      "remediation": "Add a 49-52 table (or retitle to 52 primary topics) matching diagrams-index.md and link generate-dataflows.",
+      "effort": "S",
+      "automation": "Corpus/docs fragment test already covers ADR-040 counts; extend to README 49-52 filenames.",
+      "automated_fix_possible": true,
+      "dependencies": [],
       "validation": [
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams --json"
+        "rg -n \"49-chembl-pipeline-activity\" docs/02-architecture/diagrams/README.md"
       ],
-      "automation": "existing STALE-001 in lint + diagram-nightly.yml freshness issue",
-      "automated_fix_possible": false,
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/architecture/13-port-protocol-contracts.mmd",
-          "line": 5,
-          "command": "read_file 13-port-protocol-contracts.mmd",
-          "observation": "@date 2026-03-28; @nodes 48; @reference decomposed into 13a-13f"
+          "path": "docs/02-architecture/diagrams/README.md",
+          "line": 117,
+          "command": "read_file README.md",
+          "observation": "Section title 48 core; table ends at item 48."
         },
         {
-          "path": "docs/02-architecture/diagrams/architecture/12-bootstrap-di-container.mmd",
+          "path": "docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd",
+          "line": 1,
+          "command": "read_file 49-chembl-pipeline-activity-dataflow.mmd",
+          "observation": "Generated chembl_activity dataflow source exists."
+        },
+        {
+          "path": "docs/02-architecture/diagrams/manifests/visual-smoke.txt",
           "line": 5,
-          "command": "read_file 12-bootstrap-di-container.mmd",
-          "observation": "@version 1.4.0 with @date 2026-03-28"
+          "command": "read_file visual-smoke.txt",
+          "observation": "Smoke baseline includes architecture/svg/49-chembl-pipeline-activity-dataflow.svg."
         }
       ]
     },
     {
       "id": "DIAG-009",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-GOV-006",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.88,
+      "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "style-policy",
-      "path": "docs/02-architecture/diagrams/views/00-legend.mermaid:5",
-      "observation": "ADR-040 D1 forbids emoji prefixes in subgraph labels, but COLOUR-002 only flags five colored-circle emojis, so 00-legend's 📋 Legend subgraph and foundation-12 node emojis pass lint.",
-      "method": "read_file 00-legend.mermaid, lint_diagrams.py DISALLOWED_SUBGRAPH_EMOJI, foundation/12-local-deployment-architecture.mmd",
-      "expected": "Lint COLOUR-002 matches ADR-040: no emoji in subgraph labels (and preferably no emoji prefixes in node labels for CLI render).",
-      "actual": "DISALLOWED_SUBGRAPH_EMOJI = (🟡,🟢,🔵,🟣,⚪). 00-legend.mermaid:5 subgraph Legend[\"📋 Legend\"]. foundation/12 uses 🌐🖥️⏰📦📁📋📊 in node labels.",
-      "impact": "CLI/headless render can still hit emoji layout issues that ADR-040 tried to eliminate; policy and linter diverge.",
-      "root_cause": "COLOUR-002 was scoped to the historical colored-circle prefixes only.",
-      "remediation": "Strip 📋 from 00-legend subgraph label; optionally tighten COLOUR-002. Do not broaden debt budgets.",
+      "category": "operator-docs",
+      "path": "docs/03-guides/cheatsheets/cli-commands.md:616-618",
+      "observation": "Cheatsheet documents non-existent scripts.diagrams subcommands diagram_lint / diagram_check / diagram_render.",
+      "method": "Compare cheatsheet lines with scripts/diagrams/__main__.py COMMAND_SPECS.",
+      "expected": "Operator docs use real commands: lint, checks, check-artifacts, etc.",
+      "actual": "`python -m scripts.diagrams diagram_lint|diagram_check|diagram_render`.",
+      "impact": "Local lint/render attempts fail; operators may skip gates.",
+      "root_cause": "Cheatsheet not updated after CLI rename to python -m scripts.diagrams <verb>.",
+      "remediation": "Replace with `python -m scripts.diagrams lint` / `checks` / documented render.sh. Canonical list is scripts/diagrams/README.md.",
       "effort": "S",
+      "automation": "CLI inventory test against __main__.COMMAND_SPECS.",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams/views/00-legend.mermaid"
+        "python -m scripts.diagrams --help"
       ],
-      "automation": "extend COLOUR-002 or add a Unicode-symbol subgraph check",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/views/00-legend.mermaid",
-          "line": 5,
-          "command": "read_file 00-legend.mermaid",
-          "observation": "subgraph Legend[\"📋 Legend\"]"
+          "path": "docs/03-guides/cheatsheets/cli-commands.md",
+          "line": 616,
+          "command": "read_file cli-commands.md",
+          "observation": "diagram_lint / diagram_check / diagram_render listed."
         },
         {
-          "path": "scripts/diagrams/lint/lint_diagrams.py",
-          "line": 89,
-          "command": "read_file lint_diagrams.py",
-          "observation": "DISALLOWED_SUBGRAPH_EMOJI limited to five circle emojis"
+          "path": "scripts/diagrams/__main__.py",
+          "line": 63,
+          "command": "read_file scripts/diagrams/__main__.py",
+          "observation": "COMMAND_SPECS keys are lint, checks, check-artifacts, nightly, … — no diagram_lint."
         }
       ]
     },
     {
       "id": "DIAG-010",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-GOV-006",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.9,
+      "confidence_score": 0.8,
       "status": "PROVEN",
-      "category": "palette",
-      "path": "docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd:70",
-      "observation": "Local-deployment diagram paints Silver with External fill #f1f5f9 instead of canonical Silver #f8fafc.",
-      "method": "read_file foundation/12-local-deployment-architecture.mmd; compare ADR-040 D1 palette",
-      "expected": "Silver fill #f8fafc / stroke #475569.",
-      "actual": "style Silver fill:#f1f5f9,stroke:#475569. #f1f5f9 is the External fill; COLOUR-001 only errors on DEPRECATED_PALETTE so this passes lint.",
-      "impact": "Medallion Silver is visually indistinguishable from External; not a deploy-model error (the same file correctly shows local-only, no Docker/Redis).",
-      "root_cause": "style Silver copied External hex; linter does not require layer-correct canonical colors.",
-      "remediation": "Change Silver fill to #f8fafc in foundation/12 and the matching views/12-local-deployment-architecture-full.mermaid if present.",
+      "category": "governance-docs",
+      "path": "docs/02-architecture/diagrams/governance/policy.md:10",
+      "observation": "POL-LLM-DIAGRAMS-001 last verified 2026-03-29 and publishes uppercase palette hex, while ADR-040 / lint CANONICAL_PALETTE use lowercase and a later measured baseline.",
+      "method": "Compare policy.md header and §6.1 palette with ADR-040 D1 and lint_diagrams.CANONICAL_PALETTE.",
+      "expected": "Active policy last-verified date and palette literals stay aligned with ADR-040 (case-insensitive hex is fine if documented as equivalent).",
+      "actual": "policy.md Last verified 2026-03-29; Domain fill `#F5F3FF` vs ADR-040 `#f5f3ff`. Lint compares case-insensitively so this is documentation drift, not a COLOUR-001 fail.",
+      "impact": "LLM/operator palette copy-paste from policy.md looks like a second SSOT; freshness of POL-LLM-DIAGRAMS-001 is stale versus ADR-040 2026-07-08.",
+      "root_cause": "Policy file not re-verified when ADR-040 baseline was updated.",
+      "remediation": "Re-verify policy.md against ADR-040 D1; normalize hex case to lowercase to match lint CANONICAL_PALETTE.",
       "effort": "S",
+      "automation": "n/a",
+      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg \"style Silver fill\" docs/02-architecture/diagrams"
+        "rg -n \"Last verified|#F5F3FF|#f5f3ff\" docs/02-architecture/diagrams/governance/policy.md docs/02-architecture/decisions/ADR-040-diagram-governance.md"
       ],
-      "automation": "optional COLOUR check: Silver classDef/style must use #f8fafc",
-      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/foundation/12-local-deployment-architecture.mmd",
-          "line": 70,
-          "command": "read_file 12-local-deployment-architecture.mmd",
-          "observation": "style Silver fill:#f1f5f9,stroke:#475569"
+          "path": "docs/02-architecture/diagrams/governance/policy.md",
+          "line": 10,
+          "command": "read_file policy.md",
+          "observation": "Last verified 2026-03-29; Domain fill #F5F3FF."
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
+          "line": 77,
+          "command": "read_file ADR-040 D1",
+          "observation": "Domain fill #f5f3ff; Last verified 2026-07-08."
         }
       ]
     },
     {
       "id": "DIAG-011",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.86,
-      "status": "PROVEN",
-      "category": "inventory",
-      "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md:20",
-      "observation": "Workflow guide still counts 404 tracked sources (239 .mmd + 165 views) and omits secondary families sequence/state-machines/providers (38 .mmd).",
-      "method": "read_file DIAGRAM-WORKFLOW-GUIDE.md; list_dir architecture/class-diagrams/foundation/views/providers/sequence/state-machines",
-      "expected": "Inventory counts include every tracked source family under diagrams/.",
-      "actual": "Guide: 404 files. Measured this audit: architecture 89 mmd, class-diagrams 94 mmd, foundation 55 mmd, _template 1, views 165 mermaid, providers 28, sequence 5, state-machines 5 → 442 sources. Sibling SVG counts match sources in those families (list_dir).",
-      "impact": "Operators under-count the corpus; secondary families look unofficial.",
-      "root_cause": "Guide baseline frozen at ADR-040 core trees.",
-      "remediation": "Update DIAGRAM-WORKFLOW-GUIDE.md and diagrams-index.md with secondary-family counts; keep ADR-040 core numbers labeled as core-only.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "python -c \"from pathlib import Path; print('count locally')\""
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 20,
-          "command": "read_file DIAGRAM-WORKFLOW-GUIDE.md",
-          "observation": "404 tracked diagram source files: 239 .mmd + 165 .mermaid"
-        }
-      ]
-    },
-    {
-      "id": "DIAG-012",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-GOV-012",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.85,
       "status": "PROVEN",
-      "category": "ci-dead-check",
-      "path": ".github/workflows/docs.yml:506",
-      "observation": "PR check-diagram-drift still diffs docs/**/png/*.png after PNG was gitignored, so the PNG half of the check can never see tracked changes.",
-      "method": "read_file docs.yml check-diagram-drift; .gitignore png rules",
-      "expected": "Drift gate matches retention policy: require sibling SVG only.",
-      "actual": "changed_rendered includes :(glob)docs/**/png/*.png. Required missing set is SVG-only (good), but the PNG glob is dead.",
-      "impact": "Noise/false confidence that PNG drift is gated in git; actual PNG policy is CI artifacts.",
-      "root_cause": "DOC-GOV-02 untracked PNG without cleaning the drift glob.",
-      "remediation": "Remove the png glob from check-diagram-drift; keep SVG requirement.",
+      "category": "budget-process",
+      "path": ".github/workflows/docs.yml:372",
+      "observation": "PR mermaid job tells operators to 'update the accepted diagram budget' on lint failure, and does not run lint-budget; nightly does run enforce_diagram_quality_budget.py with max-lint-errors 0.",
+      "method": "Read docs.yml validate-mermaid vs diagram-nightly.yml budget step.",
+      "expected": "Lint failures are fixed in sources; budgets never increased. PR path either runs lint-budget or does not suggest raising it.",
+      "actual": "Error string: 'Fix the reported issues or update the accepted diagram budget.' No lint-budget step in docs.yml. Nightly uses --max-lint-errors 0.",
+      "impact": "Process smell: contributors may try to raise diagram quality budgets to pass PR lint, which is forbidden.",
+      "root_cause": "CI copy leftover from budget-gated lint.",
+      "remediation": "Change the error to 'fix the reported issues' only. Optionally add `python -m scripts.diagrams lint-budget --mode pr` without raising limits.",
       "effort": "S",
-      "dependencies": ["DIAG-003"],
-      "validation": [
-        "rg png .github/workflows/docs.yml"
-      ],
-      "automation": "n/a",
+      "automation": "Keep nightly --max-lint-errors 0; do not increase any --max-* flags.",
       "automated_fix_possible": true,
+      "dependencies": [],
+      "validation": [
+        "rg -n \"accepted diagram budget|lint-budget|max-lint-errors\" .github/workflows/docs.yml .github/workflows/diagram-nightly.yml"
+      ],
       "evidence": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 506,
-          "command": "read_file docs.yml",
-          "observation": "git diff includes :(glob)docs/**/png/*.png"
-        }
-      ]
-    },
-    {
-      "id": "DIAG-013",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "medium",
-      "confidence_score": 0.8,
-      "status": "PROVEN",
-      "category": "tooling-duplicate",
-      "path": "scripts/diagrams/fix_mermaid_operators.py:1",
-      "observation": "A second fix_mermaid_operators.py sits at scripts/diagrams/ while the CLI command fix-operators dispatches to fix/fix_mermaid_operators.py.",
-      "method": "read_file both files; read scripts/diagrams/__main__.py COMMAND_SPECS",
-      "expected": "Single fixer module on the public CLI path.",
-      "actual": "Root script is a shorter older module (no argparse header). CLI uses python_command(\"fix/fix_mermaid_operators.py\").",
-      "impact": "Operators following a raw path may run the stale copy.",
-      "root_cause": "Move into fix/ left the old module in place.",
-      "remediation": "Delete or turn scripts/diagrams/fix_mermaid_operators.py into a thin wrapper that execs fix/fix_mermaid_operators.py.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "python -m scripts.diagrams fix-operators --help"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 83,
-          "command": "read_file __main__.py",
-          "observation": "fix-operators -> fix/fix_mermaid_operators.py"
+          "line": 372,
+          "command": "read_file docs.yml validate-mermaid",
+          "observation": "Suggests updating the accepted diagram budget; no lint-budget invocation in this job."
         },
         {
-          "path": "scripts/diagrams/fix_mermaid_operators.py",
-          "line": 1,
-          "command": "read_file scripts/diagrams/fix_mermaid_operators.py",
-          "observation": "Duplicate module still present at package root"
+          "path": ".github/workflows/diagram-nightly.yml",
+          "line": 128,
+          "command": "read_file diagram-nightly.yml",
+          "observation": "Nightly runs enforce_diagram_quality_budget.py --max-lint-errors 0."
         }
       ]
     },
     {
-      "id": "DIAG-014",
+      "id": "DIAG-012",
       "requirement_id": "REQ-ARCH-001",
       "priority": "P3",
       "severity": "Low",
       "confidence": "medium",
-      "confidence_score": 0.78,
+      "confidence_score": 0.75,
       "status": "PROVEN",
-      "category": "diagram-accuracy",
-      "path": "docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd:44",
-      "observation": "High-level hexagonal Interfaces subgraph shows a sibling Orchestration node beside CLI and HTTP, but src/bioetl/interfaces/ only contains cli/ and http/; orchestration is a CLI service, not a third interface package.",
-      "method": "read_file 01-high-level-hexagonal.mmd; list_dir src/bioetl/interfaces; grep Orchestration in interfaces",
-      "expected": "Interfaces layer on the context diagram matches live packages (CLI, HTTP) or labels orchestration as a CLI concern.",
-      "actual": "ORCH[Orchestration] is a third Interfaces node. CliRunOrchestrationService lives under interfaces/cli/commands.",
-      "impact": "Mild C4/context distortion; not a security/deploy error.",
-      "root_cause": "Conceptual orchestration box was not folded into CLI after the package split.",
-      "remediation": "Fold ORCH into the CLI node or label it CLI orchestration (CliRunOrchestrationService).",
+      "category": "render-layout",
+      "path": "docs/02-architecture/diagrams/architecture/13h-port-contracts-storage.mmd:41",
+      "observation": "Storage port-contract source declares labeled SilverWriter/GoldWriter/NoOpMetadataWriter, but the sibling SVG renders extra unlabeled SW/GW/NOMW nodes outside the Infrastructure cluster (Mermaid chained-edge subgraph membership).",
+      "method": "Compare 13h .mmd node declarations with SVG fo-fallback text SW/GW/NOMW.",
+      "expected": "Rendered nodes keep source labels and subgraph membership.",
+      "actual": "SVG contains nodes whose visible text is 'SW', 'GW', 'NOMW' while BronzeWriter/DeltaReader/MetadataWriter labels remain inside the cluster.",
+      "impact": "Published SVG for storage ports is harder to read than the text source; pretty-but-wrong relative to the .mmd.",
+      "root_cause": "Mermaid `A --- B & C & D` plus ELK can duplicate/extract chained nodes from subgraphs.",
+      "remediation": "Replace chained edges with one edge per target (`STP --- SW`, `STP --- GW`, …) and re-render SVG only for this stem.",
       "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "ls src/bioetl/interfaces"
-      ],
-      "automation": "n/a",
+      "automation": "check-svg-text / visual-smoke on 13h after rewrite.",
       "automated_fix_possible": true,
+      "dependencies": ["DIAG-003"],
+      "validation": [
+        "python -m scripts.diagrams check-svg-text --manifest <temp 13h svg path>"
+      ],
       "evidence": [
         {
-          "path": "docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd",
-          "line": 44,
-          "command": "read_file 01-high-level-hexagonal.mmd",
-          "observation": "Interfaces subgraph: CLI, HTTP_IF, ORCH"
+          "path": "docs/02-architecture/diagrams/architecture/13h-port-contracts-storage.mmd",
+          "line": 41,
+          "command": "read_file 13h-port-contracts-storage.mmd",
+          "observation": "STP --- BW & SW & GW with labeled SW/GW/NOMW declarations."
         },
         {
-          "path": "src/bioetl/interfaces",
+          "path": "docs/02-architecture/diagrams/architecture/svg/13h-port-contracts-storage.svg",
           "line": 1,
-          "command": "list_dir src/bioetl/interfaces",
-          "observation": "Only cli/ and http/ packages plus README"
-        }
-      ]
-    },
-    {
-      "id": "DIAG-015",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.84,
-      "status": "PROVEN",
-      "category": "experimental-source",
-      "path": "docs/02-architecture/diagrams/class-diagrams/07-application-core-services-frontmatter-sandbox.mmd:8",
-      "observation": "Frontmatter sandbox copy remains in the canonical class-diagrams corpus with YAML --- config --- and @date 2026-03-28 (STALE-001).",
-      "method": "read_file 07-application-core-services-frontmatter-sandbox.mmd; README cleanup matrix",
-      "expected": "Experiments live outside the linted canonical set, or are clearly excluded from NAME/STALE gates.",
-      "actual": "File is a sandbox copy for frontmatter config experiment, still numbered 07-*, still linted. Tests exempt it from description cards only.",
-      "impact": "Duplicate class diagram plus YAML frontmatter can confuse mermaid-cli; adds a guaranteed stale ERROR.",
-      "root_cause": "Sandbox was kept in class-diagrams/ for a layout experiment.",
-      "remediation": "Move the sandbox out of class-diagrams/ or delete it if the experiment is done; keep 07-application-core-services.mmd as the only 07 source.",
-      "effort": "S",
-      "dependencies": ["DIAG-008"],
-      "validation": [
-        "python -m scripts.diagrams lint docs/02-architecture/diagrams/class-diagrams/07-application-core-services-frontmatter-sandbox.mmd"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/02-architecture/diagrams/class-diagrams/07-application-core-services-frontmatter-sandbox.mmd",
-          "line": 1,
-          "command": "read_file sandbox mmd",
-          "observation": "YAML frontmatter config.layout elk; comment Sandbox copy; @date 2026-03-28"
+          "command": "read_file 13h SVG",
+          "observation": "Visible labels include raw ids SW, GW, NOMW outside the infrastructure cluster."
         }
       ]
     }

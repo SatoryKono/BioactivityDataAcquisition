@@ -1,0 +1,5 @@
+nodeid_or_surface,layer,category,status,n_repeats_this_session,pass_fail,evidence,notes
+configs/quality/flaky_test_inventory.yaml#reviewed_flaky_tests,governance,inventory,empty,0,NOT_PROVEN,reviewed_on=2026-08-03,curated residual is []
+tests.yml:flaky-telemetry,ci,empirical,exists,0,NOT_PROVEN,.github/workflows/tests.yml:313,3 seeds on 2 files; artifact not downloaded
+tests/e2e/test_pipeline_matrix_e2e.py::test_pipeline_matrix_smoke,e2e,INFRA_FLAKY_CASSETTE_MISMATCH,skip-not-flake,0,NOT_PROVEN,line 547,skip used instead of fail for non-critical
+tests/e2e/conftest.py::_skip_transient_pipeline_run,e2e,INFRA_FLAKY_429,skip-not-flake,0,NOT_PROVEN,line 1164,skip after retry exhaustion; not a pytest-rerunfailures healer

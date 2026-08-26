@@ -1,0 +1,17 @@
+path,kind,reason,owner_or_lane,ci_runs,finding
+pyproject.toml:216,global_addopts,not benchmark and not slow AND-combined with CLI -m,all default pytest,no unless -o addopts=,TEST-SYS-001
+tests/security/test_security.py:86,pytest.mark.slow,TestVCRCassetteSanitization,security lane,no (addopts),TEST-SYS-001
+tests/e2e/test_full_pipeline_chain_e2e.py:56,pytestmark slow,large VCR chains,e2e,no (addopts),TEST-SYS-001
+tests/e2e/test_full_pipeline.py:146,pytest.mark.slow,TestChEMBLPipelineE2E,e2e,no (addopts),TEST-SYS-001
+tests/e2e/test_advanced_scenarios_e2e.py:400,pytest.mark.slow,advanced scenarios,e2e,no (addopts),TEST-SYS-001
+tests/architecture/test_layer_dependencies.py:673,pytest.mark.slow,test_import_linter_contracts,architecture-slow-governance,lint-imports CLI yes; pytest wrapper no,TEST-SYS-001
+tests/architecture/test_antipatterns.py:103,pytest.mark.slow,test_no_hardcoded_secrets,architecture,yes via security.yml -o addopts=,exception
+tests/contract/test_chembl_contract.py:334,pytest.mark.slow,live slow contract,monthly contract-tests.yml,no (addopts still not slow),TEST-SYS-001
+tests/e2e/test_pipeline_matrix_e2e.py:262,deferred_collection,MATRIX_REPLAY_DEFERRED_PIPELINES 16 names,e2e-smoke,no,TEST-SYS-006
+tests/e2e/test_chembl_publication_term_e2e.py,not_in_e2e_smoke,owner not in e2e-smoke paths,entity_test_ownership,nightly only,TEST-SYS-006
+tests/e2e/test_pipeline_matrix_e2e.py:547,runtime_skip,INFRA_FLAKY_CASSETTE_MISMATCH non-critical,e2e-smoke,collected but skip,TEST-SYS-007
+configs/quality/test_skip_inventory.yaml,reviewed_skip,24 contract/integration paths permanent_policy,census,conditional,TEST-SYS-004
+tests/e2e/** pytest.skip,runtime_skip,not in skip inventory,e2e,yes with skip,TEST-SYS-004
+pytest.mark.xfail,absent,only in skip-inventory unit tests,n/a,n/a,none
+pytest.mark.only,absent,no focused tests,n/a,n/a,none
+*.disabled modules,forbidden,architecture guard test_no_disabled_test_modules.py,architecture,blocked,none
