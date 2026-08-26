@@ -601,9 +601,12 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
     zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
 
-    assert set(triggers) == {"pull_request"}
+    assert "pull_request" in triggers
+    assert "push" in triggers
+    assert triggers["push"]["branches"] == ["main"]
     assert ".github/workflows/**" in triggers["pull_request"]["paths"]
     assert ".github/actions/**" in triggers["pull_request"]["paths"]
+    assert ".github/workflows/**" in triggers["push"]["paths"]
     assert zizmor_step["uses"] == f"zizmorcore/zizmor-action@{zizmor_sha}"
     assert zizmor_step["with"]["min-severity"] == "high"
     assert zizmor_step["with"]["min-confidence"] == "high"

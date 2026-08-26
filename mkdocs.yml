@@ -673,10 +673,10 @@ nav:
               - "12B Bootstrap Wiring": 02-architecture/diagrams/descriptions/architecture/12b-bootstrap-wiring.md
               - "13 Port Protocol Contracts": 02-architecture/diagrams/descriptions/architecture/13-port-protocol-contracts.md
               - "13A Data Storage Ports": 02-architecture/diagrams/descriptions/architecture/13a-data-storage-ports.md
-              - "13A Port Contracts Data Sources": 02-architecture/diagrams/descriptions/architecture/13a-port-contracts-data-sources.md
+              - "13G Port Contracts Data Sources": 02-architecture/diagrams/descriptions/architecture/13g-port-contracts-data-sources.md
               - "13B Operational Ports": 02-architecture/diagrams/descriptions/architecture/13b-operational-ports.md
-              - "13B Port Contracts Storage": 02-architecture/diagrams/descriptions/architecture/13b-port-contracts-storage.md
-              - "13C Port Contracts Observability": 02-architecture/diagrams/descriptions/architecture/13c-port-contracts-observability.md
+              - "13H Port Contracts Storage": 02-architecture/diagrams/descriptions/architecture/13h-port-contracts-storage.md
+              - "13I Port Contracts Observability": 02-architecture/diagrams/descriptions/architecture/13i-port-contracts-observability.md
               - "13C Validation Dq Ports": 02-architecture/diagrams/descriptions/architecture/13c-validation-dq-ports.md
               - "13D Port Contracts Services": 02-architecture/diagrams/descriptions/architecture/13d-port-contracts-services.md
               - "13E Operational Ports Domain": 02-architecture/diagrams/descriptions/architecture/13e-operational-ports-domain.md
