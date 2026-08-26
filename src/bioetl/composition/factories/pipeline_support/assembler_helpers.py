@@ -7,6 +7,7 @@ from typing import cast
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
 from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.ports.providers import DataSourceCreatorProtocol
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
@@ -34,7 +35,9 @@ def build_factory_context(
     """Build typed factory context used by composition helper methods."""
     return build_pipeline_factory_context(
         pipeline_name=factory.pipeline_name,
-        create_data_source_fn=factory._create_data_source,
+        create_data_source_fn=cast(
+            "DataSourceCreatorProtocol", factory._create_data_source
+        ),
         pipeline_class=cast("type[BasePipeline] | None", factory.pipeline_class),
         provider=factory.provider,
         transformer_class=cast(

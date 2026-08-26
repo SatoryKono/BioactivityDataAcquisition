@@ -12,8 +12,7 @@ from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 
-# Keep typing protocols imported at runtime because these helpers define them
-# in module scope and the Windows shared-drive bytecode cache can otherwise lag.
+# These helper-only protocol imports remain type-checker dependencies.
 
 if TYPE_CHECKING:
     from bioetl.composition.builders import FilterConfigBuilder
@@ -29,8 +28,6 @@ if TYPE_CHECKING:
         MaintenanceConfig,
         PipelineYamlConfig,
     )
-
-from bioetl.domain.ports import SourceConfigLike
 
 
 def apply_tracing_override(
@@ -158,7 +155,7 @@ def resolve_filter_batch_size_impl(
     source_loader: Callable[..., object],
 ) -> int | None:
     try:
-        source_cfg = cast(SourceConfigLike, source_loader(yaml_config.provider))
+        source_cfg = cast(SimpleNamespace, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size
         return batch_size if isinstance(batch_size, int) else None
     except (ValueError, AttributeError):

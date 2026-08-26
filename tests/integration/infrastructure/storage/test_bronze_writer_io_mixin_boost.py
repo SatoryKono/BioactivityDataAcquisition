@@ -22,6 +22,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
+from bioetl.infrastructure.storage.bronze import io_mixin
 
 
 class _ConcreteBronzeMixin(BronzeWriterIOMixin):
@@ -73,6 +74,33 @@ class TestWriteAtomicStreamEdgeCases:
         assert not target.exists()
         tmp_files = list(tmp_path.glob("*.tmp"))
         assert len(tmp_files) == 0
+
+
+@pytest.mark.parametrize("existing", [b"same", b"different"])
+def test_write_bytes_if_absent_or_same_handles_exclusive_create_race(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    existing: bytes,
+) -> None:
+    """A concurrent creator must be validated without overwriting its payload."""
+    target = tmp_path / "race.bin"
+    target.write_bytes(existing)
+    monkeypatch.setattr(
+        io_mixin.os,
+        "open",
+        MagicMock(side_effect=FileExistsError),
+    )
+    monkeypatch.setattr(Path, "exists", lambda self: False)
+
+    if existing == b"same":
+        io_mixin.write_bytes_if_absent_or_same(
+            target, b"same", mismatch_message="mismatch"
+        )
+    else:
+        with pytest.raises(FileExistsError, match="mismatch"):
+            io_mixin.write_bytes_if_absent_or_same(
+                target, b"same", mismatch_message="mismatch"
+            )
 
     def test_write_atomic_stream_large_chunk_triggers_mid_write(
         self, tmp_path: Path

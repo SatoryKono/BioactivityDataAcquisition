@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import cast
 
-from bioetl.composition.bootstrap.service_registry_contracts import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     AdrServicePort,
     AuditInspectionServiceProtocol,
     BronzeCleanupServiceProtocol,

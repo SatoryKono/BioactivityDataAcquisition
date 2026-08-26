@@ -6,7 +6,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.bootstrap.service_registry_contracts import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     AdrServicePort,
     AuditInspectionServiceProtocol,
     BronzeCleanupServiceProtocol,
@@ -92,7 +92,7 @@ def get_audit_service() -> AuditInspectionServiceProtocol:
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
-    factory = _resolve(
+    factory: QuarantineServiceFactoryProtocol = _resolve(
         _typed_port[QuarantineServiceFactoryProtocol](QuarantineServiceFactoryProtocol)
     )
     return factory(data_root=data_root)
@@ -129,7 +129,7 @@ def get_pipeline_runner_service(
 ) -> PipelineRunnerService:
     """Get universal pipeline runner service."""
     effective_registry = _ensure_pipeline_registrations(registry=registry)
-    factory = _resolve(
+    factory: PipelineRunnerServiceFactoryProtocol = _resolve(
         _typed_port[PipelineRunnerServiceFactoryProtocol](
             PipelineRunnerServiceFactoryProtocol
         )
@@ -213,7 +213,7 @@ def get_health_server_dependencies(
     data_root: Path | None = None,
 ) -> HealthServerDependencies:
     """Get health-server dependencies without pipeline registration."""
-    factory = _resolve(
+    factory: HealthServerDependenciesFactoryProtocol = _resolve(
         _typed_port[HealthServerDependenciesFactoryProtocol](
             HealthServerDependenciesFactoryProtocol
         )

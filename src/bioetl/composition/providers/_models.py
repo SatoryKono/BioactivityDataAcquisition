@@ -15,10 +15,12 @@ from bioetl.application.ports.providers import (
     ProviderSettingsProtocol,
     SecretValueProviderProtocol,
 )
+from bioetl.domain.resilience import CircuitBreakerConfig
 
 
 __all__ = [
     "AdapterCreatorProtocol",
+    "CircuitBreakerConfig",
     "DataSourceCreatorProtocol",
     "HttpConfig",
     "ProviderConfig",

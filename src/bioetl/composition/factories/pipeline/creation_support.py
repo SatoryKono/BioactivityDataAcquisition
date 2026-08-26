@@ -8,11 +8,11 @@ importing the private ``_creation_wiring`` module directly.
 from __future__ import annotations
 
 from bioetl.composition.factories.pipeline._creation_wiring import (
-    _BuildPipelineServicesFn,
-    _create_pipeline_with_services_impl,
-    _PipelineCreationInputs,
-    _PipelineCreationRequest,
-    _ServiceBundleDeps,
+    _BuildPipelineServicesFn as _BuildPipelineServicesFn,
+    _create_pipeline_with_services_impl as _create_pipeline_with_services_impl,
+    _PipelineCreationInputs as _PipelineCreationInputs,
+    _PipelineCreationRequest as _PipelineCreationRequest,
+    _ServiceBundleDeps as _ServiceBundleDeps,
 )
 
 # Public non-underscore aliases for first-party importers that must not

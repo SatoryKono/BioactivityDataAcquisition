@@ -39,6 +39,12 @@ from bioetl.application.services.control_plane import (
     WorkflowLedgerService,
     WorkflowManifestService,
 )
+from bioetl.application.services.control_plane.workflow import (
+    ledger_service as workflow_ledger_module,
+)
+from bioetl.application.services.workflow.control_plane import (
+    execution_service as workflow_execution_module,
+)
 from bioetl.application.services.workflow.control_plane.execution_preparation_incremental import (
     _apply_incremental_offset,
     _next_incremental_start_offset,
@@ -66,6 +72,19 @@ from bioetl.domain.ports import LockPort
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 from tests.helpers.clock import FIXED_TEST_TIME
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        workflow_ledger_module._missing_entry_id_factory,
+        workflow_execution_module._missing_run_id_factory,
+    ],
+)
+def test_control_plane_default_factories_fail_closed(factory: object) -> None:
+    """Composition omissions must fail before a workflow event is persisted."""
+    with pytest.raises(RuntimeError, match="must be supplied"):
+        factory()
 
 
 @dataclass

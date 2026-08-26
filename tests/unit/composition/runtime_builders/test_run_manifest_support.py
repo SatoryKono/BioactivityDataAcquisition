@@ -129,6 +129,17 @@ def test_emit_replay_reconstructability_metric_is_owned_by_creation_support() ->
 
 
 @pytest.mark.unit
+def test_emit_replay_reconstructability_metric_accepts_disabled_metrics() -> None:
+    """The optional metrics port must remain a no-op boundary."""
+    emit_replay_reconstructability_metric(
+        request=_make_manifest_request(),
+        strict_exact_replay_supported=False,
+        metrics=None,
+    )
+    assert _make_manifest_request().launch_context["exact_replay"] is False
+
+
+@pytest.mark.unit
 def test_build_manifest_create_request_uses_supplied_reproducibility_context(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

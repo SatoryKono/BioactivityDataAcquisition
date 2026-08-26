@@ -211,6 +211,7 @@ def emit_replay_reconstructability_metric(
     lag_seconds = _resolve_replay_lag_seconds(
         launch_context=launch_context,
         lag_status=lag_status,
+        read_attr=_read_attr,
     )
     if lag_seconds is not None:
         metrics.set_gauge(

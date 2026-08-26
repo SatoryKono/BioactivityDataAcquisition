@@ -25,6 +25,8 @@ def collect_datetime_now_calls(
 ) -> list[str]:
     """Collect datetime.now()/utcnow() calls for one Python file."""
     source = py_file.read_text(encoding="utf-8")
+    if "datetime.now" not in source and "datetime.utcnow" not in source:
+        return []
     try:
         tree = ast.parse(source)
     except SyntaxError:
