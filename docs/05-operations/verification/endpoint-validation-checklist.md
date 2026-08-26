@@ -447,7 +447,7 @@ ______________________________________________________________________
 | --------------------- | --------------------------------------------------------------------------- |
 | Base URL              | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils`                             |
 | Auth Type             | `api-key` (optional, via `BIOETL_PUBMED_API_KEY` env var)                   |
-| Email                 | Optional (`BIOETL_PUBMED_EMAIL`; empty/unset — adapter returns `None`, no fake identity) |
+| Email                 | Optional (`BIOETL_PUBMED_EMAIL`; empty / unset — adapter returns `None`, no fake identity) |
 | Rate Limit (no key)   | 3.0 req/sec, burst 5                                                        |
 | Rate Limit (with key) | 10 req/sec, burst 20                                                        |
 | Batch Size            | 200 PMIDs per efetch request                                                |
@@ -797,7 +797,7 @@ ______________________________________________________________________
 
 | Provider         | Without Key/Email                 | With Key/Email           |
 | ---------------- | --------------------------------- | ------------------------ |
-| ChEMBL           | 0.1 req/sec (burst 1)             | N/A                      |
+| ChEMBL           | 0.1 req/sec (`chembl.yaml`)       | N/A                      |
 | CrossRef         | Shared pool (aggressive limiting) | 50 req/sec (polite pool) |
 | OpenAlex         | Not a production support boundary | 10 req/sec with API key / credit model |
 | PubChem          | 5 req/sec                         | N/A                      |

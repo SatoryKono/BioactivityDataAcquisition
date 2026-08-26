@@ -55,6 +55,10 @@ data/
     │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/
     │       └── composite-{name}-{run-id}.json
+    ├── control/                         # Control-plane artifacts (ADR-044/047)
+    │   ├── run_manifest/
+    │   ├── run_ledger/
+    │   └── workflow_manifest/
     ├── quarantine/
     │   └── common.quarantine/           # Unified quarantine table
     │       ├── _delta_log/

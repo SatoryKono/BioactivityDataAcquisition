@@ -637,7 +637,7 @@ ______________________________________________________________________
 ### Структура
 
 ```yaml
-# configs/providers/chembl.yaml (live values; 15 entities)
+# configs/providers/chembl.yaml (live values; 15 entities; not an illustrative sketch)
 source:
   provider_config:
     provider: chembl

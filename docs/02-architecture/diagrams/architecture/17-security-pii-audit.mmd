@@ -35,7 +35,7 @@ graph TB
     subgraph PIIFlow["PII Hashing Flow"]
         RAW_PII["Raw PII Data<br/>(names, emails, affiliations)"]:::size-md
         HASH_FN["SHA256(lowercase(value) + salt)"]:::size-sm
-        HASHED["Hashed PII value"]:::size-sm
+        HASHED["Hashed PII<br/>(SHA256 digest)"]:::size-sm
         RAW_PII --> HASH_FN --> HASHED
     end
 
@@ -54,8 +54,8 @@ graph TB
     end
 
     subgraph StorageAudit["Storage Audit Integration"]
-        BW["BronzeWriter<br/>audit: AuditPort"]:::size-md
-        SW["SilverWriter<br/>audit: AuditPort"]:::size-md
+        BW["BronzeWriter<br/>--------<br/>audit: AuditPort"]:::size-md
+        SW["SilverWriter<br/>--------<br/>audit: AuditPort"]:::size-md
         GW["GoldWriter<br/>--------<br/>audit: AuditPort<br/>logs writes"]:::size-md
     end
 

@@ -43,7 +43,7 @@ graph TB
     end
 
     subgraph External["External Systems"]
-        PROM["Prometheus<br/>Grafana optional"]:::size-sm
+        PROM["Prometheus + Grafana (optional, ADR-010/053)"]:::size-sm
         OTEL_COL["OTLP collector / console exporter"]:::size-sm
     end
 

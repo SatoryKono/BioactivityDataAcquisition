@@ -22,6 +22,7 @@ def test_gitignore_ignores_dotenv_and_keeps_example() -> None:
         text=True,
     )
     assert ".gitignore:" in ignored
+    assert ".env" in ignored
     not_ignored = subprocess.run(
         ["git", "check-ignore", "-q", ".env.example"],
         cwd=ROOT,
@@ -55,7 +56,10 @@ def test_runtime_guides_start_at_agents_and_runtime_maps() -> None:
         "GEMINI.md",
     ):
         text = (ROOT / rel).read_text(encoding="utf-8")
-        assert "`AGENTS.md`" in text, rel
+        agents_at = text.find("`AGENTS.md`")
+        assert agents_at != -1, rel
+        prefix = text[: agents_at + 20]
+        assert "AGENTS.md" in prefix
         assert "CODEX-RUNTIME.md" in text, rel
         assert "JUNIE-RUNTIME.md" in text, rel
 

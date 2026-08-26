@@ -131,8 +131,8 @@ Accepted ADRs documenting key architectural decisions (through ADR-059):
 | [ADR-055](decisions/ADR-055-workflow-reconciliation-data-step-ownership.md) | Workflow reconciliation data-step ownership | §2.4, ADR-047 |
 | [ADR-056](decisions/ADR-056-proof-or-stop-lifecycle-control.md) | Proof-or-Stop lifecycle control | §6, governance |
 | [ADR-057](decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic runtime config authority and identity | §1, ADR-032/044/046/052 |
-| [ADR-058](decisions/ADR-058-layered-port-registries.md) | Layered port registries (domain / application / composition) | §1, ADR-005 |
-| [ADR-059](decisions/ADR-059-package-cohesion-budgets.md) | Package cohesion budgets (shrink-only) | §1, governance |
+| [ADR-058](decisions/ADR-058-layered-port-registries.md) | Layered port registries (domain / application / composition contracts) | §1, ADR-005/048 |
+| [ADR-059](decisions/ADR-059-package-cohesion-budgets.md) | Package cohesion budgets (shrink-only) | §1, ADR-049/041 |
 
 ______________________________________________________________________
 
