@@ -8,10 +8,10 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `a066536957a6d77782d6319bfa2516b5a73bff58`
+Audited commit SHA: `6734cc64f336c6e5b25209097880b0f7eeccc675`
 
 
-Evidence surface SHA-256: `fdf0f88deeb6cb66a60965d2804f99df2d4860c6518d8c1c82883f5e1a7deabf`
+Evidence surface SHA-256: `0d95d25fa7330705996e92955524fb20cb9d81474536f2e99f4e969093e874bf`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,8 +19,8 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "a066536957a6d77782d6319bfa2516b5a73bff58",
-  "evidence_surface_sha256": "fdf0f88deeb6cb66a60965d2804f99df2d4860c6518d8c1c82883f5e1a7deabf",
+  "audited_commit_sha": "6734cc64f336c6e5b25209097880b0f7eeccc675",
+  "evidence_surface_sha256": "0d95d25fa7330705996e92955524fb20cb9d81474536f2e99f4e969093e874bf",
   "metrics": {
     "architecture_integral_score": 7.41,
     "architecture_interpretation": "satisfactory_system_refactoring_required",
@@ -48,7 +48,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `a066536957` after repairing merge-conflicted module-coverage-inventory.json (#9676); hotspot measured LOC aligned without budget growth (#9674); honest residual unmeasured_module_count=84 vs max_count 0 remains (#9678). No debt budget grew.
+Refresh reason: Re-pin to origin/main `6734cc64f3` after merging latest main into fix/audit-cycle-tech-debt-0794442d74; inventory JSON remains valid; residual unmeasured_module_count=84 vs max_count 0 (#9678). No debt budget grew.
 
 
 ## Executive summary
