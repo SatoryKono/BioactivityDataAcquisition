@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-26T12:36:15.626692+00:00",
+  "generated_at": "2026-08-26T08:09:49.705066+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -5088,7 +5088,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5110,25 +5110,19 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 120,
+          "line": 119,
           "source_group": "docs",
           "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 152,
-          "source_group": "docs",
-          "text": "`observability_runtime.py`, `observability.py`, `registry.py`, `types.py`,"
-        },
-        {
-          "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 232,
+          "line": 231,
           "source_group": "docs",
           "text": "### 2.4. `registry.py` — Реестр пайплайнов"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 270,
+          "line": 269,
           "source_group": "docs",
           "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
         },
@@ -5137,6 +5131,12 @@
           "line": 102,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
+          "line": 165,
+          "source_group": "docs",
+          "text": "- `pipeline/registry.py` — imports, configs, and exports updated"
         }
       ],
       "owner": "@bioetl-platform",
@@ -7849,7 +7849,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 148,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/docs/build/generate_docs_export.py\","
         }
@@ -9644,7 +9644,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 340,
+          "line": 344,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -9797,7 +9797,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 222,
+          "line": 226,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
@@ -9854,7 +9854,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 38,
+          "line": 42,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -9905,7 +9905,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 216,
+          "line": 220,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -9953,7 +9953,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 150,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -9974,7 +9974,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 151,
+          "line": 155,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
@@ -10058,7 +10058,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 152,
+          "line": 156,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -10103,7 +10103,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 153,
+          "line": 157,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         },
@@ -10191,7 +10191,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 147,
+          "line": 151,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/file_merger.py\","
         },
@@ -12092,7 +12092,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 373,
+      "reference_count": 374,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13684,7 +13684,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 424,
+          "line": 428,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14066,7 +14066,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -14100,21 +14100,21 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 554,
+          "line": 555,
           "source_group": "docs",
-          "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
-        },
-        {
-          "path": "docs/00-project/glossary.md",
-          "line": 558,
-          "source_group": "docs",
-          "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
+          "text": "(`scripts/engineering/qa/lint_terminology.py`):"
         },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 27,
           "source_group": "scripts",
           "text": "| `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 119,
+          "source_group": "scripts",
+          "text": "\"check-terminology\": \"scripts.engineering.qa.lint_terminology\","
         }
       ]
     },
@@ -14425,7 +14425,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 427,
+          "line": 431,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -15237,7 +15237,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 154,
+          "line": 158,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -15356,7 +15356,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 155,
+          "line": 159,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         },
@@ -16015,7 +16015,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 409,
+          "line": 413,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -16049,7 +16049,7 @@
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 257,
+          "line": 256,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/run_architecture_audit_read_only.py`."
         },
@@ -16706,7 +16706,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 207,
+          "line": 211,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         }
@@ -17596,7 +17596,7 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 246,
+          "line": 245,
           "source_group": "docs",
           "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/"
         },
@@ -19033,13 +19033,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 410,
+          "line": 414,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 460,
+          "line": 464,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -19365,7 +19365,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 289,
+          "line": 293,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -19417,7 +19417,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 308,
+          "line": 312,
           "source_group": "tests",
           "text": "/ \"check_dashboard_panel_fill.py\""
         },
@@ -19876,7 +19876,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 274,
+          "line": 278,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
@@ -21843,7 +21843,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 64,
+          "line": 68,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
@@ -22443,7 +22443,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 149,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/schema/generation/generate_schema_artifacts.py\","
         },

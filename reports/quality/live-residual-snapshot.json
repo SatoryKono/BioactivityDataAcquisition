@@ -34,7 +34,7 @@
       "max_internal_fan_in": 2,
       "helper_function_ratio": 0.358,
       "files": 35,
-      "total_loc": 3960,
+      "total_loc": 3968,
       "budget_files_ge_250_loc": 2,
       "budget_max_internal_fan_in": 3
     },
@@ -50,9 +50,9 @@
     "composition_runtime_builders": {
       "files_ge_250_loc": 0,
       "max_internal_fan_in": 3,
-      "helper_function_ratio": 0.373,
+      "helper_function_ratio": 0.375,
       "files": 57,
-      "total_loc": 7225,
+      "total_loc": 7229,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 5
     }

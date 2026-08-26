@@ -33,8 +33,8 @@ class HttpConfigProtocol(Protocol):
     the Protocol (deprecated since 2026-08-26).
     """
 
-    rate: float
-    capacity: int
+    rate: float = 5.0
+    capacity: int = 10
 
 
 @runtime_checkable

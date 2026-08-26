@@ -6,5 +6,7 @@
 # Versioned compatibility check confirmed support for current key semantics.
 # User model, auth, provider, and MCP configuration stay user-local.
 
-[agents]
-max_threads = 3
+# Dotted key keeps the root table open so a --profile overlay cannot
+# accidentally bind `model = "..."` under [agents] (AgentRoleToml flatten).
+agents.max_threads = 3
+

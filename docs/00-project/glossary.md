@@ -551,11 +551,12 @@ ______________________________________________________________________
 
 ### Lint Script
 
-A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:
+A terminology linter is available via the packaged QA dispatcher
+(`scripts/engineering/qa/lint_terminology.py`):
 
 ```bash
 # Check for deprecated terms
-python scripts/engineering/qa/lint_terminology.py src/bioetl/
+python -m scripts.engineering.qa check-terminology src/bioetl/
 
 # Pre-commit hook (see .pre-commit-config.yaml)
 ```

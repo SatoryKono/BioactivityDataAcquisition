@@ -10,8 +10,6 @@ from collections.abc import Awaitable, Callable
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.contracts import BronzeCleanupServiceProtocol
-
 if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.cleanup_service import CleanupPreview
     from bioetl.application.services.contracts.contract_migration_service import (
@@ -32,6 +30,7 @@ __all__ = [
 ]
 
 _ENTRYPOINTS_MODULE = "bioetl.composition.entrypoints"
+_CONTROL_PLANE_ACCESS_MODULE = "bioetl.composition.control_plane_service_access"
 
 
 def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
@@ -48,7 +47,9 @@ def get_vacuum_service() -> VacuumService:
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Load the bronze cleanup service through composition on demand."""
-    candidate = import_module(_ENTRYPOINTS_MODULE).resolve(BronzeCleanupServiceProtocol)
+    candidate = import_module(
+        _CONTROL_PLANE_ACCESS_MODULE
+    ).get_bronze_cleanup_service()
     return cast("BronzeCleanupService", candidate)
 
 
