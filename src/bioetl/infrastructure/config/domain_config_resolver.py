@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, cast
 
-from bioetl.domain.ports.config_mapper import DomainConfigMapper
+from bioetl.domain.ports import DomainConfigMapperPort
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
@@ -19,6 +19,9 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
     DQConfigResolver,
     resolve_pipeline_dq_config,
 )
+
+DomainConfigMapper = DomainConfigMapperPort
+_DEFAULT_DOMAIN_MAPPER = cast(DomainConfigMapper, yaml_config_to_domain)
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
@@ -42,7 +45,7 @@ class DomainConfigResolver:
 
     configs_root: Path = field(default_factory=resolve_configs_root)
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader
-    domain_mapper: DomainConfigMapper = yaml_config_to_domain
+    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER
 
     def resolve(
         self,
@@ -68,7 +71,7 @@ def resolve_domain_pipeline_config(
     configs_root: Path | None = None,
     relaxed_dq: bool = False,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
-    domain_mapper: DomainConfigMapper = yaml_config_to_domain,
+    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER,
 ) -> PipelineConfig:
     """Resolve domain config from an already validated YAML pipeline config."""
     resolver = DomainConfigResolver(
@@ -86,7 +89,7 @@ def load_domain_pipeline_config(
     relaxed_dq: bool = False,
     yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
-    domain_mapper: DomainConfigMapper = yaml_config_to_domain,
+    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
     root = resolve_configs_root(configs_root)

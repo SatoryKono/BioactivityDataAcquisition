@@ -94,6 +94,50 @@ def _is_private_module(module: str) -> bool:
     return any(part.startswith("_") for part in module.split("."))
 
 
+def _parse_source_file(
+    py_file: Path,
+    *,
+    resolved_src: Path,
+) -> tuple[str, ast.AST] | None:
+    """Return a source-relative path and parsed tree for one readable source file."""
+    try:
+        rel_path = py_file.resolve().relative_to(resolved_src).as_posix()
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+    except (OSError, SyntaxError, ValueError):
+        return None
+    return rel_path, tree
+
+
+def _is_external_private_target(target_module: str, *, importer_owner: str) -> bool:
+    """Return whether a target is private and owned by a different package."""
+    return _is_private_module(target_module) and (
+        target_module.rsplit(".", 1)[0] != importer_owner
+    )
+
+
+def _external_private_imports_in_tree(
+    tree: ast.AST,
+    *,
+    existing_modules: frozenset[str],
+    importer_module: str,
+) -> list[tuple[str, int]]:
+    """Collect external private targets and line numbers from one parsed tree."""
+    importer_owner = importer_module.rsplit(".", 1)[0]
+    return [
+        (target_module, getattr(node, "lineno", 0))
+        for node in ast.walk(tree)
+        for target_module in _iter_candidate_import_targets(
+            existing_modules=existing_modules,
+            importer_module=importer_module,
+            node=node,
+        )
+        if _is_external_private_target(
+            target_module,
+            importer_owner=importer_owner,
+        )
+    ]
+
+
 def collect_external_private_imports(
     src_dir: Path = SRC_DIR,
 ) -> dict[tuple[str, str], list[int]]:
@@ -102,29 +146,18 @@ def collect_external_private_imports(
     existing_modules = _collect_existing_modules(src_dir)
     resolved_src = src_dir.resolve()
     for py_file in sorted(src_dir.rglob("*.py")):
-        try:
-            rel_path = py_file.resolve().relative_to(resolved_src).as_posix()
-        except ValueError:
+        parsed = _parse_source_file(py_file, resolved_src=resolved_src)
+        if parsed is None:
             continue
-        try:
-            tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
-        except (OSError, SyntaxError):
-            continue
+        rel_path, tree = parsed
         importer_module = _module_name_for_path(src_dir, py_file)
-        importer_owner = importer_module.rsplit(".", 1)[0]
-        for node in ast.walk(tree):
-            for target_module in _iter_candidate_import_targets(
-                existing_modules=existing_modules,
-                importer_module=importer_module,
-                node=node,
-            ):
-                if not _is_private_module(target_module):
-                    continue
-                target_owner = target_module.rsplit(".", 1)[0]
-                if importer_owner == target_owner:
-                    continue
-                key = (rel_path, target_module)
-                violations.setdefault(key, []).append(getattr(node, "lineno", 0))
+        for target_module, line in _external_private_imports_in_tree(
+            tree,
+            existing_modules=existing_modules,
+            importer_module=importer_module,
+        ):
+            key = (rel_path, target_module)
+            violations.setdefault(key, []).append(line)
     return violations
 
 
