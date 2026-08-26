@@ -12,8 +12,7 @@ from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 
-# Keep typing protocols imported at runtime because these helpers define them
-# in module scope and the Windows shared-drive bytecode cache can otherwise lag.
+# These helper-only protocol imports remain type-checker dependencies.
 
 if TYPE_CHECKING:
     from bioetl.composition.builders import FilterConfigBuilder
@@ -29,6 +28,7 @@ if TYPE_CHECKING:
         MaintenanceConfig,
         PipelineYamlConfig,
     )
+
 
 def apply_tracing_override(
     *,

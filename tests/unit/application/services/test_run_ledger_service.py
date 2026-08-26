@@ -36,6 +36,9 @@ from pathlib import Path
 import pytest
 
 from bioetl.application.services.control_plane import RunLedgerService
+from bioetl.application.services.control_plane.ledger import (
+    service as ledger_service_module,
+)
 from bioetl.domain.control_plane import (
     RunCodeProvenance,
     RunManifest,
@@ -59,6 +62,12 @@ GOLD_DQ_REPORT_PATH = str(
 
 
 _InMemoryRunLedgerStore = InMemoryRunLedgerStore
+
+
+def test_missing_entry_id_factory_fails_closed() -> None:
+    """The default factory must reject composition that omits an ID source."""
+    with pytest.raises(RuntimeError, match="entry_id_factory"):
+        ledger_service_module._missing_entry_id_factory()
 
 
 def _run_id(label: str) -> RunID:
