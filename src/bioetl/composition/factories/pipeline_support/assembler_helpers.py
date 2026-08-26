@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 from bioetl.application.core.wiring.factory import BasePipeline, PipelineRunner
+from bioetl.application.core.wiring.transformer import BaseTransformer
 from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
@@ -18,6 +20,13 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
 
 from bioetl.composition.contracts.factories import FactoryLike as _FactoryLike
 
+__all__ = [
+    "_FactoryLike",
+    "build_factory_context",
+    "create_runner_from_factory",
+    "create_with_services_from_factory",
+]
+
 
 def build_factory_context(
     factory: _FactoryLike,
@@ -26,9 +35,11 @@ def build_factory_context(
     return build_pipeline_factory_context(
         pipeline_name=factory.pipeline_name,
         create_data_source_fn=factory._create_data_source,
-        pipeline_class=factory.pipeline_class,
+        pipeline_class=cast("type[BasePipeline] | None", factory.pipeline_class),
         provider=factory.provider,
-        transformer_class=factory.transformer_class,
+        transformer_class=cast(
+            "type[BaseTransformer] | None", factory.transformer_class
+        ),
         pandera_silver_schema=factory.pandera_silver_schema,
     )
 
@@ -55,6 +66,8 @@ def create_runner_from_factory(
     """Create a runner using the factory's current bound service constructor."""
     return create_factory_runner(
         request=request,
-        create_with_services_fn=factory.create_with_services,
+        create_with_services_fn=cast(
+            "Callable[..., BasePipeline]", factory.create_with_services
+        ),
         assemble_runner_fn=assemble_runner_fn,
     )

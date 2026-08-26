@@ -116,7 +116,9 @@ from tests.unit.infrastructure.storage.test_metadata_writer_control_plane import
 pytestmark = pytest.mark.integration
 
 
-def _repro_contract_entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
+def _repro_contract_entry_id_factory(
+    prefix: str = "entry-historical",
+) -> Callable[[], str]:
     sequence = count(1)
     return lambda: f"{prefix}-{next(sequence)}"
 
@@ -1529,7 +1531,8 @@ def test_reproducibility_contract_composite_full_snapshot_envelope_rebuild_resum
             metrics=MagicMock(),
             tracer=MagicMock(),
             storage=MagicMock(),
-            lock=MagicMock(), clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
+            lock=MagicMock(),
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,
@@ -1658,7 +1661,8 @@ def test_reproducibility_contract_composite_forensic_grade_matrix_rejects_full_s
         metrics=MagicMock(),
         tracer=MagicMock(),
         storage=MagicMock(),
-        lock=MagicMock(), clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
+        lock=MagicMock(),
+        clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
     )
 
     with pytest.raises(

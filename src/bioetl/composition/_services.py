@@ -174,7 +174,9 @@ def get_workflow_execution_service(
 def get_workflow_inspection_service() -> WorkflowInspectionServiceProtocol:
     """Build workflow inspection service via the canonical workflow seam."""
     return _resolve(
-        _typed_port[WorkflowInspectionServiceProtocol](WorkflowInspectionServiceProtocol)
+        _typed_port[WorkflowInspectionServiceProtocol](
+            WorkflowInspectionServiceProtocol
+        )
     )
 
 

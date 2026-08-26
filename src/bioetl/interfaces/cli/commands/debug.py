@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -99,10 +99,8 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    _impl = import_module(
-        "bioetl.composition.entrypoints"
-    ).get_pipeline_runner_service
-    return _impl(registry=registry)
+    _impl = import_module("bioetl.composition.entrypoints").get_pipeline_runner_service
+    return cast("PipelineRunnerService", _impl(registry=registry))
 
 
 @typed_click_command()

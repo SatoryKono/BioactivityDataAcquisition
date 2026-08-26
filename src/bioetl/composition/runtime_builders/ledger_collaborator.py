@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from bioetl.application.ports.pipeline import PipelineRunnerProtocol
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -9,6 +10,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )
+
+__all__ = [
+    "ArtifactRecorderAttachmentResult",
+    "PipelineRunnerProtocol",
+    "attach_control_plane_collaborators",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,7 +140,6 @@ from bioetl.composition.runtime_builders._ledger_metadata_candidates import (
     _iter_unique_candidates,
 )
 
-from bioetl.application.ports.pipeline import PipelineRunnerProtocol
 from bioetl.infrastructure.control_plane.file_contract_evidence_recorder import (
     FileContractEvidenceRecorder,
 )

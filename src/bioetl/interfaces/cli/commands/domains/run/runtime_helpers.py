@@ -47,9 +47,7 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Resolve the pipeline runner service lazily for CLI runtime helpers."""
-    _impl = import_module(
-        "bioetl.composition.entrypoints"
-    ).get_pipeline_runner_service
+    _impl = import_module("bioetl.composition.entrypoints").get_pipeline_runner_service
     return cast(PipelineRunnerService, _impl(registry=registry))  # pyright: ignore[reportInvalidCast]
 
 
