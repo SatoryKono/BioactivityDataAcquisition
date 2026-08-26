@@ -9,24 +9,26 @@ behavior changes MUST be synchronized via
 
 Read before planning or editing:
 
+- `AGENTS.md`
+- `.junie/guidelines.md`
+- `.codex/agents/CODEX-RUNTIME.md` (equal-peer Codex runtime map)
 - `docs/00-project/NORMATIVE_SOURCES.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `AGENTS.md`
-- `.junie/guidelines.md`
 
 ## Purpose
 
 Map logical BioETL `py-*` profiles onto the native JetBrains Junie runtime
-roles used in this repository. Content parity with
-`.codex/agents/CODEX-RUNTIME.md` is enforced by
-`scripts/ai/junie/check_junie_mirror.sh --check`; the two runtime maps MUST
-keep identical logical mappings, only runtime-specific labels (Codex
-`default`/`worker` vs Junie-native roles) MAY differ and are declared in
-`scripts/ai/junie/junie-mirror-contract.json`.
+roles used in this repository. `scripts/ai/junie/check_junie_mirror.sh --check`
+enforces `scripts/ai/junie/junie-mirror-contract.json`: py-* profile SHA-256,
+shared agent docs, and the skills tree. `JUNIE-RUNTIME.md` and
+`CODEX-RUNTIME.md` are runtime-only maps and are **not** byte-compared; they
+MUST keep identical logical profile mappings. Runtime-specific labels (Codex
+`default`/`worker` vs Junie-native roles) MAY differ as declared in the
+contract.
 
 ## Response Language
 
@@ -123,8 +125,10 @@ assemble and verify their normalized receipts:
   --bundle reports/quality/proof-or-stop/<run-id>/bundle.json
 ```
 
-Use `.venv-win/Scripts/python.exe` on native Windows and
-`.venv/bin/python` in WSL/Linux. `ADMIT` is the only outcome that can qualify a
+Use `.venv-win/Scripts/python.exe` on native Windows. In WSL/Linux prefer the
+canonical dev interpreter `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python`
+(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back
+to `.venv/bin/python` only when that venv is absent. `ADMIT` is the only outcome that can qualify a
 lifecycle transition at the policy-required trust tier. `DEGRADED` and `STOP`
 must be reported with reasons and follow-up; unavailable evidence is never
 pass. Optional vendor evaluators may add receipts but cannot override the core
