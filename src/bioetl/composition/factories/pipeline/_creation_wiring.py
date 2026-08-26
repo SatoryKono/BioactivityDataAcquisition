@@ -31,7 +31,6 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
     AuditPort,
-    DomainConfigMapper,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
