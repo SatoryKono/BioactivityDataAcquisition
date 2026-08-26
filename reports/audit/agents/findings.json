@@ -1,81 +1,749 @@
 {
-  "run_id": "20260820-agents-memory-cycle-c22e7b01b3",
-  "prompt_id": "prompt.audit.cycle.agents-memory",
-  "base": "origin/main@c22e7b01b3",
-  "generated_at_utc": "2026-08-20T07:15:00Z",
-  "contours": ["runtime", "scripts", "memory"],
+  "domain_id": "agents-runtime",
+  "prompt_id": "prompt.audit.agents-runtime",
   "surface_score": 2,
+  "generated_at": "2026-08-26",
+  "audit_mode": "full",
+  "scope": "AGENTS.md .codex/ .junie/ .devin/ docs/00-project/ai/",
+  "p0_p1_count": 1,
+  "proven_count": 20,
   "findings": [
     {
-      "id": "AGENTS-MEM-001",
+      "id": "AGT-001",
+      "requirement_id": "GAP",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "permissions",
+      "path": ".devin/config.json:24-27",
+      "observation": "Project-level deny Write(**/docs/**) and Write(**/configs/**) contradicts Devin profiles that must write those trees.",
+      "method": "read_file .devin/config.json vs .devin/agents/py-doc-bot/AGENT.md and py-config-bot/AGENT.md",
+      "expected": "Project permission matrix and profile allow-lists agree so py-doc-bot can write docs/ and py-config-bot can write configs/ without a blanket deny.",
+      "actual": ".devin/config.json deny lists Write(**/docs/**) and Write(**/configs/**); py-doc-bot allows Write(docs/**); py-config-bot allows Write(configs/**). DEVIN-RUNTIME.md mapping table documents those writes.",
+      "impact": "Devin config/docs tasks fail with permission denied, or operators flip to smart mode and over-grant. Critical Devin write path is uncontrolled relative to the documented profiles.",
+      "root_cause": "Project deny copied as a broad safety net without carving out the two write-capable profiles.",
+      "remediation": "Remove or narrow those two deny globs; keep Write(**/.env*) deny-only. Document deny-vs-profile precedence in DEVIN-RUNTIME.md.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["read .devin/config.json permissions vs each AGENT.md frontmatter"],
+      "automation": "architecture test that deny globs do not cover profile allow Write() paths",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".devin/config.json",
+          "line": 24,
+          "command": "read_file",
+          "observation": "deny includes Write(**/.env*), Write(**/docs/**), Write(**/configs/**)"
+        },
+        {
+          "path": ".devin/agents/py-doc-bot/AGENT.md",
+          "line": 15,
+          "command": "read_file",
+          "observation": "allow: Write(docs/**)"
+        },
+        {
+          "path": ".devin/agents/py-config-bot/AGENT.md",
+          "line": 15,
+          "command": "read_file",
+          "observation": "allow: Write(configs/**)"
+        }
+      ]
+    },
+    {
+      "id": "AGT-002",
+      "requirement_id": "GAP",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "scripts/determinism",
-      "evidence": [
-        {"path": "scripts/ai/mcp/mcp_deja_wrapper.sh", "line": 38, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh", "observation": "npx -y \"@vshulcz/deja-vu@0.17.0\" mcp"},
-        {"path": "scripts/ai/mcp/mcp_deja_wrapper.ps1", "line": 23, "command": "rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.ps1", "observation": "& npx -y \"@vshulcz/deja-vu@0.15.7\" mcp"},
-        {"path": "docs/00-project/ai/mcp-governance.md", "line": 127, "command": "rg -n 'deja' docs/00-project/ai/mcp-governance.md", "observation": "### deja (deja-vu v0.13.1)"}
-      ],
-      "expected": "Single canonical deja-vu version across sh wrapper, ps1 wrapper, and governance doc.",
-      "actual": "Three divergent versions: 0.17.0 (Linux/WSL), 0.15.7 (Windows), 0.13.1 (doc).",
-      "impact": "Non-deterministic MCP memory runtime depending on OS entry point; governance doc drift.",
-      "root_cause": "Independent per-OS/per-doc version updates without a single source of truth.",
-      "remediation": "Choose one canonical version; sync both wrappers and mcp-governance.md.",
+      "category": "instruction-conflict",
+      "path": ".junie/agents/JUNIE-RUNTIME.md:23-29",
+      "observation": "JUNIE-RUNTIME claims check_junie_mirror.sh enforces content parity with CODEX-RUNTIME, but both files are runtime_only and the checker does not hash-compare them; WSL python already drifted.",
+      "method": "read JUNIE-RUNTIME.md, CODEX-RUNTIME.md, junie-mirror-contract.json, check_junie_mirror.py",
+      "expected": "Runtime-only maps either are hash-checked for shared closeout commands, or the docs say only profile-name/dashboard/forbidden-id semantics are enforced. WSL interpreter matches CODEX-RUNTIME / README.",
+      "actual": "Contract runtime_only_files lists CODEX-RUNTIME.md and JUNIE-RUNTIME.md separately. check_runtime_semantics only extracts py-* table names, forbidden identifiers, and .junie/skills/observability-* refs. JUNIE-RUNTIME:126-127 uses .venv/bin/python on WSL/Linux; CODEX-RUNTIME:110-113 prefers ${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python.",
+      "impact": "Junie agents on WSL may validate with a different interpreter than the project canonical venv, causing false pass/fail. Operators over-trust the parity checker for runtime-map text.",
+      "root_cause": "Overstated enforcement sentence plus allowed runtime_only divergence without a shared closeout-command contract.",
+      "remediation": "Align the WSL python sentence with CODEX-RUNTIME.md; replace 'content parity is enforced' with the actual check_runtime_semantics scope.",
       "effort": "S",
       "dependencies": [],
-      "validation": ["rg -n 'deja-vu@' scripts/ai/mcp/mcp_deja_wrapper.sh scripts/ai/mcp/mcp_deja_wrapper.ps1", "rg -n 'deja' docs/00-project/ai/mcp-governance.md"],
+      "validation": [
+        "python scripts/ai/junie/check_junie_mirror.py --check",
+        "diff Proof-or-Stop interpreter paragraphs"
+      ],
+      "automation": "extend check_runtime_semantics to require BIOETL_WSL_VENV_DIR in JUNIE-RUNTIME.md",
       "automated_fix_possible": true,
-      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9134"
+      "evidence": [
+        {
+          "path": ".junie/agents/JUNIE-RUNTIME.md",
+          "line": 25,
+          "command": "read_file",
+          "observation": "claims content parity enforced by check_junie_mirror.sh --check"
+        },
+        {
+          "path": "scripts/ai/junie/junie-mirror-contract.json",
+          "line": 43,
+          "command": "read_file",
+          "observation": "CODEX-RUNTIME.md and JUNIE-RUNTIME.md are runtime_only_files"
+        },
+        {
+          "path": ".junie/agents/JUNIE-RUNTIME.md",
+          "line": 126,
+          "command": "read_file",
+          "observation": "WSL/Linux: .venv/bin/python"
+        },
+        {
+          "path": ".codex/agents/CODEX-RUNTIME.md",
+          "line": 110,
+          "command": "read_file",
+          "observation": "WSL/Linux: ${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python with .venv fallback"
+        }
+      ]
     },
     {
-      "id": "AGENTS-MEM-002",
+      "id": "AGT-003",
+      "requirement_id": "GAP",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "scripts/supply-chain",
-      "evidence": [
-        {"path": "scripts/ai/mcp/github-mcp-wrapper.sh", "line": 30, "command": "rg -o 'npx -y .*' scripts/ai/mcp/github-mcp-wrapper.sh", "observation": "npx -y @modelcontextprotocol/server-github --stdio (no version pin)"},
-        {"path": "scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_adr_analysis_wrapper.sh", "observation": "npx -y mcp-adr-analysis-server (no version pin)"},
-        {"path": "scripts/ai/mcp/mcp_github_actions_wrapper.sh", "line": 32, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_github_actions_wrapper.sh", "observation": "npx -y github-actions-mcp --stdio (no version pin)"},
-        {"path": "scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "line": 17, "command": "rg -o 'npx -y .*' scripts/ai/mcp/mcp_ast_grep_wrapper.sh", "observation": "npx -y @notprolands/ast-grep-mcp / @chousyn/ast-grep-mcp (no version pin)"}
-      ],
-      "expected": "All MCP wrappers pin explicit versions (as context7@3.2.4, filesystem@2026.1.14, neo4j-server@0.2.0 do).",
-      "actual": "Mixed policy: several wrappers use bare `npx -y <pkg>` resolving to latest.",
-      "impact": "Non-reproducible MCP runtime; silent supply-chain upgrade risk. Local runtime (not production CI) => P2.",
-      "root_cause": "Inconsistent pin policy across MCP wrappers.",
-      "remediation": "Pin listed packages to verified versions in both .sh and .ps1.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": ["for f in scripts/ai/mcp/*.sh scripts/ai/mcp/*.ps1; do rg -o 'npx -y [^\"']*' \"$f\"; done"],
+      "category": "env-guardrail",
+      "path": ".devin/config.json:4-6",
+      "observation": "Write(**/.env*) appears in both ask and deny; Read(**/.env*) appears in both ask and allow.",
+      "method": "read_file .devin/config.json",
+      "expected": "Env writes are deny-only with no ask prompt. Env reads may be allow (AGENTS.md permits reading).",
+      "actual": "ask includes Read(**/.env*) and Write(**/.env*); allow includes Read(**/.env*); deny includes Write(**/.env*). Precedence is undocumented.",
+      "impact": "If ask wins, the agent can prompt the user to authorize .env mutation, weakening the per-task explicit-approval guardrail. If deny wins, ask is dead/confusing.",
+      "root_cause": "Overlapping permission buckets without a documented merge rule.",
+      "remediation": "Keep Write(**/.env*) only in deny. Keep Read(**/.env*) only in allow. Document merge order.",
+      "effort": "S",
+      "dependencies": ["AGT-001"],
+      "validation": ["inspect .devin/config.json permissions uniqueness"],
+      "automation": "test that Write(.env*) is deny-only",
       "automated_fix_possible": true,
-      "github_issue": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9135"
+      "evidence": [
+        {
+          "path": ".devin/config.json",
+          "line": 4,
+          "command": "read_file",
+          "observation": "ask: Read(**/.env*), Write(**/.env*)"
+        },
+        {
+          "path": ".devin/config.json",
+          "line": 25,
+          "command": "read_file",
+          "observation": "deny: Write(**/.env*)"
+        }
+      ]
     },
     {
-      "id": "AGENTS-MEM-003",
+      "id": "AGT-004",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "permissions",
+      "path": ".devin/agents/py-audit-bot/AGENT.md:6-21",
+      "observation": "Read-only Devin profiles grant unrestricted Exec(python) while denying write/edit tools.",
+      "method": "read_file Devin AGENT.md frontmatter for py-audit-bot, py-debug-bot, py-test-bot",
+      "expected": "Read-only roles cannot mutate the workspace. Exec allow-list is limited to non-mutating commands, or the runtime sandboxes python writes.",
+      "actual": "py-audit-bot allowed-tools includes exec; permissions allow Exec(python) and deny write/edit. Same pattern on py-debug-bot and py-test-bot. Whether Devin enforces deny after exec is not proven in-repo.",
+      "impact": "A 'read-only' audit/debug/test subagent can write files via python if the runtime only filters Write/Edit tools. Residual sandbox bypass risk.",
+      "root_cause": "Tool deny list does not constrain exec payloads.",
+      "remediation": "Drop Exec(python) from read-only profiles or wrap exec in a deny-write supervisor. State the runtime guarantee in DEVIN-RUNTIME.md if already enforced.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": ["review AGENT.md frontmatter; confirm Devin exec sandbox behavior (external)"],
+      "automation": "n/a (needs Devin runtime semantics)",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": ".devin/agents/py-audit-bot/AGENT.md",
+          "line": 9,
+          "command": "read_file",
+          "observation": "allowed-tools includes exec; deny write/edit"
+        },
+        {
+          "path": ".devin/agents/py-debug-bot/AGENT.md",
+          "line": 13,
+          "command": "read_file",
+          "observation": "allow Exec(python); deny write/edit"
+        },
+        {
+          "path": ".devin/agents/py-test-bot/AGENT.md",
+          "line": 14,
+          "command": "read_file",
+          "observation": "allow Exec(python); deny write/edit"
+        }
+      ]
+    },
+    {
+      "id": "AGT-005",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "scripts",
+      "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py:15-25",
+      "observation": "Wrapper resolves canonical terminology linter to src/tools/scripts/lint_terminology.py, which does not exist.",
+      "method": "read_file script; list_dir src/tools (missing); grep lint_terminology",
+      "expected": "Wrapper calls scripts/engineering/qa/lint_terminology.py (TOOLS.md / scripts.engineering.qa check-terminology).",
+      "actual": "_canonical_script_path searches parents for src/tools/scripts/lint_terminology.py. src/tools does not exist. Fallback still appends that relative path. Docstring also cites src/tools/scripts/engineering/qa/lint_terminology.py.",
+      "impact": "Agents following docs orchestration still invoke a broken wrapper; terminology lint never runs via this entrypoint.",
+      "root_cause": "Stale path after linter moved to scripts/engineering/qa/.",
+      "remediation": "Point the wrapper at scripts/engineering/qa/lint_terminology.py or delete it and update remaining docs references.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["python docs/00-project/ai/agents/scripts/py-team-orchestration.py --help"],
+      "automation": "test that wrapper resolves to scripts/engineering/qa/lint_terminology.py",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
+          "line": 21,
+          "command": "read_file",
+          "observation": "looks for src/tools/scripts/lint_terminology.py"
+        },
+        {
+          "path": "src/tools",
+          "line": 0,
+          "command": "list_dir",
+          "observation": "directory does not exist"
+        }
+      ]
+    },
+    {
+      "id": "AGT-006",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "instruction-conflict",
+      "path": ".devin/agents/DEVIN-SETUP-GUIDE.md:119",
+      "observation": "Setup guide says Codex model assignment is fixed per profile (opus/sonnet); Codex runtime inherits parent and has no opus/sonnet literals.",
+      "method": "read DEVIN-SETUP-GUIDE.md; grep opus|sonnet in .codex; read CODEX-RUNTIME.md and ORCHESTRATION.md",
+      "expected": "Devin docs match CODEX-RUNTIME.md: native descriptors inherit the parent model; no provider-specific labels.",
+      "actual": "DEVIN-SETUP-GUIDE.md Key Differences table: Codex = Fixed per profile (opus/sonnet). grep opus|sonnet under .codex/** = no matches. DEVIN-RUNTIME.md table already says Inherit parent.",
+      "impact": "Devin operators may pick wrong models or think Codex profiles pin Anthropic SKUs.",
+      "root_cause": "Stale comparison table vs current inherit-parent policy.",
+      "remediation": "Copy the DEVIN-RUNTIME.md wording into DEVIN-SETUP-GUIDE.md.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["rg opus\\|sonnet .codex .devin/agents/DEVIN-SETUP-GUIDE.md"],
+      "automation": "architecture test: DEVIN-SETUP-GUIDE must not contain opus/sonnet as Codex model assignment",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".devin/agents/DEVIN-SETUP-GUIDE.md",
+          "line": 119,
+          "command": "read_file",
+          "observation": "Codex column: Fixed per profile (opus/sonnet)"
+        },
+        {
+          "path": ".codex/agents/CODEX-RUNTIME.md",
+          "line": 51,
+          "command": "read_file",
+          "observation": "the parent model is inherited"
+        }
+      ]
+    },
+    {
+      "id": "AGT-007",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "precedence",
+      "path": "docs/00-project/ai/agents/guides/CODEX.md:21-35",
+      "observation": "Mandatory pre-work context lists docs mirrors (AGENT/CLAUDE/GEMINI/ORCHESTRATION mirror) and omits AGENTS.md and .codex/agents/CODEX-RUNTIME.md.",
+      "method": "read_file docs/00-project/ai/agents/guides/CODEX.md vs AGENTS.md Canonical Precedence",
+      "expected": "Docs mirrors point at AGENTS.md and the active runtime map first; they must not present mirror ORCHESTRATION as the required orchestration source.",
+      "actual": "Section 2 lists NORMATIVE_SOURCES, RULES, REQUIREMENTS, MEMORY_USAGE, POST_CHANGE, AGENT.md, CLAUDE.md, GEMINI.md, agent-memory, dashboard guide, then docs/00-project/ai/agents/agents/ORCHESTRATION.md. No AGENTS.md, no CODEX-RUNTIME.md.",
+      "impact": "Codex sessions that bootstrap from this guide skip runtime SSOT and may treat a docs mirror as orchestration truth (ownership anti-pattern).",
+      "root_cause": "Guide dated 2026-04-06 not updated after AGENTS.md became the root contract.",
+      "remediation": "Insert AGENTS.md and .codex/agents/CODEX-RUNTIME.md at the top of the mandatory list; mark docs ORCHESTRATION as mirror-only.",
+      "effort": "S",
+      "dependencies": ["AGT-008"],
+      "validation": ["rg AGENTS.md docs/00-project/ai/agents/guides/CODEX.md"],
+      "automation": "drift check that Codex/Gemini/AGENT guides mention AGENTS.md in the first context list",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/guides/CODEX.md",
+          "line": 23,
+          "command": "read_file",
+          "observation": "mandatory list starts at NORMATIVE_SOURCES; AGENTS.md absent"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CODEX.md",
+          "line": 35,
+          "command": "read_file",
+          "observation": "points at docs ORCHESTRATION mirror for complex tasks"
+        }
+      ]
+    },
+    {
+      "id": "AGT-008",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "precedence",
+      "path": "docs/00-project/ai/agents/guides/GEMINI.md:17-24",
+      "observation": "Docs Gemini guide defines Jules persona and Mandate: Read RULES.md → Plan → Implement, without AGENTS.md runtime precedence.",
+      "method": "read_file docs/00-project/ai/agents/guides/GEMINI.md vs root GEMINI.md and AGENTS.md",
+      "expected": "Mirror guides defer to AGENTS.md and state they are not runtime SSOT.",
+      "actual": "Persona Jules; Mandate Read RULES.md only. Root GEMINI.md correctly lists AGENTS.md first. AGENT.md (guides/AGENT.md) repeats Jules + make lint && make test without AGENTS.md in TL;DR.",
+      "impact": "Gemini/Jules sessions started from the docs guide skip equal-peer runtime trees and memory provenance.",
+      "root_cause": "Historical persona guide not subordinated to AGENTS.md.",
+      "remediation": "Add AGENTS.md + 'not runtime SSOT' banner; keep RULES as constitution not as the first runtime contract.",
+      "effort": "S",
+      "dependencies": ["AGT-007"],
+      "validation": ["compare root GEMINI.md vs docs/00-project/ai/agents/guides/GEMINI.md"],
+      "automation": "same drift check as AGT-007",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/guides/GEMINI.md",
+          "line": 24,
+          "command": "read_file",
+          "observation": "Mandate: Read RULES.md → Plan → Implement → Verify → Document"
+        },
+        {
+          "path": "GEMINI.md",
+          "line": 10,
+          "command": "read_file",
+          "observation": "root Gemini context lists AGENTS.md first"
+        }
+      ]
+    },
+    {
+      "id": "AGT-009",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "instruction-conflict",
+      "path": ".devin/agents/py-test-bot/AGENT.md:4",
+      "observation": "Several Devin profiles pin model: swe-1.6 while DEVIN-RUNTIME mapping table says Parent / Default subagent model.",
+      "method": "read AGENT.md frontmatter vs DEVIN-RUNTIME.md Recommended Mapping",
+      "expected": "Profile model: field matches the runtime map, or the map lists the pinned SKU.",
+      "actual": "py-audit-bot and py-plan-bot use model: parent. py-test-bot, py-config-bot, py-doc-bot use model: swe-1.6. DEVIN-RUNTIME.md says Parent model for audit/plan/debug and Default subagent model for config/doc/test.",
+      "impact": "Subagents may run a different model than the orchestrator expects; map is not a reliable inventory.",
+      "root_cause": "Runtime map not updated when profiles pinned swe-1.6.",
+      "remediation": "Either set those profiles to model: parent or name swe-1.6 in DEVIN-RUNTIME.md.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["compare model: lines in .devin/agents/*/AGENT.md to DEVIN-RUNTIME table"],
+      "automation": "parse frontmatter vs mapping table",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".devin/agents/py-test-bot/AGENT.md",
+          "line": 4,
+          "command": "read_file",
+          "observation": "model: swe-1.6"
+        },
+        {
+          "path": ".devin/agents/DEVIN-RUNTIME.md",
+          "line": 116,
+          "command": "read_file",
+          "observation": "py-test-bot Model column: Default subagent model"
+        }
+      ]
+    },
+    {
+      "id": "AGT-010",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "medium",
+      "confidence_score": 0.75,
+      "status": "PROVEN",
+      "category": "secrets",
+      "path": "scripts/ai/mcp/mcp_filesystem_wrapper.sh:17",
+      "observation": "Filesystem MCP is scoped to the entire repo root with no mechanical .env write deny.",
+      "method": "read_file mcp_filesystem_wrapper.sh; AGENTS.md env guardrail",
+      "expected": "Secret-bearing paths (.env, .env.*) are excluded from MCP filesystem write, or the wrapper documents that policy-only (agents) is the control.",
+      "actual": "exec npx @modelcontextprotocol/server-filesystem@2026.1.14 \"${REPO_ROOT}\" \"$@\". Policy in AGENTS.md forbids .env writes; wrapper does not exclude them.",
+      "impact": "Any client with filesystem MCP can write or read .env without a wrapper-level guard. Policy exists; mechanical control does not.",
+      "root_cause": "Least-privilege not applied at the MCP allow-root boundary.",
+      "remediation": "Pass ignore/deny for .env if the server supports it; otherwise document the residual risk in MCP_LOCAL_RUNTIME_CONFIG.md.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": ["read wrapper; check server-filesystem deny/ignore flags"],
+      "automation": "n/a unless server supports exclude globs",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "scripts/ai/mcp/mcp_filesystem_wrapper.sh",
+          "line": 17,
+          "command": "read_file",
+          "observation": "filesystem MCP allowed root is REPO_ROOT"
+        }
+      ]
+    },
+    {
+      "id": "AGT-011",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "ownership",
+      "path": "scripts/engineering/qa/check_quality_exemptions.py:4-5",
+      "observation": "Engineering QA wrapper declares docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py as the canonical quality-exemptions implementation.",
+      "method": "read_file check_quality_exemptions.py vs AI_RUNTIME_MIRROR_OWNERSHIP.md",
+      "expected": "Behavior SSOT for quality gates lives under scripts/ (or src/), not docs/00-project/ai/**.",
+      "actual": "check_quality_exemptions.py runpy's the docs-tree script and calls it Canonical script. Ownership says docs/00-project/ai/** is not canonical for runtime/behavior.",
+      "impact": "Agents editing 'docs mirrors' can change a CI-facing debt gate. Ownership inversion.",
+      "root_cause": "Historical agent script never relocated after docs were classified as mirrors.",
+      "remediation": "Move implementation to scripts/engineering/qa/; leave a thin docs wrapper or delete it.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": ["python -m scripts.engineering.qa check-quality-exemptions --help"],
+      "automation": "ownership test: no canonical implementation under docs/00-project/ai/agents/scripts/",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "scripts/engineering/qa/check_quality_exemptions.py",
+          "line": 4,
+          "command": "read_file",
+          "observation": "Canonical script: docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py"
+        }
+      ]
+    },
+    {
+      "id": "AGT-012",
+      "requirement_id": "GAP",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.8,
-      "status": "NOT_PROVEN",
-      "category": "memory/tooling",
-      "evidence": [
-        {"path": "src/memory/storage.py", "line": 15, "command": "PYTHONPATH=src python3 -m memory.tooling.workflow smoke", "observation": "ModuleNotFoundError: No module named 'psutil' at import time"},
-        {"path": "pyproject.toml", "line": 83, "command": "rg -n 'psutil' pyproject.toml", "observation": "psutil>=5.9 IS declared as a dependency"}
-      ],
-      "expected": "memory workflow smoke runs in a properly provisioned env.",
-      "actual": "Smoke failed only because the ad-hoc system python3 lacked psutil; psutil is declared in pyproject.toml, so this is an environment provisioning gap, not a code defect.",
-      "impact": "None on product; audit-env limitation. Memory smoke NOT validated this iteration.",
-      "root_cause": "Audit ran with unprovisioned system interpreter (no project venv on this host).",
-      "remediation": "Re-run smoke inside project venv (.venv-win on Windows) to confirm memory tooling.",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": "docs/00-project/ai/agents/guides/CLAUDE.md:9",
+      "observation": "Hardcoded RULES.md v6.1.5 (2026-07-16); RULES.md header is Version 6.1.11 Last verified 2026-08-25.",
+      "method": "read CLAUDE.md stub + guides/CLAUDE.md vs docs/00-project/RULES.md header",
+      "expected": "No hardcoded RULES version literals (NORMATIVE_SOURCES.md version policy).",
+      "actual": "guides/CLAUDE.md and docs/00-project/ai/agents/CLAUDE.md both say v6.1.5 (2026-07-16).",
+      "impact": "Stale version signal; agents may think RULES is frozen at 6.1.5.",
+      "root_cause": "Version literal instead of 'read header'.",
+      "remediation": "Replace with 'read Version: in RULES.md' like AGENT.md already does.",
       "effort": "S",
       "dependencies": [],
-      "validation": [".\\.venv-win\\Scripts\\python.exe -m memory.tooling.workflow smoke"],
-      "automated_fix_possible": false
+      "validation": ["rg 'RULES.md v6' docs/00-project/ai"],
+      "automation": "freshness/drift check already exists; extend to these files if not covered",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 9,
+          "command": "read_file",
+          "observation": "Синхронизировано с RULES.md v6.1.5 (2026-07-16)"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 3,
+          "command": "read_file",
+          "observation": "Version: 6.1.11 Last verified: 2026-08-25"
+        }
+      ]
+    },
+    {
+      "id": "AGT-013",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "discoverability",
+      "path": ".gitignore:657",
+      "observation": "Later .agents/ ignore undoes the earlier selective un-ignore; skills-consistency.yml still watches .agents/skills/**.",
+      "method": "read .gitignore around 300 and 657; read skills-consistency.yml paths; list_dir .agents",
+      "expected": "Either track .agents/skills/*/SKILL.md as documented, or drop the path from CI and the dead un-ignore block.",
+      "actual": "Lines 300-305 un-ignore SKILL.md; line 657 ignores entire .agents/. list_dir .agents is empty. Workflow push/PR paths include .agents/skills/**.",
+      "impact": "Dead CI path filter and contradictory gitignore. No current tracked .agents skills.",
+      "root_cause": "Layered gitignore rules from different cleanups.",
+      "remediation": "Delete the selective un-ignore block and the workflow path, or move the catch-all .agents/ ignore above and keep a real un-ignore.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["git check-ignore -v .agents/skills/foo/SKILL.md"],
+      "automation": "gitignore unit/architecture test",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".gitignore",
+          "line": 300,
+          "command": "read_file",
+          "observation": ".agents/* with !.agents/skills/*/SKILL.md"
+        },
+        {
+          "path": ".gitignore",
+          "line": 657,
+          "command": "read_file",
+          "observation": ".agents/ catch-all"
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 23,
+          "command": "read_file",
+          "observation": "paths include .agents/skills/**"
+        }
+      ]
+    },
+    {
+      "id": "AGT-014",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": "docs/00-project/ai/memory/mcp-memory.json:8",
+      "observation": "Machine-readable memory still says to use the dashboard guide for Loki/Tempo drilldown; AGENTS.md says Loki/Tempo were removed.",
+      "method": "read mcp-memory.json vs AGENTS.md Dashboard Skill Routing",
+      "expected": "Memory artifacts do not advertise removed Loki/Tempo surfaces.",
+      "actual": "entity dashboard-extension-llm-guide observation includes Loki/Tempo drilldown. AGENTS.md: Loki, Tempo, and Quarantine Explorer UI were removed. File is declared not human SSOT.",
+      "impact": "MCP memory retrieval can route agents to removed observability surfaces.",
+      "root_cause": "Memory JSON not refreshed after dashboard stack change.",
+      "remediation": "Edit the observation to drop Loki/Tempo; keep the path to the current playbook.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["rg Loki docs/00-project/ai/memory/mcp-memory.json"],
+      "automation": "n/a (generated/machine memory; refresh via memory workflow)",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/memory/mcp-memory.json",
+          "line": 8,
+          "command": "read_file",
+          "observation": "Use when ... Loki/Tempo drilldown"
+        },
+        {
+          "path": "AGENTS.md",
+          "line": 132,
+          "command": "read_file",
+          "observation": "Loki, Tempo, and Quarantine Explorer UI were removed"
+        }
+      ]
+    },
+    {
+      "id": "AGT-015",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "docs-quality",
+      "path": ".codex/agents/CODEX-RUNTIME.md:54-57",
+      "observation": "Native Project Discovery validation sentence is grammatically broken: '`python -m` is not used here'.",
+      "method": "read_file .codex/agents/CODEX-RUNTIME.md",
+      "expected": "A single clear command: Windows .venv-win python scripts/ai/codex/doctor.py static --no-write; else python scripts/ai/codex/doctor.py static --no-write.",
+      "actual": "Bullet reads 'Validate these surfaces with `python -m` is not used here; on Windows use ...'",
+      "impact": "Agents may skip doctor.py or invent a python -m invocation.",
+      "root_cause": "Edit residue.",
+      "remediation": "Rewrite the bullet as two complete commands.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["read CODEX-RUNTIME.md Native Project Discovery"],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".codex/agents/CODEX-RUNTIME.md",
+          "line": 54,
+          "command": "read_file",
+          "observation": "Validate these surfaces with `python -m` is not used here"
+        }
+      ]
+    },
+    {
+      "id": "AGT-016",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "scripts",
+      "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py:12",
+      "observation": "Usage documents output docs/audits/config_gaps.md but docs/audits/ does not exist.",
+      "method": "read_file script; list_dir docs/audits",
+      "expected": "Default report path exists under reports/ or the usage line is updated.",
+      "actual": "Docstring: python ... -o docs/audits/config_gaps.md. list_dir docs/audits = does not exist.",
+      "impact": "Agent may fail to write the report or create an untracked docs/audits/ tree.",
+      "root_cause": "Stale output path vs reports/ convention.",
+      "remediation": "Change example to reports/audit/agents/ or reports/quality/.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["list_dir docs/audits"],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+          "line": 12,
+          "command": "read_file",
+          "observation": "-o docs/audits/config_gaps.md"
+        }
+      ]
+    },
+    {
+      "id": "AGT-017",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "discoverability",
+      "path": ".devin/agents/README.md:70-77",
+      "observation": "Comparison and sp-* tables use leading double-pipe rows that will not render as Markdown tables.",
+      "method": "read_file .devin/agents/README.md",
+      "expected": "Standard GitHub-flavored tables with single leading |.",
+      "actual": "Lines 70-75 and 82-95 start with ||. Line 76 is a correct single-pipe row mixed into the broken table.",
+      "impact": "Devin operators cannot read the Codex vs Devin difference table in rendered view.",
+      "root_cause": "Accidental extra pipe characters.",
+      "remediation": "Normalize tables to single-pipe GFM.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["render README.md"],
+      "automation": "markdown table lint",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".devin/agents/README.md",
+          "line": 70,
+          "command": "read_file",
+          "observation": "|| Aspect | Codex Runtime | Devin Runtime |"
+        }
+      ]
+    },
+    {
+      "id": "AGT-018",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "instruction-conflict",
+      "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md:16-28",
+      "observation": "DEPRECATED file still specifies an 8-agent team including pyCodeBot and points at the broken docs scripts.",
+      "method": "read_file py-team-orchestration.md",
+      "expected": "Deprecated runtime-path docs either redirect-only or live in docs/99-archive.",
+      "actual": "Banner says DEPRECATED 2026-02-25 but body still lists 8 subagents and commands python docs/00-project/ai/agents/scripts/py-team-orchestration.py (AGT-005).",
+      "impact": "Path contains 'runtime/orchestration'; agents may treat it as live despite the banner.",
+      "root_cause": "Legacy alias retained with full body.",
+      "remediation": "Replace body with a stub pointing at .codex/agents/ORCHESTRATION.md; archive the snapshot.",
+      "effort": "S",
+      "dependencies": ["AGT-005"],
+      "validation": ["read file after stubbing"],
+      "automation": "n/a",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md",
+          "line": 3,
+          "command": "read_file",
+          "observation": "DEPRECATED (2026-02-25)"
+        },
+        {
+          "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md",
+          "line": 16,
+          "command": "read_file",
+          "observation": "команда из 8 субагентов ... pyCodeBot"
+        }
+      ]
+    },
+    {
+      "id": "AGT-019",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.7,
+      "status": "PROVEN",
+      "category": "discoverability",
+      "path": "AGENTS.md:140-146",
+      "observation": "Related Files omits .junie/guidelines.md and the three runtime maps even though Canonical Precedence names them.",
+      "method": "read AGENTS.md Related Files vs Canonical Precedence",
+      "expected": "Related Files lists equal-peer entrypoints: guidelines.md, CODEX-RUNTIME, JUNIE-RUNTIME, DEVIN-RUNTIME.",
+      "actual": "Related Files: NORMATIVE_SOURCES, ownership, MEMORY_USAGE, POST_CHANGE, MCP_LOCAL only.",
+      "impact": "Low: precedence section already names the maps. Discoverability gap for operators who jump to Related Files.",
+      "root_cause": "Related Files not kept in lock-step with precedence.",
+      "remediation": "Add the four runtime entrypoints to Related Files.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["read AGENTS.md Related Files"],
+      "automation": "test_runtime_agent_docs_drift could require those links",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "AGENTS.md",
+          "line": 140,
+          "command": "read_file",
+          "observation": "Related Files list has no .junie/guidelines.md or *RUNTIME.md"
+        }
+      ]
+    },
+    {
+      "id": "AGT-020",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": ".devin/agents/DEVIN-SETUP-GUIDE.md:64",
+      "observation": "Setup guide says full MCP plane is all 18 servers; MCP_LOCAL_RUNTIME_CONFIG.md says the sanctioned inventory is 21 servers.",
+      "method": "read DEVIN-SETUP-GUIDE.md vs MCP_LOCAL_RUNTIME_CONFIG.md; count keys in .devin/mcp_config.json",
+      "expected": "Server counts match the tracked inventory.",
+      "actual": "DEVIN-SETUP-GUIDE: Full MCP plane (all 18 servers). MCP_LOCAL_RUNTIME_CONFIG.md: currently 21 servers. .devin/mcp_config.json lists 21 mcpServers keys (memory through ref).",
+      "impact": "Operators may think the Devin MCP plane is smaller than the tracked set.",
+      "root_cause": "Count not updated when servers were added.",
+      "remediation": "Replace the literal 18 with 21 or 'see MCP_LOCAL_RUNTIME_CONFIG.md'.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": ["count mcpServers in .devin/mcp_config.json"],
+      "automation": "test that setup guide count matches mcp_config.json keys",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": ".devin/agents/DEVIN-SETUP-GUIDE.md",
+          "line": 64,
+          "command": "read_file",
+          "observation": "Full MCP plane (all 18 servers)"
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
+          "line": 98,
+          "command": "read_file",
+          "observation": "currently 21 servers"
+        }
+      ]
     }
   ]
 }
