@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.ports import LoggerPort, MetricsPort
 
     Settings = object
     StartResult = object
@@ -29,6 +29,8 @@ class MetricsFactoryProtocol(Protocol):
 class MetricsService(Protocol):
     """Metrics HTTP server lifecycle contract used by composition bootstrap."""
 
+    logger: LoggerPort | object
+
     def start(
         self,
         port: int,
@@ -38,3 +40,13 @@ class MetricsService(Protocol):
         retry_count: int,
         retry_delay: float,
     ) -> StartResult: ...
+
+    def get_status(self) -> object: ...
+
+    def delete_from_gateway(
+        self,
+        *,
+        gateway: str,
+        run_label: str,
+        grouping_key: dict[str, str],
+    ) -> object: ...

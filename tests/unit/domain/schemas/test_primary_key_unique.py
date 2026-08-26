@@ -25,7 +25,6 @@ def test_unique_constraint_rejects_duplicate_pk_values() -> None:
         schema.validate(df)
 
 
-
 @pytest.mark.unit
 def test_publication_term_composite_unique_is_immutable() -> None:
     unique = PublicationTermSchema.to_schema().unique

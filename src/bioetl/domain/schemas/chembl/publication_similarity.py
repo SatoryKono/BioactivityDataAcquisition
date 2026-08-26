@@ -20,7 +20,9 @@ class PublicationSimilaritySchema(ETLRecordSchema):
     """Publication Similarity validation schema for Silver layer."""
 
     # === Primary Key ===
-    sim_id: Series[int] = pa.Field(nullable=False, unique=True, description="Primary key.")
+    sim_id: Series[int] = pa.Field(
+        nullable=False, unique=True, description="Primary key."
+    )
 
     # === Foreign Keys ===
     doc_1: Series[int] = pa.Field(nullable=False, description="FK to document 1.")

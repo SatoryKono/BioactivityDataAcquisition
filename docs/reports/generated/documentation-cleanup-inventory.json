@@ -10898,7 +10898,7 @@
       "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
-      "declared_status": "internal-published (architecture audit M4 #6513)",
+      "declared_status": "internal-published (architecture audit M4 #6513; regen hygiene #9629)",
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,

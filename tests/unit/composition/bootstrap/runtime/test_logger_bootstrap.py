@@ -41,7 +41,9 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
-from bioetl.composition.bootstrap.runtime import logger_bootstrap as logger_bootstrap_module
+from bioetl.composition.bootstrap.runtime import (
+    logger_bootstrap as logger_bootstrap_module,
+)
 from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
     bootstrap_logger,
 )

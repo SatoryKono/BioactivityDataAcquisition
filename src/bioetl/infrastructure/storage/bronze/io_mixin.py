@@ -74,7 +74,9 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         """Validate non-empty stream write and atomically publish temp payload."""
         if record_count == 0:
             raise ValueError("No records to write")
-        if _existing_payload_matches(target_path, temp_path, self._compressed_payload_matches):
+        if _existing_payload_matches(
+            target_path, temp_path, self._compressed_payload_matches
+        ):
             return
         try:
             _publish_new_file_exclusive(temp_path, target_path)
@@ -212,7 +214,6 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             atomic_write_bytes(json_full_path, jsonl_content)
 
         await asyncio.to_thread(_write)
-
 
 
 def _existing_payload_matches(

@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID
 from types import SimpleNamespace
@@ -28,6 +29,7 @@ from bioetl.composition.bootstrap.runtime.composite_infrastructure_context impor
     CompositeInfrastructureContext,
 )
 from bioetl.infrastructure.config._base import Settings
+from tests.helpers.clock import FixedClock
 from tests.integration.ci.reproducibility_contract_support import (
     build_replay_matrix_composite_config as _build_replay_matrix_composite_config,
     load_manifest_payload as _load_manifest_payload,
@@ -100,7 +102,7 @@ def test_reproducibility_composite_full_snapshot_envelope_rebuild_resume_matrix(
             metrics=MagicMock(),
             tracer=MagicMock(),
             storage=MagicMock(),
-            lock=MagicMock(),
+            lock=MagicMock(), clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,

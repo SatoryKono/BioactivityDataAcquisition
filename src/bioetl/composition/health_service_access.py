@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition import _resource_management, _services
 
@@ -43,27 +43,36 @@ def get_health_server_dependencies(
 ) -> HealthServerDependencies:
     """Load health-listener dependencies through one composition owner seam."""
     if data_root is None:
-        return _services.get_health_server_dependencies()
-    return _services.get_health_server_dependencies(data_root=data_root)
+        return cast("HealthServerDependencies", _services.get_health_server_dependencies())
+    return cast(
+        "HealthServerDependencies",
+        _services.get_health_server_dependencies(data_root=data_root),
+    )
 
 
 def get_health_service() -> HealthService:
     """Load the health service through one composition owner seam."""
-    return _services.get_health_service()
+    return cast("HealthService", _services.get_health_service())
 
 
 def get_quarantine_runtime_service(
     pipeline: str,
 ) -> QuarantineRuntimeServiceProtocol:
     """Load a pipeline-scoped quarantine runtime service through one owner seam."""
-    return _resource_management.get_quarantine_runtime_service(pipeline)
+    return cast(
+        "QuarantineRuntimeServiceProtocol",
+        _resource_management.get_quarantine_runtime_service(pipeline),
+    )
 
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Load the quarantine admin service through one composition owner seam."""
     if data_root is None:
-        return _services.get_quarantine_service()
-    return _services.get_quarantine_service(data_root=data_root)
+        return cast("QuarantineService", _services.get_quarantine_service())
+    return cast(
+        "QuarantineService",
+        _services.get_quarantine_service(data_root=data_root),
+    )
 
 
 def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:

@@ -163,7 +163,7 @@
   },
   "diagnostics": {
     "composition_module_cap": 300,
-    "composition_module_count": 294,
+    "composition_module_count": 295,
     "families_at_budget": [
       "application_services_control_plane"
     ],

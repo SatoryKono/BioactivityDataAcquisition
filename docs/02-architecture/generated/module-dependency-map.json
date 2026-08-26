@@ -24,25 +24,25 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 190,
+      "imports": 188,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 682,
+      "imports": 685,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 290,
+      "imports": 287,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 240,
+      "imports": 239,
       "allowed": true
     },
     {
@@ -185,6 +185,11 @@
       "imports": 28
     },
     {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 27
+    },
+    {
       "source": "composition.factories",
       "target": "infrastructure.adapters",
       "imports": 27
@@ -193,11 +198,6 @@
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
       "imports": 27
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "domain.ports",
-      "imports": 26
     },
     {
       "source": "composition.factories",

@@ -30,6 +30,7 @@ from bioetl.domain.ports import AuditLayer
 from bioetl.domain.ports.noop import NoOpMetrics
 from bioetl.domain.types import RunType
 from bioetl.infrastructure.audit.file_audit import FileAuditAdapter
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 pytestmark = pytest.mark.integration
 
@@ -108,6 +109,7 @@ async def test_storage_factory_wires_file_audit_across_medallion_writers(
         logger=noop_logger,
         metrics=metrics,
         audit=audit,
+        silver_validator=NoOpValidator(),
     )
 
     bronze_audit = context.adapter.bronze._audit

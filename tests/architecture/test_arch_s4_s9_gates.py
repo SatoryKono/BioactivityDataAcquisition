@@ -110,9 +110,9 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         VacuumServiceProtocol,
         WorkflowInspectionServiceProtocol,
     }
-    services_source = (
-        ROOT / "src/bioetl/composition/_services.py"
-    ).read_text(encoding="utf-8")
+    services_source = (ROOT / "src/bioetl/composition/_services.py").read_text(
+        encoding="utf-8"
+    )
     assert "invoke_bootstrap" not in services_source
     assert "_BOOTSTRAP_EXPORTS" not in services_source
     assert "resolve_bootstrap_attr" not in services_source
