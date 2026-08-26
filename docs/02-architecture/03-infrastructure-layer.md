@@ -134,8 +134,8 @@ Package contract для `infrastructure/adapters/{provider}/` строится �
 
 | Адаптер                    | Базовый класс                    | HTTP-клиент              | Примечание                                                                           |
 | -------------------------- | -------------------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
-| **ChemblAdapter**          | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 14 entities, 3 req/sec. Native pagination and filtering (without mixins) |
-| **UniProtAdapter**         | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 100 req/sec. Mixin: `PaginatedFetcherMixin`                              |
+| **ChemblAdapter**          | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 15 entities, 0.1 req/sec (`chembl.yaml`). Native pagination and filtering (without mixins) |
+| **UniProtAdapter**         | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, 10 req/sec default (100 with API key). Mixin: `PaginatedFetcherMixin` |
 | **PubMedAdapter**          | `@dataclass` + `BaseHttpAdapter` | `UnifiedHTTPClient`      | Async HTTP, 3 req/sec                                                                |
 | **PubChemAdapter**         | `BaseSyncAdapter`                | `pubchempy` + ThreadPool | Legacy sync, 5 req/sec. Mixin: `NotSupportedMultiFilterMixin`                        |
 | **CrossRefAdapter**        | `BaseHttpAdapter`                | `UnifiedHTTPClient`      | Async HTTP, polite pool. Mixin: `PaginatedFetcherMixin`                              |
