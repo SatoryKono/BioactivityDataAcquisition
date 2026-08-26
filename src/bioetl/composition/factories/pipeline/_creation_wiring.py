@@ -26,12 +26,12 @@ from bioetl.composition.factories.pipeline.control_plane_artifacts import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
-from bioetl.domain.ports.config_mapper import DomainConfigMapper
 from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
     AuditPort,
+    DomainConfigMapper,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,

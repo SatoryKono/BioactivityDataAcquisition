@@ -109,7 +109,7 @@ flowchart TB
     end
 
     subgraph Composition["Composition: src/bioetl/composition"]
-        APIs["entrypoints / execution_api / registry_api / control_plane_api"]
+        APIs["entrypoints / execution_api / registry_api / control_plane_runtime"]
         Boot["bootstrap/runtime, bootstrap/cli"]
         Factories["factories/*"]
     end

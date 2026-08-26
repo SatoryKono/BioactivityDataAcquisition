@@ -57,7 +57,7 @@ ______________________________________________________________________
 
   - runtime/bootstrap entrypoints (`bootstrap_pipeline_runner()`, `bootstrap_composite_runner()`, CLI bootstrap helpers)
   - provider loading lifecycle, registry helpers и factory families
-  - public composition seams (`entrypoints`, `execution_api`, `control_plane_api`, `health_api`, `maintenance_api`, `resources_api`)
+  - public composition seams (`entrypoints`, `execution_api`, `control_plane_runtime`, `health_api`, `maintenance_api`, `resources_runtime`)
 
 - **Infrastructure Layer** - Адаптеры:
 
