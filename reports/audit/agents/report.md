@@ -1,172 +1,166 @@
-# Agents / runtime audit — `prompt.audit.agents-runtime`
+# Agents / runtime instructions audit
 
 | Field | Value |
 | --- | --- |
-| `domain_id` | `agents-runtime` |
-| `prompt_id` | `prompt.audit.agents-runtime` |
-| `version` | card 1.2.0 |
-| `MODE` | `audit` |
-| `AUDIT_MODE` | `full` |
-| `LANGUAGE` | `ru` |
-| `REQUIRE_GH_TRACKING` | `false` |
-| `SCOPE` | `AGENTS.md` `.codex/` `.junie/` `.devin/` `docs/00-project/ai/` |
-| Date | 2026-08-26 |
-| `surface_score` | **2** / 3 |
-| `blocked` | `false` |
+| domain_id | `agents-runtime` |
+| prompt_id | `prompt.audit.agents-runtime` v1.2.0 |
+| MODE | `audit` |
+| AUDIT_MODE | `full` |
+| LANGUAGE | `ru` |
+| REQUIRE_GH_TRACKING | `false` |
+| SCOPE | `AGENTS.md` `.codex/` `.junie/` `.devin/` `docs/00-project/ai/` |
+| generated_at | 2026-08-26 |
+| surface_score | **2** / 3 (core mechanism correct; local non-critical gaps) |
+| debt_outcome | `unchanged` (бюджеты не трогались) |
+| blocked | `false` |
 
 ## Executive summary
 
-Канонический runtime-стек на месте: equal-peer `.codex/**` ↔ `.junie/**` с контрактом
-`scripts/ai/junie/junie-mirror-contract.json` и CI job
-`verify-codex-junie-runtime-parity`; Devin — отдельное дерево `.devin/agents/**` +
-`.devin/skills/**`; docs в `docs/00-project/ai/**` в основном помечены как mirrors.
-Env-guardrail и запрет роста tech-debt бюджетов повторены в `AGENTS.md`,
-`.junie/guidelines.md` и runtime maps. `curl|bash`, `git reset --hard` и печать
-значений токенов в `scripts/ai/**` не найдены.
+Канонический runtime-контур BioETL **собран и в основном согласован**:
 
-Материальные разрывы: (1) матрица permissions Devin (`config.json` deny write
-`docs/`+`configs/` против профилей, которым эти write нужны); (2) Junie runtime map
-заявляет content-parity с Codex, которую checker не считает, и уже разошёлся
-WSL-интерпретатор; (3) docs-guides (`CODEX.md`, `GEMINI.md`, `AGENT.md`) обходят
-`AGENTS.md` в обязательном read-order; (4) сломанный agent-script
-`py-team-orchestration.py`. P0 (секрет/RCE/destroy without guard) не доказан.
+- `AGENTS.md` задаёт equal-peer precedence (`.codex/**` ≡ `.junie/**`, `.devin/**` для Devin, `.gemini/**` только если дерево реально есть).
+- `.junie/guidelines.md` lock-step с `AGENTS.md` по env/debt/guardrails; dashboard-пути Junie-native — допустимое runtime-specific расхождение.
+- Шесть `py-*` профилей есть в Codex, Junie и Devin. `py-code-bot` — documented exclusion.
+- CI `.github/workflows/skills-consistency.yml` гоняет `check_junie_mirror.sh --check` и Codex–Devin/docs skills-mirror.
+- Env-guardrail и запрет роста tech-debt бюджетов повторены в runtime maps, Copilot, GEMINI.md, Devin config (`Write(**/.env*)` deny).
+- `.codex/config.toml` портабелен (нет auth/MCP/абсолютных путей). `.devin/mcp_config.json` использует `${env:VAR}`, не секреты.
+- Prompts library явно **не** SSOT (`docs/00-project/ai/prompts/README.md`).
+- `.claude/**` и tracked `.gemini/agents|skills` корректно помечены unavailable. `.junie/agents/CODEX-RUNTIME.md` — navigation stub, не fork.
 
-**Оценка 2:** основной workflow воспроизводим и закрыт автоматизацией; есть
-конфликтующие инструкции и избыточные/противоречивые permissions, но не
-системный отказ механизма.
+Материальные gaps — **не P0**: усечённый precedence в always-on Cursor/Windsurf правилах, stale RULES v6.1.5 в Claude/Windsurf/coverage matrix, inversion «canonical script» под `docs/00-project/ai/agents/scripts/`, docs-only `sp-*` с Write/sonnet, Devin maps читают RULES раньше `AGENTS.md`, post-change policy не покрывает `.devin/**`, Windows-рецепт junie-check не документирован.
+
+P0 (secret leak / destroy-without-guard / RCE): **не найдено**. `curl|bash` в agent scripts нет. Live SHA-256 parity **не прогонялась** в этой сессии (`AUD-015` NOT_PROVEN).
+
+## Surface score
+
+| Score | Meaning (kit) | Why 2 |
+| --- | --- | --- |
+| 3 | consistent + automated | CI parity jobs exist, but IDE/Devin/docs mirrors still contradict AGENTS.md |
+| **2** | main workflow reliable; undocumented preconditions | Windows bash-only junie check; Cursor/Windsurf/Devin precedence drift; docs-owned debt script |
+| 1 | material gaps / weak enforcement | Core Codex/Junie CI gate is present — not this band |
+| 0 | leak/destroy/uncontrolled privilege | No proven P0 |
+
+Mapping: qualitative kit scale (not 0–5 dimension average).
 
 ## Instruction scope graph
 
 ```text
-AGENTS.md  ≡  .junie/guidelines.md          (root contracts, lock-step claimed)
-    ├─ .codex/agents/CODEX-RUNTIME.md       (Codex-only map)
-    ├─ .junie/agents/JUNIE-RUNTIME.md       (Junie-only map)
-    ├─ .devin/agents/DEVIN-RUNTIME.md       (Devin-only map)
-    ├─ profiles: .codex/agents/py-*.md  ==  .junie/agents/py-*.md  (SHA-256 contract)
-    │            .devin/agents/*/AGENT.md   (platform variant)
-    ├─ skills:   .codex/skills/**  →sync→  .junie/skills/**
-    │            .devin/skills/**           (SKILL.md may vary; references identical)
-    ├─ scripts:  scripts/ai/{junie,codex,mcp,sync}/
-    ├─ CI:       .github/workflows/skills-consistency.yml
-    └─ mirrors:  docs/00-project/ai/**      (MUST NOT redefine behavior)
-                 .github/copilot-instructions.md
-                 GEMINI.md (root)
+AGENTS.md  (root contract)
+ ├─ .junie/guidelines.md          equal-peer root (Junie)
+ ├─ .codex/agents/CODEX-RUNTIME.md
+ │    └─ .codex/agents/py-*.md + .toml  → .codex/skills/** → memory-py-*.md
+ ├─ .junie/agents/JUNIE-RUNTIME.md
+ │    └─ .junie/agents/py-*.md (SHA parity vs Codex) → .junie/skills/**
+ ├─ .devin/agents/DEVIN-RUNTIME.md
+ │    └─ .devin/agents/*/AGENT.md → .devin/skills/** (+ optional coderabbit-audit)
+ ├─ docs/00-project/NORMATIVE_SOURCES.md → RULES.md → REQUIREMENTS.md → ADRs
+ ├─ docs/00-project/ai/**          mirrors / prompts / cursor rules (not behavior SSOT
+ │                                 except cursor/ which IS Cursor guidance SSOT)
+ └─ scripts/ai/junie|codex|sync    parity + doctor + windsurf/cursor sync
+        └─ CI: skills-consistency.yml
 ```
 
-Owner matrix coincides with
-`docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`.
+Optional discovery (present): `.github/copilot-instructions.md`, `.github/instructions/**`, root `GEMINI.md`. `CLAUDE.md` at repo root — нет; stub в `docs/00-project/ai/agents/CLAUDE.md`. `.agents/` directory — нет (gitignore un-ignore `!.agents/skills/*/SKILL.md` остаётся контрактом). `.gemini/settings.json` — gitignored local-only.
 
-## Method
+## What is healthy
 
-- Read: audit card + fragments (`evidence-contract`, `finding-schema`,
-  `debt-budget-ban`, `env-guardrail`, `audit-scale`, `generic-nine-contract`),
-  `AGENTS.md`, `NORMATIVE_SOURCES.md`, ownership, POST_CHANGE, runtime maps,
-  Devin config/profiles, catalogs, gitignore, skills-consistency workflow.
-- Inventory: `.codex/`, `.junie/`, `.devin/`, `docs/00-project/ai/`, `scripts/ai/`.
-- Grep: `curl|`, `git reset --hard`, secret-echo, `.env` writes, opus/sonnet,
-  WSL venv, `rm -rf`.
-- Static compare: sampled `.codex/agents/py-audit-bot.md` vs
-  `.junie/agents/py-audit-bot.md` (identical prefix); `SKILLS-CATALOG.md` across
-  Codex/Junie/Devin/docs-local (identical text); `ORCHESTRATION.md` Codex/Junie
-  (identical header).
-- **Не запускалось** (в этой сессии нет shell): live
-  `bash scripts/ai/junie/check_junie_mirror.sh --check`,
-  `python scripts/ai/codex/doctor.py static --no-write`,
-  `bash scripts/ai/codex/check_skills_mirror.sh --check`,
-  `python -m scripts.ai.sync.runtime_skills --mode check`,
-  `python -m scripts.docs check-drift --runtime-mirrors --freshness`,
-  memory `pre-task`/`post-task`.
-- `.env` не читался на предмет значений; не изменялся. Бюджеты техдолга не
-  трогались.
+| Surface | Evidence |
+| --- | --- |
+| Precedence SSOT | `AGENTS.md` L6–26; `NORMATIVE_SOURCES.md` L39–52 points back, does not fork a numbered list |
+| Junie lock-step | `.junie/guidelines.md` L9–34 + env/debt/guardrails match AGENTS |
+| Profile set | Codex/Junie: 6 `py-*.md`; Devin: 6 `*/AGENT.md`; contract excludes `py-code-bot` |
+| Skill catalogs | `.codex/skills/SKILLS-CATALOG.md` prefix identical to `.devin/skills/` and `docs/00-project/ai/skills/local/` (spot-read) |
+| Env deny | `.devin/config.json` deny `Write(**/.env*)`; AGENTS.md Env File Guardrail |
+| Debt ban | Runtime maps + Copilot + GEMINI.md + Devin ORCHESTRATION §1.0 |
+| Portable Codex config | `.codex/config.toml` only `agents.max_threads = 3` |
+| MCP tokens | `.devin/mcp_config.json` `${env:DEEPWIKI_API_KEY}` etc.; `export_mcp_env_from_dotenv.ps1` prints name+len only |
+| CI | `skills-consistency.yml` jobs `verify-codex-junie-runtime-parity`, `verify-local-skills-mirror`, `verify-native-codex-runtime` |
+| Gemini/Claude claims | AGENTS.md L113–121; GEMINI.md L26–29, L56–58; no tracked `.gemini/agents` |
 
-Live hash-parity `.codex/**`↔`.junie/**` = **NOT_PROVEN** (нет exit code
-checker). Контракт, CI path-filter и architecture tests
-(`tests/architecture/test_junie_runtime_ci_contract.py`) существуют.
+## Findings (16; 15 PROVEN + 1 NOT_PROVEN)
 
-## Surface score
-
-| Score | Meaning (domain card) | This audit |
-| ---: | --- | --- |
-| 3 | Instructions consistent; scripts reproducible; tools limited; validation automated | — |
-| **2** | Main workflow reliable; a few undocumented preconditions | **Selected** |
-| 1 | Implicit env assumptions, excessive permissions, or conflicting instructions | partial (conflicts exist, not systemic) |
-| 0 | Agent can leak a secret, destroy data, or run uncontrolled privileged action | not proven |
-
-Mapping: domain card 0–3 (not 0–5).
-
-## Findings (PROVEN preferred)
-
-Полный machine-readable набор: `findings.json`. Ниже — condensed.
-
-| ID | Pri | Status | Path | Observation |
+| ID | Pri | Status | Path | One-line |
 | --- | --- | --- | --- | --- |
-| AGT-001 | P1 | PROVEN | `.devin/config.json:24-27` | Project `deny` Write `docs/**` и `configs/**` противоречит `py-doc-bot` / `py-config-bot` |
-| AGT-002 | P2 | PROVEN | `.junie/agents/JUNIE-RUNTIME.md:23-29,126-127` | Checker не сравнивает runtime maps; WSL python уже drifted |
-| AGT-003 | P2 | PROVEN | `.devin/config.json:4-6,24-25` | `Write(**/.env*)` одновременно в `ask` и `deny` |
-| AGT-004 | P2 | PROVEN | `.devin/agents/py-audit-bot/AGENT.md:6-21` | Read-only профили дают `Exec(python)` |
-| AGT-005 | P2 | PROVEN | `docs/00-project/ai/agents/scripts/py-team-orchestration.py:15-25` | Резолв в несуществующий `src/tools/scripts/lint_terminology.py` |
-| AGT-006 | P2 | PROVEN | `.devin/agents/DEVIN-SETUP-GUIDE.md:119` | Codex «opus/sonnet» — в `.codex` моделей нет, inherit parent |
-| AGT-007 | P2 | PROVEN | `docs/00-project/ai/agents/guides/CODEX.md:21-35` | Обязательный контекст без `AGENTS.md` / runtime maps |
-| AGT-008 | P2 | PROVEN | `docs/00-project/ai/agents/guides/GEMINI.md:17-24` | Mandate RULES-only, без runtime precedence |
-| AGT-009 | P2 | PROVEN | `.devin/agents/py-test-bot/AGENT.md:4` | `model: swe-1.6` vs DEVIN-RUNTIME «Default subagent model» |
-| AGT-010 | P2 | PROVEN | `scripts/ai/mcp/mcp_filesystem_wrapper.sh:17` | Filesystem MCP = весь `REPO_ROOT`, включая `.env` write |
-| AGT-011 | P2 | PROVEN | `scripts/engineering/qa/check_quality_exemptions.py:4-5` | Canonical quality-exemptions script живёт в docs-дереве |
-| AGT-012 | P3 | PROVEN | `docs/00-project/ai/agents/guides/CLAUDE.md:9` | Hardcoded RULES v6.1.5 vs 6.1.11 |
-| AGT-013 | P3 | PROVEN | `.gitignore:300-305,657` | `.agents/` un-ignore затем полный ignore; CI всё ещё watches `.agents/skills/**` |
-| AGT-014 | P3 | PROVEN | `docs/00-project/ai/memory/mcp-memory.json:8` | Stale Loki/Tempo observation |
-| AGT-015 | P3 | PROVEN | `.codex/agents/CODEX-RUNTIME.md:54-57` | Сломанная фраза про `python -m` / doctor.py |
-| AGT-016 | P3 | PROVEN | `docs/00-project/ai/agents/scripts/py-config-bot-1.py:12` | Output `docs/audits/config_gaps.md` — каталога нет |
-| AGT-017 | P3 | PROVEN | `.devin/agents/README.md:70-77` | Сломанные markdown-таблицы `\|\|` |
-| AGT-018 | P3 | PROVEN | `docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md:16-28` | DEPRECATED, но описывает 8 агентов (`pyCodeBot`) |
-| AGT-019 | P3 | PROVEN | `AGENTS.md:140-146` | Related Files не указывает `.junie/guidelines.md` / runtime maps |
-| AGT-020 | P3 | PROVEN | `.devin/agents/DEVIN-SETUP-GUIDE.md:64` | «all 18 servers» vs MCP policy 21 |
+| AUD-001 | P2 | PROVEN | `docs/00-project/ai/rules/cursor/05-agent-workflow.mdc:12` | Always-on Cursor/Windsurf precedence = Codex then RULES; Junie/Devin/NORMATIVE_SOURCES omitted |
+| AUD-002 | P2 | PROVEN | `docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md:8` | Windsurf core rule stale vs Cursor: RULES v6.1.5, ADR-050, priority starts at RULES |
+| AUD-003 | P2 | PROVEN | `docs/00-project/ai/agents/guides/CLAUDE.md:9` | Claude stub/guide + RULES_COVERAGE_MATRIX still pin RULES v6.1.5; live RULES is 6.1.11 |
+| AUD-004 | P2 | PROVEN | `docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py` | Debt-exemptions and config-gap “canonical scripts” live under docs AI tree |
+| AUD-005 | P2 | PROVEN | `docs/00-project/ai/agents/agents/sp-test-automator.md:21` | docs-only sp-* still Write/sonnet, coverage >80%, escalate to missing `sp-workflow-orchestrator` |
+| AUD-006 | P2 | PROVEN | `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md:27` | Applies To omits `.devin/**` |
+| AUD-007 | P2 | PROVEN | `.devin/agents/DEVIN-RUNTIME.md:7` | Devin Canonical Sources lists docs/RULES before AGENTS.md |
+| AUD-008 | P2 | PROVEN | `AGENTS.md:86` | Junie parity MUST is bash-only; Windows `.venv-win` python path undocumented |
+| AUD-009 | P3 | PROVEN | `docs/00-project/ai/rules/cursor/00-bioetl-core-governance.mdc:37` | Cites nonexistent AGENTS.md import matrix |
+| AUD-010 | P3 | PROVEN | `.codex/agents/CODEX-RUNTIME.md:55` | Broken “python -m is not used here” sentence |
+| AUD-011 | P3 | PROVEN | `docs/00-project/ai/agents/scripts/py-config-bot-1.py:12` | Default output `docs/audits/` (not `reports/`) |
+| AUD-012 | P3 | PROVEN | `.devin/config.json:17` | Unbounded `Exec(git)` at project allow-list |
+| AUD-013 | P3 | PROVEN | `AGENTS.md:136` | Dashboard routing only `.codex/skills/` (Junie guidelines use `.junie/skills/`) |
+| AUD-014 | P3 | PROVEN | `.devin/skills/coderabbit-audit/SKILL.md:294` | Audit skill runs `gh issue create` and `git tag` without dry-run |
+| AUD-015 | P3 | NOT_PROVEN | `scripts/ai/junie/check_junie_mirror.sh` | Live SHA parity not executed this session |
+| AUD-016 | P3 | PROVEN | `docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md:17` | Template still `model: sonnet` + Write tools |
 
-`p0_p1_count` = 1. `proven_count` = 20. NOT_PROVEN findings в массив не включались
-(live parity вынесен в skipped checks).
+P0/P1 count: **0**. Proven: **15**.
 
 ## Top remediations
 
-1. Согласовать `.devin/config.json` deny/allow с профилями: либо убрать project-deny
-   `Write(**/docs/**)` / `Write(**/configs/**)`, либо сузить deny так, чтобы
-   `py-doc-bot`/`py-config-bot` могли писать свои поверхности; `Write(**/.env*)`
-   оставить только в `deny` (не в `ask`).
-2. Выровнять Proof-or-Stop WSL interpreter в `JUNIE-RUNTIME.md` с
-   `CODEX-RUNTIME.md` / README (`${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`);
-   сузить формулировку «content parity enforced» до того, что реально проверяет
-   `check_junie_mirror.py` (profile names + dashboard refs + forbidden ids).
-3. В docs-guides (`CODEX.md`, `GEMINI.md`, `AGENT.md`) поставить `AGENTS.md` и
-   matching runtime map первым пунктом обязательного контекста.
-4. Починить `py-team-orchestration.py` → `scripts/engineering/qa/lint_terminology.py`
-   (или удалить wrapper и ссылки из deprecated orchestration).
-5. Убрать `Exec(python)` у read-only Devin профилей либо ограничить allow-list
-   командами; не полагаться только на `deny: write`.
-6. Перенести canonical quality-exemptions implementation из
-   `docs/00-project/ai/agents/scripts/` в `scripts/engineering/qa/` (docs = wrapper).
-7. Добавить в `AGENTS.md` portable команду
-   `python scripts/ai/junie/check_junie_mirror.py --check` рядом с bash.
-8. Почистить stale: RULES version literals, Loki/Tempo в `mcp-memory.json`,
-   opus/sonnet, «18 servers», `||` tables, `docs/audits`.
+1. Выровнять always-on Cursor `05-agent-workflow.mdc` с `AGENTS.md` (Junie/Devin/NORMATIVE_SOURCES), затем `python -m scripts.ai.sync.windsurf`.
+2. Прогнать Windsurf sync и убрать hardcoded `RULES v6.1.5` / `ADR-001…ADR-050` из `00-bioetl-core-governance.md`.
+3. Снять version banners в `CLAUDE.md` (stub+guide) и `RULES_COVERAGE_MATRIX.md`; читать header `Version:`.
+4. Перенести implementations `architecture-techdebt-automation.py` / `py-config-bot-1.py` в `scripts/**`; docs оставить wrappers.
+5. Починить Devin Canonical Sources order + добавить `.devin/**` в `POST_CHANGE_VALIDATION.md` и skills-mirror check.
+6. Документировать Windows-вызов `python scripts/ai/junie/check_junie_mirror.py --check`.
+7. Нейтрализовать docs-only `sp-*` (no Write/sonnet/missing orchestrator) и шаблон.
+8. Прогнать live `--check` junie + skills-mirror на этом checkout (закрыть AUD-015).
+
+## Command matrix (canonical)
+
+| Need | Command | Notes |
+| --- | --- | --- |
+| Codex–Junie parity | `bash scripts/ai/junie/check_junie_mirror.sh --check` | Python twin: `python scripts/ai/junie/check_junie_mirror.py --check` (undocumented in AGENTS.md) |
+| Codex–Devin + docs skills | `bash scripts/ops/support/skills/check_skills_mirror.sh --check` | |
+| Codex native doctor | `python scripts/ai/codex/doctor.py static --no-write` | Windows: `.\\.venv-win\\Scripts\\python.exe ...` |
+| Docs runtime-mirror drift | `python -m scripts.docs check-drift --runtime-mirrors --freshness` | |
+| Windsurf regen | `python -m scripts.ai.sync.windsurf` | From cursor/*.mdc |
+| Memory pre-task | `python -m memory.tooling.workflow pre-task --profile audit ...` | Skipped this session |
+| Operator bootstrap | `make install` / `make test-deps` / `make setup-plugins` | AGENT.md / CLAUDE.md |
+| Risk-tier tests | V1–V4 in CODEX-RUNTIME / JUNIE-RUNTIME | Not a single `make test` for every task |
 
 ## Scripts / permissions (summary)
 
-- `setup_agents.sh` / `setup_skills.sh`: `--check` и `--dry-run` есть; `set -euo pipefail`.
-- MCP wrappers: `set -euo pipefail`; `token_validation.sh` не печатает значения.
-- `check-env.ps1` создаёт `.env.codex` только при `BIOETL_CREATE_LOCAL_ENV_FILES=1`.
-- Codex native descriptors: `sandbox_mode = "read-only"` у `py-audit-bot` /
-  `py-debug-bot`.
-- Devin: profile-based + project `config.json` (конфликт — AGT-001/003/004).
+- `scripts/ai/junie/check_junie_mirror.sh`: `--check` read-only exit 1 on drift; `--sync` one-way Codex→Junie, never writes Codex. No extra dry-run (check is the preview).
+- `scripts/ai/mcp/export_mcp_env_from_dotenv.ps1`: prints key name + length, not values.
+- `docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-*.sh`: thin exec wrappers to `scripts/diagrams/`.
+- Codex `py-audit-bot.toml`: `sandbox_mode = "read-only"`.
+- Devin `py-test-bot` AGENT.md denies write/edit (orchestrator owns test file edits) — documented platform difference vs Codex/Junie workspace-write.
+- No `curl|bash`, no `eval`, no `rm -rf` under `scripts/ai/**` in this scan.
+
+## Skipped checks
+
+| Check | Reason |
+| --- | --- |
+| `bash scripts/ai/junie/check_junie_mirror.sh --check` | no shell in this auditor runtime |
+| `bash scripts/ops/support/skills/check_skills_mirror.sh --check` | same |
+| `python scripts/ai/codex/doctor.py static --no-write` | same |
+| `python -m scripts.docs check-drift --runtime-mirrors --freshness` | same |
+| `python -m memory.tooling.workflow pre-task --profile audit` | same; memory sheets read directly |
+| GitHub issue tracking | `REQUIRE_GH_TRACKING=false` |
+
+## Mirror-sync status
+
+This audit is **read-only**. Runtime trees were not edited. Live `--check` exit codes: **skipped** (AUD-015). CI contract for both Junie and Devin/docs mirrors is present on `main` workflow file.
 
 ## Kit extras
 
-- `agent-instruction-map.md`
-- `agent-scripts.csv`
-- `tool-permissions.csv`
-- `instruction-conflicts.csv`
-- `command-matrix.md`
+- `reports/audit/agents/agent-instruction-map.md`
+- `reports/audit/agents/agent-scripts.csv`
+- `reports/audit/agents/tool-permissions.csv`
+- `reports/audit/agents/instruction-conflicts.csv`
+- `reports/audit/agents/command-matrix.md`
+- `reports/audit/agents/findings.json`
 
 ## Guardrails honored
 
-- Tech-debt budgets: не предлагалось увеличивать.
-- `.env`: не создавался/не редактировался.
-- Product code: не изменялся.
-- Runtime trees: не редактировались (MODE=audit).
+- Product code not edited.
+- Tech-debt budgets not increased.
+- `.env` not created/edited/moved.
+- No secrets in this report.
+- Artifacts only under `reports/audit/agents/`.
