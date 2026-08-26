@@ -1,30 +1,69 @@
-{
-  "source_run": "20260825T164939Z-tests-cycle-80651be4d1",
-  "previous_source_run": "20260820T081148Z-tests-cycle-16c9a2b6e6",
-  "surface_score": 1,
-  "findings": [
-    {
-      "id": "FAIL-COVERAGE-INVENTORY-FRESHNESS",
-      "severity": "High",
-      "priority": "P1",
-      "path": "reports/quality/module-coverage-inventory.json",
-      "symbol_or_lines": "source_tree_sha256; summary.unmeasured_module_count",
-      "claim": "Материализованный coverage inventory не соответствует текущему дереву src/bioetl, что снижает live architecture quality scorecard до 7.41 и делает unit-fast lane красной.",
-      "evidence": [
-        "tests/architecture/test_module_coverage_inventory_freshness.py:63",
-        "reports/audit/test-cycle/20260825T164939Z-80651be4d1-test/cycle-1/coverage-freshness.log:9-15",
-        "reports/audit/test-cycle/20260825T164939Z-80651be4d1-test/cycle-1/scorecard-live-metrics.json:2-8",
-        "tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py:52-67"
-      ],
-      "status": "PROVEN",
-      "classification": "fixture",
-      "action": "block",
-      "required_remediation": "Выполнить канонический coverage-verify на чистом src/bioetl, затем обновить module-coverage-inventory из полученного coverage.xml и повторно подтвердить freshness и scorecard gates.",
-      "github_tracking": {
-        "search_command": "gh issue list --repo SatoryKono/BioactivityDataAcquisition --state open --search coverage inventory freshness scorecard --limit 20 --json number,title,labels,url",
-        "result": "no_matching_open_issue",
-        "write_allowed": false
+[
+  {
+    "id": "TEST-GOV-001",
+    "requirement_id": "REQ-GOV-012",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.95,
+    "status": "PROVEN",
+    "category": "governance-snapshot",
+    "path": "reports/quality/test-governance-current.json",
+    "observation": "Committed test-governance snapshot drifted from live collector: total_test_functions 25006->25010 and source_tree_sha256 mismatch on origin/main@1e64aaac80.",
+    "method": "python -m scripts.engineering.qa.report_test_governance_audit --check",
+    "expected": "--check exits 0; snapshot equals live collector; skip/xfail/debt budgets unchanged",
+    "actual": "[drift] mismatch: reports/quality/test-governance-current.json; functions 25006 vs 25010; sha 899962f4 vs b77152e5; budget_violations []",
+    "impact": "Architecture test test_test_governance_artifacts_match_live_collector fail-closes; test-census identity is stale while budgets are unchanged.",
+    "root_cause": "Tests landed on main without regenerating reports/quality/test-governance-current.json (recurrence of closed #9339/#9131/#9640 on a new SHA).",
+    "remediation": "Regenerate via python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json",
+    "effort": "S",
+    "dependencies": [],
+    "validation": [
+      "python -m scripts.engineering.qa.report_test_governance_audit --check",
+      "python -m pytest tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector -q --tb=short"
+    ],
+    "automation": "tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector",
+    "automated_fix_possible": true,
+    "evidence": [
+      {
+        "path": "reports/quality/test-governance-current.json",
+        "command": "python -m scripts.engineering.qa.report_test_governance_audit --check",
+        "observation": "exit 1 [drift] mismatch before regen; exit 0 x3 after regen"
       }
-    }
-  ]
-}
+    ]
+  },
+  {
+    "id": "TEST-RES-001",
+    "requirement_id": "REQ-GOV-012",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.9,
+    "status": "PROVEN",
+    "category": "residual-gate",
+    "path": "reports/quality/live-residual-snapshot.json",
+    "observation": "Live residual --check fail-closes on composition_factories_pipeline.total_loc live=3983 committed=3970. Test system correctly blocks growth. Product shrink is out of this card SCOPE.",
+    "method": "python -m scripts.engineering.qa.report_live_residual_snapshot --check",
+    "expected": "live residual metrics <= committed freeze (shrink-only)",
+    "actual": "residual growth for composition_factories_pipeline.total_loc: live=3983 committed=3970; exit 1",
+    "impact": "architecture residual tests fail; not a skip/xfail budget issue; remediating src/bioetl is out of SCOPE tests/ configs/quality/ pyproject.toml",
+    "root_cause": "Product LOC growth in composition factories vs freeze snapshot; gate working as designed",
+    "remediation": "Do not bump residual snapshot. Route to tech-debt/architecture paydown (related open epic #9639). Do not treat as tests-layer snapshot regen.",
+    "effort": "M",
+    "dependencies": [
+      "#9639"
+    ],
+    "validation": [
+      "python -m scripts.engineering.qa.report_live_residual_snapshot --check"
+    ],
+    "automation": "tests/architecture/test_live_residual_snapshot.py",
+    "automated_fix_possible": false,
+    "evidence": [
+      {
+        "path": "reports/quality/live-residual-snapshot.json",
+        "command": "python -m scripts.engineering.qa.report_live_residual_snapshot --check",
+        "observation": "exit 1 residual growth composition_factories_pipeline.total_loc 3970->3983"
+      }
+    ]
+  }
+]
