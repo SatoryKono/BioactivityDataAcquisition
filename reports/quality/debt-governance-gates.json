@@ -407,7 +407,6 @@
     },
     {
       "current": "cdad7398753ae9a1973c4075934d1fe483c8db1494973089f2c4b3335d1b26c0",
-
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
