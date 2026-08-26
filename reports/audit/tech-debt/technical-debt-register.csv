@@ -1,6 +1,21 @@
-id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority,status,issue
-TECH-DEBT-001,configs/quality/technical_debt_audit_registry.yaml,8,governance-pin,validate-technical-debt-audit ok=false then ok=true after re-pin,hours,medium,closeout SSOT,S,@bioetl-architecture,P2,PROVEN,#9646
-TECH-DEBT-002,reports/quality/architecture-debt-remote-main-baseline.json,9,generated-artifact-drift,gates --check generated_artifact_drift remote_main_baseline,hours,high,release --check,S,@bioetl-architecture,P1,PROVEN,#9647
-RESIDUAL-WAIVER,configs/quality/constructor_waivers.yaml,6,intentional_exception,QuarantineEntry max_args=9 ADR-051,governed,low,domain aggregate ctor,n/a,@bioetl-domain,P3,intentional,#6685
-RESIDUAL-ENTRYPOINTS,src/bioetl/composition/entrypoints.py,31,wrapper_contract_drift,census wrapper_contract_drift=1,days,medium,public composition API,M,@bioetl-platform,P2,tracked,#9643
-RESIDUAL-CONTROL-PLANE,src/bioetl/application/services/control_plane/,1,hotspot-at-budget,families_at_budget application_services_control_plane,weeks,medium,replay/manifest,L,@bioetl-platform,P2,tracked,#9618
+id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
+TD-001,reports/quality/module-coverage-inventory.json,7816,ci,3 merge conflict hunks HEAD vs fix/architecture-governance-23,in-progress-merge,release_integrity,coverage+gates+REQ-GOV-007,S,@bioetl-architecture,P0
+TD-002,reports/quality/debt-governance-gates.json,77,ci,unmeasured gate pass/0 vs summary fail_count=1,same-day-merge,release_integrity,release_gate_status,S,@bioetl-architecture,P1
+TD-003,reports/quality/architecture-quality-scorecard.json,181,architecture,categories~9.41 vs integral_score=7.41,same-day-merge,false_grade,architecture_closeout,S,@bioetl-architecture,P1
+TD-004,reports/quality/debt-governance-gates.md,22,documentation,md unmeasured=84 fail vs json pass/0,same-day-merge,operator_confusion,human_closeout,S,@bioetl-architecture,P1
+TD-005,reports/quality/source-tree-manifest.json,4,ci,multiple source_tree_sha256; remote-main 9.41 vs unmeasured 84,2026-08-26,hash_drift,REQ-GOV-007,M,@bioetl-architecture,P1
+TD-006,reports/quality/total-tech-debt-audit-main-current.md,19,documentation,registry pin 45/45 score 9.41 modules 2465 vs live 7.41/2467,reviewed_2026-08-25,stale_ssot,#9646_closeout,S,@bioetl-architecture,P1
+TD-007,scripts/engineering/qa/report_live_residual_snapshot.py,85,code,_module_coverage_residuals uses rows not summary,code_present,false_green_snapshot,shrink_only_gate,S,@bioetl-platform,P1
+TD-008,configs/quality/debt_scorecard.yaml,256,architecture,current==max freezes config/lazy/private/fan-in/assertless,playbook_#8714,feature_block,config+composition+control_plane,L,@bioetl-architecture,P1
+TD-009,configs/quality/basedpyright_import_cycle_allowlist.json,199,architecture,30 typing cycles review_by 2026-10-28,snapshot_2026-07-28,change_cost,application/core+control_plane+silver,M,@bioetl-architecture,P2
+TD-010,configs/quality/constructor_waivers.yaml,6,architecture,QuarantineEntry max_args=9 ADR-051,expiry_2026-12-31,constructor_policy,domain_quarantine,M,@bioetl-domain,P2
+TD-011,configs/quality/duplication_complexity_exemptions.yaml,9,code,wide xenon/critical_check path exemptions,expiry_2026-12-31,complexity_blind_spot,composite+pipelines+storage,L,@bioetl-architecture,P2
+TD-012,src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py,124,code,>=82 type: ignore in src/bioetl,ongoing,type_safety_holes,CLI+adapters+DI,L,@bioetl-architecture,P2
+TD-013,src/bioetl/application/core/transformer_runtime/__init__.py,11,code,14 F403 star-import facades,post-split,hidden_public_surface,application.core+openalex,M,@bioetl-application,P2
+TD-014,reports/quality/branch-coverage-gap-report.md,8,tests,552 files below 85% branch; aggregate 86.152%,refresh_2026-07-27,untested_branches,coverage-verify,L,@bioetl-test-platform,P2
+TD-015,configs/quality/public_lazy_facade_inventory.yaml,8,architecture,52 lazy facades; lazy_import 98/98,review_by_2026-10-27,api_surface,src/bioetl public barrels,L,@bioetl-architecture,P2
+TD-016,reports/quality/hotspot-family-baseline.json,6,architecture,snapshot_date 2026-07-27; runtime_builders LOC 7226 vs 7229,2026-07-27,stale_hotspot_pin,hotspot_families,S,@bioetl-platform,P2
+TD-017,configs/quality/compatibility_facade_inventory.yaml,22,architecture,12 public entrypoints + 4 facades freeze,review_2026-09-30,public_api_bound,CLI+composition,L,@bioetl-architecture,P2
+TD-018,reports/quality/live-residual-snapshot.json,74,tests,51 closeout files / 262 fn / 10488 LOC,ongoing,change_cost_of_gates,tests/architecture,M,@bioetl-architecture,P2
+TD-019,reports/quality/debt-governance-gates.json,40,ci,budget_increase_count not_evaluated_without_changed_from_ref,payload_design,missed_budget_growth,scorecard_max_count,S,@bioetl-architecture,P2
+TD-020,reports/quality/dead-code-inventory.json,2,tests,dead-code 2026-08-01; weak-assert 2026-08-07 stale,2026-08-01,stale_prioritization,dead_code+weak_assert,S,@bioetl-architecture,P3

@@ -1,96 +1,122 @@
-# Циклический аудит диаграмм и `scripts/diagrams`
+# Audit diagrams — `prompt.audit.diagrams`
 
-Run ID: `20260818T141321Z-diagrams-cycle-3809e140`
-
-Base: `main@3809e140aa`
-
-Scope: `docs/02-architecture/diagrams`, `scripts/diagrams`
-
-Режим: `full`, 10 итераций, read-only mutation fallback
-
-Итоговый `surface_score`: **1 / 3 (weak)**
-
-## Итог
-
-Корпус имеет сильную базовую механику — 441 активный text-as-code источник, 441 соответствующий SVG, pinned Mermaid CLI `10.6.1`, нулевой hard lint budget и проходящие curated artifact/smoke gates. Однако опубликованные provider-specific диаграммы содержат системные противоречия живым конфигам и нормативному storage contract, а официальный Docker render fallback и два публичных fixer-а дают ложные либо неработающие результаты. Поэтому поверхность нельзя оценить выше `1` до устранения P1 и восстановления воспроизводимого полного render gate.
-
-Найдено **7 PROVEN** gaps: `P1=1`, `P2=5`, `P3=1`, `P0=0`. Секретов и непубликуемых внутренних endpoint-ов в источниках не обнаружено. Бюджеты качества не повышались. PNG не создавались и не коммитились.
-
-## Главные gaps
-
-| ID | Priority | Кратко | Статус |
-| --- | --- | --- | --- |
-| `DIAG-AUD-001` | P1 | ChEMBL и ещё четыре provider API diagrams противоречат auth/pagination/storage config/SSOT | PROVEN, unchanged |
-| `DIAG-AUD-002` | P2 | 9 SVG без fallback text; 23 без canonical CSS; broad gate видит лишь часть | PROVEN, unchanged |
-| `DIAG-AUD-003` | P2 | Official Docker fallback ломает Chromium discovery args-only Puppeteer config | PROVEN, unchanged |
-| `DIAG-AUD-004` | P2 | `apply-elk` предлагает менять 17 уже ELK-enabled multiline sources | PROVEN, unchanged |
-| `DIAG-AUD-005` | P2 | `differentiate-linkstyle` молча сканирует удалённый каталог и 0 файлов | PROVEN, unchanged |
-| `DIAG-AUD-006` | P2 | `generate-dataflows --check` создаёт date-only drift для 14 artifacts | PROVEN, unchanged |
-| `DIAG-AUD-007` | P3 | Published view inventory: 162 вместо фактических 165 | PROVEN, unchanged |
-
-Полные поля доказательств и remediation находятся в `findings.json`.
-
-## Инвентаризация
-
-- 442 text source candidates: 277 `.mmd` (включая `_template.mmd`) и 165 `.mermaid`.
-- 441 активная диаграмма и 441 tracked SVG sibling; lone PNG и tracked PNG не найдены.
-- 6 embedded Mermaid fences в 4 Markdown-файлах; config-only fence без diagram declaration корректно исключается validator-ом.
-- Классификация активного корпуса: component 300, data 70, sequence 25, state 14, context 14, container 12, deployment 6, CI flow 1.
-- Renderer: `@mermaid-js/mermaid-cli 10.6.1`, зафиксирован в action package/lock и Docker image reference. Bare `npx -y` в production CI/render scripts не найден.
-- C4 zoom используется как context/container/component; признаков подмены container на Docker или whole-repo code-level dump нет.
-- Полная строковая карта находится в `diagram-inventory.csv`.
-
-## Gate evidence
-
-| Проверка | Результат |
+| Field | Value |
 | --- | --- |
-| `python -m scripts.diagrams lint docs/02-architecture/diagrams` | PASS: 441 checked, 0 failed, 0 errors, 279 warnings |
-| `lint-budget --mode pr ...` | PASS: hard=0, DIAG-T022=0, DIAG-T023=0, lint errors=0 |
-| `check-quality-gates` | PASS: 5 files, 0 hard/warning failures |
-| default/extended/broad `check-artifacts` | PASS: 6 / 26 / 56 |
-| default/extended/broad `check-visual-smoke` | PASS: 6 / 26 / 56 |
-| default/extended `check-svg-text` | PASS: 6 / 26 |
-| broad `check-svg-text` | FAIL: architecture SVG 24 lacks readable fallback text |
-| full `fix-svg-text --check` | FAIL: 9 SVG need fallback text |
-| `fix-svg-styles --check` | FAIL: 23 SVG need injection |
-| `fix-orphans --check` | PASS: 0 orphan artifacts |
-| `fix-operators --check` | PASS: 442 scanned, no issues |
-| pinned direct Docker sample renders | PASS: flowchart, sequence, state, class |
-| official pinned Docker `checks --profile quick` | FAIL: Puppeteer/Chromium discovery blocker |
-| `generate-dataflows --check` | FAIL: 14 date-only stale artifacts; 0 normalized semantic mismatches |
-| focused diagram test groups | PASS: 49 + 53 + 53 tests |
-| additional composite/config/debt groups | PASS: 8 + 25 + 5 tests |
-| docs link/spec/config checks | PASS |
-| docs runtime-mirror/freshness drift check | PASS |
-| Codex-Junie mirror parity | PASS |
+| domain_id | `diagrams` |
+| prompt_id | `prompt.audit.diagrams` |
+| version | 1.2.0 |
+| MODE | `audit` |
+| AUDIT_MODE | `full` |
+| LANGUAGE | `ru` |
+| REQUIRE_GH_TRACKING | `false` |
+| SCOPE | `docs/02-architecture/diagrams/` · `scripts/diagrams/` |
+| surface_score | **2** / 3 |
+| blocked | `false` |
+| debt_outcome | `unchanged` (бюджеты не трогались) |
+| generated_at | 2026-08-26 |
 
-Полный `checks --profile pr --enforce-budget` не завершён: системный `mmdc 11.12.0` правильно отклонён pin guard-ом, а pinned Docker fallback доказанно ломается в official wrapper. После `DIAG-AUD-003` точная повторная команда: `MMDC_FORCE_DOCKER=1 python -m scripts.diagrams checks --profile pr --enforce-budget`.
+Легенда surface_score (kit + `fragments/audit-scale.md`): **3** = text source в VCS, детерминированный pinned render, CI validation, модель совпадает с системой; **2** = диаграммы в целом актуальны, часть regenerate/review ещё ручная; **1** = binary-only / регулярный drift; **0** = ключевая схема достаточно неверна, чтобы сломать security/deploy.
 
-## Accuracy и security
+Оценка **2**: канонические `.mmd`/`.mermaid` в git, SVG sibling contract закрыт тестами, Mermaid CLI **10.6.1** pin в `.github/actions/setup-mermaid` + `mmdc_wrapper.sh`, CI lint/render/drift есть. До 3 не дотягивает из‑за stale generated `90-pkg-*`, skill-пути `mmd-diagrams/`, дыр pre-commit и локальных неточностей модели (Grafana, dual 13a, unlabeled security nodes).
 
-Core architecture, composite и config-topology guard suites проходят. Generated ChEMBL dataflow preview после исключения display-only date полностью совпадает с tracked content, поэтому semantic drift там не заявлен. При ручной проверке provider-specific claim mapping подтверждён один системный P1: неверные auth/pagination/storage claims перечислены в `DIAG-AUD-001`.
+## Executive summary
 
-Поиск URL/IP/localhost/token/secret patterns не выявил опубликованных secret values или внутренних endpoint-ов. Термины `token`/`secret` встречаются только как архитектурные понятия и security filtering labels.
+Корпус diagrams — инженерный text-as-code набор с ADR-040 lint, pinned render и PR SVG-drift gate. PNG после DOC-GOV-02 gitignored (правильно в `.gitignore` / `render-retention.md`). Живой lint/render в этой сессии **не запускался** (нет shell tool); выводы по STALE/SIZE сделаны из исходников + кода линтера.
 
-## Mutation blocker
+P0 нет. P1: skill всё ещё учит писать в `mmd-diagrams/`; generated `90-pkg-*` старше 150 дней и без CI `--check`.
 
-Исходный checkout содержал крупный чужой dirty work, поэтому аудит выполнялся в отдельном worktree `/tmp/bioetl-diagrams-cycle-3809e140`. Все три разрешённые `.env` GitHub credential variables и default `gh` credential были проверены read-only запросом и не прошли authentication. Значения секретов не печатались.
+## Inventory (measured this checkout)
 
-Согласно `orchestrator-guards.md`, missing permissions требуют остановить mutation и вернуть read-only + blocker report. Поэтому:
+| Family | Sources | Sibling SVG | Class | Notes |
+| --- | ---: | ---: | --- | --- |
+| `architecture/*.mmd` | 89 | 89 | container/component/sequence/data | Core ADR-040 tree |
+| `class-diagrams/*.mmd` | 94 | 94 | class | 19 curated + sandbox + 74 `90-pkg-*` |
+| `foundation/*.mmd` | 55 | 55 | mixed historical | TOP-25 + class/sequence |
+| `views/*.mermaid` | 165 | 165 | decomposed views | `-full/-overview/-domain/-infra/-dataflow` |
+| `providers/**/*.mmd` | 28 | 28 | data/API | 7 providers × 4 flows |
+| `sequence/*.mmd` | 5 | 5 | sequence | issue #6544 |
+| `state-machines/*.mmd` | 5 | 5 | state | issue #6546 |
+| `_template.mmd` | 1 | n/a | template | excluded from lint (`_` prefix) |
+| **Total sources** | **442** | **441 SVG** | | Guide still says 404 (DIAG-011) |
 
-- source/SVG fixes не применялись;
-- GitHub issues не создавались, но payloads сохранены в `issues.jsonl` и по итерациям;
-- commit/push/merge/close не выполнялись;
-- финальный delta всех семи findings: `unchanged`; regressions/new-after-fix отсутствуют.
+Другие форматы в SCOPE: PlantUML / Graphviz / drawio **не найдены**. PNG sibling trees gitignored. Bundles `diagrams/bundles/*.{md,pdf,docx}` — publication artifacts. Embedded Mermaid вне SCOPE живёт в `docs/02-architecture/current-state-diagrams.md` (compact current-state, не SSOT).
 
-Proof-or-Stop для claim `reviewed` сформировал bundle и вернул ожидаемый `STOP`: независимый evaluator receipt недоступен в single-agent запуске. Поэтому отчёт не заявляет `independently reviewed` или `ready_to_merge`. Обязательный memory post-task затем прошёл успешно (`ok=true`, `degraded=false`) и записал локальную episodic summary; это единственный untracked файл вне ignored report tree, созданный обязательным memory workflow.
+Канонический source map: `canonical-source-map.md`. CSV: `diagram-inventory.csv`, `diagram-code-drift.csv`. Render: `render-failures.txt` (live skip).
 
-## Рекомендуемый порядок устранения
+## Tooling / CI (pinned)
 
-1. Исправить `DIAG-AUD-001` и добавить provider config contract test.
-2. Исправить Docker branch `DIAG-AUD-003`, затем прогнать полный pinned render.
-3. Нормализовать только перечисленные SVG и расширить required coverage (`DIAG-AUD-002`).
-4. Починить idempotence/path fixers (`DIAG-AUD-004`, `DIAG-AUD-005`).
-5. Устранить date-only generated drift и обновить view inventory (`DIAG-AUD-006`, `DIAG-AUD-007`).
+| Surface | Evidence |
+| --- | --- |
+| Entry | `python -m scripts.diagrams` (`scripts/diagrams/__main__.py`) |
+| Lint | `lint/lint_diagrams.py` — SIZE/META/COLOUR/GRAPH/STALE/NBSP; exit 1 on ERROR |
+| Budget | `lint/enforce_diagram_quality_budget.py`; nightly `--max-lint-errors 0` |
+| Render | `docs/02-architecture/diagrams/tooling/render.sh` + `mmdc_wrapper.sh` (`minlag/mermaid-cli:10.6.1`, `MMDC_REQUIRED_VERSION=10.6.1`) |
+| CI pin | `.github/actions/setup-mermaid` `npm ci` from lockfile; refuses unlocked version |
+| PR | `.github/workflows/docs.yml` validate-mermaid, render-diagrams, check-diagram-drift (SVG) |
+| Nightly | `.github/workflows/diagram-nightly.yml` render + artifacts + STALE-001 issue + budget |
+| Dataflow gate | `docs.yml` `generate-dataflows --pipeline chembl_activity --check` |
+| Tests | `tests/architecture/test_diagram_corpus_regression_guards.py` sibling SVG; no `mmd-diagrams` sources |
+| Pre-commit | lint + prune-orphans for architecture/foundation/class-diagrams + views only (DIAG-007) |
+| `npx -y` in diagram CI | **не найден** (антипаттерн kit закрыт на этом контуре) |
 
-Не следует повышать lint/debt budgets или коммитить PNG/bulk binary render dumps для прохождения этих проверок.
+`scripts/diagrams/core/diagram_paths.py` и `diagram_paths.sh` умеют fallback на `mmd-diagrams/`, но выбирают `diagrams/` если каталог существует — для текущего checkout это безопасно.
+
+## Accuracy / model
+
+- Local-only deploy: `foundation/12-local-deployment-architecture.mmd` — CLI, MemoryLock, local `data/`, без Docker/Redis. Совпадает с ADR-010.
+- Observability 22 помечает Grafana как optional; 09/09b — нет (DIAG-006).
+- Security 17: unlabeled `HASHED`/`BW`/`SW` (DIAG-005).
+- Hexagonal 01: лишний Interfaces-узел `ORCH` (DIAG-014).
+- Dual 13a/13b/13c decompositions (DIAG-004).
+- Секреты/внутренние URL на диаграммах не найдены (`api_key`/`token` — поля адаптеров и rate-limit, не значения).
+
+## Findings (15 PROVEN)
+
+| ID | P | Status | Path | One-liner |
+| --- | --- | --- | --- | --- |
+| DIAG-001 | P1 | PROVEN | `.codex/skills/technical-designer-mermaid/SKILL.md:72` | Skill канонит `mmd-diagrams/` |
+| DIAG-002 | P1 | PROVEN | `class-diagrams/90-pkg-interfaces-http.mmd:6` | `90-pkg-*` STALE-001, generator `--check` не в CI |
+| DIAG-003 | P2 | PROVEN | `diagrams/README.md:35` | README: PNG tracked vs gitignore |
+| DIAG-004 | P2 | PROVEN | `architecture/13a-data-storage-ports.mmd` | Две схемы декомпозиции 13a/b/c |
+| DIAG-005 | P2 | PROVEN | `architecture/17-security-pii-audit.mmd:38` | Unlabeled HASHED/BW/SW |
+| DIAG-006 | P2 | PROVEN | `architecture/09-observability-stack.mmd:72` | Grafana без optional |
+| DIAG-007 | P2 | PROVEN | `.pre-commit-config.yaml:234` | Нет sequence/providers/state-machines |
+| DIAG-008 | P2 | PROVEN | `architecture/13-port-protocol-contracts.mmd:5` | @date 2026-03-28 → STALE-001 |
+| DIAG-009 | P3 | PROVEN | `views/00-legend.mermaid:5` | COLOUR-002 ≠ ADR-040 emoji ban |
+| DIAG-010 | P3 | PROVEN | `foundation/12-local-deployment-architecture.mmd:70` | Silver fill #f1f5f9 |
+| DIAG-011 | P3 | PROVEN | `governance/DIAGRAM-WORKFLOW-GUIDE.md:20` | 404 vs 442 sources |
+| DIAG-012 | P3 | PROVEN | `.github/workflows/docs.yml:506` | Мёртвый png glob в drift |
+| DIAG-013 | P3 | PROVEN | `scripts/diagrams/fix_mermaid_operators.py` | Дубль fixer |
+| DIAG-014 | P3 | PROVEN | `architecture/01-high-level-hexagonal.mmd:44` | ORCH не package interfaces |
+| DIAG-015 | P3 | PROVEN | `class-diagrams/07-…-frontmatter-sandbox.mmd` | Эксперимент в каноническом дереве |
+
+Полные поля: `findings.json`.
+
+## Top remediations
+
+1. Починить skill path `mmd-diagrams/` → `diagrams/` в `.codex` и синхронизировать `.junie` (`check_junie_mirror.sh --check`).
+2. Прогнать `generate_package_family_class_diagrams.py` и добавить `--check` в `docs.yml` рядом с `generate-dataflows`.
+3. Не поднимать `ERROR_STALE_DAYS` / lint-budget; обновить `@date` только после review содержимого.
+4. Свести семейство 13* к одной нумерации; подписать узлы в 17-security.
+5. Выровнять README PNG с DOC-GOV-02; расширить pre-commit glob.
+6. Пометить Grafana optional в 09/09b как в 22.
+
+## Skipped / NOT_PROVEN checks
+
+| Check | Why skipped |
+| --- | --- |
+| `python -m memory.tooling.workflow pre-task/post-task` | Нет shell tool в этой сессии |
+| `python -m scripts.diagrams lint` / `lint-budget` | Нет shell; STALE-001 выведен статически |
+| `bash …/tooling/render.sh` / visual-smoke / check-artifacts | Нет shell; SVG наличие подтверждено list_dir + architecture tests (код), не live render |
+| `git status` / SHA | Нет shell |
+| Nightly job result on origin | `REQUIRE_GH_TRACKING=false`; статус nightly **NOT_PROVEN** |
+| AST drift каждой `90-pkg` vs `src/bioetl` | Без `--check` run; доказан только stale date + отсутствие CI gate |
+| fa:fa- icon render in mermaid-cli 10.6.1 | Присутствие иконок PROVEN; визуальный fail **NOT_PROVEN** |
+
+`.env` не читался и не менялся. Техдолг-бюджеты не менялись.
+
+## Guardrails
+
+- MODE=audit: патчи не предлагались к применению.
+- Root scratch не создавался.
+- Runtime mirrors не редактировались.
