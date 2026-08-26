@@ -8,173 +8,138 @@
 | AUDIT_MODE | `full` |
 | LANGUAGE | `ru` |
 | REQUIRE_GH_TRACKING | `false` |
-| SCOPE | `scripts/docs/` · `mkdocs.yml` · `docs/` |
-| surface_score | **2** / 3 (acceptable: core chain reproducible; semantic gaps remain) |
+| SCOPE | `scripts/docs/` `mkdocs.yml` `docs/` |
+| checkout | `refs/heads/master20260825-21` |
+| date | 2026-08-26 |
+| surface_score | **2** (acceptable: pipeline reproducible; some semantic checks still manual) |
 | blocked | `false` |
-| debt_outcome | `unchanged` (read-only; budgets not touched) |
-| findings | 18 PROVEN (P1: 1, P2: 10, P3: 7) |
+| debt outcome | `unchanged` (read-only audit; budgets not touched) |
 
-## Executive summary
+Легенда surface_score (домен docs-pipeline): **3** one-command clean build + pinned toolchain + deterministic + links/API in CI; **2** reproducible pipeline, часть semantic-проверок ручная; **1** hidden preconditions / generated drift / unpredictable publish; **0** build broken, secret leak, or dangerous publish.
 
-Каноническая цепочка **есть и подключена к CI**: `python -m scripts.docs verify` гоняет links, sliced drift, docstrings, cleanup-inventory `--check` и `mkdocs build --strict` во временный каталог. Workflow `.github/workflows/docs.yml` дополнительно гоняет passports `--check`, architecture docs tests, xwalk/dashboard inventory и (на PR) dependency-map `--check`. Toolchain в CI заморожен (`uv run --frozen --no-build`, `uv.lock` pin `mkdocs==1.6.1`, action pin `uv==0.11.26`).
+## Summary
 
-Это **не** score 3:
+Цепочка **source-of-truth → generator → validation → artifact → publication** в репозитории существует и в основном воспроизводима:
 
-- generator/verify exit 0 **не** равен семантической корректности API reference;
-- image/external links не валятся в strict build;
-- часть generated SoT объявлена tracked, но gitignore/CI `--check` её не держат;
-- `site_url` указывает на GitHub Pages, которого нет (404).
+- единый CLI `python -m scripts.docs <command>`;
+- канонический verify `python -m scripts.docs verify`;
+- CI `.github/workflows/docs.yml` (`docs-governance` + `validate-mkdocs`) на `uv run --frozen`;
+- pin toolchain: `pyproject.toml` extra `docs` (`mkdocs>=1.6,<2.0`) + `uv.lock`;
+- semantic-островки: passports `--check`, API curated-symbol tests, architecture docs drift, cleanup inventory.
 
-Секретов в generated pages/logs **не доказано**. `.env` не читался на предмет значений и не изменялся.
+Это не score 3: advertised GitHub Pages URL отдаёт 404; image-ссылки и MkDocs missing-file не валят gate; extra JS/CSS для Mermaid отсутствуют в дереве; `verify` уже каноническая one-command, но уже *уже*, чем полный CI (нет passports / `--ai-surfaces`); shell-транспорт выбирает «первый python с mkdocs».
 
-## Surface score
-
-| Score | Meaning (kit) | Why this audit |
-| --- | --- | --- |
-| 3 | One-command clean build; pinned toolchain; deterministic; links/API in CI | API vs public surface **not** in CI; image/external links weak |
-| **2** | Pipeline reproducible; some semantic checks still manual | **Selected**: verify+docs.yml exist and are frozen |
-| 1 | Hidden preconditions / generated drift / unpredictable publish | Matrix workbook is local-only, but core docs chain is not |
-| 0 | Build broken / secret leak / dangerous publish | Not observed |
-
-Mapping: kit domain table in `prompt.audit.docs-pipeline` (one-command + pins present; semantic API/image/publish gaps keep the score at 2).
-
-## Method
-
-1. Read AGENTS.md precedence, `docs/00-project/NORMATIVE_SOURCES.md`, MEMORY_USAGE, agent-memory, audit card + fragments (evidence-contract, finding-schema, debt-budget-ban, env-guardrail, audit-scale, reports-output).
-2. Inventory `scripts/docs/**`, `mkdocs.yml`, `docs/03-guides/docs-verification.md`, publication/nav policy, `.github/workflows/docs.yml`, `docs-kpi-weekly.yml`, `architecture-docs-nightly.yml`.
-3. Trace SoT → generator → validation → artifact → publication for MkDocs, passports, cleanup inventory, matrices, dependency map.
-4. HTTP GET advertised `site_url`.
-5. **Not run** (no shell tool in this runtime): live `verify`, `check-links`, `check-drift --modules`, `build-site --strict`, matrix `--check`, memory `pre-task`. Marked skipped, not invented as PASS.
-
-Disjoint scope: narrative/IA/stale prose belongs to `prompt.audit.docs-content`. Here only generators, gates, publish, and operator pipeline contracts.
+P0/P1 не доказаны. Secret leak в generated output не найден (pymdownx.snippets включён, но `--8<--` в docs не используется). Живые `verify` / `check-links` / `mkdocs build` в этой сессии **не запускались** (нет shell-инструмента у auditor-агента) — статус live-green CI помечен `NOT_PROVEN`.
 
 ## Pipeline map
 
-| Step | Entrypoint | Inputs | Outputs | Env / network | Failure | Local vs CI |
-| --- | --- | --- | --- | --- | --- | --- |
-| Unified CLI | `python -m scripts.docs <cmd>` (`scripts/docs/__main__.py`) | argv | stdout + files per command | no network required for checks | rc 1 on violations | both |
-| Verify chain | `scripts/docs/checks/verify.py` | repo docs + src | temp MkDocs site | needs docs extra for last step | fail-fast per step | CI `docs.yml` validate-mkdocs; local `uv run python -m scripts.docs verify` |
-| Links | `scripts/docs/checks/check_links.py` | `docs/`, `mkdocs.yml`, configs, workflows | optional JSON report | local FS only; **no http(s)** | rc 1 | CI full unflagged; published guide often `--links --specs --configs` |
-| Drift | `scripts/docs/checks/check_drift.py` | architecture docs, `.codex` mirrors | stdout/JSON | local | rc 1 on ERROR | verify uses **subset** of flags |
-| Docstrings | `scripts/docs/checks/check_docstrings.py` | `src/bioetl` | summary | local | rc 1 under thresholds | in verify |
-| Cleanup inventory | `generate-cleanup-inventory --check` | git + routing yaml | `docs/reports/generated/documentation-cleanup-inventory.{json,md}` | local, deterministic (no wall clock) | rc 1 on drift | in verify |
-| Passports | `python -m scripts.docs passports check` | configs + src factories | `docs/04-reference/passports/**` | git status optional | rc 1 stale/orphan | docs.yml docs-governance |
-| MkDocs build | verify: `python -m mkdocs build --strict --clean --site-dir <tmp>`; preview: `scripts.docs build-site` | `mkdocs.yml`, `docs/` | tmp or `docs/site/` | docs extra (`mkdocs==1.6.1`) | strict on **anchors**, not missing files | CI after docs extra install |
-| KPI | `check-kpi --fail-on-breach` | nav + baseline | `reports/docs-kpi/*` | schedule | hard limit 135 / orphans 0 | weekly only |
-| Diagrams | `docs.yml` mermaid jobs | `.mmd` / theme | svg/png artifacts | Node mermaid CLI | separate from docs verify | skipped unless diagram paths change |
-| Matrix | `scripts/docs/matrix/* --check` | code + **gitignored xlsx** | generated JSON/MD/xlsx dicts | local | --check exists, **not in docs.yml** | unit tests on tmp_path |
-| Publish | **none** | — | advertised Pages URL 404 | — | n/a | policy: validation-only |
+| Step | Entrypoint | Inputs | Outputs | Caller | Failure |
+| --- | --- | --- | --- | --- | --- |
+| Unified CLI | `python -m scripts.docs` | `scripts/docs/__main__.py` COMMANDS | dispatch | local / CI | unknown command → non-zero |
+| Links / nav / specs | `python -m scripts.docs check-links` | `docs/`, `mkdocs.yml`, configs, workflows | stdout; optional JSON report | verify; docs.yml; pre-commit manual | exit 1 on violations |
+| Drift | `python -m scripts.docs check-drift` | architecture docs, `.codex`/`.junie` mirrors | stdout / `--json` | verify (subset of flags); weekly KPI | exit 1 on ERROR only |
+| Docstrings | `python -m scripts.docs check-docstrings` | `src/bioetl/` | coverage vs THRESHOLDS | verify | exit 1 under threshold |
+| Cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` | tracked docs + `configs/quality/generated_artifact_routing.yaml` | `docs/reports/generated/documentation-cleanup-inventory.*` | verify | exit 1 on drift |
+| Passports | `python -m scripts.docs passports check\|generate` | configs + composition/workflow sources | `docs/04-reference/passports/**` | docs.yml docs-governance; nightly | exit 1 on stale/blocking diagnostics |
+| Strict site | `python -m mkdocs build --strict` (via verify) or `python -m scripts.docs build-site` | `mkdocs.yml`, `docs/` | temp dir (verify) or `docs/site/` (build-site) | verify / local | mkdocs non-zero; missing files are **info** |
+| Parity configs↔specs | `python -m scripts.data_quality check-entity-config-parity` | entity YAML + pipeline specs | stdout | docs.yml validate-mkdocs | fail-closed |
+| Dataflows / class diagrams | `scripts.diagrams generate-dataflows --check`, `generate_package_family_class_diagrams.py --check` | schemas/code | `docs/02-architecture/generated/**`, diagram trees | docs.yml docs-governance | exit 1 on drift |
+| Dependency map | `scripts/engineering/qa/generate_architecture_dependency_map.py --check` | import graph | `docs/02-architecture/generated/module-dependency-map.*` | docs.yml; tests.yml | exit 1 on drift |
+| KPI | `python -m scripts.docs check-kpi --fail-on-breach` | docs tree | `reports/docs-kpi/` artifacts | docs-kpi-weekly.yml | scheduled, not PR |
+| Publish | **none** | — | advertised `site_url` | — | live 404 |
 
-### Toolchain pins
+Pinned packages (docs extra): `mkdocs>=1.6,<2.0`, `mkdocs-material>=9.5`, `backrefs>=6.2`, `mkdocs-mermaid2-plugin>=1.1` (unused in `mkdocs.yml`), `pymdown-extensions>=10.8`, `mkdocstrings[python]>=0.25` (plugin on, no `:::` pages).
 
-| Package | Declared | Locked |
-| --- | --- | --- |
-| mkdocs | `>=1.6,<2.0` | `1.6.1` (`uv.lock`) |
-| mkdocs-material | `>=9.5` | lock |
-| mkdocstrings[python] | `>=0.25` | lock |
-| mkdocs-mermaid2-plugin | `>=1.1` | `1.2.3` — **unused by mkdocs.yml** |
-| uv (CI action) | `0.11.26` | `.github/actions/setup-python-uv/action.yml` |
-| Python | docs-governance **3.13**; validate-mkdocs **default 3.12** | split |
+Network: link-check is relative-only (`MD_LINK_RE` negative lookahead `https?://|mailto:`). Cache: uv action caches `~/.cache/uv` and `.venv`. Env: no `.env` reads in `scripts/docs/**` observed; env guardrail respected (`.env` not touched).
 
-## Source of truth vs generated
+## Source-of-truth chain
 
-See `source-of-truth-map.md` and `generated-files.csv`.
+See `source-of-truth-map.md`. Short form:
 
-Tracked generated that **are** gated:
+| Artifact | SoT | Generator | Gate |
+| --- | --- | --- | --- |
+| Published nav pages | hand-written `docs/00-05/**` | none | check-links + mkdocs nav test |
+| API reference | curated markdown, **not** mkdocstrings dump | none | `test_api_reference_public_facades.py` |
+| Passports | configs + composition/workflow code | `scripts.docs passports` | `passports check` + projector tests |
+| Module dependency map | live packages | `generate_architecture_dependency_map.py` | `--check` + PR regenerate-and-diff |
+| Pipeline dataflows | pipeline/schema code | `scripts.diagrams generate-dataflows` | `--check` |
+| Cleanup inventory | tracked tree + routing YAML | `documentation_cleanup_inventory.py` | `--check` in verify |
+| MkDocs site | `mkdocs.yml` + docs | mkdocs | `--strict` with `not_found: info` |
+| GitHub Pages | n/a | **no deploy job** | live URL 404 |
 
-- passports under `docs/04-reference/passports/` (`passports check` in docs.yml);
-- cleanup inventory JSON/MD (`verify`);
-- `docs/02-architecture/generated/module-dependency-map.*` (PR `--check` + commit assert);
-- `docs/reports/generated/chembl_matrix_structural_contract_v1.json` (file tracked; **`--check` not in CI**);
-- `docs/reports/generated/pipeline_normalization_field_matrix/*.md` (tracked; **`--check` not in CI**).
-
-Declared tracked but **not** in git allowlist / tree:
-
-- `docs/reports/generated/chembl_activity_field_matrix/` (`generated_artifact_routing.yaml` vs `.gitignore`).
-
-Hidden local:
-
-- `docs/reports/chembl_pipeline_silver_matrices_v12.xlsx` and `docs/reports/dictionaries/` under `/docs/reports/*`.
-
-MkDocs HTML is gitignored (`site/`, `docs/site/`). verify does not publish it.
+Generated Markdown is not treated as correct merely because a generator exited 0: passports validate JSON Schema + completeness diagnostics; several `--check` diffs exist. Gaps: images, advertised Pages, unused mkdocstrings, verify subset.
 
 ## Findings (PROVEN)
 
+Полные объекты — `findings.json`. Кратко:
+
 | ID | Pri | Path | Observation |
 | --- | --- | --- | --- |
-| DOCS-PIPE-001 | P1 | `docs/04-reference/api/application.md:16` | API pages claim autogen; mkdocstrings unused (`:::` absent); no API-vs-public-API gate |
-| DOCS-PIPE-002 | P2 | `scripts/docs/checks/verify.py:53` | verify omits `--modules` / providers / glossary |
-| DOCS-PIPE-003 | P2 | `scripts/docs/checks/check_links.py:667` | `.png`/`.svg` skipped; mkdocs `not_found: info` |
-| DOCS-PIPE-004 | P2 | `mkdocs.yml:3` | `site_url` GitHub Pages **404**; no deploy workflow |
-| DOCS-PIPE-005 | P2 | `configs/quality/generated_artifact_routing.yaml:106` | field-matrix routing vs gitignore; dir missing |
-| DOCS-PIPE-006 | P2 | `.gitignore:549` | canonical xlsx + dictionaries gitignored |
-| DOCS-PIPE-007 | P2 | `.github/workflows/docs.yml:18` | path filters miss `.codex/agents/**` / `.junie/**` |
-| DOCS-PIPE-008 | P2 | `.github/workflows/architecture-docs-nightly.yml:41` | nightly `--update` does not fail on diff |
-| DOCS-PIPE-009 | P2 | `scripts/docs/common/markdown.py:9` | no http(s) linkcheck |
-| DOCS-PIPE-010 | P2 | `.github/workflows/docs.yml:218` | matrix `--check` not in docs.yml |
-| DOCS-PIPE-011 | P3 | `pyproject.toml:175` | unused `mkdocs-mermaid2-plugin` |
-| DOCS-PIPE-012 | P3 | `mkdocs.yml:7` | `site/` vs `docs/site/` |
-| DOCS-PIPE-013 | P3 | `.github/workflows/docs.yml:121` | Python 3.13 vs 3.12 in one workflow |
-| DOCS-PIPE-014 | P3 | `.github/workflows/docs-kpi-weekly.yml:20` | missing `persist-credentials: false` |
-| DOCS-PIPE-015 | P3 | `.github/workflows/docs.yml:203` | check-links then verify (duplicate links) |
-| DOCS-PIPE-016 | P3 | `.pre-commit-config.yaml:38` | check-yaml excludes `mkdocs.yml` |
-| DOCS-PIPE-017 | P3 | `scripts/docs/build_docs_site.sh:30` | PATH python-with-mkdocs before `.venv` |
-| DOCS-PIPE-018 | P2 | `tests/unit/scripts/test_generate_chembl_activity_field_matrix.py:91` | `--check` tests never hit DEFAULT_OUT_DIR |
+| DOCS-PIPE-001 | P2 | `scripts/docs/checks/check_links.py:667` | `.png`/`.svg` цели пропускаются; mkdocs `not_found: info` |
+| DOCS-PIPE-002 | P2 | `mkdocs.yml:3` | `site_url` github.io → live 404; нет Pages workflow |
+| DOCS-PIPE-003 | P2 | `mkdocs.yml:147-152` | `docs/assets/**` для mermaid-init/css отсутствует |
+| DOCS-PIPE-004 | P2 | `README.md:102` | README обещает mkdocstrings API; страницы curated, `:::` нет |
+| DOCS-PIPE-005 | P2 | `.github/workflows/docs.yml:18` | path-filter без `.codex/agents` / `.junie` / `.devin/agents` |
+| DOCS-PIPE-006 | P2 | `scripts/docs/checks/verify.py:53` | verify без passports и `--ai-surfaces` |
+| DOCS-PIPE-007 | P2 | `scripts/docs/build_docs_site.sh:30` | первый PATH python с mkdocs; нет `.venv-win` |
+| DOCS-PIPE-008 | P2 | `scripts/docs/checks/check_links.py:1214` | README.md/AGENTS.md вне link-scan |
+| DOCS-PIPE-009 | P3 | `scripts/docs_parity_check.py:65` | dual entrypoint с порогом 85% |
+| DOCS-PIPE-010 | P3 | `pyproject.toml:175` | `mkdocs-mermaid2-plugin` не подключён в plugins |
+| DOCS-PIPE-011 | P3 | `.github/workflows/docs.yml:121` | governance 3.13 vs validate-mkdocs default 3.12 |
+| DOCS-PIPE-012 | P3 | `scripts/docs/checks/verify.py:105` | verify зовёт `python -m mkdocs`, не `build-site` |
+| DOCS-PIPE-013 | P3 | `.pre-commit-config.yaml:294` | docs hooks manual + урезанные флаги |
+| DOCS-PIPE-014 | P3 | `scripts/generate_adr_registry.py:1` | ADR registry вне `python -m scripts.docs` |
+| DOCS-PIPE-015 | P3 | `docs/03-guides/docs-parity-gate.md:16` | гайд описывает чужой CI (v4/pip/old shell) |
+| DOCS-PIPE-016 | P3 | `scripts/docs/checks/check_drift.py:1945` | WARNING не меняет exit code |
 
-Full records: `findings.json`.
+P0/P1 count: **0**. PROVEN count: **16**.
 
-## What is working (not findings)
+## What is working
 
-- One-command local/CI path: `uv run python -m scripts.docs verify` (docs extra required for strict build — documented in `docs/00-project/TOOLS.md` and `docs/03-guides/docs-verification.md`).
-- Unflagged `check-links` is a real semantic suite (specs, configs, contracts index, workflow inventory, provider overview, governance sections, not-in-nav growth, legacy tokens), not merely “file exists”.
-- Passports `--check` + jsonschema in docs-governance with `fetch-depth: 0`.
-- Runtime mirror/freshness ERROR path exists (`check_drift` + `test_runtime_agent_docs_drift.py` + weekly KPI).
-- `uv --frozen`, pinned uv, mkdocs `<2.0` lock.
-- Publication policy honestly says docs.yml is not a Pages deploy (but `site_url` still pretends otherwise — DOCS-PIPE-004).
-- Root `site/` and `docs/site/` gitignored; verify uses tempfile (no accidental commit of HTML).
-- No P0 secret leak observed in scripts/docs generators (timestamps in KPI/link JSON artifacts only; those paths are working output).
+- `python -m scripts.docs verify` — реальная one-command цепочка (links + drift subset + docstrings + cleanup inventory + strict mkdocs в temp dir).
+- CI `docs.yml` на `uv --frozen`, `persist-credentials: false`, passports check, dataflow/class-diagram `--check`, architecture pytest slice including API facades and mkdocs nav existence.
+- Passports: byte-canonical JSON, source revision from fact-owner git log (not self-referential HEAD), schema validate, `--require-clean-source` available; unit tests for determinism.
+- `docs/site/` and `site/` gitignored; build-site stages via tempfile then copies.
+- Weekly KPI + nightly architecture-docs as delayed backstops.
+- Publication policy explicitly records that `docs.yml` is not a Pages deploy (so 404 is a metadata/contract bug, not a silent prod publish of wrong material).
 
 ## Skipped / NOT_PROVEN
 
-| Check | Why |
+| Check | Reason |
 | --- | --- |
-| Live `python -m scripts.docs verify` / `build-site --strict` | No `run_terminal_command` in this agent runtime |
-| Live link-check JSON | same |
-| Live `check-drift --modules` on current tree | same — **code path proven omitted from verify**, live violation count unknown |
-| Live matrix `--check` | same — missing DEFAULT_OUT_DIR proven via listing |
-| Memory `pre-task` | no shell; catalog not refreshed |
-| GitHub workflow run history | `REQUIRE_GH_TRACKING=false`; not required |
-| Secret values in `.env` | env-guardrail: do not copy secrets into reports |
+| Live `python -m scripts.docs verify` / `check-links` / `build-site --strict` | no shell tool in this auditor runtime |
+| Live passport `--check` and cleanup-inventory `--check` | same |
+| Memory `pre-task` / `post-task` | same; `BIOETL_AI_MEMORY_MODE` not applied |
+| Secret scan of built `site/` HTML | site not built |
+| GitHub Pages settings API | REQUIRE_GH_TRACKING=false; judged via public 404 + missing workflow |
+| Whether missing extra_js fails mkdocs `--strict` | not executed; files are absent regardless |
 
-Do not treat skipped live builds as green.
+Residual risks (not separate findings): `pymdownx.snippets` without `base_path` restriction; `generate_docs_export.py` uses `date.today()` (artifact gitignored); `check-links --report-json` embeds wall-clock timestamp (CI artifact only).
 
 ## Top remediations
 
-1. **API gate (P1):** убрать баннер «Autogenerated» или подключить mkdocstrings/`--check` к public facades и гонять в `docs.yml`.
-2. **verify completeness:** добавить `--modules` (и providers/glossary) в `scripts/docs/checks/verify.py`.
-3. **Image integrity:** проверять `.png`/`.svg` для nav-published pages или сузить `not_found: info` до gitignored `**/png/**`.
-4. **Publication metadata:** убрать/пометить `site_url` или добавить реальный Pages deploy одним changeset с policy.
-5. **Generated matrices:** allowlist field-matrix в `.gitignore`, закоммитить артефакты, добавить `--check` в `docs.yml`; решить судьбу gitignored xlsx (tracked SoT vs local-only README).
-6. **Path filters:** `.codex/agents/**` и `.junie/agents/**` в `docs.yml`.
-7. **Nightly fail-closed:** `architecture-docs-nightly.yml` rc≠0 при `git diff` по `docs/02-architecture/generated`.
-8. **Toolchain hygiene:** удалить unused mermaid2; выровнять `site_dir` и Python 3.12/3.13; `verify --skip-links` после JSON check-links; `persist-credentials: false` на weekly/nightly.
-
-Не повышать tech-debt budgets. MODE=audit — патчи не предлагались к применению.
-
-## Kit extras
-
-| File | Role |
-| --- | --- |
-| `findings.json` | machine findings (schema) |
-| `docs-pipeline.csv` | step inventory |
-| `generated-files.csv` | generated SoT routing |
-| `source-of-truth-map.md` | SoT → generator → gate |
-| `docs-build.log` | skipped live build note |
-| `link-report.json` | skipped live linkcheck note |
+1. Включить проверку tracked `.svg` (и не-gitignore image) в `check_broken_links`; сузить mkdocs `not_found: info` или компенсировать отдельным runner (DOCS-PIPE-001).
+2. Либо задеплоить Pages, либо убрать github.io `site_url` синхронно с publication policy (DOCS-PIPE-002).
+3. Закоммитить `docs/assets/javascripts/mermaid-init.js` + CSS **или** включить/удалить `mkdocs-mermaid2-plugin` (DOCS-PIPE-003/010).
+4. Починить README API row и либо убрать idle mkdocstrings, либо дать `:::` pages (DOCS-PIPE-004).
+5. Добавить `.codex/agents/**`, `.junie/**`, `.devin/agents/**` в path filters `docs.yml` (DOCS-PIPE-005).
+6. Включить `passports check` и `--ai-surfaces` в `verify.py` (DOCS-PIPE-006).
+7. Заставить `build_docs_site.sh` / операторов идти через `run_project_python.py` / `uv run --frozen` и `.venv-win` (DOCS-PIPE-007).
+8. Сканировать `README.md` и `AGENTS.md` в check-links (DOCS-PIPE-008).
 
 ## Guardrails
 
-- Debt budgets: not modified.
-- `.env`: not created/edited/moved.
-- Product code: not edited.
-- GitHub issues: not opened (`REQUIRE_GH_TRACKING=false`).
+- `.env` не читался и не менялся.
+- Tech-debt budgets не менялись и не предлагались к увеличению.
+- Product code не редактировался; MODE=audit, патчи не предлагались к применению.
+- GitHub issues/PR не создавались (`REQUIRE_GH_TRACKING=false`).
+
+## Artifacts
+
+- `reports/audit/docs-pipeline/report.md`
+- `reports/audit/docs-pipeline/findings.json`
+- `reports/audit/docs-pipeline/docs-pipeline.csv`
+- `reports/audit/docs-pipeline/generated-files.csv`
+- `reports/audit/docs-pipeline/source-of-truth-map.md`
+- `reports/audit/docs-pipeline/link-report.json` (static analysis of the checker, not a live scan)
+- `reports/audit/docs-pipeline/docs-build.log` (skipped live build)

@@ -1,56 +1,40 @@
-# Debt heatmap — 2026-08-26
+# Debt heatmap
 
-Легенда: **P1** высокий шанс сломать release integrity / заблокировать фичу; **P2** стоимость изменений; **P3** гигиена.
+SCOPE: `reports/quality/` + `configs/quality/` + `src/`. Дата: 2026-08-26.  
+Шкала ячейки: **P0** блокер / **P1** высокий / **P2** cost-of-change / **P3** локально / **OK** под контролем / **FREEZE** shrink-only cap.
 
-## По поверхности
+## Surfaces
 
-| Surface | Control | Residual | Pri | Notes |
-| --- | --- | --- | --- | --- |
-| `reports/quality/module-coverage-inventory.json` | unmeasured ratchet 0 | **84 unmeasured** | P1 | `coverage_xml_has_no_class_entry`; hash `29bf3d81` |
-| `reports/quality/debt-governance-gates.json` | 45 gates | split-brain pass vs summary fail | P1 | regenerate |
-| `reports/quality/debt-governance-gates.md` | generated mirror | unmeasured 84 fail vs json 0 pass | P1 | pair drift |
-| `reports/quality/architecture-quality-scorecard.json` | 0–10 integral | 7.41 header vs ~9.41 categories | P1 | hash `ef737d02` vs inventory |
-| `reports/quality/total-tech-debt-audit-main-current.md` | registry pin | stale 9.41 / 45/45 | P1 | re-pin |
-| `scripts/.../report_live_residual_snapshot.py` | shrink-only snapshot | reads `rows` not `summary` | P1 | snapshot unmeasured=0 |
-| `configs/quality/debt_scorecard.yaml` | shrink-only | many `current==max` | P1 | do not raise |
-| `configs/quality/lazy_import_ratchet.yaml` | max 98 / target 60 | **98/98** | P1 | freeze |
-| `configs/quality/private_import_ratchet.yaml` | max 15 | **15/15** | P1 | freeze |
-| `configs/quality/assertless_ratchet.yaml` | max 87 / target 77 | **87/87** | P1 | freeze |
-| Hotspot control_plane | fan-in max 2 | **2/2** | P1 | #8714 |
-| Config surface | 27 / 419 | **27/27**, **419/419** | P1 | #8714 |
-| Composition cohesion | max_modules 300 | 295/300 | P2 | near cap |
-| Basedpyright cycles | shrink-only | 30 | P2 | review_by 2026-10-28 |
-| Constructor waivers | shrink-only | 1 | P2 | ADR-051 |
-| Xenon path exemptions | expiry 2026-12-31 | wide prefixes | P2 | |
-| `src/bioetl` type: ignore | mypy max 0 | ≥82 ignores | P2 | |
-| F403 barrels | ruff F403 | 14 | P2 | |
-| Branch coverage | hard 85% | 552 files below | P2 | aggregate 86.152% |
-| Lazy public facades | fail-fast unclassified | 52 | P2 | |
-| Public entrypoints/facades | sanctioned freeze | 12 + 4 | P2 | review 2026-09-30 |
-| Closeout tests | classified ratchet | 51 files / 10k LOC | P2 | |
-| Architecture exemptions | empty registries | 0 | — | healthy |
-| Flaky / twins / uuid4 / layers | zero | 0 | — | healthy |
-| Uncovered modules | max 0 | 0 | — | held |
-| Sonar | QG OK | 0 open (2026-08-20) | P3 | freshness |
+| Surface | Integrity | Coverage | Architecture | Compat | Complexity | Tests | Docs |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `reports/quality/` | **P0** conflicted inventory; **P1** stale 45/45 gates | **P1** 4/5 hotspot floors fail | OK score 9.41 (stale vs inventory) | OK 0/0/0 transition | OK 0 duplicate clusters | **P2** branch tail 552; assertless 87 | **P3** broken total-tech-debt md |
+| `configs/quality/` | OK YAML registries | FREEZE coverage floors must not drop | FREEZE lazy 97; private 15; fan-in 2 | **P2** 2026-09-30 review cluster | **P2** xenon 15 paths | FREEZE assertless 87→77 | **P2** stale expected_action 6 clusters |
+| `src/bioetl/` | OK no conflict markers | **P1** low-tail helpers 11.9–22% | **P2** 30 cycles; F403 barrels | **P2** ungoverned ports aliases | **P2** under xenon exemptions | n/a (product) | n/a |
 
-## По слою `src/`
+## Hotspot families (live residual + inventory)
 
-| Layer | Debt class | Heat |
-| --- | --- | --- |
-| `application/core` | F403, cycles, 2 unmeasured helpers, 194 files / 23419 LOC | medium-high |
-| `application/services/control_plane` | fan-in freeze 2/2; 3 unmeasured | **high** |
-| `application/composite` | xenon exemption | medium |
-| `composition` | 295/300 modules; pipeline unmeasured 3; lazy facades | **high** |
-| `domain` | constructor waiver QuarantineEntry | low |
-| `infrastructure` | type ignores; xenon silver/control_plane | medium |
-| `interfaces/cli` | click ignores; 12 public entrypoints | medium |
+| Family | files | LOC | fan-in (live/budget) | files≥250 | duplication | coverage floor | Heat |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `application_core` | 194 | 23419 | 6/10 | 0 | 0 | 95.98&lt;96.34 **fail** | P1 |
+| `application_services_control_plane` | 133 | 15091 | **2/2** | 0 | 0 | 95.21&lt;96.44 **fail** | P1+FREEZE |
+| `composition_bootstrap_runtime` | 51 | 6199 | 2/3 | 0 | 0 | 96.39≥95.65 pass | OK |
+| `composition_factories_pipeline` | 35 | 3947 | 2/3 | 0/2 | 0 | 95.36&lt;96.8 **fail** | P1 |
+| `composition_runtime_builders` | 57 | 7225 | 3/5 | 0 | 0 | 92.63&lt;94.9 **fail** | P1 |
 
-## Paydown order
+## Paydown lanes
 
-1. Измерить 84 unmeasured (coverage.xml) — TD-001
-2. Связанный refresh gates+scorecard+hashes — TD-002..TD-006
-3. Snapshot reader `summary.*` — TD-007
-4. Freeze cluster shrink (lazy/private/fan-in) — TD-008
-5. F403 + cycles — TD-013/TD-009
-6. Branch tail — TD-014
-7. Closeout fold — TD-018
+```text
+P0  inventory JSON conflict          ████████  do first
+P1  gates snapshot trust + floors    ██████
+P2  freezes (config/lazy/private)    ████████████  hold, shrink only
+P2  cycles / xenon / aliases         ██████
+P3  waiver / VCR / markdown / F403   ██
+```
+
+## Quick wins vs strategic vs dependency
+
+| Lane | Items |
+| --- | --- |
+| Quick wins | AUD-TD-001, 003, 004, 013, 014, 019, 012 |
+| Strategic | AUD-TD-002, 005, 006, 009, 010, 011, 015 |
+| Dependency/calendar | AUD-TD-016 (2026-09-30), AUD-TD-009 (2026-10-28), AUD-TD-011/017 (2026-12-31) |
