@@ -1,101 +1,811 @@
-[
-  {
-    "id": "TECH-DEBT-001",
-    "requirement_id": "REQ-GOV-007",
-    "priority": "P0",
-    "severity": "Critical",
-    "confidence": "high",
-    "confidence_score": 0.99,
-    "status": "PROVEN",
-    "category": "quality-artifact-integrity",
-    "path": "reports/quality/module-coverage-inventory.json:49353-49365",
-    "observation": "origin/main inventory JSON contains nested merge-conflict markers and does not parse.",
-    "method": "json.load; git show origin/main; report-module-coverage --check; report-debt-governance-gates --check",
-    "expected": "Valid JSON; source_tree_sha256 from canonical generator; inventory --check exit 0",
-    "actual": "JSONDecodeError line 49353; conflict markers from merge master20260825-18 and fix/audit-cycle-docs-20260826",
-    "impact": "Debt gates, coverage inventory --check, and technical-debt audit validator cannot run. Release integrity break.",
-    "root_cause": "Merge commits left unresolved source_tree_sha256 conflict in a tracked quality artifact.",
-    "remediation": "Canonical hash-only regen via report-module-coverage --allow-missing-coverage-xml; do not hand-pick a conflict side.",
-    "effort": "S",
-    "automation": "report-module-coverage --check; test_module_coverage_inventory_source_tree_hash_is_current",
-    "automated_fix_possible": true,
-    "issue": 9676,
-    "dependencies": [],
-    "validation": [
-      "python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml",
-      "pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current"
-    ]
-  },
-  {
-    "id": "TECH-DEBT-002",
-    "requirement_id": "REQ-GOV-012",
-    "priority": "P2",
-    "severity": "Medium",
-    "confidence": "high",
-    "confidence_score": 0.95,
-    "status": "PROVEN",
-    "category": "stale-audit-pin",
-    "path": "configs/quality/technical_debt_audit_registry.yaml",
-    "observation": "Current tech-debt audit pin SHA/hash/headlines were stale vs live evidence and claimed 45/45 pass while gates failed.",
-    "method": "python -m scripts.engineering.qa validate-technical-debt-audit --json --print-evidence-hash",
-    "expected": "audited_commit_sha exists; evidence_surface_sha256 matches live evidence; headlines match semantic summary",
-    "actual": "pin 710930f41f / hash 81238e2a vs origin/main a066536957; validator ok=false until re-pin",
-    "impact": "Governance closeout lies about gate status (45/45 vs 44/1).",
-    "root_cause": "Main moved past last re-pin (#9646) without regenerating the five-path evidence surface.",
-    "remediation": "Re-pin registry + total-tech-debt-audit-main-current.md after inventory/gates refresh.",
-    "effort": "S",
-    "automation": "validate-technical-debt-audit",
-    "automated_fix_possible": true,
-    "issue": 9677,
-    "dependencies": ["TECH-DEBT-001"],
-    "validation": ["python -m scripts.engineering.qa validate-technical-debt-audit --json"]
-  },
-  {
-    "id": "TECH-DEBT-003",
-    "requirement_id": "REQ-GOV-012",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 0.95,
-    "status": "PROVEN",
-    "category": "unmeasured-module-ratchet",
-    "path": "configs/quality/module_coverage_gates.yaml:80-81",
-    "observation": "After valid inventory regen, unmeasured_module_count=84 vs max_count=0. Hash-only refresh cannot invent coverage rows; coverage.xml absent.",
-    "method": "report-module-coverage --allow-missing-coverage-xml; report-debt-governance-gates --check --changed-from-ref origin/main",
-    "expected": "unmeasured_module_count <= 0 without raising the ratchet",
-    "actual": "current=84 limit=0; release_gate_status=failing; REJECTED_POLICY to raise max_count",
-    "impact": "Debt-governance release gate remains failing. Coverage-verify lane required to measure 84 modules.",
-    "root_cause": "coverage_xml_has_no_class_entry residual after merge cascade; no local coverage.xml for --refresh-from-coverage-xml.",
-    "remediation": "Run coverage-verify, then report-module-coverage --refresh-from-coverage-xml. Do not raise max_count.",
-    "effort": "M",
-    "automation": "coverage-verify lane + module_coverage_unmeasured_modules gate",
-    "automated_fix_possible": false,
-    "issue": 9678,
-    "dependencies": ["TECH-DEBT-001"],
-    "validation": ["python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"]
-  },
-  {
-    "id": "TECH-DEBT-004",
-    "requirement_id": "REQ-GOV-012",
-    "priority": "P1",
-    "severity": "High",
-    "confidence": "high",
-    "confidence_score": 0.9,
-    "status": "PROVEN",
-    "category": "hotspot-scorecard-drift",
-    "path": "configs/quality/debt_scorecard.yaml:518",
-    "observation": "test_debt_scorecard_hotspot_family_metrics_match_committed_baseline failed: composition_factories_pipeline.total_loc scorecard=3968 baseline=3969.",
-    "method": "pytest tests/architecture/test_quality_debt_scorecard.py::test_debt_scorecard_hotspot_family_metrics_match_committed_baseline",
-    "expected": "Scorecard measured metrics match generated hotspot-family-baseline.json without raising bounded_growth budgets.",
-    "actual": "3968 vs 3969 on origin/main a066536957 (related open #9674 originally 3968 vs 3983 on 1e64aaac80).",
-    "impact": "Architecture scorecard test fails; merge friction.",
-    "root_cause": "Measured LOC drift vs pinned scorecard metrics; budgets unchanged.",
-    "remediation": "refresh_governance_artifacts copies measured metrics into scorecard (no budget growth).",
-    "effort": "S",
-    "automation": "refresh_governance_artifacts + hotspot scorecard test",
-    "automated_fix_possible": true,
-    "issue": 9674,
-    "dependencies": [],
-    "validation": ["pytest tests/architecture/test_quality_debt_scorecard.py::test_debt_scorecard_hotspot_family_metrics_match_committed_baseline"]
-  }
-]
+{
+  "schema_version": "finding-schema-v1",
+  "prompt_id": "prompt.audit.tech-debt",
+  "domain_id": "tech-debt",
+  "audit_date": "2026-08-26",
+  "scope": [
+    "reports/quality/",
+    "configs/quality/",
+    "src/"
+  ],
+  "mode": "audit",
+  "audit_mode": "full",
+  "surface_score": 1,
+  "debt_budget_policy": "forbidden_to_increase",
+  "debt_outcome": "unchanged",
+  "notes": [
+    "Worktree quality artifacts changed during the audit (merge of HEAD vs fix/architecture-governance-23). Findings cite the checkout state at write time.",
+    "Memory pre-task/post-task skipped: no shell tool in this runtime.",
+    "REQUIRE_GH_TRACKING=false; no GitHub issues opened."
+  ],
+  "findings": [
+    {
+      "id": "TD-001",
+      "requirement_id": "REQ-GOV-007",
+      "priority": "P0",
+      "severity": "Critical",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "ci",
+      "path": "reports/quality/module-coverage-inventory.json:7816",
+      "method": "grep ^<<<<<<< reports/quality + read_file of conflict hunks",
+      "observation": "Канонический module-coverage inventory содержит незакрытые merge-конфликты (3 hunks: source_lines для bioetl.composition._services и source_tree_sha256), JSON невалиден.",
+      "expected": "Валидный JSON без conflict markers; единый source_tree_sha256, согласованный с coverage XML и scorecard.",
+      "actual": "<<<<<<< HEAD / ||||||| 1e64aaac80 / ======= / >>>>>>> fix/architecture-governance-23 в трёх местах; source_lines 315 vs 314 vs 307; source_tree_sha256 9cee93ef… vs 286576ed… vs 8582acc5…",
+      "impact": "Release/coverage gates, REQ-GOV-007 hash check и любой потребитель inventory ломаются или читают мусор. Нельзя честно закрыть debt-governance.",
+      "root_cause": "Незавершённый merge quality-артефактов между HEAD и fix/architecture-governance-23.",
+      "evidence": [
+        {
+          "path": "reports/quality/module-coverage-inventory.json",
+          "line": 7816,
+          "command": "grep ^<<<<<<< reports/quality",
+          "observation": "Conflict on source_lines for src/bioetl/composition/_services.py"
+        },
+        {
+          "path": "reports/quality/module-coverage-inventory.json",
+          "line": 32494,
+          "observation": "Duplicate conflict hunk in rows[] copy of the same module"
+        },
+        {
+          "path": "reports/quality/module-coverage-inventory.json",
+          "line": 49365,
+          "observation": "Conflict on source_tree_sha256 (three hashes)"
+        }
+      ],
+      "remediation": "Не поднимать бюджеты. Завершить merge inventory без conflict markers, затем python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml и python -m scripts.engineering.qa refresh_governance_artifacts --check. Не коммитить конфликтный JSON.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -c \"import json; json.load(open('reports/quality/module-coverage-inventory.json', encoding='utf-8'))\"",
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": true,
+      "automation": "CI fail-closed on conflict markers in reports/quality/*.json"
+    },
+    {
+      "id": "TD-002",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "ci",
+      "path": "reports/quality/debt-governance-gates.json:77",
+      "method": "read_file gates[] vs summary",
+      "observation": "Один и тот же gates JSON одновременно объявляет module_coverage_unmeasured_modules=pass (current=0) и summary.failing_gates=[module_coverage_unmeasured_modules] с release_gate_status=failing.",
+      "expected": "status_counts/summary согласованы с массивом gates; fail_count равен числу gates со status=fail.",
+      "actual": "gates[module_coverage_unmeasured_modules].status=pass, current=0; summary.fail_count=1, failing_gates=['module_coverage_unmeasured_modules'], release_gate_status=failing, architecture score 7.41.",
+      "impact": "Оператор/CI не могут доверять release_gate_status. Ложные pass и fail одновременно.",
+      "root_cause": "Частичная перегенерация/склейка hunks после merge quality-артефактов.",
+      "evidence": [
+        {
+          "path": "reports/quality/debt-governance-gates.json",
+          "line": 77,
+          "observation": "unmeasured gate status=pass current=0"
+        },
+        {
+          "path": "reports/quality/debt-governance-gates.json",
+          "line": 460,
+          "observation": "status_counts.fail=1; summary.failing_gates includes module_coverage_unmeasured_modules"
+        }
+      ],
+      "remediation": "Пересобрать gates целиком: python -m scripts.engineering.qa report-debt-governance-gates --update после валидного inventory/scorecard. Не править summary вручную и не поднимать max_count.",
+      "effort": "S",
+      "dependencies": ["TD-001"],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": true,
+      "automation": "Architecture test that summary.failing_gates == [g.name for g in gates if g.status==fail]"
+    },
+    {
+      "id": "TD-003",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.96,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "reports/quality/architecture-quality-scorecard.json:181",
+      "method": "read_file categories vs integral_score vs metrics.unmeasured_module_count",
+      "observation": "Scorecard внутренне противоречив: категории ddd_invariants=9.0 и test_strategy=9.9 (unmeasured=0) суммируются ≈9.41, но integral_score=7.41 и interpretation=satisfactory_system_refactoring_required.",
+      "expected": "integral_score = сумма weighted_score категорий; interpretation из _interpretation(integral_score); metrics.unmeasured согласован с категориями.",
+      "actual": "categories imply ~9.41 / good_targeted_improvements; header integral_score=7.41 (порог <8.5); metrics.unmeasured_module_count=0; source_tree_sha256 в source_artifacts=ef737d02…",
+      "impact": "Архитектурный grade врёт. 7.41 соответствует штрафу unmeasured≈84 (0.75*84 и 1.5*84 зануляют две категории), 9.41 — нулевому unmeasured.",
+      "root_cause": "Склейка старого integral_score/interpretation с новыми category scores после merge.",
+      "evidence": [
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 33,
+          "observation": "ddd_invariants score 9.0"
+        },
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 81,
+          "observation": "test_strategy_testability score 9.9 with unmeasured_module_count 0"
+        },
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 181,
+          "observation": "integral_score 7.41 interpretation satisfactory_system_refactoring_required"
+        }
+      ],
+      "remediation": "Регенерировать scorecard из валидного inventory: python scripts/engineering/qa/report_architecture_quality_scorecard.py. Не подгонять interpretation вручную.",
+      "effort": "S",
+      "dependencies": ["TD-001"],
+      "validation": [
+        "python -c \"import json; p=json.load(open('reports/quality/architecture-quality-scorecard.json',encoding='utf-8')); s=round(sum(c['weighted_score'] for c in p['categories']),2); assert abs(s-p['integral_score'])<0.02, (s,p['integral_score'])\""
+      ],
+      "automated_fix_possible": true,
+      "automation": "Scorecard generator + architecture test: weighted sum == integral_score"
+    },
+    {
+      "id": "TD-004",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "documentation",
+      "path": "reports/quality/debt-governance-gates.md:22",
+      "method": "diff md table vs json gates",
+      "observation": "Markdown-зеркало gates расходится с JSON: md показывает unmeasured=84 fail, json-гейт показывает unmeasured=0 pass.",
+      "expected": "debt-governance-gates.md генерируется из того же payload, что и .json.",
+      "actual": "md: fail_count=1, unmeasured_module_count current=84 limit=0, score=7.41; json gate current=0 status=pass при том же summary.failing_gates.",
+      "impact": "Человеческий closeout и машинный gate рассказывают разные истории релиза.",
+      "root_cause": "Неатомарное обновление пары md/json во время merge.",
+      "evidence": [
+        {
+          "path": "reports/quality/debt-governance-gates.md",
+          "line": 22,
+          "observation": "module_coverage_unmeasured_modules fail current 84 limit 0"
+        },
+        {
+          "path": "reports/quality/debt-governance-gates.json",
+          "line": 77,
+          "observation": "same gate status=pass current=0"
+        }
+      ],
+      "remediation": "Только канонический генератор report-debt-governance-gates --update; не редактировать md отдельно.",
+      "effort": "S",
+      "dependencies": ["TD-002"],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check"
+      ],
+      "automated_fix_possible": true,
+      "automation": "generated_artifact_drift already exists; extend to md/json pair equality"
+    },
+    {
+      "id": "TD-005",
+      "requirement_id": "REQ-GOV-007",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.94,
+      "status": "PROVEN",
+      "category": "ci",
+      "path": "reports/quality/source-tree-manifest.json:4",
+      "method": "compare source_tree_sha256 across quality artifacts",
+      "observation": "Несколько канонических quality-артефактов держат разные source_tree_sha256 при snapshot_date 2026-08-26.",
+      "expected": "Один hash дерева src для inventory, scorecard, source-tree-manifest, test-governance и remote-main baseline.",
+      "actual": "source-tree-manifest=9cee93ef…; scorecard source_artifacts=ef737d02…; inventory conflict 9cee93ef/286576ed/8582acc5; test-governance-current=b77152e5…; remote-main baseline inventory summary=286576ed… unmeasured=84 при scorecard summary integral=9.41.",
+      "impact": "REQ-GOV-007 и module_coverage_source_tree_hash_current нельзя считать доказанными. Remote-main baseline смешивает несовместимые blob summary.",
+      "root_cause": "Артефакты пересобраны из разных деревьев/coverage.xml без связанного refresh.",
+      "evidence": [
+        {
+          "path": "reports/quality/source-tree-manifest.json",
+          "line": 4,
+          "observation": "source_tree_sha256=9cee93ef2121d785639f41479157afaf1243892318ecab0adacaf6fb3dcc2138"
+        },
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 263,
+          "observation": "module_coverage_inventory.source_tree_sha256=ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440"
+        },
+        {
+          "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+          "line": 12,
+          "observation": "scorecard summary integral_score=9.41 and inventory unmeasured_module_count=84 at same source_revision 1e64aaac80"
+        },
+        {
+          "path": "reports/quality/test-governance-current.json",
+          "line": 2055,
+          "observation": "source_tree_sha256=b77152e5cbe0a5857c366ca2925bee1e9799e8ea562636c0cf93ae72d4d28119"
+        }
+      ],
+      "remediation": "Связанный refresh: report-module-coverage → scorecard → report-debt-governance-gates → remote-main baseline. Не поднимать ratchet unmeasured.",
+      "effort": "M",
+      "dependencies": ["TD-001", "TD-003"],
+      "validation": [
+        "python -m scripts.engineering.qa.refresh_governance_artifacts --check"
+      ],
+      "automated_fix_possible": true,
+      "automation": "refresh_governance_artifacts fail-closed on hash mismatch"
+    },
+    {
+      "id": "TD-006",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.93,
+      "status": "PROVEN",
+      "category": "documentation",
+      "path": "reports/quality/total-tech-debt-audit-main-current.md:19",
+      "method": "compare audit registry metrics with live gates/scorecard",
+      "observation": "Текущий total-tech-debt audit (registry current_audit_id total-tech-debt-main-2026-08-20-r1) утверждает 45/45 pass, unmeasured=0, integral=9.41 на SHA 710930f4, тогда как live gates/scorecard в checkout несогласованы (7.41 + failing summary).",
+      "expected": "validate-technical-debt-audit и registry pin совпадают с live debt-governance-gates.json.",
+      "actual": "Audit HTML comment: debt_gate_fail_count=0, unmeasured_module_count=0, architecture_integral_score=9.41, source_module_count=2465; live scorecard integral=7.41, source_module_count=2467; gates summary failing.",
+      "impact": "Реестр аудита врёт о green release; #9646 closeout нельзя считать актуальным.",
+      "root_cause": "Реестр не перепиннен после изменения coverage/scorecard; source_module_count 2465 vs 2467.",
+      "evidence": [
+        {
+          "path": "reports/quality/total-tech-debt-audit-main-current.md",
+          "line": 21,
+          "observation": "audit_id total-tech-debt-main-2026-08-20-r1 metrics unmeasured=0 fail_count=0 score=9.41 source_module_count=2465"
+        },
+        {
+          "path": "configs/quality/technical_debt_audit_registry.yaml",
+          "line": 2,
+          "observation": "current_audit_id still total-tech-debt-main-2026-08-20-r1 reviewed_on 2026-08-25 linked_issue #9646"
+        }
+      ],
+      "remediation": "После связанного refresh прогнать python -m scripts.engineering.qa validate-technical-debt-audit и перепинить registry. Не заявлять 45/45 пока gates.json внутренне противоречив.",
+      "effort": "S",
+      "dependencies": ["TD-002", "TD-003"],
+      "validation": [
+        "python -m scripts.engineering.qa validate-technical-debt-audit --json"
+      ],
+      "automated_fix_possible": true,
+      "automation": "validate-technical-debt-audit already exists; keep it blocking"
+    },
+    {
+      "id": "TD-007",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.92,
+      "status": "PROVEN",
+      "category": "code",
+      "path": "scripts/engineering/qa/report_live_residual_snapshot.py:85",
+      "method": "read_file _module_coverage_residuals vs inventory schema",
+      "observation": "Live residual snapshot считает unmeasured по payload['rows'] и игнорирует summary.unmeasured_module_count; при отсутствии/усечении rows возможен undercount (исторически 74 vs 84).",
+      "expected": "Снимок читает summary.unmeasured_module_count / summary.uncovered_module_count как SSOT inventory.",
+      "actual": "Функция итерирует rows; inventory имеет и modules[], и rows[]; snapshot_date 2026-08-26 сейчас пишет unmeasured=0, тогда как remote-main baseline inventory summary держал 84.",
+      "impact": "Shrink-only check snapshot может зеленеть при реальном росте unmeasured, если rows пуст или устарел.",
+      "root_cause": "Схема inventory сменилась на summary+modules, генератор остался на rows.",
+      "evidence": [
+        {
+          "path": "scripts/engineering/qa/report_live_residual_snapshot.py",
+          "line": 94,
+          "command": "read_file _module_coverage_residuals",
+          "observation": "rows = payload.get('rows', []); counts only coverage_status on rows"
+        },
+        {
+          "path": "reports/quality/live-residual-snapshot.json",
+          "line": 71,
+          "observation": "module_coverage.unmeasured_module_count=0"
+        },
+        {
+          "path": "reports/quality/architecture-debt-remote-main-baseline.json",
+          "line": 31,
+          "observation": "inventory summary unmeasured_module_count=84"
+        }
+      ],
+      "remediation": "Читать summary.unmeasured_module_count (fallback: status_counts.unmeasured). Не ослаблять ratchet max_count=0. После фикса пересобрать snapshot.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "tests covering _module_coverage_residuals against fixture with summary.unmeasured_module_count=84 and empty rows"
+      ],
+      "automated_fix_possible": true,
+      "automation": "unit test in tests/unit/scripts/qa/"
+    },
+    {
+      "id": "TD-008",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "configs/quality/debt_scorecard.yaml:256",
+      "method": "read scorecard current_count==max_count plus diagnostics caps",
+      "observation": "Несколько shrink-only freeze сидят в current==max: любой рост метрики без shrink в том же PR запрещён playbook #8714.",
+      "expected": "Headroom либо явное shrink-before-grow в том же изменении; target_count ниже max.",
+      "actual": "config_count 27/27; unique_parameter_count 419/419; application_services_control_plane max_internal_fan_in 2/2; lazy_import 98/98 (target 60); private_import pairs 15/15; assertless 87/87; retirement zero-import 3/3 and triaged_entry_count 18/18; public_export_facade 4/4; composition modules 295/300.",
+      "impact": "Высокая вероятность блокировки фич/рефакторинга. Попытка «поднять max_count» — нарушение debt-budget-ban.",
+      "root_cause": "Успешный ratchet до пола без последующего burn-down target.",
+      "evidence": [
+        {
+          "path": "configs/quality/debt_scorecard.yaml",
+          "line": 256,
+          "observation": "config_surface_ratchet.metrics.config_count current_count=27 max_count=27"
+        },
+        {
+          "path": "configs/quality/debt_scorecard.yaml",
+          "line": 541,
+          "observation": "application_services_control_plane bounded_growth_budgets.max_internal_fan_in=2 and metrics.max_internal_fan_in=2"
+        },
+        {
+          "path": "configs/quality/lazy_import_ratchet.yaml",
+          "line": 5,
+          "observation": "max_count=98 target_count=60; scorecard diagnostics lazy_import_observed_count=98"
+        },
+        {
+          "path": "configs/quality/private_import_ratchet.yaml",
+          "line": 7,
+          "observation": "max_count=15 with 15 listed pairs"
+        },
+        {
+          "path": "configs/quality/assertless_ratchet.yaml",
+          "line": 5,
+          "observation": "max_assertless_tests=87; test-governance summary assertless_total_candidates=87"
+        },
+        {
+          "path": "docs/00-project/governance/08-debt-ownership-playbook.md",
+          "line": 122,
+          "observation": "Shrink-before-grow freezes (#8714)"
+        }
+      ],
+      "remediation": "Платить долг вниз: lazy imports к 60, private pairs удалять/публиковать, control_plane fan-in split, config surface не расширять. ЗАПРЕЩЕНО поднимать max_count.",
+      "effort": "L",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": false,
+      "automation": "existing freeze gate with --changed-from-ref"
+    },
+    {
+      "id": "TD-009",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "configs/quality/basedpyright_import_cycle_allowlist.json:199",
+      "method": "read allowlist count and review_by",
+      "observation": "30 typing-visible import cycles в shrink-only allowlist, review_by=2026-10-28, одинаковый rationale PD2-8.",
+      "expected": "Allowlist стремится к 0 через TYPE_CHECKING / types modules; новые циклы не добавляются.",
+      "actual": "count=30; policy.tech_debt_budget_growth=forbidden; snapshot_date=2026-07-28.",
+      "impact": "Циклы повышают стоимость правок application/core, control_plane, composition, silver operations.",
+      "root_cause": "Post-PD residual typing cycles not broken.",
+      "evidence": [
+        {
+          "path": "configs/quality/basedpyright_import_cycle_allowlist.json",
+          "line": 199,
+          "observation": "count=30"
+        }
+      ],
+      "remediation": "Ломать циклы TYPE_CHECKING/types-модулями по PD2-8; shrink count; не расширять allowlist.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "basedpyright import-cycle check vs allowlist length"
+      ],
+      "automated_fix_possible": false,
+      "automation": "shrink-only allowlist CI"
+    },
+    {
+      "id": "TD-010",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "configs/quality/constructor_waivers.yaml:6",
+      "method": "read constructor_waivers.yaml",
+      "observation": "Единственный constructor waiver: QuarantineEntry max_args=9, expiry=2026-12-31, classification=intentional_exception (ADR-051).",
+      "expected": "Shrink-only; max_args не растёт; expiry соблюдён или waiver снят.",
+      "actual": "1 waiver, frozen max_args=9, linked_issue #6685.",
+      "impact": "Широкий конструктор агрегата quarantine остаётся исключением из общего constructor policy.",
+      "root_cause": "ADR-051 explicit multi-field identity surface.",
+      "evidence": [
+        {
+          "path": "configs/quality/constructor_waivers.yaml",
+          "line": 6,
+          "observation": "QuarantineEntry max_args=9 expiry 2026-12-31"
+        }
+      ],
+      "remediation": "Держать freeze; не добавлять args. Пересмотр до expiry: params bag vs ADR-051 identity surface. Не поднимать max_args.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "tests/architecture constructor waiver tests"
+      ],
+      "automated_fix_possible": false,
+      "automation": "constructor waiver registry tests"
+    },
+    {
+      "id": "TD-011",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "code",
+      "path": "configs/quality/duplication_complexity_exemptions.yaml:9",
+      "method": "read path_entries",
+      "observation": "Широкие path-level xenon/critical_check exemptions на production trees (composite, pipelines, CLI, runtime_builders, silver, control_plane, quarantine, observability, adapters/input, dq) с expiry 2026-12-31.",
+      "expected": "Точечные function exemptions с removal_step; production xenon без широких prefix.",
+      "actual": "path_entries покрывают целые пакеты src/bioetl/** до 2026-12-31.",
+      "impact": "Сложность в orchestration/storage не гоняется глобальным xenon; риск god-functions.",
+      "root_cause": "Temporary reviewed debt for maintainability hotspots.",
+      "evidence": [
+        {
+          "path": "configs/quality/duplication_complexity_exemptions.yaml",
+          "line": 41,
+          "observation": "src/bioetl/application/composite/ xenon+critical_check expiry 2026-12-31"
+        },
+        {
+          "path": "configs/quality/duplication_complexity_exemptions.yaml",
+          "line": 91,
+          "observation": "src/bioetl/infrastructure/storage/silver/ xenon+critical_check"
+        }
+      ],
+      "remediation": "Сужать path→function exemptions по мере split; не добавлять новые prefix и не продлевать expiry без burn-down.",
+      "effort": "L",
+      "dependencies": [],
+      "validation": [
+        ".github/workflows/duplication-complexity.yml"
+      ],
+      "automated_fix_possible": false,
+      "automation": "exemption expiry CI"
+    },
+    {
+      "id": "TD-012",
+      "requirement_id": "REQ-GOV-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "code",
+      "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py:124",
+      "method": "rg 'type: ignore' src/bioetl --glob '*.py'",
+      "observation": "Не менее 82 `# type: ignore[...]` в src/bioetl (часто рядом с pyright: ignore), концентрация в CLI health/click, bronze_writer, context_run, adapters.",
+      "expected": "Строгая типизация без массовых suppressions; mypy_error_count max=0 не маскирует локальные ignore.",
+      "actual": "82+ ignore в product code; mypy/ruff budgets remain 0.",
+      "impact": "Локальные дыры в type-safety на CLI/DI/adapter швах; стоимость рефакторинга.",
+      "root_cause": "Click typing, duck-typed write requests, optional orjson, mixin attributes.",
+      "evidence": [
+        {
+          "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup.py",
+          "line": 124,
+          "observation": "cluster of type: ignore[operator]/[arg-type] on startup hooks"
+        },
+        {
+          "path": "src/bioetl/infrastructure/storage/bronze_writer.py",
+          "line": 123,
+          "observation": "constructor kwargs type: ignore[arg-type]"
+        }
+      ],
+      "remediation": "Заменять ignore на Protocol/TypedDict/overload; не вводить новые ignore без issue. Бюджет mypy_error_count не поднимать.",
+      "effort": "L",
+      "dependencies": [],
+      "validation": [
+        "rg -c 'type: ignore' src/bioetl --glob '*.py'"
+      ],
+      "automated_fix_possible": false,
+      "automation": "optional ratchet on type: ignore count (shrink-only)"
+    },
+    {
+      "id": "TD-013",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "code",
+      "path": "src/bioetl/application/core/transformer_runtime/__init__.py:11",
+      "method": "rg 'noqa: F403' src/bioetl",
+      "observation": "Star-import facades (`from … import *  # noqa: F403`) в application/core transformer_runtime/batch_execution/field_transforms/preflight и openalex extractors.",
+      "expected": "Явные re-export списки без F403.",
+      "actual": "14 F403 в src/bioetl, плюс ruff: noqa: I001 на тех же facades.",
+      "impact": "Скрытый public surface, ломает навигацию и importlinter-доказательства.",
+      "root_cause": "Compatibility/lazy package barrels after splits.",
+      "evidence": [
+        {
+          "path": "src/bioetl/application/core/transformer_runtime/__init__.py",
+          "line": 11,
+          "observation": "star imports from finalization/orchestration/state with noqa F403"
+        },
+        {
+          "path": "src/bioetl/application/pipelines/openalex/extractors.py",
+          "line": 5,
+          "observation": "three star-imports of extractor fragments"
+        }
+      ],
+      "remediation": "Заменить * на __all__/явные имена; снять F403. Не добавлять новые star-import facades.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "ruff check src/bioetl --select F403"
+      ],
+      "automated_fix_possible": true,
+      "automation": "ruff F403 as shrink-only allowlist"
+    },
+    {
+      "id": "TD-014",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "medium",
+      "confidence_score": 0.8,
+      "status": "PROVEN",
+      "category": "tests",
+      "path": "reports/quality/branch-coverage-gap-report.md:8",
+      "method": "read branch-coverage-gap-report.md + module_coverage_gates.yaml",
+      "observation": "Агрегатный branch-rate 86.152% проходит hard gate 85%, но 552 файла ниже 85% branch; closeout #5978 фиксирует этот хвост.",
+      "expected": "Hard gate 85% + сужение files_below_85; advisory 85.2% (#7611).",
+      "actual": "files_below_85_branch_coverage=552; files_with_branch_measurement=1401; refresh_note 2026-07-27; line_rate 95.88%.",
+      "impact": "Ошибки на ветках в хвосте не ловятся агрегатом; ложная уверенность green coverage-verify.",
+      "root_cause": "Module-level branch tail after line-coverage burn-down.",
+      "evidence": [
+        {
+          "path": "reports/quality/branch-coverage-gap-report.md",
+          "line": 8,
+          "observation": "branch_rate_percent=86.152 files_below_85_branch_coverage=552"
+        },
+        {
+          "path": "configs/quality/module_coverage_gates.yaml",
+          "line": 16,
+          "observation": "hard_gate_threshold_percent=85 advisory_target_percent=85.2"
+        }
+      ],
+      "remediation": "Точечные owner-tests на ranked tail; не снижать 85%. Не поднимать unmeasured/uncovered ratchets.",
+      "effort": "L",
+      "dependencies": ["TD-001"],
+      "validation": [
+        "python -m scripts.engineering.qa check-branch-coverage --coverage-xml reports/coverage/coverage.xml --min-percent 85"
+      ],
+      "automated_fix_possible": false,
+      "automation": "coverage-verify lane"
+    },
+    {
+      "id": "TD-015",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "configs/quality/public_lazy_facade_inventory.yaml:8",
+      "method": "read public_lazy_facade_inventory.yaml",
+      "observation": "52 классифицированных lazy public facades (__getattr__/_PUBLIC_EXPORTS); review_by=2026-10-27; new_surface_policy=fail_fast_unclassified.",
+      "expected": "Явный bounded set; рост только с inventory+ADR.",
+      "actual": "row_count=52; classifications include external_public_api, owner_package_root, internal_lazy_import_optimization.",
+      "impact": "Ленивые facades маскируют циклы и раздувают public API; связаны с lazy_import 98/98.",
+      "root_cause": "Intentional lazy barrels after package splits.",
+      "evidence": [
+        {
+          "path": "configs/quality/public_lazy_facade_inventory.yaml",
+          "line": 8,
+          "observation": "row_count=52 review_by=2026-10-27"
+        },
+        {
+          "path": "reports/quality/architecture-quality-scorecard.json",
+          "line": 172,
+          "observation": "lazy_import_observed_count=98 lazy_import_cap=98"
+        }
+      ],
+      "remediation": "Не добавлять facades; выжигать internal_lazy_import_optimization к target 60. Не поднимать lazy_import max_count.",
+      "effort": "L",
+      "dependencies": ["TD-008"],
+      "validation": [
+        "architecture tests for unclassified lazy facades"
+      ],
+      "automated_fix_possible": false,
+      "automation": "fail_fast_unclassified_lazy_public_facade"
+    },
+    {
+      "id": "TD-016",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.86,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "reports/quality/hotspot-family-baseline.json:6",
+      "method": "compare hotspot-family-baseline vs live-residual-snapshot vs scorecard families",
+      "observation": "hotspot-family-baseline.snapshot_date=2026-07-27 при live residual snapshot_date=2026-08-26; LOC composition_runtime_builders 7226 (baseline md/json) vs 7229 (scorecard/live residual).",
+      "expected": "Связанный refresh держит family LOC/fan-in идентичными во всех трёх артефактах.",
+      "actual": "application_services_control_plane at_budget max_internal_fan_in=2/2; composition_runtime_builders total_loc drift 7226 vs 7229; snapshot_date не обновлён.",
+      "impact": "Слабый сигнал готовности к hotspot refactor; freeze fan-in 2/2 реален.",
+      "root_cause": "Baseline date left at last reviewed snapshot while metrics partially refreshed.",
+      "evidence": [
+        {
+          "path": "reports/quality/hotspot-family-baseline.json",
+          "line": 3,
+          "observation": "snapshot_date=2026-07-27 budget_review_notes=1"
+        },
+        {
+          "path": "reports/quality/hotspot-family-baseline.md",
+          "line": 15,
+          "observation": "composition_runtime_builders total_loc=7226; control_plane at_budget 2/2"
+        },
+        {
+          "path": "reports/quality/live-residual-snapshot.json",
+          "line": 5,
+          "observation": "snapshot_date=2026-08-26 composition_runtime_builders.total_loc=7229"
+        }
+      ],
+      "remediation": "python -m scripts.engineering.qa report-family-baseline --update вместе с scorecard. Не поднимать bounded_growth_budgets.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "hotspot-family-baseline.json total_loc == live-residual-snapshot hotspot_families.*.total_loc"
+      ],
+      "automated_fix_possible": true,
+      "automation": "refresh_governance_artifacts"
+    },
+    {
+      "id": "TD-017",
+      "requirement_id": "REQ-ARCH-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "architecture",
+      "path": "configs/quality/compatibility_facade_inventory.yaml:22",
+      "method": "read compatibility_facade_inventory + scorecard sanctioned_public_entrypoint_governance",
+      "observation": "12 retained public entrypoints и 4 public export facades — sanctioned API, не transition shims; next_review_by=2026-09-30; transition_debt=[].",
+      "expected": "Явный bounded public API; facades 4/4 freeze; без silent removal.",
+      "actual": "retained_entrypoints listed; public_export_facade_count current=4; twin families empty; last_hygiene_review 2026-08-04 #7461 empty first removal wave.",
+      "impact": "Широкий public patch/import surface; любой новый facade — architecture review, не budget bump.",
+      "root_cause": "Permanent public CLI/composition seams after RF-024.",
+      "evidence": [
+        {
+          "path": "configs/quality/compatibility_facade_inventory.yaml",
+          "line": 12,
+          "observation": "next_review_by=2026-09-30; 12 entrypoints kept as permanent public API"
+        },
+        {
+          "path": "configs/quality/debt_scorecard.yaml",
+          "line": 160,
+          "observation": "public_export_facade_count current_count=4"
+        }
+      ],
+      "remediation": "Держать freeze; burn-down только с deprecation+importer census. Не поднимать facade/entrypoint counts.",
+      "effort": "L",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-compatibility-importer-census"
+      ],
+      "automated_fix_possible": false,
+      "automation": "compatibility census gates"
+    },
+    {
+      "id": "TD-018",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "tests",
+      "path": "reports/quality/live-residual-snapshot.json:74",
+      "method": "read live residual closeout_program + closeout_ratchet_triage.yaml",
+      "observation": "Программа closeout-тестов сама стала крупным residual: 51 file / 262 functions / 10488 LOC; 60 fold-into-generic; часть retain_nightly.",
+      "expected": "Closeout tests только как live guards; fold в generic inventory (TEST-SYS-03).",
+      "actual": "tech_debt_closeout_test_file_count=51; closeout_files_using_live_residual_helpers=8; policy max_unclassified=0.",
+      "impact": "Стоимость изменения quality-артефактов: много issue-specific closeout, хрупкость при refresh.",
+      "root_cause": "Historical issue closeouts retained as ratchets.",
+      "evidence": [
+        {
+          "path": "reports/quality/live-residual-snapshot.json",
+          "line": 74,
+          "observation": "51 closeout files, 262 functions, 10488 LOC"
+        },
+        {
+          "path": "configs/quality/closeout_ratchet_triage.yaml",
+          "line": 12,
+          "observation": "max_unclassified_closeout_ratchets=0; retain_nightly allowed for budget_closeout_ratchet"
+        }
+      ],
+      "remediation": "Fold historical closeouts в generic inventory; не добавлять unclassified *closeout* tests. Не увеличивать closeout LOC.",
+      "effort": "M",
+      "dependencies": [],
+      "validation": [
+        "tests/architecture/test_architecture_closeout_inventory.py"
+      ],
+      "automated_fix_possible": false,
+      "automation": "closeout inventory ratchet"
+    },
+    {
+      "id": "TD-019",
+      "requirement_id": "REQ-GOV-012",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "ci",
+      "path": "reports/quality/debt-governance-gates.json:40",
+      "method": "read debt_scorecard_budget_no_growth gate",
+      "observation": "Локальный gates payload помечает budget_increase_count=not_evaluated_without_changed_from_ref при status=pass — freeze compensation не проверяется без --changed-from-ref.",
+      "expected": "CI и freeze PR всегда с --changed-from-ref origin/main (playbook §Shrink-before-grow).",
+      "actual": "Gate status=pass, current=not_evaluated_without_changed_from_ref, limit=0.",
+      "impact": "Локальный --check может пропустить рост max_count. В сочетании с конфликтным inventory это слепая зона.",
+      "root_cause": "Bare --check design; evaluation requires ref.",
+      "evidence": [
+        {
+          "path": "reports/quality/debt-governance-gates.json",
+          "line": 40,
+          "observation": "budget_increase_count not_evaluated_without_changed_from_ref status=pass"
+        },
+        {
+          "path": "docs/00-project/governance/08-debt-ownership-playbook.md",
+          "line": 141,
+          "observation": "CI and freeze PRs MUST pass reference-aware invocation"
+        }
+      ],
+      "remediation": "В CI всегда --changed-from-ref origin/main. Не трактовать bare pass как доказательство no-growth.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main"
+      ],
+      "automated_fix_possible": false,
+      "automation": "CI workflow already should pass changed-from-ref; verify workflow yaml"
+    },
+    {
+      "id": "TD-020",
+      "requirement_id": "REQ-TEST-005",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.75,
+      "status": "PROVEN",
+      "category": "tests",
+      "path": "reports/quality/dead-code-inventory.json:2",
+      "method": "read snapshot_date of supporting inventories",
+      "observation": "Часть quality-инвентарей не совпадает по дате с 2026-08-26 live residual: dead-code 2026-08-01, weak-assert/VCR reports 2026-08-07, hotspot snapshot_date 2026-07-27, sonar snapshot 2026-08-20.",
+      "expected": "Связанный refresh либо явная freshness policy (как observability 21d).",
+      "actual": "dead-code snapshot_date=2026-08-01 next_review_by=2026-10-30; weak-assert 1149 advisory generated 2026-08-07; vcr 126346660/150000000 bytes 2026-08-07; sonar open=0 at 2026-08-20.",
+      "impact": "Приоритизация по stale counts (1149 weak asserts) завышает шум; dead-code 3 classified candidates могут быть drift.",
+      "root_cause": "Inventories regenerated on issue closeout, not on every governance refresh.",
+      "evidence": [
+        {
+          "path": "reports/quality/dead-code-inventory.json",
+          "line": 2,
+          "observation": "snapshot_date=2026-08-01 repo_wide_zero_import_candidate_count=3"
+        },
+        {
+          "path": "reports/quality/weak-assert-inventory.md",
+          "line": 3,
+          "observation": "Generated 2026-08-07 total without direct assert=1149 advisory"
+        },
+        {
+          "path": "reports/quality/sonar/live-snapshot-20260820-rf009-summary.json",
+          "line": 29,
+          "observation": "quality_gate_status=OK open_total=0 at revision ec0d516b"
+        }
+      ],
+      "remediation": "Включить dead-code/weak-assert в cadence refresh без изменения бюджетов. Не трактовать 1149 как merge-blocking.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "python -m scripts.engineering.qa report-dead-code-inventory"
+      ],
+      "automated_fix_possible": true,
+      "automation": "optional freshness field in debt-governance-gates"
+    }
+  ]
+}
