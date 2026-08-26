@@ -2,16 +2,16 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-25
+Audit date: 2026-08-26
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `710930f41f7632699bd55f0d18c3c71b39471f51`
+Audited commit SHA: `a066536957a6d77782d6319bfa2516b5a73bff58`
 
 
-Evidence surface SHA-256: `81238e2a26b1fcb4e2e597fcf75e11eb5ba187f7ecb3b254d8a0dc6af94fa23a`
+Evidence surface SHA-256: `fdf0f88deeb6cb66a60965d2804f99df2d4860c6518d8c1c82883f5e1a7deabf`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,28 +19,28 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "710930f41f7632699bd55f0d18c3c71b39471f51",
-  "evidence_surface_sha256": "81238e2a26b1fcb4e2e597fcf75e11eb5ba187f7ecb3b254d8a0dc6af94fa23a",
+  "audited_commit_sha": "a066536957a6d77782d6319bfa2516b5a73bff58",
+  "evidence_surface_sha256": "fdf0f88deeb6cb66a60965d2804f99df2d4860c6518d8c1c82883f5e1a7deabf",
   "metrics": {
-    "architecture_integral_score": 9.41,
-    "architecture_interpretation": "good_targeted_improvements",
+    "architecture_integral_score": 7.41,
+    "architecture_interpretation": "satisfactory_system_refactoring_required",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1563,
+    "fully_covered_module_count": 1447,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 898,
-    "source_module_count": 2465,
+    "no_executable_lines_module_count": 13,
+    "partially_covered_module_count": 923,
+    "source_module_count": 2467,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 84
   },
   "schema_version": "technical-debt-audit-summary-v1"
 }
@@ -48,22 +48,22 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 
 
 
-Refresh reason: Re-pin to origin/main `710930f41f` for #9646 after the final #9629/#9647 unified-governance cascade; all debt-governance gates pass and no budget grows.
+Refresh reason: Re-pin to origin/main `a066536957` after repairing merge-conflicted module-coverage-inventory.json (#9676); hotspot measured LOC aligned without budget growth (#9674); honest residual unmeasured_module_count=84 vs max_count 0 remains (#9678). No debt budget grew.
 
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
-1. Release status: **debt-governance gates passing**.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
+1. Debt-governance gates: **44 pass / 1 fail** (`44/45` debt-governance gates).
+1. Release status: **debt-governance gates failing** (`module_coverage_unmeasured_modules` 84 vs max_count 0).
+1. Architecture quality integral score: **7.41** (`satisfactory_system_refactoring_required`). Integral score `7.41`.
 1. Module inventory (from `module-coverage-inventory.json` only):
-   - source_module_count: **2465**
-   - fully_covered: **1563**
-   - partially_covered: **898**
-   - no_executable_lines: **4**
+   - source_module_count: **2467**
+   - fully_covered: **1447**
+   - partially_covered: **923**
+   - no_executable_lines: **13**
    - uncovered: **0**
-   - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2465 == source_module_count
+   - unmeasured: **84**
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2467 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

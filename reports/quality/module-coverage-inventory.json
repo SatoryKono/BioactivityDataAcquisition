@@ -49350,19 +49350,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-26",
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "source_tree_sha256": "ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440",
-||||||| 1e64aaac80
-  "source_tree_sha256": "286576edb62dc6e17e2fcbd144fbb8e781b31d6d90a0a7301d252203d82edaaf",
-=======
-  "source_tree_sha256": "b9831b46a74ba1a689e08deb8f6c9a4c9008530d1a44665af3e76f97730d4e49",
->>>>>>> master20260825-18
-||||||| 1e64aaac80
-  "source_tree_sha256": "286576edb62dc6e17e2fcbd144fbb8e781b31d6d90a0a7301d252203d82edaaf",
-=======
-  "source_tree_sha256": "ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440",
->>>>>>> fix/audit-cycle-docs-20260826
+  "source_tree_sha256": "9cee93ef2121d785639f41479157afaf1243892318ecab0adacaf6fb3dcc2138",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
