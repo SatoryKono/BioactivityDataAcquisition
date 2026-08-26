@@ -1848,10 +1848,10 @@ ______________________________________________________________________
 
 | Источник     | Библиотека                        | Rate Limit                     | Retry Strategy          | Auth Type           | Health Check                                                                  |
 | ------------ | --------------------------------- | ------------------------------ | ----------------------- | ------------------- | ----------------------------------------------------------------------------- |
-| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec                      | Exponential backoff     | Public              | `GET /chembl/api/data/status.json`                                            |
+| **ChEMBL**   | `httpx` via `UnifiedHTTPClient`   | 0.1 req/sec (`chembl.yaml`)    | Exponential backoff     | Public              | `GET /chembl/api/data/status`                                                 |
 | **PubChem**  | `pubchempy` via `BaseSyncAdapter` | 5 req/sec                      | 429 -> wait Retry-After | Public              | Lightweight: `GET /rest/pug/compound/cid/2244/property/MolecularFormula/JSON` |
 | **UniProt**  | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (100 with API key)  | Exponential backoff     | API Key (optional)  | Search probe query                                                            |
-| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec (polite pool)       | 429 -> backoff          | Email (polite pool) | Generic Probe\*                                                               |
+| **OpenAlex** | `httpx` via `UnifiedHTTPClient`   | 10 req/sec                     | 429 -> backoff          | API key (`BIOETL_OPENALEX_API_KEY`; email is attribution only) | Generic Probe\*                                                               |
 | **Semantic** | `httpx` via `UnifiedHTTPClient`   | 0.1 req/sec (1.0 with API key) | Sliding window          | API Key             | Generic Probe\*                                                               |
 | **PubMed**   | `httpx` via `UnifiedHTTPClient`   | 3 req/sec (10 with API key)    | 429 -> backoff          | API Key             | Generic Probe\*                                                               |
 | **Crossref** | `httpx` via `UnifiedHTTPClient`   | 50 req/sec (polite pool)       | Exponential backoff     | Email               | Generic Probe\*                                                               |

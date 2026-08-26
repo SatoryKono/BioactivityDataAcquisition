@@ -1,24 +1,13 @@
-"""YAML-to-domain config mapper contract."""
+"""YAML-to-domain config mapper contract.
+
+``DomainConfigMapper`` is a compatibility alias of the canonical
+``DomainConfigMapperPort`` (one mapper ``*Port`` surface).
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from bioetl.domain.ports.config.config_loader_port import DomainConfigMapperPort
 
-if TYPE_CHECKING:
-    from bioetl.domain.config.pipeline import PipelineConfig
+DomainConfigMapper = DomainConfigMapperPort
 
-    DQConfig = object
-    PipelineYamlConfig = object
-
-
-@runtime_checkable
-class DomainConfigMapper(Protocol):
-    """Callable contract for mapping YAML config to domain config."""
-
-    def __call__(
-        self,
-        yaml_config: PipelineYamlConfig,
-        resolved_dq_config: DQConfig | None = None,
-    ) -> PipelineConfig:
-        """Map YAML config to domain PipelineConfig."""
-        ...
+__all__ = ["DomainConfigMapper"]
