@@ -1,4 +1,15 @@
+______________________________________________________________________
 
+Version: 1.2.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Last verified: '2026-08-26'
+
+______________________________________________________________________
 
 ## Lane classification (pure-unit vs repo_backed vs scripts-tooling)
 
@@ -16,19 +27,6 @@ CI `unit-fast` and `unit-other` ignore `tests/unit/scripts` so tooling is not du
 Local architecture feedback should prefer `architecture-fast-boundary` over full
 `tests/architecture` (#8331).
 
-
-______________________________________________________________________
-
-Version: 1.2.0
-Status: active
-Class: published
-Owner: BioETL Team
-Reviewers:
-
-- BioETL Team
-  Last verified: '2026-06-19'
-
-______________________________________________________________________
 
 # Testing Guide
 
@@ -103,7 +101,6 @@ map 1:1 to a canonical lane:
 | `tests/fixtures/**` | shared fixture payloads, including VCR/golden support inputs | contract, integration, repo-backed unit |
 | `tests/golden/**` | standalone golden payload bundles referenced by tests outside `tests/fixtures/golden/**` | contracts, integration, targeted regression tests |
 | `tests/helpers/**` | test helper APIs and process wrappers | all lanes via imports |
-| `tests/infrastructure/**` | infra-adjacent behavior that stays separate from `tests/unit/**` and `tests/integration/**` | targeted infra validation |
 | `tests/snapshots/**` | snapshot artifacts and snapshot-backed assertions | contracts, repo-backed unit |
 | `tests/testing_support/**` | repo-backed testing utilities and meta-test support code | governance, memory, repo-backed unit |
 

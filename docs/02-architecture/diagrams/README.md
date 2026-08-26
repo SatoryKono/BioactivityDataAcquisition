@@ -32,7 +32,7 @@ ______________________________________________________________________
 ## Source Of Truth And Publication Boundary
 
 - Canonical architecture/class/foundation sources live in the `.mmd` trees under this directory.
-- `svg/` and `png/` files under the current diagram tree are tracked render baselines used for drift review.
+- `svg/` files under the current diagram tree are tracked render baselines used for drift review. **PNG** under `**/png/` is **not tracked** (DOC-GOV-02 / gitignore).
 - `bundles/`, `descriptions/` and supplemental `INDEX.md` files are published or derived artifacts.
 - `views/*.mermaid` are focused review views and should be treated as presentation-oriented slices, not as replacements for the canonical `.mmd` families.
 
@@ -49,7 +49,8 @@ Use this matrix before moving or deleting diagram files.
 | `architecture/*.mmd`, `class-diagrams/*.mmd`, `foundation/*.mmd` | canonical source | Mermaid source file | Keep unless source drift is proven and reviewed under ADR-040. |
 | `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
 | `views/*.mermaid` | decomposed review view | focused view source | Keep as presentation-oriented slices; do not treat as replacement for canonical `.mmd`. |
-| `**/svg/**`, `**/png/**` | tracked rendered baseline | diagram renderer | Regenerate and commit with source changes; do not hand-edit without render/check evidence. |
+| `**/svg/**` | tracked rendered baseline | diagram renderer | Regenerate and commit with source changes; do not hand-edit without render/check evidence. |
+| `**/png/**` | local/CI render artifact | diagram renderer | **Not tracked** (DOC-GOV-02). Generate locally or via CI artifacts. |
 | `bundles/*.bundle.md` | generated bundle | diagram bundle generator | Regenerate from source families. |
 | `descriptions/**` | derived/published description cards | diagram description governance | Fix missing/stale description cards before deleting source or render files. |
 | `governance/**`, `manifests/**`, `tooling/**` | governance/tooling | ADR-040 + local policies | Keep with docs verification and diagram checks. |

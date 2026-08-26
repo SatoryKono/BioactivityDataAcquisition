@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-26'
 
 ______________________________________________________________________
 
@@ -48,6 +48,10 @@ data/
     │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/
     │       └── composite-{name}-{run-id}.json
+    ├── control/                         # Control-plane artifacts (ADR-044/047)
+    │   ├── run_manifest/
+    │   ├── run_ledger/
+    │   └── workflow_manifest/
     ├── quarantine/
     │   └── common.quarantine/           # Unified quarantine table
     │       ├── _delta_log/

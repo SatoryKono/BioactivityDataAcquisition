@@ -367,6 +367,7 @@ desktop.ini
 # Secrets / API keys (RULES.md REQ-SECRET-004)
 *.env
 .env.*
+.env
 !.env.example
 API_KEY.env
 secrets.json

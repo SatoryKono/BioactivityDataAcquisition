@@ -32,12 +32,11 @@ def test_gitignore_ignores_dotenv_and_keeps_example() -> None:
 
 def test_gitignore_last_match_keeps_agents_skill_unignore() -> None:
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    last_agents = gitignore.rfind(".agents/")
-    skill_unignore = gitignore.rfind("!.agents/skills/*/SKILL.md")
-    assert skill_unignore != -1
-    assert last_agents < skill_unignore or ".agents/\n" not in gitignore.split(
-        "!.agents/skills/*/SKILL.md", 1
-    )[-1]
+    marker = "!.agents/skills/*/SKILL.md"
+    assert marker in gitignore
+    after = gitignore.split(marker, 1)[-1]
+    assert "\n.agents/\n" not in after
+    assert not after.lstrip().startswith(".agents/")
 
 
 def test_startup_wrappers_share_mcp_check_path() -> None:
