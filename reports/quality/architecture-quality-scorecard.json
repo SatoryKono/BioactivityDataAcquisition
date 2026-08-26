@@ -169,8 +169,8 @@
     ],
     "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 99,
-    "lazy_import_observed_count": 99,
+    "lazy_import_cap": 98,
+    "lazy_import_observed_count": 98,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -178,8 +178,8 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
-  "interpretation": "good_targeted_improvements",
+  "integral_score": 7.41,
+  "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 57,
     "adr_enforcement_blocking_gap_count": 0,
@@ -260,7 +260,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "0c4b2810a627ed40893d829cff7aa4ba0d39d2ca69e1e14ad9fb894ab48f105a"
+      "source_tree_sha256": "63c94a188412723dabb3d8d5a63330d7271f6a9b49dc013391bf80a829cc641b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

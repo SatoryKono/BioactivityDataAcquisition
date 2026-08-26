@@ -403,9 +403,9 @@ fail-closed CRIT (`2`) одновременно в manifest/ledger failure и re
 
 Operator diagnostics не ограничиваются только `health` и metrics server.
 Канонический public seam для observability-related bootstrap и diagnostics —
-`bioetl.composition.observability_api`.
+`bioetl.composition.observability_runtime`.
 
-`bioetl.composition.observability_api` экспортирует единый diagnostics bundle и
+`bioetl.composition.observability_runtime` экспортирует единый diagnostics bundle и
 service getters:
 
 - `get_audit_service()`

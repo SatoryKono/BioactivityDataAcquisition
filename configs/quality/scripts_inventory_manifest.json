@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T21:31:38.066673+00:00",
+  "generated_at": "2026-08-26T08:09:49.705066+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -5088,7 +5088,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 33,
       "references": [
         {
           "path": "docs/00-project/ai/memory/MEMORY_ARCHITECTURE.md",
@@ -5110,25 +5110,19 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 120,
+          "line": 119,
           "source_group": "docs",
           "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 152,
-          "source_group": "docs",
-          "text": "`observability_runtime.py`, `observability.py`, `registry.py`, `types.py`,"
-        },
-        {
-          "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 232,
+          "line": 231,
           "source_group": "docs",
           "text": "### 2.4. `registry.py` — Реестр пайплайнов"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 270,
+          "line": 269,
           "source_group": "docs",
           "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
         },
@@ -5137,6 +5131,12 @@
           "line": 102,
           "source_group": "docs",
           "text": "| Pipeline factory registry | `src/bioetl/composition/factories/pipeline/registry.py` | Registers provider/composite factories for composition-time lookup. | Composition registry API and pipeline fact"
+        },
+        {
+          "path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
+          "line": 165,
+          "source_group": "docs",
+          "text": "- `pipeline/registry.py` — imports, configs, and exports updated"
         }
       ],
       "owner": "@bioetl-platform",
@@ -12092,7 +12092,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 373,
+      "reference_count": 374,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14066,7 +14066,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -14100,21 +14100,21 @@
         },
         {
           "path": "docs/00-project/glossary.md",
-          "line": 554,
+          "line": 555,
           "source_group": "docs",
-          "text": "A terminology linter is available at `scripts/engineering/qa/lint_terminology.py`:"
-        },
-        {
-          "path": "docs/00-project/glossary.md",
-          "line": 558,
-          "source_group": "docs",
-          "text": "python scripts/engineering/qa/lint_terminology.py src/bioetl/"
+          "text": "(`scripts/engineering/qa/lint_terminology.py`):"
         },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 27,
           "source_group": "scripts",
           "text": "| `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 119,
+          "source_group": "scripts",
+          "text": "\"check-terminology\": \"scripts.engineering.qa.lint_terminology\","
         }
       ]
     },
@@ -16049,7 +16049,7 @@
       "references": [
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 257,
+          "line": 256,
           "source_group": "docs",
           "text": "`scripts/engineering/qa/run_architecture_audit_read_only.py`."
         },
@@ -17596,7 +17596,7 @@
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
-          "line": 246,
+          "line": 245,
           "source_group": "docs",
           "text": "| Pipeline run CLI | `src/bioetl/interfaces/cli/commands/run.py` resolves the canonical `bioetl.composition.entrypoints` seam; `execution_api` is external compatibility only | `src/bioetl/composition/"
         },

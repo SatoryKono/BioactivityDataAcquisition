@@ -29,7 +29,7 @@ if TYPE_CHECKING:
         SilverDQConfigPort,
     )
 
-from bioetl.domain.ports.pipeline_callbacks import (
+from bioetl.domain.ports import (
     GoldFilterCallback,
     GoldTransformCallback,
     TransformCallback,

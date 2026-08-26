@@ -679,14 +679,14 @@ commands, not a local docs server target.
 │       │   ├── runtime_builders/ # Leaf builders for runner inputs and observability
 │       │   ├── services/     # Thin re-exports for metadata/versioning helpers
 │       │   ├── entrypoints.py # Stable broad public seam
-│       │   ├── composite_api.py # Composite runtime facade
-│       │   ├── control_plane_api.py # Control-plane API seam
+│       │   ├── composite_catalog.py # Composite catalog / runtime facade
+│       │   ├── control_plane_runtime.py # Control-plane runtime seam
 │       │   ├── execution_api.py # Narrow execution API
 │       │   ├── health_api.py # Health and diagnostics seam
 │       │   ├── maintenance_api.py # Maintenance API seam
-│       │   ├── observability_api.py # Observability facade
+│       │   ├── observability_runtime.py # Observability runtime facade
 │       │   ├── registry_api.py # Registry API seam
-│       │   └── resources_api.py # Narrow checkpoint/quarantine API
+│       │   └── resources_runtime.py # Resource-management runtime seam
 │       ├── infrastructure/   # Adapters (API clients, Delta Lake, Storage)
 │       │   ├── adapters/     # HTTP clients with unified resilience
 │       │   ├── storage/      # Bronze/Silver/Gold writers
@@ -696,7 +696,7 @@ commands, not a local docs server target.
 │           ├── cli/          # Click CLI commands
 │           └── http/         # HTTP health server and request/response types
 ├── tests/                    # Unit, integration, contract, architecture, E2E, smoke, performance, security, golden/snapshot, benchmark, fixture/helper suites
-├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
+├── scripts/                  # Canonical tooling (`python -m scripts.<domain> …`)
 ├── Makefile                  # Automation commands
 └── pyproject.toml            # Dependencies & Tool configuration
 ```
