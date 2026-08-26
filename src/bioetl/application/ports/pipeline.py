@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import PipelineConfig
     from bioetl.domain.ports import (
         AuditPort,
         DataSourcePort,
@@ -23,6 +25,9 @@ if TYPE_CHECKING:
     PipelineYamlConfig = object
     RunLedgerService = object
     Settings = object
+
+type DomainConfigMapper = Callable[..., PipelineConfig]
+type EntityTypeExtractor = Callable[[str], str | None]
 
 
 @runtime_checkable

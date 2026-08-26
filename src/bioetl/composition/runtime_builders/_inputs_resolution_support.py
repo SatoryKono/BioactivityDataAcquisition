@@ -30,9 +30,6 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
     )
 
-from bioetl.domain.ports import SourceConfigLike
-
-
 def apply_tracing_override(
     *,
     settings: Settings,
@@ -158,7 +155,7 @@ def resolve_filter_batch_size_impl(
     source_loader: Callable[..., object],
 ) -> int | None:
     try:
-        source_cfg = cast(SourceConfigLike, source_loader(yaml_config.provider))
+        source_cfg = cast(SimpleNamespace, source_loader(yaml_config.provider))
         batch_size = source_cfg.pagination.id_batch_size
         return batch_size if isinstance(batch_size, int) else None
     except (ValueError, AttributeError):

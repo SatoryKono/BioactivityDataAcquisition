@@ -12,6 +12,7 @@ from bioetl.application.core.wiring.factory import (
     ShutdownSignal,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
+from bioetl.application.ports.pipeline import DomainConfigMapper
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
@@ -30,7 +31,6 @@ from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
     AuditPort,
-    DomainConfigMapper,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
@@ -45,8 +45,8 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.composition.contracts.factories import (
-    BuildPipelineServicesFn as _BuildPipelineServicesFn,
-    ServiceBundleDeps as _ServiceBundleDeps,
+    BuildPipelineServicesFn,
+    ServiceBundleDeps,
 )
 
 from bioetl.infrastructure.config.contract_policy_loader import (
@@ -56,13 +56,8 @@ from bioetl.application.core.pipeline_service_protocols import (
     PipelineServicesProtocol,
 )
 
-__all__ = [
-    "_BuildPipelineServicesFn",
-    "_PipelineCreationInputs",
-    "_PipelineCreationRequest",
-    "_ServiceBundleDeps",
-    "_create_pipeline_with_services_impl",
-]
+_BuildPipelineServicesFn = BuildPipelineServicesFn
+_ServiceBundleDeps = ServiceBundleDeps
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

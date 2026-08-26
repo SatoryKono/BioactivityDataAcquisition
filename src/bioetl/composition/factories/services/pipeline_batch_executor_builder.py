@@ -128,7 +128,7 @@ def _resolve_gold_filter(
             state="disabled",
         )
         return cast(GoldFilterCallback, lambda _context, _record: False)
-        return cast("GoldFilterCallback", callbacks.gold_filter)
+    return callbacks.gold_filter
 
 
 def _resolve_effective_gold_table(pipeline: BasePipeline) -> str:
