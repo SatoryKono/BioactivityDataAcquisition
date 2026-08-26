@@ -8,6 +8,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.protocols import (
+    GoldFilterCallback,
+    GoldTransformCallback,
+    TransformCallback,
+)
 from bioetl.application.ports.control_plane import (
     ForensicRunDiffServiceProtocol,
     HistoricalReplayClosureServiceProtocol,
@@ -37,10 +42,7 @@ from bioetl.composition.contracts.factories import (
 from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
 from bioetl.domain.ports import (
     AdrServicePort,
-    GoldFilterCallback,
-    GoldTransformCallback,
     QuarantinePort,
-    TransformCallback,
 )
 
 if TYPE_CHECKING:
