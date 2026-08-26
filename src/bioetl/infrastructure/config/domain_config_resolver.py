@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.ports.config_mapper import DomainConfigMapper
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
@@ -20,18 +21,8 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.domain.config import DQConfig, PipelineConfig
+    from bioetl.domain.config import PipelineConfig
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
-
-
-class DomainConfigMapper(Protocol):
-    """Typed mapper seam for translating validated YAML config into domain config."""
-
-    def __call__(
-        self,
-        yaml_config: PipelineYamlConfig,
-        resolved_dq_config: DQConfig | None = None,
-    ) -> PipelineConfig: ...
 
 
 class PipelineConfigDQResolverProvider(Protocol):
@@ -113,6 +104,7 @@ def load_domain_pipeline_config(
 
 
 __all__ = [
+    "DomainConfigMapper",
     "DomainConfigResolver",
     "load_domain_pipeline_config",
     "resolve_domain_pipeline_config",

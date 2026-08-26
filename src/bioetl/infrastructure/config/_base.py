@@ -77,6 +77,11 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
     """Port for Prometheus metrics HTTP server (default: 8000)."""
     metrics_addr: str = Field(default="0.0.0.0")
     """Address to bind Prometheus metrics HTTP server (default: 0.0.0.0)."""
+    prometheus_url: str | None = Field(
+        default=None,
+        validation_alias="BIOETL_PROMETHEUS_URL",
+        description="Optional Prometheus base URL for local HTTP probes (BIOETL_PROMETHEUS_URL)",
+    )
     silver_dedup_timeout_seconds: float = Field(
         default=60.0,
         validation_alias="BIOETL_SILVER_DEDUP_TIMEOUT_SECONDS",

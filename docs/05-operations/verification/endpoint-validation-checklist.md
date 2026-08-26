@@ -49,11 +49,11 @@ ______________________________________________________________________
 | ----------------- | --------------------------------------- |
 | Base URL          | `https://www.ebi.ac.uk/chembl/api/data` |
 | Auth Type         | `public` (no authentication required)   |
-| Rate Limit        | 3 req/sec, burst 10                     |
+| Rate Limit        | 0.1 req/sec, burst 1 (`chembl.yaml`)    |
 | Page Size         | 1000 records/page (paginated queries)   |
 | Filter Batch Size | 20 IDs per filtered API request         |
-| Timeout           | 60.0 sec                                |
-| Max Retries       | 3                                       |
+| Timeout           | 120.0 sec                               |
+| Max Retries       | 8                                       |
 | Max URL Length    | 2000 chars                              |
 | API Version       | None (unversioned)                      |
 | Data License      | CC BY-SA 3.0                            |
@@ -447,7 +447,7 @@ ______________________________________________________________________
 | --------------------- | --------------------------------------------------------------------------- |
 | Base URL              | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils`                             |
 | Auth Type             | `api-key` (optional, via `BIOETL_PUBMED_API_KEY` env var)                   |
-| Email                 | Required (`BIOETL_PUBMED_EMAIL` env var, default: `bioetl-bot@example.com`) |
+| Email                 | Optional (`BIOETL_PUBMED_EMAIL`; empty/unset — adapter returns `None`, no fake identity) |
 | Rate Limit (no key)   | 3.0 req/sec, burst 5                                                        |
 | Rate Limit (with key) | 10 req/sec, burst 20                                                        |
 | Batch Size            | 200 PMIDs per efetch request                                                |
@@ -797,7 +797,7 @@ ______________________________________________________________________
 
 | Provider         | Without Key/Email                 | With Key/Email           |
 | ---------------- | --------------------------------- | ------------------------ |
-| ChEMBL           | 3 req/sec                         | N/A                      |
+| ChEMBL           | 0.1 req/sec (burst 1)             | N/A                      |
 | CrossRef         | Shared pool (aggressive limiting) | 50 req/sec (polite pool) |
 | OpenAlex         | Not a production support boundary | 10 req/sec with API key / credit model |
 | PubChem          | 5 req/sec                         | N/A                      |

@@ -102,6 +102,7 @@ def build_health_server(
     server = HealthServer(
         host=host,
         port=port,
+        prometheus_base_url=load_settings().prometheus_url,
         control_plane=HealthServerControlPlaneDeps(
             health_monitor=deps.health_monitor,
             quarantine_service=quarantine_service,

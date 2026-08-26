@@ -28,7 +28,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 7 | `grafana/dashboards/*.json` | Trust/control-plane, overview, runtime, provider health, DQ, incident, run-explorer (Silver Reject Explorer removed 2026-07-23). |
-| Domain port files | 76 | `src/bioetl/domain/ports/**/*.py` | 67 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 21 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
+| Domain port files | 82 | `src/bioetl/domain/ports/**/*.py` | 73 port modules + 9 package `__init__.py` (inventory: `reports/quality/domain-ports-inventory.json`); 25 top-level `*.py` including `__init__.py` and `_facade_support.py`. |
 
 ## Architecture Quality Evidence
 
@@ -36,14 +36,14 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `7.41` (`satisfactory_system_refactoring_required`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.41` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2467` | `reports/quality/module-coverage-inventory.json` |
-| Unmeasured / uncovered modules | `84` / `0` | `reports/quality/module-coverage-inventory.json` |
-| Coverage inventory status counts | `1447` fully covered, `923` partially covered, `13` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1476` fully covered, `978` partially covered, `13` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `1` (`application_services_control_plane` 2/2) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
-| Debt-governance gates | `44` pass, `0` warn, `1` fail | `reports/quality/debt-governance-gates.json` |
+| Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `44` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 The full-app duplication baseline distinguishes actionable clusters from raw
@@ -54,7 +54,7 @@ drift is currently clear (`stale_artifacts` are all false in
 `module_coverage_source_tree_hash_current`, so stale
 `reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
 release-gate failures rather than hidden warning-only coverage drift. Module
-coverage currently reports `84` unmeasured and zero uncovered source modules
+coverage currently reports `0` unmeasured and zero uncovered source modules
 from the current committed coverage XML. That is a module-inventory fact, not
 a blanket line/branch coverage guarantee: `923` modules
 remain partially covered and line/branch coverage must be read from the
@@ -301,11 +301,11 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=87`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `7.41`, `44` passing gates, and `1` failing gate; `reports/quality/module-coverage-inventory.json` reports `2467` source modules with `84` unmeasured, zero uncovered, and `923` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `44` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage; the remaining module-coverage gate requires shrink-only remediation. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.41`, `45` passing gates, and `0` failing gates; `reports/quality/module-coverage-inventory.json` reports `2467` source modules with `0` unmeasured, zero uncovered, and `978` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `44` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage. |
 
 ## Open Questions
 
-- Module coverage currently has `84` unmeasured and zero uncovered source modules
+- Module coverage currently has `0` unmeasured and zero uncovered source modules
   in `reports/quality/module-coverage-inventory.json`, while `923` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.

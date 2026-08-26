@@ -35,8 +35,9 @@ Baseline Local-Only setup requires only the following local tools:
 
 **Optional adjunct tooling only, not baseline prerequisites:**
 
-- Docker Desktop
-- Redis, MinIO, Postgres helper stacks
+- Docker Desktop — see [DOCKER_QUICKSTART.md](../DOCKER_QUICKSTART.md) for the
+  optional compose helpers. Redis, MinIO, and Postgres are **not** part of the
+  ADR-010 Local-Only runtime and are not required to run pipelines.
 
 ## Runtime compatibility policy
 

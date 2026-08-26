@@ -30,7 +30,7 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_PUBMED_API_KEY` | PubMed API key for higher rate limits | - | No |
-| `BIOETL_PUBMED_EMAIL` | Email for polite pool attribution | `bioetl-bot@example.com` | No |
+| `BIOETL_PUBMED_EMAIL` | Email for polite pool attribution | empty / unset (adapter returns `None`; no fake identity) | No |
 
 ### Semantic Scholar
 | Variable | Description | Required |
@@ -47,6 +47,7 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_METRICS_PORT` | Prometheus metrics endpoint port | `8000` | No |
+| `BIOETL_PROMETHEUS_URL` | Optional Prometheus base URL for local HTTP probes | unset (`http://localhost:9090` loopback default in health/processed-records) | No |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` | No |
 | `BIOETL_OBSERVABILITY__ALLOW_NOOP_OBSERVABILITY_IN_PROD` | Allow NoOp observability in prod | `false` | No |
 

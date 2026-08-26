@@ -54,6 +54,13 @@ jobs:
           fi
           cat /tmp/architecture-docs-summary.txt >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Fail on architecture map drift
+        run: |
+          git diff --exit-code -- docs/02-architecture/generated || (
+            echo "::error::Nightly architecture dependency map drifted from the committed generated files. Commit an --update refresh before merge."
+            exit 1
+          )
+
       - name: Upload architecture docs artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
