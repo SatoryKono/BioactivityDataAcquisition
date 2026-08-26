@@ -119,14 +119,11 @@ def validate_optional_source_reference_keys_pair(
 
     if reference_keys is None:
         raise ValueError("source_keys and reference_keys must be provided together")
-
-    present_source_keys = source_keys
-    present_reference_keys = reference_keys
-    require_non_empty_keys_tuples(present_source_keys, present_reference_keys)
-    require_equal_key_tuple_lengths(present_source_keys, present_reference_keys)
+    require_non_empty_keys_tuples(source_keys, reference_keys)
+    require_equal_key_tuple_lengths(source_keys, reference_keys)
     require_first_keys_match(
-        source_keys=present_source_keys,
-        reference_keys=present_reference_keys,
+        source_keys=source_keys,
+        reference_keys=reference_keys,
         source_key=source_key,
         reference_key=reference_key,
     )
@@ -236,11 +233,7 @@ class ForeignKeyReconciliationRequest:
     @property
     def effective_reference_keys(self) -> tuple[str, ...]:
         """Return the canonical reference key sequence for the request."""
-        return (
-            self.reference_keys
-            if self.reference_keys is not None
-            else (self.reference_key,)
-        )
+        return self.reference_keys or (self.reference_key,)
 
     @property
     def effective_mutation_layer(self) -> ForeignKeyReconciliationLayer:

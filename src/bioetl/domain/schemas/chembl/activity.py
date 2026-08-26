@@ -40,11 +40,9 @@ class ActivitySchema(ETLRecordSchema):
         isin=["raw", "normalized", "validated"],
         description="Processing state for the activity record.",
     )
-    # === Primary Key ===
     activity_id: Series[str] = pa.Field(
         nullable=False, unique=True, description="Primary key."
     )
-    # === Foreign Keys ===
     assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,

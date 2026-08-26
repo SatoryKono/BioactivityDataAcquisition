@@ -49,10 +49,10 @@ function Test-BenchmarkPluginNeeded {
 
 function Test-CoveragePluginNeeded {
     param(
-        [string[]]$Args
+        [string[]]$CandidateArgs
     )
 
-    foreach ($Arg in $Args) {
+    foreach ($Arg in $CandidateArgs) {
         if (
             $Arg -eq "--cov" -or
             $Arg -like "--cov=*" -or
@@ -297,7 +297,7 @@ if ($env:BIOETL_PYTEST_LIVE_OUTPUT -eq "1" -and -not $QuietRequested) {
     $PytestArgs += @("-o", "console_output_style=progress")
 }
 
-if ((Test-CoveragePluginNeeded -Args $PytestArgs) -and -not $env:COVERAGE_FILE) {
+if ((Test-CoveragePluginNeeded -CandidateArgs $PytestArgs) -and -not $env:COVERAGE_FILE) {
     $CoverageDir = Join-Path $env:TEMP "bioetl-coverage"
     New-Item -ItemType Directory -Force -Path $CoverageDir | Out-Null
     $env:COVERAGE_FILE = Join-Path $CoverageDir (".coverage.{0}.sqlite" -f $PID)
@@ -329,7 +329,7 @@ if ($PytestNarrow) {
         "pytest_recording.plugin",
         "_hypothesis_pytestplugin"
     )
-    if (Test-CoveragePluginNeeded -Args $PytestArgs) {
+    if (Test-CoveragePluginNeeded -CandidateArgs $PytestArgs) {
         $PluginModules += "pytest_cov.plugin"
     }
     if (Test-XdistPluginNeeded -Args $PytestArgs) {

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-05'
+  Last verified: '2026-08-26'
 
 ______________________________________________________________________
 
@@ -48,7 +48,6 @@ composition/bootstrap/
 │   ├── noop.py          # NoOp implementations для CLI
 │   ├── storage.py       # Storage CLI bootstrap
 │   ├── checkpoint.py    # Checkpoint CLI bootstrap
-│   ├── adr.py           # ADR-related CLI bootstrap
 │   └── run_manifest.py  # Run-manifest inspection bootstrap
 └── runtime/             # Runtime assembly
 ```
@@ -149,7 +148,7 @@ import paths.
 `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`,
 `execution_api.py`, `registry_api.py`, `control_plane_runtime.py`, `health_api.py`,
 `maintenance_api.py`, `resources_runtime.py`, `composite_catalog.py`,
-`observability_runtime.py`, `observability.py`, `registry.py`, `types.py`,
+`observability_runtime.py`, `observability.py`, `types.py`,
 `_pipeline_execution.py`, `_resource_management.py`, `_services.py`.
 
 Политика использования root-level composition seams:

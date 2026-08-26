@@ -25,7 +25,7 @@ This document describes the internal implementation modules within the compositi
 
 ### `_resource_management`
 
-**Purpose**: Internal implementation module behind the public `entrypoints` and `resources_api` modules.
+**Purpose**: Internal implementation module behind the public `entrypoints` and `resources_runtime` modules.
 
 **Key Responsibilities**:
 
@@ -36,7 +36,7 @@ This document describes the internal implementation modules within the compositi
 **Public Counterparts**:
 
 - `composition.entrypoints`
-- `composition.resources_api`
+- `composition.resources_runtime`
 
 ### `_services`
 
@@ -62,12 +62,12 @@ This document describes the internal implementation modules within the compositi
 
 ```
 composition/
-├── entrypoints/              # Public execution-focused seam
-├── execution_api/           # Narrow execution-focused public API
-├── resources_api/           # Narrow resource-management public API
-├── _pipeline_execution/     # Internal implementation
-├── _resource_management/    # Internal implementation
-└── _services/               # Internal implementation
+├── entrypoints.py            # Public execution-focused seam
+├── execution_api.py          # Narrow execution-focused public API
+├── resources_runtime.py      # Resource-management runtime seam
+├── _pipeline_execution.py    # Internal implementation
+├── _resource_management.py   # Internal implementation
+└── _services.py              # Internal implementation
 ```
 
 ### Dependency Flow
