@@ -3,7 +3,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+
+from bioetl.application.ports.providers import (
+    AdapterCreatorProtocol,
+    DataSourceCreatorProtocol,
+    SupportAwareDataSourceCreatorProtocol,
+)
 
 from bioetl.application.core.data_sources.idmapping import IDMappingDataSource
 from bioetl.application.core.data_sources.publication_term import (
@@ -293,21 +299,30 @@ def _build_bio_http_provider_specs(
             adapter_class=ChemblAdapter,
             rate=chembl.rate,
             capacity=chembl.capacity,
-            data_source_creator=_create_chembl_data_source,
+            data_source_creator=cast(
+                "SupportAwareDataSourceCreatorProtocol",
+                _create_chembl_data_source,
+            ),
         ),
         build_http_provider_config_spec(
             provider_name="uniprot",
             adapter_class=UniProtAdapter,
             rate=uniprot.rate,
             capacity=uniprot.capacity,
-            data_source_creator=_create_uniprot_data_source,
+            data_source_creator=cast(
+                "SupportAwareDataSourceCreatorProtocol",
+                _create_uniprot_data_source,
+            ),
         ),
         build_http_provider_config_spec(
             provider_name="uniprot_idmapping",
             adapter_class=IDMappingDataSource,
             rate=uniprot.rate,
             capacity=uniprot.capacity,
-            data_source_creator=_create_uniprot_idmapping_data_source,
+            data_source_creator=cast(
+                "SupportAwareDataSourceCreatorProtocol",
+                _create_uniprot_idmapping_data_source,
+            ),
         ),
     )
 
@@ -325,8 +340,11 @@ def _build_bio_extra_provider_configs(
             http_config=HttpConfig(rate=pubchem.rate, capacity=pubchem.capacity),
             requires_http_client=False,
             requires_logger=True,
-            adapter_creator=_create_pubchem_adapter,
-            data_source_creator=_create_pubchem_data_source,
+            adapter_creator=cast("AdapterCreatorProtocol", _create_pubchem_adapter),
+            data_source_creator=cast(
+                "DataSourceCreatorProtocol",
+                _create_pubchem_data_source,
+            ),
         ),
     }
 

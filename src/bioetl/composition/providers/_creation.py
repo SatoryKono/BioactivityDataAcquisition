@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.providers._models import (
     DataSourceCreatorProtocol,
@@ -184,7 +184,7 @@ def build_bound_data_source_creator(
             pipeline_name=pipeline_name,
         )
 
-    return creator
+    return cast("DataSourceCreatorProtocol", creator)
 
 
 def _inject_http_client(
