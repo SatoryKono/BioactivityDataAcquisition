@@ -1,0 +1,95 @@
+%% Title: Package Family: application/pipelines/chembl (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/pipelines/chembl; part 1/2; modules: pipeline_types, target_helpers, activity_transformer, assay_parameters_transformer, assay_transformer, base_chembl_transformer.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace pipeline_types {
+        class ChEMBLActivityPipeline
+        class ChEMBLAssayParametersPipeline
+        class ChEMBLAssayPipeline
+        class ChEMBLCellLinePipeline
+        class ChEMBLCompoundRecordPipeline
+        class ChEMBLMoleculePipeline
+        class ChEMBLProteinClassPipeline
+        class ChEMBLPublicationPipeline
+        class ChEMBLPublicationSimilarityPipeline
+        class ChEMBLPublicationTermPipeline
+        class ChEMBLSubcellularFractionPipeline
+        class ChEMBLTargetComponentPipeline
+        class ChEMBLTargetPipeline
+        class ChEMBLTargetProteinClassificationPipeline
+        class ChEMBLTissuePipeline
+    }
+
+    namespace target_helpers {
+        class ComponentHelper
+        class SynonymHelper
+        class XrefHelper
+    }
+
+    namespace activity_transformer {
+        class ActivityTransformer
+    }
+
+    namespace assay_parameters_transformer {
+        class AssayParametersTransformer
+    }
+
+    namespace assay_transformer {
+        class AssayTransformer
+    }
+
+    namespace base_chembl_transformer {
+        class BaseChemblTransformer
+    }
+
+    namespace cell_line_transformer {
+        class CellLineTransformer
+    }
+
+    namespace compound_record_transformer {
+        class CompoundRecordTransformer
+    }
+
+    namespace molecule_transformer {
+        class MoleculeTransformer
+    }
+
+    namespace protein_class_transformer {
+        class ProteinClassTransformer
+    }
+
+    namespace publication_similarity_transformer {
+        class PublicationSimilarityTransformer
+    }
+
+    namespace publication_term_transformer {
+        class PublicationTermTransformer
+    }
+
+    namespace publication_transformer {
+        class PublicationTransformer
+    }
+
+    namespace subcellular_fraction_transformer {
+        class SubcellularFractionTransformer
+    }
+
+    BaseChemblTransformer <|-- ActivityTransformer
+    BaseChemblTransformer <|-- AssayParametersTransformer
+    BaseChemblTransformer <|-- AssayTransformer
+    BaseChemblTransformer <|-- CellLineTransformer
+    BaseChemblTransformer <|-- CompoundRecordTransformer
+    BaseChemblTransformer <|-- MoleculeTransformer
+    BaseChemblTransformer <|-- ProteinClassTransformer
+    BaseChemblTransformer <|-- PublicationSimilarityTransformer
+    BaseChemblTransformer <|-- PublicationTermTransformer
+    BaseChemblTransformer <|-- PublicationTransformer
+    BaseChemblTransformer <|-- SubcellularFractionTransformer
+

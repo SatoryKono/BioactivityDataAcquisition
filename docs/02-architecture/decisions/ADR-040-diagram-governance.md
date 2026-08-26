@@ -24,10 +24,10 @@ BioETL содержит два согласованных diagram subtrees с р
 **Canonical sources** (`docs/02-architecture/diagrams/`):
 
 - `architecture/` — 89 `.mmd` файла
-- `class-diagrams/` — 94 `.mmd` файла: 19 curated families, 1 frontmatter sandbox, 74 supplemental package slices
+- `class-diagrams/` — 145 `.mmd` файла (curated `01`–`16` including `01a`/`08a`/`14a`, 1 sandbox, generated `90-pkg-*`)
 - `foundation/` — 55 `.mmd` файлов
 - `_template.mmd` — 1 reusable template
-- Итого: **239 `.mmd` артефактов**
+- Итого: **290 `.mmd` артефактов**
 
 **Decomposed views** (`docs/02-architecture/diagrams/views/`):
 

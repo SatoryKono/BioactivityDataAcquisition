@@ -1,9 +1,9 @@
 %% Title: Package Family: application/core/batch_execution
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/batch_execution; modules: lifecycle, _contracts, run_service, state_service.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/batch_execution; modules: lifecycle, contracts, run_service, state_service.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
 %% @nodes   15
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
@@ -14,17 +14,17 @@ classDiagram
         class BatchExecutionFinalizationContext
         class BatchExecutionLifecycleContext
         class BatchExecutionLifecycleService
-        class _BatchCheckpointRecoveryLifecyclePort
-        class _BatchProgressInitializerPort
-        class _BatchTracingLifecyclePort
+        class _BatchCheckpointRecoveryLifecycleProtocol
+        class _BatchProgressInitializerProtocol
+        class _BatchTracingLifecycleProtocol
     }
 
     namespace contracts {
         class BatchExecutionCountersSnapshot
         class BatchExecutionMemoryState
-        class BatchExecutionStatePort
+        class BatchExecutionStateProtocol
         class BatchExecutionStatisticsState
-        class BatchResultBuilderPort
+        class BatchResultBuilderProtocol
     }
 
     namespace run_service {
@@ -37,4 +37,5 @@ classDiagram
     }
 
     BatchExecutionCountersSnapshot <|-- BatchExecutionStatisticsState
-    BatchExecutionStatisticsState <|-- BatchExecutionStatePort
+    BatchExecutionStatisticsState <|-- BatchExecutionStateProtocol
+

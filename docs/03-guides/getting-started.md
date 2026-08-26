@@ -112,27 +112,29 @@ hit the known socket-buffer ceiling sooner than WSL/Linux.
 Manual fallback when you do not use the recommended bootstrap helper:
 
 ```bash
-uv sync --extra dev --extra tests --extra tracing
+uv sync --extra dev --extra tests --extra tests_full --extra export
 ```
 
 If you need MkDocs/site tooling, install the separate docs toolchain extra on
 top of the canonical bootstrap extras:
 
 ```bash
-uv sync --extra dev --extra tests --extra tracing --extra docs
+uv sync --extra dev --extra tests --extra tests_full --extra export --extra docs
 ```
 
-On Windows without `make` or `uv`:
+On Windows without `make` or `uv`, use the repository Python 3.12 baseline:
 
 ```powershell
-py -3.13 -m venv .venv-win
+py -3.12 -m venv .venv-win
 .\.venv-win\Scripts\Activate.ps1
-pip install -e ".[dev,tests,tracing,docs]"
+pip install -e ".[dev,tests,tests_full,export]"
 ```
 
 For the supported aggregate setup flow, use `make install`, `make test-deps`,
-and `make setup-plugins`. Raw `uv sync --extra …` is the implementation of
-`make install` only. The repository-local
+and `make setup-plugins`. `make install` is lock-backed `uv sync` with extras
+`dev`, `tests`, `tests_full`, and `export` (see the `install` target in
+[`Makefile`](../../Makefile)). Coverage and architecture verify paths need
+`tests_full`; do not omit it from a manual fallback. The repository-local
 `scripts/engineering/dev/dev_setup.sh` is absent
 ([`scripts/engineering/dev/README.md`](../../scripts/engineering/dev/README.md));
 do not invoke it.

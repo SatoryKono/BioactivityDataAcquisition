@@ -1,0 +1,28 @@
+%% Title: Package Family: application/services/contracts
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/contracts; modules: contract_migration_ports, contract_migration_models, contract_migration_service.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   8
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace contract_migration_ports {
+        class ContractPolicyLoaderProtocol
+        class ContractPolicyProtocol
+        class PipelineInfoLoaderProtocol
+        class RegistryEntriesLoaderProtocol
+    }
+
+    namespace contract_migration_models {
+        class ContractMigrationActionRecord
+        class ContractMigrationPlanSummary
+        class ContractVersionTransitionRecord
+    }
+
+    namespace contract_migration_service {
+        class ContractMigrationService
+    }
+

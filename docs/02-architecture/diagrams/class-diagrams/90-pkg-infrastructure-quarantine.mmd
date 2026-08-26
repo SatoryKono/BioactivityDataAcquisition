@@ -1,0 +1,36 @@
+%% Title: Package Family: infrastructure/quarantine
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/quarantine; modules: statistics_support, _unified_filtered_mixin, _pyarrow_helpers, _timeseries, unified.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   8
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace statistics_support {
+        class _ArrowTableLike
+        class _PandasFrameLike
+        class _PandasSeriesLike
+    }
+
+    namespace unified_filtered_mixin {
+        class UnifiedQuarantineFilteredMixin
+        class _UnifiedQuarantineFilteredHost
+    }
+
+    namespace pyarrow_helpers {
+        class _PyArrowComputeModule
+    }
+
+    namespace timeseries {
+        class _TimeseriesBucket
+    }
+
+    namespace unified {
+        class UnifiedQuarantineAdapter
+    }
+
+    UnifiedQuarantineFilteredMixin <|-- UnifiedQuarantineAdapter
+

@@ -1,0 +1,55 @@
+%% Title: Package Family: application/services/control_plane/manifest/diagnostics
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/manifest/diagnostics; modules: replay_refresh_types, finalization, summary, base_replay_context, composite_projection, dq_details.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   14
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace replay_refresh_types {
+        class _ReplayRefreshContext
+        class _ReplayRefreshProjection
+        class _ReplayRefreshSummaryUpdate
+    }
+
+    namespace finalization {
+        class _LedgerEnrichedSummary
+        class _ProcessedLedgerDiagnostics
+    }
+
+    namespace summary {
+        class _FinalSummaryRequest
+        class _RuntimeViewsRequest
+    }
+
+    namespace base_replay_context {
+        class _BaseSummaryReplayContext
+    }
+
+    namespace composite_projection {
+        class _CompositeSummaryRequest
+    }
+
+    namespace dq_details {
+        class DQDetailsSummary
+    }
+
+    namespace ledger_processing {
+        class _LedgerProcessingState
+    }
+
+    namespace persistence_profile_support {
+        class PersistenceProfileContext
+    }
+
+    namespace replay_projection {
+        class _ReplayProjectionBundle
+    }
+
+    namespace replay_projection_payload {
+        class _ReplayProjectionContextKwargs
+    }
+

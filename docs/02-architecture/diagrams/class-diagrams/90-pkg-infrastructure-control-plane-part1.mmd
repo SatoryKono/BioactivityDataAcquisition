@@ -1,0 +1,100 @@
+%% Title: Package Family: infrastructure/control_plane (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 1/2; modules: _raw_run_manifest_inspection, _file_run_ledger_helpers, _run_manifest_scope_index, artifact_byte_comparison, file_contract_registry_store, file_effective_config_artifact_store.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace raw_run_manifest_inspection {
+        class ContractEvidenceConflictError
+        class RawRunManifestInspectionMixin
+        class _RawManifestInspectionHost
+    }
+
+    namespace file_run_ledger_helpers {
+        class RunLedgerCorruptionError
+        class _LedgerOSModule
+    }
+
+    namespace run_manifest_scope_index {
+        class LatestScopeIndexCatalog
+        class LatestScopeIndexRecord
+    }
+
+    namespace artifact_byte_comparison {
+        class FileArtifactByteComparisonAdapter
+        class _ArtifactComparisonState
+    }
+
+    namespace file_contract_registry_store {
+        class FileContractRegistryStore
+        class RegistryLoadError
+    }
+
+    namespace file_effective_config_artifact_store {
+        class EffectiveConfigArtifactConflictError
+        class FileEffectiveConfigArtifactStore
+    }
+
+    namespace file_historical_replay_closure_store {
+        class FileHistoricalReplayClosureStore
+        class _HistoricalReplayClosureReportLike
+    }
+
+    namespace file_historical_replay_universe_store {
+        class FileHistoricalReplayUniverseStore
+        class _HistoricalReplayUniverseClosureReportLike
+    }
+
+    namespace file_provider_health_evidence {
+        class FileProviderHealthEvidenceStore
+        class ProviderHealthEvidenceRecord
+    }
+
+    namespace file_run_manifest_store {
+        class FileRunManifestStore
+        class RunManifestStoreCorruptionError
+    }
+
+    namespace file_artifact_lifecycle_protections {
+        class ProtectedRefAccumulator
+    }
+
+    namespace file_lineage_index {
+        class LineageIndexCorruptionError
+    }
+
+    namespace file_lineage_queries {
+        class FileLineageQueriesMixin
+    }
+
+    namespace file_run_ledger_queries {
+        class FileRunLedgerQueriesMixin
+    }
+
+    namespace file_run_manifest_persistence {
+        class _WriteProgress
+    }
+
+    namespace run_manifest_scope_rebuild {
+        class _ScopeIndexStore
+    }
+
+    namespace file_artifact_lifecycle_store {
+        class FileControlPlaneArtifactLifecycleStore
+    }
+
+    namespace file_artifact_lifecycle_types {
+        class _ProtectedRefs
+    }
+
+    namespace file_contract_evidence_recorder {
+        class FileContractEvidenceRecorder
+    }
+
+    RawRunManifestInspectionMixin <|-- FileRunManifestStore
+

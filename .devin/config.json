@@ -2,8 +2,7 @@
   "version": 2,
   "permissions": {
     "ask": [
-      "Read(**/.env*)",
-      "Write(**/.env*)"
+      "Read(**/.env*)"
     ],
     "allow": [
       "Read(**/.env*)",
@@ -22,9 +21,7 @@
       "Exec(ruff)"
     ],
     "deny": [
-      "Write(**/.env*)",
-      "Write(**/docs/**)",
-      "Write(**/configs/**)"
+      "Write(**/.env*)"
     ]
   },
   "read_config_from": {

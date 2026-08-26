@@ -456,8 +456,8 @@ def _project_path_findings(
                 },
             )
         )
-    # Classify origin on the canonical path so Windows `E:/repo` and Docker
-    # Desktop `/mnt/e/repo` of the same checkout are one origin, not mixed.
+    # Classify origin on the canonical path so a Windows drive path and the
+    # matching Docker Desktop WSL drive-letter mount are one origin, not mixed.
     origins = {_path_origin(_normalise_path(path, root=root)) for path in config_files}
     if len(origins) > 1:
         findings.append(

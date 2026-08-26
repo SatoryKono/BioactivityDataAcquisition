@@ -484,7 +484,7 @@ docs/02-architecture/diagrams/
     *.mmd           # source diagrams (94 total:
                     #   19 curated families
                     #   1 frontmatter sandbox copy
-                    #   74 supplemental package slices)
+                    #   generated 90-pkg-* supplemental package slices)
     svg/*.svg
     png/*.png
   foundation/

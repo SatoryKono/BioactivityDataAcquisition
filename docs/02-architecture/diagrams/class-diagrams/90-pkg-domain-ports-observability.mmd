@@ -1,18 +1,27 @@
 %% Title: Package Family: domain/ports/observability
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/observability; modules: metrics, dq_monitor, logging, tracing.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/observability; modules: metrics, tracing, dq_monitor, logging.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   6
+%% @nodes   11
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
     namespace metrics {
         class ExecutorMetricsPort
+        class HealthMetricsExpositionPort
         class MetricsPort
+        class MetricsPublisherPort
         class MetricsServerPort
+        class MetricsServerRuntimeStatus
+    }
+
+    namespace tracing {
+        class SpanHandle
+        class TracerHandle
+        class TracingPort
     }
 
     namespace dq_monitor {
@@ -23,6 +32,3 @@ classDiagram
         class LoggerPort
     }
 
-    namespace tracing {
-        class TracingPort
-    }

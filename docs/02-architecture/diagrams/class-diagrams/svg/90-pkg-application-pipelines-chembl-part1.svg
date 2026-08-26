@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" aria-roledescription="classDiagram" role="graphics-document document" viewBox="0 -8 4465.4765625 2009" style="max-width: 4465.48px; background-color: white;" width="100%" id="my-svg"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker extension classDiagram" id="my-svg_classDiagram-extensionStart"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker extension classDiagram" id="my-svg_classDiagram-extensionEnd"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker composition classDiagram" id="my-svg_classDiagram-compositionStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker composition classDiagram" id="my-svg_classDiagram-compositionEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="6" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyStart"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="13" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyEnd"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="13" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopStart"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="1" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopEnd"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><g class="root"><g class="clusters"><g id="activity_transformer" class="cluster"><rect height="112" width="273.015625" y="1873" x="693.6953125" style="fill: none; stroke: black" /><g transform="translate(749.28125, 1873)" class="cluster-label"><text x="80.922" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="80.922">activity_transform</tspan><tspan x="80.922" dy="16.8">er</tspan></text></g></g><g id="assay_parameters_transformer" class="cluster"><rect height="112" width="360.40625" y="1873" x="986.7109375" style="fill: none; stroke: black" /><g transform="translate(1042.203125, 1873)" class="cluster-label"><text x="124.711" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="124.711">assay_parameters_transforme</tspan><tspan x="124.711" dy="16.8">r</tspan></text></g></g><g id="assay_transformer" class="cluster"><rect height="112" width="256.1875" y="1873" x="1367.1171875" style="fill: none; stroke: black" /><g transform="translate(1420.90625, 1873)" class="cluster-label"><text x="74.305" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.305">assay_transformer</tspan></text></g></g><g id="base_chembl_transformer" class="cluster"><rect height="1820" width="3548.59765625" y="8" x="790.203125" style="fill: none; stroke: black" /><g transform="translate(2460.517578125, 8)" class="cluster-label"><text x="103.984" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.984">base_chembl_transformer</tspan></text></g></g><g id="cell_line_transformer" class="cluster"><rect height="112" width="275.5" y="1873" x="1643.3046875" style="fill: none; stroke: black" /><g transform="translate(1697.421875, 1873)" class="cluster-label"><text x="83.633" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="83.633">cell_line_transfor</tspan><tspan x="83.633" dy="16.8">mer</tspan></text></g></g><g id="compound_record_transformer" class="cluster"><rect height="112" width="363.09375" y="1873" x="1938.8046875" style="fill: none; stroke: black" /><g transform="translate(1997.0859375, 1873)" class="cluster-label"><text x="123.266" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="123.266">compound_record_transformer</tspan></text></g></g><g id="molecule_transformer" class="cluster"><rect height="112" width="284.484375" y="1873" x="2321.8984375" style="fill: none; stroke: black" /><g transform="translate(2376.265625, 1873)" class="cluster-label"><text x="87.875" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="87.875">molecule_transforme</tspan><tspan x="87.875" dy="16.8">r</tspan></text></g></g><g id="protein_class_transformer" class="cluster"><rect height="112" width="317.078125" y="1873" x="2626.3828125" style="fill: none; stroke: black" /><g transform="translate(2681.1953125, 1873)" class="cluster-label"><text x="103.727" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.727">protein_class_transform</tspan><tspan x="103.727" dy="16.8">er</tspan></text></g></g><g id="publication_similarity_transformer" class="cluster"><rect height="112" width="392.25" y="1873" x="2963.4609375" style="fill: none; stroke: black" /><g transform="translate(3022.9453125, 1873)" class="cluster-label"><text x="136.641" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="136.641">publication_similarity_transfo</tspan><tspan x="136.641" dy="16.8">rmer</tspan></text></g></g><g id="publication_term_transformer" class="cluster"><rect height="112" width="349.5625" y="1873" x="3375.7109375" style="fill: none; stroke: black" /><g transform="translate(3431.765625, 1873)" class="cluster-label"><text x="118.727" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="118.727">publication_term_transform</tspan><tspan x="118.727" dy="16.8">er</tspan></text></g></g><g id="publication_transformer" class="cluster"><rect height="112" width="305.359375" y="1873" x="3745.2734375" style="fill: none; stroke: black" /><g transform="translate(3802.2265625, 1873)" class="cluster-label"><text x="95.727" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="95.727">publication_transform</tspan><tspan x="95.727" dy="16.8">er</tspan></text></g></g><g id="subcellular_fraction_transformer" class="cluster"><rect height="112" width="378.84375" y="1873" x="4070.6328125" style="fill: none; stroke: black" /><g transform="translate(4130.328125, 1873)" class="cluster-label"><text x="129.727" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="129.727">subcellular_fraction_transfor</tspan><tspan x="129.727" dy="16.8">mer</tspan></text></g></g></g><g class="edgePaths"><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id1" d="M2388.264577808425,960.258166511469L2128.5876690070213,1104.881805426224C1868.9107602056167,1249.5054443409792,1349.5569426028085,1538.7527221704895,1089.8800338014041,1687.1263610852448C830.203125,1835.5,830.203125,1843,830.203125,1850.5C830.203125,1858,830.203125,1865.5,830.203125,1873C830.203125,1880.5,830.203125,1888,830.203125,1891.75L830.203125,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id2" d="M2401.6497747068142,961.8371179026786L2195.8604893390116,1106.1975982522322C1990.0712039712096,1250.5580786017856,1578.4926332356047,1539.279039300893,1372.7033478678022,1687.3895196504463C1166.9140625,1835.5,1166.9140625,1843,1166.9140625,1850.5C1166.9140625,1858,1166.9140625,1865.5,1166.9140625,1873C1166.9140625,1880.5,1166.9140625,1888,1166.9140625,1891.75L1166.9140625,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id3" d="M2415.3505735803565,963.8226715154454L2261.9939675669634,1107.8522262628712C2108.637361553571,1251.8817810102971,1801.9241495267854,1539.9408905051484,1648.5675435133926,1687.720445252574C1495.2109375,1835.5,1495.2109375,1843,1495.2109375,1850.5C1495.2109375,1858,1495.2109375,1865.5,1495.2109375,1873C1495.2109375,1880.5,1495.2109375,1888,1495.2109375,1891.75L1495.2109375,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id4" d="M2428.188123457814,965.8955496040924L2320.3325507981785,1109.579624670077C2212.4769781385426,1253.2636997360617,1996.7658328192713,1540.631849868031,1888.9102601596358,1688.0659249340154C1781.0546875,1835.5,1781.0546875,1843,1781.0546875,1850.5C1781.0546875,1858,1781.0546875,1865.5,1781.0546875,1873C1781.0546875,1880.5,1781.0546875,1888,1781.0546875,1891.75L1781.0546875,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id5" d="M2445.123261050094,968.3384286532232L2390.9946446250783,1111.6153572110195C2336.8660282000624,1254.8922857688156,2228.6087953500314,1541.446142884408,2174.4801789250155,1688.473071442204C2120.3515625,1835.5,2120.3515625,1843,2120.3515625,1850.5C2120.3515625,1858,2120.3515625,1865.5,2120.3515625,1873C2120.3515625,1880.5,2120.3515625,1888,2120.3515625,1891.75L2120.3515625,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id6" d="M2464.140625,969.5L2464.140625,1112.5833333333333C2464.140625,1255.6666666666667,2464.140625,1541.8333333333333,2464.140625,1688.6666666666667C2464.140625,1835.5,2464.140625,1843,2464.140625,1850.5C2464.140625,1858,2464.140625,1865.5,2464.140625,1873C2464.140625,1880.5,2464.140625,1888,2464.140625,1891.75L2464.140625,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id7" d="M2481.933810564264,968.4761386879067L2532.4318213035535,1111.7301155732555C2582.929832042843,1254.9840924586044,2683.9258535214212,1541.492046229302,2734.4238642607106,1688.4960231146513C2784.921875,1835.5,2784.921875,1843,2784.921875,1850.5C2784.921875,1858,2784.921875,1865.5,2784.921875,1873C2784.921875,1880.5,2784.921875,1888,2784.921875,1891.75L2784.921875,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id8" d="M2500.671950511485,965.8017546713306L2610.490948342904,1109.501462226109C2720.3099461743236,1253.201169780887,2939.9479418371616,1540.6005848904435,3049.766939668581,1688.0502924452219C3159.5859375,1835.5,3159.5859375,1843,3159.5859375,1850.5C3159.5859375,1858,3159.5859375,1865.5,3159.5859375,1873C3159.5859375,1880.5,3159.5859375,1888,3159.5859375,1891.75L3159.5859375,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id9" d="M2517.931222392831,963.0585660454425L2690.0247165773594,1107.2154717045353C2862.1182107618874,1251.3723773636284,3206.305199130944,1539.6861886818142,3378.398693315472,1687.5930943409069C3550.4921875,1835.5,3550.4921875,1843,3550.4921875,1850.5C3550.4921875,1858,3550.4921875,1865.5,3550.4921875,1873C3550.4921875,1880.5,3550.4921875,1888,3550.4921875,1891.75L3550.4921875,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id10" d="M2532.1213758089953,961.1454484015068L2759.7600006741627,1105.6212070012557C2987.39862553933,1250.0969656010045,3442.6758752696646,1539.0484828005021,3670.3145001348325,1687.2742414002512C3897.953125,1835.5,3897.953125,1843,3897.953125,1850.5C3897.953125,1858,3897.953125,1865.5,3897.953125,1873C3897.953125,1880.5,3897.953125,1888,3897.953125,1891.75L3897.953125,1895.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id11" d="M2546.3103357756154,959.6358657505697L2831.9343943963463,1104.363221458808C3117.5584530170768,1249.0905771670466,3688.8065702585386,1538.5452885835232,3974.430628879269,1687.0226442917617C4260.0546875,1835.5,4260.0546875,1843,4260.0546875,1850.5C4260.0546875,1858,4260.0546875,1865.5,4260.0546875,1873C4260.0546875,1880.5,4260.0546875,1888,4260.0546875,1891.75L4260.0546875,1895.5" /></g><g class="edgeLabels" /><g class="nodes"><g transform="translate(8, 22.5)" class="root"><g class="clusters"><g id="pipeline_types" class="cluster"><rect height="1775" width="460.140625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(180.2890625, 8)" class="cluster-label"><text x="57.781" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="57.781">pipeline_types</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(238.0703125, 76.5)" id="classId-ChEMBLActivityPipeline-0" class="node default"><rect height="67" width="238.09375" y="-33.5" x="-119.046875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="119.046875" x1="-119.046875" class="divider" /><line y2="13.5" y1="13.5" x2="119.046875" x1="-119.046875" class="divider" /><g class="label"><text x="107.047" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -107.046875, -21.5)"><tspan x="107.047">ChEMBLActivityPipeline</tspan></text></g></g><g transform="translate(238.0703125, 193.5)" id="classId-ChEMBLAssayParametersPipeline-1" class="node default"><rect height="67" width="325.484375" y="-33.5" x="-162.7421875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="162.7421875" x1="-162.7421875" class="divider" /><line y2="13.5" y1="13.5" x2="162.7421875" x1="-162.7421875" class="divider" /><g class="label"><text x="150.742" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -150.7421875, -21.5)"><tspan x="150.742">ChEMBLAssayParametersPipeline</tspan></text></g></g><g transform="translate(238.0703125, 310.5)" id="classId-ChEMBLAssayPipeline-2" class="node default"><rect height="67" width="221.265625" y="-33.5" x="-110.6328125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="110.6328125" x1="-110.6328125" class="divider" /><line y2="13.5" y1="13.5" x2="110.6328125" x1="-110.6328125" class="divider" /><g class="label"><text x="98.633" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -98.6328125, -21.5)"><tspan x="98.633">ChEMBLAssayPipeline</tspan></text></g></g><g transform="translate(238.0703125, 427.5)" id="classId-ChEMBLCellLinePipeline-3" class="node default"><rect height="67" width="240.59375" y="-33.5" x="-120.296875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="120.296875" x1="-120.296875" class="divider" /><line y2="13.5" y1="13.5" x2="120.296875" x1="-120.296875" class="divider" /><g class="label"><text x="108.297" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -108.296875, -21.5)"><tspan x="108.297">ChEMBLCellLinePipeline</tspan></text></g></g><g transform="translate(238.0703125, 544.5)" id="classId-ChEMBLCompoundRecordPipeline-4" class="node default"><rect height="67" width="328.1875" y="-33.5" x="-164.09375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="164.09375" x1="-164.09375" class="divider" /><line y2="13.5" y1="13.5" x2="164.09375" x1="-164.09375" class="divider" /><g class="label"><text x="152.094" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -152.09375, -21.5)"><tspan x="152.094">ChEMBLCompoundRecordPipeline</tspan></text></g></g><g transform="translate(238.0703125, 661.5)" id="classId-ChEMBLMoleculePipeline-5" class="node default"><rect height="67" width="249.5625" y="-33.5" x="-124.78125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="124.78125" x1="-124.78125" class="divider" /><line y2="13.5" y1="13.5" x2="124.78125" x1="-124.78125" class="divider" /><g class="label"><text x="112.781" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -112.78125, -21.5)"><tspan x="112.781">ChEMBLMoleculePipeline</tspan></text></g></g><g transform="translate(238.0703125, 778.5)" id="classId-ChEMBLProteinClassPipeline-6" class="node default"><rect height="67" width="282.15625" y="-33.5" x="-141.078125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="141.078125" x1="-141.078125" class="divider" /><line y2="13.5" y1="13.5" x2="141.078125" x1="-141.078125" class="divider" /><g class="label"><text x="129.078" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -129.078125, -21.5)"><tspan x="129.078">ChEMBLProteinClassPipeline</tspan></text></g></g><g transform="translate(238.0703125, 895.5)" id="classId-ChEMBLPublicationPipeline-7" class="node default"><rect height="67" width="270.4375" y="-33.5" x="-135.21875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="135.21875" x1="-135.21875" class="divider" /><line y2="13.5" y1="13.5" x2="135.21875" x1="-135.21875" class="divider" /><g class="label"><text x="123.219" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -123.21875, -21.5)"><tspan x="123.219">ChEMBLPublicationPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1012.5)" id="classId-ChEMBLPublicationSimilarityPipeline-8" class="node default"><rect height="67" width="357.34375" y="-33.5" x="-178.671875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="178.671875" x1="-178.671875" class="divider" /><line y2="13.5" y1="13.5" x2="178.671875" x1="-178.671875" class="divider" /><g class="label"><text x="166.672" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -166.671875, -21.5)"><tspan x="166.672">ChEMBLPublicationSimilarityPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1129.5)" id="classId-ChEMBLPublicationTermPipeline-9" class="node default"><rect height="67" width="314.640625" y="-33.5" x="-157.3203125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="157.3203125" x1="-157.3203125" class="divider" /><line y2="13.5" y1="13.5" x2="157.3203125" x1="-157.3203125" class="divider" /><g class="label"><text x="145.32" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -145.3203125, -21.5)"><tspan x="145.32">ChEMBLPublicationTermPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1246.5)" id="classId-ChEMBLSubcellularFractionPipeline-10" class="node default"><rect height="67" width="343.9375" y="-33.5" x="-171.96875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="171.96875" x1="-171.96875" class="divider" /><line y2="13.5" y1="13.5" x2="171.96875" x1="-171.96875" class="divider" /><g class="label"><text x="159.969" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -159.96875, -21.5)"><tspan x="159.969">ChEMBLSubcellularFractionPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1363.5)" id="classId-ChEMBLTargetComponentPipeline-11" class="node default"><rect height="67" width="327.078125" y="-33.5" x="-163.5390625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="163.5390625" x1="-163.5390625" class="divider" /><line y2="13.5" y1="13.5" x2="163.5390625" x1="-163.5390625" class="divider" /><g class="label"><text x="151.539" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -151.5390625, -21.5)"><tspan x="151.539">ChEMBLTargetComponentPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1480.5)" id="classId-ChEMBLTargetPipeline-12" class="node default"><rect height="67" width="223.953125" y="-33.5" x="-111.9765625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="111.9765625" x1="-111.9765625" class="divider" /><line y2="13.5" y1="13.5" x2="111.9765625" x1="-111.9765625" class="divider" /><g class="label"><text x="99.977" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -99.9765625, -21.5)"><tspan x="99.977">ChEMBLTargetPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1597.5)" id="classId-ChEMBLTargetProteinClassificationPipeline-13" class="node default"><rect height="67" width="410.140625" y="-33.5" x="-205.0703125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="205.0703125" x1="-205.0703125" class="divider" /><line y2="13.5" y1="13.5" x2="205.0703125" x1="-205.0703125" class="divider" /><g class="label"><text x="193.07" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -193.0703125, -21.5)"><tspan x="193.07">ChEMBLTargetProteinClassificationPipeline</tspan></text></g></g><g transform="translate(238.0703125, 1714.5)" id="classId-ChEMBLTissuePipeline-14" class="node default"><rect height="67" width="224.140625" y="-33.5" x="-112.0703125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="112.0703125" x1="-112.0703125" class="divider" /><line y2="13.5" y1="13.5" x2="112.0703125" x1="-112.0703125" class="divider" /><g class="label"><text x="100.07" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -100.0703125, -21.5)"><tspan x="100.07">ChEMBLTissuePipeline</tspan></text></g></g></g></g><g transform="translate(518.140625, 724.5)" class="root"><g class="clusters"><g id="target_helpers" class="cluster"><rect height="371" width="237.0625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(68.53125, 8)" class="cluster-label"><text x="58" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="58">target_helpers</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(126.53125, 76.5)" id="classId-ComponentHelper-15" class="node default"><rect height="67" width="187.0625" y="-33.5" x="-93.53125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="93.53125" x1="-93.53125" class="divider" /><line y2="13.5" y1="13.5" x2="93.53125" x1="-93.53125" class="divider" /><g class="label"><text x="81.531" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -81.53125, -21.5)"><tspan x="81.531">ComponentHelper</tspan></text></g></g><g transform="translate(126.53125, 193.5)" id="classId-SynonymHelper-16" class="node default"><rect height="67" width="166.75" y="-33.5" x="-83.375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="83.375" x1="-83.375" class="divider" /><line y2="13.5" y1="13.5" x2="83.375" x1="-83.375" class="divider" /><g class="label"><text x="71.375" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -71.375, -21.5)"><tspan x="71.375">SynonymHelper</tspan></text></g></g><g transform="translate(126.53125, 310.5)" id="classId-XrefHelper-17" class="node default"><rect height="67" width="121.96875" y="-33.5" x="-60.984375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="60.984375" x1="-60.984375" class="divider" /><line y2="13.5" y1="13.5" x2="60.984375" x1="-60.984375" class="divider" /><g class="label"><text x="48.984" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -48.984375, -21.5)"><tspan x="48.984">XrefHelper</tspan></text></g></g></g></g><g transform="translate(830.203125, 1929)" id="classId-ActivityTransformer-18" class="node default"><rect height="67" width="203.015625" y="-33.5" x="-101.5078125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="101.5078125" x1="-101.5078125" class="divider" /><line y2="13.5" y1="13.5" x2="101.5078125" x1="-101.5078125" class="divider" /><g class="label"><text x="89.508" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -89.5078125, -21.5)"><tspan x="89.508">ActivityTransformer</tspan></text></g></g><g transform="translate(1166.9140625, 1929)" id="classId-AssayParametersTransformer-19" class="node default"><rect height="67" width="290.40625" y="-33.5" x="-145.203125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="145.203125" x1="-145.203125" class="divider" /><line y2="13.5" y1="13.5" x2="145.203125" x1="-145.203125" class="divider" /><g class="label"><text x="133.203" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -133.203125, -21.5)"><tspan x="133.203">AssayParametersTransformer</tspan></text></g></g><g transform="translate(1495.2109375, 1929)" id="classId-AssayTransformer-20" class="node default"><rect height="67" width="186.1875" y="-33.5" x="-93.09375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="93.09375" x1="-93.09375" class="divider" /><line y2="13.5" y1="13.5" x2="93.09375" x1="-93.09375" class="divider" /><g class="label"><text x="81.094" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -81.09375, -21.5)"><tspan x="81.094">AssayTransformer</tspan></text></g></g><g transform="translate(2464.140625, 918)" id="classId-BaseChemblTransformer-21" class="node default"><rect height="67" width="244.984375" y="-33.5" x="-122.4921875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="122.4921875" x1="-122.4921875" class="divider" /><line y2="13.5" y1="13.5" x2="122.4921875" x1="-122.4921875" class="divider" /><g class="label"><text x="110.492" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -110.4921875, -21.5)"><tspan x="110.492">BaseChemblTransformer</tspan></text></g></g><g transform="translate(1781.0546875, 1929)" id="classId-CellLineTransformer-22" class="node default"><rect height="67" width="205.5" y="-33.5" x="-102.75" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="102.75" x1="-102.75" class="divider" /><line y2="13.5" y1="13.5" x2="102.75" x1="-102.75" class="divider" /><g class="label"><text x="90.75" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -90.75, -21.5)"><tspan x="90.75">CellLineTransformer</tspan></text></g></g><g transform="translate(2120.3515625, 1929)" id="classId-CompoundRecordTransformer-23" class="node default"><rect height="67" width="293.09375" y="-33.5" x="-146.546875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="146.546875" x1="-146.546875" class="divider" /><line y2="13.5" y1="13.5" x2="146.546875" x1="-146.546875" class="divider" /><g class="label"><text x="134.547" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -134.546875, -21.5)"><tspan x="134.547">CompoundRecordTransformer</tspan></text></g></g><g transform="translate(2464.140625, 1929)" id="classId-MoleculeTransformer-24" class="node default"><rect height="67" width="214.484375" y="-33.5" x="-107.2421875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="107.2421875" x1="-107.2421875" class="divider" /><line y2="13.5" y1="13.5" x2="107.2421875" x1="-107.2421875" class="divider" /><g class="label"><text x="95.242" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -95.2421875, -21.5)"><tspan x="95.242">MoleculeTransformer</tspan></text></g></g><g transform="translate(2784.921875, 1929)" id="classId-ProteinClassTransformer-25" class="node default"><rect height="67" width="247.078125" y="-33.5" x="-123.5390625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="123.5390625" x1="-123.5390625" class="divider" /><line y2="13.5" y1="13.5" x2="123.5390625" x1="-123.5390625" class="divider" /><g class="label"><text x="111.539" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -111.5390625, -21.5)"><tspan x="111.539">ProteinClassTransformer</tspan></text></g></g><g transform="translate(3159.5859375, 1929)" id="classId-PublicationSimilarityTransformer-26" class="node default"><rect height="67" width="322.25" y="-33.5" x="-161.125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="161.125" x1="-161.125" class="divider" /><line y2="13.5" y1="13.5" x2="161.125" x1="-161.125" class="divider" /><g class="label"><text x="149.125" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -149.125, -21.5)"><tspan x="149.125">PublicationSimilarityTransformer</tspan></text></g></g><g transform="translate(3550.4921875, 1929)" id="classId-PublicationTermTransformer-27" class="node default"><rect height="67" width="279.5625" y="-33.5" x="-139.78125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="139.78125" x1="-139.78125" class="divider" /><line y2="13.5" y1="13.5" x2="139.78125" x1="-139.78125" class="divider" /><g class="label"><text x="127.781" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -127.78125, -21.5)"><tspan x="127.781">PublicationTermTransformer</tspan></text></g></g><g transform="translate(3897.953125, 1929)" id="classId-PublicationTransformer-28" class="node default"><rect height="67" width="235.359375" y="-33.5" x="-117.6796875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="117.6796875" x1="-117.6796875" class="divider" /><line y2="13.5" y1="13.5" x2="117.6796875" x1="-117.6796875" class="divider" /><g class="label"><text x="105.68" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -105.6796875, -21.5)"><tspan x="105.68">PublicationTransformer</tspan></text></g></g><g transform="translate(4260.0546875, 1929)" id="classId-SubcellularFractionTransformer-29" class="node default"><rect height="67" width="308.84375" y="-33.5" x="-154.421875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="154.421875" x1="-154.421875" class="divider" /><line y2="13.5" y1="13.5" x2="154.421875" x1="-154.421875" class="divider" /><g class="label"><text x="142.422" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -142.421875, -21.5)"><tspan x="142.422">SubcellularFractionTransformer</tspan></text></g></g></g></g></g><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

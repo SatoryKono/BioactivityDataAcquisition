@@ -1,11 +1,11 @@
 %% Title: Package Family: composition/factories/storage
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/storage; modules: factory, merged_mixin, _helpers, adapter, clear_mixin, health_mixin.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/storage; modules: factory, _context_resolution, _layer_writers, _silver, bundle, clear_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   10
+%% @nodes   11
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -14,37 +14,45 @@ classDiagram
         class StorageFactory
     }
 
-    namespace merged_mixin {
-        class StorageAdapterMergedMixin
-        class _SilverMergedWriteProtocol
-    }
-
-    namespace helpers {
+    namespace context_resolution {
         class StorageCreationContext
     }
 
-    namespace adapter {
-        class StorageAdapter
+    namespace layer_writers {
+        class _SilverLayerWriterSupport
+    }
+
+    namespace silver {
+        class CreateSilverWriterRequest
+    }
+
+    namespace bundle {
+        class StorageBundle
     }
 
     namespace clear_mixin {
-        class StorageAdapterClearMixin
+        class StorageBundleClearMixin
     }
 
     namespace health_mixin {
-        class StorageAdapterHealthMixin
+        class StorageBundleHealthMixin
     }
 
     namespace maintenance_mixin {
-        class StorageAdapterMaintenanceMixin
+        class StorageBundleMaintenanceMixin
+    }
+
+    namespace merged_mixin {
+        class StorageBundleMergedMixin
     }
 
     namespace write_mixin {
-        class StorageAdapterWriteMixin
+        class StorageBundleWriteMixin
     }
 
-    StorageAdapterClearMixin <|-- StorageAdapter
-    StorageAdapterHealthMixin <|-- StorageAdapter
-    StorageAdapterMaintenanceMixin <|-- StorageAdapter
-    StorageAdapterMergedMixin <|-- StorageAdapter
-    StorageAdapterWriteMixin <|-- StorageAdapter
+    StorageBundleClearMixin <|-- StorageBundle
+    StorageBundleHealthMixin <|-- StorageBundle
+    StorageBundleMaintenanceMixin <|-- StorageBundle
+    StorageBundleMergedMixin <|-- StorageBundle
+    StorageBundleWriteMixin <|-- StorageBundle
+

@@ -3,9 +3,9 @@
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   22
+%% @nodes   26
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -14,6 +14,9 @@ classDiagram
         class ExecutionMetricsRunnerPort
         class ExecutionObservabilityPort
         class MetricsExtractorPort
+        class PipelineControlPlaneArtifacts
+        class PipelineCreateRunnerRequest
+        class PipelineCreateWithServicesRequest
         class PipelineFactoryPort
         class RunnablePort
         class RunnerFactoryPort
@@ -28,6 +31,7 @@ classDiagram
     }
 
     namespace memory {
+        class MemoryDecisionTraceEntry
         class MemoryMonitorPort
         class MemoryStats
     }
@@ -63,3 +67,4 @@ classDiagram
 
     ExecutionMetricsReadablePort <|-- ExecutionMetricsRunnerPort
     RunnablePort <|-- ExecutionMetricsRunnerPort
+

@@ -53,7 +53,7 @@ if defined WSL_DISTRO (
     for /f "usebackq delims=" %%I in (`"%WSL_EXE%" -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"
 )
 
-REM If wslpath failed, construct path manually: E:\repo -> /mnt/e/repo.
+REM If wslpath failed, construct path manually: E:\repo -> WSL /mnt/<drive>/repo.
 if not defined REPO_WSL (
     for /f "tokens=1" %%A in ("%REPO_WIN%") do (
         set "DRIVE=%%A:="

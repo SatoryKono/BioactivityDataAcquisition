@@ -1,0 +1,52 @@
+%% Title: Package Family: interfaces/cli/commands/domains/health
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands/domains/health; modules: _observability_backend_startup_types, server_integration_observability, observability_backend_failure_details, observability_backend_probes, observability_backend_runtime.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   26
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace observability_backend_startup_types {
+        class _AppendBackendStartupDiagnosticFn
+        class _BackendResultConstructor
+        class _BuildStartupFailureDetailFn
+        class _DescribeRequiredProbeFailureFn
+        class _DropStaleBackendFn
+        class _ListenerPidFn
+        class _MessagePrinter
+        class _ObservabilityBackendFailureHandlers
+        class _ObservabilityBackendRuntimeHooks
+        class _ObservabilityBackendStartupKwargs
+        class _ProbeFn
+        class _PythonExecutableToTupleFn
+        class _RequiredProbeFn
+        class _StartFn
+        class _StartedBackendProcess
+        class _WaitFn
+        class _WaitRequiredPathsFn
+    }
+
+    namespace server_integration_observability {
+        class _HealthObservabilitySettings
+        class _HealthRuntimeSettings
+        class _ProviderHealthDeps
+    }
+
+    namespace observability_backend_failure_details {
+        class _ResponseOpener
+        class _SupportsPoll
+    }
+
+    namespace observability_backend_probes {
+        class _HttpProbeResponse
+        class _UrlOpenFn
+    }
+
+    namespace observability_backend_runtime {
+        class ObservabilityBackendCliOptions
+        class ObservabilityBackendEnsureResult
+    }
+

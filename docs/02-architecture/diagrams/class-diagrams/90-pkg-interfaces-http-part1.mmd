@@ -1,0 +1,100 @@
+%% Title: Package Family: interfaces/http (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/interfaces/http; part 1/2; modules: _health_server_control_plane_scope, _health_server_observability_routing, health_server, _control_plane_selector_records, _health_server_checkpoint_lookup, _health_server_quarantine_routing.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace health_server_control_plane_scope {
+        class _ControlPlaneScopeHost
+        class _IdentityScope
+        class _RunManifestLookupPort
+    }
+
+    namespace health_server_observability_routing {
+        class _HealthObservabilityRoutingHost
+        class health_server_observability_routing__HealthResponseSupport
+        class _RunLedgerLookup
+    }
+
+    namespace health_server {
+        class HealthServer
+        class HealthServerControlPlaneDeps
+        class _StaticHealthMetricsExposition
+    }
+
+    namespace control_plane_selector_records {
+        class RunLedgerLookup
+        class SelectorRecord
+    }
+
+    namespace health_server_checkpoint_lookup {
+        class _CheckpointLookupHost
+        class _LatestCheckpointLookupPort
+    }
+
+    namespace health_server_quarantine_routing {
+        class _HealthQuarantineRoutingHost
+        class health_server_quarantine_routing__HealthResponseSupport
+    }
+
+    namespace health_server_readiness {
+        class _MetricsExposition
+        class _ReadinessHost
+    }
+
+    namespace health_server_routing_support {
+        class health_server_routing_support__HealthResponseSupport
+        class _HealthRoutingHost
+    }
+
+    namespace health_server_http_mixin {
+        class HealthServerHTTPMixin
+        class _RouteRequestSupport
+    }
+
+    namespace forensic_request_budget {
+        class ForensicEndpointUnavailable
+    }
+
+    namespace health_server_checkpoint_freshness {
+        class _CheckpointFreshnessHost
+    }
+
+    namespace health_server_control_plane_evidence_routing {
+        class _EvidenceRoutingHost
+    }
+
+    namespace health_server_control_plane_evidence_scope {
+        class EvidenceScopeHost
+    }
+
+    namespace health_server_control_plane_metrics_refresh {
+        class ControlPlaneMetricsRefresher
+    }
+
+    namespace processed_records_http {
+        class _UrlResponse
+    }
+
+    namespace processed_records_table_support {
+        class ProcessedRecordRowSpec
+    }
+
+    namespace health_server_routing_mixin {
+        class HealthServerRoutingMixin
+    }
+
+    namespace health_server_state_mixin {
+        class HealthServerStateMixin
+    }
+
+    EvidenceScopeHost <|-- _EvidenceRoutingHost
+    HealthServerHTTPMixin <|-- HealthServer
+    HealthServerRoutingMixin <|-- HealthServer
+    HealthServerStateMixin <|-- HealthServer
+

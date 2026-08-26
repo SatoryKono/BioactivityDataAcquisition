@@ -3,7 +3,8 @@
 set -euo pipefail
 export PATH="${HOME}/.local/bin:${PATH}"
 
-SRC=/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SRC="${BIOETL_CR_REVIEW_SRC:-$REPO_ROOT}"
 DST="${HOME}/bioetl-cr-review"
 OUT="${SRC}/reports/quality/coderabbit"
 BASE_REF="${1:-HEAD~300}"

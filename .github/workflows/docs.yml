@@ -126,6 +126,11 @@ jobs:
             --pipeline chembl_activity \
             --check
 
+      - name: Check generated package-family class diagram drift
+        run: |
+          uv run --frozen --no-build python \
+            scripts/diagrams/render/generate_package_family_class_diagrams.py --check
+
       - name: Check pipeline and workflow passport drift
         run: uv run --frozen --no-build python -m scripts.docs passports check
 
@@ -141,6 +146,7 @@ jobs:
             tests/architecture/test_diagram_issues_6205_6211_closeout.py \
             tests/architecture/test_documentation_audit_remediation.py \
             tests/architecture/test_check_doc_links_guardrails.py \
+            tests/architecture/test_api_reference_public_facades.py \
             tests/architecture/test_docs_governance_workflow.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
