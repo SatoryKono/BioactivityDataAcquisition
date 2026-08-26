@@ -14,13 +14,16 @@ Note:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
-from bioetl.application.services.ops._metrics_service_gateway_support import (
+from bioetl.application.ports.metrics import (
     DeleteResult,
+    MetricsServerStatus,
     PushResult,
+    StartResult,
+)
+from bioetl.application.services.ops._metrics_service_gateway_support import (
     _MetricsGatewayMixin,
     _MetricsTracingHost,
     _MetricsTracingMixin,
@@ -50,41 +53,6 @@ _METRICS_START_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class MetricsServerStatus:
-    """Status of the metrics server.
-
-    Attributes:
-        running: Whether the server is running.
-        port: Port the server is bound to (if running).
-        started_at: When the server was started.
-        error: Error message if server failed to start.
-    """
-
-    running: bool = False
-    port: int | None = None
-    started_at: datetime | None = None
-    error: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class StartResult:
-    """Result of starting the metrics server.
-
-    Attributes:
-        success: Whether the server started successfully.
-        port: Port the server is bound to.
-        already_running: True if server was already running.
-        error: Error message if failed.
-    """
-
-    success: bool = False
-    port: int = 0
-    addr: str = "127.0.0.1"
-    already_running: bool = False
-    error: str | None = None
 
 
 class _MetricsStartHost(_MetricsTracingHost, Protocol):

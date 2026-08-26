@@ -1,4 +1,3 @@
-# Schema field override residual (PD3).
 """Pandera schema for ChEMBL Activity entity aligned with RULES.md v5.24 and ChEMBL 34 schema."""
 
 from __future__ import annotations
@@ -40,7 +39,6 @@ class ActivitySchema(ETLRecordSchema):
         isin=["raw", "normalized", "validated"],
         description="Processing state for the activity record.",
     )
-    # === Primary Key ===
     activity_id: Series[str] = pa.Field(
         nullable=False, unique=True, description="Primary key."
     )

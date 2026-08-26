@@ -4,39 +4,39 @@
     "total_internal_imports": 7691,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 335,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "df3cb196980efba05a52b5d55de529e7b33e85babeb78042b9693a3fcdaef789"
+    "source_fingerprint": "de45fa96cbf5830e9a29c0c8a7de46262124b3f3afa24902c4e3c66c3eca1944"
   },
   "layer_edges": [
     {
       "source": "application",
       "target": "application",
-      "imports": 1550,
+      "imports": 1552,
       "allowed": true
     },
     {
       "source": "application",
       "target": "domain",
-      "imports": 978,
+      "imports": 977,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 190,
+      "imports": 187,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 682,
+      "imports": 685,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 290,
+      "imports": 286,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1242,
+      "imports": 1244,
       "allowed": true
     },
     {
@@ -72,7 +72,7 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 48,
+      "imports": 49,
       "allowed": true
     },
     {
@@ -270,11 +270,6 @@
       "imports": 19
     },
     {
-      "source": "application.services",
-      "target": "domain.lineage",
-      "imports": 18
-    },
-    {
       "source": "composition.factories",
       "target": "application.services",
       "imports": 18
@@ -292,6 +287,11 @@
     {
       "source": "application.pipelines",
       "target": "domain.value_objects",
+      "imports": 17
+    },
+    {
+      "source": "application.services",
+      "target": "domain.lineage",
       "imports": 17
     },
     {

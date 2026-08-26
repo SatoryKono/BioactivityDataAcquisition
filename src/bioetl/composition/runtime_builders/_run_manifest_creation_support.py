@@ -15,6 +15,7 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers 
     assemble_manifest_create_spec as _assemble_manifest_create_spec,
     build_manifest_source_refs as _build_manifest_source_refs,
     create_ledger_service as _create_ledger_service,
+    resolve_replay_lag_seconds as _resolve_replay_lag_seconds,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,
@@ -212,6 +213,7 @@ def emit_replay_reconstructability_metric(
     lag_seconds = _resolve_replay_lag_seconds(
         launch_context=launch_context,
         lag_status=lag_status,
+        read_attr=_read_attr,
     )
     if lag_seconds is not None:
         metrics.set_gauge(
@@ -230,22 +232,6 @@ def emit_replay_reconstructability_metric(
                 "status": "detected",
             },
         )
-
-
-def _resolve_replay_lag_seconds(
-    *,
-    launch_context: object,
-    lag_status: str,
-) -> float | None:
-    from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
-        resolve_replay_lag_seconds as _resolve,
-    )
-
-    return _resolve(
-        launch_context=launch_context,
-        lag_status=lag_status,
-        read_attr=_read_attr,
-    )
 
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:

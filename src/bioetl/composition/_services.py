@@ -6,7 +6,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.bootstrap.service_registry_contracts import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     AdrServicePort,
     AuditInspectionServiceProtocol,
     BronzeCleanupServiceProtocol,

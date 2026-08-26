@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -15,12 +16,12 @@ if TYPE_CHECKING:
     UnifiedHTTPClient = object
 
 
-@runtime_checkable
-class HttpConfig(Protocol):
-    """Minimal HTTP client config used by provider registry lookups."""
+@dataclass(frozen=True)
+class HttpConfig:
+    """HTTP client configuration returned by provider registries."""
 
-    rate: float
-    capacity: int
+    rate: float = 5.0
+    capacity: int = 10
 
 
 @runtime_checkable

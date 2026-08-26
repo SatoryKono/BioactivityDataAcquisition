@@ -25,14 +25,14 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2467,
+        "source_module_count": 2464,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 9.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.81
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 9.9,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.188
     },
     {
       "evidence_metrics": {
@@ -163,14 +163,14 @@
   },
   "diagnostics": {
     "composition_module_cap": 300,
-    "composition_module_count": 295,
+    "composition_module_count": 294,
     "families_at_budget": [
       "application_services_control_plane"
     ],
     "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 99,
-    "lazy_import_observed_count": 99,
+    "lazy_import_cap": 98,
+    "lazy_import_observed_count": 98,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -205,13 +205,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2467,
+    "source_module_count": 2464,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 84
+    "unmeasured_module_count": 0
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -241,7 +241,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "df3cb196980efba05a52b5d55de529e7b33e85babeb78042b9693a3fcdaef789"
+      "source_fingerprint": "de45fa96cbf5830e9a29c0c8a7de46262124b3f3afa24902c4e3c66c3eca1944"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -258,9 +258,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
+      "coverage_xml_sha256": "c29e1fcf6c649dd964df11edb767b5b268207597600584fc165e5794b0bf1411",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "0c4b2810a627ed40893d829cff7aa4ba0d39d2ca69e1e14ad9fb894ab48f105a"
+      "source_tree_sha256": "1603c5923458a67ef2281aeccdaa9e7aec9e44b229a486503669f6938dfd6ced"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

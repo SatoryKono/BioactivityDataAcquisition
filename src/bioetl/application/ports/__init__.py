@@ -22,8 +22,12 @@ from bioetl.application.ports.dq import (
 )
 from bioetl.application.ports.health import HealthServiceProtocol
 from bioetl.application.ports.metrics import (
+    DeleteResult,
     MetricsFactoryProtocol,
+    MetricsServerStatus,
     MetricsService,
+    PushResult,
+    StartResult,
     WorkflowMetricsFactoryProtocol,
 )
 from bioetl.application.ports.observability import ObservabilitySettingsProtocol
@@ -48,6 +52,7 @@ from bioetl.application.ports.pipeline_registry import PipelineRegistryProtocol
 from bioetl.application.ports.providers import (
     AdapterCreatorProtocol,
     DataSourceCreatorProtocol,
+    HttpConfig,
     ProviderAdapterFactoryProtocol,
     ProviderDataSourceAccessProtocol,
     ProviderHttpClientFactoryProtocol,
@@ -80,6 +85,7 @@ __all__ = [
     "DQDetectorConfig",
     "DQReportServiceFactoryProtocol",
     "DataSourceCreatorProtocol",
+    "DeleteResult",
     "ExportServiceProtocol",
     "ForensicRunDiffServiceProtocol",
     "GoldMergedWriteProtocol",
@@ -87,9 +93,11 @@ __all__ = [
     "HistoricalReplayClosureServiceProtocol",
     "HistoricalReplayCorpusServiceProtocol",
     "HistoricalReplayUniverseServiceProtocol",
+    "HttpConfig",
     "LineageInspectionServiceProtocol",
     "LockServiceProtocol",
     "MetricsFactoryProtocol",
+    "MetricsServerStatus",
     "MetricsService",
     "ObservabilitySettingsProtocol",
     "ObservabilityWorkflowServiceProtocol",
@@ -100,11 +108,13 @@ __all__ = [
     "ProviderHttpClientFactoryProtocol",
     "ProviderRegistrarProtocol",
     "ProviderSettingsProtocol",
+    "PushResult",
     "RegistryEntryProtocol",
     "RunManifestInspectionServiceProtocol",
     "SchemaBuilderProtocol",
     "SecretValueProviderProtocol",
     "SilverMergedWriteProtocol",
+    "StartResult",
     "StorageContextProtocol",
     "StorageFactoryProtocol",
     "SupportAwareDataSourceCreatorProtocol",
