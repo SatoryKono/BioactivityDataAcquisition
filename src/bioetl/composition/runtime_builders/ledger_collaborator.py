@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.application.ports.pipeline import PipelineRunnerProtocol
     from bioetl.application.services.control_plane.ledger.service import (
         RunLedgerService,
     )

@@ -54,6 +54,18 @@ def test_service_access_delegates_sync_accessors(
     entrypoints.resolve = lambda _protocol: calls.append("bronze") or "bronze"
     monkeypatch.setitem(__import__("sys").modules, entrypoints.__name__, entrypoints)
 
+    control_plane_access = ModuleType(
+        "bioetl.composition.control_plane_service_access"
+    )
+    control_plane_access.get_bronze_cleanup_service = (
+        lambda: calls.append("bronze") or "bronze"
+    )
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        control_plane_access.__name__,
+        control_plane_access,
+    )
+
     assert subject.get_lifecycle_service() == "lifecycle"
     assert subject.get_vacuum_service() == "vacuum"
     assert subject.get_bronze_cleanup_service() == "bronze"

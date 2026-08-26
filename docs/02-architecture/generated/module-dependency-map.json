@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2464,
-    "total_internal_imports": 7691,
+    "scanned_modules": 2465,
+    "total_internal_imports": 7688,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 335,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "df3cb196980efba05a52b5d55de529e7b33e85babeb78042b9693a3fcdaef789"
+    "source_fingerprint": "17cf4ba3791a00a54eef120341cfacef9cae1909b2c017fe4e62981f871fab49"
   },
   "layer_edges": [
     {
@@ -18,25 +18,25 @@
     {
       "source": "application",
       "target": "domain",
-      "imports": 978,
+      "imports": 977,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "application",
-      "imports": 190,
+      "imports": 187,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 682,
+      "imports": 684,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 290,
+      "imports": 287,
       "allowed": true
     },
     {
@@ -48,7 +48,7 @@
     {
       "source": "domain",
       "target": "domain",
-      "imports": 1242,
+      "imports": 1244,
       "allowed": true
     },
     {
@@ -137,7 +137,7 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 47
+      "imports": 46
     },
     {
       "source": "infrastructure.storage",
@@ -270,11 +270,6 @@
       "imports": 19
     },
     {
-      "source": "application.services",
-      "target": "domain.lineage",
-      "imports": 18
-    },
-    {
       "source": "composition.factories",
       "target": "application.services",
       "imports": 18
@@ -292,6 +287,11 @@
     {
       "source": "application.pipelines",
       "target": "domain.value_objects",
+      "imports": 17
+    },
+    {
+      "source": "application.services",
+      "target": "domain.lineage",
       "imports": 17
     },
     {
