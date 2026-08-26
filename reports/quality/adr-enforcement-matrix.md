@@ -68,3 +68,4 @@
 | `ADR-057` | `enforced` | 8 | 2 | - |
 | `ADR-058` | `enforced` | 20 | 5 | - |
 | `ADR-059` | `enforced` | 8 | 5 | - |
+
