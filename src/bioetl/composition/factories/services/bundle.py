@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.factories.pipeline.creation_support import (
+    BuildPipelineServicesFn,
+    ServiceBundleDeps,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
 )
@@ -82,23 +84,28 @@ class _BaseServicesFactoryProxy:
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
     ) -> PipelineService:
-        return self._resolve().create_common_services(
-            settings=settings,
-            logger=logger,
-            data_source=data_source,
-            pipeline_config=pipeline_config,
-            pipeline_name=pipeline_name,
-            audit=audit,
-            metrics=metrics,
-            tracer=tracer,
-            dq_monitor=dq_monitor,
-            metadata_coordinator=metadata_coordinator,
-            silver_validator=silver_validator,
+        return cast(
+            "PipelineService",
+            self._resolve().create_common_services(
+                settings=settings,
+                logger=logger,
+                data_source=data_source,
+                pipeline_config=pipeline_config,
+                pipeline_name=pipeline_name,
+                audit=audit,
+                metrics=metrics,
+                tracer=tracer,
+                dq_monitor=dq_monitor,
+                metadata_coordinator=metadata_coordinator,
+                silver_validator=silver_validator,
+            ),
         )
 
 
 PipelineCreationInputs = _PipelineCreationInputs
-BaseServicesFactory: BaseServicesFactoryProtocol = _BaseServicesFactoryProxy()
+BaseServicesFactory: BaseServicesFactoryProtocol = cast(
+    "BaseServicesFactoryProtocol", _BaseServicesFactoryProxy()
+)
 _DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
 
 
@@ -137,7 +144,10 @@ def _resolve_base_services_factory() -> BaseServicesFactoryProtocol:
         factory as _services_factory_module,
     )
 
-    return _services_factory_module.BaseServicesFactory
+    return cast(
+        "BaseServicesFactoryProtocol",
+        _services_factory_module.BaseServicesFactory,
+    )
 
 
 def _resolve_service_bundle_dependencies(
@@ -266,18 +276,21 @@ def build_pipeline_services(
         metrics=shared_metrics,
         cached_bronze=cached_bronze,
     )
-    return deps.base_services_factory.create_common_services(
-        settings=settings,
-        logger=logger,
-        data_source=data_source,
-        pipeline_config=pipeline_config,
-        pipeline_name=pipeline_name,
-        audit=audit,
-        metrics=shared_metrics,
-        tracer=tracer,
-        dq_monitor=dq_monitor,
-        metadata_coordinator=metadata_coordinator,
-        silver_validator=silver_validator,
+    return cast(
+        "PipelineService",
+        deps.base_services_factory.create_common_services(
+            settings=settings,
+            logger=logger,
+            data_source=data_source,
+            pipeline_config=pipeline_config,
+            pipeline_name=pipeline_name,
+            audit=audit,
+            metrics=shared_metrics,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
+        ),
     )
 
 
@@ -292,7 +305,9 @@ def create_pipeline_with_services(
     resolved_deps = _resolve_service_bundle_dependencies(_deps)
     return _create_pipeline_with_services_impl(
         inputs,
-        deps=resolved_deps,
+        deps=cast("ServiceBundleDeps", resolved_deps),
         extract_entity_type=_extract_entity_type,
-        build_pipeline_services_fn=build_pipeline_services,
+        build_pipeline_services_fn=cast(
+            "BuildPipelineServicesFn", build_pipeline_services
+        ),
     )

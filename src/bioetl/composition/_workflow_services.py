@@ -7,7 +7,7 @@ from collections.abc import Callable
 from datetime import datetime
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.composition._workflow_transform_registry import (
     build_workflow_transform_registry,
@@ -80,9 +80,12 @@ def load_workflow_config(name: str) -> WorkflowConfig:
         "bioetl.infrastructure.config.workflow_config_api"
     )
 
-    return workflow_config_api.load_workflow_config(
-        name,
-        configs_root=resolve_configs_root(),
+    return cast(
+        "WorkflowConfig",
+        workflow_config_api.load_workflow_config(
+            name,
+            configs_root=resolve_configs_root(),
+        ),
     )
 
 
@@ -92,7 +95,10 @@ def _default_pipeline_runner_service_factory(
     """Build the pipeline runner service without depending on the facade module."""
     runner = import_module("bioetl.composition.bootstrap.runtime.runner")
 
-    return runner.bootstrap_pipeline_runner_service(registry=registry)
+    return cast(
+        "PipelineRunnerService",
+        runner.bootstrap_pipeline_runner_service(registry=registry),
+    )
 
 
 def get_workflow_runner_service(
@@ -130,14 +136,17 @@ def get_workflow_runner_service(
         if pipeline_runner_service_factory is None
         else pipeline_runner_service_factory
     )
-    return workflow_runner_service.WorkflowRunnerService(
-        pipeline_runner=pipeline_runner_factory(registry),
-        transform_service=workflow_transform_service.WorkflowTransformService(
-            registry=transform_registry,
+    return cast(
+        "WorkflowRunnerService",
+        workflow_runner_service.WorkflowRunnerService(
+            pipeline_runner=pipeline_runner_factory(registry),
+            transform_service=workflow_transform_service.WorkflowTransformService(
+                registry=transform_registry,
+                metrics=metrics,
+            ),
             metrics=metrics,
+            workflow_transform_artifact_sink=artifact_sink,
         ),
-        metrics=metrics,
-        workflow_transform_artifact_sink=artifact_sink,
     )
 
 
@@ -198,23 +207,28 @@ def get_workflow_execution_service(
         base_path=output_root / "workflow_state",
         metrics=metrics,
     )
-    return execution_service.WorkflowExecutionService(
-        workflow_runner=get_workflow_runner_service(registry=registry),
-        manifest_service=manifest_service_module.WorkflowManifestService(
-            manifest_port=manifest_store,
-            clock=infrastructure_time.SystemClock(),
-            _manifest_id_factory=lambda: create_runtime_occurrence_id(
-                "workflow_manifest"
+    return cast(
+        "WorkflowExecutionService",
+        execution_service.WorkflowExecutionService(
+            workflow_runner=get_workflow_runner_service(registry=registry),
+            manifest_service=manifest_service_module.WorkflowManifestService(
+                manifest_port=manifest_store,
+                clock=infrastructure_time.SystemClock(),
+                _manifest_id_factory=lambda: create_runtime_occurrence_id(
+                    "workflow_manifest"
+                ),
+            ),
+            workflow_ledger_port=ledger_store,
+            workflow_ledger_factory=_create_workflow_ledger_service,
+            workflow_state_port=state_store,
+            workflow_lock_port=workflow_lock_port
+            if workflow_lock_port is not None
+            else _get_workflow_memory_lock(),
+            now_factory=infrastructure_time.SystemClock().now,
+            run_id_factory=lambda: create_runtime_occurrence_run_id(
+                "workflow_execution"
             ),
         ),
-        workflow_ledger_port=ledger_store,
-        workflow_ledger_factory=_create_workflow_ledger_service,
-        workflow_state_port=state_store,
-        workflow_lock_port=workflow_lock_port
-        if workflow_lock_port is not None
-        else _get_workflow_memory_lock(),
-        now_factory=infrastructure_time.SystemClock().now,
-        run_id_factory=lambda: create_runtime_occurrence_run_id("workflow_execution"),
     )
 
 
@@ -228,17 +242,20 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
-    return inspection_service.WorkflowInspectionService(
-        manifest_port=control_plane.FileWorkflowManifestStore(
-            base_path=output_root / "workflow_manifest",
-            metrics=metrics,
-        ),
-        ledger_port=control_plane.FileWorkflowLedgerStore(
-            base_path=output_root / "workflow_ledger",
-            metrics=metrics,
-        ),
-        state_port=control_plane.FileWorkflowExecutionStateStore(
-            base_path=output_root / "workflow_state",
-            metrics=metrics,
+    return cast(
+        "WorkflowInspectionService",
+        inspection_service.WorkflowInspectionService(
+            manifest_port=control_plane.FileWorkflowManifestStore(
+                base_path=output_root / "workflow_manifest",
+                metrics=metrics,
+            ),
+            ledger_port=control_plane.FileWorkflowLedgerStore(
+                base_path=output_root / "workflow_ledger",
+                metrics=metrics,
+            ),
+            state_port=control_plane.FileWorkflowExecutionStateStore(
+                base_path=output_root / "workflow_state",
+                metrics=metrics,
+            ),
         ),
     )

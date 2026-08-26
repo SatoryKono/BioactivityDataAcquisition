@@ -28,6 +28,7 @@ from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMet
 from bioetl.infrastructure.time import SystemClock
 
 if TYPE_CHECKING:
+    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -65,7 +66,7 @@ class _HealthCheckDataSourceFactory:
         )
         return DataSourceFactory.create(
             provider,
-            http_client=http_client,
+            http_client=cast("UnifiedHTTPClient | None", http_client),
             logger=self.logger,
             settings=self.settings,
             metrics=self.metrics,

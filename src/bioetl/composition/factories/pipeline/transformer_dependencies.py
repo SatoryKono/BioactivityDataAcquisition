@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Collection
+from typing import cast
 
 from bioetl.application.core.wiring.transformer import (
     DefaultContractPolicy,
@@ -102,6 +103,8 @@ def _load_contract_policy(
     if entity_type is None or contract_policy_loader is None:
         return DefaultContractPolicy()
     try:
-        return contract_policy_loader(provider, entity_type)
+        return cast(
+            "ContractPolicyProtocol", contract_policy_loader(provider, entity_type)
+        )
     except ValueError:
         return DefaultContractPolicy()
