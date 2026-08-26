@@ -49311,12 +49311,18 @@
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "source_tree_sha256": "796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362",
 ||||||| aba2ded177
   "source_tree_sha256": "d561c2c978a64b9158b582a0c06de65ea75ec536b55c88784b68e0cdb3b37810",
 =======
   "source_tree_sha256": "05e0950529a81698922c315c9cab5db7c38b575ece598e76b65e139acaf9daf8",
 >>>>>>> fix/arch-followup-9617-s12-s17-s20-s21
+||||||| f13bad6a67
+  "source_tree_sha256": "52f9fc36ff282850389afa5dd3ed93881df84bac628f4ca07319afdebb61b11c",
+=======
+  "source_tree_sha256": "ba25e20680a1420cf325e0ed20ff31324f235bfb4cf576f3c7a0022ae42ef5db",
+>>>>>>> fix/issue-9647-refresh-quality-artifacts
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

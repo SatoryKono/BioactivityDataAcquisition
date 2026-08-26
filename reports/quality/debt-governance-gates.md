@@ -10,6 +10,7 @@
 - architecture_quality_scorecard_integral_score: `9.41`
 - architecture_quality_scorecard_interpretation: `good_targeted_improvements`
 
+
 | gate | status | metric | current | limit | source |
 | --- | --- | --- | ---: | ---: | --- |
 | `debt_scorecard_budget_violations` | `pass` | `violation_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
@@ -20,6 +21,7 @@
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362` | `796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2465, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362'}` | `{'source_module_count': 2465, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
+
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
 | `compatibility_twin_pairs` | `pass` | `twin_pair_count` | `0` | `0` | `reports/quality/compatibility-importer-census.json` |
@@ -57,3 +59,4 @@
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
 | `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `cdad7398753ae9a1973c4075934d1fe483c8db1494973089f2c4b3335d1b26c0` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `fail` | `stale_artifact_count` | `{'count': 1, 'artifacts': ['adr_enforcement_matrix']}` | `0` | `reports/quality/*.json` |
+

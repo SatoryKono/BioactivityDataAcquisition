@@ -13,3 +13,4 @@
 | `composition_factories_pipeline` | 35 | 3968 | 0 | 0.358 | 0 | 2 | `bioetl.composition.factories.pipeline.transformer_builder` | `files_ge_250_loc=2, max_internal_fan_in=3` | `-` | `-` |
 | `application_services_control_plane` | 133 | 15091 | 0 | 0.376 | 0 | 2 | `bioetl.application.services.control_plane.replay.reproducibility_score_cards_types` | `files_ge_250_loc=0, max_internal_fan_in=2` | `-` | `at_budget:max_internal_fan_in=2/2` |
 | `composition_runtime_builders` | 57 | 7229 | 0 | 0.375 | 0 | 3 | `bioetl.composition.runtime_builders.run_manifest_support` | `files_ge_250_loc=0, max_internal_fan_in=5` | `-` | `-` |
+
