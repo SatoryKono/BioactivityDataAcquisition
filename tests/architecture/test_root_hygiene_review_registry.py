@@ -290,6 +290,24 @@ def test_root_hygiene_review_registry_classifies_qodo_as_local_vendor_surface() 
     assert ".junie" not in by_path
 
 
+def test_root_hygiene_review_registry_keeps_junie_as_equal_peer_runtime() -> None:
+    payload = _load_yaml(REGISTRY_PATH)
+    lanes = payload.get("review_lanes")
+    assert isinstance(lanes, list)
+    tooling_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "root_tooling_transitions"
+    )
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in tooling_lane["candidates"]
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+    assert by_path[".junie"]["current_live_state"] == "present_curated_root_surface"
+    assert by_path[".junie"]["disposition"] == "must_stay_root"
+
+
 def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -> None:
     payload = _load_yaml(REGISTRY_PATH)
     lanes = payload.get("review_lanes")
