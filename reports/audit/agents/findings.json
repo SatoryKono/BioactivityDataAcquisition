@@ -1,659 +1,99 @@
 {
-  "domain_id": "agents-runtime",
-  "prompt_id": "prompt.audit.agents-runtime",
-  "prompt_version": "1.2.0",
-  "audit_mode": "full",
-  "scope": "AGENTS.md .codex/ .junie/ .devin/ docs/00-project/ai/",
-  "generated_at": "2026-08-26",
-  "surface_score": 2,
-  "debt_outcome": "unchanged",
-  "skipped_checks": [
-    "bash scripts/ai/junie/check_junie_mirror.sh --check",
-    "python scripts/ai/codex/doctor.py static --no-write",
-    "bash scripts/ops/support/skills/check_skills_mirror.sh --check",
-    "python -m scripts.docs check-drift --runtime-mirrors --freshness",
-    "python -m memory.tooling.workflow pre-task --profile audit"
-  ],
   "findings": [
     {
-      "id": "AUD-001",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
+      "id": "AGENTS-MEM-SCR-001",
+      "requirement_id": "REQ-GOV-006",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "scripts",
+      "issue": 9712,
+      "pr": 9724,
+      "iteration_delta": "resolved_on_branch",
+      "path": "scripts/ai/mcp/mcp_memory_wrapper.sh:44-53",
+      "observation": "Bash MCP memory wrapper wired by .mcp.json never discovers .venv-win; on native Windows Git Bash with no python3 and no .venv/bin/python it would exit 69 when BIOETL_AI_MEMORY_MODE=read-write even though .venv-win exists.",
+      "method": "read wrapper; Git Bash interpreter probe; compare mcp_memory_wrapper.ps1 and run_workflow.sh",
+      "expected": ".venv-win/Scripts/python.exe selected on native Windows when POSIX venv is absent, matching AGENTS.md and #9121",
+      "actual": "order was BIOETL_WSL_VENV_DIR, .venv/bin/python, python3, else exit 69. Probe: venv-win YES, venv/bin NO, python3 NONE, PICK=NONE",
+      "impact": "Windows operators cannot start the documented MCP memory server from canonical .mcp.json after enabling read-write.",
+      "root_cause": "#9121 fixed run_workflow.sh only; architecture test asserted .venv-win solely on the unused-by-.mcp.json PowerShell wrapper.",
+      "remediation": "Add .venv-win after POSIX .venv/bin/python; extend architecture assertion.",
+      "effort": "S",
+      "automation": "test_shared_mcp_memory_requires_explicit_write_enablement",
+      "automated_fix_possible": true,
+      "evidence": [
+        {
+          "path": "scripts/ai/mcp/mcp_memory_wrapper.sh",
+          "line": 44,
+          "command": "bash -lc interpreter probe",
+          "observation": "PICK=NONE before fix; PICK=.venv-win after fix"
+        },
+        {
+          "path": ".mcp.json",
+          "line": 4,
+          "command": "read .mcp.json",
+          "observation": "memory.command=bash args=[scripts/ai/mcp/mcp_memory_wrapper.sh]"
+        }
+      ],
+      "validation": [
+        "pytest tests/architecture/test_ai_memory_program_contracts.py tests/unit/repo_backed/scripts/ai/mcp/test_memory_persistence_mode.py -q"
+      ]
+    },
+    {
+      "id": "AGENTS-MEM-RT-001",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "instruction-conflict",
-      "path": "docs/00-project/ai/rules/cursor/05-agent-workflow.mdc:12",
-      "observation": "Always-on Cursor/Windsurf agent-workflow rule publishes a truncated precedence that names only `.codex/agents/` (plus optional `.gemini/**`) and then jumps to RULES.md, omitting Junie/Devin equal peers and NORMATIVE_SOURCES.md.",
-      "method": "read_file of cursor and windsurf 05-agent-workflow vs AGENTS.md Canonical Precedence",
-      "expected": "Cursor canonical rules (AI_RUNTIME_MIRROR_OWNERSHIP.md) MUST NOT contradict AGENTS.md: equal-peer `.codex/**` / `.junie/**`, Devin tree for Devin sessions, then NORMATIVE_SOURCES.md before RULES.md.",
-      "actual": "docs/00-project/ai/rules/cursor/05-agent-workflow.mdc:12-15 and docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md:12-15 list `.codex/agents/` then RULES.md / REQUIREMENTS.md / ADRs.",
-      "impact": "Cursor/Windsurf sessions with alwaysApply/always_on can ignore Junie/Devin runtime trees and the normative index, treating RULES as the next authority after Codex.",
-      "root_cause": "Condensed IDE rule was not updated when AGENTS.md added Junie equal-peer and Devin surfaces.",
-      "remediation": "Rewrite 05-agent-workflow precedence to match AGENTS.md; run `python -m scripts.ai.sync.windsurf` so the Windsurf mirror stays generated from Cursor.",
+      "category": "runtime",
+      "issue": 9713,
+      "pr": 9724,
+      "iteration_delta": "resolved_on_branch",
+      "path": ".devin/agents/py-audit-bot/AGENT.md:51-52",
+      "observation": "Devin py-audit-bot Memory section claimed memory-py-audit-bot.md contains import matrix, scoring, and valid exceptions.",
+      "method": "read AGENT.md and memory-py-audit-bot.md",
+      "expected": "Memory sheet is navigation only; scoring/import matrix live in RULES/quality configs/architecture tests",
+      "actual": "AGENT.md pointed at the sheet as owner of import matrix/scoring",
+      "impact": "Devin audit sessions may invent thresholds from a sheet that explicitly forbids duplicating them.",
+      "root_cause": "Stale Devin profile text after memory sheets were compacted.",
+      "remediation": "Rewrite Memory section as navigation-only.",
       "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"Runtime source:\" docs/00-project/ai/rules/cursor/05-agent-workflow.mdc docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md",
-        "python -m scripts.ai.sync.windsurf --check"
-      ],
-      "automation": "Add an architecture test that Cursor/Windsurf 05-agent-workflow contains `.junie/` and NORMATIVE_SOURCES.md.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/rules/cursor/05-agent-workflow.mdc",
-          "line": 12,
-          "command": "read_file",
-          "observation": "Precedence item 1 is `.codex/agents/` plus optional `.gemini/**`; item 2 is RULES.md."
-        },
-        {
-          "path": "docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md",
-          "line": 12,
-          "command": "read_file",
-          "observation": "Byte-equivalent truncated precedence after Windsurf transform."
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 10,
-          "command": "read_file",
-          "observation": "Canonical precedence lists Codex, Junie, Devin, optional Gemini, then profiles/skills, then NORMATIVE_SOURCES.md."
-        }
-      ]
-    },
-    {
-      "id": "AUD-002",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN",
-      "category": "mirror-drift",
-      "path": "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md:8",
-      "observation": "Tracked Windsurf core-governance rule is not a current transform of Cursor: it hardcodes RULES v6.1.5, REQUIREMENTS v1.12 / 168 reqs, ADR-001…ADR-050, and starts Source Priority at RULES.md instead of the runtime contract.",
-      "method": "side-by-side read of cursor/00-bioetl-core-governance.mdc vs windsurf/rules/00-bioetl-core-governance.md; RULES.md header Version: 6.1.11; REQUIREMENTS.md Version: 1.12.5; decisions/ through ADR-059",
-      "expected": "Windsurf rules are generated from docs/00-project/ai/rules/cursor/ via scripts/ai/sync/windsurf.py and must not pin stale RULES/ADR literals (NORMATIVE_SOURCES.md version policy).",
-      "actual": "Cursor file reads Version headers and lists AGENTS.md-aligned source priority; Windsurf file still says RULES.md (v6.1.5), REQUIREMENTS v1.12, ADR-001…ADR-050, and Source Priority item 1 is RULES.md.",
-      "impact": "Cascade/Windsurf agents follow a stale governance map (missing ADR-051…059 and current RULES 6.1.11) and can invert runtime-vs-RULES precedence.",
-      "root_cause": "Cursor rule was updated in place; Windsurf mirror was not regenerated.",
-      "remediation": "Regenerate Windsurf from Cursor (`python -m scripts.ai.sync.windsurf`) and add a drift gate so hardcoded RULES versions fail CI.",
-      "effort": "S",
-      "dependencies": ["AUD-001"],
-      "validation": [
-        "python -m scripts.ai.sync.windsurf --check",
-        "rg -n \"v6.1.5\" docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md"
-      ],
-      "automation": "CI job already in skills-consistency for other mirrors; extend or add windsurf --check.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
-          "line": 8,
-          "command": "read_file",
-          "observation": "Hardcoded RULES v6.1.5, REQUIREMENTS v1.12, ADR-001…ADR-050."
-        },
-        {
-          "path": "docs/00-project/ai/rules/cursor/00-bioetl-core-governance.mdc",
-          "line": 8,
-          "command": "read_file",
-          "observation": "Cursor counterpart says read header Version: and AGENTS.md-aligned priority."
-        },
-        {
-          "path": "docs/00-project/RULES.md",
-          "line": 3,
-          "command": "read_file",
-          "observation": "Current RULES Version: 6.1.11, Last verified: 2026-08-25."
-        }
-      ]
-    },
-    {
-      "id": "AUD-003",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.95,
-      "status": "PROVEN",
-      "category": "stale-version-literal",
-      "path": "docs/00-project/ai/agents/guides/CLAUDE.md:9",
-      "observation": "Claude compatibility guides and the Cursor rules coverage matrix still claim synchronization with RULES.md v6.1.5 (2026-07-16) while RULES.md is 6.1.11.",
-      "method": "grep v6.1.5 under docs/00-project/ai/; read RULES.md header",
-      "expected": "NORMATIVE_SOURCES.md Version policy: do not hardcode RULES version literals in mirrors; read the RULES.md Version: header.",
-      "actual": "docs/00-project/ai/agents/guides/CLAUDE.md:9, docs/00-project/ai/agents/CLAUDE.md:9, and docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md:8,14 still say v6.1.5.",
-      "impact": "Agents treating Claude/Cursor coverage docs as current will apply an outdated constitution stamp and may skip later RULES/ADR obligations.",
-      "root_cause": "Hardcoded version banners were not converted to header-read instructions when RULES advanced 6.1.5 → 6.1.11.",
-      "remediation": "Replace version banners with 'read Version: in RULES.md'; refresh RULES_COVERAGE_MATRIX.md Last verified against current RULES/REQUIREMENTS/ADR range.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"v6.1.5\" docs/00-project/ai/agents docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-        "python -m scripts.docs check-drift --runtime-mirrors --freshness"
-      ],
-      "automation": "docs drift/freshness check should fail hardcoded RULES version literals in ai mirrors.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
-          "line": 9,
-          "command": "read_file",
-          "observation": "Синхронизировано с RULES.md v6.1.5 (2026-07-16)."
-        },
-        {
-          "path": "docs/00-project/ai/agents/CLAUDE.md",
-          "line": 9,
-          "command": "read_file",
-          "observation": "Synchronized with RULES.md v6.1.5 (2026-07-16)."
-        },
-        {
-          "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 8,
-          "command": "read_file",
-          "observation": "Aligned with RULES v6.1.5; Last verified 2026-07-16."
-        }
-      ]
-    },
-    {
-      "id": "AUD-004",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "ownership-inversion",
-      "path": "docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py:1",
-      "observation": "Engineering QA wrappers declare docs-mirror Python under docs/00-project/ai/agents/scripts/ as the canonical implementation for the quality-exemptions (debt-budget) gate and config-gap analysis.",
-      "method": "read_file of scripts/engineering/qa/check_quality_exemptions.py and scripts/schema/analysis/config_gap_analysis.py vs AI_RUNTIME_MIRROR_OWNERSHIP.md",
-      "expected": "docs/00-project/ai/** is a mirror/guidance surface and MUST NOT be the behavior SSOT; debt-budget checkers belong under scripts/engineering/**.",
-      "actual": "check_quality_exemptions.py:4-5 and config_gap_analysis.py:4-5 name docs/00-project/ai/agents/scripts/*.py as Canonical script and runpy into those files.",
-      "impact": "Agents following ownership policy may treat the debt gate as a disposable mirror, or edit the docs copy without realizing it is the live checker. Debt-budget enforcement is coupled to an AI-docs path.",
-      "root_cause": "Historical 'agent-canonical' script inventory left implementations under docs/ and pointed engineering wrappers at them.",
-      "remediation": "Move implementations to scripts/engineering/qa (and scripts/schema/analysis); keep docs paths as thin deprecated wrappers, not the reverse.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"Canonical script\" scripts/engineering/qa/check_quality_exemptions.py scripts/schema/analysis/config_gap_analysis.py"
-      ],
-      "automation": "n/a until ownership is inverted; then a path-owner test.",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "scripts/engineering/qa/check_quality_exemptions.py",
-          "line": 5,
-          "command": "read_file",
-          "observation": "Canonical script: docs/00-project/ai/agents/scripts/architecture-techdebt-automation.py"
-        },
-        {
-          "path": "scripts/schema/analysis/config_gap_analysis.py",
-          "line": 5,
-          "command": "read_file",
-          "observation": "Canonical script: docs/00-project/ai/agents/scripts/py-config-bot-1.py"
-        },
-        {
-          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 30,
-          "command": "read_file",
-          "observation": "docs/00-project/ai/** is not canonical for runtime behavior."
-        }
-      ]
-    },
-    {
-      "id": "AUD-005",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "conflicting-instructions",
-      "path": "docs/00-project/ai/agents/agents/sp-test-automator.md:21",
-      "observation": "Docs-only sp-* specialist profiles still ship Write/Edit/Bash tools, hardcoded model: sonnet, coverage >80%, and escalate to sp-workflow-orchestrator, which has no profile file.",
-      "method": "list_dir docs/00-project/ai/agents/agents/; grep sp-workflow-orchestrator and model: sonnet; compare coverage to RULES.md ≥85%",
-      "expected": "sp-* files are documented as non-runtime (agents/README.md). They MUST NOT advertise spawnable Write agents, provider-specific models, or coverage thresholds that contradict RULES.md. Escalation targets MUST exist or be removed.",
-      "actual": "12 sp-*.md files exist; none is sp-workflow-orchestrator.md. sp-test-automator.md:21 tools include Write/Edit/Bash; checklist line 49 requires Test coverage > 80%; RULES.md:1109 requires ≥85%.",
-      "impact": "An agent that treats docs/00-project/ai/agents/agents/ as spawnable can write product code with a non-governed profile, wrong coverage gate, and a dead orchestrator handoff.",
-      "root_cause": "Generated specialist specs retained Claude-style frontmatter after they were reclassified as docs-only.",
-      "remediation": "Strip Write/Bash from docs-only profiles or convert them to read-only pointers at py-* runtime roles; delete sonnet literals; replace coverage >80% with a pointer to RULES.md; remove or add sp-workflow-orchestrator.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"sp-workflow-orchestrator|model: sonnet|coverage > 80\" docs/00-project/ai/agents/agents/sp-*.md"
-      ],
-      "automation": "Extend docs/00-project/ai/agents/policy/check_agent_consolidation.py --strict to ban missing escalation targets and coverage literals.",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/agents/sp-test-automator.md",
-          "line": 21,
-          "command": "read_file",
-          "observation": "tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/sp-test-automator.md",
-          "line": 49,
-          "command": "read_file",
-          "observation": "Test coverage > 80% achieved"
-        },
-        {
-          "path": "docs/00-project/ai/agents/agents/README.md",
-          "line": 63,
-          "command": "read_file",
-          "observation": "sp-* live only under docs and MUST NOT be spawned as ORCHESTRATION.md agents."
-        }
-      ]
-    },
-    {
-      "id": "AUD-006",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "coverage-gap",
-      "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md:27",
-      "observation": "Post-change policy Applies To lists `.codex/**`, `.junie/**`, optional `.gemini/**`, AGENTS.md, and `.junie/guidelines.md`, but never `.devin/**`, despite AGENTS.md treating `.devin/agents/**` and `.devin/skills/**` as canonical Devin runtime.",
-      "method": "read_file POST_CHANGE_VALIDATION.md; grep .devin in that file (no matches); compare AGENTS.md Guardrails",
-      "expected": "Write-capable Devin runtime edits follow the same post-change protocol, including Codex–Devin skill parity (`check_skills_mirror.sh --check`).",
-      "actual": "POST_CHANGE_VALIDATION.md:27-29 omits `.devin/**`. Minimum Surface Checks for Runtime AI files mention only junie-mirror.sh, not the Devin skills-mirror contract.",
-      "impact": "Devin profile/skill changes can close out without the documented Devin parity gate or post-change scan.",
-      "root_cause": "Policy updated for Codex–Junie equal peers; Devin was left as a side tree.",
-      "remediation": "Add `.devin/agents/**` and `.devin/skills/**` to Applies To and Minimum Surface Checks; cite `bash scripts/ops/support/skills/check_skills_mirror.sh --check`.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"devin\" docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
-      ],
-      "automation": "Architecture test that POST_CHANGE_VALIDATION.md mentions .devin/skills and the skills-mirror checker.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 27,
-          "command": "grep .devin",
-          "observation": "No `.devin` string in the file; Applies To names only Codex/Junie/Gemini."
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 109,
-          "command": "read_file",
-          "observation": ".devin/agents/** and .devin/skills/** are canonical tracked Devin runtime sources."
-        }
-      ]
-    },
-    {
-      "id": "AUD-007",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "instruction-conflict",
-      "path": ".devin/agents/DEVIN-RUNTIME.md:7",
-      "observation": "Devin runtime map and orchestration list NORMATIVE_SOURCES/RULES/REQUIREMENTS/ADRs before AGENTS.md, inverting the repository Canonical Precedence inside the Devin SSOT tree.",
-      "method": "read_file DEVIN-RUNTIME.md, .devin/agents/ORCHESTRATION.md, .devin/agents/py-test-bot/AGENT.md Canonical Sources vs AGENTS.md",
-      "expected": "Devin-specific behavior may differ, but repository-wide precedence still starts at AGENTS.md then the active runtime map (AGENTS.md Canonical Precedence).",
-      "actual": "DEVIN-RUNTIME.md:7-14 and ORCHESTRATION.md:5-12 put docs/00-project/* above AGENTS.md. py-test-bot/AGENT.md:25-32 repeats the inverted list.",
-      "impact": "Devin sessions can treat RULES/docs as higher than the root runtime contract, including env/debt/mirror guardrails that live in AGENTS.md.",
-      "root_cause": "Devin adaptation copied a docs-first read order instead of AGENTS.md precedence.",
-      "remediation": "Put AGENTS.md then DEVIN-RUNTIME.md first in every Devin Canonical Sources list; keep RULES/ADR as selected-by-index reads.",
-      "effort": "S",
-      "dependencies": ["AUD-006"],
-      "validation": [
-        "rg -n \"Canonical Sources\" -A 12 .devin/agents/DEVIN-RUNTIME.md .devin/agents/ORCHESTRATION.md"
-      ],
-      "automation": "Extend tests/architecture/test_runtime_orchestration_surfaces.py to assert AGENTS.md appears before RULES.md in Devin maps.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": ".devin/agents/DEVIN-RUNTIME.md",
-          "line": 7,
-          "command": "read_file",
-          "observation": "First Canonical Sources bullet is docs/00-project/NORMATIVE_SOURCES.md; AGENTS.md is seventh."
-        },
-        {
-          "path": ".devin/agents/ORCHESTRATION.md",
-          "line": 5,
-          "command": "read_file",
-          "observation": "Same docs-first order."
-        }
-      ]
-    },
-    {
-      "id": "AUD-008",
-      "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "undocumented-precondition",
-      "path": "AGENTS.md:86",
-      "observation": "Mandatory Codex–Junie parity check is documented only as `bash scripts/ai/junie/check_junie_mirror.sh --check`, with no Windows-native `python scripts/ai/junie/check_junie_mirror.py --check` despite agent-memory.md requiring `.venv-win` on Windows.",
-      "method": "read AGENTS.md Post-Change Validation, POST_CHANGE_VALIDATION.md:51, check_junie_mirror.sh, agent-memory.md platform section; grep check_junie_mirror.py in AGENTS.md (absent)",
-      "expected": "fragments/shell-portability.md: primary operator OS is Windows; mandatory checks MUST document a `.venv-win` Python invocation.",
-      "actual": "AGENTS.md:86 and POST_CHANGE_VALIDATION.md:51 only show bash. The Python checker exists at scripts/ai/junie/check_junie_mirror.py and is what the shell wrapper execs.",
-      "impact": "Windows agents without Git Bash may skip the required parity gate or fail closeout, even though the checker is portable Python.",
-      "root_cause": "Post-change text copied the CI bash invocation only.",
-      "remediation": "Document `python scripts/ai/junie/check_junie_mirror.py --check` (Windows: `.\\.venv-win\\Scripts\\python.exe ...`) next to the bash form in AGENTS.md, guidelines.md, and POST_CHANGE_VALIDATION.md.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"check_junie_mirror.py\" AGENTS.md docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"
-      ],
       "automation": "n/a",
       "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "AGENTS.md",
-          "line": 86,
-          "command": "read_file",
-          "observation": "Only bash scripts/ai/junie/check_junie_mirror.sh --check is required."
-        },
-        {
-          "path": "scripts/ai/junie/check_junie_mirror.sh",
-          "line": 43,
-          "command": "read_file",
-          "observation": "Wrapper execs check_junie_mirror.py with the same --check/--sync mode."
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 73,
-          "command": "read_file",
-          "observation": "On native Windows agents MUST use .venv-win."
+          "path": ".devin/agents/py-audit-bot/AGENT.md",
+          "line": 51,
+          "command": "rg import matrix .devin/agents/py-audit-bot/AGENT.md",
+          "observation": "stale claim present on origin/main@8a79ac6e4d; removed on branch"
         }
       ]
     },
     {
-      "id": "AUD-009",
+      "id": "AGENTS-MEM-VEN-001",
       "requirement_id": "GAP",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "discoverability",
-      "path": "docs/00-project/ai/rules/cursor/00-bioetl-core-governance.mdc:37",
-      "observation": "Always-on Cursor core-governance rule tells agents to apply 'Architecture boundaries per AGENTS.md import matrix', but AGENTS.md contains no import matrix.",
-      "method": "read_file cursor rule; grep 'import matrix' in AGENTS.md (no matches); import matrix lives in docs/00-project/ai/rules/bioetl-ai-rules.md and RULES.md",
-      "expected": "Point at RULES.md §1 / ADR-005/048 (NORMATIVE_SOURCES.md topic table), not AGENTS.md.",
-      "actual": "00-bioetl-core-governance.mdc:37 cites AGENTS.md import matrix.",
-      "impact": "Cursor agents search AGENTS.md for layer rules and miss the real matrix.",
-      "root_cause": "Condensed rule attributed the import matrix to the wrong canonical file.",
-      "remediation": "Replace the citation with RULES.md §1 (and optionally bioetl-ai-rules.md as a digest).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"import matrix\" AGENTS.md docs/00-project/ai/rules/cursor/00-bioetl-core-governance.mdc"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/rules/cursor/00-bioetl-core-governance.mdc",
-          "line": 37,
-          "command": "read_file",
-          "observation": "Architecture boundaries per AGENTS.md import matrix"
-        },
-        {
-          "path": "AGENTS.md",
-          "line": 1,
-          "command": "grep import matrix",
-          "observation": "No matches for 'import matrix' in AGENTS.md."
-        }
-      ]
-    },
-    {
-      "id": "AUD-010",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "instruction-hygiene",
-      "path": ".codex/agents/CODEX-RUNTIME.md:55",
-      "observation": "Native discovery validation paragraph is a broken sentence: '`python -m` is not used here; on Windows use ... doctor.py'.",
-      "method": "read_file CODEX-RUNTIME.md Native Project Discovery",
-      "expected": "A single unambiguous command recipe for `scripts/ai/codex/doctor.py static --no-write`.",
-      "actual": "Lines 54-57 splice an unfinished 'python -m is not used here' clause into the Windows/Linux doctor commands.",
-      "impact": "Agents may skip doctor.py or invent a `python -m` invocation that does not exist.",
-      "root_cause": "Incomplete edit of the validation sentence.",
-      "remediation": "Replace with the two explicit doctor.py commands only; keep the same Windows vs POSIX split.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"python -m is not used here\" .codex/agents/CODEX-RUNTIME.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 55,
-          "command": "read_file",
-          "observation": "`python -m` is not used here; on Windows use `.\\.venv-win\\Scripts\\python.exe scripts/ai/codex/doctor.py static --no-write`"
-        }
-      ]
-    },
-    {
-      "id": "AUD-011",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "reports-output",
-      "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py:12",
-      "observation": "Agent-canonical config-gap script documents default write to `docs/audits/config_gaps.md`, which is outside the reports/ contract and is not a tracked audit domain dir.",
-      "method": "read_file usage docstring; compare fragments/reports-output.md",
-      "expected": "Audit/gap artifacts land under reports/audit/configs/ or reports/quality/, not docs/audits/.",
-      "actual": "Usage line: python ... py-config-bot-1.py -o docs/audits/config_gaps.md",
-      "impact": "Operators following the docstring create an ungoverned docs/audits/ tree and miss the domain audit pair.",
-      "root_cause": "Legacy output path predates reports-output fragment.",
-      "remediation": "Change the example to reports/audit/configs/config_gaps.md (or reports/quality/) and reject docs/audits/ in the CLI if present.",
-      "effort": "S",
-      "dependencies": ["AUD-004"],
-      "validation": [
-        "rg -n \"docs/audits\" docs/00-project/ai/agents/scripts/py-config-bot-1.py"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
-          "line": 12,
-          "command": "read_file",
-          "observation": "Usage example writes docs/audits/config_gaps.md"
-        }
-      ]
-    },
-    {
-      "id": "AUD-012",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "medium",
-      "confidence_score": 0.7,
-      "status": "PROVEN",
-      "category": "permissions",
-      "path": ".devin/config.json:17",
-      "observation": "Tracked Devin project permissions allow unbounded `Exec(git)` (and `Exec(python)` / `Exec(make)`) at session scope while only denying `Write(**/.env*)`.",
-      "method": "read_file .devin/config.json; compare py-audit-bot AGENT.md which also allows Exec(git)",
-      "expected": "Least privilege: git allowlist limited to read/diff/log (as the audit profile already lists Exec(git diff)/Exec(git log)), with reset/clean/push denied unless the user grants them.",
-      "actual": ".devin/config.json allow includes Exec(git), Exec(python), Exec(make). deny is only Write(**/.env*).",
-      "impact": "A Devin session can run destructive git (`reset --hard`, force-push) without a config-level deny; mitigation is only AGENTS.md prose and operator grants.",
-      "root_cause": "Project-level allow list used coarse Exec(git) instead of subcommand allowlists.",
-      "remediation": "Narrow Exec(git) to diff/log/status/rev-parse; keep deny for Write(.env*); document that reset/force-push stay session-grant only.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "python -c \"import json; print(json.load(open('.devin/config.json'))['permissions'])\""
-      ],
-      "automation": "test_dev_setup_copilot_codex_mcp_consolidation.py already covers Devin MCP inventory; extend to deny destructive git if Devin schema supports it.",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": ".devin/config.json",
-          "line": 17,
-          "command": "read_file",
-          "observation": "allow contains Exec(git); deny contains only Write(**/.env*)."
-        }
-      ]
-    },
-    {
-      "id": "AUD-013",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.8,
-      "status": "PROVEN",
-      "category": "routing",
-      "path": "AGENTS.md:136",
-      "observation": "Repository-wide Dashboard Skill Routing tells every agent to use `.codex/skills/observability-dashboard/` and `.codex/skills/observability-prometheus/`, while Junie guidelines correctly point at `.junie/skills/...` equal-peer paths.",
-      "method": "read AGENTS.md Dashboard Skill Routing vs .junie/guidelines.md Dashboard Skill Routing; junie-mirror-contract.json required_dashboard_skills",
-      "expected": "AGENTS.md either names both equal-peer skill paths or says 'matching runtime tree'.",
-      "actual": "AGENTS.md:136-138 only lists .codex/skills. guidelines.md:146-150 lists .junie/skills as equal-peer mirrors.",
-      "impact": "Junie agents that stop at AGENTS.md load Codex skill paths. Content is contracted byte-identical, so behavior matches; discoverability/routing is inconsistent.",
-      "root_cause": "Dashboard routing was added on the Codex side of the root contract.",
-      "remediation": "In AGENTS.md, say matching runtime tree (`.codex/skills/...` or `.junie/skills/...`).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"observability-dashboard\" AGENTS.md .junie/guidelines.md"
-      ],
-      "automation": "test_junie_runtime_ci_contract.py already checks Junie guidelines; add AGENTS.md peer-path mention.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "AGENTS.md",
-          "line": 136,
-          "command": "read_file",
-          "observation": "SHOULD use .codex/skills/observability-dashboard/"
-        },
-        {
-          "path": ".junie/guidelines.md",
-          "line": 146,
-          "command": "read_file",
-          "observation": "SHOULD use .junie/skills/observability-dashboard/ (equal-peer mirror)."
-        }
-      ]
-    },
-    {
-      "id": "AUD-014",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "medium",
-      "confidence_score": 0.75,
-      "status": "PROVEN",
-      "category": "script-safety",
-      "path": ".devin/skills/coderabbit-audit/SKILL.md:294",
-      "observation": "Devin-only coderabbit-audit skill includes unguarded `git tag` and `gh issue create` as part of an 'audit' workflow, plus a clean-working-tree precondition.",
-      "method": "read_file .devin/skills/coderabbit-audit/SKILL.md; skills-mirror-contract.json optional_presence_globs includes coderabbit-audit/*",
-      "expected": "Audit skills stay read-only unless the user authorizes issue/tag writes; destructive/mutating git has a dry-run and explicit approval.",
-      "actual": "Phase 3/5 run `gh issue create`; Phase 6 runs `git tag \"audit/coderabbit-${AUDIT_TS}\"`. Prerequisites require clean git status. No dry-run flag.",
-      "impact": "An operator invoking the skill for review can create GitHub issues and tags without a separate write authorization step.",
-      "root_cause": "Campaign playbook was copied into a Devin skill body (allowed SKILL.md variant) including mutating steps.",
-      "remediation": "Split read-only audit vs publish phases; require explicit MODE=publish; add dry-run for tag/issue creation.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"git tag|gh issue create\" .devin/skills/coderabbit-audit/SKILL.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": ".devin/skills/coderabbit-audit/SKILL.md",
-          "line": 133,
-          "command": "read_file",
-          "observation": "gh issue create for P0 findings inside the skill workflow."
-        },
-        {
-          "path": ".devin/skills/coderabbit-audit/SKILL.md",
-          "line": 294,
-          "command": "read_file",
-          "observation": "git tag audit/coderabbit-${AUDIT_TS}"
-        }
-      ]
-    },
-    {
-      "id": "AUD-015",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "medium",
-      "confidence_score": 0.55,
       "status": "NOT_PROVEN",
-      "category": "parity-unverified",
-      "path": "scripts/ai/junie/check_junie_mirror.sh:1",
-      "observation": "This session could not execute `bash scripts/ai/junie/check_junie_mirror.sh --check` or the Devin/docs skills-mirror checkers, so live SHA-256 parity of `.codex/**` ↔ `.junie/**` and Codex–Devin catalogs is NOT_PROVEN here.",
-      "method": "Static inventory + CI wiring inspection only; no shell",
-      "expected": "Auditor reports the live --check exit code for Codex–Junie and Codex–Devin skill mirrors.",
-      "actual": "CI workflow .github/workflows/skills-consistency.yml:171-189 runs both checkers; tests/architecture/test_junie_runtime_ci_contract.py asserts the job exists. Spot-read of py-test-bot.md (Codex vs Junie) and SKILLS-CATALOG.md (Codex vs Devin vs docs local) showed identical prefixes, but hashes were not computed.",
-      "impact": "Cannot claim current-checkout byte parity beyond CI contract presence. Residual risk: local dirty tree drift invisible to this audit.",
-      "root_cause": "Audit runtime had no run_terminal_command; REQUIRE_GH_TRACKING=false.",
-      "remediation": "Operator: run `bash scripts/ai/junie/check_junie_mirror.sh --check` and `bash scripts/ops/support/skills/check_skills_mirror.sh --check` on this checkout and attach exit codes.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "bash scripts/ai/junie/check_junie_mirror.sh --check",
-        "bash scripts/ops/support/skills/check_skills_mirror.sh --check"
-      ],
-      "automation": ".github/workflows/skills-consistency.yml jobs verify-codex-junie-runtime-parity and verify-local-skills-mirror",
-      "automated_fix_possible": false,
-      "evidence": [
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 178,
-          "command": "read_file",
-          "observation": "Job verify-codex-junie-runtime-parity runs bash scripts/ai/junie/check_junie_mirror.sh --check"
-        },
-        {
-          "path": "tests/architecture/test_junie_runtime_ci_contract.py",
-          "line": 43,
-          "command": "read_file",
-          "observation": "Architecture test requires that exact command in the workflow."
-        }
-      ]
-    },
-    {
-      "id": "AUD-016",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "template-drift",
-      "path": "docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md:17",
-      "observation": "Specialist profile template still defaults to `model: sonnet` and Write/Edit tools, which is the generator of AUD-005 and conflicts with tests/architecture/test_devin_setup_guide_codex_models.py (no opus/sonnet on Codex).",
-      "method": "read_file SPECIALIST_PROFILE_TEMPLATE.md; grep model: sonnet in sp-*.md",
-      "expected": "Docs-only specialist template inherits parent model and does not prescribe Write tools or Anthropic model names.",
-      "actual": "Template lines 16-17: tools: Read, Write, Edit, Glob, Grep / model: sonnet. Alias template also uses model: sonnet.",
-      "impact": "New sp-* profiles will keep reproducing provider-locked Write agents in the docs mirror.",
-      "root_cause": "Template frozen at 2026-03-08 Claude consolidation.",
-      "remediation": "Change template model to inherit-parent; default tools to Read/Glob/Grep; point writers at py-* runtime roles.",
-      "effort": "S",
-      "dependencies": ["AUD-005"],
-      "validation": [
-        "rg -n \"model: sonnet\" docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md"
-      ],
-      "automation": "check_agent_consolidation.py should reject sonnet in new profiles.",
-      "automated_fix_possible": true,
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md",
-          "line": 17,
-          "command": "read_file",
-          "observation": "Canonical specialist template hardcodes model: sonnet and Write/Edit tools."
-        }
-      ]
+      "category": "memory",
+      "iteration_delta": "unchanged",
+      "path": "src/memory/catalog/vendor_memory_registry.yaml",
+      "observation": "Vendor-hosted Copilot/Gemini/Cursor/Devin/Junie memory remains BLOCKED_EXTERNAL / NOT_PROVEN without dated account-backed deletion/isolation tests.",
+      "method": "read vendor_memory_registry.yaml",
+      "expected": "Vendor runtime verification stays NOT_PROVEN until dated evidence is attached without secrets",
+      "actual": "Registry already marks runtime_status BLOCKED_EXTERNAL; no secrets in notes",
+      "impact": "None; policy-compliant. Do not treat vendor docs as runtime proof.",
+      "root_cause": "External vendor surfaces are not repository-controlled.",
+      "remediation": "Keep NOT_PROVEN; do not invent vendor verification.",
+      "effort": "n/a",
+      "automation": "n/a",
+      "automated_fix_possible": false
     }
   ]
 }
