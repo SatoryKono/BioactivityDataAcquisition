@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
-from bioetl.domain.ports import ClockPort
+if TYPE_CHECKING:
+    from bioetl.domain.ports import ClockPort
 
 __all__ = ["RuntimeClock", "current_utc_time", "resolve_runtime_clock"]
 
 
-class RuntimeClockService(ClockPort):
+class RuntimeClockService:
     """Explicit system ClockPort implementation for runtime wiring."""
 
     def now(self) -> datetime:
