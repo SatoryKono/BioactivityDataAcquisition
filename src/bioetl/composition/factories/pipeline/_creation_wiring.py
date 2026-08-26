@@ -58,6 +58,14 @@ from bioetl.application.core.pipeline_service_protocols import (
     PipelineServicesProtocol,
 )
 
+__all__ = [
+    "_BuildPipelineServicesFn",
+    "_PipelineCreationInputs",
+    "_PipelineCreationRequest",
+    "_ServiceBundleDeps",
+    "_create_pipeline_with_services_impl",
+]
+
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class _PipelineCreationRequest(ControlPlaneArtifacts):

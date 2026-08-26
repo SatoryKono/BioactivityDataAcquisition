@@ -84,7 +84,7 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
         get_observability_diagnostics_bundle as _impl,
     )
 
-    return cast("ObservabilityDiagnosticsBundle", _impl())
+    return _impl()
 
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
@@ -93,7 +93,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
         get_metrics_operator_profile as _impl,
     )
 
-    return cast("MetricsOperatorProfile", _impl())
+    return _impl()
 
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:

@@ -50,9 +50,7 @@ class ArticleRecord(BaseModel):
     pmid: str = Field(description="PubMed ID")
 
     # Other identifiers
-    doi: str | None = Field(
-        default=None, description="Digital Object Identifier"
-    )
+    doi: str | None = Field(default=None, description="Digital Object Identifier")
     pmc_id: str | None = Field(default=None, description="PubMed Central ID")
 
     # Title and abstract
@@ -67,15 +65,9 @@ class ArticleRecord(BaseModel):
     issn: str | None = Field(default=None, description="ISSN")
     volume: str | None = Field(default=None, description="Volume number")
     issue: str | None = Field(default=None, description="Issue number")
-    pages: str | None = Field(
-        default=None, description="Page numbers (medline_pgn)"
-    )
-    first_page: str | None = Field(
-        default=None, description="First page (unified)"
-    )
-    last_page: str | None = Field(
-        default=None, description="Last page (unified)"
-    )
+    pages: str | None = Field(default=None, description="Page numbers (medline_pgn)")
+    first_page: str | None = Field(default=None, description="First page (unified)")
+    last_page: str | None = Field(default=None, description="Last page (unified)")
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
     # affiliations excluded per user request
@@ -87,9 +79,7 @@ class ArticleRecord(BaseModel):
     pub_date: str | None = Field(
         default=None, description="Publication date (ISO format)"
     )
-    year: int | None = Field(
-        default=None, description="Publication year (1500-2100)"
-    )
+    year: int | None = Field(default=None, description="Publication year (1500-2100)")
     # Note: accepted_date, received_date, revised_date, epub_date excluded from
     # transformer output per design (PubMed pipeline field exclusions)
 
@@ -98,9 +88,7 @@ class ArticleRecord(BaseModel):
         default_factory=list, description="Publication types"
     )
     keywords: list[str] = Field(default_factory=list, description="Keywords")
-    mesh_terms: list[str] = Field(
-        default_factory=list, description="MeSH terms"
-    )
+    mesh_terms: list[str] = Field(default_factory=list, description="MeSH terms")
 
     # Chemical and genetic data
     chemicals: list[str] = Field(
@@ -115,17 +103,11 @@ class ArticleRecord(BaseModel):
     )
 
     # Additional metadata
-    language: str | None = Field(
-        default=None, description="Primary language code"
-    )
-    country: str | None = Field(
-        default=None, description="Country of publication"
-    )
+    language: str | None = Field(default=None, description="Primary language code")
+    country: str | None = Field(default=None, description="Country of publication")
 
     # Raw data for forensic (optional)
-    raw_xml: str | None = Field(
-        default=None, description="Raw XML content (forensic)"
-    )
+    raw_xml: str | None = Field(default=None, description="Raw XML content (forensic)")
 
     def model_post_init(self, _context: object, /) -> None:
         """Detach and freeze nested DTO collections after validation."""

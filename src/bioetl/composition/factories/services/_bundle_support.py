@@ -29,6 +29,12 @@ if TYPE_CHECKING:
 
 from bioetl.application.ports.pipeline import BaseServicesFactoryProtocol
 
+__all__ = [
+    "BaseServicesFactoryProtocol",
+    "ServiceBundleDependencies",
+    "resolve_service_bundle_dependencies",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class ServiceBundleDependencies:

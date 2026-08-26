@@ -50,7 +50,7 @@ def get_configured_pipeline_names() -> list[str]:
         list_configured_pipeline_names as _impl,
     )
 
-    return cast("list[str]", _impl())
+    return _impl()
 
 
 def _fail_config(title: str, detail: str, exit_code: ExitCode) -> NoReturn:
