@@ -190,9 +190,7 @@ def _build_batch_executor_dependencies(
         memory_manager=memory_manager,
         execution_run_service=execution_run_service,
         extraction_loop_service=extraction_loop_service,
-        execution_state_service=cast(
-            Any, execution_state_service
-        ),  # Any: builder protocol compatibility
+        execution_state_service=cast(Any, execution_state_service),  # Any: builder protocol compatibility
         processing_port=batch_processing_service,
         fsm=BatchExecutionFSM(),
     )

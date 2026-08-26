@@ -77,6 +77,15 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--refresh-nonregressing-from-coverage-xml",
+        action="store_true",
+        help=(
+            "Add absent measurements and accept only non-decreasing measured rows "
+            "from --coverage-xml. Lower candidate values never replace the accepted "
+            "baseline."
+        ),
+    )
+    parser.add_argument(
         "--allow-missing-coverage-xml",
         action="store_true",
         help=(
@@ -1245,7 +1254,98 @@ def _refresh_existing_inventory_source_tree(
     return refreshed
 
 
+def _refresh_nonregressing_inventory_from_coverage(
+    current: dict[str, Any],
+    candidate: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Promote only absent or non-decreasing rows from a coverage candidate."""
+    current_rows = current.get("modules", [])
+    candidate_rows = candidate.get("modules", [])
+    if not isinstance(current_rows, list) or not isinstance(candidate_rows, list):
+        raise ValueError("Module coverage inventories must contain modules lists")
+
+    current_by_path = {
+        str(row.get("path")): row
+        for row in current_rows
+        if isinstance(row, dict) and isinstance(row.get("path"), str)
+    }
+    merged_rows: list[dict[str, Any]] = []
+    promoted_count = 0
+    for candidate_row in candidate_rows:
+        if not isinstance(candidate_row, dict):
+            continue
+        path = str(candidate_row.get("path"))
+        current_row = current_by_path.get(path)
+        current_percent = (
+            current_row.get("coverage_percent")
+            if isinstance(current_row, dict)
+            else None
+        )
+        candidate_percent = candidate_row.get("coverage_percent")
+        candidate_is_nondecreasing = isinstance(candidate_percent, int | float) and (
+            not isinstance(current_percent, int | float)
+            or float(candidate_percent) >= float(current_percent)
+        )
+        if candidate_is_nondecreasing:
+            merged_rows.append(candidate_row)
+            promoted_count += 1
+            continue
+        if isinstance(current_row, dict):
+            merged_rows.append(current_row)
+        else:
+            merged_rows.append(candidate_row)
+
+    refreshed = dict(current)
+    refreshed["source_tree_sha256"] = candidate["source_tree_sha256"]
+    refreshed["modules"] = merged_rows
+    refreshed["rows"] = merged_rows
+    refreshed["additive_coverage_xml_path"] = candidate["coverage_xml_path"]
+    refreshed["additive_coverage_xml_sha256"] = candidate["coverage_xml_sha256"]
+    refreshed["additive_measured_module_count"] = promoted_count
+    summary = dict(refreshed.get("summary") or {})
+    unmeasured = _modules_with_status(
+        merged_rows,
+        status="unmeasured",
+        reason="coverage_xml_has_no_class_entry",
+    )
+    uncovered = _modules_with_status(
+        merged_rows,
+        status="uncovered",
+        reason="coverage_xml_reports_zero_executed_lines",
+    )
+    summary.update(
+        {
+            "source_module_count": len(merged_rows),
+            "status_counts": _coverage_status_counts(merged_rows),
+            "unmeasured_module_count": len(unmeasured),
+            "unmeasured_modules": unmeasured,
+            "uncovered_module_count": len(uncovered),
+            "uncovered_modules": uncovered,
+            "hotspot_family_coverage": _build_hotspot_family_coverage(
+                merged_rows, repo_root=repo_root
+            ),
+        }
+    )
+    refreshed["summary"] = summary
+    return refreshed
+
+
 def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
+    if args.json_out.exists() and args.refresh_nonregressing_from_coverage_xml:
+        current = json.loads(args.json_out.read_text(encoding="utf-8"))
+        if not isinstance(current, dict):
+            raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
+        candidate = build_module_coverage_inventory(
+            repo_root=args.repo_root,
+            coverage_xml=args.coverage_xml,
+            snapshot_date=args.snapshot_date,
+        )
+        return _refresh_nonregressing_inventory_from_coverage(
+            current, candidate, repo_root=args.repo_root
+        )
+
     if args.json_out.exists() and not args.refresh_from_coverage_xml:
         current = json.loads(args.json_out.read_text(encoding="utf-8"))
         if not isinstance(current, dict):
@@ -1267,6 +1367,14 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
+    if (
+        args.refresh_from_coverage_xml
+        and args.refresh_nonregressing_from_coverage_xml
+    ):
+        print(
+            "[module-coverage-inventory] choose only one coverage refresh mode"
+        )
+        return 2
     repo_root = args.repo_root.resolve()
     enforcement_mode = _resolve_enforcement_mode(args)
 

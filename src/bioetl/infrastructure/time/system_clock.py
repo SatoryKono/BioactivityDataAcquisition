@@ -5,10 +5,8 @@ from __future__ import annotations
 import time
 from datetime import UTC, datetime
 
-from bioetl.domain.ports import ClockPort
 
-
-class SystemClock(ClockPort):
+class SystemClock:
     """Clock adapter backed by the system UTC time."""
 
     def now(self) -> datetime:

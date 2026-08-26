@@ -22,6 +22,7 @@ from scripts.engineering.qa.report_module_coverage_inventory import (
     _read_source_module_snapshots,
     _read_stable_source_module_snapshots,
     _refresh_existing_inventory_source_tree,
+    _refresh_nonregressing_inventory_from_coverage,
 )
 
 pytestmark = pytest.mark.unit
@@ -162,6 +163,91 @@ def test_refresh_existing_inventory_prunes_removed_source_rows(
     assert refreshed["modules"] == []
     assert refreshed["rows"] == []
     assert refreshed["summary"]["source_module_count"] == 0
+
+
+def test_refresh_nonregressing_inventory_preserves_lower_accepted_measurements(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._build_hotspot_family_coverage",
+        lambda rows, *, repo_root: {},
+    )
+    measured = {
+        "module": "bioetl.measured",
+        "path": "src/bioetl/measured.py",
+        "coverage_status": "partially_covered",
+        "coverage_percent": 90.0,
+        "executable_lines": 10,
+        "covered_lines": 9,
+        "missing_lines": 1,
+    }
+    current = {
+        "coverage_xml_path": "reports/coverage/accepted.xml",
+        "coverage_xml_sha256": "accepted-sha",
+        "measurement_mode": "coverage_xml",
+        "modules": [
+            measured,
+            {
+                "module": "bioetl.new",
+                "path": "src/bioetl/new.py",
+                "coverage_status": "unmeasured",
+                "coverage_percent": None,
+                "executable_lines": None,
+                "covered_lines": None,
+                "missing_lines": None,
+            },
+            {
+                "module": "bioetl.improved",
+                "path": "src/bioetl/improved.py",
+                "coverage_status": "partially_covered",
+                "coverage_percent": 80.0,
+                "executable_lines": 10,
+                "covered_lines": 8,
+                "missing_lines": 2,
+            },
+        ],
+        "summary": {},
+    }
+    candidate = {
+        "coverage_xml_path": "reports/coverage/coverage.xml",
+        "coverage_xml_sha256": "additive-sha",
+        "source_tree_sha256": "current-tree",
+        "modules": [
+            {**measured, "coverage_percent": 80.0, "covered_lines": 8},
+            {
+                "module": "bioetl.new",
+                "path": "src/bioetl/new.py",
+                "coverage_status": "fully_covered",
+                "coverage_percent": 100.0,
+                "executable_lines": 2,
+                "covered_lines": 2,
+                "missing_lines": 0,
+            },
+            {
+                "module": "bioetl.improved",
+                "path": "src/bioetl/improved.py",
+                "coverage_status": "partially_covered",
+                "coverage_percent": 90.0,
+                "executable_lines": 10,
+                "covered_lines": 9,
+                "missing_lines": 1,
+            },
+        ],
+    }
+
+    refreshed = _refresh_nonregressing_inventory_from_coverage(
+        current, candidate, repo_root=tmp_path
+    )
+
+    assert refreshed["modules"][0] == measured
+    assert refreshed["modules"][1]["coverage_percent"] == 100.0
+    assert refreshed["modules"][2]["coverage_percent"] == 90.0
+    assert refreshed["coverage_xml_sha256"] == "accepted-sha"
+    assert refreshed["additive_coverage_xml_sha256"] == "additive-sha"
+    assert refreshed["additive_measured_module_count"] == 2
+    assert refreshed["source_tree_sha256"] == "current-tree"
+    assert refreshed["summary"]["unmeasured_module_count"] == 0
 
 
 def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (

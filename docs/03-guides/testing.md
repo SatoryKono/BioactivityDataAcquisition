@@ -799,6 +799,12 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
   Локальный `coverage.xml` не должен перезаписывать committed measurement rows;
   `--refresh-from-coverage-xml` принадлежит только trusted green
   `coverage-verify`.
+  Для SHA-bound агрегированного XML, который содержит новые измерения, но не
+  может заменить более сильные принятые строки, используй монотонный режим
+  `--refresh-nonregressing-from-coverage-xml` вместе с
+  `--enforce-module-thresholds block-regression --fail-on-regression`. Он
+  добавляет отсутствующие строки и принимает только равные или более высокие
+  module coverage values; более низкие candidate rows остаются отклонёнными.
   Per-module gates (`configs/quality/module_coverage_gates.yaml`): lane
   `coverage-verify` также запускает
   `--enforce-module-thresholds block-regression --fail-on-regression`, чтобы
