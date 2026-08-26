@@ -1,4 +1,8 @@
-"""YAML-to-domain config mapper contract."""
+"""YAML-to-domain config mapper contract.
+
+``DomainConfigMapper`` is a compatibility alias of the canonical
+``DomainConfigMapperPort`` (one mapper ``*Port`` surface).
+"""
 
 from __future__ import annotations
 

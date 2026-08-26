@@ -145,6 +145,11 @@ docs/
 │   ├── development/             # Developer guides (config schema, etc.)
 │   └── ... (User guides: getting-started, testing, etc.)
 │
+├── 03-data-model/               # Data-model notes (repo-only supporting)
+├── 05-engineering/              # Engineering baselines (telemetry, etc.)
+├── filters/                     # Filter-rule notes (repo-only supporting)
+├── security/                    # Security notes (repo-only supporting)
+│
 ├── 04-reference/                # Reference Documentation
 │   ├── index.md                 # Reference landing page
 │   ├── api/                     # API Reference

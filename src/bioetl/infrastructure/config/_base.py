@@ -141,6 +141,13 @@ class Settings(StoragePathSettingsMixin, BaseSettings):
         default=None,
         description="Opaque runtime source digest (BIOETL_RUNTIME_SOURCE_ID)",
     )
+    prometheus_url: str | None = Field(
+        default=None,
+        description=(
+            "Prometheus HTTP API base URL for backend queries "
+            "(BIOETL_PROMETHEUS_URL). Docker DNS names are not implied."
+        ),
+    )
 
     # Serialization settings
     json_encoder: Literal["orjson", "stdlib", ""] = Field(
