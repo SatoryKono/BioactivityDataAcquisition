@@ -42,6 +42,7 @@ from bioetl.composition.factories.storage.storage_factory import SilverWriter
 from bioetl.composition.factories.storage.storage_factory import StorageContext
 from bioetl.composition.factories.storage.storage_factory import StorageFactory
 from bioetl.domain.ports.noop import NoOpAudit
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 
 def _make_csv_config(path: str, *, enabled: bool) -> SimpleNamespace:
@@ -149,6 +150,7 @@ def test_create_uses_canonical_yaml_paths_and_returns_storage_context(
         logger=logger,
         metrics=metrics,
         audit=MagicMock(),
+        silver_validator=NoOpValidator(),
     )
 
     assert isinstance(result, StorageContext)
@@ -201,6 +203,7 @@ def test_create_uses_test_mode_paths_and_overrides_csv_export_targets(
         logger=MagicMock(),
         metrics=MagicMock(),
         audit=MagicMock(),
+        silver_validator=NoOpValidator(),
     )
 
     assert result.bronze_path == settings.bronze_path
@@ -242,6 +245,7 @@ def test_create_normalizes_delta_writer_base_paths_for_entity_scoped_yaml_paths(
         logger=MagicMock(),
         metrics=MagicMock(),
         audit=MagicMock(),
+        silver_validator=NoOpValidator(),
     )
 
     assert result.silver_path == tmp_path / "custom" / "silver" / "chembl" / "activity"
@@ -290,6 +294,7 @@ def test_create_normalizes_windows_style_entity_scoped_delta_paths() -> None:
         logger=MagicMock(),
         metrics=MagicMock(),
         audit=MagicMock(),
+        silver_validator=NoOpValidator(),
     )
 
     assert Path(result.adapter.silver.base_path) == Path("data/output/silver")
@@ -399,6 +404,7 @@ def test_create_uses_explicit_noop_audit_by_default(tmp_path: Path) -> None:
         logger=MagicMock(),
         metrics=MagicMock(),
         audit=NoOpAudit(),
+        silver_validator=NoOpValidator(),
     )
 
     assert isinstance(result.adapter.bronze._audit, NoOpAudit)
@@ -438,6 +444,7 @@ def test_create_uses_file_audit_adapter_when_enabled(tmp_path: Path) -> None:
         logger=MagicMock(),
         metrics=MagicMock(),
         audit=audit,
+        silver_validator=NoOpValidator(),
     )
 
     bronze_audit = result.adapter.bronze._audit
@@ -509,6 +516,7 @@ def test_create_resolves_tracing_once_at_storage_factory_boundary(
             metrics=metrics,
             audit=MagicMock(),
             tracing=None,
+            silver_validator=NoOpValidator(),
         )
 
     mock_build_ctx.assert_called_once_with(

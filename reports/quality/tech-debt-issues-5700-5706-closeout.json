@@ -90,13 +90,13 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "coverage_actual_percent": 96.49,
-      "coverage_percent_fallback_used": true,
-      "coverage_xml_present": false,
-      "refreshed_at_utc": "2026-08-21T19:24:12.023426+00:00",
+      "coverage_actual_percent": 95.69,
+      "coverage_percent_fallback_used": false,
+      "coverage_xml_present": true,
+      "refreshed_at_utc": "2026-08-26T03:31:59.616198+00:00",
       "slowest_total_cases": 49046,
-      "source_commit": "d1c97617563eee3fc3aaa1f5bdd9e17307482fec",
-      "source_run_id": "32516555293",
+      "source_commit": "aba2ded1775a30544c4b601966d6ba5080141c57",
+      "source_run_id": "local",
       "top_slow_zone": {
         "max_duration_s": 16.872,
         "test_count": 4,

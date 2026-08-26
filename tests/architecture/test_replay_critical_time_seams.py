@@ -100,9 +100,7 @@ def _current_utc_time_refs(py_file: Path) -> list[str]:
             and isinstance(node.func, ast.Attribute)
             and node.func.attr == "current_utc_time"
         ):
-            refs.append(
-                f"{_relative_path(py_file)}:{node.lineno}: .current_utc_time()"
-            )
+            refs.append(f"{_relative_path(py_file)}:{node.lineno}: .current_utc_time()")
     return refs
 
 

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from bioetl.domain.config.pipeline import PipelineConfig
-    from bioetl.domain.quality.dq_config import DQConfig
+    from bioetl.domain.ports.quality.dq_config import DQConfig
 
     PipelineYamlConfig = object
 

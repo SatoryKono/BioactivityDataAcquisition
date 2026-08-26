@@ -30,6 +30,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, cast
@@ -37,6 +38,8 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
+
+from tests.helpers.clock import FixedClock
 
 from bioetl.application.composite.runtime_models import CompositeRuntimeConfig
 from bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support import (
@@ -258,6 +261,7 @@ def test_build_composite_control_plane_bundle_fails_closed_when_manifest_disable
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -297,6 +301,7 @@ def test_build_composite_control_plane_bundle_allows_disabled_ledger_under_degra
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -349,6 +354,7 @@ def test_build_composite_control_plane_bundle_requires_ledger_for_forensic_grade
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -405,6 +411,7 @@ def test_build_composite_control_plane_bundle_rejects_forensic_grade_with_full_s
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -445,6 +452,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_profile(
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -501,6 +509,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_with_full_sna
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -558,6 +567,7 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(
@@ -645,6 +655,7 @@ def test_build_composite_control_plane_bundle_persists_effective_config_artifact
         Any,
         SimpleNamespace(
             run_id=_VALID_RUN_ID,
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
             settings=SimpleNamespace(
                 data_dir=str(tmp_path),
                 pipeline=SimpleNamespace(

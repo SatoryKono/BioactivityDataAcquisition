@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -41,7 +41,7 @@ def get_lineage_service() -> LineageInspectionService:
         get_lineage_service as _impl,
     )
 
-    return _impl()
+    return cast("LineageInspectionService", _impl())
 
 
 def _render_node_lines(nodes: list[object]) -> list[str]:

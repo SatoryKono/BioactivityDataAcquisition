@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, cast
 
-from bioetl.composition.lazy_exports import install_cached_public_exports
+from bioetl.composition.lazy_exports import (
+    LazyExportTarget,
+    install_cached_public_exports,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.services.ops.health_service import HealthService
@@ -68,11 +72,14 @@ _PUBLIC_EXPORTS = {
 _COMPATIBILITY_EXPORTS = {
     "get_runtime_settings": (_CONFIG_ACCESS_MODULE, "get_settings"),
 }
-_LAZY_EXPORTS = {**_PUBLIC_EXPORTS, **_COMPATIBILITY_EXPORTS}
+_LAZY_EXPORTS: Mapping[str, LazyExportTarget] = {
+    **_PUBLIC_EXPORTS,
+    **_COMPATIBILITY_EXPORTS,
+}
 
 
 install_cached_public_exports(
     module_globals=globals(),
-    public_exports=_LAZY_EXPORTS,
+    public_exports=cast("Mapping[str, LazyExportTarget]", _LAZY_EXPORTS),
     module_name=__name__,
 )

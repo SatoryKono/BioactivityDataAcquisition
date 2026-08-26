@@ -12,6 +12,15 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 
+from bioetl.composition.bootstrap.service_registry_contracts import (
+    AuditInspectionServiceProtocol,
+    CheckpointServiceProtocol,
+    HealthServiceProtocol,
+    LineageInspectionServiceProtocol,
+    MetricsService,
+    ObservabilityWorkflowServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+)
 from bioetl.composition import _services
 from bioetl.composition.runtime_builders import config_access as _config_access
 from bioetl.domain.exceptions import MetricsServerError
@@ -20,25 +29,10 @@ from bioetl.domain.ports import LoggerPort
 _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
 if TYPE_CHECKING:
-    from bioetl.application.services.export_lineage.audit_inspection_service import (
-        AuditInspectionService,
-    )
-    from bioetl.application.services.checkpoint.checkpoint_service import (
-        CheckpointService,
-    )
-    from bioetl.application.services.control_plane.manifest.inspection_service import (
-        RunManifestInspectionService,
-    )
-    from bioetl.application.services.ops.health_service import HealthService
-    from bioetl.application.services.lineage.lineage_inspection_service import (
-        LineageInspectionService,
-    )
-    from bioetl.application.services.ops.metrics_service import MetricsService
+    from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.application.services.workflow.observability_workflow_service import (
-        ObservabilityWorkflowService,
         RunForensicDossierResult,
     )
-    from bioetl.application.services.quality.quarantine_service import QuarantineService
 
 __all__ = [
     "MetricsOperatorProfile",
@@ -64,14 +58,14 @@ __all__ = [
 class ObservabilityDiagnosticsBundle:
     """Unified operator-facing observability diagnostics surface."""
 
-    health_service: HealthService
-    checkpoint_service: CheckpointService
-    audit_service: AuditInspectionService
+    health_service: HealthServiceProtocol
+    checkpoint_service: CheckpointServiceProtocol
+    audit_service: AuditInspectionServiceProtocol
     metrics_service: MetricsService
     quarantine_service: QuarantineService
-    run_manifest_service: RunManifestInspectionService
-    lineage_service: LineageInspectionService
-    workflow_service: ObservabilityWorkflowService
+    run_manifest_service: RunManifestInspectionServiceProtocol
+    lineage_service: LineageInspectionServiceProtocol
+    workflow_service: ObservabilityWorkflowServiceProtocol
 
 
 @dataclass(frozen=True, slots=True)
@@ -197,13 +191,13 @@ def delete_metrics_from_gateway(
     return bool(result.success)
 
 
-def get_audit_service() -> AuditInspectionService:
+def get_audit_service() -> AuditInspectionServiceProtocol:
     """Load the audit diagnostics service through composition on demand."""
 
     return _services.get_audit_service()
 
 
-def get_checkpoint_service() -> CheckpointService:
+def get_checkpoint_service() -> CheckpointServiceProtocol:
     """Load the checkpoint diagnostics service through composition on demand."""
 
     return _services.get_checkpoint_service()
@@ -266,7 +260,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
     )
 
 
-def get_observability_workflow_service() -> ObservabilityWorkflowService:
+def get_observability_workflow_service() -> ObservabilityWorkflowServiceProtocol:
     """Load the canonical observability workflow service on demand."""
 
     return _services.get_observability_workflow_service()
@@ -285,7 +279,7 @@ async def inspect_run_dossier(
     )
 
 
-def get_health_service() -> HealthService:
+def get_health_service() -> HealthServiceProtocol:
     """Load the health diagnostics service through composition on demand."""
 
     return _services.get_health_service()
@@ -297,13 +291,13 @@ def get_quarantine_service() -> QuarantineService:
     return _services.get_quarantine_service()
 
 
-def get_run_manifest_service() -> RunManifestInspectionService:
+def get_run_manifest_service() -> RunManifestInspectionServiceProtocol:
     """Load the run-manifest diagnostics service through composition on demand."""
 
     return _services.get_run_manifest_service()
 
 
-def get_lineage_service() -> LineageInspectionService:
+def get_lineage_service() -> LineageInspectionServiceProtocol:
     """Load the lineage diagnostics service through composition on demand."""
 
     return _services.get_lineage_service()

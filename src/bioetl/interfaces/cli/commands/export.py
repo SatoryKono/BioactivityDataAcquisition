@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -45,7 +45,7 @@ def get_export_service() -> ExportService:
         get_export_service as _impl,
     )
 
-    return _impl()
+    return cast("ExportService", _impl())
 
 
 @typed_click_command("export")

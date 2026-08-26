@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -84,7 +84,7 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
         get_observability_diagnostics_bundle as _impl,
     )
 
-    return _impl()
+    return cast("ObservabilityDiagnosticsBundle", _impl())
 
 
 def get_metrics_operator_profile() -> MetricsOperatorProfile:
@@ -93,7 +93,7 @@ def get_metrics_operator_profile() -> MetricsOperatorProfile:
         get_metrics_operator_profile as _impl,
     )
 
-    return _impl()
+    return cast("MetricsOperatorProfile", _impl())
 
 
 def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
@@ -111,7 +111,7 @@ def get_forensic_run_diff_service() -> ForensicRunDiffService:
         get_forensic_run_diff_service as _impl,
     )
 
-    return _impl()
+    return cast("ForensicRunDiffService", _impl())
 
 
 def _build_diagnostics_guide_lines() -> list[str]:

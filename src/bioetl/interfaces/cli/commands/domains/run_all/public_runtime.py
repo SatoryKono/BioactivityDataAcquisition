@@ -75,9 +75,7 @@ def load_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Load the pipeline runner service through composition on demand."""
-    impl = import_module(
-        "bioetl.composition.entrypoints"
-    ).get_pipeline_runner_service
+    impl = import_module("bioetl.composition.entrypoints").get_pipeline_runner_service
     return impl(registry=registry)
 
 
