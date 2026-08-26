@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -25,30 +26,36 @@ class MetricsFactoryProtocol(Protocol):
     def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
-@runtime_checkable
-class MetricsStartResult(Protocol):
+@dataclass(frozen=True, slots=True)
+class MetricsStartResult:
     """Result of starting the metrics HTTP server."""
 
-    success: bool
-    error: str | None
-    port: int
+    success: bool = False
+    port: int = 0
+    addr: str = "127.0.0.1"
+    already_running: bool = False
+    error: str | None = None
 
 
-@runtime_checkable
-class MetricsServerStatus(Protocol):
+@dataclass(frozen=True, slots=True)
+class MetricsServerStatus:
     """Runtime status of the metrics HTTP server."""
 
-    running: bool
-    port: int | None
-    started_at: datetime | None
+    running: bool = False
+    port: int | None = None
+    started_at: datetime | None = None
+    error: str | None = None
 
 
-@runtime_checkable
-class MetricsGatewayResult(Protocol):
+@dataclass(frozen=True, slots=True)
+class MetricsGatewayResult:
     """Result of a Pushgateway publish or delete."""
 
-    success: bool
-    error: str | None
+    success: bool = False
+    gateway: str = ""
+    run_label: str = ""
+    grouping_key: dict[str, str] = field(default_factory=dict)
+    error: str | None = None
 
 
 @runtime_checkable

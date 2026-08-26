@@ -238,7 +238,7 @@ This section contains references to internal implementation details and extended
 ### Internal Modules
 
 - **`_pipeline_execution`**: Internal implementation behind `entrypoints`/`execution_api`
-- **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_api`
+- **`_resource_management`**: Internal implementation behind `entrypoints`/`resources_runtime`
 - **`_services`**: Internal implementation behind service-oriented owner APIs
 
 For comprehensive documentation on internal modules, see:
@@ -309,13 +309,10 @@ ______________________________________________________________________
 | `execution_api`        | Logic-free lazy re-export shim retained for external compatibility                                                                 |
 | `health_api`           | Logic-free lazy re-export shim retained for external compatibility                                                                 |
 | `maintenance_api`      | Logic-free lazy re-export shim retained for external compatibility                                                                 |
-| `resources_api`        | Public resource-management composition API                                                                                         |
-| `composite_api`        | Public composite-runtime composition API                                                                                           |
-| `observability_api`    | Public observability composition API                                                                                               |
+| `resources_runtime`    | Public resource-management composition runtime seam                                                                                |
+| `composite_catalog`    | Public composite catalog / runtime composition seam                                                                                |
+| `observability_runtime`| Public observability composition runtime seam                                                                                      |
 | `types`                | Type definitions for composition layer                                                                                             |
 | `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_services`            | Internal implementation module behind service-oriented owner APIs (see [Internal/Extended Material](#internalextended-material))   |
-| `_pipeline_execution`  | Internal implementation module behind `entrypoints`/`execution_api` (see [Internal/Extended Material](#internalextended-material)) |
-| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_api` (see [Internal/Extended Material](#internalextended-material)) |
+| `_resource_management` | Internal implementation module behind `entrypoints`/`resources_runtime` (see [Internal/Extended Material](#internalextended-material)) |
 | `_services`            | Internal implementation module behind service-oriented owner APIs (see [Internal/Extended Material](#internalextended-material))   |

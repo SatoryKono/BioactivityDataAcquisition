@@ -30,7 +30,7 @@ if TYPE_CHECKING:
         PipelineYamlConfig,
     )
 
-from bioetl.domain.ports.source_config import SourceConfigLike
+from bioetl.domain.ports import SourceConfigLike
 
 
 def apply_tracing_override(

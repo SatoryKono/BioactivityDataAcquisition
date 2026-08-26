@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-08-26'
 
 ______________________________________________________________________
 
@@ -25,7 +25,7 @@ infrastructure, and operator dashboards are shipped as repository JSON.
 | Application observer | `src/bioetl/application/observability/observer.py` |
 | Metrics service | `src/bioetl/application/services/metrics_service.py` |
 | Infrastructure metrics/tracing/logging | `src/bioetl/infrastructure/observability/**` |
-| Composition bootstrap | `src/bioetl/composition/bootstrap/runtime/observability*.py`, `src/bioetl/composition/observability_api.py` |
+| Composition bootstrap | `src/bioetl/composition/bootstrap/runtime/observability*.py`, `src/bioetl/composition/observability_runtime.py` |
 | Dashboards/rules | `grafana/dashboards/*.json`, `grafana/prometheus-rules/*.yml` |
 | Operator diagnostics | `src/bioetl/interfaces/cli/commands/diagnostics.py` |
 
