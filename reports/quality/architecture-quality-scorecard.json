@@ -30,9 +30,9 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 9.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.81
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 9.9,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.188
     },
     {
       "evidence_metrics": {
@@ -211,7 +211,7 @@
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 84
+    "unmeasured_module_count": 0
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -241,7 +241,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "df3cb196980efba05a52b5d55de529e7b33e85babeb78042b9693a3fcdaef789"
+      "source_fingerprint": "17cf4ba3791a00a54eef120341cfacef9cae1909b2c017fe4e62981f871fab49"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -258,7 +258,7 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
+      "coverage_xml_sha256": "6fafd4b1d34b20130c845e77ffb92c83a318458c28b37ed2b819fce64d63af4e",
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440"
     },

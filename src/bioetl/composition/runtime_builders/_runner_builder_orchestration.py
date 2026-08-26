@@ -19,13 +19,13 @@ from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy i
     validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
 )
 from bioetl.composition.runtime_builders.ledger_collaborator import (
-    PipelineRunnerProtocol,
     attach_control_plane_collaborators,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
 from bioetl.domain.ports import PipelineControlPlaneArtifacts, PipelineFactoryPort
 
 if TYPE_CHECKING:
+    from bioetl.application.ports.pipeline import PipelineRunnerProtocol
     from bioetl.composition.runtime_builders.runner_inputs import (
         RunnerInputs as _RunnerInputs,
     )
