@@ -8,19 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `8324378c7b5d56d70f67ad49989a073fd06b8fca`
+Audited commit SHA: `8472592a3cc0a3348b183aec8a265626c5d74727`
 
-
-Evidence surface SHA-256: `b40d1c633298e9bb41c479fc093ae0f129ad6caefc2cb6680c2203bef1b6e99a`
-
+Evidence surface SHA-256: `2dee28875aaf612d8614350ab08fc8b007a4810da0c4e948d8f7d1985eb0b4db`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "8324378c7b5d56d70f67ad49989a073fd06b8fca",
-  "evidence_surface_sha256": "b40d1c633298e9bb41c479fc093ae0f129ad6caefc2cb6680c2203bef1b6e99a",
+  "audited_commit_sha": "8472592a3cc0a3348b183aec8a265626c5d74727",
+  "evidence_surface_sha256": "2dee28875aaf612d8614350ab08fc8b007a4810da0c4e948d8f7d1985eb0b4db",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -31,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1568,
+    "fully_covered_module_count": 1476,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 895,
+    "no_executable_lines_module_count": 13,
+    "partially_covered_module_count": 978,
     "source_module_count": 2467,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -46,21 +44,18 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-
-
-Refresh reason: Re-pin to origin/main `8324378c7b` after the governance and architecture repair cascade; all debt-governance gates pass and no budget grows.
-
+Refresh reason: Re-pin to origin/main 8472592a3cc0 after measuring 84 previously unmeasured modules (#9678) and restoring 45/45 debt-governance gates. No budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (`45/45` debt-governance gates).
+1. Debt-governance gates: **45 pass / 0 fail** (45/45 debt-governance gates).
 1. Release status: **debt-governance gates passing**.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
-1. Module inventory (from `module-coverage-inventory.json` only):
+1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score 9.41.
+1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2467**
-   - fully_covered: **1568**
-   - partially_covered: **895**
-   - no_executable_lines: **4**
+   - fully_covered: **1476**
+   - partially_covered: **978**
+   - no_executable_lines: **13**
    - uncovered: **0**
    - unmeasured: **0**
    - check: fully + partial + no_exec + uncovered + unmeasured = 2467 == source_module_count
@@ -71,37 +66,26 @@ Refresh reason: Re-pin to origin/main `8324378c7b` after the governance and arch
 
 ## Evidence anchors
 
-- `reports/quality/module-coverage-inventory.json`
-- `reports/quality/architecture-quality-scorecard.json`
-- `reports/quality/debt-governance-gates.json`
-- `reports/quality/contract-coverage-matrix.json`
-- `configs/quality/debt_scorecard.yaml`
-- `configs/quality/constructor_waivers.yaml`
+- 
+eports/quality/module-coverage-inventory.json
+- 
+eports/quality/architecture-quality-scorecard.json
+- 
+eports/quality/debt-governance-gates.json
+- 
+eports/quality/contract-coverage-matrix.json
+- configs/quality/debt_scorecard.yaml
+- configs/quality/constructor_waivers.yaml
 
-## Reproducibility
+## Validation
 
-```bash
-python -m scripts.engineering.qa report-compatibility-importer-census --snapshot-date 2026-08-01
-python -m scripts.engineering.qa report-dead-code-inventory --snapshot-date 2026-08-01
-python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml
-python scripts/engineering/qa/report_architecture_quality_scorecard.py
-python -m scripts.engineering.qa report-contract-coverage-matrix
-python -m scripts.engineering.qa report-debt-governance-gates --update
+`	ext
+python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml
+python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main
 python -m scripts.engineering.qa validate-technical-debt-audit --json
-```
+python -m scripts.engineering.qa check-exemptions
+`
 
-## Compatibility retained entrypoints (importer census)
+## Guard
 
-| module | src importers | test importers |
-| --- | ---: | ---: |
-| `bioetl.domain.composite.config` | 0 | 40 |
-| `bioetl.application.composite.merger` | 0 | 5 |
-
-## TD2 residual closeout (2026-07-29)
-
-- Epic #7033 / children #7034–#7041: artifact drift cleared, hotspot re-export trim, shim review, scripts ratchet 17→15, public API interim review.
-
-## Related closeouts
-
-- CodeRabbit epic CR-00 / #6692 (children CR-01..CR-07)
-- Residual tech-debt epic TD-R-00 / #6676
+- **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
