@@ -21,9 +21,10 @@ if sys.platform == "win32":
 def main():
     """Main CLI function."""
     if len(sys.argv) < 3:
-        print("Usage: python scripts/grok_cli.py <pattern> <text>")
+        print("Usage: python scripts/engineering/dev/grok_cli.py <pattern> <text>")
         print(
-            "Example: python scripts/grok_cli.py '%{IP:client} %{WORD:method}' '192.168.1.1 GET /api'"
+            "Example: python scripts/engineering/dev/grok_cli.py "
+            "'%{IP:client} %{WORD:method}' '192.168.1.1 GET /api'"
         )
         sys.exit(1)
 

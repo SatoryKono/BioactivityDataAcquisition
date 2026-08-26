@@ -4,6 +4,16 @@
 
 *Версия: 1.1 (консолидировано из веток `codex/develop-user-instructions-for-codex*`) | Основано на `docs/00-project/RULES.md`, `AGENT.md`, `CLAUDE.md`, `GEMINI.md` | Дата: 2026-04-06*
 
+## 0) Canonical runtime entry
+
+Read first, in this order:
+
+1. `AGENTS.md`
+1. `.codex/agents/CODEX-RUNTIME.md` and `.junie/agents/JUNIE-RUNTIME.md` (equal peers; plus `.junie/guidelines.md`)
+1. `docs/00-project/NORMATIVE_SOURCES.md`
+
+This file is a Codex contributor guide, not a substitute for those contracts.
+
 ## 1) Роль и цель
 
 Ты — **Architecture Auditor + Implementation Engineer** проекта BioETL.

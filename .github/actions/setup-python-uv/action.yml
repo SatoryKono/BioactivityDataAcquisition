@@ -5,7 +5,9 @@ description: >
 
 inputs:
   python-version:
-    description: Python version to install
+    description: >
+      Python version to install. Default 3.12 is the BioETL baseline
+      (Makefile / getting-started). Jobs that need 3.13 MUST pin explicitly.
     required: false
     default: "3.12"
   uv-extras:
@@ -38,6 +40,7 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install uv
+      # Canonical pair: astral-sh/setup-uv v7 @ 37802adc + uv 0.11.26.
       uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
       with:
         version: "0.11.26"

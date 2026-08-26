@@ -2,6 +2,16 @@
 
 *Статус: internal-published (Internal / Extended)*
 
+## 0. Canonical runtime entry
+
+Read first, in this order:
+
+1. `AGENTS.md`
+1. `.codex/agents/CODEX-RUNTIME.md` and `.junie/agents/JUNIE-RUNTIME.md` (equal peers; plus `.junie/guidelines.md`)
+1. `docs/00-project/NORMATIVE_SOURCES.md`
+
+Root `GEMINI.md` is the session routing file. This guide does not override those contracts.
+
 ## 1. Project Overview
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data from major public repositories (ChEMBL, PubChem, UniProt, PubMed) into a unified **Delta Lake** warehouse.
