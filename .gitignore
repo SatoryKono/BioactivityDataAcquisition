@@ -367,6 +367,7 @@ desktop.ini
 # Secrets / API keys (RULES.md REQ-SECRET-004)
 *.env
 .env.*
+.env
 !.env.example
 API_KEY.env
 secrets.json
@@ -653,8 +654,8 @@ _fail_*.txt
 .zed/
 2026-08-06_20-00-44.gif
 
-# Local agent workspace (untracked)
-.agents/
+# Local agent workspace (untracked). Do not re-add a trailing `.agents/`
+# blanket: last-match would override the SKILL.md un-ignore above.
 /data/debug_exports
 /data/debug_exports
 /chrome-headless-shell

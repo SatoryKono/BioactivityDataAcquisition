@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-26T16:46:29.354487+00:00",
+  "generated_at": "2026-08-26T17:47:59.742757+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -10,12 +10,12 @@
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
-      "ci": 81,
+      "ci": 82,
       "docs": 250,
       "other": 74,
-      "scripts": 505,
+      "scripts": 503,
       "skills": 12,
-      "tests": 406
+      "tests": 409
     }
   },
   "scripts": [
@@ -347,7 +347,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 123,
+          "line": 126,
           "source_group": "docs",
           "text": "python3 scripts/ai/codex/doctor.py static --no-write"
         },
@@ -1404,25 +1404,25 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 141,
+          "line": 144,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 184,
+          "line": 187,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-setup"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 187,
+          "line": 190,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-static"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 190,
+          "line": 193,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/run-codex.sh mcp-check --profile stable \\"
         },
@@ -1491,7 +1491,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 524,
+          "line": 543,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.bat\": \"scripts/ai/codex/setup-codex-wsl.bat\","
         }
@@ -1560,7 +1560,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 525,
+          "line": 544,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
@@ -2886,7 +2886,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
@@ -2931,10 +2931,10 @@
           "text": "\"check\": shell_command(\"check.sh\"),"
         },
         {
-          "path": "scripts/startup.sh",
-          "line": 10,
+          "path": "scripts/startup.ps1",
+          "line": 14,
           "source_group": "scripts",
-          "text": "exec bash \"${repo_root}/scripts/ai/mcp/check.sh\""
+          "text": "bash \"$ProjectDir/scripts/ai/mcp/check.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -3008,7 +3008,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 235,
+          "line": 238,
           "source_group": "docs",
           "text": "`scripts/ai/mcp/export_mcp_env_from_dotenv.ps1` can export already configured"
         },
@@ -4420,19 +4420,13 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 274,
           "source_group": "scripts",
           "text": "if PYTHONPATH=\"${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}\" python3 \"${SCRIPT_DIR}/protocol_smoke.py\" --config \"${protocol_config}\" --server memory --timeout 15 >/dev/null; then"
-        },
-        {
-          "path": "scripts/startup.ps1",
-          "line": 16,
-          "source_group": "scripts",
-          "text": "python \"$ProjectDir\\scripts\\ai\\mcp\\protocol_smoke.py\" --config \"$ProjectDir\\.mcp.json\" --server memory --timeout 15"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
@@ -4549,7 +4543,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 232,
+          "line": 235,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -4699,7 +4693,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 249,
+          "line": 252,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -4756,7 +4750,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 248,
+          "line": 251,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -5586,7 +5580,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 215,
+          "line": 221,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -5946,13 +5940,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 321,
+          "line": 327,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 406,
+          "line": 412,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6003,7 +5997,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 428,
+          "line": 434,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6058,7 +6052,7 @@
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
           "line": 121,
           "source_group": "skills",
-          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -6080,7 +6074,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 417,
+          "line": 423,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6088,7 +6082,7 @@
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
           "line": 128,
           "source_group": "docs",
-          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
+          "text": "- `python scripts/diagrams/check/check_diagram_visual_smoke.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -6158,13 +6152,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 324,
+          "line": 330,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 411,
+          "line": 417,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6220,7 +6214,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 36,
+      "reference_count": 35,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
@@ -6594,7 +6588,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 423,
+          "line": 429,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6890,7 +6884,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 361,
+          "line": 367,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
@@ -6935,7 +6929,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 364,
+          "line": 370,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7201,8 +7195,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".github/workflows/architecture-docs-nightly.yml",
+          "line": 39,
+          "source_group": "ci",
+          "text": "run: uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
+        },
+        {
+          "path": ".github/workflows/docs.yml",
+          "line": 132,
+          "source_group": "ci",
+          "text": "scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
+        },
         {
           "path": "docs/02-architecture/diagrams/README.md",
           "line": 50,
@@ -7216,10 +7222,22 @@
           "text": "- Supplemental generator: `scripts/diagrams/render/generate_package_family_class_diagrams.py`"
         },
         {
+          "path": "docs/02-architecture/diagrams/governance/diagrams-index.md",
+          "line": 63,
+          "source_group": "docs",
+          "text": "- Class families: 19 curated families (`class-diagrams/01-*.mmd` ... `class-diagrams/16-*.mmd`, including focused method/operation catalogs `01a`, `08a`, `14a`), 1 frontmatter sandbox copy, and genera"
+        },
+        {
           "path": "scripts/diagrams/README.md",
           "line": 126,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/render/generate_package_family_class_diagrams.py` | Supplemental package-family class-diagram generator                                           |"
+        },
+        {
+          "path": "tests/architecture/test_docs_governance_workflow.py",
+          "line": 35,
+          "source_group": "tests",
+          "text": "assert \"generate_package_family_class_diagrams.py --check\" in workflow"
         }
       ]
     },
@@ -7671,7 +7689,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 354,
+          "line": 360,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8036,7 +8054,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 204,
+          "line": 210,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9947,7 +9965,7 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 80,
+          "line": 73,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/validate_contract_identity.py"
         },
@@ -9968,7 +9986,7 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 96,
+          "line": 89,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/validate_contract_registry.py"
         },
@@ -10022,19 +10040,19 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 19,
+          "line": 22,
           "source_group": "ci",
           "text": "- 'scripts/engineering/ci/validate_registry_dq_refs.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 35,
+          "line": 38,
           "source_group": "ci",
           "text": "- 'scripts/engineering/ci/validate_registry_dq_refs.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 166,
+          "line": 159,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/validate_registry_dq_refs.py"
         },
@@ -10079,25 +10097,25 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 20,
+          "line": 23,
           "source_group": "ci",
           "text": "- 'scripts/engineering/ci/validate_schema_classifier_gate.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 36,
+          "line": 39,
           "source_group": "ci",
           "text": "- 'scripts/engineering/ci/validate_schema_classifier_gate.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 147,
+          "line": 140,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --base-sha \"$BASE_SHA\" --head-sha \"$HEAD_SHA\""
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 149,
+          "line": 142,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/validate_schema_classifier_gate.py --head-sha \"$HEAD_SHA\""
         },
@@ -10273,7 +10291,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 29,
+          "line": 26,
           "source_group": "docs",
           "text": "from scripts.engineering.common.repo_paths import ensure_safe_cli_argv"
         },
@@ -10355,7 +10373,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 152,
+          "line": 162,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev setup-mcp"
         },
@@ -10385,7 +10403,7 @@
         },
         {
           "path": "docs/03-guides/getting-started.md",
-          "line": 182,
+          "line": 184,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests smoke"
         }
@@ -10499,13 +10517,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
-          "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 30,
-          "source_group": "scripts",
-          "text": "- grok_cli.py"
+          "path": "tests/architecture/test_scripts_root_wrapper_policy.py",
+          "line": 98,
+          "source_group": "tests",
+          "text": "assert \"grok_cli.py\" not in allowlist"
+        },
+        {
+          "path": "tests/architecture/test_scripts_root_wrapper_policy.py",
+          "line": 100,
+          "source_group": "tests",
+          "text": "assert (Path(\"scripts\") / \"engineering\" / \"dev\" / \"grok_cli.py\").is_file()"
         }
       ]
     },
@@ -10517,10 +10541,10 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 31,
-          "source_group": "scripts",
-          "text": "- grok_cli_advanced.py"
+          "path": "tests/architecture/test_scripts_root_wrapper_policy.py",
+          "line": 99,
+          "source_group": "tests",
+          "text": "assert \"grok_cli_advanced.py\" not in allowlist"
         }
       ]
     },
@@ -10720,13 +10744,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 175,
+          "line": 185,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` в PowerShell"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 183,
+          "line": 193,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\run_mypy.ps1"
         },
@@ -10738,7 +10762,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 189,
+          "line": 199,
           "source_group": "docs",
           "text": "- PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\architecture\\ -v`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`"
         },
@@ -10785,13 +10809,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 176,
+          "line": 186,
           "source_group": "docs",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` в WSL"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 189,
+          "line": 199,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_mypy.sh"
         },
@@ -10803,7 +10827,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 190,
+          "line": 200,
           "source_group": "docs",
           "text": "- WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh tests/architecture/ -v`, `bash scripts/engineering/dev/run_mypy.sh`"
         },
@@ -10917,13 +10941,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 175,
+          "line": 185,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` в PowerShell"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 182,
+          "line": 192,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\ --timeout=120 -n 1 --lf"
         },
@@ -10935,7 +10959,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 189,
+          "line": 199,
           "source_group": "docs",
           "text": "- PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1 tests\\architecture\\ -v`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`"
         }
@@ -10965,13 +10989,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 176,
+          "line": 186,
           "source_group": "docs",
           "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` в WSL"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 188,
+          "line": 198,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest.sh tests/ --timeout=120 -n auto --lf"
         },
@@ -10983,7 +11007,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/guides/CODEX.md",
-          "line": 190,
+          "line": 200,
           "source_group": "docs",
           "text": "- WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh tests/architecture/ -v`, `bash scripts/engineering/dev/run_mypy.sh`"
         },
@@ -11223,13 +11247,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 173,
+          "line": 183,
           "source_group": "docs",
           "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` → `.venv-win`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 181,
+          "line": 191,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -11280,13 +11304,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 174,
+          "line": 184,
           "source_group": "docs",
           "text": "- `bash scripts/engineering/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
-          "line": 187,
+          "line": 197,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -13705,13 +13729,13 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 222,
+          "line": 228,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 226,
+          "line": 232,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -14066,7 +14090,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -14084,19 +14108,13 @@
           "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
           "line": 5,
           "source_group": "docs",
-          "text": "- src/tools/scripts/engineering/qa/lint_terminology.py"
+          "text": "- scripts/engineering/qa/lint_terminology.py"
         },
         {
           "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 21,
+          "line": 17,
           "source_group": "docs",
-          "text": "if (parent / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\").exists()"
-        },
-        {
-          "path": "docs/00-project/ai/agents/scripts/py-team-orchestration.py",
-          "line": 25,
-          "source_group": "docs",
-          "text": "return repo_root / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\""
+          "text": "linter = Path(\"scripts\") / \"engineering\" / \"qa\" / \"lint_terminology.py\""
         },
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14115,6 +14133,12 @@
           "line": 28,
           "source_group": "tests",
           "text": "script_path = repo_root / \"scripts\" / \"engineering\" / \"qa\" / \"lint_terminology.py\""
+        },
+        {
+          "path": "tests/architecture/test_lint_terminology_script.py",
+          "line": 30,
+          "source_group": "tests",
+          "text": "assert script_path.exists(), \"scripts/engineering/qa/lint_terminology.py must exist\""
         }
       ]
     },
@@ -14874,13 +14898,13 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 16,
+          "line": 19,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/report_contract_coverage_matrix.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 32,
+          "line": 35,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/report_contract_coverage_matrix.py'"
         },
@@ -15741,13 +15765,13 @@
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 17,
+          "line": 20,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'"
         },
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
-          "line": 33,
+          "line": 36,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/report_pipeline_config_contract_ownership.py'"
         },
@@ -16760,7 +16784,7 @@
         },
         {
           "path": ".github/workflows/branch-hygiene.yml",
-          "line": 44,
+          "line": 49,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
@@ -16772,7 +16796,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 201,
+          "line": 207,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -17958,7 +17982,7 @@
       "references": [
         {
           "path": "scripts/ops/_run_cr_arch_review_remaining.sh",
-          "line": 77,
+          "line": 78,
           "source_group": "scripts",
           "text": "python3 \"${SRC}/scripts/ops/_build_arch_review_report.py\" \\"
         }
@@ -20396,7 +20420,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 198,
+          "line": 201,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
@@ -20470,13 +20494,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 200,
+          "line": 203,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 217,
+          "line": 220,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -20621,7 +20645,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 217,
+          "line": 220,
           "source_group": "docs",
           "text": "after reconnects run `cleanup-mcp-orphans.ps1` or `ensure-stable.ps1`."
         },
@@ -21217,7 +21241,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 218,
+          "line": 221,
           "source_group": "docs",
           "text": "Alternatively run the **shared HTTP plane** (`start-shared.ps1` +"
         },
@@ -21758,7 +21782,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 231,
+          "line": 234,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
@@ -21944,7 +21968,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 32,
+          "line": 30,
           "source_group": "scripts",
           "text": "- optimized_test_runner.py"
         },
@@ -22010,13 +22034,13 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 62,
+          "line": 67,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 114,
+          "line": 123,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         }
@@ -22169,13 +22193,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 15,
+          "line": 18,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_json_field_typing_inventory.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 29,
+          "line": 32,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_json_field_typing_inventory.py'"
         },
@@ -22265,13 +22289,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 12,
+          "line": 15,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_contracts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 26,
+          "line": 29,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_contracts.py'"
         },
@@ -22413,13 +22437,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 13,
+          "line": 16,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 27,
+          "line": 30,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
         },
@@ -22530,7 +22554,7 @@
           "path": "scripts/schema/README.md",
           "line": 29,
           "source_group": "scripts",
-          "text": "- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) imp"
+          "text": "- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](../../tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract "
         },
         {
           "path": "scripts/schema/README.md",
@@ -22693,13 +22717,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 14,
+          "line": 17,
           "source_group": "ci",
           "text": "- 'scripts/schema/validation/verify_schema_parity.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 28,
+          "line": 31,
           "source_group": "ci",
           "text": "- 'scripts/schema/validation/verify_schema_parity.py'"
         },
@@ -22796,7 +22820,7 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
@@ -22809,6 +22833,12 @@
           "line": 1129,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
+        },
+        {
+          "path": "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+          "line": 44,
+          "source_group": "tests",
+          "text": "ps1 = (ROOT / \"scripts\" / \"startup.ps1\").read_text(encoding=\"utf-8\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
@@ -22833,13 +22863,19 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
           "line": 929,
           "source_group": "tests",
           "text": "for name in (\"startup.sh\", \"startup.ps1\", \"shutdown.sh\", \"shutdown.ps1\")"
+        },
+        {
+          "path": "tests/architecture/test_gitignore_secret_and_agents_policy.py",
+          "line": 43,
+          "source_group": "tests",
+          "text": "sh = (ROOT / \"scripts\" / \"startup.sh\").read_text(encoding=\"utf-8\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
@@ -22868,7 +22904,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/catalog.yaml",
-          "line": 33,
+          "line": 31,
           "source_group": "scripts",
           "text": "- test_selection_strategy.py"
         }

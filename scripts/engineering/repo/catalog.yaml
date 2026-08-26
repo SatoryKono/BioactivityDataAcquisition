@@ -27,8 +27,6 @@ policies:
   - docker-setup.sh
   - generate_adr_registry.py
   - generate_test_github_issues.py
-  - grok_cli.py
-  - grok_cli_advanced.py
   - optimized_test_runner.py
   - test_selection_strategy.py
 entrypoints:
