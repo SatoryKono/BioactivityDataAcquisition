@@ -105,11 +105,11 @@ routes:
 
   - id: chembl-field-matrix-generated-docs
     generator: scripts/docs/matrix/generate_field_matrix.py
-    output_kind: curated_generated_docs
-    commit_policy: tracked_curated_generated_doc
+    output_kind: ignored_docs_export
+    commit_policy: ignored_local_output
     outputs:
       - docs/reports/generated/chembl_activity_field_matrix/
-    notes: Deterministic docs report generated from code and contract inputs.
+    notes: Generated locally; not a tracked docs artifact (no gitignore allowlist).
 
   - id: pipeline-normalization-generated-docs
     generator: scripts/docs/matrix/generate_pipeline_normalization_matrix.py

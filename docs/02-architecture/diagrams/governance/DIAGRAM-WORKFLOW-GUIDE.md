@@ -383,9 +383,9 @@ ______________________________________________________________________
 
 ```
 13-port-protocol-contracts.mmd      → основной (до 35 нод)
-13a-port-contracts-data-sources.mmd → фокус на data source ports
-13b-port-contracts-storage.mmd      → фокус на storage ports
-13c-port-contracts-observability.mmd → фокус на observability
+13g-port-contracts-data-sources.mmd → фокус на data source ports
+13h-port-contracts-storage.mmd      → фокус на storage ports
+13i-port-contracts-observability.mmd → фокус на observability
 13d-port-contracts-services.mmd     → фокус на service ports
 ```
 
