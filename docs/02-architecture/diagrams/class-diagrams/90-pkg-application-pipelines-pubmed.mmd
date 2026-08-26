@@ -1,27 +1,36 @@
 %% Title: Package Family: application/pipelines/pubmed
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/pipelines/pubmed; modules: block_definitions, __init__, transformer.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/pipelines/pubmed; modules: _block_definitions_analytics, _block_definitions_edition, _block_definitions_identifiers, __init__, _block_definitions_base, transformer.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
 %% @nodes   10
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
-    namespace block_definitions {
-        class _PubMedAuthorBlock
+    namespace block_definitions_analytics {
         class _PubMedClassificationBlock
-        class _PubMedCoreBlock
         class _PubMedDateBlock
-        class _PubMedIdentifierBlock
-        class _PubMedJournalBlock
         class _PubMedMetricsBlock
-        class _PubMedXmlBlock
+    }
+
+    namespace block_definitions_edition {
+        class _PubMedAuthorBlock
+        class _PubMedJournalBlock
+    }
+
+    namespace block_definitions_identifiers {
+        class _PubMedCoreBlock
+        class _PubMedIdentifierBlock
     }
 
     namespace init {
         class PubMedPublicationPipeline
+    }
+
+    namespace block_definitions_base {
+        class _PubMedXmlBlock
     }
 
     namespace transformer {
@@ -35,3 +44,4 @@ classDiagram
     _PubMedXmlBlock <|-- _PubMedIdentifierBlock
     _PubMedXmlBlock <|-- _PubMedJournalBlock
     _PubMedXmlBlock <|-- _PubMedMetricsBlock
+

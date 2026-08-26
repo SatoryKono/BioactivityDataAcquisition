@@ -11,7 +11,7 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 if [[ -n "${REPO_ROOT:-}" ]]; then
     # If REPO_ROOT is set, convert Windows path to WSL if needed
     if [[ "$REPO_ROOT" =~ ^[A-Za-z]: ]]; then
-        # Convert E:\path to /mnt/e/path
+        # Convert E:\path to WSL /mnt/<drive>/path
         REPO_ROOT="$(echo "$REPO_ROOT" | sed 's/^\([A-Za-z]\):/\/mnt\/\L\1/' | sed 's/\\/\//g')"
     fi
 else

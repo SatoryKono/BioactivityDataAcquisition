@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/storage/bronze
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_builders, metrics_mixin, reporting_helpers, io_mixin.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/bronze; modules: pipeline_helpers, metadata_operations, metadata_builders, metrics_mixin, reporting_helpers, facade_contracts.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   18
+%% @nodes   22
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -20,6 +20,7 @@ classDiagram
     namespace metadata_operations {
         class BronzeMetadataWriteRequest
         class PreparedBronzeMetadataWrite
+        class _BronzeMetadataBundleBuilder
         class _BronzeMetadataWriteHostProtocol
     }
 
@@ -38,12 +39,20 @@ classDiagram
         class BronzeMetadataInputRequest
     }
 
+    namespace facade_contracts {
+        class BronzeWriterRuntimeServices
+    }
+
     namespace io_mixin {
         class BronzeWriterIOMixin
     }
 
     namespace metadata_mixin {
         class BronzeWriterMetadataMixin
+    }
+
+    namespace read_cleanup_mixin {
+        class BronzeWriterReadCleanupMixin
     }
 
     namespace side_effects_mixin {
@@ -53,3 +62,10 @@ classDiagram
     namespace validation_mixin {
         class BronzeWriterValidationMixin
     }
+
+    namespace write_execution {
+        class _BronzeWriteExecutionHostProtocol
+    }
+
+    BronzeWriterReadCleanupMixin <|-- BronzeWriterIOMixin
+

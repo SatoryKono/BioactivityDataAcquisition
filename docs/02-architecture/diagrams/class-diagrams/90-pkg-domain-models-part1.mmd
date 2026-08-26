@@ -1,0 +1,46 @@
+%% Title: Package Family: domain/models (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/models; part 1/2; modules: _metadata_gold, _metadata_common, _metadata_bronze.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   24
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace metadata_gold {
+        class CompositeOutputExt
+        class CompositeSchemaValidationMetadata
+        class GoldMetadata
+        class GoldOutputExt
+        class SCDMetadata
+        class SchemaColumnInspection
+        class SchemaColumnMetadata
+        class SchemaInspectionResult
+        class SchemaMetadata
+    }
+
+    namespace metadata_common {
+        class BaseOutputMetadata
+        class EnvironmentMetadata
+        class GovernanceLineageConfig
+        class GovernanceMetadata
+        class PipelineMetadata
+        class QualityExpectations
+        class RunTypeEnum
+        class RuntimeMetadata
+    }
+
+    namespace metadata_bronze {
+        class APIRequestDetails
+        class BronzeMetadata
+        class BronzeOutputExt
+        class FileOutputMetadata
+        class InputSnapshotRef
+        class RateLimitInfo
+        class SourceMetadata
+    }
+
+    GoldOutputExt <|-- CompositeOutputExt
+

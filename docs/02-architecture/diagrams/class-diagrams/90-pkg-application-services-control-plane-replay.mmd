@@ -1,0 +1,76 @@
+%% Title: Package Family: application/services/control_plane/replay
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/replay; modules: historical_corpus_models, historical_identity_models, _historical_certification_models, historical_universe_service, historical_closure_models, _bundle_descriptor_payloads.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   26
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace historical_corpus_models {
+        class HistoricalReplayBulkCertificationRecord
+        class HistoricalReplayBulkCertificationResult
+        class HistoricalReplayBulkCertificationSpec
+        class HistoricalReplayCertifiabilityInventory
+        class HistoricalReplayCertifiabilityRecord
+        class HistoricalReplaySnapshotCertification
+    }
+
+    namespace historical_identity_models {
+        class HistoricalReplayRunIdentityRecord
+        class HistoricalReplayUniverseExternalRecord
+        class HistoricalReplayUniverseRecord
+        class _HistoricalReplayCertifiedIdentity
+    }
+
+    namespace historical_certification_models {
+        class HistoricalReplayCertificationProtocol
+        class HistoricalReplayCertificationResult
+        class HistoricalReplayCertificationResultAssembler
+    }
+
+    namespace historical_universe_service {
+        class HistoricalReplayUniverseClosureReportRecord
+        class HistoricalReplayUniverseInventorySnapshot
+        class HistoricalReplayUniverseService
+    }
+
+    namespace historical_closure_models {
+        class HistoricalReplayClosureReportRecord
+        class HistoricalReplayResidualDispositionRecord
+    }
+
+    namespace bundle_descriptor_payloads {
+        class ReplayClaimSnapshot
+    }
+
+    namespace historical_certification_support {
+        class HistoricalReplayCertificationValidator
+    }
+
+    namespace bundle_descriptor_service {
+        class RunReplayBundleDescriptorRecord
+    }
+
+    namespace closure_claims {
+        class _ManifestRecord
+    }
+
+    namespace historical_certification_service {
+        class HistoricalReplayCertificationService
+    }
+
+    namespace historical_closure_service {
+        class HistoricalReplayClosureService
+    }
+
+    namespace historical_corpus_service {
+        class HistoricalReplayCorpusService
+    }
+
+    namespace reproducibility_score_cards_types {
+        class ScoreCardRecord
+    }
+

@@ -1,0 +1,49 @@
+%% Title: Package Family: application/ports (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 1/2; modules: providers, control_plane, operations.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   27
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace providers {
+        class AdapterCreatorProtocol
+        class DataSourceCreatorProtocol
+        class HttpConfig
+        class HttpConfigProtocol
+        class ProviderAdapterFactoryProtocol
+        class ProviderDataSourceAccessProtocol
+        class ProviderHttpClientFactoryProtocol
+        class ProviderRegistrarProtocol
+        class ProviderSettingsProtocol
+        class SecretValueProviderProtocol
+        class SupportAwareDataSourceCreatorProtocol
+    }
+
+    namespace control_plane {
+        class ControlPlaneArtifactLifecycleStoreProtocol
+        class ForensicRunDiffServiceProtocol
+        class HistoricalReplayClosureServiceProtocol
+        class HistoricalReplayCorpusServiceProtocol
+        class HistoricalReplayUniverseServiceProtocol
+        class LineageInspectionServiceProtocol
+        class RunManifestInspectionServiceProtocol
+        class WorkflowInspectionServiceProtocol
+    }
+
+    namespace operations {
+        class AuditInspectionServiceProtocol
+        class CheckpointServiceProtocol
+        class ConfigServiceProtocol
+        class ContractMigrationServiceProtocol
+        class ExportServiceProtocol
+        class LockServiceProtocol
+        class ObservabilityWorkflowServiceProtocol
+        class VacuumServiceProtocol
+    }
+
+    ProviderRegistrarProtocol <|-- ProviderDataSourceAccessProtocol
+

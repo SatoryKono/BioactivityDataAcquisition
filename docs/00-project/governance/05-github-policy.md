@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active**: `checks-complete` + `root-hygiene` |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined: `checks-complete` + `root-hygiene`; not GitHub-enforced). See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -119,7 +119,7 @@ from checks that run only for matching paths.
 | **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python SAST uploaded to GitHub code scanning                                                            |
 | **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
-| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, Trivy image scanning (CRITICAL+HIGH), Syft SBOM, GHCR push on main            |
+| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, Trivy image scanning (CRITICAL+HIGH), Syft SBOM; GHCR push on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
 
 ### 2.4 Code Hygiene
 
@@ -452,8 +452,13 @@ permissions:
 | ------------------------ | ------------------------------------------------- |
 | `contents: read`         | All workflows (default)                           |
 | `contents: write`        | release.yml (asset upload)                        |
-| `packages: write`        | docker.yml (GHCR push)                            |
+| `packages: write`        | docker.yml `docker-push` (GHCR; Environment `ghcr-publish`) |
 | `security-events: write` | docker.yml (Trivy SARIF upload)                   |
+
+`docker-push` publishes GHCR images only from `main` pushes, through Environment
+`ghcr-publish`, with tags `:${{ github.sha }}` and `:${{ github.ref_name }}`.
+It does not publish `:latest`. Environment protection (required reviewers or a
+wait timer) can be added on `ghcr-publish` without changing the workflow.
 | `id-token: write`        | release.yml (trusted publishing)                  |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
 

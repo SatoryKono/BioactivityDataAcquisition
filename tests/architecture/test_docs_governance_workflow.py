@@ -32,6 +32,7 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
 
     assert "docs-governance:" in workflow
     assert "fetch-depth: 0" in workflow
+    assert "generate_package_family_class_diagrams.py --check" in workflow
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow
     assert "'grafana/README.md'" in workflow
@@ -57,6 +58,7 @@ def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
         "tests/architecture/test_diagram_narrative_docs_sync.py",
         "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/architecture/test_api_reference_public_facades.py",
         "tests/architecture/test_docs_governance_workflow.py",
         "tests/architecture/test_observability_docs_drift.py",
         "tests/architecture/test_observability_docs_sync.py",

@@ -1,34 +1,13 @@
 %% Title: Package Family: infrastructure/storage/gold (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: io_delta_runtime, io_mixin, pipeline_helpers, metadata_operations, io_delta_mixins.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/gold; part 1/2; modules: pipeline_helpers, io_delta_protocols, metadata_operations, io_delta_mixins, io_delta_runtime, io_protocols.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   29
+%% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
-
-    namespace io_delta_runtime {
-        class _GoldWriteAsyncioProtocol
-        class _GoldWriteRetryModuleProtocol
-        class _GoldWriterDeltaModuleProtocol
-        class _GoldWriterScd2HostProtocol
-        class _GoldWriterSimpleDeltaHostProtocol
-        class _PreparedScd2GoldWrite
-        class _PreparedSimpleGoldWrite
-        class _SimpleGoldWriteRequest
-    }
-
-    namespace io_mixin {
-        class GoldWriterIOMixin
-        class _GoldMergedMetadataWriterProtocol
-        class _GoldMergedWriteHostProtocol
-        class _GoldMergedWriteRequest
-        class _GoldWriteDispatchTargetProtocol
-        class _GoldWriterMergedDispatchMixin
-        class _PreparedGoldMergedWrite
-    }
 
     namespace pipeline_helpers {
         class GoldWriteDispatchContext
@@ -37,6 +16,14 @@ classDiagram
         class PreparedGoldWriteContext
         class _GoldWritePostwriteHostProtocol
         class _GoldWritePreparationHostProtocol
+    }
+
+    namespace io_delta_protocols {
+        class GoldWriteAsyncioProtocol
+        class GoldWriteRetryModuleProtocol
+        class GoldWriterDeltaModuleProtocol
+        class GoldWriterScd2HostProtocol
+        class GoldWriterSimpleDeltaHostProtocol
     }
 
     namespace metadata_operations {
@@ -53,11 +40,35 @@ classDiagram
         class _GoldWriterSimpleDeltaMixin
     }
 
+    namespace io_delta_runtime {
+        class _PreparedScd2GoldWrite
+        class _PreparedSimpleGoldWrite
+        class _SimpleGoldWriteRequest
+    }
+
+    namespace io_protocols {
+        class _GoldMergedMetadataWriterProtocol
+        class _GoldMergedWriteHostProtocol
+        class _GoldWriteDispatchTargetProtocol
+    }
+
+    namespace writer_protocols {
+        class _GoldWriterHost
+        class _ResolvedSchema
+        class _SchemaBuilder
+    }
+
+    namespace io_mixin {
+        class GoldWriterIOMixin
+        class _GoldWriterMergedDispatchMixin
+    }
+
+    GoldWriteRetryModuleProtocol <|-- GoldWriterDeltaModuleProtocol
     _GoldMetadataWriteHostProtocol <|-- _GoldMergedMetadataWriteHostProtocol
-    _GoldWriteRetryModuleProtocol <|-- _GoldWriterDeltaModuleProtocol
     _GoldWriterExecutorArrowMixin <|-- _GoldWriterMergedDispatchMixin
     _GoldWriterExecutorArrowMixin <|-- _GoldWriterScd2MergeMixin
     _GoldWriterExecutorArrowMixin <|-- _GoldWriterSimpleDeltaMixin
     _GoldWriterMergedDispatchMixin <|-- GoldWriterIOMixin
     _GoldWriterScd2MergeMixin <|-- GoldWriterIOMixin
     _GoldWriterSimpleDeltaMixin <|-- GoldWriterIOMixin
+

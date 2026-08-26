@@ -1,0 +1,23 @@
+%% Title: Package Family: application/pipelines/crossref
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/pipelines/crossref; modules: blocks, transformer.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace blocks {
+        class _CrossRefAuthorBlock
+        class _CrossRefCoreBlock
+        class _CrossRefDateBlock
+        class _CrossRefJournalBlock
+        class _CrossRefMetadataBlock
+    }
+
+    namespace transformer {
+        class CrossRefPublicationTransformer
+    }
+

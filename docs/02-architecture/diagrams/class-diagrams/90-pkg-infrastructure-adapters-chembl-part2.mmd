@@ -1,13 +1,45 @@
 %% Title: Package Family: infrastructure/adapters/chembl (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: health, metadata.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 2/2; modules: _models_common_page, _protein_classification_node, client, entity_mapper, fetch_adapter_mixin, fetch_multi_filter_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   2
+%% @nodes   11
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace models_common_page {
+        class ChemblPageMeta
+    }
+
+    namespace protein_classification_node {
+        class ProteinClassificationNode
+    }
+
+    namespace client {
+        class ChemblAdapter
+    }
+
+    namespace entity_mapper {
+        class ChemblEntityMapper
+    }
+
+    namespace fetch_adapter_mixin {
+        class ChemblFetchAdapterMixin
+    }
+
+    namespace fetch_multi_filter_mixin {
+        class ChemblFetchMultiFilterMixin
+    }
+
+    namespace fetch_paging_mixin {
+        class ChemblFetchPagingMixin
+    }
+
+    namespace fetch_resilience_mixin {
+        class ChemblFetchResilienceMixin
+    }
 
     namespace health {
         class ChemblHealthMixin
@@ -16,3 +48,15 @@ classDiagram
     namespace metadata {
         class ChemblMetadataMixin
     }
+
+    namespace protein_classification_graph {
+        class ChEMBLProteinClassificationGraph
+    }
+
+    ChemblFetchAdapterMixin <|-- ChemblAdapter
+    ChemblFetchMultiFilterMixin <|-- ChemblFetchAdapterMixin
+    ChemblFetchPagingMixin <|-- ChemblFetchAdapterMixin
+    ChemblFetchResilienceMixin <|-- ChemblFetchAdapterMixin
+    ChemblHealthMixin <|-- ChemblAdapter
+    ChemblMetadataMixin <|-- ChemblAdapter
+

@@ -1,19 +1,20 @@
 %% Title: Package Family: application/composite/runner_pkg (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/composite/runner_pkg; part 1/2; modules: runner_completion_helpers, runner_runtime_helpers, runner_execution_orchestrator, runner_merge_stage_types, runner_models, runner_stage_types.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/composite/runner_pkg; part 1/2; modules: runner_execution_orchestrator, runner_runtime_helpers, runner_completion_helpers, runner_control_plane_mixin, runner_stage_types, runner_key_flow.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
-    namespace runner_completion_helpers {
-        class CompositePipelineFinalizationContext
-        class CompositePipelineFinalizationResult
-        class CompositeResultBuildContext
-        class _CompositePipelineFinalizationHostProtocol
+    namespace runner_execution_orchestrator {
+        class CompositeLockedExecutionContext
+        class CompositeLockedExecutionResult
+        class CompositeRunPhaseService
+        class _CompositeLockedExecutionHostProtocol
+        class _CompositePreMergeExecutionResult
     }
 
     namespace runner_runtime_helpers {
@@ -23,22 +24,16 @@ classDiagram
         class _FSMRuntimeHelperProtocol
     }
 
-    namespace runner_execution_orchestrator {
-        class CompositeLockedExecutionContext
-        class CompositeLockedExecutionResult
-        class _CompositeLockedExecutionHostProtocol
+    namespace runner_completion_helpers {
+        class CompositePipelineFinalizationContext
+        class CompositePipelineFinalizationResult
+        class _CompositePipelineFinalizationHostProtocol
     }
 
-    namespace runner_merge_stage_types {
-        class _CompositeRunnerMergeStageHostProtocol
-        class _PreparedMergeInputs
-        class _PreparedMergeRequest
-    }
-
-    namespace runner_models {
-        class CompositeExecutionContext
-        class CompositeRunnerDependencyGroup
-        class CompositeRuntimeConfig
+    namespace runner_control_plane_mixin {
+        class CompositeRunnerControlPlaneMixin
+        class _CompositeRunnerLedgerLifecycleMixin
+        class _CompositeRunnerPhaseCompletionMixin
     }
 
     namespace runner_stage_types {
@@ -47,20 +42,19 @@ classDiagram
         class _PreparedDependenciesRunContext
     }
 
-    namespace runner_support_types {
-        class _CompositeRunnerSupportHostProtocol
-        class _PreparedCompositeResultContext
-        class _PreparedPreflightValidationContext
-    }
-
     namespace runner_key_flow {
         class CompositeEnrichmentKeyContext
         class CompositeEnrichmentKeyResult
     }
 
-    namespace runner_observability_mixin {
-        class CompositeRunnerObservabilityMixin
-        class _CompositeRunnerObservabilityHostProtocol
+    namespace runner_merge_stage_types {
+        class _CompositeRunnerMergeStageHostProtocol
+        class _PreparedMergeInputs
+    }
+
+    namespace runner_result_types {
+        class CompositeResultBuildContext
+        class _PreparedCompositeResultContext
     }
 
     namespace runner_stage_enrichment_types {
@@ -68,8 +62,20 @@ classDiagram
         class _PreparedEnrichmentRunContext
     }
 
+    namespace runner_support_types {
+        class _CompositeRunnerSupportHostProtocol
+        class _PreparedPreflightValidationContext
+    }
+
     namespace runner {
         class CompositePipelineRunner
     }
 
-    CompositeRunnerObservabilityMixin <|-- CompositePipelineRunner
+    namespace runner_control_plane_lifecycle {
+        class CompositeRunnerControlPlaneHostProtocol
+    }
+
+    CompositeRunnerControlPlaneMixin <|-- CompositePipelineRunner
+    _CompositeRunnerLedgerLifecycleMixin <|-- CompositeRunnerControlPlaneMixin
+    _CompositeRunnerPhaseCompletionMixin <|-- CompositeRunnerControlPlaneMixin
+

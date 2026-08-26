@@ -1,0 +1,59 @@
+%% Title: Package Family: domain/normalization/profiles
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/normalization/profiles; modules: chembl_policy_registry_data, base, _standard_profile_spec, _chembl_policy_family_mapping, _chembl_profile_helpers, _profile_ontology_companion_normalizers.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   18
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace chembl_policy_registry_data {
+        class ChemblControlledVocabularyFamily
+        class ChemblOntologyPolicyFamily
+        class ChemblPolicyRegistryData
+        class ChemblReferenceIdentifierFamily
+        class ChemblStrictScalarFamily
+    }
+
+    namespace base {
+        class FieldRule
+        class FieldRuleIdentity
+        class NormalizationProfile
+        class NormalizationProfileIdentity
+    }
+
+    namespace standard_profile_spec {
+        class StandardProfileSpec
+        class _StandardProfileSpecKwargs
+    }
+
+    namespace chembl_policy_family_mapping {
+        class _NamedFamily
+    }
+
+    namespace chembl_profile_helpers {
+        class ChemblProfileFieldGroups
+    }
+
+    namespace profile_ontology_companion_normalizers {
+        class _OBOCompanionSpec
+    }
+
+    namespace registry_declarations {
+        class NormalizationProfileDeclaration
+    }
+
+    namespace standard_profile_rule_context {
+        class _RuleComponentContext
+    }
+
+    namespace chembl_json_ordering_policy {
+        class ChemblJsonOrderingPolicy
+    }
+
+    namespace chembl_policy_registry {
+        class ChemblPolicySurface
+    }
+

@@ -23,7 +23,7 @@ ______________________________________________________________________
 
 - Canonical `.mmd` sources:
   - `architecture/` — 89 files
-  - `class-diagrams/` — 94 files
+  - `class-diagrams/` — 145 files
   - `foundation/` — 55 files
 - Decomposed `.mermaid` views:
   - `views/` — 165 files
@@ -60,7 +60,7 @@ ______________________________________________________________________
   - `architecture/16-transformer-hierarchy.mmd`
   - `architecture/17-security-pii-audit.mmd`
   - `architecture/18-lock-checkpoint-shutdown.mmd`
-- Class families (94 `.mmd` files): 19 curated families (`class-diagrams/01-*.mmd` ... `class-diagrams/16-*.mmd`, including focused method/operation catalogs `01a`, `08a`, `14a`), 1 frontmatter sandbox copy, and 74 supplemental `90-pkg-*` package slices.
+- Class families: 19 curated families (`class-diagrams/01-*.mmd` ... `class-diagrams/16-*.mmd`, including focused method/operation catalogs `01a`, `08a`, `14a`), 1 frontmatter sandbox copy, and generated `90-pkg-*` supplemental package slices (regenerate via `scripts/diagrams/render/generate_package_family_class_diagrams.py`; do not hand-count).
 - Foundation set (55 `.mmd` files): `foundation/01-*.mmd` ... `foundation/50-*.mmd` (with historical number gaps)
 
 ## Render And Validation

@@ -1,29 +1,36 @@
 %% Title: Package Family: infrastructure/adapters/pubchem
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubchem; modules: models, fetch_flow, _client_fetch_surface, _fetch_strategy_search, client, client_model_mixin.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/pubchem; modules: models, _detail_models, fetch_flow, _client_fetch_surface, _fetch_strategy_identifiers, _fetch_strategy_search.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   14
+%% @nodes   15
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
     namespace models {
         class PubChemAssayRecord
-        class PubChemBioactivityRecord
         class PubChemSubstanceRecord
         class PubchemMoleculeApiRecord
+    }
+
+    namespace detail_models {
+        class PubChemBioactivityRecord
         class PubchemMoleculeDetailRecord
     }
 
     namespace fetch_flow {
-        class PubChemFetchFlowService
+        class PubChemFetchFlow
         class _RequestRecorder
     }
 
     namespace client_fetch_surface {
         class _PubChemClientFetchMixin
+    }
+
+    namespace fetch_strategy_identifiers {
+        class _PubChemIdentifierFetchMixin
     }
 
     namespace fetch_strategy_search {
@@ -52,4 +59,6 @@ classDiagram
 
     PubChemAdapterModelMixin <|-- PubChemAdapter
     _PubChemClientFetchMixin <|-- PubChemAdapter
+    _PubChemIdentifierFetchMixin <|-- PubChemFetchStrategies
     _PubChemSearchFetchMixin <|-- PubChemFetchStrategies
+

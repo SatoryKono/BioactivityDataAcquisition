@@ -1,29 +1,84 @@
 %% Title: Package Family: composition/runtime_builders
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: inputs_resolver, inputs_runtime_helpers, run_manifest_builder, runner_builder.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/runtime_builders; modules: runner_builder_wiring, _manifest_publication_context_support, _runner_input_preparation, _run_manifest_builder_policy, _run_manifest_context_updates, _run_manifest_creation_support_helpers.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   7
+%% @nodes   22
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
-    namespace inputs_resolver {
-        class ResolvedVacuumSettings
-        class RunnerInputs
-        class _PaginationConfigLike
-        class _SourceConfigLike
+    namespace runner_builder_wiring {
+        class LegacyRunnerBuilderOverrides
+        class RunnerBuilderWiring
+        class RunnerFactoryWiring
+        class RunnerInputWiring
+    }
+
+    namespace manifest_publication_context_support {
+        class ManifestPublicationIdentityKwargs
+        class ResolvedManifestPublicationContext
+    }
+
+    namespace runner_input_preparation {
+        class PreparedRunnerContext
+        class ResolvedRunnerDerivedInputs
+    }
+
+    namespace run_manifest_builder_policy {
+        class ManifestReproducibilityContext
+    }
+
+    namespace run_manifest_context_updates {
+        class _MutableManifestContext
+    }
+
+    namespace run_manifest_creation_support_helpers {
+        class RunManifestCreateRequestInputs
+    }
+
+    namespace run_manifest_refs {
+        class ManifestControlPlaneRefs
+    }
+
+    namespace runner_builder_orchestration {
+        class RunnerFactoryBootstrap
+    }
+
+    namespace runner_control_plane_policy {
+        class ResolvedRunnerControlPlanePolicy
     }
 
     namespace inputs_runtime_helpers {
         class ResolvedRuntimeProjection
     }
 
-    namespace run_manifest_builder {
-        class _ManifestControlPlaneRefs
+    namespace inputs_runtime_models {
+        class ResolvedVacuumSettings
     }
 
-    namespace runner_builder {
-        class _LoggerBindableObservability
+    namespace ledger_collaborator {
+        class ArtifactRecorderAttachmentResult
     }
+
+    namespace registry_manifest {
+        class RuntimeBuilderExportEntry
+    }
+
+    namespace run_manifest_contract_identity {
+        class RunManifestContractIdentity
+    }
+
+    namespace run_manifest_support {
+        class RunManifestProvenanceBundle
+    }
+
+    namespace runner_control_plane_assembly {
+        class ControlPlaneSetupResult
+    }
+
+    namespace runner_inputs {
+        class RunnerInputs
+    }
+

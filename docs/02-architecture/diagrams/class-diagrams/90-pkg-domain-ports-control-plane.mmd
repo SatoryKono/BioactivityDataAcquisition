@@ -1,0 +1,49 @@
+%% Title: Package Family: domain/ports/control_plane
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/control_plane; modules: run_manifest, artifact_byte_comparison, contract_evidence, effective_config_artifact, lineage, run_ledger.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   11
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace run_manifest {
+        class RawManifestInspection
+        class RawRunManifestInspectionPort
+        class RunManifestPort
+    }
+
+    namespace artifact_byte_comparison {
+        class ArtifactByteComparisonPort
+    }
+
+    namespace contract_evidence {
+        class ContractEvidenceRecorderPort
+    }
+
+    namespace effective_config_artifact {
+        class EffectiveConfigArtifactStorePort
+    }
+
+    namespace lineage {
+        class LineageStorePort
+    }
+
+    namespace run_ledger {
+        class RunLedgerPort
+    }
+
+    namespace workflow_execution_state {
+        class WorkflowExecutionStatePort
+    }
+
+    namespace workflow_ledger {
+        class WorkflowLedgerPort
+    }
+
+    namespace workflow_manifest {
+        class WorkflowManifestPort
+    }
+

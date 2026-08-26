@@ -1,11 +1,11 @@
 %% Title: Package Family: interfaces/cli/commands/domains/run
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands/domains/run; modules: command_policy.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/interfaces/cli/commands/domains/run; modules: command_policy, command_entrypoint, runtime_helpers.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   6
+%% @nodes   8
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -17,3 +17,12 @@ classDiagram
         class RunCommandInput
         class RunExecutorCallable
     }
+
+    namespace command_entrypoint {
+        class RunCommandCallback
+    }
+
+    namespace runtime_helpers {
+        class PipelineRunnerService
+    }
+

@@ -25,6 +25,9 @@ from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
     build_pipeline_context as build_pipeline_context_impl,
 )
 from bioetl.composition.factories.pipeline.runner import create_metrics_extractor
+from bioetl.composition.runtime_builders.config_access import (
+    get_settings as _get_settings_impl,
+)
 from bioetl.composition.observability_runtime import (
     push_metrics_to_gateway as push_metrics_to_gateway_impl,
 )
@@ -52,10 +55,8 @@ __all__ = [
 
 
 def get_settings() -> Settings:
-    """Resolve runtime settings lazily while keeping a patchable module seam."""
-    from bioetl.composition.runtime_builders.config_access import get_settings as impl
-
-    return impl()
+    """Resolve runtime settings through the composition config-access seam."""
+    return _get_settings_impl()
 
 
 def maybe_start_metrics_server(settings: Settings) -> bool:

@@ -26,7 +26,7 @@ python -m scripts.schema <command> [args...]
 ## Contract Source Of Truth
 
 - Shared config-governance constants live in `src/bioetl/infrastructure/config/config_ci_contract.py`.
-- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
+- `scripts/schema/validation/check_config_invariants.py` and [test_config_ci_invariants.py](../../tests/architecture/test_config_ci_invariants.py) import the same active/retired/transitional contract from that module.
 - `check-invariants` is also the fail-fast YAML parse gate for all `configs/**/*.yaml` governance surfaces, including `configs/contracts/**/*.yaml`.
 - `scripts/schema/validation/validate_pipeline_configs.py` is the canonical validator for `validate-configs`.
 - `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validation/validate_pipeline_configs.py` first.

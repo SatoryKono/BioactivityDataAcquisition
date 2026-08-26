@@ -1,13 +1,55 @@
-%% Title: Package Family: domain/composite (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/composite; part 2/2; modules: config_runtime, config_schema, field_groups_models, result_enrichment, config, field_groups_registry.
+%% Title: Package Family: domain/composite (Part 2/3)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/composite; part 2/3; modules: config_composite_validation, config_models, lineage, result_seed_dependency, strategy, config_dq.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   13
+%% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace config_composite_validation {
+        class CompositeConfigProtocol
+        class _DependencyConfigProtocol
+        class _EnricherConfigProtocol
+        class _SeedConfigProtocol
+    }
+
+    namespace config_models {
+        class CompositeConfig
+        class DependencyConfig
+        class EnricherConfig
+        class SeedConfig
+    }
+
+    namespace lineage {
+        class CompositeLineageMetadata
+        class EnrichmentStatusRecord
+        class FieldSource
+    }
+
+    namespace result_seed_dependency {
+        class DependencyResult
+        class DependencyStatus
+        class SeedResult
+    }
+
+    namespace strategy {
+        class ConflictResolution
+        class FallbackStrategy
+        class MergeStrategy
+    }
+
+    namespace config_dq {
+        class CompositeDQConfig
+        class DQOverrideConfig
+    }
+
+    namespace config_merge {
+        class ColumnGroupConfig
+        class MergeConfig
+    }
 
     namespace config_runtime {
         class ExecutionConfig
@@ -29,22 +71,7 @@ classDiagram
         class EnrichmentStatus
     }
 
-    namespace config {
-        class CompositeConfig
+    namespace config_cross_validation {
+        class CrossValidationConfig
     }
 
-    namespace field_groups_registry {
-        class FieldGroupRegistry
-    }
-
-    namespace result_composite {
-        class CompositeResult
-    }
-
-    namespace result_merge {
-        class MergeResult
-    }
-
-    namespace state {
-        class CompositePipelineState
-    }

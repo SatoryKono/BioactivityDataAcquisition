@@ -29,7 +29,7 @@ python -m scripts.engineering.ci <command> [args...]
 
 Canonical taxonomy:
 
-- descriptive test-health classes are defined in [configs/quality/test_health_reporting.yaml](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/configs/quality/test_health_reporting.yaml)
+- descriptive test-health classes are defined in [configs/quality/test_health_reporting.yaml](../../../configs/quality/test_health_reporting.yaml)
 - these classes are informational and do not replace merge-blocking CI pass/fail or the quality gate
 - skip-conditioned buckets are also canonicalized there, so reports can distinguish architecture skips, network opt-in gating, scheduled live gates, pilot providers, and VCR-only providers
   | `e2e-skip-rate` | After E2E test runs; validates skip rate against SLO, classifies infra_flaky vs code_regression | CI gate (`e2e-matrix-health.yml`) |
