@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/adapters/crossref
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/crossref; modules: models_shared, _batch_support, _response_models, response_mapper, _client_fallback_policy, _doi_batch_processor.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/crossref; modules: models_shared, _batch_support, _response_models, response_mapper, types, _client_fallback_policy.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   26
+%% @nodes   29
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -22,7 +22,7 @@ classDiagram
 
     namespace batch_support {
         class BaseMetrics
-        class HeadersBuilder
+        class HeadersProvider
         class HttpTransport
     }
 
@@ -37,12 +37,25 @@ classDiagram
         class CrossRefResponseMapper
     }
 
+    namespace types {
+        class CrossRefBatchFetcher
+        class CrossRefSearchPaginator
+    }
+
     namespace client_fallback_policy {
         class _CrossRefFallbackPolicyMixin
     }
 
+    namespace client_port_surface {
+        class _CrossRefPortSurfaceMixin
+    }
+
     namespace doi_batch_processor {
         class DoiBatchProcessor
+    }
+
+    namespace publication_record {
+        class CrossRefPublicationRecord
     }
 
     namespace search_paginator {
@@ -69,12 +82,10 @@ classDiagram
         class CrossRefFetchFlow
     }
 
-    namespace models {
-        class CrossRefPublicationRecord
-    }
-
     namespace query_builder {
-        class CrossRefQueryBuilder
+        class CrossRefQueryPlanner
     }
 
     _CrossRefFallbackPolicyMixin <|-- CrossRefAdapter
+    _CrossRefPortSurfaceMixin <|-- CrossRefAdapter
+

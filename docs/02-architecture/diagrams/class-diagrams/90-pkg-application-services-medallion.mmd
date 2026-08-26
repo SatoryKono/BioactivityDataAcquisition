@@ -1,0 +1,32 @@
+%% Title: Package Family: application/services/medallion
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/medallion; modules: medallion_lifecycle, medallion_types, medallion_maintenance_mixin.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   8
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace medallion_lifecycle {
+        class MedallionLifecycleService
+        class MedallionStorageProtocol
+        class _MedallionClearMixin
+        class _MedallionRunLifecycleMixin
+    }
+
+    namespace medallion_types {
+        class ClearResult
+        class PrepareResult
+        class VacuumResult
+    }
+
+    namespace medallion_maintenance_mixin {
+        class _MedallionMaintenanceMixin
+    }
+
+    _MedallionClearMixin <|-- _MedallionRunLifecycleMixin
+    _MedallionMaintenanceMixin <|-- MedallionLifecycleService
+    _MedallionRunLifecycleMixin <|-- MedallionLifecycleService
+

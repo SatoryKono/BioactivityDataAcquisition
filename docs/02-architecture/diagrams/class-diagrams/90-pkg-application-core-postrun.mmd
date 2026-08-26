@@ -1,11 +1,11 @@
 %% Title: Package Family: application/core/postrun
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/postrun; modules: _failure_policy, service, compact_orchestrator, _service_collaborators, cleanup_orchestrator, dq_report_orchestrator.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/postrun; modules: _failure_policy, _service_support, service, _phase_descriptions, compact_orchestrator, _service_collaborators.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   15
+%% @nodes   18
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -13,14 +13,23 @@ classDiagram
         class PostrunFailureHandlingMixin
         class PostrunFailurePolicySpec
         class PostrunStrictValidationMixin
-        class _HasPostrunFailureHandling
-        class _HasPostrunRuntime
+    }
+
+    namespace service_support {
+        class PostrunServiceSupportMixin
+        class _PostrunHostAttrSurface
+        class _PostrunSupportHost
     }
 
     namespace service {
         class PostrunDependencyContext
         class PostrunResult
         class PostrunService
+    }
+
+    namespace phase_descriptions {
+        class PostrunPhaseCompletion
+        class _PostrunResultProtocol
     }
 
     namespace compact_orchestrator {
@@ -50,5 +59,7 @@ classDiagram
 
     PostrunFailureHandlingMixin <|-- PostrunDQReportService
     PostrunFailureHandlingMixin <|-- PostrunMetadataVersionResolver
+    PostrunServiceSupportMixin <|-- PostrunService
     PostrunStrictValidationMixin <|-- PostrunFailureHandlingMixin
-    _HasPostrunRuntime <|-- _HasPostrunFailureHandling
+    _PostrunHostAttrSurface <|-- _PostrunSupportHost
+

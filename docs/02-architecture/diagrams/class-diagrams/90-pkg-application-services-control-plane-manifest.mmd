@@ -1,0 +1,74 @@
+%% Title: Package Family: application/services/control_plane/manifest
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/control_plane/manifest; modules: inspection_models, _inspection_compare_support, _inspection_support, inspection_service, service, service_scaffold.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   20
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace inspection_models {
+        class RunManifestDiffEntry
+        class RunManifestDiffResult
+        class RunManifestInspectionCorruptionError
+        class RunManifestVerifyResult
+    }
+
+    namespace inspection_compare_support {
+        class RunManifestInspectionCompareMixin
+        class _InspectionCompareHost
+    }
+
+    namespace inspection_support {
+        class RunManifestInspectionDiffClassificationMixin
+        class RunManifestInspectionIdentityGraphMixin
+    }
+
+    namespace inspection_service {
+        class RunManifestInspectionService
+        class _HistoricalReplayUniverseReportLoader
+    }
+
+    namespace service {
+        class RunManifestService
+        class _RunManifestSaveAssertionPort
+    }
+
+    namespace service_scaffold {
+        class ManifestClockProtocol
+        class ManifestServiceScaffoldMixin
+    }
+
+    namespace service_hydration {
+        class RunManifestHydrationMixin
+    }
+
+    namespace service_support {
+        class RunManifestPayloadMixin
+    }
+
+    namespace identity_graph_assembly {
+        class RunManifestIdentityGraphAssembler
+    }
+
+    namespace inspection_result_model {
+        class RunManifestInspectionResult
+    }
+
+    namespace inspection_verification {
+        class EffectiveConfigArtifactStoreProtocol
+    }
+
+    namespace models {
+        class RunManifestCreateSpec
+    }
+
+    ManifestServiceScaffoldMixin <|-- RunManifestService
+    RunManifestHydrationMixin <|-- RunManifestService
+    RunManifestInspectionCompareMixin <|-- RunManifestInspectionService
+    RunManifestInspectionDiffClassificationMixin <|-- RunManifestInspectionService
+    RunManifestInspectionIdentityGraphMixin <|-- RunManifestInspectionService
+    RunManifestPayloadMixin <|-- RunManifestService
+

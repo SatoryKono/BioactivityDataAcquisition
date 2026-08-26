@@ -1287,6 +1287,22 @@ def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
     return seen
 
 
+def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    job = workflow["jobs"]["docker-push"]
+    tags = ""
+    persist_credentials = None
+    for step in job["steps"]:
+        if str(step.get("uses", "")).startswith("docker/build-push-action@"):
+            tags = str(step.get("with", {}).get("tags", ""))
+        if str(step.get("uses", "")).startswith("actions/checkout@"):
+            persist_credentials = step.get("with", {}).get("persist-credentials")
+
+    assert job.get("environment") == "ghcr-publish"
+    assert ":latest" not in tags
+    assert persist_credentials is False
+
+
 def test_docker_push_requires_all_validation_jobs() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     jobs = workflow["jobs"]

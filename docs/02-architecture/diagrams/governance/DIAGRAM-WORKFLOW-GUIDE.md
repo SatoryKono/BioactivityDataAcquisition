@@ -17,8 +17,8 @@ ______________________________________________________________________
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **404 tracked diagram source files**:
-**239** `.mmd`-артефактов в canonical tree (`architecture/`, `class-diagrams/`,
+Проект BioETL поддерживает **455 tracked diagram source files**:
+**290** `.mmd`-артефактов в canonical tree (`architecture/`, `class-diagrams/`,
 `foundation/`, `_template.mmd`) и **165** `.mermaid` view-файлов в `views/`
 (38 tracked view families/singletons, 164 derived views и `00-legend.mermaid`). Вся система
 подчинена ADR-040 — решению об управлении диаграммами, которое определяет
@@ -31,7 +31,7 @@ ______________________________________________________________________
 | Каталог           | Файлов | Назначение                                             |
 | ----------------- | ------ | ------------------------------------------------------ |
 | `architecture/`   | 89     | Системные и компонентные диаграммы уровня архитектуры  |
-| `class-diagrams/` | 94     | 19 curated UML families, sandbox, supplemental package slices |
+| `class-diagrams/` | 145    | 19 curated UML families, sandbox, generated 90-pkg slices |
 | `foundation/`     | 55     | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
 **Декомпозированные представления** — `docs/02-architecture/diagrams/views/` (165 файлов):

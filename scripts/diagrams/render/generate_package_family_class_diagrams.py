@@ -11,16 +11,19 @@ from __future__ import annotations
 
 import argparse
 import ast
+import sys
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-try:
-    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
-except ImportError:  # pragma: no cover - direct script execution
-    from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT_IMPORT = SCRIPT_DIR.parents[2]
+if str(REPO_ROOT_IMPORT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT_IMPORT))
+
+from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
 
 
 SRC_ROOT = REPO_ROOT / "src" / "bioetl"

@@ -172,6 +172,7 @@ jobs:
     timeout-minutes: 15
     needs: docker-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: ghcr-publish
     concurrency:
       group: docker-ghcr-push-${{ github.ref }}
       cancel-in-progress: false
@@ -182,6 +183,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
@@ -209,7 +212,6 @@ jobs:
           file: Dockerfile.bioetl
           push: true
           tags: |
-            ${{ steps.ghcr.outputs.image_base }}:latest
             ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
             ${{ steps.ghcr.outputs.image_base }}:${{ github.ref_name }}
           cache-from: type=gha

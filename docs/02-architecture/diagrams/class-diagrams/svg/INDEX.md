@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-07-08T11:14:31+03:00_
+_Generated: 2026-08-26T17:10:11+00:00_
 
 ## Domain Ports
 
@@ -8,7 +8,7 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 01a Domain Ports Method Catalog
+## 01adomain Ports Method Catalog
 
 ![01a-domain-ports-method-catalog](./01a-domain-ports-method-catalog.svg)
 
@@ -62,7 +62,7 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 08a Application Services Operation Catalog
+## 08aapplication Services Operation Catalog
 
 ![08a-application-services-operation-catalog](./08a-application-services-operation-catalog.svg)
 
@@ -104,7 +104,7 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 14a Observability Method Catalog
+## 14aobservability Method Catalog
 
 ![14a-observability-method-catalog](./14a-observability-method-catalog.svg)
 
@@ -125,6 +125,12 @@ _Generated: 2026-07-08T11:14:31+03:00_
 ## Pkg Application Composite Checkpoint
 
 ![90-pkg-application-composite-checkpoint](./90-pkg-application-composite-checkpoint.svg)
+
+---
+
+## Pkg Application Composite Helpers
+
+![90-pkg-application-composite-helpers](./90-pkg-application-composite-helpers.svg)
 
 ---
 
@@ -152,6 +158,12 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Application Core Data Sources
+
+![90-pkg-application-core-data-sources](./90-pkg-application-core-data-sources.svg)
+
+---
+
 ## Pkg Application Core Lifecycle
 
 ![90-pkg-application-core-lifecycle](./90-pkg-application-core-lifecycle.svg)
@@ -170,21 +182,39 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Application Observability Control Plane Evidence
+
+![90-pkg-application-observability-control-plane-evidence](./90-pkg-application-observability-control-plane-evidence.svg)
+
+---
+
 ## Pkg Application Observability
 
 ![90-pkg-application-observability](./90-pkg-application-observability.svg)
 
 ---
 
-## Pkg Application Pipelines Chembl
+## Pkg Application Pipelines Chembl Part1
 
-![90-pkg-application-pipelines-chembl](./90-pkg-application-pipelines-chembl.svg)
+![90-pkg-application-pipelines-chembl-part1](./90-pkg-application-pipelines-chembl-part1.svg)
+
+---
+
+## Pkg Application Pipelines Chembl Part2
+
+![90-pkg-application-pipelines-chembl-part2](./90-pkg-application-pipelines-chembl-part2.svg)
 
 ---
 
 ## Pkg Application Pipelines Common
 
 ![90-pkg-application-pipelines-common](./90-pkg-application-pipelines-common.svg)
+
+---
+
+## Pkg Application Pipelines Crossref
+
+![90-pkg-application-pipelines-crossref](./90-pkg-application-pipelines-crossref.svg)
 
 ---
 
@@ -206,15 +236,141 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Application Ports Part1
+
+![90-pkg-application-ports-part1](./90-pkg-application-ports-part1.svg)
+
+---
+
+## Pkg Application Ports Part2
+
+![90-pkg-application-ports-part2](./90-pkg-application-ports-part2.svg)
+
+---
+
+## Pkg Application Services Checkpoint
+
+![90-pkg-application-services-checkpoint](./90-pkg-application-services-checkpoint.svg)
+
+---
+
+## Pkg Application Services Contracts
+
+![90-pkg-application-services-contracts](./90-pkg-application-services-contracts.svg)
+
+---
+
+## Pkg Application Services Control Plane Ledger
+
+![90-pkg-application-services-control-plane-ledger](./90-pkg-application-services-control-plane-ledger.svg)
+
+---
+
+## Pkg Application Services Control Plane Manifest Diagnostics
+
+![90-pkg-application-services-control-plane-manifest-diagnostics](./90-pkg-application-services-control-plane-manifest-diagnostics.svg)
+
+---
+
+## Pkg Application Services Control Plane Manifest
+
+![90-pkg-application-services-control-plane-manifest](./90-pkg-application-services-control-plane-manifest.svg)
+
+---
+
+## Pkg Application Services Control Plane Replay
+
+![90-pkg-application-services-control-plane-replay](./90-pkg-application-services-control-plane-replay.svg)
+
+---
+
+## Pkg Application Services Control Plane Workflow
+
+![90-pkg-application-services-control-plane-workflow](./90-pkg-application-services-control-plane-workflow.svg)
+
+---
+
 ## Pkg Application Services Dq
 
 ![90-pkg-application-services-dq](./90-pkg-application-services-dq.svg)
 
 ---
 
+## Pkg Application Services Execution
+
+![90-pkg-application-services-execution](./90-pkg-application-services-execution.svg)
+
+---
+
+## Pkg Application Services Export Lineage
+
+![90-pkg-application-services-export-lineage](./90-pkg-application-services-export-lineage.svg)
+
+---
+
+## Pkg Application Services Lineage
+
+![90-pkg-application-services-lineage](./90-pkg-application-services-lineage.svg)
+
+---
+
+## Pkg Application Services Medallion
+
+![90-pkg-application-services-medallion](./90-pkg-application-services-medallion.svg)
+
+---
+
+## Pkg Application Services Ops
+
+![90-pkg-application-services-ops](./90-pkg-application-services-ops.svg)
+
+---
+
+## Pkg Application Services Protein
+
+![90-pkg-application-services-protein](./90-pkg-application-services-protein.svg)
+
+---
+
+## Pkg Application Services Quality
+
+![90-pkg-application-services-quality](./90-pkg-application-services-quality.svg)
+
+---
+
+## Pkg Application Services Run Reports
+
+![90-pkg-application-services-run-reports](./90-pkg-application-services-run-reports.svg)
+
+---
+
+## Pkg Application Services Workflow Control Plane
+
+![90-pkg-application-services-workflow-control-plane](./90-pkg-application-services-workflow-control-plane.svg)
+
+---
+
+## Pkg Application Services Workflow
+
+![90-pkg-application-services-workflow](./90-pkg-application-services-workflow.svg)
+
+---
+
+## Pkg Composition Bootstrap Assembly
+
+![90-pkg-composition-bootstrap-assembly](./90-pkg-composition-bootstrap-assembly.svg)
+
+---
+
 ## Pkg Composition Bootstrap Runtime
 
 ![90-pkg-composition-bootstrap-runtime](./90-pkg-composition-bootstrap-runtime.svg)
+
+---
+
+## Pkg Composition Contracts
+
+![90-pkg-composition-contracts](./90-pkg-composition-contracts.svg)
 
 ---
 
@@ -260,6 +416,18 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Domain Behavior Part1
+
+![90-pkg-domain-behavior-part1](./90-pkg-domain-behavior-part1.svg)
+
+---
+
+## Pkg Domain Behavior Part2
+
+![90-pkg-domain-behavior-part2](./90-pkg-domain-behavior-part2.svg)
+
+---
+
 ## Pkg Domain Composite Part1
 
 ![90-pkg-domain-composite-part1](./90-pkg-domain-composite-part1.svg)
@@ -272,27 +440,45 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Domain Contracts Gold
+## Pkg Domain Composite Part3
 
-![90-pkg-domain-contracts-gold](./90-pkg-domain-contracts-gold.svg)
-
----
-
-## Pkg Domain Control Plane
-
-![90-pkg-domain-control-plane](./90-pkg-domain-control-plane.svg)
+![90-pkg-domain-composite-part3](./90-pkg-domain-composite-part3.svg)
 
 ---
 
-## Pkg Domain Exceptions Infrastructure
+## Pkg Domain Contracts Gold Part1
 
-![90-pkg-domain-exceptions-infrastructure](./90-pkg-domain-exceptions-infrastructure.svg)
+![90-pkg-domain-contracts-gold-part1](./90-pkg-domain-contracts-gold-part1.svg)
+
+---
+
+## Pkg Domain Contracts Gold Part2
+
+![90-pkg-domain-contracts-gold-part2](./90-pkg-domain-contracts-gold-part2.svg)
+
+---
+
+## Pkg Domain Control Plane Part1
+
+![90-pkg-domain-control-plane-part1](./90-pkg-domain-control-plane-part1.svg)
+
+---
+
+## Pkg Domain Control Plane Part2
+
+![90-pkg-domain-control-plane-part2](./90-pkg-domain-control-plane-part2.svg)
 
 ---
 
 ## Pkg Domain Exceptions Network
 
 ![90-pkg-domain-exceptions-network](./90-pkg-domain-exceptions-network.svg)
+
+---
+
+## Pkg Domain Exceptions Storage
+
+![90-pkg-domain-exceptions-storage](./90-pkg-domain-exceptions-storage.svg)
 
 ---
 
@@ -308,15 +494,57 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Domain Models
+## Pkg Domain Mapping
 
-![90-pkg-domain-models](./90-pkg-domain-models.svg)
+![90-pkg-domain-mapping](./90-pkg-domain-mapping.svg)
+
+---
+
+## Pkg Domain Models Part1
+
+![90-pkg-domain-models-part1](./90-pkg-domain-models-part1.svg)
+
+---
+
+## Pkg Domain Models Part2
+
+![90-pkg-domain-models-part2](./90-pkg-domain-models-part2.svg)
+
+---
+
+## Pkg Domain Normalization Profiles
+
+![90-pkg-domain-normalization-profiles](./90-pkg-domain-normalization-profiles.svg)
+
+---
+
+## Pkg Domain Normalization
+
+![90-pkg-domain-normalization](./90-pkg-domain-normalization.svg)
+
+---
+
+## Pkg Domain Part1
+
+![90-pkg-domain-part1](./90-pkg-domain-part1.svg)
+
+---
+
+## Pkg Domain Part2
+
+![90-pkg-domain-part2](./90-pkg-domain-part2.svg)
 
 ---
 
 ## Pkg Domain Ports Config
 
 ![90-pkg-domain-ports-config](./90-pkg-domain-ports-config.svg)
+
+---
+
+## Pkg Domain Ports Control Plane
+
+![90-pkg-domain-ports-control-plane](./90-pkg-domain-ports-control-plane.svg)
 
 ---
 
@@ -356,6 +584,18 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Domain Registry
+
+![90-pkg-domain-registry](./90-pkg-domain-registry.svg)
+
+---
+
+## Pkg Domain Run Reports
+
+![90-pkg-domain-run-reports](./90-pkg-domain-run-reports.svg)
+
+---
+
 ## Pkg Domain Schemas Chembl
 
 ![90-pkg-domain-schemas-chembl](./90-pkg-domain-schemas-chembl.svg)
@@ -374,9 +614,9 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Domain
+## Pkg Domain Workflow
 
-![90-pkg-domain](./90-pkg-domain.svg)
+![90-pkg-domain-workflow](./90-pkg-domain-workflow.svg)
 
 ---
 
@@ -446,15 +686,27 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Infrastructure Config
+## Pkg Infrastructure Config Part1
 
-![90-pkg-infrastructure-config](./90-pkg-infrastructure-config.svg)
+![90-pkg-infrastructure-config-part1](./90-pkg-infrastructure-config-part1.svg)
 
 ---
 
-## Pkg Infrastructure Control Plane
+## Pkg Infrastructure Config Part2
 
-![90-pkg-infrastructure-control-plane](./90-pkg-infrastructure-control-plane.svg)
+![90-pkg-infrastructure-config-part2](./90-pkg-infrastructure-config-part2.svg)
+
+---
+
+## Pkg Infrastructure Control Plane Part1
+
+![90-pkg-infrastructure-control-plane-part1](./90-pkg-infrastructure-control-plane-part1.svg)
+
+---
+
+## Pkg Infrastructure Control Plane Part2
+
+![90-pkg-infrastructure-control-plane-part2](./90-pkg-infrastructure-control-plane-part2.svg)
 
 ---
 
@@ -464,9 +716,15 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Infrastructure Observability Anomaly
+## Pkg Infrastructure Quality
 
-![90-pkg-infrastructure-observability-anomaly](./90-pkg-infrastructure-observability-anomaly.svg)
+![90-pkg-infrastructure-quality](./90-pkg-infrastructure-quality.svg)
+
+---
+
+## Pkg Infrastructure Quarantine
+
+![90-pkg-infrastructure-quarantine](./90-pkg-infrastructure-quarantine.svg)
 
 ---
 
@@ -485,6 +743,12 @@ _Generated: 2026-07-08T11:14:31+03:00_
 ## Pkg Infrastructure Schemas Part3
 
 ![90-pkg-infrastructure-schemas-part3](./90-pkg-infrastructure-schemas-part3.svg)
+
+---
+
+## Pkg Infrastructure Schemas Part4
+
+![90-pkg-infrastructure-schemas-part4](./90-pkg-infrastructure-schemas-part4.svg)
 
 ---
 
@@ -518,6 +782,18 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Infrastructure Storage Silver Operations Part1
+
+![90-pkg-infrastructure-storage-silver-operations-part1](./90-pkg-infrastructure-storage-silver-operations-part1.svg)
+
+---
+
+## Pkg Infrastructure Storage Silver Operations Part2
+
+![90-pkg-infrastructure-storage-silver-operations-part2](./90-pkg-infrastructure-storage-silver-operations-part2.svg)
+
+---
+
 ## Pkg Infrastructure Storage Silver Part1
 
 ![90-pkg-infrastructure-storage-silver-part1](./90-pkg-infrastructure-storage-silver-part1.svg)
@@ -542,6 +818,12 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
+## Pkg Interfaces Cli Commands Domains Health
+
+![90-pkg-interfaces-cli-commands-domains-health](./90-pkg-interfaces-cli-commands-domains-health.svg)
+
+---
+
 ## Pkg Interfaces Cli Commands Domains Quarantine
 
 ![90-pkg-interfaces-cli-commands-domains-quarantine](./90-pkg-interfaces-cli-commands-domains-quarantine.svg)
@@ -560,8 +842,33 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## Pkg Interfaces Http
+## Pkg Interfaces Cli Commands Domains Shared
 
-![90-pkg-interfaces-http](./90-pkg-interfaces-http.svg)
+![90-pkg-interfaces-cli-commands-domains-shared](./90-pkg-interfaces-cli-commands-domains-shared.svg)
 
 ---
+
+## Pkg Interfaces Cli Commands
+
+![90-pkg-interfaces-cli-commands](./90-pkg-interfaces-cli-commands.svg)
+
+---
+
+## Pkg Interfaces Http Control Plane Identity
+
+![90-pkg-interfaces-http-control-plane-identity](./90-pkg-interfaces-http-control-plane-identity.svg)
+
+---
+
+## Pkg Interfaces Http Part1
+
+![90-pkg-interfaces-http-part1](./90-pkg-interfaces-http-part1.svg)
+
+---
+
+## Pkg Interfaces Http Part2
+
+![90-pkg-interfaces-http-part2](./90-pkg-interfaces-http-part2.svg)
+
+---
+

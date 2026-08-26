@@ -1,0 +1,77 @@
+%% Title: Package Family: application/services/export_lineage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/export_lineage; modules: export_models, debug_export_service, export_service, export_execution, audit_inspection_service, pipeline_debug_service.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   26
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace export_models {
+        class ColumnInfo
+        class ExportOptions
+        class ExportResult
+        class TableInfo
+        class TablePreview
+    }
+
+    namespace debug_export_service {
+        class DebugExportCollectorBuilderProtocol
+        class DebugExportConfig
+        class DebugExportService
+        class DebugExportWriterProtocol
+    }
+
+    namespace export_service {
+        class ExportService
+        class _PreviewField
+        class _PreviewSchema
+        class _PreviewTable
+    }
+
+    namespace export_execution {
+        class _ExportSchema
+        class _SchemaField
+        class _SelectableTable
+    }
+
+    namespace audit_inspection_service {
+        class AuditInspectionResult
+        class AuditInspectionService
+    }
+
+    namespace pipeline_debug_service {
+        class DebugAbortError
+        class PipelineDebugService
+    }
+
+    namespace debug_export_collector {
+        class DebugExportCollector
+    }
+
+    namespace debug_export_collector_gold_mixin {
+        class DebugExportGoldRowsMixin
+    }
+
+    namespace debug_export_collector_transform_mixin {
+        class DebugExportTransformRowsMixin
+    }
+
+    namespace debug_export_service_recording_mixin {
+        class DebugExportServiceRecordingMixin
+    }
+
+    namespace export_manifest_attribution {
+        class ProviderAttributionRecord
+    }
+
+    namespace export_manifests {
+        class ExportSidecarPayloadsRecord
+    }
+
+    DebugExportGoldRowsMixin <|-- DebugExportCollector
+    DebugExportServiceRecordingMixin <|-- DebugExportService
+    DebugExportTransformRowsMixin <|-- DebugExportCollector
+

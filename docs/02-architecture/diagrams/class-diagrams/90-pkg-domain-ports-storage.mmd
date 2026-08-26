@@ -1,13 +1,18 @@
 %% Title: Package Family: domain/ports/storage
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/storage; modules: bronze_port, gold_port, lifecycle_port, merged_port, silver_port.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/ports/storage; modules: silver_port, bronze_port, gold_port, lifecycle_port, merged_port, run_report_store.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   7
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace silver_port {
+        class SilverStoragePort
+        class SilverWriteRequest
+    }
 
     namespace bronze_port {
         class BronzeStoragePort
@@ -25,11 +30,7 @@ classDiagram
         class MergedStoragePort
     }
 
-    namespace silver_port {
-        class SilverStoragePort
+    namespace run_report_store {
+        class RunReportStorePort
     }
 
-    BronzeStoragePort ..> StorageLifecyclePort : lifecycle ops
-    GoldStoragePort ..> StorageLifecyclePort : lifecycle ops
-    MergedStoragePort ..> StorageLifecyclePort : lifecycle ops
-    SilverStoragePort ..> StorageLifecyclePort : lifecycle ops

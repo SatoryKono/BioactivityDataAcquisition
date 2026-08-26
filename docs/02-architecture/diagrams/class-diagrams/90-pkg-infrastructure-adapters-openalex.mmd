@@ -1,11 +1,11 @@
 %% Title: Package Family: infrastructure/adapters/openalex
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/openalex; modules: _filter_fetch_requests, health_adapter_mixin, _filter_fetch_flow, client, client_helpers_adapter_mixin, client_runtime_helpers.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/openalex; modules: _filter_fetch_requests, health_adapter_mixin, _client_runtime_request, _filter_fetch_flow, client, client_helpers_adapter_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   16
+%% @nodes   17
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -19,6 +19,10 @@ classDiagram
     namespace health_adapter_mixin {
         class OpenAlexAdapterHealthMixin
         class _OpenAlexHealthHost
+    }
+
+    namespace client_runtime_request {
+        class OpenAlexRuntimeServicesRequest
     }
 
     namespace filter_fetch_flow {
@@ -38,7 +42,7 @@ classDiagram
     }
 
     namespace cursor_flow {
-        class OpenAlexCursorFlowService
+        class OpenAlexCursorFlow
     }
 
     namespace fallback {
@@ -64,3 +68,4 @@ classDiagram
     OpenAlexAdapterFilterFetchMixin <|-- OpenAlexAdapter
     OpenAlexAdapterHealthMixin <|-- OpenAlexAdapter
     OpenAlexAdapterHelpersMixin <|-- OpenAlexAdapter
+

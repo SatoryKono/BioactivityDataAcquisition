@@ -1,0 +1,42 @@
+%% Title: Package Family: domain/exceptions/storage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/exceptions/storage; modules: _storage, _delta, _base.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   12
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace storage {
+        class BronzeValidationError
+        class BucketNotFoundError
+        class CachedBronzeEmptyError
+        class SchemaEvolutionError
+        class StorageError
+        class StorageQuotaExceededError
+        class TableNotFoundError
+        class UploadError
+    }
+
+    namespace delta {
+        class DeltaOptimizeError
+        class DeltaSchemaValidationError
+        class DeltaWriteConflictError
+    }
+
+    namespace base {
+        class InfrastructureError
+    }
+
+    StorageError <|-- BronzeValidationError
+    StorageError <|-- BucketNotFoundError
+    StorageError <|-- CachedBronzeEmptyError
+    StorageError <|-- DeltaOptimizeError
+    StorageError <|-- DeltaWriteConflictError
+    StorageError <|-- SchemaEvolutionError
+    StorageError <|-- TableNotFoundError
+    StorageError <|-- UploadError
+    StorageQuotaExceededError <|-- DeltaSchemaValidationError
+

@@ -1,23 +1,23 @@
 %% Title: Package Family: infrastructure/adapters/common
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/common; modules: fallback_fetch_service, composable_fallback, dependency_context, api_request_collector, base_title_fallback, fallback_policy_mixin.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/common; modules: fallback_fetch_service, composable_fallback, dependency_context, _fetch_resilience_host, _title_fallback_flow, api_request_collector.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   17
+%% @nodes   19
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
     namespace fallback_fetch_service {
         class DefaultFallbackExecution
-        class ExtractRecordIdPort
-        class FallbackExecutionPort
-        class FallbackFetchOrchestratorService
+        class ExtractRecordIdProtocol
+        class FallbackExecutionProtocol
+        class FallbackFetchOrchestrator
         class FallbackFetchRequest
-        class NormalizeIdPort
-        class Phase1SummaryLoggerPort
-        class PrimaryRecordFetchPort
+        class NormalizeIdProtocol
+        class Phase1SummaryLoggerProtocol
+        class PrimaryRecordFetchProtocol
     }
 
     namespace composable_fallback {
@@ -28,6 +28,14 @@ classDiagram
     namespace dependency_context {
         class HttpAdapterDependencyContext
         class SyncAdapterDependencyContext
+    }
+
+    namespace fetch_resilience_host {
+        class FilteredBatchRecoveryHost
+    }
+
+    namespace title_fallback_flow {
+        class MissingDoiTitleFallbackRequest
     }
 
     namespace api_request_collector {
@@ -49,3 +57,4 @@ classDiagram
     namespace source_metadata_capability {
         class SourceMetadataCollectorProtocol
     }
+

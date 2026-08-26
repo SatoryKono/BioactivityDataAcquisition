@@ -1,0 +1,73 @@
+%% Title: Package Family: application/services/ops
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/ops; modules: metrics_service, _metrics_service_gateway_support, config_service, health_service, vacuum_service, bronze_cleanup_service.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   26
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace metrics_service {
+        class MetricsService
+        class _MetricsLifecycleMixin
+        class _MetricsStartHost
+        class _MetricsStartMixin
+        class _MetricsStatusHost
+    }
+
+    namespace metrics_service_gateway_support {
+        class _MetricsGatewayHost
+        class _MetricsGatewayMixin
+        class _MetricsTracingHost
+        class _MetricsTracingMixin
+    }
+
+    namespace config_service {
+        class ConfigDQServiceProtocol
+        class ConfigService
+        class PipelineInfo
+        class SettingsInfo
+    }
+
+    namespace health_service {
+        class HealthCheckSummary
+        class HealthResult
+        class HealthService
+        class _NullAsyncContext
+    }
+
+    namespace vacuum_service {
+        class TableVacuumResult
+        class VacuumAllResult
+        class VacuumService
+    }
+
+    namespace bronze_cleanup_service {
+        class BronzeCleanupResult
+        class BronzeCleanupService
+    }
+
+    namespace lock_service {
+        class LockInfo
+        class LockService
+    }
+
+    namespace error_handler {
+        class ErrorHandlerService
+    }
+
+    namespace shutdown_service {
+        class ShutdownService
+    }
+
+    _MetricsGatewayMixin <|-- MetricsService
+    _MetricsLifecycleMixin <|-- MetricsService
+    _MetricsStartMixin <|-- _MetricsLifecycleMixin
+    _MetricsTracingHost <|-- _MetricsGatewayHost
+    _MetricsTracingHost <|-- _MetricsStartHost
+    _MetricsTracingHost <|-- _MetricsStatusHost
+    _MetricsTracingMixin <|-- _MetricsGatewayMixin
+    _MetricsTracingMixin <|-- _MetricsStartMixin
+

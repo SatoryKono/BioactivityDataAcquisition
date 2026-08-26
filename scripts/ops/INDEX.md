@@ -23,4 +23,4 @@ wrappers rather than documented as primary user commands.
 
 Canonical operational docs for `scripts/ops` now live under:
 
-- [docs/05-operations/tooling/scripts-ops/INDEX.md](/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/docs/05-operations/tooling/scripts-ops/INDEX.md)
+- [docs/05-operations/tooling/scripts-ops/INDEX.md](../../docs/05-operations/tooling/scripts-ops/INDEX.md)

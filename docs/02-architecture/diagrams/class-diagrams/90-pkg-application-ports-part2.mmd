@@ -1,0 +1,56 @@
+%% Title: Package Family: application/ports (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/ports; part 2/2; modules: metrics, storage, pipeline, dq, health, observability.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   24
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace metrics {
+        class DeleteResult
+        class MetricsFactoryProtocol
+        class MetricsServerStatus
+        class MetricsService
+        class PushResult
+        class StartResult
+        class WorkflowMetricsFactoryProtocol
+    }
+
+    namespace storage {
+        class CompositeMergeStorageProtocol
+        class CompositeRuntimeStorageProtocol
+        class GoldMergedWriteProtocol
+        class SilverMergedWriteProtocol
+        class StorageContextProtocol
+        class StorageFactoryProtocol
+    }
+
+    namespace pipeline {
+        class BaseServicesFactoryProtocol
+        class ContractPolicyLoaderProtocol
+        class PipelineRunnerProtocol
+        class RegistryEntryProtocol
+        class SchemaBuilderProtocol
+    }
+
+    namespace dq {
+        class ConfigurableDQMonitor
+        class DQDetectorConfig
+        class DQReportServiceFactoryProtocol
+    }
+
+    namespace health {
+        class HealthServiceProtocol
+    }
+
+    namespace observability {
+        class ObservabilitySettingsProtocol
+    }
+
+    namespace pipeline_registry {
+        class PipelineRegistryProtocol
+    }
+

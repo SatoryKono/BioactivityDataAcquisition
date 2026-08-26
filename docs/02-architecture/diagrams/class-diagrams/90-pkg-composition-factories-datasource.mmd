@@ -1,11 +1,11 @@
 %% Title: Package Family: composition/factories/datasource
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/datasource; modules: adapter_helpers, data_source_factory, http_client, pubchem.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/datasource; modules: adapter_helpers, http_client, _crossref_support, data_source_factory, pubchem.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   7
+%% @nodes   8
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -15,15 +15,20 @@ classDiagram
         class SyncAdapterHelperServices
     }
 
-    namespace data_source_factory {
-        class DataSourceFactory
-    }
-
     namespace http_client {
         class HttpClientFactory
         class ResolvedHttpConfig
     }
 
+    namespace crossref_support {
+        class CrossRefAdapterComponents
+    }
+
+    namespace data_source_factory {
+        class DataSourceFactory
+    }
+
     namespace pubchem {
         class PubChemRuntimeDependencies
     }
+

@@ -1,30 +1,33 @@
 %% Title: Package Family: application/composite/checkpoint
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/composite/checkpoint; modules: anchor_context, _anchor_context, load_service, persistence_service, service, state.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/composite/checkpoint; modules: load_service, service, _anchor_context, persistence_service, state.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   7
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
-    namespace _anchor_context {
-        class ExpectedCheckpointContext
+    namespace load_service {
+        class CompositeCheckpointLoadParams
+        class CompositeCheckpointLoadService
     }
 
-    namespace load_service {
-        class CompositeCheckpointLoadService
+    namespace service {
+        class CompositeCheckpointService
+        class CompositeCheckpointServiceContext
+    }
+
+    namespace anchor_context {
+        class ExpectedCheckpointContext
     }
 
     namespace persistence_service {
         class CompositeCheckpointPersistenceService
     }
 
-    namespace service {
-        class CompositeCheckpointService
-    }
-
     namespace state {
         class CompositeCheckpointState
     }
+

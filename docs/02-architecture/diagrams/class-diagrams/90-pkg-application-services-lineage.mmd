@@ -1,0 +1,41 @@
+%% Title: Package Family: application/services/lineage
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/lineage; modules: lineage_inspection_results, metadata_assembler_support, metadata_assemblers, metadata_context, lineage_inspection_service, metadata_coordinator.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   12
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace lineage_inspection_results {
+        class LineageFragmentInspectionResult
+        class LineageNodeRelationResult
+        class LineageRunExplanationResult
+        class LineageTraceResult
+    }
+
+    namespace metadata_assembler_support {
+        class PipelineMetadataBuilderProtocol
+        class RuntimeMetadataBuilderProtocol
+    }
+
+    namespace metadata_assemblers {
+        class GoldMetadataService
+        class SilverMetadataService
+    }
+
+    namespace metadata_context {
+        class EnvironmentMetadataRuntimeService
+        class RunMetadataAssembler
+    }
+
+    namespace lineage_inspection_service {
+        class LineageInspectionService
+    }
+
+    namespace metadata_coordinator {
+        class MetadataCoordinator
+    }
+

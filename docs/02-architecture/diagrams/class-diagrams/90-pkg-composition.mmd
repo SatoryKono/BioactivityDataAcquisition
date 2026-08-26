@@ -1,11 +1,11 @@
 %% Title: Package Family: composition
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition; modules: bootstrap_contexts, _pipeline_execution, observability, registry, bootstrap_logger, builders.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition; modules: bootstrap_contexts, _service_registry, _pipeline_execution, observability, observability_runtime, pipeline_runner_request.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   12
+%% @nodes   18
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -14,6 +14,12 @@ classDiagram
         class DQOutputPathsContext
         class PipelineCallbacksContext
         class RateLimitContext
+    }
+
+    namespace service_registry {
+        class _LazyContextualFactory
+        class _LazyServiceFactory
+        class _TypedPortSelector
     }
 
     namespace pipeline_execution {
@@ -26,9 +32,18 @@ classDiagram
         class ObservabilityContractError
     }
 
-    namespace registry {
-        class PipelineDefinition
-        class PipelineRegistry
+    namespace observability_runtime {
+        class MetricsOperatorProfile
+        class ObservabilityDiagnosticsBundle
+    }
+
+    namespace pipeline_runner_request {
+        class PipelineCreateRunnerCore
+        class PipelineCreateRunnerExtras
+    }
+
+    namespace registration {
+        class RuntimeRegistrationScope
     }
 
     namespace bootstrap_logger {
@@ -38,3 +53,4 @@ classDiagram
     namespace builders {
         class FilterConfigBuilder
     }
+

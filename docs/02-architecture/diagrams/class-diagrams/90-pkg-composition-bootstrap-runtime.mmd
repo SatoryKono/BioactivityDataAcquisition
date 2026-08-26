@@ -1,18 +1,17 @@
 %% Title: Package Family: composition/bootstrap/runtime
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: composite_support_service_bundles, composite_support_services_factory, runner_factory_builder_service, composite, composite_filter_extraction_service, composite_infrastructure_context.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/bootstrap/runtime; modules: _observability_bundle_support, composite_support_services_factory, runner_factory_builder_service, _composite_control_plane_builder_support, _composite_plan_runtime_support, _composite_plan_support.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   10
+%% @nodes   17
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
-    namespace composite_support_service_bundles {
-        class ExecutionSupportServicesBundle
-        class MergeDependenciesBundle
-        class RuntimeManagementServicesBundle
+    namespace observability_bundle_support {
+        class ObservabilityBootstrappers
+        class ObservabilityComponents
     }
 
     namespace composite_support_services_factory {
@@ -22,17 +21,50 @@ classDiagram
 
     namespace runner_factory_builder_service {
         class BronzeRunOptions
-        class RunnerFactoryBuilderService
+        class RunnerFactoryBuilder
     }
 
-    namespace composite {
-        class _CompositeBootstrapPlan
+    namespace composite_control_plane_builder_support {
+        class CompositeControlPlaneConfigArtifacts
+    }
+
+    namespace composite_plan_runtime_support {
+        class BootstrapRuntimeResources
+    }
+
+    namespace composite_plan_support {
+        class CompositeBootstrapPlan
+    }
+
+    namespace runner_assembly_support {
+        class CompositeRunnerServiceInputs
+    }
+
+    namespace assembly {
+        class RuntimeBootstrapPhases
+    }
+
+    namespace composite_control_plane_bundle {
+        class CompositeControlPlaneBundle
+    }
+
+    namespace composite_execution_support_bundle {
+        class ExecutionSupportServicesBundle
     }
 
     namespace composite_filter_extraction_service {
-        class CompositeFilterExtractionService
+        class CompositeFilterExtractor
     }
 
-    namespace composite_infrastructure_context {
-        class CompositeInfrastructureContext
+    namespace composite_merge_dependencies_bundle {
+        class MergeDependenciesBundle
     }
+
+    namespace composite_runtime_management_bundle {
+        class RuntimeManagementServicesBundle
+    }
+
+    namespace composite_support_runtime_context {
+        class CompositeSupportRuntimeContext
+    }
+

@@ -1,17 +1,40 @@
 %% Title: Package Family: application/core/base_transformer
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/base_transformer; modules: errors, types, base, contract_policy.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/core/base_transformer; modules: _structural_policy_types, field_policy, _structural_policy_support, errors, optionality, types.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   6
+%% @nodes   17
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace structural_policy_types {
+        class StructuralFieldSpec
+        class StructuralPolicyOutcome
+        class StructuralPolicyProtocol
+        class StructuralPolicySignal
+    }
+
+    namespace field_policy {
+        class FieldPolicyResolver
+        class FieldPolicySpec
+        class ResolvedFieldPolicy
+    }
+
+    namespace structural_policy_support {
+        class NoOpStructuralPolicy
+        class SchemaAwareStructuralPolicy
+    }
 
     namespace errors {
         class FilteredOutError
         class TransformationError
+    }
+
+    namespace optionality {
+        class ConfigSurfaceOptionalityResolver
+        class ResolvedOptionalityResult
     }
 
     namespace types {
@@ -26,3 +49,7 @@ classDiagram
     namespace contract_policy {
         class _DefaultContractPolicy
     }
+
+    FieldPolicySpec <|-- ResolvedFieldPolicy
+    FieldPolicySpec <|-- StructuralFieldSpec
+

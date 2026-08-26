@@ -1,0 +1,39 @@
+%% Title: Package Family: domain/workflow
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/workflow; modules: config, dag, foreign_key_reconciliation, _run_options_config, step_transition, transform_spec.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   10
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace config {
+        class TransformStepConfig
+        class WorkflowConfig
+        class WorkflowStepConfig
+    }
+
+    namespace dag {
+        class WorkflowDagValidationError
+        class _WorkflowStepLike
+    }
+
+    namespace foreign_key_reconciliation {
+        class ForeignKeyReconciliationRequest
+        class ForeignKeyReconciliationResult
+    }
+
+    namespace run_options_config {
+        class WorkflowRunOptionsConfig
+    }
+
+    namespace step_transition {
+        class WorkflowStepTransitionPolicy
+    }
+
+    namespace transform_spec {
+        class WorkflowTransformSpec
+    }
+
