@@ -151,6 +151,7 @@ def get_workflow_runner_service(
 
 
 def _get_workflow_memory_lock() -> LockPort:
+    """Return or lazily create the global in-memory workflow lock."""
     global _workflow_memory_lock
     if _workflow_memory_lock is None:
         from bioetl.infrastructure import locking
@@ -160,6 +161,7 @@ def _get_workflow_memory_lock() -> LockPort:
 
 
 def _system_clock_now() -> Callable[[], datetime]:
+    """Return a callable that produces the current system time."""
     return SystemClock().now
 
 
@@ -167,7 +169,7 @@ def _create_workflow_ledger_service(
     ledger_port: WorkflowLedgerPort,
     manifest: WorkflowManifest,
 ) -> WorkflowLedgerService:
-
+    """Create a workflow ledger service bound to a specific manifest."""
     return WorkflowLedgerService(
         ledger_port=ledger_port,
         manifest_id=manifest.manifest_id,

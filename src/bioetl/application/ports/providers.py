@@ -25,6 +25,19 @@ class HttpConfig:
 
 
 @runtime_checkable
+class HttpConfigProtocol(Protocol):
+    """Protocol version of HttpConfig for structural type checking (deprecated).
+
+    Use HttpConfig dataclass directly instead. This protocol is provided for
+    backward compatibility with code that used isinstance() checks against
+    the Protocol (deprecated since 2026-08-26).
+    """
+
+    rate: float
+    capacity: int
+
+
+@runtime_checkable
 class SecretValueProviderProtocol(Protocol):
     """Minimal secret wrapper contract used by provider settings wiring."""
 

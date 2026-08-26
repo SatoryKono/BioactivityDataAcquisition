@@ -103,3 +103,8 @@ class MetricsService(Protocol):
         run_label: str,
         grouping_key: dict[str, str],
     ) -> DeleteResult: ...
+
+
+# Deprecated aliases for backward compatibility (deprecated since 2026-08-26)
+MetricsStartResult = StartResult  # Use StartResult instead
+MetricsGatewayResult = PushResult  # Use PushResult or DeleteResult instead
