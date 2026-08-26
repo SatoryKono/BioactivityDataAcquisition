@@ -149,7 +149,7 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
 
     assert summary["retained_entrypoint_count"] == 12
     assert summary["retained_public_export_facade_count"] == 4
-    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_entrypoint_burden"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
 

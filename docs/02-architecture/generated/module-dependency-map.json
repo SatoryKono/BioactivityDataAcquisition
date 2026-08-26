@@ -1,12 +1,12 @@
 {
   "summary": {
     "scanned_modules": 2464,
-    "total_internal_imports": 7691,
+    "total_internal_imports": 7692,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 335,
+    "cross_layer_group_edges_total": 336,
     "violations": 0,
-    "source_fingerprint": "f449668eb830ffb9cddc6e0178a31469ca27925094e40886f7f993e86c763864"
+    "source_fingerprint": "1aedfcfce3af1c3b57bbf8cc28e4dab1d5dc9bdcb430b36fc597cfc08c1c0fba"
   },
   "layer_edges": [
     {
@@ -72,7 +72,7 @@
     {
       "source": "interfaces",
       "target": "composition",
-      "imports": 48,
+      "imports": 49,
       "allowed": true
     },
     {
