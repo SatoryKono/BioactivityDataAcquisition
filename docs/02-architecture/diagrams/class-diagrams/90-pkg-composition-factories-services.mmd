@@ -1,24 +1,39 @@
 %% Title: Package Family: composition/factories/services
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: builder, bundle, common_service_wiring, factory, polars_join_adapter.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/composition/factories/services; modules: common_service_wiring, _bundle_support, _builder_record_processor_support, _pipeline_batch_executor_types, builder, bundle.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   11
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace common_service_wiring {
+        class CommonServicePorts
+        class CommonServicePortsRequest
+        class _LazyStorageFactory
+    }
+
+    namespace bundle_support {
+        class ServiceBundleDependencies
+        class _PipelineCreationIdentity
+    }
+
+    namespace builder_record_processor_support {
+        class _RecordProcessorBuildRequest
+    }
+
+    namespace pipeline_batch_executor_types {
+        class BatchExecutorBuildRequest
+    }
 
     namespace builder {
         class ServicesBuilder
     }
 
     namespace bundle {
-        class ServiceBundleDependencies
-    }
-
-    namespace common_service_wiring {
-        class CommonServicePorts
+        class _BaseServicesFactoryProxy
     }
 
     namespace factory {
@@ -26,5 +41,6 @@ classDiagram
     }
 
     namespace polars_join_adapter {
-        class PolarsJoinAdapter
+        class PolarsJoinBridge
     }
+

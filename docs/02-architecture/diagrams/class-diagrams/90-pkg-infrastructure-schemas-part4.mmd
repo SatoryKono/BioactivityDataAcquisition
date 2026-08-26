@@ -1,0 +1,35 @@
+%% Title: Package Family: infrastructure/schemas (Part 4/4)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 4/4; modules: composite_config, pipeline_config, pipeline_config_provider, pipeline_contract_policy, source_profile_config.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   9
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace composite_config {
+        class CompositeConfigFileSchema
+        class CompositeConfigSchema
+    }
+
+    namespace pipeline_config {
+        class FieldPolicyConfigSchema
+        class PipelineYamlConfig
+    }
+
+    namespace pipeline_config_provider {
+        class ApiConfig
+        class SourceConfig
+    }
+
+    namespace pipeline_contract_policy {
+        class PipelineContractPolicy
+        class PipelineContractRollout
+    }
+
+    namespace source_profile_config {
+        class SourceProfileYamlConfig
+    }
+

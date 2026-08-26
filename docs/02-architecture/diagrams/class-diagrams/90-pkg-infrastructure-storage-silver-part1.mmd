@@ -1,23 +1,13 @@
 %% Title: Package Family: infrastructure/storage/silver (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver; part 1/2; modules: metadata_operations, pipeline_helpers, validation_operations, delta_helpers, merged_operations, postwrite_mixin.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver; part 1/2; modules: pipeline_helpers, merged_operations, validation_operations, prepared_operation_models, audit_operations, delta_merge_helpers.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   29
+%% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
-
-    namespace metadata_operations {
-        class _PreparedSilverMetadataWriteOperation
-        class _PreparedSilverWriteFinalizationContext
-        class _ResolvedSilverMetadataContext
-        class _SilverMergedMetadataWriteRequest
-        class _SilverMetadataWriteHostProtocol
-        class _SilverMetadataWriteRequest
-        class _SilverWriteFinalizationHostProtocol
-    }
 
     namespace pipeline_helpers {
         class _PreparedSilverWriteDispatcher
@@ -28,6 +18,14 @@ classDiagram
         class _SilverWritePipelineRunner
     }
 
+    namespace merged_operations {
+        class _MergedSilverMetadataWriterProtocol
+        class _MergedSilverWriteExecutorProtocol
+        class _MergedSilverWriteRequest
+        class _PreparedMergedSilverWrite
+        class _SilverWriterMergedHostProtocol
+    }
+
     namespace validation_operations {
         class _PreparedSilverWritePayload
         class _SilverSchemaPolicyRequest
@@ -36,25 +34,37 @@ classDiagram
         class _ValidatedSilverWriteContext
     }
 
-    namespace delta_helpers {
-        class _DeltaWriteDispatchPolicy
-        class _DeltaWriteRequest
+    namespace prepared_operation_models {
+        class _PreparedSilverMetadataWriteOperation
+        class _PreparedSilverWriteFinalizationContext
+        class _ResolvedSilverMetadataContext
+        class _SilverMergedMetadataWriteRequest
+    }
+
+    namespace audit_operations {
+        class _SilverAuditHostProtocol
+        class _SilverAuditWriteRequest
+    }
+
+    namespace delta_merge_helpers {
+        class ReplaySafeRerunContract
         class _MergeExecutionTimeoutError
     }
 
-    namespace merged_operations {
-        class _MergedSilverWriteRequest
-        class _PreparedMergedSilverWrite
-        class _SilverWriterMergedHostProtocol
+    namespace delta_request_models {
+        class _DeltaWriteDispatchPolicy
+        class _DeltaWriteRequest
     }
 
-    namespace postwrite_mixin {
-        class SilverWriterPostwriteMixin
-        class _SilverWritePostwriteContext
-        class _SilverWriterPostwriteSelf
+    namespace finalization_models {
+        class _SilverWriteFinalizationPreparationRequest
+        class _SilverWriteResultFinalizationRequest
     }
 
-    namespace arrow_mixin {
-        class SilverWriterArrowMixin
-        class _SilverWriterArrowContext
+    namespace metadata_operation_protocols {
+        class _SilverMetadataWriteHostProtocol
+        class _SilverWriteFinalizationHostProtocol
     }
+
+    _SilverWritePreparationRequest <|-- _SilverWriteInvocation
+

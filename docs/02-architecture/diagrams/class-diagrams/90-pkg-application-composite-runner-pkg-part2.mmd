@@ -1,16 +1,32 @@
 %% Title: Package Family: application/composite/runner_pkg (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/composite/runner_pkg; part 2/2; modules: runner_merge_stage_mixin, runner_stage_enrichment_mixin, runner_stage_mixin, runner_stage_support_mixin, runner_stage_support_types, runner_support_mixin.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/application/composite/runner_pkg; part 2/2; modules: runner_lifecycle_flow, runner_merge_request_flow, runner_merge_stage_mixin, runner_observability_helpers, runner_observability_mixin, runner_stage_enrichment_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   6
+%% @nodes   12
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
+    namespace runner_lifecycle_flow {
+        class _RunnerLifecycleHost
+    }
+
+    namespace runner_merge_request_flow {
+        class _MergerProtocol
+    }
+
     namespace runner_merge_stage_mixin {
         class CompositeRunnerMergeStageMixin
+    }
+
+    namespace runner_observability_helpers {
+        class CompositeRunnerObservabilityHostProtocol
+    }
+
+    namespace runner_observability_mixin {
+        class CompositeRunnerObservabilityMixin
     }
 
     namespace runner_stage_enrichment_mixin {
@@ -21,6 +37,10 @@ classDiagram
         class CompositeRunnerStageMixin
     }
 
+    namespace runner_stage_start_flow {
+        class _CompositePhaseStartHostProtocol
+    }
+
     namespace runner_stage_support_mixin {
         class _CompositeRunnerStageSupportMixin
     }
@@ -29,9 +49,16 @@ classDiagram
         class _CompositeRunnerStageSupportHostProtocol
     }
 
+    namespace runner_summary_helpers {
+        class EnrichmentSummary
+    }
+
     namespace runner_support_mixin {
         class CompositeRunnerSupportMixin
     }
 
+    CompositeRunnerMergeStageMixin <|-- CompositeRunnerStageMixin
+    CompositeRunnerObservabilityMixin <|-- CompositeRunnerSupportMixin
     _CompositeRunnerStageEnrichmentMixin <|-- CompositeRunnerStageMixin
     _CompositeRunnerStageSupportMixin <|-- CompositeRunnerStageMixin
+

@@ -1,0 +1,78 @@
+%% Title: Package Family: infrastructure/storage/silver/operations (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver/operations; part 1/2; modules: postwrite_protocols, metadata_runtime_support, metadata_write_support, validation_operations, delta_operations, merged_operations.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace postwrite_protocols {
+        class _SilverMaintenancePostwriteOps
+        class _SilverMetadataPostwriteOps
+        class _SilverPostwriteExecutorProtocol
+        class _SilverPostwriteFinalizerProtocol
+        class _SilverPostwriteHostProtocol
+        class _SilverWritePostwriteContext
+    }
+
+    namespace metadata_runtime_support {
+        class _BasePathMetadataWriter
+        class _DeltaVersionHost
+        class _PositionalMetadataWriter
+        class _SilverMetadataWriterProtocol
+        class _TablePathMetadataWriter
+    }
+
+    namespace metadata_write_support {
+        class _MetadataAuditOps
+        class _MetadataWriteOps
+        class _SilverAuditHost
+        class _SilverMetadataAuditSupportRequest
+        class _SilverMetadataWriteSupportRequest
+    }
+
+    namespace validation_operations {
+        class SilverValidationOperations
+        class _SilverPayloadPreparationHostProtocol
+        class _SilverPayloadPreparationRuntimeProtocol
+        class _SilverValidationOperationFacade
+    }
+
+    namespace delta_operations {
+        class SilverDeltaOperations
+        class _SilverDeltaOperationFacade
+    }
+
+    namespace merged_operations {
+        class SilverMergedOperations
+        class _MergedWriteFacade
+    }
+
+    namespace postwrite_execution {
+        class _SilverPostwriteAuditHookRequest
+        class _SilverPostwriteExportHookRequest
+    }
+
+    namespace arrow_operations {
+        class SilverArrowOperations
+    }
+
+    namespace delta_operation_protocols {
+        class _SilverDeltaHostProtocol
+    }
+
+    namespace maintenance_operations {
+        class SilverMaintenanceOperations
+    }
+
+    namespace metadata_audit_operations {
+        class _SilverMetadataAuditOps
+    }
+
+    _MergedWriteFacade <|-- SilverMergedOperations
+    _SilverDeltaOperationFacade <|-- SilverDeltaOperations
+    _SilverValidationOperationFacade <|-- SilverValidationOperations
+

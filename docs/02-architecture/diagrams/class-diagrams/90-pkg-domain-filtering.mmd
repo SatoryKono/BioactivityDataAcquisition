@@ -1,11 +1,11 @@
 %% Title: Package Family: domain/filtering
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/filtering; modules: column_filter, input_config, list_filters, _base_filter_config, gold_config, load_result.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/filtering; modules: column_filter, input_config, list_filters, _base_filter_config, _filter_decision, gold_config.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   11
+%% @nodes   12
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
@@ -28,6 +28,10 @@ classDiagram
         class BaseFilterConfig
     }
 
+    namespace filter_decision {
+        class FilterDecision
+    }
+
     namespace gold_config {
         class GoldFilterConfig
     }
@@ -46,3 +50,4 @@ classDiagram
 
     BaseFilterConfig <|-- GoldFilterConfig
     BaseFilterConfig <|-- SilverFilterConfig
+

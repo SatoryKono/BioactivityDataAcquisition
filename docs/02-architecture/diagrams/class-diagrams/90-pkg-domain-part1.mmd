@@ -1,0 +1,92 @@
+%% Title: Package Family: domain (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain; part 1/2; modules: medallion, locking, context_filtering, immutability, runtime_observability_publication_contract, _observability_contract_core.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace medallion {
+        class ClearPolicy
+        class GoldWriteMode
+        class Layer
+        class LoadingStrategy
+        class MedallionPolicy
+        class SilverWriteMode
+        class WriteMode
+        class WriteModePolicy
+    }
+
+    namespace locking {
+        class FencingToken
+        class LockContext
+        class LockContextHolder
+        class LockNotHeldError
+    }
+
+    namespace context_filtering {
+        class InputFilterContext
+        class VacuumSettings
+    }
+
+    namespace immutability {
+        class FrozenDict
+        class FrozenList
+    }
+
+    namespace runtime_observability_publication_contract {
+        class RuntimeObservabilityPublicationContract
+        class RuntimeObservabilityPublicationRoute
+    }
+
+    namespace observability_contract_core {
+        class ObservabilityContractPayload
+    }
+
+    namespace adapter_config {
+        class AdapterConfig
+    }
+
+    namespace context {
+        class PipelineContext
+    }
+
+    namespace context_cached_bronze {
+        class CachedBronzeContext
+    }
+
+    namespace context_run {
+        class PipelineRunContext
+    }
+
+    namespace context_time {
+        class ClockLike
+    }
+
+    namespace error_classifier {
+        class ErrorClassifier
+    }
+
+    namespace error_types {
+        class ErrorType
+    }
+
+    namespace events {
+        class PipelineEvent
+    }
+
+    namespace observability_event_mapping {
+        class DomainEventObservabilityEnvelope
+    }
+
+    namespace resilience {
+        class RetryConfig
+    }
+
+    namespace resilience_circuit_breaker {
+        class CircuitBreakerConfig
+    }
+

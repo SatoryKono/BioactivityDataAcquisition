@@ -1,0 +1,37 @@
+%% Title: Package Family: domain/normalization
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/normalization; modules: structured_payload_policies, publication_structured_fields, chembl, _reference_id_registry, join_keys.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   11
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace structured_payload_policies {
+        class StructuredPayloadCollectionSemantics
+        class StructuredPayloadPolicy
+        class StructuredPayloadRepresentation
+        class StructuredPayloadSemanticPolicy
+    }
+
+    namespace publication_structured_fields {
+        class CollectionSemantics
+        class FieldRepresentation
+        class PublicationStructuredFieldPolicy
+    }
+
+    namespace chembl {
+        class ActivityOntologyCompanionFields
+        class OntologyMappingResult
+    }
+
+    namespace reference_id_registry {
+        class ReferenceIdentifierFamily
+    }
+
+    namespace join_keys {
+        class JoinKeyNormalizationPolicy
+    }
+

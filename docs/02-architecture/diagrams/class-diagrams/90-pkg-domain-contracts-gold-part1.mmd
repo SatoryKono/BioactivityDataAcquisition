@@ -1,0 +1,116 @@
+%% Title: Package Family: domain/contracts/gold (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/contracts/gold; part 1/2; modules: _chembl_reference_publication_schemas, _chembl_target_lookup_schemas, _chembl_activity_assay_schemas, composite_bioassay, _chembl_molecule_protein_schemas, _composite_gold_common_schema.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace chembl_reference_publication_schemas {
+        class ChEMBLCellLineGoldSchema
+        class ChEMBLCompoundRecordGoldSchema
+        class ChEMBLPublicationGoldSchema
+        class ChEMBLPublicationSimilarityGoldSchema
+        class ChEMBLPublicationTermGoldSchema
+    }
+
+    namespace chembl_target_lookup_schemas {
+        class ChEMBLSubcellularFractionGoldSchema
+        class ChEMBLTargetComponentGoldSchema
+        class ChEMBLTargetGoldSchema
+        class ChEMBLTargetProteinClassificationGoldSchema
+        class ChEMBLTissueGoldSchema
+    }
+
+    namespace chembl_activity_assay_schemas {
+        class ChEMBLActivityGoldSchema
+        class ChEMBLAssayGoldSchema
+        class ChEMBLAssayParametersGoldSchema
+    }
+
+    namespace composite_bioassay {
+        class CompositeActivityGoldSchema
+        class CompositeAssayGoldSchema
+        class CompositeTargetGoldSchema
+    }
+
+    namespace chembl_molecule_protein_schemas {
+        class ChEMBLMoleculeGoldSchema
+        class ChEMBLProteinClassGoldSchema
+    }
+
+    namespace composite_gold_common_schema {
+        class CompositeGoldCommonSchema
+        class CompositeLookupLineageSchema
+    }
+
+    namespace uniprot {
+        class UniProtIDMappingGoldSchema
+        class UniProtProteinGoldSchema
+    }
+
+    namespace publication_common_schema {
+        class PublicationGoldCommonSchema
+    }
+
+    namespace strict_gold_contract_schema {
+        class StrictGoldContractSchema
+    }
+
+    namespace composite_molecule {
+        class CompositeMoleculeGoldSchema
+    }
+
+    namespace composite_publication {
+        class CompositePublicationGoldSchema
+    }
+
+    namespace pubchem {
+        class PubChemCompoundGoldSchema
+    }
+
+    namespace publications_crossref {
+        class CrossRefPublicationGoldSchema
+    }
+
+    namespace publications_openalex {
+        class OpenAlexPublicationGoldSchema
+    }
+
+    namespace publications_pubmed {
+        class PubMedPublicationGoldSchema
+    }
+
+    CompositeGoldCommonSchema <|-- CompositeLookupLineageSchema
+    CompositeGoldCommonSchema <|-- CompositeMoleculeGoldSchema
+    CompositeLookupLineageSchema <|-- CompositeActivityGoldSchema
+    CompositeLookupLineageSchema <|-- CompositeAssayGoldSchema
+    CompositeLookupLineageSchema <|-- CompositePublicationGoldSchema
+    CompositeLookupLineageSchema <|-- CompositeTargetGoldSchema
+    PublicationGoldCommonSchema <|-- CrossRefPublicationGoldSchema
+    PublicationGoldCommonSchema <|-- OpenAlexPublicationGoldSchema
+    PublicationGoldCommonSchema <|-- PubMedPublicationGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLActivityGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLAssayGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLAssayParametersGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLCellLineGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLCompoundRecordGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLMoleculeGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLProteinClassGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLPublicationGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLPublicationSimilarityGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLPublicationTermGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLSubcellularFractionGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLTargetComponentGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLTargetGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLTargetProteinClassificationGoldSchema
+    StrictGoldContractSchema <|-- ChEMBLTissueGoldSchema
+    StrictGoldContractSchema <|-- CompositeGoldCommonSchema
+    StrictGoldContractSchema <|-- PubChemCompoundGoldSchema
+    StrictGoldContractSchema <|-- PublicationGoldCommonSchema
+    StrictGoldContractSchema <|-- UniProtIDMappingGoldSchema
+    StrictGoldContractSchema <|-- UniProtProteinGoldSchema
+

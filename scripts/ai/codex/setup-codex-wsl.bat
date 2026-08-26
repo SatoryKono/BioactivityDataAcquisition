@@ -57,7 +57,7 @@ if defined WSL_DISTRO (
 
 REM If wslpath failed, construct path manually
 if not defined REPO_WSL (
-    REM Manual conversion: E:\path\to\repo -> /mnt/e/path/to/repo
+    REM Manual conversion: E:\path\to\repo -> WSL /mnt/<drive>/path/to/repo
     for /f "tokens=1" %%A in ("%REPO_WIN%") do (
         set "DRIVE=%%A:="
         set "DRIVE=!DRIVE:~0,1!"

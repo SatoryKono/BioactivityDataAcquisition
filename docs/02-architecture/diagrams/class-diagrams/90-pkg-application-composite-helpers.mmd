@@ -1,0 +1,47 @@
+%% Title: Package Family: application/composite/helpers
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/composite/helpers; modules: merger_orchestration_types, coordinator_execution, dependency_chained_key_resolver, dependency_coordinator_execution, join_planner_identity, lifecycle_observer_terminal_emit.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   12
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace merger_orchestration_types {
+        class MergeExecutionContext
+        class MergeExecutionRequestSpec
+        class MergeInputContext
+        class MergeWorkflowContext
+    }
+
+    namespace coordinator_execution {
+        class EnricherExecutionContext
+        class _CoordinatorExecutionHost
+    }
+
+    namespace dependency_chained_key_resolver {
+        class ChainedKeyResolver
+    }
+
+    namespace dependency_coordinator_execution {
+        class _DependencyCoordinatorExecutionHost
+    }
+
+    namespace join_planner_identity {
+        class PipelineIdentityRecord
+    }
+
+    namespace lifecycle_observer_terminal_emit {
+        class LifecycleTerminalEmitHost
+    }
+
+    namespace preflight_schema_field_extraction {
+        class PreflightSchemaFieldExtractionHost
+    }
+
+    namespace resolver_helper {
+        class ResolverHelper
+    }
+

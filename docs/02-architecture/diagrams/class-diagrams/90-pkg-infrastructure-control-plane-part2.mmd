@@ -1,0 +1,39 @@
+%% Title: Package Family: infrastructure/control_plane (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/control_plane; part 2/2; modules: file_lineage_store, file_run_ledger_store, file_workflow_execution_state_store, file_workflow_ledger_store, file_workflow_manifest_store, file_workflow_transform_artifact_store.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   7
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace file_lineage_store {
+        class FileLineageStore
+    }
+
+    namespace file_run_ledger_store {
+        class FileRunLedgerStore
+    }
+
+    namespace file_workflow_execution_state_store {
+        class FileWorkflowExecutionStateStore
+    }
+
+    namespace file_workflow_ledger_store {
+        class FileWorkflowLedgerStore
+    }
+
+    namespace file_workflow_manifest_store {
+        class FileWorkflowManifestStore
+    }
+
+    namespace file_workflow_transform_artifact_store {
+        class FileWorkflowTransformArtifactStore
+    }
+
+    namespace provider_health_evidence {
+        class PersistingProviderHealthMonitor
+    }
+

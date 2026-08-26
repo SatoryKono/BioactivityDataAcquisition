@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" aria-roledescription="classDiagram" role="graphics-document document" viewBox="0 -8 6867.1953125 605" style="max-width: 6867.2px; background-color: white;" width="100%" id="my-svg"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker extension classDiagram" id="my-svg_classDiagram-extensionStart"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker extension classDiagram" id="my-svg_classDiagram-extensionEnd"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker composition classDiagram" id="my-svg_classDiagram-compositionStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker composition classDiagram" id="my-svg_classDiagram-compositionEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="6" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyStart"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="13" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyEnd"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="13" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopStart"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="1" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopEnd"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><g class="root"><g class="clusters"><g id="health_server" class="cluster"><rect height="112" width="3110.890625" y="469" x="3387.3203125" style="fill: none; stroke: black" /><g transform="translate(4888.1171875, 469)" class="cluster-label"><text x="54.648" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="54.648">health_server</tspan></text></g></g><g id="health_server_http_mixin" class="cluster"><rect height="416" width="590.515625" y="8" x="3306.109375" style="fill: none; stroke: black" /><g transform="translate(3500.25, 8)" class="cluster-label"><text x="101.117" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="101.117">health_server_http_mix</tspan><tspan x="101.117" dy="16.8">in</tspan></text></g></g><g id="health_server_control_plane_evidence_routing" class="cluster"><rect height="112" width="370.859375" y="469" x="6480.3359375" style="fill: none; stroke: black" /><g transform="translate(6480.3359375, 469)" class="cluster-label"><text x="185.43" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="185.43">health_server_control_plane_evidence_rout</tspan><tspan x="185.43" dy="16.8">ing</tspan></text></g></g><g id="health_server_control_plane_evidence_scope" class="cluster"><rect height="416" width="360.609375" y="8" x="6485.4609375" style="fill: none; stroke: black" /><g transform="translate(6485.4609375, 8)" class="cluster-label"><text x="180.305" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="180.305">health_server_control_plane_evidence_sco</tspan><tspan x="180.305" dy="16.8">pe</tspan></text></g></g><g id="health_server_routing_mixin" class="cluster"><rect height="416" width="332.28125" y="8" x="5681.96875" style="fill: none; stroke: black" /><g transform="translate(5734.828125, 8)" class="cluster-label"><text x="113.281" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="113.281">health_server_routing_mix</tspan><tspan x="113.281" dy="16.8">in</tspan></text></g></g><g id="health_server_state_mixin" class="cluster"><rect height="416" width="310.078125" y="8" x="6200.3203125" style="fill: none; stroke: black" /><g transform="translate(6250.3984375, 8)" class="cluster-label"><text x="104.961" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="104.961">health_server_state_mix</tspan><tspan x="104.961" dy="16.8">in</tspan></text></g></g></g><g class="edgePaths"><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id1" d="M6665.765625,267.5L6665.765625,293.5833333333333C6665.765625,319.6666666666667,6665.765625,371.8333333333333,6665.765625,401.6666666666667C6665.765625,431.5,6665.765625,439,6665.765625,446.5C6665.765625,454,6665.765625,461.5,6665.765625,469C6665.765625,476.5,6665.765625,484,6665.765625,487.75L6665.765625,491.5" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id2" d="M3460.5703125,267.5L3460.5703125,293.5833333333333C3460.5703125,319.6666666666667,3460.5703125,371.8333333333333,3460.5703125,401.6666666666667C3460.5703125,431.5,3460.5703125,439,3460.5703125,446.5C3460.5703125,454,3460.5703125,461.5,3818.8984375,474.2829314783294C4177.2265625,487.06586295665875,4893.8828125,505.1317259133175,5252.2109375,514.1646573916469L5610.5390625,523.1975888699762" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id3" d="M5848.109375,267.5L5848.109375,293.5833333333333C5848.109375,319.6666666666667,5848.109375,371.8333333333333,5848.109375,401.6666666666667C5848.109375,431.5,5848.109375,439,5848.109375,446.5C5848.109375,454,5848.109375,461.5,5832.34765625,470.5649550736228C5816.5859375,479.62991014724565,5785.0625,490.25982029449125,5769.30078125,495.5747753681141L5753.5390625,500.88973044173684" /><path marker-start="url(#my-svg_classDiagram-extensionStart)" style="fill:none" class="edge-pattern-solid relation" id="id4" d="M6355.359375,267.5L6355.359375,293.5833333333333C6355.359375,319.6666666666667,6355.359375,371.8333333333333,6355.359375,401.6666666666667C6355.359375,431.5,6355.359375,439,6355.359375,446.5C6355.359375,454,6355.359375,461.5,6255.055989583333,473.5922250584982C6154.752604166667,485.6844501169964,5954.145833333333,502.36890023399275,5853.842447916667,510.711125292491L5753.5390625,519.0533503509891" /></g><g class="edgeLabels" /><g class="nodes"><g transform="translate(8, 22.5)" class="root"><g class="clusters"><g id="health_server_control_plane_scope" class="cluster"><rect height="371" width="299.609375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(17.765625, 8)" class="cluster-label"><text x="140.039" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="140.039">health_server_control_plane_sco</tspan><tspan x="140.039" dy="16.8">pe</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(157.8046875, 76.5)" id="classId-_ControlPlaneScopeHost-0" class="node default"><rect height="67" width="244.25" y="-33.5" x="-122.125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="122.125" x1="-122.125" class="divider" /><line y2="13.5" y1="13.5" x2="122.125" x1="-122.125" class="divider" /><g class="label"><text x="110.125" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -110.125, -21.5)"><tspan x="110.125">_ControlPlaneScopeHost</tspan></text></g></g><g transform="translate(157.8046875, 193.5)" id="classId-_IdentityScope-1" class="node default"><rect height="67" width="157.171875" y="-33.5" x="-78.5859375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="78.5859375" x1="-78.5859375" class="divider" /><line y2="13.5" y1="13.5" x2="78.5859375" x1="-78.5859375" class="divider" /><g class="label"><text x="66.586" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -66.5859375, -21.5)"><tspan x="66.586">_IdentityScope</tspan></text></g></g><g transform="translate(157.8046875, 310.5)" id="classId-_RunManifestLookupPort-2" class="node default"><rect height="67" width="249.609375" y="-33.5" x="-124.8046875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="124.8046875" x1="-124.8046875" class="divider" /><line y2="13.5" y1="13.5" x2="124.8046875" x1="-124.8046875" class="divider" /><g class="label"><text x="112.805" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -112.8046875, -21.5)"><tspan x="112.805">_RunManifestLookupPort</tspan></text></g></g></g></g><g transform="translate(357.609375, 22.5)" class="root"><g class="clusters"><g id="health_server_observability_routing" class="cluster"><rect height="371" width="632" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(181.15625, 8)" class="cluster-label"><text x="142.844" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="142.844">health_server_observability_rout</tspan><tspan x="142.844" dy="16.8">ing</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(324, 76.5)" id="classId-_HealthObservabilityRoutingHost-3" class="node default"><rect height="67" width="324.328125" y="-33.5" x="-162.1640625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="162.1640625" x1="-162.1640625" class="divider" /><line y2="13.5" y1="13.5" x2="162.1640625" x1="-162.1640625" class="divider" /><g class="label"><text x="150.164" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -150.1640625, -21.5)"><tspan x="150.164">_HealthObservabilityRoutingHost</tspan></text></g></g><g transform="translate(324, 193.5)" id="classId-health_server_observability_routing__HealthResponseSupport-4" class="node default"><rect height="67" width="582" y="-33.5" x="-291" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="291" x1="-291" class="divider" /><line y2="13.5" y1="13.5" x2="291" x1="-291" class="divider" /><g class="label"><text x="279" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -279, -21.5)"><tspan x="279">health_server_observability_routing__HealthResponseSupport</tspan></text></g></g><g transform="translate(324, 310.5)" id="classId-_RunLedgerLookup-5" class="node default"><rect height="67" width="195.46875" y="-33.5" x="-97.734375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="97.734375" x1="-97.734375" class="divider" /><line y2="13.5" y1="13.5" x2="97.734375" x1="-97.734375" class="divider" /><g class="label"><text x="85.734" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -85.734375, -21.5)"><tspan x="85.734">_RunLedgerLookup</tspan></text></g></g></g></g><g transform="translate(5682.0390625, 525)" id="classId-HealthServer-6" class="node default"><rect height="67" width="143" y="-33.5" x="-71.5" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="71.5" x1="-71.5" class="divider" /><line y2="13.5" y1="13.5" x2="71.5" x1="-71.5" class="divider" /><g class="label"><text x="59.5" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -59.5, -21.5)"><tspan x="59.5">HealthServer</tspan></text></g></g><g transform="translate(5955.7890625, 525)" id="classId-HealthServerControlPlaneDeps-7" class="node default"><rect height="67" width="304.5" y="-33.5" x="-152.25" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="152.25" x1="-152.25" class="divider" /><line y2="13.5" y1="13.5" x2="152.25" x1="-152.25" class="divider" /><g class="label"><text x="140.25" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -140.25, -21.5)"><tspan x="140.25">HealthServerControlPlaneDeps</tspan></text></g></g><g transform="translate(6310.625, 525)" id="classId-_StaticHealthMetricsExposition-8" class="node default"><rect height="67" width="305.171875" y="-33.5" x="-152.5859375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="152.5859375" x1="-152.5859375" class="divider" /><line y2="13.5" y1="13.5" x2="152.5859375" x1="-152.5859375" class="divider" /><g class="label"><text x="140.586" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -140.5859375, -21.5)"><tspan x="140.586">_StaticHealthMetricsExposition</tspan></text></g></g><g transform="translate(1039.609375, 81)" class="root"><g class="clusters"><g id="control_plane_selector_records" class="cluster"><rect height="254" width="247.203125" y="8" x="3.1328125" style="fill: none; stroke: black" /><g transform="translate(3.1328125, 8)" class="cluster-label"><text x="123.602" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="123.602">control_plane_selector_reco</tspan><tspan x="123.602" dy="16.8">rds</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(126.734375, 76.5)" id="classId-RunLedgerLookup-9" class="node default"><rect height="67" width="187.46875" y="-33.5" x="-93.734375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="93.734375" x1="-93.734375" class="divider" /><line y2="13.5" y1="13.5" x2="93.734375" x1="-93.734375" class="divider" /><g class="label"><text x="81.734" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -81.734375, -21.5)"><tspan x="81.734">RunLedgerLookup</tspan></text></g></g><g transform="translate(126.734375, 193.5)" id="classId-SelectorRecord-10" class="node default"><rect height="67" width="161.71875" y="-33.5" x="-80.859375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="80.859375" x1="-80.859375" class="divider" /><line y2="13.5" y1="13.5" x2="80.859375" x1="-80.859375" class="divider" /><g class="label"><text x="68.859" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -68.859375, -21.5)"><tspan x="68.859">SelectorRecord</tspan></text></g></g></g></g><g transform="translate(1336.8125, 81)" class="root"><g class="clusters"><g id="health_server_checkpoint_lookup" class="cluster"><rect height="254" width="343.671875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(46.8125, 8)" class="cluster-label"><text x="133.023" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="133.023">health_server_checkpoint_look</tspan><tspan x="133.023" dy="16.8">up</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(179.8359375, 76.5)" id="classId-_CheckpointLookupHost-11" class="node default"><rect height="67" width="240.296875" y="-33.5" x="-120.1484375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="120.1484375" x1="-120.1484375" class="divider" /><line y2="13.5" y1="13.5" x2="120.1484375" x1="-120.1484375" class="divider" /><g class="label"><text x="108.148" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -108.1484375, -21.5)"><tspan x="108.148">_CheckpointLookupHost</tspan></text></g></g><g transform="translate(179.8359375, 193.5)" id="classId-_LatestCheckpointLookupPort-12" class="node default"><rect height="67" width="293.671875" y="-33.5" x="-146.8359375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="146.8359375" x1="-146.8359375" class="divider" /><line y2="13.5" y1="13.5" x2="146.8359375" x1="-146.8359375" class="divider" /><g class="label"><text x="134.836" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -134.8359375, -21.5)"><tspan x="134.836">_LatestCheckpointLookupPort</tspan></text></g></g></g></g><g transform="translate(1730.484375, 81)" class="root"><g class="clusters"><g id="health_server_quarantine_routing" class="cluster"><rect height="254" width="613.171875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(179.6875, 8)" class="cluster-label"><text x="134.898" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="134.898">health_server_quarantine_routi</tspan><tspan x="134.898" dy="16.8">ng</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(314.5859375, 76.5)" id="classId-_HealthQuarantineRoutingHost-13" class="node default"><rect height="67" width="305.046875" y="-33.5" x="-152.5234375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="152.5234375" x1="-152.5234375" class="divider" /><line y2="13.5" y1="13.5" x2="152.5234375" x1="-152.5234375" class="divider" /><g class="label"><text x="140.523" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -140.5234375, -21.5)"><tspan x="140.523">_HealthQuarantineRoutingHost</tspan></text></g></g><g transform="translate(314.5859375, 193.5)" id="classId-health_server_quarantine_routing__HealthResponseSupport-14" class="node default"><rect height="67" width="563.171875" y="-33.5" x="-281.5859375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="281.5859375" x1="-281.5859375" class="divider" /><line y2="13.5" y1="13.5" x2="281.5859375" x1="-281.5859375" class="divider" /><g class="label"><text x="269.586" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -269.5859375, -21.5)"><tspan x="269.586">health_server_quarantine_routing__HealthResponseSupport</tspan></text></g></g></g></g><g transform="translate(2393.65625, 81)" class="root"><g class="clusters"><g id="health_server_readiness" class="cluster"><rect height="254" width="243.03125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(32.296875, 8)" class="cluster-label"><text x="97.219" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="97.219">health_server_readine</tspan><tspan x="97.219" dy="16.8">ss</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(129.515625, 76.5)" id="classId-_MetricsExposition-15" class="node default"><rect height="67" width="193.03125" y="-33.5" x="-96.515625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="96.515625" x1="-96.515625" class="divider" /><line y2="13.5" y1="13.5" x2="96.515625" x1="-96.515625" class="divider" /><g class="label"><text x="84.516" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -84.515625, -21.5)"><tspan x="84.516">_MetricsExposition</tspan></text></g></g><g transform="translate(129.515625, 193.5)" id="classId-_ReadinessHost-16" class="node default"><rect height="67" width="165.75" y="-33.5" x="-82.875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="82.875" x1="-82.875" class="divider" /><line y2="13.5" y1="13.5" x2="82.875" x1="-82.875" class="divider" /><g class="label"><text x="70.875" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -70.875, -21.5)"><tspan x="70.875">_ReadinessHost</tspan></text></g></g></g></g><g transform="translate(2686.6875, 81)" class="root"><g class="clusters"><g id="health_server_routing_support" class="cluster"><rect height="254" width="584.421875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(178.2578125, 8)" class="cluster-label"><text x="121.953" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="121.953">health_server_routing_suppo</tspan><tspan x="121.953" dy="16.8">rt</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(300.2109375, 76.5)" id="classId-health_server_routing_support__HealthResponseSupport-17" class="node default"><rect height="67" width="534.421875" y="-33.5" x="-267.2109375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="267.2109375" x1="-267.2109375" class="divider" /><line y2="13.5" y1="13.5" x2="267.2109375" x1="-267.2109375" class="divider" /><g class="label"><text x="255.211" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -255.2109375, -21.5)"><tspan x="255.211">health_server_routing_support__HealthResponseSupport</tspan></text></g></g><g transform="translate(300.2109375, 193.5)" id="classId-_HealthRoutingHost-18" class="node default"><rect height="67" width="203.796875" y="-33.5" x="-101.8984375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="101.8984375" x1="-101.8984375" class="divider" /><line y2="13.5" y1="13.5" x2="101.8984375" x1="-101.8984375" class="divider" /><g class="label"><text x="89.898" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -89.8984375, -21.5)"><tspan x="89.898">_HealthRoutingHost</tspan></text></g></g></g></g><g transform="translate(3460.5703125, 216)" id="classId-HealthServerHTTPMixin-19" class="node default"><rect height="67" width="238.921875" y="-33.5" x="-119.4609375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="119.4609375" x1="-119.4609375" class="divider" /><line y2="13.5" y1="13.5" x2="119.4609375" x1="-119.4609375" class="divider" /><g class="label"><text x="107.461" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -107.4609375, -21.5)"><tspan x="107.461">HealthServerHTTPMixin</tspan></text></g></g><g transform="translate(3745.828125, 216)" id="classId-_RouteRequestSupport-20" class="node default"><rect height="67" width="231.59375" y="-33.5" x="-115.796875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="115.796875" x1="-115.796875" class="divider" /><line y2="13.5" y1="13.5" x2="115.796875" x1="-115.796875" class="divider" /><g class="label"><text x="103.797" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -103.796875, -21.5)"><tspan x="103.797">_RouteRequestSupport</tspan></text></g></g><g transform="translate(3931.625, 139.5)" class="root"><g class="clusters"><g id="forensic_request_budget" class="cluster"><rect height="137" width="336.609375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(77.921875, 8)" class="cluster-label"><text x="98.383" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="98.383">forensic_request_budge</tspan><tspan x="98.383" dy="16.8">t</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(176.3046875, 76.5)" id="classId-ForensicEndpointUnavailable-21" class="node default"><rect height="67" width="286.609375" y="-33.5" x="-143.3046875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="143.3046875" x1="-143.3046875" class="divider" /><line y2="13.5" y1="13.5" x2="143.3046875" x1="-143.3046875" class="divider" /><g class="label"><text x="131.305" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -131.3046875, -21.5)"><tspan x="131.305">ForensicEndpointUnavailable</tspan></text></g></g></g></g><g transform="translate(4318.234375, 139.5)" class="root"><g class="clusters"><g id="health_server_checkpoint_freshness" class="cluster"><rect height="137" width="315.484375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(20.8515625, 8)" class="cluster-label"><text x="144.891" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="144.891">health_server_checkpoint_freshne</tspan><tspan x="144.891" dy="16.8">ss</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(165.7421875, 76.5)" id="classId-_CheckpointFreshnessHost-22" class="node default"><rect height="67" width="265.484375" y="-33.5" x="-132.7421875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="132.7421875" x1="-132.7421875" class="divider" /><line y2="13.5" y1="13.5" x2="132.7421875" x1="-132.7421875" class="divider" /><g class="label"><text x="120.742" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -120.7421875, -21.5)"><tspan x="120.742">_CheckpointFreshnessHost</tspan></text></g></g></g></g><g transform="translate(6665.765625, 525)" id="classId-_EvidenceRoutingHost-23" class="node default"><rect height="67" width="225.109375" y="-33.5" x="-112.5546875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="112.5546875" x1="-112.5546875" class="divider" /><line y2="13.5" y1="13.5" x2="112.5546875" x1="-112.5546875" class="divider" /><g class="label"><text x="100.555" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -100.5546875, -21.5)"><tspan x="100.555">_EvidenceRoutingHost</tspan></text></g></g><g transform="translate(6665.765625, 216)" id="classId-EvidenceScopeHost-24" class="node default"><rect height="67" width="200.734375" y="-33.5" x="-100.3671875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="100.3671875" x1="-100.3671875" class="divider" /><line y2="13.5" y1="13.5" x2="100.3671875" x1="-100.3671875" class="divider" /><g class="label"><text x="88.367" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -88.3671875, -21.5)"><tspan x="88.367">EvidenceScopeHost</tspan></text></g></g><g transform="translate(4683.71875, 139.5)" class="root"><g class="clusters"><g id="health_server_control_plane_metrics_refresh" class="cluster"><rect height="137" width="357.265625" y="8" x="2.234375" style="fill: none; stroke: black" /><g transform="translate(2.234375, 8)" class="cluster-label"><text x="178.633" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="178.633">health_server_control_plane_metrics_refr</tspan><tspan x="178.633" dy="16.8">esh</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(180.8671875, 76.5)" id="classId-ControlPlaneMetricsRefresher-25" class="node default"><rect height="67" width="295.734375" y="-33.5" x="-147.8671875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="147.8671875" x1="-147.8671875" class="divider" /><line y2="13.5" y1="13.5" x2="147.8671875" x1="-147.8671875" class="divider" /><g class="label"><text x="135.867" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -135.8671875, -21.5)"><tspan x="135.867">ControlPlaneMetricsRefresher</tspan></text></g></g></g></g><g transform="translate(5090.984375, 139.5)" class="root"><g class="clusters"><g id="processed_records_http" class="cluster"><rect height="137" width="195.28125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(10.75, 8)" class="cluster-label"><text x="94.891" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="94.891">processed_records_htt</tspan><tspan x="94.891" dy="16.8">p</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(105.640625, 76.5)" id="classId-_UrlResponse-26" class="node default"><rect height="67" width="145.28125" y="-33.5" x="-72.640625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="72.640625" x1="-72.640625" class="divider" /><line y2="13.5" y1="13.5" x2="72.640625" x1="-72.640625" class="divider" /><g class="label"><text x="60.641" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -60.640625, -21.5)"><tspan x="60.641">_UrlResponse</tspan></text></g></g></g></g><g transform="translate(5336.265625, 139.5)" class="root"><g class="clusters"><g id="processed_records_table_support" class="cluster"><rect height="137" width="310.703125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(29.90625, 8)" class="cluster-label"><text x="133.445" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="133.445">processed_records_table_suppo</tspan><tspan x="133.445" dy="16.8">rt</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(163.3515625, 76.5)" id="classId-ProcessedRecordRowSpec-27" class="node default"><rect height="67" width="260.703125" y="-33.5" x="-130.3515625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="130.3515625" x1="-130.3515625" class="divider" /><line y2="13.5" y1="13.5" x2="130.3515625" x1="-130.3515625" class="divider" /><g class="label"><text x="118.352" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -118.3515625, -21.5)"><tspan x="118.352">ProcessedRecordRowSpec</tspan></text></g></g></g></g><g transform="translate(5848.109375, 216)" id="classId-HealthServerRoutingMixin-28" class="node default"><rect height="67" width="262.28125" y="-33.5" x="-131.140625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="131.140625" x1="-131.140625" class="divider" /><line y2="13.5" y1="13.5" x2="131.140625" x1="-131.140625" class="divider" /><g class="label"><text x="119.141" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -119.140625, -21.5)"><tspan x="119.141">HealthServerRoutingMixin</tspan></text></g></g><g transform="translate(6355.359375, 216)" id="classId-HealthServerStateMixin-29" class="node default"><rect height="67" width="240.078125" y="-33.5" x="-120.0390625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="120.0390625" x1="-120.0390625" class="divider" /><line y2="13.5" y1="13.5" x2="120.0390625" x1="-120.0390625" class="divider" /><g class="label"><text x="108.039" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -108.0390625, -21.5)"><tspan x="108.039">HealthServerStateMixin</tspan></text></g></g></g></g></g><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

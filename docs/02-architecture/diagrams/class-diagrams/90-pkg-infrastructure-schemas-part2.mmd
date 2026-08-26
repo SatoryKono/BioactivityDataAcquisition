@@ -1,13 +1,35 @@
-%% Title: Package Family: infrastructure/schemas (Part 2/3)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/3; modules: base_schemas_pubchem, pipeline_config_common, dq_report_config, source_config.
+%% Title: Package Family: infrastructure/schemas (Part 2/4)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 2/4; modules: composite_validation, workflow_config, base_schemas_pubchem, pipeline_config_common.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   26
+%% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
+
+    namespace composite_validation {
+        class CompositeDQSchema
+        class CrossValidationSchema
+        class DQOverrideSchema
+        class EnricherFieldPairingSchema
+        class ExecutionSchema
+        class FieldComparisonSpecSchema
+        class LineageSchema
+        class RetrySchema
+    }
+
+    namespace workflow_config {
+        class WorkflowConfigFileSchema
+        class WorkflowConfigSchema
+        class WorkflowDefaultsSchema
+        class WorkflowPipelineStepSchema
+        class WorkflowReconcileForeignKeysConfigSchema
+        class WorkflowReconcileRowsConfigSchema
+        class WorkflowRunOptionsSchema
+        class WorkflowTransformStepSchema
+    }
 
     namespace base_schemas_pubchem {
         class BaseFilterColumnSchema
@@ -29,20 +51,3 @@ classDiagram
         class FieldValidationConfig
     }
 
-    namespace dq_report_config {
-        class BronzeDQReportConfig
-        class BronzeSinkConfig
-        class GoldDQReportConfig
-        class GoldSinkConfig
-        class SilverDQReportConfig
-        class SilverSinkConfig
-    }
-
-    namespace source_config {
-        class FallbackPolicyYamlConfig
-        class PaginationConfig
-        class ProviderConfigYaml
-        class SourceCircuitBreakerYamlConfig
-        class SourceSectionConfig
-        class SourceYamlConfig
-    }

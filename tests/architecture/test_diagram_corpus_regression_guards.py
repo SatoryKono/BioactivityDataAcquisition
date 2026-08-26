@@ -181,9 +181,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
         view_count,
     ) == (
         89,
-        94,
+        145,
         55,
-        239,
+        290,
         165,
     )
 

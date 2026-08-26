@@ -1,25 +1,31 @@
 %% Title: Package Family: infrastructure/adapters/chembl (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 1/2; modules: models_common, models_compound, models_activity, _fetch_paging_filtered, _fetch_resilience_fallback, _fetch_resilience_recovery.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/adapters/chembl; part 1/2; modules: models_additional, models_common, models_compound, _models_common_extra, models_activity, _fetch_paging_filtered.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
+    namespace models_additional {
+        class ChemblCompoundRecordApiRecord
+        class ChemblCompoundRecordResponse
+        class ChemblProteinClassApiRecord
+        class ChemblProteinClassResponse
+        class ChemblPublicationSimilarityApiRecord
+        class ChemblPublicationSimilarityResponse
+        class ChemblTissueApiRecord
+        class ChemblTissueResponse
+    }
+
     namespace models_common {
         class ChemblAssayRecord
         class ChemblAssayResponse
-        class ChemblCellLineRecord
-        class ChemblCellLineResponse
-        class ChemblPageMeta
         class ChemblPublicationApiRecord
         class ChemblPublicationResponse
         class ChemblReleaseInfo
-        class ChemblTargetComponentRecord
-        class ChemblTargetComponentResponse
         class ChemblTargetRecord
         class ChemblTargetResponse
     }
@@ -30,6 +36,13 @@ classDiagram
         class MoleculeHierarchy
         class MoleculeProperties
         class MoleculeStructures
+    }
+
+    namespace models_common_extra {
+        class ChemblCellLineRecord
+        class ChemblCellLineResponse
+        class ChemblTargetComponentRecord
+        class ChemblTargetComponentResponse
     }
 
     namespace models_activity {
@@ -43,40 +56,7 @@ classDiagram
         class _ChemblFetchPagingFilteredMixin
     }
 
-    namespace fetch_resilience_fallback {
-        class _ChemblFallbackHost
+    namespace fetch_resilience_error {
+        class ChemblErrorHost
     }
 
-    namespace fetch_resilience_recovery {
-        class _ChemblRecoveryHost
-    }
-
-    namespace client {
-        class ChemblAdapter
-    }
-
-    namespace entity_mapper {
-        class ChemblEntityMapper
-    }
-
-    namespace fetch_adapter_mixin {
-        class ChemblFetchAdapterMixin
-    }
-
-    namespace fetch_multi_filter_mixin {
-        class ChemblFetchMultiFilterMixin
-    }
-
-    namespace fetch_paging_mixin {
-        class ChemblFetchPagingMixin
-    }
-
-    namespace fetch_resilience_mixin {
-        class ChemblFetchResilienceMixin
-    }
-
-    ChemblFetchAdapterMixin <|-- ChemblAdapter
-    ChemblFetchMultiFilterMixin <|-- ChemblFetchAdapterMixin
-    ChemblFetchPagingMixin <|-- ChemblFetchAdapterMixin
-    ChemblFetchResilienceMixin <|-- ChemblFetchAdapterMixin
-    _ChemblFetchPagingFilteredMixin <|-- ChemblFetchPagingMixin

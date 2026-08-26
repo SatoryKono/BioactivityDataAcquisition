@@ -1,16 +1,24 @@
 %% Title: Package Family: infrastructure/export
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/export; modules: csv_exporter, dq_report_writer, export_catalog_adapter, export_writer_adapter.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/export; modules: csv_exporter, csv_exporter_contract, debug_export_adapter, dq_report_writer, export_catalog_adapter, export_writer_adapter.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   4
+%% @nodes   6
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
     namespace csv_exporter {
         class CsvExporter
+    }
+
+    namespace csv_exporter_contract {
+        class CsvExporterProtocol
+    }
+
+    namespace debug_export_adapter {
+        class DebugExportAdapter
     }
 
     namespace dq_report_writer {
@@ -24,3 +32,4 @@ classDiagram
     namespace export_writer_adapter {
         class ExportWriterAdapter
     }
+

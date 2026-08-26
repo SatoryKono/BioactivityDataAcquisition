@@ -1,0 +1,27 @@
+%% Title: Package Family: application/observability/control_plane_evidence
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/observability/control_plane_evidence; modules: checks, retention, service, service_support.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   4
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace checks {
+        class EvidenceCheckResult
+    }
+
+    namespace retention {
+        class ControlPlaneLifecyclePlanner
+    }
+
+    namespace service {
+        class ControlPlaneEvidenceService
+    }
+
+    namespace service_support {
+        class EvidenceScopeContext
+    }
+

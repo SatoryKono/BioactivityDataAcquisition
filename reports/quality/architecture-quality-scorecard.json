@@ -30,9 +30,9 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 9.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.81
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 9.9,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.188
     },
     {
       "evidence_metrics": {
@@ -169,8 +169,8 @@
     ],
     "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 98,
-    "lazy_import_observed_count": 98,
+    "lazy_import_cap": 97,
+    "lazy_import_observed_count": 97,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -211,7 +211,7 @@
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 84
+    "unmeasured_module_count": 0
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -241,7 +241,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "a3f483e39dba762b198c57862c28d5bb2a09884d0208de4d90b9c6846d5d6659"
+      "source_fingerprint": "798a6d7bd79de16fc7fc2b5e68391ddf33f1b5d3982b686651728c2ef7f5e6eb"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -260,7 +260,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "421a06364a3e363dc377b666e816007a08f04ed4c1d46a13b0f6f71b7cfce6bb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "fc0b8e529018bcd0b453d9430608e5da3900b1483682ab103d273b7378b8a536"
+      "source_tree_sha256": "adfa9f79f193756bef35d73205919a88238ca3a3832b513203301ad8488644b8"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

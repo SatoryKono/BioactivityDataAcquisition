@@ -1,0 +1,80 @@
+%% Title: Package Family: domain/behavior (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/behavior; part 1/2; modules: staged_enforcement, normalization_service, aggregation_validator, cross_validation_validator, merged_metadata_explainability, normalization_config.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace staged_enforcement {
+        class CheckResult
+        class EnforcementPolicy
+        class EnforcementStage
+        class StagedEnforcementEngine
+        class _DefaultPolicySpec
+    }
+
+    namespace normalization_service {
+        class BioactivityNormalizer
+        class NormalizationResult
+        class _NormalizationActivityMixin
+        class _NormalizationBatchMixin
+    }
+
+    namespace aggregation_validator {
+        class AggregationConfig
+        class AggregationProvenance
+        class AggregationValidator
+    }
+
+    namespace cross_validation_validator {
+        class CrossValidationConfig
+        class CrossValidationDispositionPolicy
+        class CrossValidationValidator
+    }
+
+    namespace merged_metadata_explainability {
+        class MergedFieldExplanation
+        class MergedMetadataExplainer
+        class MergedRecordExplanation
+    }
+
+    namespace normalization_config {
+        class ConcentrationRangeConfig
+        class NormalizationConfig
+        class PChemblRangeConfig
+    }
+
+    namespace preflight_governance_types {
+        class GovernancePolicy
+        class PreflightGovernanceConfig
+    }
+
+    namespace composite_metadata_cv {
+        class CompositeCvDQSummary
+        class MergedRecordExplanationLike
+    }
+
+    namespace dq_metrics_calculator {
+        class DQMetricsCalculator
+        class DQMetricsInput
+    }
+
+    namespace author_normalization_service {
+        class AuthorNormalizer
+    }
+
+    namespace chemical_standardization {
+        class ChemicalStandardizationResult
+    }
+
+    namespace composite_validation_config {
+        class CompositeValidationConfig
+    }
+
+    _NormalizationActivityMixin <|-- _NormalizationBatchMixin
+    _NormalizationBatchMixin <|-- BioactivityNormalizer
+

@@ -1,0 +1,36 @@
+%% Title: Package Family: application/services/checkpoint
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/checkpoint; modules: _checkpoint_compatibility_runtime_identity, _checkpoint_compatibility_runtime_identity_details, _checkpoint_service_runtime, checkpoint_compatibility_service, checkpoint_models, checkpoint_service.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   7
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace checkpoint_compatibility_runtime_identity {
+        class CheckpointExecutionIdentityFallbackContext
+        class ExecutionIdentityCompatibilityContext
+    }
+
+    namespace checkpoint_compatibility_runtime_identity_details {
+        class IdentityDetailsSpec
+    }
+
+    namespace checkpoint_service_runtime {
+        class _CheckpointServiceRuntimeHost
+    }
+
+    namespace checkpoint_compatibility_service {
+        class CheckpointCompatibilityService
+    }
+
+    namespace checkpoint_models {
+        class CheckpointInfo
+    }
+
+    namespace checkpoint_service {
+        class CheckpointService
+    }
+

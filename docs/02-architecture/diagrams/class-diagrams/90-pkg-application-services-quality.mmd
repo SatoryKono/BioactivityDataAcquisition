@@ -1,0 +1,92 @@
+%% Title: Package Family: application/services/quality
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/services/quality; modules: config_dq_service, _quarantine_service_async_mixin, _quarantine_service_filtered_mixin, data_quality_anomalies, dq_report_models, _dq_report_layer_flows.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   23
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace config_dq_service {
+        class ConfigDQService
+        class ConfigSourceRefProviderProtocol
+        class DQConfigLoaderProtocol
+        class PipelineYamlConfigGetterProtocol
+    }
+
+    namespace quarantine_service_async_mixin {
+        class QuarantineServiceAsyncMixin
+        class _QuarantineAsyncHost
+    }
+
+    namespace quarantine_service_filtered_mixin {
+        class QuarantineServiceFilteredMixin
+        class _FilteredQuarantineHost
+    }
+
+    namespace data_quality_anomalies {
+        class DataQualityAnomalyMixin
+        class DataQualityMetricsMixin
+    }
+
+    namespace dq_report_models {
+        class DQReportContext
+        class DQReportResult
+    }
+
+    namespace dq_report_layer_flows {
+        class _DQReport
+    }
+
+    namespace quarantine_models {
+        class QuarantineRecord
+    }
+
+    namespace quarantine_service_replay_purge_sync {
+        class QuarantineServiceReplayPurgeSyncMixin
+    }
+
+    namespace quarantine_service_status_sync {
+        class QuarantineServiceStatusSyncMixin
+    }
+
+    namespace quarantine_service_sync_mixin {
+        class QuarantineServiceSyncMixin
+    }
+
+    namespace quarantine_service_sync_support {
+        class _QuarantineSyncHost
+    }
+
+    namespace data_quality_service {
+        class DataQualityService
+    }
+
+    namespace data_quality_thresholds {
+        class DataQualityThresholdMixin
+    }
+
+    namespace dq_report_generation_mixin {
+        class DQReportGenerationMixin
+    }
+
+    namespace dq_report_service {
+        class DQReportService
+    }
+
+    namespace quarantine_service {
+        class QuarantineService
+    }
+
+    DQReportGenerationMixin <|-- DQReportService
+    DataQualityAnomalyMixin <|-- DataQualityService
+    DataQualityMetricsMixin <|-- DataQualityAnomalyMixin
+    DataQualityThresholdMixin <|-- DataQualityService
+    QuarantineServiceAsyncMixin <|-- QuarantineServiceFilteredMixin
+    QuarantineServiceFilteredMixin <|-- QuarantineService
+    QuarantineServiceReplayPurgeSyncMixin <|-- QuarantineServiceSyncMixin
+    QuarantineServiceStatusSyncMixin <|-- QuarantineServiceSyncMixin
+    QuarantineServiceSyncMixin <|-- QuarantineServiceFilteredMixin
+

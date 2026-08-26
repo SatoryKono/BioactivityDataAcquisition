@@ -1,0 +1,70 @@
+%% Title: Package Family: domain/control_plane (Part 2/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/control_plane; part 2/2; modules: gold_contract, config_source_hashing, reproducibility_policy, workflow_execution_state, workflow_manifest, _reproducibility_policy_verdicts.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   20
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace gold_contract {
+        class CompatibilityCheckResult
+        class CompatibilityVerdict
+        class GoldContract
+        class GoldContractRegistry
+    }
+
+    namespace config_source_hashing {
+        class ConfigSourceHashes
+        class _UniqueKeySafeLoader
+    }
+
+    namespace reproducibility_policy {
+        class ReproducibilityPolicyAssessment
+        class SnapshotEnvelopeStatus
+    }
+
+    namespace workflow_execution_state {
+        class WorkflowExecutionState
+        class WorkflowStepState
+    }
+
+    namespace workflow_manifest {
+        class WorkflowManifest
+        class WorkflowManifestStep
+    }
+
+    namespace reproducibility_policy_verdicts {
+        class ReplayReadinessVerdict
+    }
+
+    namespace reproducibility_profile_types {
+        class ReproducibilityFamilyProfile
+    }
+
+    namespace run_ledger_replay_policy {
+        class StageCompletionUpdate
+    }
+
+    namespace run_ledger_runtime {
+        class RunLedgerEntry
+    }
+
+    namespace run_manifest_serialization {
+        class _FrozenManifestMapping
+    }
+
+    namespace contract_registry_service {
+        class ContractRegistry
+    }
+
+    namespace run_ledger_replay {
+        class RunLedgerReplayProjection
+    }
+
+    namespace workflow_ledger {
+        class WorkflowLedgerEntry
+    }
+

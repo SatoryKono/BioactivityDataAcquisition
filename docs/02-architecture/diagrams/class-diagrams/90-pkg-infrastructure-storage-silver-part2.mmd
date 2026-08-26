@@ -1,22 +1,22 @@
 %% Title: Package Family: infrastructure/storage/silver (Part 2/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver; part 2/2; modules: audit_operations, merged_mixin, schema_drift_operations, delta_mixin, maintenance_mixin, metadata_mixin.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/storage/silver; part 2/2; modules: postwrite_mixin, runtime_helpers, schema_drift_operations, delta_mixin, delta_write_execution, maintenance_mixin.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   11
+%% @nodes   19
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
-    namespace audit_operations {
-        class _SilverAuditHostProtocol
-        class _SilverAuditWriteRequest
+    namespace postwrite_mixin {
+        class SilverWriterPostwriteMixin
+        class _SilverWriterPostwriteSelf
     }
 
-    namespace merged_mixin {
-        class SilverWriterMergedMixin
-        class _MergedSilverMetadataWriterProtocol
+    namespace runtime_helpers {
+        class SilverWriterRuntimeServices
+        class SilverWriterRuntimeServicesRequest
     }
 
     namespace schema_drift_operations {
@@ -28,18 +28,54 @@ classDiagram
         class SilverWriterDeltaMixin
     }
 
+    namespace delta_write_execution {
+        class _DeltaWriteModule
+    }
+
     namespace maintenance_mixin {
         class SilverWriterMaintenanceMixin
+    }
+
+    namespace merged_mixin {
+        class SilverWriterMergedMixin
+    }
+
+    namespace merged_request_support {
+        class _CommonMergedWriteFields
     }
 
     namespace metadata_mixin {
         class SilverWriterMetadataMixin
     }
 
-    namespace runtime_helpers {
-        class SilverWriterRuntimeServices
+    namespace metadata_mixin_protocols {
+        class _SilverWriterMetadataRuntimeProtocol
+    }
+
+    namespace metadata_write_models {
+        class _SilverMetadataWriteRequest
     }
 
     namespace validation_mixin {
         class SilverWriterValidationMixin
     }
+
+    namespace writer_metadata_facade {
+        class SilverWriterMetadataFacade
+    }
+
+    namespace writer_runtime_facade {
+        class SilverWriterRuntimeFacade
+    }
+
+    namespace writer_runtime_support {
+        class _SilverWriterDispatchHost
+    }
+
+    namespace writer_runtime_validation_facade {
+        class _SilverWriterRuntimeValidationFacade
+    }
+
+    SilverWriterMetadataFacade <|-- SilverWriterRuntimeFacade
+    _SilverWriterRuntimeValidationFacade <|-- SilverWriterRuntimeFacade
+

@@ -1,29 +1,72 @@
 %% Title: Package Family: application/observability
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/observability; modules: observer, observer_context_mixin, observer_event_mixin.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/application/observability; modules: observer, pipeline_metrics, control_plane_integrity_metrics, current_metrics_rehydrate, current_metrics_reconciliation, domain_event_emitter.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   5
+%% @nodes   18
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
 
     namespace observer {
-        class LifecyclePhase
         class PipelineObserver
+        class PipelineObserverParams
         class _ObserverLifecycleEmissionMixin
+    }
+
+    namespace pipeline_metrics {
+        class PipelineMetricsRecorder
+        class _CompositePhaseMetricsRecorderMixin
+        class _PipelineMetricsRecorderCore
+    }
+
+    namespace control_plane_integrity_metrics {
+        class ControlPlaneIntegrityMetricsService
+        class ManifestLedgerIntegritySummary
+    }
+
+    namespace current_metrics_rehydrate {
+        class PipelineRunSnapshot
+        class RehydrateResult
+    }
+
+    namespace current_metrics_reconciliation {
+        class CurrentMetricsReconciliationOutcome
+    }
+
+    namespace domain_event_emitter {
+        class DomainEventEmitterProtocol
     }
 
     namespace observer_context_mixin {
         class _ObserverContextManagerMixin
     }
 
+    namespace observer_contract {
+        class LifecyclePhase
+    }
+
     namespace observer_event_mixin {
         class _ObserverEventMixin
     }
 
+    namespace observer_health_mixin {
+        class _ObserverHealthEmissionMixin
+    }
+
+    namespace observer_postrun_mixin {
+        class _ObserverPostrunEmissionMixin
+    }
+
+    namespace replay_write_risk {
+        class ReplayWriteRiskClassification
+    }
+
+    _CompositePhaseMetricsRecorderMixin <|-- PipelineMetricsRecorder
     _ObserverContextManagerMixin <|-- PipelineObserver
-    _ObserverEventMixin <|-- _ObserverContextManagerMixin
-    _ObserverEventMixin <|-- _ObserverLifecycleEmissionMixin
+    _ObserverHealthEmissionMixin <|-- _ObserverLifecycleEmissionMixin
     _ObserverLifecycleEmissionMixin <|-- PipelineObserver
+    _ObserverPostrunEmissionMixin <|-- _ObserverLifecycleEmissionMixin
+    _PipelineMetricsRecorderCore <|-- PipelineMetricsRecorder
+

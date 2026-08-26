@@ -1,0 +1,53 @@
+%% Title: Package Family: domain/control_plane (Part 1/2)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/domain/control_plane; part 1/2; modules: effective_config_artifact, artifact_lifecycle, run_manifest, contract_registry_types.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-08-26
+%% @level   Package Family / Inventory Slice
+%% @nodes   30
+%% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
+classDiagram
+
+    namespace effective_config_artifact {
+        class ConfigResolutionPolicy
+        class ConfigSourceRef
+        class DQPolicySnapshot
+        class EffectiveConfigArtifact
+        class EffectiveConfigHashes
+        class EffectiveExecutionConfig
+        class ExecutionEnvironmentSnapshot
+        class ResolvedConfigSnapshot
+        class RuntimeOverrideSnapshot
+        class SourceClassProvenance
+    }
+
+    namespace artifact_lifecycle {
+        class ControlPlaneArtifactLifecycleApplyResult
+        class ControlPlaneArtifactLifecycleDecision
+        class ControlPlaneArtifactLifecyclePlan
+        class ControlPlaneArtifactLifecyclePolicy
+        class ControlPlaneArtifactRef
+        class ControlPlaneArtifactReplayImpact
+        class ControlPlaneArtifactResolutionIssue
+        class ControlPlaneArtifactResolutionIssueCode
+        class ControlPlaneArtifactSurface
+    }
+
+    namespace run_manifest {
+        class ReplayCapability
+        class RunArtifactRef
+        class RunCodeProvenance
+        class RunInputSnapshotRef
+        class RunManifest
+        class RunSourceRef
+    }
+
+    namespace contract_registry_types {
+        class ContractRegistryEntry
+        class RegistryValidationError
+        class RegistryValidationIssue
+        class RegistryValidationResult
+        class RegistryValidationSeverity
+    }
+

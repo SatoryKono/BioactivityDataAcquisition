@@ -1,24 +1,34 @@
 %% Title: Package Family: infrastructure/adapters/http
-%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: client_retry_observability, health_monitor, _client_retry_models, _health_monitor_support, circuit_breaker, client.
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/http; modules: _client_retry_flow, client_retry_observability, _health_monitor_models, _client_retry_models, client_request_methods_mixin, health_monitor.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   17
+%% @nodes   27
 %% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
 classDiagram
+
+    namespace client_retry_flow {
+        class _CanRetryCheck
+        class _RetryBudgetRecorder
+        class _RetryDelayHandler
+        class _RetryLogger
+        class _RetryableErrorCheck
+        class _StatusCodeResolver
+    }
 
     namespace client_retry_observability {
         class RetryStateLike
         class SpanLike
+        class _NoOpSpan
         class _OtelTracerLike
     }
 
-    namespace health_monitor {
+    namespace health_monitor_models {
         class HealthAdjustedConfig
-        class ProviderHealthMonitor
-        class ProviderHealthState
+        class ProviderHealthMonitorProtocol
+        class ProviderHealthStateView
     }
 
     namespace client_retry_models {
@@ -26,8 +36,18 @@ classDiagram
         class _RetryRequestState
     }
 
-    namespace health_monitor_support {
-        class _ProviderHealthStateLike
+    namespace client_request_methods_mixin {
+        class HTTPClientRequestMethodsMixin
+        class _HTTPClientRequestHost
+    }
+
+    namespace health_monitor {
+        class ProviderHealthMonitor
+        class ProviderHealthState
+    }
+
+    namespace health_monitor_transitions {
+        class ProviderHealthStateLike
     }
 
     namespace circuit_breaker {
@@ -40,10 +60,6 @@ classDiagram
 
     namespace client_context_mixin {
         class HTTPClientContextMixin
-    }
-
-    namespace client_request_methods_mixin {
-        class HTTPClientRequestMethodsMixin
     }
 
     namespace client_retry_mixin {
@@ -65,3 +81,4 @@ classDiagram
     HTTPClientContextMixin <|-- UnifiedHTTPClient
     HTTPClientRequestMethodsMixin <|-- UnifiedHTTPClient
     HTTPClientRetryMixin <|-- UnifiedHTTPClient
+

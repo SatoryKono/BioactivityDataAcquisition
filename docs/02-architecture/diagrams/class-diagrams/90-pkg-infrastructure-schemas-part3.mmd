@@ -1,28 +1,30 @@
-%% Title: Package Family: infrastructure/schemas (Part 3/3)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/3; modules: composite_config_base, pipeline_config_provider, _composite_config_merge_schema, filter_config, dq_config, composite_config.
+%% Title: Package Family: infrastructure/schemas (Part 3/4)
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/schemas; part 3/4; modules: dq_report_config, source_config, _composite_config_merge_schema, composite_config_base, filter_config, dq_config.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-03-27
+%% @date    2026-08-26
 %% @level   Package Family / Inventory Slice
-%% @nodes   25
+%% @nodes   29
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
 classDiagram
 
-    namespace composite_config_base {
-        class AggregationFieldSchema
-        class AggregationSchema
-        class DependencySchema
-        class EnricherSchema
-        class SeedSchema
+    namespace dq_report_config {
+        class BronzeDQReportConfig
+        class BronzeSinkConfig
+        class GoldDQReportConfig
+        class GoldSinkConfig
+        class SilverDQReportConfig
+        class SilverSinkConfig
     }
 
-    namespace pipeline_config_provider {
-        class ApiConfig
-        class ClientSourceConfig
-        class ProviderSourceConfig
-        class RateLimitSourceConfig
-        class SourceConfig
+    namespace source_config {
+        class FallbackPolicyYamlConfig
+        class PaginationConfig
+        class ProviderConfigYaml
+        class SourceCircuitBreakerYamlConfig
+        class SourceSectionConfig
+        class SourceYamlConfig
     }
 
     namespace composite_config_merge_schema {
@@ -30,6 +32,15 @@ classDiagram
         class MergeOutputSchema
         class MergeSchema
         class MergeSortBySchema
+        class TargetProteinClassificationProjectionSchema
+    }
+
+    namespace composite_config_base {
+        class AggregationFieldSchema
+        class AggregationSchema
+        class DependencySchema
+        class EnricherSchema
+        class SeedSchema
     }
 
     namespace filter_config {
@@ -45,15 +56,3 @@ classDiagram
         class ThresholdsConfig
     }
 
-    namespace composite_config {
-        class CompositeConfigFileSchema
-        class CompositeConfigSchema
-    }
-
-    namespace pipeline_config {
-        class PipelineYamlConfig
-    }
-
-    namespace pipeline_contract_policy {
-        class PipelineContractPolicy
-    }
