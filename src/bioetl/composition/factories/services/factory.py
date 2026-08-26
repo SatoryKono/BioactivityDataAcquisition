@@ -31,6 +31,7 @@ from bioetl.composition.factories.services.common_service_wiring import (
     build_common_service_ports,
     resolve_tracer,
 )
+from bioetl.application.ports.storage import StorageFactoryProtocol
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
     create_lock,
@@ -120,7 +121,9 @@ class BaseServicesFactory:
                 metadata_coordinator=metadata_coordinator,
                 silver_validator=silver_validator,
                 create_dq_services_fn=cls._create_dq_services,
-                storage_factory=StorageFactory,
+                storage_factory=cast(
+                    "type[StorageFactoryProtocol] | None", StorageFactory
+                ),
                 create_metrics_fn=cls._create_metrics,
                 create_lock_fn=create_lock,
                 create_checkpoint_fn=create_checkpoint,

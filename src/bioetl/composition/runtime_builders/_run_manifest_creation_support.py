@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest import RunManifestCreateSpec
@@ -25,6 +25,10 @@ from bioetl.composition.runtime_builders._run_manifest_replay_support import (
     build_manifest_launch_context as _build_manifest_launch_context,
     build_replay_assessment as _build_replay_assessment,
     validate_exact_replay_boundary as _validate_exact_replay_boundary,
+)
+from bioetl.composition.contracts.runtime import (
+    ManifestLaunchContextBuilder as _ManifestLaunchContextBuilder,
+    ManifestSourceRefBuilder as _ManifestSourceRefBuilder,
 )
 from bioetl.domain.control_plane import ReplayCapability
 from bioetl.domain.control_plane.reproducibility_policy import (
@@ -50,7 +54,7 @@ def build_manifest_create_request(
     reproducibility_context = request_inputs.reproducibility_context
     _validate_exact_replay_boundary(ctx, reproducibility_context)
     source_refs = _build_manifest_source_refs(
-        manifest_support=_manifest_support,
+        manifest_support=cast("_ManifestSourceRefBuilder", _manifest_support),
         ctx=ctx,
         inputs=inputs,
         provider=request_inputs.provider,
@@ -70,7 +74,7 @@ def build_manifest_create_request(
         resume_requested=bool(_read_attr(ctx, "resume", False)),
     )
     launch_context = _build_manifest_launch_context(
-        manifest_support=_manifest_support,
+        manifest_support=cast("_ManifestLaunchContextBuilder", _manifest_support),
         request_inputs=request_inputs,
         reproducibility_context=reproducibility_context,
     )

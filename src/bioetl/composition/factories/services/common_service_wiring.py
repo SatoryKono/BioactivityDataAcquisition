@@ -160,17 +160,20 @@ def build_common_service_ports(
     audit_port = request.audit if request.audit is not None else NoOpAudit()
     storage_factory = request.storage_factory
     if storage_factory is None:
-        storage_factory = StorageFactory
-    storage_ctx = storage_factory.create(
-        request.settings,
-        request.pipeline_config,
-        request.logger,
-        metrics=metrics_port,
-        audit=audit_port,
-        tracing=request.tracer,
-        metadata_coordinator=request.metadata_coordinator,
-        silver_validator=request.silver_validator,
-        pipeline_name=request.pipeline_name,
+        storage_factory = cast("type[_StorageFactoryProtocol]", StorageFactory)
+    storage_ctx = cast(
+        "StorageContext",
+        storage_factory.create(
+            request.settings,
+            request.pipeline_config,
+            request.logger,
+            metrics=metrics_port,
+            audit=audit_port,
+            tracing=request.tracer,
+            metadata_coordinator=request.metadata_coordinator,
+            silver_validator=request.silver_validator,
+            pipeline_name=request.pipeline_name,
+        ),
     )
     return CommonServicePorts(
         storage_ctx=storage_ctx,

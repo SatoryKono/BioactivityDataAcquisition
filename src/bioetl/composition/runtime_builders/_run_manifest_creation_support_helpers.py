@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from bioetl.application.services.control_plane.ledger import RunLedgerService
 from bioetl.infrastructure.time import SystemClock
@@ -75,13 +75,16 @@ def build_manifest_source_refs(
     entity: str,
     required_persistence_profile: str,
 ) -> tuple[RunSourceRef, ...]:
-    return manifest_support.build_run_source_refs(
-        ctx=ctx,
-        cached_bronze=inputs.cached_bronze,
-        settings=inputs.settings,
-        provider=provider,
-        entity=entity,
-        required_persistence_profile=required_persistence_profile,
+    return cast(
+        "tuple[RunSourceRef, ...]",
+        manifest_support.build_run_source_refs(
+            ctx=ctx,
+            cached_bronze=inputs.cached_bronze,
+            settings=inputs.settings,
+            provider=provider,
+            entity=entity,
+            required_persistence_profile=required_persistence_profile,
+        ),
     )
 
 

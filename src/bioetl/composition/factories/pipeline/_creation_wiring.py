@@ -26,6 +26,7 @@ from bioetl.composition.factories.pipeline.control_plane_artifacts import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
+from bioetl.domain.ports.config_mapper import DomainConfigMapper
 from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
@@ -104,7 +105,10 @@ def _resolve_yaml_config(
     deps: _ServiceBundleDeps,
 ) -> PipelineYamlConfig:
     """Resolve the effective pipeline YAML config for one creation request."""
-    return inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name)
+    return cast(
+        "PipelineYamlConfig",
+        inputs.request.config or deps.load_pipeline_config(inputs.pipeline_name),
+    )
 
 
 def _build_pipeline_transformer(
@@ -165,7 +169,7 @@ def _create_pipeline_with_services_impl(
         yaml_config,
         configs_root=resolve_configs_root(),
         relaxed_dq=request.settings.pipeline.relaxed_dq,
-        domain_mapper=deps.yaml_config_to_domain,
+        domain_mapper=cast("DomainConfigMapper", deps.yaml_config_to_domain),
     )
 
     services = build_pipeline_services_fn(

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import click
 
@@ -42,8 +42,8 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.forensic import (
-        ForensicRunDiffService,
+    from bioetl.application.ports.control_plane import (
+        ForensicRunDiffServiceProtocol,
     )
     from bioetl.application.services.control_plane.manifest.inspection_service import (
         RunManifestInspectionService,
@@ -105,13 +105,13 @@ def get_quarantine_runtime_service(pipeline: str) -> _QuarantineRuntimeService:
     return _impl(pipeline)
 
 
-def get_forensic_run_diff_service() -> ForensicRunDiffService:
+def get_forensic_run_diff_service() -> ForensicRunDiffServiceProtocol:
     """Load the canonical forensic diff service on demand."""
     from bioetl.composition.control_plane_service_access import (
         get_forensic_run_diff_service as _impl,
     )
 
-    return cast("ForensicRunDiffService", _impl())
+    return _impl()
 
 
 def _build_diagnostics_guide_lines() -> list[str]:
