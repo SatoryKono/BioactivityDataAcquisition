@@ -73,7 +73,7 @@ def _create_chembl_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create a filtered ChEMBL source, including derived-entity wrappers."""
+    """Create ChEMBL data source with config-owned filters and derived entities."""
     if pipeline_config.entity_type == "target_protein_classification":
         return _wrap_with_filter(
             TargetProteinClassificationSnapshotDataSource(
@@ -92,7 +92,6 @@ def _create_chembl_data_source(
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("chembl", settings, metrics=metrics)
 
-    # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
 
     # Build ExtractionParams from pipeline config (ADR-028 §3)
@@ -180,7 +179,7 @@ def _create_uniprot_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create a filtered UniProt source with composition-owned HTTP wiring."""
+    """Create UniProt data source with configurable API base URL and filtering."""
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(

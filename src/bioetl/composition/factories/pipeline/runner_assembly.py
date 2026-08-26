@@ -14,23 +14,11 @@ from bioetl.application.services.medallion.medallion_lifecycle import (
 from bioetl.composition.bootstrap_contexts import DQConfigsContext
 from bioetl.composition.factories.pipeline._runner_assembly_support import (
     RunnerAssemblyContext as _RunnerAssemblyContext,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     assemble_runner_parts as _assemble_runner_parts_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_batch_executor as _build_batch_executor_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_lock_runtime_service as _build_lock_runtime_service_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_observer as _build_observer_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_preflight_service as _build_preflight_service_impl,
-)
-from bioetl.composition.factories.pipeline._runner_assembly_support import (
     build_runner_constructor_payload as _build_runner_constructor_payload_impl,
 )
 from bioetl.composition.factories.pipeline_support.checkpoint_metadata_helpers import (
@@ -189,9 +177,7 @@ def _build_runner_constructor_payload(
     )
 
 
-def _assemble_runner_parts(
-    context: _RunnerAssemblyContext,
-) -> RunnerAssemblyParts:
+def _assemble_runner_parts(context: _RunnerAssemblyContext) -> RunnerAssemblyParts:
     return _assemble_runner_parts_impl(
         context,
         checkpoint_manager_builder=_build_checkpoint_manager,

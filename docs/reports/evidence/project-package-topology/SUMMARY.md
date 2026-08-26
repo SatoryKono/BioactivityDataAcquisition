@@ -3,6 +3,8 @@
 Дата: 2026-08-17
 Статус: refreshed
 
+Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+
 Refresh note (2026-08-20): TYP-RF RF-007 hash-only reconcile on origin/main after SNR-RF RF-002 (#9143); `source_tree_sha256` now matches `reports/quality/module-coverage-inventory.json`.
 
 Refresh note (2026-08-19): TYP-RF RF-007 hash-only reconcile after the mypy zero-error typing track; `source_tree_sha256` and `source_module_count` now match `reports/quality/module-coverage-inventory.json`.
@@ -22,8 +24,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2466` with
-`source_tree_sha256=fd019617cf27d9cfcc0673b39d41eb732cbf205ba065ceb4cef0bbee3a69a28f`.
+`source_module_count=2467` with
+`source_tree_sha256=8582acc5516c2a805bd182ef63b145d75a008a33a5183310cfc4e2afe9781618`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -31,7 +33,7 @@ and related module-coverage inventory hash-only reconcile.
 
 Refresh note (2026-08-25): ARCH-VG hash-only reconcile after composition/domain
 facade closeout. Source baseline is
-`source_module_count=2466` with the updated `source_tree_sha256` above; the
+`source_module_count=2467` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -90,6 +92,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `fd019617cf27d9cfcc0673b39d41eb732cbf205ba065ceb4cef0bbee3a69a28f`
+- source_tree_sha256: `8582acc5516c2a805bd182ef63b145d75a008a33a5183310cfc4e2afe9781618`
 
-`source_module_count=2466`
+`source_module_count=2467`

@@ -90,18 +90,18 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "coverage_actual_percent": 95.69,
+      "coverage_actual_percent": 96.44,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-26T11:36:19.774388+00:00",
-      "slowest_total_cases": 49046,
-      "source_commit": "aba2ded1775a30544c4b601966d6ba5080141c57",
-      "source_run_id": "local",
+      "refreshed_at_utc": "2026-08-26T06:59:26.524018+00:00",
+      "slowest_total_cases": 49169,
+      "source_commit": "5b19ac248cf6f8ab4a3554cf62eaf2547a23ff11",
+      "source_run_id": "32935853676",
       "top_slow_zone": {
-        "max_duration_s": 16.872,
+        "max_duration_s": 21.321,
         "test_count": 4,
-        "total_duration_s": 45.264,
-        "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates"
+        "total_duration_s": 48.631,
+        "zone": "tests.unit.scripts.docs.passports.test_passport_projector"
       }
     },
     "5702": {

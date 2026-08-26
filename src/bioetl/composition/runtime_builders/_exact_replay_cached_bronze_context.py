@@ -12,8 +12,7 @@ from bioetl.composition.runtime_builders._run_manifest_control_plane_paths impor
     control_plane_root,
 )
 from bioetl.domain.context import CachedBronzeContext
-from bioetl.domain.control_plane import RunLedgerEntry
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import INPUT_SNAPSHOT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunLedgerStore, FileRunManifestStore
@@ -59,19 +58,13 @@ def bind_cached_bronze_context(
     ctx: PipelineRunContext,
     cached_bronze: CachedBronzeContext,
 ) -> PipelineRunContext:
-    """Return context with resolved cached Bronze replay inputs attached.
-
-    Preserves the concrete ``PipelineRunContext`` type. Non-dataclass hosts
-    must support ``cached_bronze`` assignment (``object.__setattr__`` for
-    frozen hosts, or direct attribute write).
-    """
+    """Attach cached Bronze inputs while preserving the concrete context type."""
     current = getattr(ctx, "cached_bronze", None)
     if current == cached_bronze:
         return ctx
     if is_dataclass(ctx):
         return replace(ctx, cached_bronze=cached_bronze)
-    # Prefer in-place binding over SimpleNamespace conversion so callers
-    # retain the original PipelineRunContext type and methods.
+    # Bind in place so callers retain the original context type and methods.
     try:
         object.__setattr__(ctx, "cached_bronze", cached_bronze)
         return ctx
@@ -127,11 +120,7 @@ def _resolve_replay_parent_manifest(
     return manifest
 
 
-def _resolve_parent_bronze_date(
-    *,
-    manifest: RunManifest,
-    settings: Settings,
-) -> str:
+def _resolve_parent_bronze_date(*, manifest: RunManifest, settings: Settings) -> str:
     ledger_store = FileRunLedgerStore(
         base_path=control_plane_root(settings, "run_ledger")
     )

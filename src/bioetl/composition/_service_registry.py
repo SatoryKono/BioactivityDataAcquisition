@@ -39,7 +39,7 @@ _REGISTRY: dict[type[object], Callable[[], object]] = {}
 class _TypedPortSelector:
     """Select a Protocol type while preserving a runtime-callable registry key."""
 
-    def __getitem__[T](self, port_type: object) -> Callable[[object], type[T]]:
+    def __getitem__[T](self, port_type: type[T]) -> Callable[[object], type[T]]:
         """Bind the selected Protocol type for one subsequent marker call."""
         del port_type
         return cast("Callable[[object], type[T]]", self)

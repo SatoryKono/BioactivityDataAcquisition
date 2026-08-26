@@ -15,7 +15,7 @@ from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers 
     assemble_manifest_create_spec as _assemble_manifest_create_spec,
     build_manifest_source_refs as _build_manifest_source_refs,
     create_ledger_service as _create_ledger_service,
-    resolve_replay_lag_seconds as _resolve_replay_lag_seconds,
+    resolve_replay_lag_seconds as _resolve_replay_lag_seconds_value,
 )
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
     resolve_code_revision_for_manifest,
@@ -173,7 +173,6 @@ def emit_replay_reconstructability_metric(
         _launch_context_value(launch_context, "required_persistence_profile")
         or DEFAULT_REQUIRED_PERSISTENCE_PROFILE
     )
-    # Prefer the attached assessment; do not recompute reproducibility policy.
     precomputed_raw = _launch_context_value(
         launch_context, "reproducibility_policy_assessment"
     )
@@ -189,7 +188,6 @@ def emit_replay_reconstructability_metric(
     )
     raw_run_type = _read_attr(request.run_type, "value", request.run_type)
     run_type = str(raw_run_type or "unknown").strip().lower().replace(" ", "_")
-    bounded_run_type = run_type or "unknown"
     metrics.increment_counter(
         "bioetl_replay_reconstructability_events_total",
         value=1,
@@ -207,7 +205,7 @@ def emit_replay_reconstructability_metric(
         lag_status = "ready"
     replay_labels = {
         "pipeline": request.pipeline_name,
-        "run_type": bounded_run_type,
+        "run_type": run_type or "unknown",
         "replay_capability": request.replay_capability.value,
     }
     lag_seconds = _resolve_replay_lag_seconds(
@@ -232,6 +230,18 @@ def emit_replay_reconstructability_metric(
                 "status": "detected",
             },
         )
+
+
+def _resolve_replay_lag_seconds(
+    *,
+    launch_context: object,
+    lag_status: str,
+) -> float | None:
+    return _resolve_replay_lag_seconds_value(
+        launch_context=launch_context,
+        lag_status=lag_status,
+        read_attr=_read_attr,
+    )
 
 
 def create_ledger_service(inputs: RunnerInputs, ctx: Context) -> Ledger | None:

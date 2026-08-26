@@ -59,7 +59,7 @@ requirements, use:
 Compatibility note for operators:
 
 - canonical diagnostics/bootstrap discovery is
-  `bioetl.composition.observability_api`
+  `bioetl.composition.observability_runtime`
 - runtime logs emit canonical `timestamp`; downstream tooling may still accept
   `ts`, but `ts` is not the canonical emitted field name
 - runtime bootstrap emits `observability_initialized` with

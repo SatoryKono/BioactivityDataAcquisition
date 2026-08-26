@@ -106,7 +106,7 @@ Current canonical Overview baseline:
 | Domain port | transport-neutral observability contracts | `src/bioetl/domain/ports/observability/` |
 | Application emitters | metric and trace callsites | `src/bioetl/application/**` |
 | Infrastructure adapter | Prometheus registry / exposition | `src/bioetl/infrastructure/observability/` |
-| Composition | observability wiring and diagnostics assembly | `src/bioetl/composition/observability_api.py` |
+| Composition | observability wiring and diagnostics assembly | `src/bioetl/composition/observability_runtime.py` |
 | Grafana dashboards | operator panels, links, variables, Explore handoffs | `grafana/dashboards/*.json` |
 | Prometheus rules | alert and recording rules | `grafana/prometheus-rules/bioetl_observability.yml` |
 | Contracts/docs | metric contracts and operator docs | `docs/04-reference/contracts/observability.md` |

@@ -1,80 +1,103 @@
 {
   "domain_id": "docs-content",
+  "prompt_id": "prompt.audit.docs-content",
   "surface_score": 2,
+  "audit_date": "2026-08-26",
+  "scope": "README.md docs/",
+  "mode": "audit",
+  "blocked": false,
+  "p0_p1_count": 1,
+  "proven_count": 12,
   "findings": [
     {
       "id": "DOCS-001",
-      "requirement_id": "REQ-BACKFILL-*",
-      "priority": "P1",
-      "severity": "High",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "content",
-      "tag": "content",
-      "path": "docs/05-operations/runbooks/pipeline-failure-critical.md:54",
-      "observation": "P0 critical-failure runbook instructed resume via --resume-from <run_id>, a flag that does not exist on bioetl run; preconditions listed Loki.",
-      "method": "read runbook; grep resume-from in CLI; read command_entrypoint.py; re-verify after patch",
-      "expected": "P0 recovery uses published CLI: --resume / --resume-run-id / --resume-manifest-id.",
-      "actual": "Pre-fix used --resume-from and Loki/Local. Post-fix: published flags + local logs.",
-      "impact": "Operator following the P0 runbook could not resume.",
-      "root_cause": "Runbook last verified 2026-04-03; CLI resume selectors evolved without this page.",
-      "remediation": "Replace --resume-from with published flags; drop Loki precondition.",
+      "category": "docs-code-drift",
+      "path": "README.md:83",
+      "observation": "Канонические таблицы документируют ChEMBL как 3 req/sec, включая ложную ссылку на chembl.yaml; живой конфиг задаёт 0.1 rps / burst 1.",
+      "method": "Compare README/RULES/specs/welcome page against configs/providers/chembl.yaml and docs/03-guides/pipeline-configuration.md rate table.",
+      "expected": "Published rate tables match configs/providers/{provider}.yaml (RULES Appendix A: yaml is canonical).",
+      "actual": "chembl.yaml requests_per_second=0.1 burst=1; README:83, RULES.md:1851, docs/00-project/index.md:111 (Last verified 2026-08-21), docs/04-reference/pipelines/chembl/05-activity-spec.md:30 ('3 req/sec (configs/providers/chembl.yaml)'), docs/04-reference/pipelines/README.md:96, docs/02-architecture/03-infrastructure-layer.md:137 still say 3 req/sec. pipeline-configuration.md:709 already lists 0.1.",
+      "impact": "Operators and capacity planning use a 30x-wrong public rate; a 'docs-aligned' yaml edit would hammer ChEMBL. Spec falsely cites the yaml.",
+      "root_cause": "Stale provider tables copied across README/RULES/specs after yaml was tightened; no automated docs↔yaml rate check.",
+      "remediation": "Replace 3 req/sec with 0.1 req/sec (burst 1) everywhere, or label 3 as upstream API courtesy and yaml as runtime cap. Add a check that published tables parse yaml.",
       "effort": "S",
       "dependencies": [],
       "validation": [
-        "rg -n resume-from docs/05-operations/runbooks/pipeline-failure-critical.md",
-        "python -m scripts.docs check-links --links --specs --configs"
+        "rg -n '3 req/sec' README.md docs/00-project/RULES.md docs/04-reference/pipelines docs/00-project/index.md",
+        "rg -n 'requests_per_second' configs/providers/chembl.yaml"
       ],
-      "automation": "optional runbook-command grep against click options",
-      "automated_fix_possible": true,
-      "issue": 9284,
-      "iteration_found": 1,
-      "post_status": "resolved",
+      "automation": "Extend scripts.docs check-links --configs or a provider-rate table test.",
+      "automated_fix_possible": false,
       "evidence": [
         {
-          "path": "docs/05-operations/runbooks/pipeline-failure-critical.md",
-          "line": 54,
-          "command": "read_file",
-          "observation": "Resume steps list --resume / --resume-run-id / --resume-manifest-id."
+          "path": "configs/providers/chembl.yaml",
+          "line": 22,
+          "command": "read configs/providers/chembl.yaml",
+          "observation": "rate_limit.requests_per_second: 0.1, burst: 1"
+        },
+        {
+          "path": "README.md",
+          "line": 83,
+          "observation": "ChEMBL Rate Limit column = 3 req/sec"
+        },
+        {
+          "path": "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+          "line": 30,
+          "observation": "Rate limit `3 req/sec` (`configs/providers/chembl.yaml`)"
+        },
+        {
+          "path": "docs/03-guides/pipeline-configuration.md",
+          "line": 709,
+          "observation": "Correct table row: ChEMBL 0.1 req/sec burst 1"
         }
       ]
     },
     {
       "id": "DOCS-002",
-      "requirement_id": "REQ-DELTA-*",
+      "requirement_id": "REQ-DX-001",
       "priority": "P1",
       "severity": "High",
       "confidence": "high",
-      "confidence_score": 0.93,
+      "confidence_score": 0.92,
       "status": "PROVEN",
-      "category": "content",
-      "tag": "content",
-      "path": "docs/05-operations/runbooks/data-recovery.md:42-60",
-      "observation": "P0/P1 data-recovery runbook used Spark SQL RESTORE TABLE; runtime is deltalake (delta-rs) with rebuild via bioetl run --run-type rebuild.",
-      "method": "read data-recovery.md; grep RESTORE TABLE; read retention_time_travel.py",
-      "expected": "DR steps use local Delta time-travel reads or documented rebuild.",
-      "actual": "Pre-fix SQL RESTORE TABLE. Post-fix: Polars read-only snapshot + rebuild.",
-      "impact": "Operators may attempt Spark SQL against a local delta-rs table.",
-      "root_cause": "Generic Delta Lake SQL copied into a local-only runbook.",
-      "remediation": "Replace SQL with Polars/delta-rs snapshot; keep rebuild-from-Bronze.",
-      "effort": "M",
+      "category": "bootstrap-drift",
+      "path": "docs/03-guides/getting-started.md:133",
+      "observation": "Getting Started утверждает, что raw uv sync extras — это реализация make install, но extras другие; Windows fallback создаёт venv через py -3.13 при baseline 3.12; verify гоняет run-tests cov без tests_full.",
+      "method": "Diff getting-started.md sections 2.1/2.3/4 against Makefile install target and README Option A notes.",
+      "expected": "Onboarding commands match Makefile/README extras and Python 3.12 baseline; verify lane extras cover architecture/cov.",
+      "actual": "getting-started.md:133-135 claims raw uv sync is the implementation of make install. Makefile:99 is uv sync --extra dev --extra tests --extra tests_full --extra export. getting-started 2.3 uses --extra dev --extra tests --extra tracing (no tests_full/export). Windows fallback line 127 is py -3.13 -m venv .venv-win. Section 4 runs run-tests cov which includes tests/architecture and --cov-fail-under=85. README:172 already documents the extras split.",
+      "impact": "Clean-checkout users following Getting Started can miss tests_full (arch/benchmark extras) and fail cov/arch, or fail venv create if only Python 3.12 is installed.",
+      "root_cause": "Guide copied README Option A extras and labeled them as make install.",
+      "remediation": "Quote Makefile extras for make install; keep tracing as a documented delta; change py -3.13 to py -3.12 (or py -3.12+); tell cov/arch users to add tests_full.",
+      "effort": "S",
       "dependencies": [],
       "validation": [
-        "rg -n \"RESTORE TABLE\" docs/ src/",
-        "python -m scripts.docs check-links --links --specs --configs"
+        "rg -n '^install:' -A2 Makefile",
+        "rg -n 'py -3.13|make install|tests_full' docs/03-guides/getting-started.md"
       ],
-      "automation": "n/a",
+      "automation": "Docs test that getting-started extras match Makefile install or an explicit delta table.",
       "automated_fix_possible": false,
-      "issue": 9286,
-      "iteration_found": 1,
-      "post_status": "resolved",
       "evidence": [
         {
-          "path": "docs/05-operations/runbooks/data-recovery.md",
-          "line": 45,
-          "command": "read_file",
-          "observation": "Negated Spark SQL; Polars time-travel snapshot documented."
+          "path": "docs/03-guides/getting-started.md",
+          "line": 135,
+          "observation": "Raw `uv sync --extra …` is the implementation of `make install` only."
+        },
+        {
+          "path": "Makefile",
+          "line": 99,
+          "observation": "uv sync --extra dev --extra tests --extra tests_full --extra export"
+        },
+        {
+          "path": "docs/03-guides/getting-started.md",
+          "line": 127,
+          "observation": "py -3.13 -m venv .venv-win"
         }
       ]
     },
@@ -84,110 +107,396 @@
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.92,
+      "confidence_score": 0.93,
       "status": "PROVEN",
-      "category": "content",
-      "tag": "content",
-      "path": "docs/04-reference/environment-variables.md:1-21",
-      "observation": "Published env-var reference claimed completeness, documented non-existent BIOETL_CHEMBL_API_KEY, and omitted BIOETL_UNIPROT_API_KEY.",
-      "method": "compare environment-variables.md to README, .env.example, configs/providers",
-      "expected": "Reference lists only wired keys or explicitly scopes itself as partial.",
-      "actual": "Post-fix: UniProt key present; ChEMBL key removed; page marked partial.",
-      "impact": "Contributors set unused keys and miss the UniProt optional key.",
-      "root_cause": "Reference not generated from configs/providers or .env.example.",
-      "remediation": "Delete BIOETL_CHEMBL_API_KEY; add BIOETL_UNIPROT_API_KEY; mark partial.",
-      "effort": "M",
+      "category": "contradiction",
+      "path": "docs/00-project/RULES.md:1854",
+      "observation": "RULES Appendix A описывает OpenAlex как Email (polite pool), тогда как provider yaml и provider reference требуют API key.",
+      "method": "Compare RULES Appendix A row with configs/providers/openalex.yaml and docs/04-reference/providers/openalex/publication.md.",
+      "expected": "Constitution appendix matches live auth_type and production-like key policy.",
+      "actual": "RULES.md:1854 Auth Type = Email (polite pool), rate 10 req/sec (polite pool). openalex.yaml:7-8 auth_type: api_key, api_key_env: BIOETL_OPENALEX_API_KEY. Provider doc lines 172-174 and 272: API key required for production-like runs; email is attribution only.",
+      "impact": "Contributors following RULES may ship OpenAlex without BIOETL_OPENALEX_API_KEY and treat mailto as access control.",
+      "root_cause": "Appendix A not updated after OpenAlex moved off mailto-as-auth.",
+      "remediation": "Change Appendix A Auth Type to API key; point at BIOETL_OPENALEX_API_KEY; keep email as optional attribution.",
+      "effort": "S",
       "dependencies": [],
       "validation": [
-        "rg -n BIOETL_CHEMBL_API_KEY docs/04-reference/environment-variables.md README.md",
-        "rg -n BIOETL_UNIPROT_API_KEY docs/04-reference/environment-variables.md"
+        "rg -n 'OpenAlex' docs/00-project/RULES.md configs/providers/openalex.yaml"
       ],
-      "automation": "Generate env-var table from configs/providers",
+      "automation": "Provider-auth table vs configs/providers/*.yaml auth_type.",
       "automated_fix_possible": false,
-      "issue": 9285,
-      "iteration_found": 1,
-      "post_status": "resolved",
       "evidence": [
         {
-          "path": "docs/04-reference/environment-variables.md",
-          "line": 21,
-          "command": "read_file",
-          "observation": "BIOETL_UNIPROT_API_KEY listed; completeness claim removed."
+          "path": "docs/00-project/RULES.md",
+          "line": 1854,
+          "observation": "OpenAlex Auth Type Email (polite pool)"
+        },
+        {
+          "path": "configs/providers/openalex.yaml",
+          "line": 7,
+          "observation": "auth_type: api_key; api_key_env: BIOETL_OPENALEX_API_KEY"
         }
       ]
     },
     {
       "id": "DOCS-004",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-ARCH-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.94,
+      "status": "PROVEN",
+      "category": "docs-code-drift",
+      "path": "docs/00-project/RULES.md:1851",
+      "observation": "RULES Appendix A health check для ChEMBL указывает GET /chembl/api/data/status.json, код и секция A.1 используют /status без .json.",
+      "method": "Compare RULES Appendix A health column with adapters/chembl/health.py and constants.py.",
+      "expected": "Documented health URL equals CHEMBL_STATUS_URL / adapter probe path.",
+      "actual": "RULES.md:1851 Health Check = GET /chembl/api/data/status.json. RULES.md:1871 Status URL = {BASE}/status. src/bioetl/infrastructure/adapters/chembl/constants.py CHEMBL_STATUS_URL = f\"{CHEMBL_API_BASE}/status\". health.py returns /chembl/api/data/status.",
+      "impact": "Manual health probes copied from Appendix A hit a non-canonical path.",
+      "root_cause": "Appendix A table not synced with A.1 / adapter constants.",
+      "remediation": "Replace status.json with /status in Appendix A; keep a single URL constant citation.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n 'status.json|/status' docs/00-project/RULES.md src/bioetl/infrastructure/adapters/chembl"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1851,
+          "observation": "Health Check GET /chembl/api/data/status.json"
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/chembl/constants.py",
+          "line": 30,
+          "observation": "CHEMBL_STATUS_URL = f\"{CHEMBL_API_BASE}/status\""
+        }
+      ]
+    },
+    {
+      "id": "DOCS-005",
+      "requirement_id": "REQ-DOC-002",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "content",
-      "tag": "content",
-      "path": ".github/SECURITY.md:43-45",
-      "observation": "Security policy examples list BIOETL_CHEMBL_API_KEY and BIOETL_PUBCHEM_API_KEY; those names are not wired in configs/providers.",
-      "method": "read SECURITY.md; grep keys in configs/ and .env.example",
-      "expected": "Examples match real BIOETL_{PROVIDER}_{KEY} names used by adapters.",
-      "actual": "Examples still invent ChEMBL/PubChem keys. Out of cycle file SCOPE.",
-      "impact": "Security onboarding invents credentials the runtime never reads.",
-      "root_cause": "Generic provider-key pattern copied as concrete examples.",
-      "remediation": "Replace examples with wired keys. Follow-up outside SCOPE.",
+      "category": "completeness",
+      "path": "docs/03-guides/local-storage-layout.md:22",
+      "observation": "Published local storage layout omits data/output/control/ used by run manifest/ledger/workflow control-plane; Last verified 2026-03-29.",
+      "method": "Compare local-storage-layout.md tree with getting-started.md and ops control-plane docs.",
+      "expected": "Storage how-to includes Bronze/Silver/Gold plus control-plane paths from ADR-044/047.",
+      "actual": "local-storage-layout.md tree ends at reports/dq and has no control/. getting-started.md:247-249 shows data/output/control/run_manifest and run_ledger. docs/05-operations/control-plane-lifecycle.md and workflow-control-plane.md document data/output/control/.",
+      "impact": "Onboarding users cannot find manifests/ledgers from the storage guide after a first run.",
+      "root_cause": "Layout guide not re-verified after control-plane pack (ADR-044/047).",
+      "remediation": "Add control/ (run_manifest, run_ledger, workflow_*) to the tree; bump Last verified.",
       "effort": "S",
       "dependencies": [],
       "validation": [
-        "rg -n \"BIOETL_CHEMBL_API_KEY|BIOETL_PUBCHEM_API_KEY\" .github/SECURITY.md"
+        "rg -n 'control/' docs/03-guides/local-storage-layout.md docs/03-guides/getting-started.md"
       ],
       "automation": "n/a",
-      "automated_fix_possible": true,
-      "issue": 9283,
-      "iteration_found": 1,
-      "post_status": "unchanged",
-      "out_of_scope": true,
+      "automated_fix_possible": false,
       "evidence": [
         {
-          "path": ".github/SECURITY.md",
-          "line": 43,
-          "command": "read_file",
-          "observation": "CHEMBL and PUBCHEM API key names listed as examples."
+          "path": "docs/03-guides/local-storage-layout.md",
+          "line": 10,
+          "observation": "Last verified: 2026-03-29; tree has no control/"
+        },
+        {
+          "path": "docs/03-guides/getting-started.md",
+          "line": 247,
+          "observation": "Shows data/output/control/run_manifest and run_ledger"
         }
       ]
     },
     {
-      "id": "DOCS-WF-INV-001",
+      "id": "DOCS-006",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.91,
+      "status": "PROVEN",
+      "category": "stale-topology",
+      "path": "docs/03-guides/testing.md:106",
+      "observation": "Testing guide lists tests/infrastructure/** as a live family, but that directory does not exist; lane-classification text sits above the document header.",
+      "method": "Read testing.md; list tests/ top-level directories.",
+      "expected": "Testing topology matches tests/**; YAML header is the first content.",
+      "actual": "Lines 1-18 are lane classification before Version/Status header at line 21. Line 106 claims tests/infrastructure/**. tests/ has architecture, contract, e2e, integration, unit, smoke, security, performance, benchmarks, fixtures, helpers, golden, snapshots, testing_support, fakes — no tests/infrastructure/.",
+      "impact": "Contributors look for a missing test family; MkDocs/header parsers may miss metadata.",
+      "root_cause": "Merge of lane-classification epic onto an older header.",
+      "remediation": "Move header to line 1; delete tests/infrastructure row or retarget to tests/unit/infrastructure/.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "list tests/",
+        "rg -n 'tests/infrastructure' docs/03-guides/testing.md"
+      ],
+      "automation": "Architecture/docs test that testing.md paths exist.",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 106,
+          "observation": "Directory tests/infrastructure/** listed as live tree"
+        },
+        {
+          "path": "docs/03-guides/testing.md",
+          "line": 1,
+          "observation": "Body content before Version header at line 21"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-007",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.88,
+      "status": "PROVEN",
+      "category": "ia-gap",
+      "path": "docs/00-project/00-map.md:115",
+      "observation": "Navigator Documentation Structure omits live trees 03-data-model/, docs/security/, filters/, 05-engineering/ that exist on disk and are cited elsewhere.",
+      "method": "Compare 00-map.md tree with docs/ listing and extended-docs-index.md.",
+      "expected": "Primary navigator lists every active docs/ subtree or explicitly marks it repo-only.",
+      "actual": "00-map.md:115-165 tree has 00-05 + 99-archive only. docs/03-data-model/ holds ADR-035 inventory; docs/security/ export-policy and rbac-matrix; docs/filters/; docs/05-engineering/ stub. 03-data-model is not mentioned in 00-map at all (grep empty). extended-docs-index.md:12 links the inventory.",
+      "impact": "Readers miss identifier/JSON typing SSOT and security policy surfaces.",
+      "root_cause": "Navigator tree not updated when 03-data-model and security/ were added.",
+      "remediation": "Add those directories to the tree plus Surface Routing rows (type/owner/retirement).",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n '03-data-model' docs/00-project/00-map.md"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/00-project/00-map.md",
+          "line": 115,
+          "observation": "Structure block has no 03-data-model, security, filters, 05-engineering"
+        },
+        {
+          "path": "docs/00-project/extended-docs-index.md",
+          "line": 12,
+          "observation": "Links docs/03-data-model/json-field-typing-inventory.md"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-008",
+      "requirement_id": "REQ-DX-005",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "env-default-drift",
+      "path": "docs/04-reference/environment-variables.md:33",
+      "observation": "Env reference documents BIOETL_PUBMED_EMAIL default bioetl-bot@example.com; adapter returns None; .env.example and README show empty/—.",
+      "method": "Compare environment-variables.md with pubmed adapter and .env.example.",
+      "expected": "Published defaults match runtime resolution and the example env file.",
+      "actual": "environment-variables.md:33 Default = bioetl-bot@example.com. _resolve_pubmed_email returns kwargs email, else settings.default_email, else None. .env.example:73 BIOETL_PUBMED_EMAIL=. README:275 Default = —.",
+      "impact": "Operators believe NCBI identification is filled by default; polite-pool attribution may be missing.",
+      "root_cause": "Env reference invented a default not wired in Settings/adapter.",
+      "remediation": "Set default to empty/None in the reference, or wire the documented default in Settings and .env.example (no secrets).",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n 'bioetl-bot' docs src .env.example"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/04-reference/environment-variables.md",
+          "line": 33,
+          "observation": "Default bioetl-bot@example.com"
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/pubmed/_adapter_support.py",
+          "line": 35,
+          "observation": "returns None when settings.default_email is missing"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-009",
+      "requirement_id": "REQ-GOV-006",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.86,
+      "status": "PROVEN",
+      "category": "freshness",
+      "path": "docs/05-operations/README.md:16",
+      "observation": "Operations index still claims sync with RULES.md v6.1.4 (2026-07-07) while RULES header is Version 6.1.11 Last verified 2026-08-25.",
+      "method": "Compare ops README pin with RULES.md header.",
+      "expected": "Ops entrypoint pin matches current RULES Version header after governance edits.",
+      "actual": "docs/05-operations/README.md:16 Synced with RULES.md v6.1.4 (2026-07-07); Last verified 2026-07-07. docs/00-project/RULES.md:3 Version: 6.1.11; line 4 Last verified: 2026-08-25.",
+      "impact": "Operators may treat ops docs as current with an outdated constitution pin.",
+      "root_cause": "Ops index not re-synced after RULES 6.1.11.",
+      "remediation": "Update the pin and Last verified; re-read runbook links against RULES §5.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "rg -n '^Version:' docs/00-project/RULES.md docs/05-operations/README.md"
+      ],
+      "automation": "scripts.docs check-drift --freshness",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/05-operations/README.md",
+          "line": 16,
+          "observation": "Synced with RULES.md v6.1.4 (2026-07-07)"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 3,
+          "observation": "Version: 6.1.11"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-010",
       "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.95,
+      "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "content",
-      "tag": "content",
-      "path": "docs/04-reference/github-actions-workflows.md",
-      "observation": "Prior cycle: published GHA inventory lagged at 41 vs 42 live YAML files.",
-      "method": "ls .github/workflows/*.yml; python -m scripts.docs check-links",
-      "expected": "Published inventory matches live workflow files.",
-      "actual": "42 live YAML files; workflow inventory OK. Closed #9265.",
-      "impact": "None remaining on this SHA.",
-      "root_cause": "Workflow added without catalog refresh; fixed on origin/main.",
-      "remediation": "None; already on origin/main.",
+      "category": "docs-code-drift",
+      "path": "docs/03-guides/pipeline-configuration.md:640",
+      "observation": "Guide example labeled as configs/providers/chembl.yaml still shows timeout 60, max_retries 3, CB 5/300, and '8 других' entities (12 total) versus live yaml 120/8/3/3000 and 15 entities.",
+      "method": "Diff the fenced yaml example with configs/providers/chembl.yaml.",
+      "expected": "Examples marked as that file match live yaml or are labeled simplified.",
+      "actual": "Example: timeout_sec 60.0, max_retries 3, max_url_length 1000, failure_threshold 5, recovery_timeout 300, four listed entities plus '8 других'. Live yaml: timeout_sec 120.0, max_retries 8, max_url_length 2000, failure_threshold 3, recovery_timeout 3000, 15 entities. Rate 0.1 in the example is correct. Last verified 2026-08-21.",
+      "impact": "Copy-paste of the example silently changes resilience vs production yaml.",
+      "root_cause": "Table was updated (0.1 rps) but the illustrative yaml block was not.",
+      "remediation": "Replace the example with a trimmed live snippet or add 'illustrative, not a dump of chembl.yaml'.",
+      "effort": "S",
+      "dependencies": ["DOCS-001"],
+      "validation": [
+        "read docs/03-guides/pipeline-configuration.md:640-669",
+        "read configs/providers/chembl.yaml:1-40"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/03-guides/pipeline-configuration.md",
+          "line": 647,
+          "observation": "timeout_sec: 60.0; max_retries: 3; CB 5/300"
+        },
+        {
+          "path": "configs/providers/chembl.yaml",
+          "line": 9,
+          "observation": "timeout_sec: 120.0; max_retries: 8; CB failure_threshold 3; recovery_timeout 3000"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-011",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.87,
+      "status": "PROVEN",
+      "category": "docs-code-drift",
+      "path": "docs/02-architecture/03-infrastructure-layer.md:137",
+      "observation": "Infrastructure layer table says ChemblAdapter has 14 entities at 3 req/sec and UniProtAdapter 100 req/sec; yaml has 15 ChEMBL entities and UniProt 10 rps default (100 with key).",
+      "method": "Count configs/providers/chembl.yaml entities; read uniprot.yaml rate_limit.",
+      "expected": "Architecture adapter table matches provider yaml entity lists and default rates.",
+      "actual": "chembl.yaml lists 15 entities. uniprot.yaml requests_per_second 10.0, with-key 100. 03-infrastructure-layer.md:137-138 ChemblAdapter 14 entities 3 req/sec; UniProtAdapter 100 req/sec without key qualifier. Last verified 2026-08-09.",
+      "impact": "Architecture readers under-count ChEMBL coverage and overstate default UniProt QPS.",
+      "root_cause": "Layer doc not updated after publication_term/similarity split and rate yaml pin.",
+      "remediation": "Set 15 entities / 0.1 rps for ChEMBL; UniProt 10 (100 with API key).",
+      "effort": "S",
+      "dependencies": ["DOCS-001"],
+      "validation": [
+        "rg -n '14 entities|100 req/sec' docs/02-architecture/03-infrastructure-layer.md"
+      ],
+      "automation": "n/a",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/02-architecture/03-infrastructure-layer.md",
+          "line": 137,
+          "observation": "ChemblAdapter ... 14 entities, 3 req/sec"
+        },
+        {
+          "path": "configs/providers/chembl.yaml",
+          "line": 24,
+          "observation": "15 entity keys under entities:"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-012",
+      "requirement_id": "REQ-DX-004",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.85,
+      "status": "PROVEN",
+      "category": "stale-adjunct",
+      "path": "docs/03-guides/getting-started.md:39",
+      "observation": "Getting Started lists Redis, MinIO, Postgres helper stacks as optional adjuncts; no docker-compose*.yml in the checkout defines those services.",
+      "method": "Grep docker-compose*.yml for redis/minio/postgres; read getting-started prerequisites.",
+      "expected": "Optional adjuncts either have a compose/helper path or are not listed as setup prerequisites.",
+      "actual": "getting-started.md:36-39 Optional adjunct: Docker Desktop; Redis, MinIO, Postgres helper stacks. Grep of docker-compose.yml / docker-compose.monitoring.yml / docker-compose.neo4j.yml / docker-compose.neo4j-audit.yml found no redis/minio/postgres services. .env.example still has REDIS_* and MINIO_* blocks (outside SCOPE except via README pointer).",
+      "impact": "New contributors search for stacks that are not a current compose surface.",
+      "root_cause": "Prereq list leftover from historical helper stacks.",
+      "remediation": "Remove Redis/MinIO/Postgres from getting-started or point at a current helper doc if one exists.",
       "effort": "S",
       "dependencies": [],
       "validation": [
-        "python -m scripts.docs check-links"
+        "rg -i 'redis|minio|postgres' docker-compose*.yml"
       ],
-      "automation": "docs.yml validate-mkdocs",
+      "automation": "n/a",
       "automated_fix_possible": false,
-      "issue": 9265,
-      "iteration_found": 1,
-      "post_status": "resolved",
       "evidence": [
         {
-          "path": "docs/05-operations/ci-workflow-map.md",
-          "line": 14,
-          "command": "grep Count at verification",
-          "observation": "42 workflow files."
+          "path": "docs/03-guides/getting-started.md",
+          "line": 39,
+          "observation": "Redis, MinIO, Postgres helper stacks listed as optional adjuncts"
+        }
+      ]
+    },
+    {
+      "id": "DOCS-013",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "medium",
+      "confidence_score": 0.7,
+      "status": "NOT_PROVEN",
+      "category": "community-health",
+      "path": "docs/INDEX.md:3",
+      "observation": "docs/INDEX.md is deprecated in favor of 00-map.md; SUPPORT.md is not present at repo root or .github/; sampled README/00-map relative links that were opened resolved.",
+      "method": "Read docs/INDEX.md; search SUPPORT.md; open sampled 00-map targets.",
+      "expected": "Deprecated indexes removed or noindexed; community SUPPORT file if the project claims GitHub community health completeness.",
+      "actual": "INDEX.md exists with DEPRECATED banner. SUPPORT.md not found. CODE_OF_CONDUCT exists at .github/CODE_OF_CONDUCT.md. Full link crawl and MkDocs strict build not executed in this session.",
+      "impact": "Legacy INDEX.md can still be followed; SUPPORT absence is community-health completeness only.",
+      "root_cause": "Retention of legacy index; SUPPORT never added.",
+      "remediation": "Redirect/remove INDEX.md after link owners are gone; add SUPPORT.md only if product wants GitHub community health completeness.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "uv run python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "automation": "scripts.docs check-links",
+      "automated_fix_possible": false,
+      "evidence": [
+        {
+          "path": "docs/INDEX.md",
+          "line": 3,
+          "observation": "DEPRECATED: use 00-map.md"
         }
       ]
     }

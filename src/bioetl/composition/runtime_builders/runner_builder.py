@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.composition.providers import ensure_providers_loaded
+from bioetl.composition.bootstrap.service_registry_contracts import (
+    PipelineRunnerProtocol,
+)
 from bioetl.composition.runtime_builders._runner_builder_orchestration import (
     attach_runner_control_plane_collaborators as _attach_runner_control_plane_collaborators,
     bootstrap_runner_factory as _bootstrap_runner_factory,
@@ -14,9 +17,6 @@ from bioetl.composition.runtime_builders.config_access import (
     load_source_config as _load_source_config,
 )
 from bioetl.composition.runtime_builders.inputs_resolver import prepare_runner_inputs
-from bioetl.composition.runtime_builders.ledger_collaborator import (
-    PipelineRunnerProtocol,
-)
 from bioetl.composition.runtime_builders.runner_builder_wiring import (
     RunnerBuilderWiring,
     RunnerFactoryWiring,
