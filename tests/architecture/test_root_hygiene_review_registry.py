@@ -287,6 +287,7 @@ def test_root_hygiene_review_registry_classifies_qodo_as_local_vendor_surface() 
     }
 
     assert by_path[".qodo"]["current_live_state"] == "present_local_only_root_surface"
+    assert ".junie" not in by_path
 
 
 def test_root_hygiene_review_registry_tracks_absent_root_logs_and_test_print() -> None:
