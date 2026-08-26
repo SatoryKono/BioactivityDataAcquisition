@@ -1254,6 +1254,27 @@ def _refresh_existing_inventory_source_tree(
     return refreshed
 
 
+def _select_nonregressing_coverage_row(
+    candidate_row: dict[str, Any],
+    *,
+    current_by_path: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], bool]:
+    """Select a candidate row unless it would reduce measured coverage."""
+    path = str(candidate_row.get("path"))
+    current_row = current_by_path.get(path)
+    current_percent = current_row.get("coverage_percent") if current_row else None
+    candidate_percent = candidate_row.get("coverage_percent")
+    candidate_is_nondecreasing = isinstance(candidate_percent, int | float) and (
+        not isinstance(current_percent, int | float)
+        or float(candidate_percent) >= float(current_percent)
+    )
+    if candidate_is_nondecreasing:
+        return candidate_row, True
+    if current_row is not None:
+        return current_row, False
+    return candidate_row, False
+
+
 def _refresh_nonregressing_inventory_from_coverage(
     current: dict[str, Any],
     candidate: dict[str, Any],
@@ -1276,26 +1297,13 @@ def _refresh_nonregressing_inventory_from_coverage(
     for candidate_row in candidate_rows:
         if not isinstance(candidate_row, dict):
             continue
-        path = str(candidate_row.get("path"))
-        current_row = current_by_path.get(path)
-        current_percent = (
-            current_row.get("coverage_percent")
-            if isinstance(current_row, dict)
-            else None
+        selected_row, promoted = _select_nonregressing_coverage_row(
+            candidate_row,
+            current_by_path=current_by_path,
         )
-        candidate_percent = candidate_row.get("coverage_percent")
-        candidate_is_nondecreasing = isinstance(candidate_percent, int | float) and (
-            not isinstance(current_percent, int | float)
-            or float(candidate_percent) >= float(current_percent)
-        )
-        if candidate_is_nondecreasing:
-            merged_rows.append(candidate_row)
+        merged_rows.append(selected_row)
+        if promoted:
             promoted_count += 1
-            continue
-        if isinstance(current_row, dict):
-            merged_rows.append(current_row)
-        else:
-            merged_rows.append(candidate_row)
 
     refreshed = dict(current)
     refreshed["source_tree_sha256"] = candidate["source_tree_sha256"]
@@ -1367,13 +1375,8 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
-    if (
-        args.refresh_from_coverage_xml
-        and args.refresh_nonregressing_from_coverage_xml
-    ):
-        print(
-            "[module-coverage-inventory] choose only one coverage refresh mode"
-        )
+    if args.refresh_from_coverage_xml and args.refresh_nonregressing_from_coverage_xml:
+        print("[module-coverage-inventory] choose only one coverage refresh mode")
         return 2
     repo_root = args.repo_root.resolve()
     enforcement_mode = _resolve_enforcement_mode(args)

@@ -235,6 +235,7 @@ repos:
         name: Lint architecture diagrams (.mmd/.mermaid)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
         language: python
+        # Canonical core: docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)
         files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams|sequence|state-machines|providers)/.*\.mmd$
         stages: [pre-commit]
 

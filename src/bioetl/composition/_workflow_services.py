@@ -61,6 +61,7 @@ __all__ = [
     "load_workflow_config",
 ]
 _workflow_memory_lock: LockPort | None = None
+_CONTROL_PLANE_MODULE = "bioetl.infrastructure.control_plane"
 
 
 def _create_workflow_metrics(settings: Settings) -> MetricsPort:
@@ -116,7 +117,7 @@ def get_workflow_runner_service(
     workflow_transform_service = import_module(
         "bioetl.application.services.workflow.workflow_transform_service"
     )
-    control_plane = import_module("bioetl.infrastructure.control_plane")
+    control_plane = import_module(_CONTROL_PLANE_MODULE)
     infrastructure_time = import_module("bioetl.infrastructure.time")
 
     settings = get_settings()
@@ -191,7 +192,7 @@ def get_workflow_execution_service(
     manifest_service_module = import_module(
         "bioetl.application.services.control_plane.workflow.manifest_service"
     )
-    control_plane = import_module("bioetl.infrastructure.control_plane")
+    control_plane = import_module(_CONTROL_PLANE_MODULE)
     infrastructure_time = import_module("bioetl.infrastructure.time")
 
     settings = get_settings()
@@ -239,7 +240,7 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
     inspection_service = import_module(
         "bioetl.application.services.control_plane.workflow.inspection_service"
     )
-    control_plane = import_module("bioetl.infrastructure.control_plane")
+    control_plane = import_module(_CONTROL_PLANE_MODULE)
 
     settings = get_settings()
     metrics = _create_workflow_metrics(settings)
