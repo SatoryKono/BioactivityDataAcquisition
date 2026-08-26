@@ -806,53 +806,82 @@ def _report_expected_class_refs(
             )
 
 
-def check_modules(report: DriftReport) -> None:
-    """Verify module paths referenced in architecture docs resolve."""
-    all_modules = _collect_modules(SRC_DIR)
-    observability_attribute_terms = _collect_observability_attribute_terms()
+def _module_docs_to_scan(arch_dir: Path) -> list[Path]:
+    """Return unique active documentation files that may reference modules."""
+    files_to_scan: list[Path] = []
+    files_to_scan.extend(sorted(arch_dir.glob("*.md")))
 
+    readme = PROJECT_ROOT / "README.md"
+    if readme.exists():
+        files_to_scan.append(readme)
+
+    for subdirectory in ("03-guides", "05-operations"):
+        files_to_scan.extend(_active_markdown_files(DOCS_DIR / subdirectory))
+
+    return list(dict.fromkeys(files_to_scan))
+
+
+def _active_markdown_files(directory: Path) -> list[Path]:
+    """Return Markdown files below *directory*, excluding archived docs."""
+    if not directory.exists():
+        return []
+    return [
+        path
+        for path in sorted(directory.rglob("*.md"))
+        if "99-archive" not in path.parts
+    ]
+
+
+def _module_path_resolves(module_path: str, all_modules: set[str]) -> bool:
+    """Return whether a documented module path resolves to a source module."""
+    return any(
+        module == module_path or module.startswith(module_path + ".")
+        for module in all_modules
+    )
+
+
+def _check_module_references(
+    report: DriftReport,
+    doc_path: Path,
+    *,
+    all_modules: set[str],
+    ignored_terms: frozenset[str],
+    module_pattern: re.Pattern[str],
+) -> None:
+    """Report unresolved module references in one documentation file."""
+    text = doc_path.read_text(encoding="utf-8")
+    for match in module_pattern.finditer(text):
+        module_path = match.group(1)
+        if module_path in ignored_terms or _module_path_resolves(
+            module_path, all_modules
+        ):
+            continue
+        report.add(
+            "modules",
+            "ERROR",
+            str(doc_path.relative_to(PROJECT_ROOT)),
+            f"Module path `{module_path}` referenced but not found in src/",
+        )
+
+
+def check_modules(report: DriftReport) -> None:
+    """Verify module paths referenced in active documentation resolve."""
     arch_dir = DOCS_DIR / "02-architecture"
     if not arch_dir.exists():
         return
 
+    all_modules = _collect_modules(SRC_DIR)
+    ignored_terms = _collect_observability_attribute_terms()
     module_pattern = re.compile(r"`(bioetl\.[a-z_.]+)`")
 
-    files_to_scan: list[Path] = []
-    if arch_dir.exists():
-        files_to_scan.extend(sorted(arch_dir.glob("*.md")))
-    readme = PROJECT_ROOT / "README.md"
-    if readme.exists():
-        files_to_scan.append(readme)
-    for sub in ("03-guides", "05-operations"):
-        d = DOCS_DIR / sub
-        if d.exists():
-            for md in sorted(d.rglob("*.md")):
-                if "99-archive" not in str(md) and md not in files_to_scan:
-                    files_to_scan.append(md)
-    seen: set[Path] = set()
-    unique: list[Path] = []
-    for f in files_to_scan:
-        if f not in seen:
-            seen.add(f)
-            unique.append(f)
-    for md_file in unique:
-        if not md_file.exists():
-            continue
-        text = md_file.read_text(encoding="utf-8")
-        for match in module_pattern.finditer(text):
-            mod_path = match.group(1)
-            if mod_path in observability_attribute_terms:
-                continue
-            if not any(
-                module == mod_path or module.startswith(mod_path + ".")
-                for module in all_modules
-            ):
-                report.add(
-                    "modules",
-                    "ERROR",
-                    str(md_file.relative_to(PROJECT_ROOT)),
-                    f"Module path `{mod_path}` referenced but not found in src/",
-                )
+    for doc_path in _module_docs_to_scan(arch_dir):
+        _check_module_references(
+            report,
+            doc_path,
+            all_modules=all_modules,
+            ignored_terms=ignored_terms,
+            module_pattern=module_pattern,
+        )
 
 
 def _bioetl_terms_from_list(raw_terms: object) -> set[str]:
