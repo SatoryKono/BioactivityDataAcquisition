@@ -219,6 +219,15 @@ def test_private_import_baseline_is_monotonically_non_increasing(
     errors = evaluate_ratchet(payload)
     assert not errors, "\n".join(errors)
     assert int(config["max_count"]) <= 19
+    stale_waves = {
+        str(row.get("target_removal_wave"))
+        for row in config.get("pairs", [])
+        if isinstance(row, dict)
+    } & {f"S{i}" for i in range(1, 10)}
+    assert not stale_waves, (
+        "#9626: target_removal_wave must not keep closed S1–S9 tags; "
+        f"found {sorted(stale_waves)}"
+    )
 
 
 @pytest.mark.architecture
