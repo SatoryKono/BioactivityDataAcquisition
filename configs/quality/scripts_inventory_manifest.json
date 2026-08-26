@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-26T08:09:49.705066+00:00",
+  "generated_at": "2026-08-26T16:46:29.354487+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -7849,7 +7849,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 152,
+          "line": 148,
           "source_group": "tests",
           "text": "\"scripts/docs/build/generate_docs_export.py\","
         }
@@ -9644,7 +9644,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 344,
+          "line": 340,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -9797,7 +9797,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 226,
+          "line": 222,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
@@ -9854,7 +9854,7 @@
         },
         {
           "path": "tests/architecture/test_quality_debt_weekly_workflow.py",
-          "line": 42,
+          "line": 38,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/ci/report_quality_debt_weekly.py\" in workflow"
         }
@@ -9905,7 +9905,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 220,
+          "line": 216,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -9953,7 +9953,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 154,
+          "line": 150,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -9974,7 +9974,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 155,
+          "line": 151,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
@@ -10058,7 +10058,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 156,
+          "line": 152,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -10103,7 +10103,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 157,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         },
@@ -10191,7 +10191,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 151,
+          "line": 147,
           "source_group": "tests",
           "text": "\"scripts/engineering/common/file_merger.py\","
         },
@@ -11028,31 +11028,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 830,
+          "line": 836,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 849,
+          "line": 855,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 940,
+          "line": 946,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 941,
+          "line": 947,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 978,
+          "line": 984,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -12092,7 +12092,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 374,
+      "reference_count": 376,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13684,7 +13684,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 428,
+          "line": 424,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14066,7 +14066,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -14099,12 +14099,6 @@
           "text": "return repo_root / \"src\" / \"tools\" / \"scripts\" / \"lint_terminology.py\""
         },
         {
-          "path": "docs/00-project/glossary.md",
-          "line": 555,
-          "source_group": "docs",
-          "text": "(`scripts/engineering/qa/lint_terminology.py`):"
-        },
-        {
           "path": "scripts/engineering/qa/README.md",
           "line": 27,
           "source_group": "scripts",
@@ -14115,6 +14109,12 @@
           "line": 119,
           "source_group": "scripts",
           "text": "\"check-terminology\": \"scripts.engineering.qa.lint_terminology\","
+        },
+        {
+          "path": "tests/architecture/test_lint_terminology_script.py",
+          "line": 28,
+          "source_group": "tests",
+          "text": "script_path = repo_root / \"scripts\" / \"engineering\" / \"qa\" / \"lint_terminology.py\""
         }
       ]
     },
@@ -14425,7 +14425,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 431,
+          "line": 427,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -15237,7 +15237,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 158,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_domain_io_taint_inventory.py\","
         }
@@ -15356,7 +15356,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 159,
+          "line": 155,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_flaky_test_burndown_review.py\","
         },
@@ -16015,7 +16015,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 413,
+          "line": 409,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_vcr_metadata_catalog.py\","
         }
@@ -16574,7 +16574,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 882,
+          "line": 888,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -16625,7 +16625,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 883,
+          "line": 889,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -16676,7 +16676,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 888,
+          "line": 894,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -16706,7 +16706,7 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 211,
+          "line": 207,
           "source_group": "tests",
           "text": "\"python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90\""
         }
@@ -19033,13 +19033,13 @@
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 414,
+          "line": 410,
           "source_group": "tests",
           "text": "\"scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py\","
         },
         {
           "path": "tests/architecture/test_integration_vcr_policy.py",
-          "line": 464,
+          "line": 460,
           "source_group": "tests",
           "text": "assert \"backfill_vcr_metadata_sidecars.py\" in migrations_readme"
         }
@@ -19365,7 +19365,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 293,
+          "line": 289,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -19417,7 +19417,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 312,
+          "line": 308,
           "source_group": "tests",
           "text": "/ \"check_dashboard_panel_fill.py\""
         },
@@ -19876,7 +19876,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 278,
+          "line": 274,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         },
@@ -21843,7 +21843,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 68,
+          "line": 64,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
@@ -22443,7 +22443,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 153,
+          "line": 149,
           "source_group": "tests",
           "text": "\"scripts/schema/generation/generate_schema_artifacts.py\","
         },

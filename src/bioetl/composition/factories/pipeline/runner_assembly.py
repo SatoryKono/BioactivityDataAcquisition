@@ -115,7 +115,6 @@ def _build_lock_manager(
     checkpoint_manager: CheckpointRuntimeService,
     context_holder: LockContextHolder,
 ) -> LockRuntimeService:
-    """Compatibility seam for tests still patching the legacy helper name."""
     return _build_lock_runtime_service(
         context,
         checkpoint_manager=checkpoint_manager,
