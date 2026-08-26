@@ -45,6 +45,9 @@ if [[ -n "${BIOETL_WSL_VENV_DIR:-}" && -x "${BIOETL_WSL_VENV_DIR}/bin/python" ]]
   MEMORY_PYTHON="${BIOETL_WSL_VENV_DIR}/bin/python"
 elif [[ -x "${REPO_ROOT}/.venv/bin/python" ]]; then
   MEMORY_PYTHON="${REPO_ROOT}/.venv/bin/python"
+elif [[ -x "${REPO_ROOT}/.venv-win/Scripts/python.exe" ]]; then
+  # Native Windows Git Bash: .mcp.json launches this .sh, not the .ps1 (#9712).
+  MEMORY_PYTHON="${REPO_ROOT}/.venv-win/Scripts/python.exe"
 elif command -v python3 >/dev/null 2>&1; then
   MEMORY_PYTHON="$(command -v python3)"
 else

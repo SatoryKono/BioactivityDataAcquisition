@@ -49,7 +49,9 @@ ______________________________________________________________________
 ## Memory
 
 > **При старте** прочитай специализированную память:
-> `docs/00-project/ai/memory/memory-py-audit-bot.md` — import matrix, anti-patterns, naming, scoring, valid exceptions.
+> `docs/00-project/ai/memory/memory-py-audit-bot.md` — navigation sheet only
+> (owners of import matrix, scoring, and thresholds live in RULES / quality
+> configs / architecture tests; do not invent them from memory).
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
 
 ______________________________________________________________________
