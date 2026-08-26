@@ -36,20 +36,9 @@ from bioetl.composition.bootstrap.service_registry_contracts import (
 _REGISTRY: dict[type[object], Callable[[], object]] = {}
 
 
-class _TypedPortSelector:
-    """Select a Protocol type while preserving a runtime-callable registry key."""
-
-    def __getitem__[T](self, port_type: type[T]) -> Callable[[object], type[T]]:
-        """Bind the selected Protocol type for one subsequent marker call."""
-        del port_type
-        return cast("Callable[[object], type[T]]", self)
-
-    def __call__[T](self, port: object) -> type[T]:
-        """Return a Protocol class as a registry key without instantiating it."""
-        return cast("type[T]", port)
-
-
-typed_port = _TypedPortSelector()
+def typed_port[T](port: object) -> type[T]:
+    """Mark a Protocol class as a registry key without instantiating it."""
+    return cast("type[T]", port)
 
 
 def register[T](port: type[T], factory: Callable[[], T]) -> None:

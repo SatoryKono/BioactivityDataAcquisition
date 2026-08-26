@@ -29,9 +29,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.lifecycle.checkpoint_manager import (
         CheckpointRuntimeService,
     )
-    from bioetl.application.services.workflow.observability_workflow_service import (
-        ObservabilityWorkflowService,
-    )
+    from bioetl.application.ports.operations import ObservabilityWorkflowServiceProtocol
 
 __all__ = [
     "COMMANDS",
@@ -59,7 +57,7 @@ def get_checkpoint_runtime_service(pipeline: str) -> CheckpointRuntimeService:
     return impl(pipeline)
 
 
-def get_observability_workflow_service() -> ObservabilityWorkflowService:
+def get_observability_workflow_service() -> ObservabilityWorkflowServiceProtocol:
     """Load observability workflows through the canonical public interface."""
     from bioetl.composition.observability_runtime import (
         get_observability_workflow_service as _impl,

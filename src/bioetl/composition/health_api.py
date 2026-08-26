@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.composition.lazy_exports import (
     LazyExportTarget,
@@ -80,6 +80,6 @@ _LAZY_EXPORTS: Mapping[str, LazyExportTarget] = {
 
 install_cached_public_exports(
     module_globals=globals(),
-    public_exports=cast("Mapping[str, LazyExportTarget]", _LAZY_EXPORTS),
+    public_exports=_LAZY_EXPORTS,
     module_name=__name__,
 )

@@ -60,9 +60,7 @@ class PublicationRecord(BaseModel):
 
     # Core metadata
     title: str | None = Field(default=None, description="Publication title")
-    abstract: str | None = Field(
-        default=None, description="Publication abstract"
-    )
+    abstract: str | None = Field(default=None, description="Publication abstract")
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
     authors: str | None = Field(
@@ -112,13 +110,9 @@ class PublicationRecord(BaseModel):
     )
 
     # Additional metadata
-    language: str | None = Field(
-        default=None, description="Primary language code"
-    )
+    language: str | None = Field(default=None, description="Primary language code")
     license_url: str | None = Field(default=None, description="License URL")
-    subjects: list[str] = Field(
-        default_factory=list, description="Subject areas"
-    )
+    subjects: list[str] = Field(default_factory=list, description="Subject areas")
 
     def model_post_init(self, _context: object, /) -> None:
         """Detach and freeze nested DTO collections after validation."""

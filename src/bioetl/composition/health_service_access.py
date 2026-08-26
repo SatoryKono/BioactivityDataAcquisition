@@ -10,9 +10,7 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition import _resource_management, _services
 
 if TYPE_CHECKING:
-    from bioetl.application.services.ops.bronze_cleanup_service import (
-        BronzeCleanupService,
-    )
+    from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
     from bioetl.application.services.ops.health_service import HealthService
     from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.composition.bootstrap.cli.health import (
@@ -47,11 +45,8 @@ def get_health_server_dependencies(
 ) -> HealthServerDependencies:
     """Load health-listener dependencies through one composition owner seam."""
     if data_root is None:
-        return cast("HealthServerDependencies", _services.get_health_server_dependencies())
-    return cast(
-        "HealthServerDependencies",
-        _services.get_health_server_dependencies(data_root=data_root),
-    )
+        return _services.get_health_server_dependencies()
+    return _services.get_health_server_dependencies(data_root=data_root)
 
 
 def get_health_service() -> HealthService:
@@ -63,20 +58,14 @@ def get_quarantine_runtime_service(
     pipeline: str,
 ) -> QuarantineRuntimeServiceProtocol:
     """Load a pipeline-scoped quarantine runtime service through one owner seam."""
-    return cast(
-        "QuarantineRuntimeServiceProtocol",
-        _resource_management.get_quarantine_runtime_service(pipeline),
-    )
+    return _resource_management.get_quarantine_runtime_service(pipeline)
 
 
 def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Load the quarantine admin service through one composition owner seam."""
     if data_root is None:
-        return cast("QuarantineService", _services.get_quarantine_service())
-    return cast(
-        "QuarantineService",
-        _services.get_quarantine_service(data_root=data_root),
-    )
+        return _services.get_quarantine_service()
+    return _services.get_quarantine_service(data_root=data_root)
 
 
 def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
@@ -88,6 +77,6 @@ def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
     return _impl(metrics)
 
 
-def get_bronze_cleanup_service() -> BronzeCleanupService:
+def get_bronze_cleanup_service() -> BronzeCleanupServiceProtocol:
     """Load Bronze cleanup through the ops/health owner seam (#9620)."""
     return _services.get_bronze_cleanup_service()

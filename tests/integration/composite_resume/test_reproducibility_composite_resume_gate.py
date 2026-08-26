@@ -102,7 +102,8 @@ def test_reproducibility_composite_full_snapshot_envelope_rebuild_resume_matrix(
             metrics=MagicMock(),
             tracer=MagicMock(),
             storage=MagicMock(),
-            lock=MagicMock(), clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
+            lock=MagicMock(),
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,
