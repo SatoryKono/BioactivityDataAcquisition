@@ -105,6 +105,48 @@ def test_check_modules_still_reports_unknown_bioetl_module(
     assert "bioetl.missing_module" in report.issues[0].detail
 
 
+def test_check_modules_scans_active_narrative_docs_but_skips_archive(
+    monkeypatch, tmp_path: Path
+) -> None:
+    docs_dir = tmp_path / "docs"
+    arch_dir = docs_dir / "02-architecture"
+    guide_dir = docs_dir / "03-guides"
+    operations_dir = docs_dir / "05-operations"
+    archive_dir = guide_dir / "99-archive"
+    for directory in (arch_dir, guide_dir, operations_dir, archive_dir):
+        directory.mkdir(parents=True, exist_ok=True)
+
+    (tmp_path / "README.md").write_text("`bioetl.missing_readme`\n", encoding="utf-8")
+    (guide_dir / "guide.md").write_text("`bioetl.missing_guide`\n", encoding="utf-8")
+    (operations_dir / "runbook.md").write_text(
+        "`bioetl.missing_runbook`\n", encoding="utf-8"
+    )
+    (archive_dir / "old.md").write_text("`bioetl.missing_archive`\n", encoding="utf-8")
+
+    src_dir = tmp_path / "src" / "bioetl"
+    src_dir.mkdir(parents=True)
+    (src_dir / "__init__.py").write_text("", encoding="utf-8")
+
+    tracing_config = tmp_path / "configs" / "quality" / "mandatory_tracing.yaml"
+    tracing_config.parent.mkdir(parents=True)
+    tracing_config.write_text("surfaces: {}\n", encoding="utf-8")
+
+    monkeypatch.setattr(check_drift, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(check_drift, "DOCS_DIR", docs_dir)
+    monkeypatch.setattr(check_drift, "SRC_DIR", src_dir)
+    monkeypatch.setattr(check_drift, "MANDATORY_TRACING_COVERAGE_PATH", tracing_config)
+
+    report = check_drift.DriftReport()
+    check_drift.check_modules(report)
+
+    reported_modules = {issue.detail.split("`")[1] for issue in report.issues}
+    assert reported_modules == {
+        "bioetl.missing_guide",
+        "bioetl.missing_readme",
+        "bioetl.missing_runbook",
+    }
+
+
 def test_check_ai_surfaces_reports_missing_policy_token(
     monkeypatch, tmp_path: Path
 ) -> None:
