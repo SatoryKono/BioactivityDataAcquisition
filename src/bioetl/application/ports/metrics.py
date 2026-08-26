@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
@@ -25,30 +26,47 @@ class MetricsFactoryProtocol(Protocol):
     def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
-@runtime_checkable
-class MetricsStartResult(Protocol):
-    """Result of starting the metrics HTTP server."""
+@dataclass(frozen=True, slots=True)
+class StartResult:
+    """Result of starting the metrics server."""
 
-    success: bool
-    error: str | None
-    port: int
-
-
-@runtime_checkable
-class MetricsServerStatus(Protocol):
-    """Runtime status of the metrics HTTP server."""
-
-    running: bool
-    port: int | None
-    started_at: datetime | None
+    success: bool = False
+    port: int = 0
+    addr: str = "127.0.0.1"
+    already_running: bool = False
+    error: str | None = None
 
 
-@runtime_checkable
-class MetricsGatewayResult(Protocol):
-    """Result of a Pushgateway publish or delete."""
+@dataclass(frozen=True, slots=True)
+class MetricsServerStatus:
+    """Runtime status of the metrics server."""
 
-    success: bool
-    error: str | None
+    running: bool = False
+    port: int | None = None
+    started_at: datetime | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class PushResult:
+    """Result of publishing metrics to an external gateway."""
+
+    success: bool = False
+    gateway: str = ""
+    run_label: str = ""
+    grouping_key: dict[str, str] = field(default_factory=dict)
+    error: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DeleteResult:
+    """Result of deleting metrics from an external gateway."""
+
+    success: bool = False
+    gateway: str = ""
+    run_label: str = ""
+    grouping_key: dict[str, str] = field(default_factory=dict)
+    error: str | None = None
 
 
 @runtime_checkable
@@ -65,7 +83,7 @@ class MetricsService(Protocol):
         fail_fast: bool,
         retry_count: int,
         retry_delay: float,
-    ) -> MetricsStartResult: ...
+    ) -> StartResult: ...
 
     def get_status(self) -> MetricsServerStatus: ...
 
@@ -76,7 +94,7 @@ class MetricsService(Protocol):
         run_label: str = "bioetl",
         grouping_key: dict[str, str] | None = None,
         metric_names: tuple[str, ...] | None = None,
-    ) -> MetricsGatewayResult: ...
+    ) -> PushResult: ...
 
     def delete_from_gateway(
         self,
@@ -84,4 +102,4 @@ class MetricsService(Protocol):
         gateway: str,
         run_label: str,
         grouping_key: dict[str, str],
-    ) -> MetricsGatewayResult: ...
+    ) -> DeleteResult: ...

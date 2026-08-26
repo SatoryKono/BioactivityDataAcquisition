@@ -60,9 +60,7 @@ def require_non_empty_str(value: str, field_name: str) -> None:
 
 def require_optional_str(value: str | None, field_name: str) -> None:
     """Validate optional string-like fields when present."""
-    if value is None:
-        return
-    if not value.strip():
+    if value is not None and not value.strip():
         raise ValueError(f"{field_name} cannot be empty")
 
 
@@ -120,13 +118,11 @@ def validate_optional_source_reference_keys_pair(
     if reference_keys is None:
         raise ValueError("source_keys and reference_keys must be provided together")
 
-    present_source_keys = source_keys
-    present_reference_keys = reference_keys
-    require_non_empty_keys_tuples(present_source_keys, present_reference_keys)
-    require_equal_key_tuple_lengths(present_source_keys, present_reference_keys)
+    require_non_empty_keys_tuples(source_keys, reference_keys)
+    require_equal_key_tuple_lengths(source_keys, reference_keys)
     require_first_keys_match(
-        source_keys=present_source_keys,
-        reference_keys=present_reference_keys,
+        source_keys=source_keys,
+        reference_keys=reference_keys,
         source_key=source_key,
         reference_key=reference_key,
     )
@@ -245,11 +241,7 @@ class ForeignKeyReconciliationRequest:
     @property
     def effective_mutation_layer(self) -> ForeignKeyReconciliationLayer:
         """Return the layer mutated by this reconciliation request."""
-        return (
-            self.mutation_layer
-            if self.mutation_layer is not None
-            else self.source_layer
-        )
+        return self.mutation_layer or self.source_layer
 
 
 @dataclass(frozen=True, slots=True)

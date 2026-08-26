@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-
+from bioetl.application.ports.pipeline import (
+    ContractPolicyLoaderProtocol,
+    SchemaBuilderProtocol as _SchemaBuilder,
+)
 from bioetl.composition.factories.pipeline.entity_type_extractor import (
     EntityTypeExtractor,
 )
-
-from bioetl.domain.ports.config_mapper import DomainConfigMapper
-from bioetl.application.ports.pipeline import ContractPolicyLoaderProtocol
-from bioetl.application.ports.pipeline import SchemaBuilderProtocol as _SchemaBuilder
+from bioetl.domain.ports import DomainConfigMapper
 
 
 __all__ = [

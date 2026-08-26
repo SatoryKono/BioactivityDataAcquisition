@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, Protocol
 
 from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
+from bioetl.application.ports.metrics import DeleteResult, PushResult
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -28,28 +28,6 @@ _METRICS_GATEWAY_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class PushResult:
-    """Result of publishing metrics to an external gateway."""
-
-    success: bool = False
-    gateway: str = ""
-    run_label: str = ""
-    grouping_key: dict[str, str] = field(default_factory=dict)
-    error: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class DeleteResult:
-    """Result of deleting metrics from an external gateway."""
-
-    success: bool = False
-    gateway: str = ""
-    run_label: str = ""
-    grouping_key: dict[str, str] = field(default_factory=dict)
-    error: str | None = None
 
 
 class _MetricsTracingHost(Protocol):

@@ -1,4 +1,3 @@
-# Boundary object/payload typing residual at this module.
 """Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping."""
 
 from __future__ import annotations
@@ -74,14 +73,7 @@ def _create_chembl_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create ChEMBL data source with optional CSV filtering.
-
-    Configuration is loaded from configs/providers/chembl.yaml via AdapterConfig.
-    This ensures YAML is the single source of truth (RULES.md §12.1.2).
-
-    For document_term entity type, wraps the adapter with PublicationTermDataSource
-    to extract terms from publication records (derived entity pattern).
-    """
+    """Create a filtered ChEMBL source, including derived-entity wrappers."""
     if pipeline_config.entity_type == "target_protein_classification":
         return _wrap_with_filter(
             TargetProteinClassificationSnapshotDataSource(
@@ -188,13 +180,7 @@ def _create_uniprot_data_source(
     *,
     assembly_support: ProviderAssemblySupport | None = None,
 ) -> DataSourcePort:
-    """Create UniProt data source with optional CSV filtering.
-
-    UniProt uses the generic DataSourceFactory path with a UnifiedHTTPClient.
-    The base URL defaults to ``https://rest.uniprot.org`` but can be overridden
-    via ``pipeline_config.source.api.base_url`` for testing or alternative
-    deployments.
-    """
+    """Create a filtered UniProt source with composition-owned HTTP wiring."""
     support = resolve_provider_assembly_support(assembly_support)
     http_client = support.create_http_client("uniprot", settings, metrics=metrics)
     helper_services = AdapterHelpersFactory.create_http_helpers(

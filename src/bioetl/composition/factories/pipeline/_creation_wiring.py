@@ -1,4 +1,3 @@
-# Host/cast bridge residual; prefer Protocol self when rewriting module.
 """Internal pipeline creation wiring extracted from service bundle facade."""
 
 from __future__ import annotations
@@ -26,12 +25,12 @@ from bioetl.composition.factories.pipeline.control_plane_artifacts import (
 from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
-from bioetl.domain.ports.config_mapper import DomainConfigMapper
 from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
     AuditPort,
+    DomainConfigMapper,
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
@@ -46,10 +45,8 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.composition.contracts.factories import (
-    ServiceBundleDeps as _ServiceBundleDeps,
-)
-from bioetl.composition.contracts.factories import (
     BuildPipelineServicesFn as _BuildPipelineServicesFn,
+    ServiceBundleDeps as _ServiceBundleDeps,
 )
 
 from bioetl.infrastructure.config.contract_policy_loader import (
@@ -70,8 +67,6 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class _PipelineCreationRequest(ControlPlaneArtifacts):
-    """Shared runtime request bundle for pipeline creation helpers."""
-
     run_id: RunID
     runtime: RuntimeConfig
     started_at: datetime
@@ -88,8 +83,6 @@ class _PipelineCreationRequest(ControlPlaneArtifacts):
 
 @dataclass(frozen=True, slots=True)
 class _PipelineCreationInputs:
-    """Immutable input bundle for pipeline creation."""
-
     pipeline_name: str
     pipeline_class: type[BasePipeline]
     provider: str
@@ -143,17 +136,7 @@ def _create_pipeline_with_services_impl(
     extract_entity_type: Callable[[str], str | None],
     build_pipeline_services_fn: _BuildPipelineServicesFn,
 ) -> BasePipeline:
-    """Implement pipeline creation while keeping facade thin.
-
-    Args:
-        inputs: Immutable bundle of pipeline creation parameters.
-        deps: Service bundle dependencies providing config loading and domain mapping.
-        extract_entity_type: Callable deriving entity type from pipeline name.
-        build_pipeline_services_fn: Callable assembling the PipelineService bundle.
-
-    Returns:
-        Configured BasePipeline instance ready for execution.
-    """
+    """Create one fully wired pipeline from immutable inputs."""
     request = inputs.request
     yaml_config = _resolve_yaml_config(
         inputs=inputs,

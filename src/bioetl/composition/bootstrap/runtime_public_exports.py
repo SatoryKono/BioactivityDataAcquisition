@@ -1,10 +1,91 @@
-"""Shared bootstrap runtime export catalog.
+"""Shared bootstrap runtime and service-registry contract catalogs.
 
 This keeps the curated bootstrap package root and the runtime package root
 aligned without duplicating long literal export tables.
 """
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from bioetl.application.ports.control_plane import (
+    ForensicRunDiffServiceProtocol,
+    HistoricalReplayClosureServiceProtocol,
+    HistoricalReplayCorpusServiceProtocol,
+    HistoricalReplayUniverseServiceProtocol,
+    LineageInspectionServiceProtocol,
+    RunManifestInspectionServiceProtocol,
+    WorkflowInspectionServiceProtocol,
+)
+from bioetl.application.ports.health import HealthServiceProtocol
+from bioetl.application.ports.metrics import MetricsService
+from bioetl.application.ports.operations import (
+    AuditInspectionServiceProtocol,
+    CheckpointServiceProtocol,
+    ConfigServiceProtocol,
+    ContractMigrationServiceProtocol,
+    ExportServiceProtocol,
+    LockServiceProtocol,
+    ObservabilityWorkflowServiceProtocol,
+    VacuumServiceProtocol,
+)
+from bioetl.composition.contracts.factories import (
+    HealthServerDependenciesFactoryProtocol,
+    PipelineRunnerServiceFactoryProtocol,
+    QuarantineServiceFactoryProtocol,
+)
+from bioetl.composition.contracts.health import BronzeCleanupServiceProtocol
+from bioetl.domain.ports import (
+    AdrServicePort,
+    GoldFilterCallback,
+    GoldTransformCallback,
+    QuarantinePort,
+    TransformCallback,
+)
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import (
+        BronzeDQConfigPort as BronzeDQConfigPort,
+        GoldDQConfigPort as GoldDQConfigPort,
+        SilverDQConfigPort as SilverDQConfigPort,
+    )
+
+__all__ = [
+    "BOOTSTRAP_ROOT_EXPORT_NAMES",
+    "BOOTSTRAP_ROOT_PUBLIC_EXPORTS",
+    "RUNTIME_PACKAGE_EXPORT_NAMES",
+    "RUNTIME_PACKAGE_PUBLIC_EXPORTS",
+    "SHARED_BOOTSTRAP_RUNTIME_EXPORTS",
+    "AdrServicePort",
+    "AuditInspectionServiceProtocol",
+    "BronzeCleanupServiceProtocol",
+    "BronzeDQConfigPort",
+    "CheckpointServiceProtocol",
+    "ConfigServiceProtocol",
+    "ContractMigrationServiceProtocol",
+    "ExportServiceProtocol",
+    "ForensicRunDiffServiceProtocol",
+    "GoldDQConfigPort",
+    "GoldFilterCallback",
+    "GoldTransformCallback",
+    "HealthServerDependenciesFactoryProtocol",
+    "HealthServiceProtocol",
+    "HistoricalReplayClosureServiceProtocol",
+    "HistoricalReplayCorpusServiceProtocol",
+    "HistoricalReplayUniverseServiceProtocol",
+    "LineageInspectionServiceProtocol",
+    "LockServiceProtocol",
+    "MetricsService",
+    "ObservabilityWorkflowServiceProtocol",
+    "PipelineRunnerServiceFactoryProtocol",
+    "QuarantinePort",
+    "QuarantineServiceFactoryProtocol",
+    "RunManifestInspectionServiceProtocol",
+    "SilverDQConfigPort",
+    "TransformCallback",
+    "VacuumServiceProtocol",
+    "WorkflowInspectionServiceProtocol",
+]
 
 RUNTIME_OBSERVABILITY_MODULE = "bioetl.composition.bootstrap.runtime.observability"
 RUNTIME_ASSEMBLY_MODULE = "bioetl.composition.bootstrap.runtime.assembly"
