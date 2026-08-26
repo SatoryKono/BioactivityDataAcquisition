@@ -154,15 +154,13 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py",
         "tests/unit/composition/test_entrypoints_public_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 6,
+      "test_importer_count": 4,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -568,15 +566,13 @@
       "usage_classification": "stable_public_api_zero_first_party_src",
       "src_importers": [],
       "test_importers": [
-        "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
         "tests/unit/composition/test_entrypoint_wrapper_coverage.py",
         "tests/unit/composition/test_entrypoints.py",
         "tests/unit/composition/test_entrypoints_public_api.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 6,
+      "test_importer_count": 4,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -891,7 +887,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 6
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1075,7 +1071,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 6
+      "test_importer_count": 4
     },
     {
       "path": "src/bioetl/composition/health_api.py",

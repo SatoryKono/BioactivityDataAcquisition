@@ -18,7 +18,7 @@
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 70,
+    "remaining_below_85_module_count": 69,
     "reason": "Issue #5244 requires zero below-tier production modules; #5272 is locally closeable, but the parent epic remains open while 70 production modules are still below the default floor."
   },
   "evidence": [

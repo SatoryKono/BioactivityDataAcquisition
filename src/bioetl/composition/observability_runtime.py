@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 
-from bioetl.composition.bootstrap.service_registry_contracts import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     AuditInspectionServiceProtocol,
     CheckpointServiceProtocol,
     HealthServiceProtocol,
