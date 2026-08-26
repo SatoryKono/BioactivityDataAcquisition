@@ -504,6 +504,25 @@ class TestMetricsService:
             grouping_key={"pipeline": "chembl_activity"},
         )
 
+    def test_delete_from_gateway_success_is_traced(
+        self, mock_logger: MagicMock, mock_server: MagicMock
+    ) -> None:
+        """Cleanup should preserve its result while using the tracing boundary."""
+        mock_publisher = MagicMock(spec=MetricsPublisherPort)
+        mock_publisher.delete_from_gateway.return_value = True
+        service = MetricsService(
+            logger=mock_logger,
+            clock=FixedClock(datetime(2026, 4, 24, 12, 0, tzinfo=UTC)),
+            tracer=_make_mock_tracer(),
+            _server=mock_server,
+            _publisher=mock_publisher,
+        )
+
+        result = service.delete_from_gateway(gateway="localhost:9091")
+
+        assert result.success is True
+        mock_publisher.delete_from_gateway.assert_called_once()
+
     def test_delete_from_gateway_logs_failure_without_publisher(
         self, mock_logger: MagicMock, mock_server: MagicMock
     ) -> None:
