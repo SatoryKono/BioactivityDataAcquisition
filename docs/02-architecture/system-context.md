@@ -74,7 +74,7 @@ flowchart TB
 
     %% Storage to consumers
     FS -->|Delta Lake| ANALYTICS
-    FS -->|Parquet| ML
+    FS -->|Delta Lake| ML
     FS -->|Delta Lake| API
 ```
 

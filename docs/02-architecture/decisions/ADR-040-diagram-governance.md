@@ -124,7 +124,9 @@ Foundation views создаются как `.mermaid` в `diagrams/views/`.
 - `-dataflow` — data movement (≤15 узлов)
 
 Для **architecture/** — декомпозиция по subdomain (предметная группировка),
-суффиксы `a/b/c/d` по теме (например, `13a-port-contracts-data-sources.mmd`).
+суффиксы `a/b/c/d` по теме (например, `13g-port-contracts-data-sources.mmd`
+для port-contracts family; `13a-data-storage-ports.mmd` остаётся в
+data-storage/operational family).
 
 Оригиналы сохраняются как `-full` reference и не удаляются.
 

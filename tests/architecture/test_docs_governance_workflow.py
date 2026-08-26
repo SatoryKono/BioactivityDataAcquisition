@@ -36,6 +36,8 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
     assert "Run docs-governance architecture tests" in workflow
     assert "validate-mkdocs:\n    needs: docs-governance" in workflow
     assert "'grafana/README.md'" in workflow
+    assert "'.codex/agents/**'" in workflow
+    assert "'.junie/agents/**'" in workflow
 
 
 def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:

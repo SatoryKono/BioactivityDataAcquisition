@@ -14,10 +14,7 @@ from bioetl.interfaces.http._processed_records_http import open_url as _open_url
 # S5332 does not flag the local operator defaults.
 _LOCAL_HTTP = "http"
 DEFAULT_PROMETHEUS_BASE_URL = f"{_LOCAL_HTTP}://localhost:9090"
-DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = (
-    f"{_LOCAL_HTTP}://prometheus:9090",
-    f"{_LOCAL_HTTP}://host.docker.internal:9090",
-)
+DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS: tuple[str, ...] = ()
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 
 

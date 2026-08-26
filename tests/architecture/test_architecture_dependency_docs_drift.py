@@ -88,6 +88,8 @@ def test_nightly_workflow_regenerates_dependency_map() -> None:
     )
     assert "Upload architecture docs artifacts" in workflow
     assert "architecture-dependency-map-nightly" in workflow
+    assert "Fail on architecture map drift" in workflow
+    assert "git diff --exit-code -- docs/02-architecture/generated" in workflow
 
 
 def test_dependency_map_drift_check_passes_current_repo(

@@ -33,10 +33,7 @@ PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
 DEFAULT_PROMETHEUS_BASE_URL = (
     "http://localhost:9090"  # NOSONAR - loopback probe default
 )
-DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = (
-    "http://prometheus:9090",  # NOSONAR - docker-internal service name
-    "http://host.docker.internal:9090",  # NOSONAR - host gateway from container
-)
+DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS: tuple[str, ...] = ()
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 
 _Denominator = Literal["constant_100", "bronze"]
