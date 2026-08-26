@@ -552,7 +552,7 @@ ______________________________________________________________________
 ### Lint Script
 
 A terminology linter is available via the packaged QA dispatcher
-(`scripts/engineering/qa/lint_terminology.py`):
+(`python -m scripts.engineering.qa check-terminology`):
 
 ```bash
 # Check for deprecated terms
