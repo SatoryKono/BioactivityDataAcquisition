@@ -24,7 +24,6 @@ import yaml
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,
 )
-from tests.architecture.quality_artifacts import REVIEWED_MAINTENANCE_CLI_SEAM
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5570-5578-closeout.json"
@@ -174,10 +173,7 @@ def test_issue_5571_public_export_facades_have_symbol_budgets_and_zero_growth() 
             Path(str(item)).as_posix()
             for item in _src_importers(str(row["module_name"]))
         }
-        if path == "src/bioetl/composition/maintenance_api.py":
-            assert actual_importers == {REVIEWED_MAINTENANCE_CLI_SEAM}
-        else:
-            assert actual_importers == set()
+        assert actual_importers == set()
 
 
 def test_issue_5572_composition_bootstrap_uses_single_owner_graph() -> None:

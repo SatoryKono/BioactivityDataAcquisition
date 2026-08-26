@@ -366,7 +366,7 @@ def test_issue_5944_test_governance_closeout_metrics_are_clean() -> None:
 
     compatibility_summary = compatibility["summary"]
     assert compatibility_summary["retained_entrypoint_count"] == 12
-    assert compatibility_summary["retained_public_entrypoint_burden"] == 1
+    assert compatibility_summary["retained_public_entrypoint_burden"] == 0
     assert compatibility_summary["retained_public_export_facade_count"] == 4
     assert (
         compatibility_summary["retained_public_export_facades_with_duplicate_exports"]
