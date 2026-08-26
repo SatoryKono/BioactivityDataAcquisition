@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.ports.providers import SupportAwareDataSourceCreatorProtocol
 from bioetl.composition.factories.datasource.crossref import (
     create_crossref_adapter,
 )
@@ -265,7 +266,10 @@ def _build_biblio_http_provider_specs(
                 AdapterCreatorProtocol,
                 _create_pubmed_adapter_from_settings,
             ),
-            data_source_creator=_create_pubmed_data_source,
+            data_source_creator=cast(
+                SupportAwareDataSourceCreatorProtocol,
+                _create_pubmed_data_source,
+            ),
         ),
         build_http_provider_config_spec(
             provider_name="crossref",
@@ -273,7 +277,10 @@ def _build_biblio_http_provider_specs(
             rate=crossref.rate,
             capacity=crossref.capacity,
             adapter_creator=cast(AdapterCreatorProtocol, create_crossref_adapter),
-            data_source_creator=_create_crossref_data_source,
+            data_source_creator=cast(
+                SupportAwareDataSourceCreatorProtocol,
+                _create_crossref_data_source,
+            ),
         ),
         build_http_provider_config_spec(
             provider_name="openalex",
@@ -284,14 +291,20 @@ def _build_biblio_http_provider_specs(
                 AdapterCreatorProtocol,
                 _create_openalex_adapter_from_settings,
             ),
-            data_source_creator=_create_openalex_data_source,
+            data_source_creator=cast(
+                SupportAwareDataSourceCreatorProtocol,
+                _create_openalex_data_source,
+            ),
         ),
         build_http_provider_config_spec(
             provider_name="semanticscholar",
             adapter_class=SemanticScholarAdapter,
             rate=semanticscholar.rate,
             capacity=semanticscholar.capacity,
-            data_source_creator=_create_semanticscholar_data_source,
+            data_source_creator=cast(
+                SupportAwareDataSourceCreatorProtocol,
+                _create_semanticscholar_data_source,
+            ),
         ),
     )
 

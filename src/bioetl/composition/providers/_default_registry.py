@@ -84,7 +84,7 @@ class ProvidersDescriptor[ProviderRegistryT: _SupportsProviderRegistryStore]:
         objtype: type[ProviderRegistryT],
     ) -> dict[str, ProviderConfig]:
         target = obj if obj is not None else objtype._get_default()
-        return target._store._providers
+        return cast("dict[str, ProviderConfig]", target._store._providers)
 
 
 def get_default_provider_registry() -> _SupportsProviderRegistryStore:

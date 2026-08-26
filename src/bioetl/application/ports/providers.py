@@ -8,12 +8,19 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 if TYPE_CHECKING:
     from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
 
-    HttpConfig = object
     InputFilterConfig = object
     PipelineYamlConfig = object
     ProviderAssemblySupport = object
     ProviderConfig = object
     UnifiedHTTPClient = object
+
+
+@runtime_checkable
+class HttpConfig(Protocol):
+    """Minimal HTTP client config used by provider registry lookups."""
+
+    rate: float
+    capacity: int
 
 
 @runtime_checkable
