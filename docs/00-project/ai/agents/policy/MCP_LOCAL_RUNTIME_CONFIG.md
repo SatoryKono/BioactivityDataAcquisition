@@ -72,6 +72,9 @@ This policy applies to:
    depends on machine-local absolute paths. `.devin/config.json` and
    `.devin/mcp_config.json` are part of the portable tracked set;
    `.devin/mcp_config.local.json` is machine-local and gitignored.
+1. Tracked `.agents/skills/*/SKILL.md` un-ignore in `.gitignore` is last-match
+   SSOT. Do not add a later blanket `.agents/` ignore that would hide those
+   skills.
 1. Do not silently rewrite checked-in runtime paths during unrelated work.
 1. If broader portability work is required, introduce an explicit
    template/strategy change instead of implying that all current runtime

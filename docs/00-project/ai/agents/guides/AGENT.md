@@ -4,6 +4,16 @@
 
 *Синхронизировано с RULES.md (read current `Version:` header) | Дедублировано: ссылки на RULES.md*
 
+## Canonical runtime entry
+
+Read first, in this order:
+
+1. `AGENTS.md`
+1. `.codex/agents/CODEX-RUNTIME.md` and `.junie/agents/JUNIE-RUNTIME.md` (equal peers; plus `.junie/guidelines.md`)
+1. `docs/00-project/NORMATIVE_SOURCES.md`
+
+This guide does not override those contracts.
+
 > **Runtime-specific note:** если задача исполняется в Claude Code, считай
 > runtime-specific orchestration source outside the Codex SSOT.
 > Для Codex используется отдельный `.codex/agents/ORCHESTRATION.md`; различия
