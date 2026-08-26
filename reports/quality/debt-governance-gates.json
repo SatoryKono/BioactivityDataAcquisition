@@ -59,13 +59,13 @@
         "source_module_count": 2467,
         "source_tree_sha256": "ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2467,
         "source_tree_sha256": "ef737d02e473d893bf0d05c5bee3acbe2df87c83a8ece7762881353c9f3f4440",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,13 +74,13 @@
       "status": "pass"
     },
     {
-      "current": 84,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,

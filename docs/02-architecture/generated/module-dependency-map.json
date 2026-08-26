@@ -137,7 +137,7 @@
     {
       "source": "composition.factories",
       "target": "application.core",
-      "imports": 47
+      "imports": 46
     },
     {
       "source": "infrastructure.storage",
