@@ -1,11 +1,11 @@
 id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-TD-001,reports/quality/module-coverage-inventory.json,7816,ci,3 merge conflict hunks HEAD vs fix/architecture-governance-23,in-progress-merge,release_integrity,coverage+gates+REQ-GOV-007,S,@bioetl-architecture,P0
-TD-002,reports/quality/debt-governance-gates.json,77,ci,unmeasured gate pass/0 vs summary fail_count=1,same-day-merge,release_integrity,release_gate_status,S,@bioetl-architecture,P1
-TD-003,reports/quality/architecture-quality-scorecard.json,181,architecture,categories~9.41 vs integral_score=7.41,same-day-merge,false_grade,architecture_closeout,S,@bioetl-architecture,P1
-TD-004,reports/quality/debt-governance-gates.md,22,documentation,md unmeasured=84 fail vs json pass/0,same-day-merge,operator_confusion,human_closeout,S,@bioetl-architecture,P1
-TD-005,reports/quality/source-tree-manifest.json,4,ci,multiple source_tree_sha256; remote-main 9.41 vs unmeasured 84,2026-08-26,hash_drift,REQ-GOV-007,M,@bioetl-architecture,P1
-TD-006,reports/quality/total-tech-debt-audit-main-current.md,19,documentation,registry pin 45/45 score 9.41 modules 2465 vs live 7.41/2467,reviewed_2026-08-25,stale_ssot,#9646_closeout,S,@bioetl-architecture,P1
-TD-007,scripts/engineering/qa/report_live_residual_snapshot.py,85,code,_module_coverage_residuals uses rows not summary,code_present,false_green_snapshot,shrink_only_gate,S,@bioetl-platform,P1
+TD-001,reports/quality/module-coverage-inventory.json,49532,tests,unmeasured=84 coverage_xml_has_no_class_entry vs ratchet 0,2026-08-26,release_integrity,coverage-verify+hotspot_families,M,@bioetl-architecture,P1
+TD-002,reports/quality/debt-governance-gates.json,77,ci,unmeasured gate pass/0 vs summary fail_count=1,same-day,release_integrity,release_gate_status,S,@bioetl-architecture,P1
+TD-003,reports/quality/architecture-quality-scorecard.json,181,architecture,categories~9.41 vs integral_score=7.41 unmeasured metrics=0 vs inventory 84,same-day,false_grade,architecture_closeout,S,@bioetl-architecture,P1
+TD-004,reports/quality/debt-governance-gates.md,22,documentation,md unmeasured=84 fail vs json pass/0,same-day,operator_confusion,human_closeout,S,@bioetl-architecture,P1
+TD-005,reports/quality/architecture-quality-scorecard.json,263,ci,inventory hash 29bf3d81 xml 8e96c245 vs scorecard/gates ef737d02 xml 6fafd4b1,2026-08-26,hash_drift,REQ-GOV-007,M,@bioetl-architecture,P1
+TD-006,reports/quality/total-tech-debt-audit-main-current.md,19,documentation,registry pin 45/45 score 9.41 modules 2465 vs live 7.41/84/2467,reviewed_2026-08-25,stale_ssot,#9646_closeout,S,@bioetl-architecture,P1
+TD-007,scripts/engineering/qa/report_live_residual_snapshot.py,85,code,_module_coverage_residuals uses rows not summary; snapshot 0 vs inventory 84,code_present,false_green_snapshot,shrink_only_gate,S,@bioetl-platform,P1
 TD-008,configs/quality/debt_scorecard.yaml,256,architecture,current==max freezes config/lazy/private/fan-in/assertless,playbook_#8714,feature_block,config+composition+control_plane,L,@bioetl-architecture,P1
 TD-009,configs/quality/basedpyright_import_cycle_allowlist.json,199,architecture,30 typing cycles review_by 2026-10-28,snapshot_2026-07-28,change_cost,application/core+control_plane+silver,M,@bioetl-architecture,P2
 TD-010,configs/quality/constructor_waivers.yaml,6,architecture,QuarantineEntry max_args=9 ADR-051,expiry_2026-12-31,constructor_policy,domain_quarantine,M,@bioetl-domain,P2
