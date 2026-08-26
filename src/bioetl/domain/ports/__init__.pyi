@@ -43,7 +43,6 @@ from bioetl.domain.ports.config import (
     SettingsLoaderPort as SettingsLoaderPort,
 )
 from bioetl.domain.ports.config import SettingsPort as SettingsPort
-from bioetl.domain.ports.config_mapper import DomainConfigMapper as DomainConfigMapper
 from bioetl.domain.ports.control_plane import (
     ArtifactByteComparisonPort as ArtifactByteComparisonPort,
 )
@@ -90,7 +89,6 @@ from bioetl.domain.ports.data_source import (
     FilterableDataSourcePort as FilterableDataSourcePort,
 )
 from bioetl.domain.ports.delta_reader import DeltaReaderPort as DeltaReaderPort
-from bioetl.domain.ports.entity_type import EntityTypeExtractor as EntityTypeExtractor
 from bioetl.domain.ports.export import (
     DebugExportPort as DebugExportPort,
 )

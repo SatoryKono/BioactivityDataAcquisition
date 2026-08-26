@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.domain.ports import DomainConfigMapper, EntityTypeExtractor
+from bioetl.domain.ports import (  # type: ignore[attr-defined]
+    DomainConfigMapper,
+    EntityTypeExtractor,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (

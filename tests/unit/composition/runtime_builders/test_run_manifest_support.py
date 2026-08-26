@@ -136,6 +136,7 @@ def test_emit_replay_reconstructability_metric_accepts_disabled_metrics() -> Non
         strict_exact_replay_supported=False,
         metrics=None,
     )
+    assert _make_manifest_request().launch_context["exact_replay"] is False
 
 
 @pytest.mark.unit

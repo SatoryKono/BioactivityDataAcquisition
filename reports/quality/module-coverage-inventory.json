@@ -4668,6 +4668,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 45,
+      "executable_lines": 45,
+      "missing_lines": 0,
+      "module": "bioetl.application.ports.operations",
+      "path": "src/bioetl/application/ports/operations.py",
+      "source_lines": 231
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 26,
       "executable_lines": 26,
       "missing_lines": 0,
@@ -16724,6 +16734,16 @@
       "module": "bioetl.domain.workflow.dag",
       "path": "src/bioetl/domain/workflow/dag.py",
       "source_lines": 158
+    },
+    {
+      "coverage_percent": 90.07,
+      "coverage_status": "partially_covered",
+      "covered_lines": 127,
+      "executable_lines": 141,
+      "missing_lines": 14,
+      "module": "bioetl.domain.workflow.foreign_key_reconciliation",
+      "path": "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
+      "source_lines": 304
     },
     {
       "coverage_percent": 100.0,
@@ -29310,6 +29330,16 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
+      "covered_lines": 45,
+      "executable_lines": 45,
+      "missing_lines": 0,
+      "module": "bioetl.application.ports.operations",
+      "path": "src/bioetl/application/ports/operations.py",
+      "source_lines": 231
+    },
+    {
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
       "covered_lines": 26,
       "executable_lines": 26,
       "missing_lines": 0,
@@ -41368,6 +41398,16 @@
       "source_lines": 158
     },
     {
+      "coverage_percent": 90.07,
+      "coverage_status": "partially_covered",
+      "covered_lines": 127,
+      "executable_lines": 141,
+      "missing_lines": 14,
+      "module": "bioetl.domain.workflow.foreign_key_reconciliation",
+      "path": "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
+      "source_lines": 304
+    },
+    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 45,
@@ -49290,7 +49330,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
-  "source_tree_sha256": "29d019f5b4d9be837935ebc5b649a992185933b9034706ea3ca83910cf8b8790",
+  "source_tree_sha256": "dff3e533ace1cd053ee7319739b4ee1e9ccb6a85b04db3ed0113fca47b4df1c9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -49445,12 +49485,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2464,
+    "source_module_count": 2466,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1563,
+      "fully_covered": 1564,
       "no_executable_lines": 4,
-      "partially_covered": 897,
+      "partially_covered": 898,
       "uncovered": 0,
       "unmeasured": 0
     },
