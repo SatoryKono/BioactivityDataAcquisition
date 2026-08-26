@@ -23,6 +23,7 @@ from bioetl.application.ports.operations import (
     ObservabilityWorkflowServiceProtocol,
     VacuumServiceProtocol,
 )
+from bioetl.application.ports.pipeline import PipelineRunnerProtocol
 from bioetl.composition.contracts.factories import (
     HealthServerDependenciesFactoryProtocol,
     PipelineRunnerServiceFactoryProtocol,
@@ -49,6 +50,7 @@ __all__ = [
     "LockServiceProtocol",
     "MetricsService",
     "ObservabilityWorkflowServiceProtocol",
+    "PipelineRunnerProtocol",
     "PipelineRunnerServiceFactoryProtocol",
     "QuarantinePort",
     "QuarantineServiceFactoryProtocol",
