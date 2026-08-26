@@ -116,7 +116,7 @@ This provides an interactive menu to help choose the appropriate profile for you
 | **Agent Spawning** | `spawn_agent(agent_type, message)` | `run_subagent(title, task, profile, is_background)` |
 | **Built-in Profiles** | `default`, `explorer`, `worker` | `subagent_explore`, `subagent_general` |
 | **Custom Profiles** | Native agent roles | Custom subagent profiles in `.devin/agents/*/AGENT.md` |
-| **Model Assignment** | Fixed per profile (opus/sonnet) | Inherits parent model or explicit `model:` field |
+| **Model Assignment** | Session/parent model (`.codex` does not pin opus/sonnet) | Inherits parent model or explicit `model:` field |
 | **Execution Modes** | Sequential/parallel | Foreground/background with permissions |
 
 ## Custom Subagent Profiles

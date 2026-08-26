@@ -2,7 +2,7 @@
 """Thin facade for the canonical terminology linter implementation.
 
 Canonical script:
-- src/tools/scripts/engineering/qa/lint_terminology.py
+- scripts/engineering/qa/lint_terminology.py
 """
 
 from __future__ import annotations
@@ -14,15 +14,12 @@ from pathlib import Path
 
 def _canonical_script_path() -> Path:
     current = Path(__file__).resolve()
+    linter = Path("scripts") / "engineering" / "qa" / "lint_terminology.py"
     repo_root = next(
-        (
-            parent
-            for parent in current.parents
-            if (parent / "src" / "tools" / "scripts" / "lint_terminology.py").exists()
-        ),
+        (parent for parent in current.parents if (parent / linter).exists()),
         current.parents[0],
     )
-    return repo_root / "src" / "tools" / "scripts" / "lint_terminology.py"
+    return repo_root / linter
 
 
 def main(argv: list[str] | None = None) -> int:

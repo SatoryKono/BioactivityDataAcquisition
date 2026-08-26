@@ -239,10 +239,15 @@ review_lanes:
     retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
     cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
-      - git ls-files .agents .claude .vibe .ai .gemini .idea .jules .zed skills-lock.json
-      - rg -n "\\.agents/|\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .agents .claude .vibe .ai .gemini .idea .jules .junie .zed skills-lock.json
+      - rg -n "\\.agents/|\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.idea/|\\.jules/|\\.junie/|\\.zed/|skills-lock\\.json" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
+      - path: .junie
+        current_live_state: present_curated_root_surface
+        canonical_path: .junie
+        disposition: must_stay_root
+        action_if_reintroduced: retain_as_tracked_jetbrains_junie_runtime_peer_equal_to_codex_not_local_vendor_clutter
       - path: .agents
         current_live_state: absent_from_root_baseline
         canonical_path: .codex/skills
@@ -492,15 +497,10 @@ review_lanes:
     retention_action: keep_untracked_or_promote_only_after_explicit_owner_review
     cleanup_policy: exact_candidate_review_only_no_blind_delete
     verification:
-      - git ls-files .junie .qodo .sonarlint .windsurf caddy
-      - git check-ignore -v .junie .qodo .sonarlint .windsurf caddy
-      - rg -n "\\.junie/|\\.qodo/|\\.sonarlint/|\\.windsurf/|caddy/" .gitignore docs scripts .github tests configs
+      - git ls-files .qodo .sonarlint .windsurf caddy
+      - git check-ignore -v .qodo .sonarlint .windsurf caddy
+      - rg -n "\\.qodo/|\\.sonarlint/|\\.windsurf/|caddy/" .gitignore docs scripts .github tests configs
     candidates:
-      - path: .junie
-        current_live_state: present_curated_root_surface
-        canonical_path: .junie
-        disposition: must_stay_root
-        action_if_reintroduced: retain_as_tracked_jetbrains_junie_runtime_peer_equal_to_codex_do_not_treat_as_local_only_cache
       - path: caddy
         current_live_state: present_local_only_root_surface
         canonical_path: null
