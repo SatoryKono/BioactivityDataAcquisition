@@ -1,7 +1,7 @@
 schema_version: 1
 owner: '@bioetl-architecture'
 linked_issue: '9599'
-expected_total: 80
+expected_total: 79
 max_composition_declarations_outside_contracts: 0
 protocols:
 - name: ObservabilityApiModule
@@ -319,8 +319,4 @@ protocols:
 - name: SourceConfigLike
   path: src/bioetl/domain/ports/source_config.py
   line: 16
-  target_tier: domain
-- name: DomainConfigMapper
-  path: src/bioetl/domain/ports/config_mapper.py
-  line: 15
   target_tier: domain

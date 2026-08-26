@@ -1,7 +1,8 @@
 """YAML-to-domain config mapper contract.
 
 ``DomainConfigMapper`` is a compatibility alias of the canonical
-``DomainConfigMapperPort`` (one mapper ``*Port`` surface).
+``DomainConfigMapperPort`` Protocol (one mapper ``*Port`` surface). The target
+is decorated with ``@runtime_checkable`` in its canonical module.
 """
 
 from __future__ import annotations

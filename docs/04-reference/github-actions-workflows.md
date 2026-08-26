@@ -60,7 +60,7 @@ Use it when you need to answer:
 | `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Python CodeQL SAST to GitHub code scanning |
 | `dependency-review.yml` | `Dependency review` | `pull_request` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
 | `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
-| `zizmor.yml` | `zizmor` | `pull_request` | High-confidence GitHub Actions YAML audit |
+| `zizmor.yml` | `zizmor` | `push`, `pull_request` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | Local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
