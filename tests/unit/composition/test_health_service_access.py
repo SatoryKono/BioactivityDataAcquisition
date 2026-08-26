@@ -28,7 +28,8 @@
 from __future__ import annotations
 
 from importlib import import_module
-from unittest.mock import MagicMock, patch
+from pathlib import Path
+from unittest.mock import MagicMock, patch, sentinel
 
 import pytest
 
@@ -55,6 +56,36 @@ def test_get_health_server_dependencies_delegates_to_services_owner() -> None:
 
     assert result is expected
     mock_impl.assert_called_once_with()
+
+
+def test_health_owner_access_forwards_explicit_data_root() -> None:
+    """Explicit roots must reach both health and quarantine owner seams."""
+    data_root = Path("synthetic-data-root")
+    owner_module = _owner_module("._services")
+
+    with (
+        patch.object(
+            owner_module,
+            "get_health_server_dependencies",
+            return_value=sentinel.health,
+        ) as health_impl,
+        patch.object(
+            owner_module,
+            "get_quarantine_service",
+            return_value=sentinel.quarantine,
+        ) as quarantine_impl,
+    ):
+        assert (
+            health_service_access.get_health_server_dependencies(data_root=data_root)
+            is sentinel.health
+        )
+        assert (
+            health_service_access.get_quarantine_service(data_root=data_root)
+            is sentinel.quarantine
+        )
+
+    health_impl.assert_called_once_with(data_root=data_root)
+    quarantine_impl.assert_called_once_with(data_root=data_root)
 
 
 def test_get_health_service_delegates_to_services_owner() -> None:

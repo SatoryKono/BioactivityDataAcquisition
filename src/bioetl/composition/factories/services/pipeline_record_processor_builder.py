@@ -34,9 +34,6 @@ if TYPE_CHECKING:
     import pandera as pdr
     import pyarrow as pa
 
-    from bioetl.application.core.protocols import (
-        TransformCallback as AppTransformCallback,
-    )
     from bioetl.composition.bootstrap_contexts import PipelineCallbacksContext
     from bioetl.domain.config import DQConfig
     from bioetl.domain.ports import GoldValidatorPort, TracingPort
@@ -159,7 +156,7 @@ def create_record_processor_from_pipeline(
             silver_write_mode=pipeline.config.table.silver_write_mode,
             gold_write_mode=pipeline.config.table.gold_write_mode,
             on_schema_mismatch=pipeline.config.table.on_schema_mismatch,
-            transform_callback=cast("AppTransformCallback", callbacks.transform),
+            transform_callback=callbacks.transform,
             gold_filter_callback=callbacks.gold_filter,
             gold_transform_callback=callbacks.gold_transform,
             tracer=tracer,

@@ -17,10 +17,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
-from bioetl.application.ports.metrics import MetricsServerStatus, MetricsStartResult
-from bioetl.application.services.ops._metrics_service_gateway_support import (
+from bioetl.application.ports.metrics import (
     DeleteResult,
+    MetricsServerStatus,
     PushResult,
+    StartResult,
+)
+from bioetl.application.services.ops._metrics_service_gateway_support import (
     _MetricsGatewayMixin,
     _MetricsTracingHost,
     _MetricsTracingMixin,
@@ -50,9 +53,6 @@ _METRICS_START_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-StartResult = MetricsStartResult
 
 
 class _MetricsStartHost(_MetricsTracingHost, Protocol):

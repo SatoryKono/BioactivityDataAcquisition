@@ -1,4 +1,3 @@
-# Boundary object/payload typing residual at this module.
 """Data source creators for bio providers: ChEMBL, PubChem, UniProt, IDMapping."""
 
 from __future__ import annotations
@@ -224,7 +223,7 @@ def _create_uniprot_idmapping_data_source(
     from_db, to_db = _resolve_uniprot_mapping_databases(pipeline_config)
     return IDMappingDataSource(
         idmapping_client=UniProtIDMappingClient(
-            http_client=http_client,
+            http_client=cast("UnifiedHTTPClient", http_client),
             logger=logger,
             metrics=metrics,
             base_url=_resolve_uniprot_mapping_base_url(pipeline_config),

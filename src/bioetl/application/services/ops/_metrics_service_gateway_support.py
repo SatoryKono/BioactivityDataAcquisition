@@ -10,7 +10,7 @@ from bioetl.application.observability.span_attribute_values import (
     coerce_span_attribute_value,
 )
 from bioetl.application.observability.tracing_operation_helpers import traced_operation
-from bioetl.application.ports.metrics import MetricsGatewayResult
+from bioetl.application.ports.metrics import DeleteResult, PushResult
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -28,10 +28,6 @@ _METRICS_GATEWAY_ERRORS = (
     ValueError,
     TypeError,
 )
-
-
-PushResult = MetricsGatewayResult
-DeleteResult = MetricsGatewayResult
 
 
 class _MetricsTracingHost(Protocol):

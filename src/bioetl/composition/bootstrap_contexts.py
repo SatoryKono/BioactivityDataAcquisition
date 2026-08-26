@@ -1,40 +1,23 @@
-"""Typed contexts for bootstrap functions returning multiple dependencies.
-
-This module provides frozen dataclasses that replace untyped tuples
-in bootstrap and factory functions, enabling IDE autocomplete and
-type-safe access to returned dependencies.
-
-All contexts are immutable (frozen=True) and contain only data, no logic.
-
-Usage:
-    >>> context = PipelineCallbacksContext(
-    ...     transform=transform_fn,
-    ...     gold_filter=filter_fn,
-    ...     gold_transform=gold_transform_fn,
-    ... )
-    >>> context.transform  # IDE autocomplete works
-"""
+"""Typed data containers shared by bootstrap and composition factories."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.domain.resilience import CircuitBreakerConfig
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import (
-        BronzeDQConfigPort,
-        GoldDQConfigPort,
-        SilverDQConfigPort,
-    )
-
-from bioetl.domain.ports import (
+from bioetl.composition.bootstrap.runtime_public_exports import (
     GoldFilterCallback,
     GoldTransformCallback,
     TransformCallback,
 )
+from bioetl.composition.providers import CircuitBreakerConfig
 
+if TYPE_CHECKING:
+    from bioetl.composition.bootstrap.runtime_public_exports import (
+        BronzeDQConfigPort,
+        GoldDQConfigPort,
+        SilverDQConfigPort,
+    )
 
 __all__ = [
     "CircuitBreakerConfig",
@@ -47,21 +30,7 @@ __all__ = [
 
 @dataclass(frozen=True)
 class PipelineCallbacksContext:
-    """Typed context for pipeline transformation callbacks.
-
-    Replaces untyped callback tuple from extract_pipeline_callbacks().
-
-    Attributes:
-        transform: Bronze to Silver transformation callback.
-            Expected signature: (context, record, index) -> Awaitable[dict | None]
-            Implements TransformCallback protocol.
-        gold_filter: Callback to determine if record should be written to Gold.
-            Expected signature: (context, record) -> bool
-            Implements GoldFilterCallback protocol.
-        gold_transform: Silver to Gold transformation callback.
-            Expected signature: (context, silver_record) -> dict
-            Implements GoldTransformCallback protocol.
-    """
+    """Pipeline transformation callbacks resolved by composition factories."""
 
     transform: TransformCallback
     gold_filter: GoldFilterCallback
@@ -70,16 +39,7 @@ class PipelineCallbacksContext:
 
 @dataclass(frozen=True)
 class DQConfigsContext:
-    """Typed context for Data Quality report configurations.
-
-    Replaces untyped tuple[BronzeDQConfigPort | None, SilverDQConfigPort | None,
-    GoldDQConfigPort | None] from _extract_dq_configs().
-
-    Attributes:
-        bronze: DQ report configuration for Bronze layer (None if disabled).
-        silver: DQ report configuration for Silver layer (None if disabled).
-        gold: DQ report configuration for Gold layer (None if disabled).
-    """
+    """Optional Data Quality configuration for each medallion layer."""
 
     bronze: BronzeDQConfigPort | None
     silver: SilverDQConfigPort | None
@@ -88,17 +48,7 @@ class DQConfigsContext:
 
 @dataclass(frozen=True)
 class DQOutputPathsContext:
-    """Typed context for DQ report output paths.
-
-    Replaces untyped tuple[str | None, str | None, str | None, bool]
-    from _extract_dq_output_paths().
-
-    Attributes:
-        bronze_path: Output path for Bronze DQ reports (None if not configured).
-        silver_path: Output path for Silver DQ reports (None if not configured).
-        gold_path: Output path for Gold DQ reports (None if not configured).
-        flat_structure: Whether to use flat directory structure for DQ reports.
-    """
+    """Data Quality output paths and layout selection."""
 
     bronze_path: str | None
     silver_path: str | None
@@ -108,18 +58,7 @@ class DQOutputPathsContext:
 
 @dataclass(frozen=True)
 class RateLimitContext:
-    """Typed context for rate limiting configuration.
-
-    Replaces untyped tuple[float, int] from _get_rate_limit_from_config().
-
-    Attributes:
-        rate: Requests per second.
-        capacity: Token bucket capacity (burst limit).
-    """
+    """Token-bucket rate and burst capacity."""
 
     rate: float
     capacity: int
-
-
-# CircuitBreakerConfig is imported from bioetl.domain.resilience (canonical definition)
-# and re-exported via __all__ for backward compatibility.

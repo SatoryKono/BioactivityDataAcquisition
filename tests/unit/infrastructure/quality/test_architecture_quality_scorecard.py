@@ -39,10 +39,73 @@ from bioetl.infrastructure.quality.architecture_quality_scorecard import (
     _build_categories,
     build_architecture_quality_scorecard,
 )
+from bioetl.infrastructure.quality import (
+    architecture_quality_scorecard as scorecard_module,
+    architecture_quality_scoring as scoring_module,
+)
 
 ROOT = Path(__file__).resolve().parents[4]
 
 pytestmark = pytest.mark.unit
+
+
+def test_scorecard_load_json_rejects_non_mapping(tmp_path: Path) -> None:
+    """Scorecard evidence inputs must be JSON objects."""
+    evidence = tmp_path / "evidence.json"
+    evidence.write_text("[]", encoding="utf-8")
+
+    with pytest.raises(TypeError, match="must contain a JSON object"):
+        scorecard_module._load_json(tmp_path, "evidence.json")
+
+
+@pytest.mark.parametrize(
+    ("payload", "error", "message"),
+    [
+        ({"packages": "invalid"}, TypeError, "packages must be a list"),
+        ({"packages": [None]}, ValueError, "budget is missing"),
+        (
+            {
+                "packages": [
+                    {"path": "src/bioetl/composition", "max_modules": "invalid"}
+                ]
+            },
+            TypeError,
+            "max_modules must be an integer",
+        ),
+    ],
+)
+def test_composition_module_cap_rejects_invalid_evidence(
+    payload: dict[str, object],
+    error: type[Exception],
+    message: str,
+) -> None:
+    """Invalid cohesion evidence must fail closed."""
+    with pytest.raises(error, match=message):
+        scoring_module._composition_module_cap(payload)
+
+
+def test_scoring_diagnostic_payload_requires_integer_lazy_import_cap() -> None:
+    """The shrink-only lazy import cap cannot be coerced from text."""
+    with pytest.raises(TypeError, match="max_count must be an integer"):
+        scoring_module._build_diagnostic_payload(
+            families_at_budget={"count": 0, "names": []},
+            lazy_import_observed_count=0,
+            lazy_import_ratchet={"max_count": "98"},
+            composition_module_count=0,
+            package_cohesion_budget={"packages": []},
+        )
+
+
+@pytest.mark.parametrize(
+    ("score", "expected"),
+    [
+        (4.9, "critical"),
+        (8.0, "satisfactory_system_refactoring_required"),
+    ],
+)
+def test_score_interpretation_lower_bands(score: float, expected: str) -> None:
+    """Lower score bands retain explicit operator-facing interpretations."""
+    assert scoring_module._interpretation(score) == expected
 
 
 @pytest.fixture(scope="module")

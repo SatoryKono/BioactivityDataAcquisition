@@ -60,9 +60,7 @@ def require_non_empty_str(value: str, field_name: str) -> None:
 
 def require_optional_str(value: str | None, field_name: str) -> None:
     """Validate optional string-like fields when present."""
-    if value is None:
-        return
-    if not value.strip():
+    if value is not None and not value.strip():
         raise ValueError(f"{field_name} cannot be empty")
 
 
@@ -238,11 +236,7 @@ class ForeignKeyReconciliationRequest:
     @property
     def effective_mutation_layer(self) -> ForeignKeyReconciliationLayer:
         """Return the layer mutated by this reconciliation request."""
-        return (
-            self.mutation_layer
-            if self.mutation_layer is not None
-            else self.source_layer
-        )
+        return self.mutation_layer or self.source_layer
 
 
 @dataclass(frozen=True, slots=True)
