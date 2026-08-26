@@ -37,11 +37,11 @@
       "status": "pass"
     },
     {
-      "current": "not_evaluated_without_changed_from_ref",
+      "current": 0,
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
+      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "82a7bd00515b7f212b44c44727e70f5ed98863b39e70bcda09bdf9f002a620b6",
+      "current": "8c971099fb33f38c48655cf18133bca2ee34a8ed305c61c5fc98c8cdf293b419",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -416,15 +416,17 @@
     },
     {
       "current": {
-        "artifacts": [],
-        "count": 0
+        "artifacts": [
+          "config_surface_backlog"
+        ],
+        "count": 1
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: config_surface_backlog",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -451,26 +453,27 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
-    "config_surface_backlog": false,
+    "config_surface_backlog": true,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 44,
+    "fail": 2,
+    "pass": 43,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 7.41,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 1,
+    "fail_count": 2,
     "failing_gates": [
-      "module_coverage_unmeasured_modules"
+      "module_coverage_unmeasured_modules",
+      "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 44,
+    "pass_count": 43,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
