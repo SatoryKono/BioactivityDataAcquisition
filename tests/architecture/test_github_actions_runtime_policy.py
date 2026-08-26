@@ -531,7 +531,9 @@ def _job_has_write_permission(job: dict[str, Any]) -> bool:
     perms = job.get("permissions")
     if not isinstance(perms, dict):
         return False
-    return any(str(perms.get(key, "")).lower() == "write" for key in _WRITE_PERMISSION_KEYS)
+    return any(
+        str(perms.get(key, "")).lower() == "write" for key in _WRITE_PERMISSION_KEYS
+    )
 
 
 def test_write_capable_jobs_disable_checkout_credentials() -> None:
@@ -579,9 +581,10 @@ def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
     assert "37802adc94f370d6bfd71619e3f0bf239e1f3b78" in action
     assert 'version: "0.11.26"' in action
     assert 'default: "3.12"' in action
-    contract = (ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml").read_text(
-        encoding="utf-8"
+    contract_path = (
+        ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml"
     )
+    contract = contract_path.read_text(encoding="utf-8")
     assert "UV_VERSION" not in contract
     assert "./.github/actions/setup-python-uv" in contract
 

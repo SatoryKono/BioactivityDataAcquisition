@@ -36,14 +36,14 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `7.41` (`satisfactory_system_refactoring_required`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.41` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2467` | `reports/quality/module-coverage-inventory.json` |
-| Unmeasured / uncovered modules | `84` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `0` / `0` | `reports/quality/debt-governance-gates.json` (inventory JSON must stay parseable) |
 | Coverage inventory status counts | `1447` fully covered, `923` partially covered, `13` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `1` (`application_services_control_plane` 2/2) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
-| Debt-governance gates | `44` pass, `0` warn, `1` fail | `reports/quality/debt-governance-gates.json` |
+| Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `44` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 The full-app duplication baseline distinguishes actionable clusters from raw
@@ -54,9 +54,9 @@ drift is currently clear (`stale_artifacts` are all false in
 `module_coverage_source_tree_hash_current`, so stale
 `reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
 release-gate failures rather than hidden warning-only coverage drift. Module
-coverage currently reports `84` unmeasured and zero uncovered source modules
-from the current committed coverage XML. That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `923` modules
+coverage currently reports `0` unmeasured and zero uncovered source modules
+from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
+a blanket line/branch coverage guarantee: remaining modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -305,7 +305,7 @@ by storage technology. Current owner boundaries:
 
 ## Open Questions
 
-- Module coverage currently has `84` unmeasured and zero uncovered source modules
+- Module coverage currently has `0` unmeasured and zero uncovered source modules
   in `reports/quality/module-coverage-inventory.json`, while `923` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.

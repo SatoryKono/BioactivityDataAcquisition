@@ -35,8 +35,7 @@ Baseline Local-Only setup requires only the following local tools:
 
 **Optional adjunct tooling only, not baseline prerequisites:**
 
-- Docker Desktop
-- Redis, MinIO, Postgres helper stacks
+- Docker Desktop for the optional monitoring compose (`docker-compose.monitoring.yml`, ADR-010/053). Redis, MinIO, and Postgres are **not** part of the default BioETL runtime.
 
 ## Runtime compatibility policy
 

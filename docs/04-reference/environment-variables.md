@@ -30,7 +30,7 @@ variables, see [README.md](../../README.md#installation) and `.env.example`.
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `BIOETL_PUBMED_API_KEY` | PubMed API key for higher rate limits | - | No |
-| `BIOETL_PUBMED_EMAIL` | Email for polite pool attribution | `bioetl-bot@example.com` | No |
+| `BIOETL_PUBMED_EMAIL` | Email for polite pool attribution | empty (adapter returns `None` unless set) | No |
 
 ### Semantic Scholar
 | Variable | Description | Required |

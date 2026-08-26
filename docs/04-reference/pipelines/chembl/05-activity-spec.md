@@ -27,7 +27,7 @@ ______________________________________________________________________
 | **Endpoint**     | `https://www.ebi.ac.uk/chembl/api/data/activity`                             |
 | **HTTP stack**   | Unified httpx-based adapters in `src/bioetl/infrastructure/adapters/chembl/` |
 | **Auth type**    | Public API                                                                   |
-| **Rate limit**   | `3 req/sec` (`configs/providers/chembl.yaml`)                                |
+| **Rate limit**   | `0.1 req/sec` (`configs/providers/chembl.yaml`; upstream courtesy 3 req/sec) |
 | **Architecture** | Local-Only runtime (ADR-010)                                                 |
 
 ## 2. Current Runtime Behavior
