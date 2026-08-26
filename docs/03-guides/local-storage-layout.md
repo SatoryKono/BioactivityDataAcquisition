@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-08-26'
 
 ______________________________________________________________________
 
@@ -44,6 +44,13 @@ data/
     │           ├── part-00000-*.parquet
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── gold-{provider}-{entity}-dq-report.json
+    ├── control/                         # ADR-044 / ADR-047 control plane
+    │   ├── run_manifest/
+    │   ├── run_ledger/
+    │   ├── workflow_manifest/
+    │   ├── workflow_ledger/
+    │   ├── workflow_state/
+    │   └── workflow_transform_results/
     ├── checkpoints/
     │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/

@@ -52,31 +52,34 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **76** Python files (**67** port modules + **9** package
+Сейчас пакет включает **82** Python files (**73** port modules + **9** package
 `__init__.py` facades) во вложенной структуре
-(`reports/quality/domain-ports-inventory.json`: `port_module_files=67`,
-`scanned_python_files=76`, `port_protocol_classes=86`). На корневом уровне
-пакета — **21** `*.py` files (19 public port modules + `__init__.py` +
+(`reports/quality/domain-ports-inventory.json`: `port_module_files=73`,
+`scanned_python_files=82`, `port_protocol_classes=89`). На корневом уровне
+пакета — **25** `*.py` files (23 public port modules + `__init__.py` +
 `_facade_support.py`). Полный module catalog:
 [Domain Ports](../04-reference/domain/ports.md).
 
 - config/ (3 port modules)
-- control_plane/ (8 port modules)
+- control_plane/ (9 port modules)
 - metadata/ (2 port modules)
 - observability/ (4 port modules)
 - quality/ (9 port modules)
 - runtime/ (10 port modules)
-- storage/ (5 port modules)
+- storage/ (6 port modules)
 - noop/ (6 NoOp fallback modules)
-- flat root modules: `adr.py`, `audit.py`, `data_normalization.py`, `data_source.py`,
-  `delta_reader.py`, `export.py`, `filtering.py`, `health_check.py`, `idmapping.py`,
-  `logger_port.py`, `pii.py`, `protein_classification.py`, `publication_strategy.py`,
-  `resilience.py`, `serialization.py`, `stage_accounting.py`,
+- flat root modules: `adr.py`, `audit.py`, `config_mapper.py`,
+  `data_normalization.py`, `data_source.py`,
+  `delta_reader.py`, `entity_type.py`, `export.py`, `filtering.py`,
+  `health_check.py`, `idmapping.py`,
+  `logger_port.py`, `pii.py`, `pipeline_callbacks.py`,
+  `protein_classification.py`, `publication_strategy.py`,
+  `resilience.py`, `serialization.py`, `source_config.py`, `stage_accounting.py`,
   `storage_maintenance.py`,
   `workflow_foreign_key_reconciliation.py`, `workflow_row_reconciliation.py`
   (plus private `_facade_support.py` and package `__init__.py`)
 
-Корневое число **21** (`Path.glob("*.py")`) синхронизируется архитектурным
+Корневое число **25** (`Path.glob("*.py")`) синхронизируется архитектурным
 тестом `test_ports_count_matches_docs`.
 
 ### 2.1.1. Дополнительные порты

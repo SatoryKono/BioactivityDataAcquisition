@@ -1,6 +1,6 @@
 # mkdocs.yml
 site_name: BioETL Project
-site_url: https://SatoryKono.github.io/BioactivityDataAcquisition/
+# site_url omitted: GitHub Pages is unpublished; docs.yml is validation/build only.
 repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition
 repo_name: SatoryKono/BioactivityDataAcquisition
 edit_uri: "edit/main/docs/"

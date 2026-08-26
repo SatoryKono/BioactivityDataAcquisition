@@ -503,7 +503,7 @@ ______________________________________________________________________
 **HTTP-адаптеры**: Все используют `BaseHttpAdapter` с Rate Limiter, Circuit Breaker, Retry Logic
 **Legacy Wrappers**: `BaseSyncAdapter` с `run-in-executor` для библиотек без async (pubchempy)
 
-**Провайдеры:** ChEMBL, PubChem (5 req/sec), UniProt (100 req/sec), CrossRef, OpenAlex, PubMed (3 req/sec), SemanticScholar
+**Провайдеры:** ChEMBL (0.1 req/sec), PubChem (5 req/sec), UniProt (10 req/sec, 100 with key), CrossRef, OpenAlex, PubMed (3 req/sec), SemanticScholar
 
 **Безопасность:** `make security` — osv-scanner + pip-audit + Bandit
 

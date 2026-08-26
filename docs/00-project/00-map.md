@@ -139,6 +139,8 @@ docs/
 │   ├── diagrams/            # Canonical Mermaid source files and rendered views
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
 │
+├── 03-data-model/               # Identifier families & JSON field typing
+│
 ├── 03-guides/                   # Guides & Manuals
 │   ├── development/             # Developer guides (config schema, etc.)
 │   └── ... (User guides: getting-started, testing, etc.)
@@ -153,11 +155,16 @@ docs/
 │   ├── schemas/                 # Auxiliary schemas & field maps
 │   └── templates/               # Code & doc templates + published template index
 │
+├── 05-engineering/              # Engineering notes (repo-published)
+│
 ├── 05-operations/               # Operations & Runbooks
 │   ├── archive-index.md         # Historical / archive-only operations surface
 │   ├── runbooks/                # Incident response playbooks
 │   ├── verification/            # Data verification reports
 │   └── ... (Ops guides: vacuum, performance)
+│
+├── filters/                     # Filter inventory baselines
+├── security/                    # Export policy & RBAC
 │
 └── 99-archive/                  # Historical / superseded (repo-only, non-canonical)
     ├── reports/                 # Old project reports

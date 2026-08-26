@@ -39,10 +39,10 @@
 - [12b-bootstrap-wiring — Bootstrap: Runtime, Control-Plane, and Admin Wiring](#12b-bootstrap-wiring)
 - [13-port-protocol-contracts — Port/Protocol Contracts (Full Map)](#13-port-protocol-contracts)
 - [13a-data-storage-ports — DataSource and Storage Ports](#13a-data-storage-ports)
-- [13a-port-contracts-data-sources — Port Contracts: Data Sources](#13a-port-contracts-data-sources)
+- [13g-port-contracts-data-sources — Port Contracts: Data Sources](#13g-port-contracts-data-sources)
 - [13b-operational-ports — Operational and Observability Ports](#13b-operational-ports)
-- [13b-port-contracts-storage — Port Contracts: Storage](#13b-port-contracts-storage)
-- [13c-port-contracts-observability — Port Contracts: Observability and Resilience](#13c-port-contracts-observability)
+- [13h-port-contracts-storage — Port Contracts: Storage](#13h-port-contracts-storage)
+- [13i-port-contracts-observability — Port Contracts: Observability and Resilience](#13i-port-contracts-observability)
 - [13c-validation-dq-ports — Validation and Data Quality Ports](#13c-validation-dq-ports)
 - [13d-port-contracts-services — Port Contracts: Services and Controls](#13d-port-contracts-services)
 - [13e-operational-ports-domain — Domain Operational Ports](#13e-operational-ports-domain)
@@ -746,11 +746,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 13a-port-contracts-data-sources
+## 13g-port-contracts-data-sources
 
 **Port Contracts: Data Sources**
 
-![13a-port-contracts-data-sources](../architecture/svg/13a-port-contracts-data-sources.svg)
+![13g-port-contracts-data-sources](../architecture/svg/13g-port-contracts-data-sources.svg)
 
 ### Описание
 Диаграмма «Port Contracts: Data Sources» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers DataSourcePort and FilterableDataSourcePort implementations per provider.. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: DataSourcePort, FilterableDataSourcePort, ChemblAdapter.
@@ -784,11 +784,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 13b-port-contracts-storage
+## 13h-port-contracts-storage
 
 **Port Contracts: Storage**
 
-![13b-port-contracts-storage](../architecture/svg/13b-port-contracts-storage.svg)
+![13h-port-contracts-storage](../architecture/svg/13h-port-contracts-storage.svg)
 
 ### Описание
 Диаграмма «Port Contracts: Storage» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, DeltaReaderPort, and layer-specific MetadataWriterPort implementations.. Схема имеет плотность порядка 9 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: Bronze/Silver/Gold/MergedStoragePorts, DeltaReaderPort, MetadataWriterPort write_bronze / write_silver / write_gold, BronzeWriter, DeltaReader, MetadataWriter atomic metadata sidecars.
@@ -803,11 +803,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 13c-port-contracts-observability
+## 13i-port-contracts-observability
 
 **Port Contracts: Observability and Resilience**
 
-![13c-port-contracts-observability](../architecture/svg/13c-port-contracts-observability.svg)
+![13i-port-contracts-observability](../architecture/svg/13i-port-contracts-observability.svg)
 
 ### Описание
 Диаграмма «Port Contracts: Observability and Resilience» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Covers Logger/Metrics/Tracing ports plus resilience control ports.. Схема имеет плотность порядка 18 узлов; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer, Domain NoOp Compatibility, Infrastructure Layer. Показательные узлы для быстрого чтения: LoggerPort, MetricsPort, TracingPort, DQMonitorPort, AuditPort, CircuitBreakerPort.

@@ -71,11 +71,7 @@ def test_fetch_processed_record_values_queries_all_visible_rows_once(
     assert values[support.PROCESSED_RECORDS_ROW_SPECS[0].metric] == 1.0
     assert values[support.PROCESSED_RECORDS_ROW_SPECS[1].metric] is None
     assert len(calls) == 1
-    assert calls[0][0] == (
-        "http://localhost:9090",
-        "http://prometheus:9090",
-        "http://host.docker.internal:9090",
-    )
+    assert calls[0][0] == ("http://localhost:9090",)
     assert 'pipeline=~"(?:chembl_activity|pubchem_compound)"' in calls[0][1]
     assert 'run_type=~"backfill"' in calls[0][1]
     assert calls[0][1].startswith("sum by (__name__)")
