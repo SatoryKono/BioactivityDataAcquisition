@@ -1,11 +1,7 @@
-# pyright: reportArgumentType=false
-# pyright: reportAttributeAccessIssue=false
-# pyright: reportCallIssue=false
-# pyright: reportIndexIssue=false
-# pyright: reportMissingTypeArgument=false
-# pyright: reportGeneralTypeIssues=false
-# pyright: reportOptionalMemberAccess=false
-# pyright: reportOperatorIssue=false
+# pyright: reportArgumentType=false, reportAttributeAccessIssue=false
+# pyright: reportCallIssue=false, reportIndexIssue=false
+# pyright: reportMissingTypeArgument=false, reportGeneralTypeIssues=false
+# pyright: reportOptionalMemberAccess=false, reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Cross-cutting reproducibility contract suite for exact replay diagnostics."""

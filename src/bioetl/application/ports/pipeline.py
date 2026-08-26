@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from bioetl.domain.ports import (  # type: ignore[attr-defined]
+    DomainConfigMapper,
+    EntityTypeExtractor,
+)
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
         AuditPort,
@@ -23,6 +28,16 @@ if TYPE_CHECKING:
     PipelineYamlConfig = object
     RunLedgerService = object
     Settings = object
+
+__all__ = [
+    "BaseServicesFactoryProtocol",
+    "ContractPolicyLoaderProtocol",
+    "DomainConfigMapper",
+    "EntityTypeExtractor",
+    "PipelineRunnerProtocol",
+    "RegistryEntryProtocol",
+    "SchemaBuilderProtocol",
+]
 
 
 @runtime_checkable

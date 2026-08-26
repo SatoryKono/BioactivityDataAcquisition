@@ -75,3 +75,8 @@ def test_get_workflow_execution_service_injects_real_manifest_clock(
     assert service.workflow_state_port.base_path == (
         tmp_path / "output" / "control" / "workflow_state"
     )
+
+
+def test_system_clock_factory_returns_timezone_aware_now() -> None:
+    """Workflow ledger timestamps must come from the canonical system clock."""
+    assert _workflow_services._system_clock_now()().tzinfo is not None

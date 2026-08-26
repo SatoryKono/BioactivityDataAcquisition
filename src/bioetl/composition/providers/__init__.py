@@ -14,6 +14,9 @@ _PROVIDER_REGISTRY_MODULE = "bioetl.composition.providers.provider_registry"
 
 
 if TYPE_CHECKING:
+    from bioetl.composition.providers._models import (
+        CircuitBreakerConfig as CircuitBreakerConfig,
+    )
     from bioetl.composition.providers.decorators import (
         register_provider as register_provider,
     )
@@ -34,6 +37,10 @@ if TYPE_CHECKING:
     )
 
 _PUBLIC_EXPORTS = {
+    "CircuitBreakerConfig": (
+        "bioetl.composition.providers._models",
+        "CircuitBreakerConfig",
+    ),
     "DataSourceCreatorProtocol": (
         _PROVIDER_REGISTRY_MODULE,
         "DataSourceCreatorProtocol",

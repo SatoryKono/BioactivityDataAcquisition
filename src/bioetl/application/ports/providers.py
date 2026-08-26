@@ -18,7 +18,20 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class HttpConfig:
-    """Minimal HTTP client config used by provider registry lookups."""
+    """HTTP client configuration returned by provider registries."""
+
+    rate: float = 5.0
+    capacity: int = 10
+
+
+@runtime_checkable
+class HttpConfigProtocol(Protocol):
+    """Protocol version of HttpConfig for structural type checking (deprecated).
+
+    Use HttpConfig dataclass directly instead. This protocol is provided for
+    backward compatibility with code that used isinstance() checks against
+    the Protocol (deprecated since 2026-08-26).
+    """
 
     rate: float = 5.0
     capacity: int = 10
