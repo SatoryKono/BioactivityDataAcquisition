@@ -18,6 +18,7 @@ from .datasource.data_source_factory import DataSourceCreatorProtocol
 
 from bioetl.application.ports.metrics import MetricsFactoryProtocol as _MetricsFactory
 
+
 def create_shared_metrics(
     *,
     settings: Settings,

@@ -1196,7 +1196,9 @@ def minimal_crossref_publication_df():
 
 
 @pytest.fixture(autouse=True)
-def _bioetl_test_silver_validator(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+def _bioetl_test_silver_validator(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Tests construct SilverWriter without a schema; inject explicit NoOp.
 
     Production resolve_silver_writer_runtime remains fail-closed. Opt out with
@@ -1225,7 +1227,10 @@ def _bioetl_test_silver_validator(request: pytest.FixtureRequest, monkeypatch: p
     ) -> None:
         if runtime_services is None:
             request_obj = runtime_request
-            if request_obj is None or getattr(request_obj, "silver_validator", None) is None:
+            if (
+                request_obj is None
+                or getattr(request_obj, "silver_validator", None) is None
+            ):
                 if request_obj is None:
                     runtime_request = SilverWriterRuntimeServicesRequest(
                         logger=logger,  # type: ignore[arg-type]

@@ -27,6 +27,7 @@ from bioetl.infrastructure.storage.silver.runtime_helpers import (
     build_silver_writer_runtime_services,
 )
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 pytestmark = pytest.mark.integration
 
@@ -90,7 +91,7 @@ def _create_dual_write_writer(
                 metrics=None,
                 audit=None,
                 logger=logger,
-                silver_validator=None,
+                silver_validator=NoOpValidator(),
                 metadata_writer=None,
                 metadata_coordinator=None,
                 lineage_store=None,

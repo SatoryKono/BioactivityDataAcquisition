@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import click
 
@@ -49,7 +49,7 @@ def get_health_service() -> HealthService:
     """Load the health service through composition on demand."""
     from bioetl.composition.health_service_access import get_health_service as _impl
 
-    return _impl()
+    return cast("HealthService", _impl())
 
 
 def get_health_server_dependencies() -> HealthServerDependencies:
@@ -58,14 +58,14 @@ def get_health_server_dependencies() -> HealthServerDependencies:
         get_health_server_dependencies as _impl,
     )
 
-    return _impl()
+    return cast("HealthServerDependencies", _impl())
 
 
 def get_quarantine_service() -> QuarantineService:
     """Load quarantine service through composition on demand."""
     from bioetl.composition.health_service_access import get_quarantine_service as _impl
 
-    return _impl()
+    return cast("QuarantineService", _impl())
 
 
 def get_health_server_quarantine_service() -> QuarantineService:

@@ -122,13 +122,23 @@ def test_issue_5814_execution_api_stays_public_but_first_party_usage_moves_owner
     None
 ):
     execution_api_importers = _src_importers("bioetl.composition.execution_api")
-    owner_seam_importers = _src_importers("bioetl.composition.entrypoints")
-
-    assert "src/bioetl/interfaces/cli/commands/debug.py" in execution_api_importers
-    assert (
-        "src/bioetl/interfaces/cli/commands/domains/run/runtime_helpers.py"
-        in execution_api_importers
-    )
+    assert execution_api_importers == set()
+    debug_source = (
+        ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "debug.py"
+    ).read_text(encoding="utf-8")
+    runtime_helpers_source = (
+        ROOT
+        / "src"
+        / "bioetl"
+        / "interfaces"
+        / "cli"
+        / "commands"
+        / "domains"
+        / "run"
+        / "runtime_helpers.py"
+    ).read_text(encoding="utf-8")
+    assert "bioetl.composition.entrypoints" in debug_source
+    assert "bioetl.composition.entrypoints" in runtime_helpers_source
 
     metrics_publication = (
         ROOT

@@ -154,7 +154,7 @@ def test_issue_5651_retained_public_compatibility_surfaces_are_justified() -> No
 
     assert registry["transition_debt"] == []
     assert summary["retained_entrypoint_count"] == 12
-    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_entrypoint_burden"] == 0
     assert summary["retained_public_export_facade_count"] == 4
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0

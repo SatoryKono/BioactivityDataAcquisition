@@ -141,17 +141,13 @@ def _install_workflow_runner_service_dependencies(
         port_factories,
     )
 
-    silver_writer_module = ModuleType("silver_writer")
-
     class _SilverWriter:
         def __init__(self, **kwargs):
             created["silver_writer"] = kwargs
 
-    silver_writer_module.SilverWriter = _SilverWriter
-    monkeypatch.setitem(
-        sys.modules,
-        "bioetl.infrastructure.storage.silver_writer",
-        silver_writer_module,
+    monkeypatch.setattr(
+        "bioetl.composition._workflow_transform_registry.SilverWriter",
+        _SilverWriter,
     )
 
     quarantine_module = ModuleType("quarantine")
@@ -234,7 +230,7 @@ def _install_workflow_execution_service_dependencies(
     )
 
     time_module = ModuleType("time")
-    time_module.SystemClock = lambda: "clock"
+    time_module.SystemClock = lambda: SimpleNamespace(now=lambda: None)
     monkeypatch.setitem(sys.modules, "bioetl.infrastructure.time", time_module)
     monkeypatch.setattr(
         _workflow_services,
@@ -434,6 +430,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
         "_ensure_pipeline_registrations",
         lambda registry=None: pipeline_calls.append(registry) or registry,
     )
+
     def resolve(port: type[object]) -> object:
         resolve_calls.append(port)
         if port is QuarantineServiceFactoryProtocol:
@@ -452,10 +449,7 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
 
     assert _services.get_checkpoint_service()[0] is CheckpointServiceProtocol
     assert _services.get_audit_service()[0] is AuditInspectionServiceProtocol
-    assert (
-        _services.get_quarantine_service()[0]
-        is QuarantineServiceFactoryProtocol
-    )
+    assert _services.get_quarantine_service()[0] is QuarantineServiceFactoryProtocol
     assert _services.get_bronze_cleanup_service()[0] is BronzeCleanupServiceProtocol
     assert _services.get_vacuum_service()[0] is VacuumServiceProtocol
     assert _services.get_export_service()[0] is ExportServiceProtocol

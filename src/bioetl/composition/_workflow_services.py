@@ -150,9 +150,7 @@ def _get_workflow_memory_lock() -> LockPort:
 
 
 def _system_clock_now() -> Callable[[], datetime]:
-    from bioetl.infrastructure.time import SystemClock
-
-    return SystemClock().now
+    return import_module("bioetl.infrastructure.time").SystemClock().now
 
 
 def _create_workflow_ledger_service(

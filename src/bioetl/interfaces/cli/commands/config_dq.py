@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, NoReturn
+from typing import TYPE_CHECKING, NoReturn, cast
 
 import click
 import yaml
@@ -42,7 +42,7 @@ def get_config_service() -> ConfigService:
         get_config_service as _impl,
     )
 
-    return _impl()
+    return cast("ConfigService", _impl())
 
 
 def _fail_dq(

@@ -41,7 +41,7 @@ def get_config_service() -> ConfigService:
         get_config_service as _impl,
     )
 
-    return _impl()
+    return cast("ConfigService", _impl())
 
 
 def get_configured_pipeline_names() -> list[str]:
@@ -50,7 +50,7 @@ def get_configured_pipeline_names() -> list[str]:
         list_configured_pipeline_names as _impl,
     )
 
-    return _impl()
+    return cast("list[str]", _impl())
 
 
 def _fail_config(title: str, detail: str, exit_code: ExitCode) -> NoReturn:

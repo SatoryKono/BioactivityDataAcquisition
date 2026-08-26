@@ -164,7 +164,7 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
 
     assert census["summary"]["retained_entrypoint_count"] == 12
     assert census["summary"]["retained_public_export_facade_count"] == 4
-    assert census["summary"]["retained_public_entrypoint_burden"] == 1
+    assert census["summary"]["retained_public_entrypoint_burden"] == 0
     assert (
         census["summary"]["retained_public_export_facades_with_duplicate_exports"] == 0
     )
