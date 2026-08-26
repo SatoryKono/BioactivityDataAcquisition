@@ -1,8 +1,8 @@
-# S8 / #9604 — shrink-only ratchet for pandera/pandas/pydantic imports in domain.
+# S17 / #9630 — shrink-only ratchet for pandera/pandas/pydantic imports in domain.
 schema_version: 1
 owner: "@bioetl-architecture"
-linked_issue: "9604"
-max_framework_imports: 130
+linked_issue: "9630"
+max_framework_imports: 128
 allowed_libraries:
   - pandera
   - pandas

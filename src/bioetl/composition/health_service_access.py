@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.composition import _resource_management, _services
 
 if TYPE_CHECKING:
+    from bioetl.application.services.ops.bronze_cleanup_service import (
+        BronzeCleanupService,
+    )
     from bioetl.application.services.ops.health_service import HealthService
     from bioetl.application.services.quality.quarantine_service import QuarantineService
     from bioetl.composition.bootstrap.cli.health import (
@@ -29,6 +32,7 @@ else:
     QuarantineRuntimeServiceProtocol = object
 
 __all__ = [
+    "get_bronze_cleanup_service",
     "get_health_server_dependencies",
     "get_health_service",
     "get_quarantine_runtime_service",
@@ -82,3 +86,8 @@ def rehydrate_provider_health_gauges(metrics: MetricsPort) -> int:
     )
 
     return _impl(metrics)
+
+
+def get_bronze_cleanup_service() -> BronzeCleanupService:
+    """Load Bronze cleanup through the ops/health owner seam (#9620)."""
+    return _services.get_bronze_cleanup_service()

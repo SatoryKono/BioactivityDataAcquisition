@@ -382,32 +382,86 @@ class TestApplicationServicesExist:
         assert service_path.exists(), "BronzeCleanupService should exist"
 
 
+_LEGACY_ENTRYPOINT_SERVICE_GETTERS = (
+    "get_checkpoint_service",
+    "get_quarantine_service",
+    "get_bronze_cleanup_service",
+)
+
+
+def _ast_exported_names(tree: ast.Module) -> set[str]:
+    """Return names that entrypoints.py binds or lists in ``__all__`` / lazy maps."""
+    names: set[str] = set()
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            names.add(node.name)
+            continue
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+            if _is_dunder_all_assign(node) and isinstance(
+                node.value, ast.List | ast.Tuple
+            ):
+                names.update(_constant_string_elts(node.value))
+            continue
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            names.add(node.target.id)
+            if node.target.id == "_PUBLIC_EXPORTS" and isinstance(node.value, ast.Dict):
+                names.update(_constant_string_keys(node.value))
+            continue
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                names.add(alias.asname or alias.name)
+    return names
+
+
+def _is_dunder_all_assign(node: ast.Assign) -> bool:
+    return any(
+        isinstance(target, ast.Name) and target.id == "__all__"
+        for target in node.targets
+    )
+
+
+def _constant_string_elts(node: ast.List | ast.Tuple) -> set[str]:
+    return {
+        elt.value
+        for elt in node.elts
+        if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+    }
+
+
+def _constant_string_keys(node: ast.Dict) -> set[str]:
+    return {
+        key.value
+        for key in node.keys
+        if isinstance(key, ast.Constant) and isinstance(key.value, str)
+    }
+
+
 @pytest.mark.architecture
 class TestEntrypointsLegacyServiceCompatibility:
     """Test removed service getter behavior in composition entrypoints."""
 
     def test_entrypoints_exports_services(self):
         """Legacy service getters must stay removed from composition entrypoints."""
-        from bioetl.composition import entrypoints
-
-        entrypoint_names = set(dir(entrypoints))
-        assert "get_checkpoint_service" not in entrypoint_names, (
-            "entrypoints should not expose get_checkpoint_service anymore"
+        tree = ast.parse(
+            (SRC_PATH / "composition" / "entrypoints.py").read_text(encoding="utf-8")
         )
-        assert "get_quarantine_service" not in entrypoint_names, (
-            "entrypoints should not expose get_quarantine_service anymore"
-        )
-        assert "get_bronze_cleanup_service" not in entrypoint_names, (
-            "entrypoints should not expose get_bronze_cleanup_service anymore"
-        )
+        entrypoint_names = _ast_exported_names(tree)
+        for forbidden in _LEGACY_ENTRYPOINT_SERVICE_GETTERS:
+            assert forbidden not in entrypoint_names, (
+                f"entrypoints should not expose {forbidden} anymore"
+            )
 
     def test_entrypoints_all_excludes_legacy_service_getters(self):
         """Legacy service getters must stay off entrypoints and retired umbrella APIs."""
-        from bioetl.composition import entrypoints
-
-        assert "get_checkpoint_service" not in entrypoints.__all__
-        assert "get_quarantine_service" not in entrypoints.__all__
-        assert "get_bronze_cleanup_service" not in entrypoints.__all__
+        tree = ast.parse(
+            (SRC_PATH / "composition" / "entrypoints.py").read_text(encoding="utf-8")
+        )
+        exported = _ast_exported_names(tree)
+        for forbidden in _LEGACY_ENTRYPOINT_SERVICE_GETTERS:
+            assert forbidden not in exported
 
         assert not (SRC_PATH / "composition" / "services_api.py").exists()
 

@@ -24,8 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel, ConfigDict
-from pydantic import Field as PydanticField
+from pydantic import BaseModel, ConfigDict, Field
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain.immutability import freeze_fields
@@ -57,67 +56,67 @@ class PublicationRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     # Primary identifier (REQUIRED, normalized DOI - lowercase, stripped)
-    doi: str = PydanticField(description="Digital Object Identifier (normalized)")
+    doi: str = Field(description="Digital Object Identifier (normalized)")
 
     # Core metadata
-    title: str | None = PydanticField(default=None, description="Publication title")
-    abstract: str | None = PydanticField(
+    title: str | None = Field(default=None, description="Publication title")
+    abstract: str | None = Field(
         default=None, description="Publication abstract"
     )
 
     # Authors (JSON-serialized list of hashed names for PII compliance)
-    authors: str | None = PydanticField(
+    authors: str | None = Field(
         default=None, description="Author names (JSON array, hashed for PII)"
     )
 
     # Journal information
-    journal: str | None = PydanticField(
+    journal: str | None = Field(
         default=None, description="Container title (journal name)"
     )
-    issn: list[str] = PydanticField(
+    issn: list[str] = Field(
         default_factory=list,
         description="ISSN values from CrossRef",
     )
-    issn_list: str | None = PydanticField(
+    issn_list: str | None = Field(
         default=None,
         description="Canonical JSON array of ISSN values",
     )
-    publisher: str | None = PydanticField(default=None, description="Publisher name")
+    publisher: str | None = Field(default=None, description="Publisher name")
 
     # Publication details
-    volume: str | None = PydanticField(default=None, description="Volume number")
-    issue: str | None = PydanticField(default=None, description="Issue number")
-    first_page: str | None = PydanticField(default=None, description="First page")
-    last_page: str | None = PydanticField(default=None, description="Last page")
+    volume: str | None = Field(default=None, description="Volume number")
+    issue: str | None = Field(default=None, description="Issue number")
+    first_page: str | None = Field(default=None, description="First page")
+    last_page: str | None = Field(default=None, description="Last page")
 
     # Dates
-    year: int | None = PydanticField(default=None, description="Publication year")
-    published_print: str | None = PydanticField(
+    year: int | None = Field(default=None, description="Publication year")
+    published_print: str | None = Field(
         default=None, description="Print publication date (ISO format)"
     )
-    published_online: str | None = PydanticField(
+    published_online: str | None = Field(
         default=None, description="Online publication date (ISO format)"
     )
 
     # Document type (mapped from CrossRef type)
-    doc_type: str = PydanticField(
+    doc_type: str = Field(
         default="PUBLICATION", description="Document type (PUBLICATION or PREPRINT)"
     )
 
     # Citation metrics
-    citation_count: int | None = PydanticField(
+    citation_count: int | None = Field(
         default=None, description="Times cited (is-referenced-by-count)"
     )
-    reference_count: int | None = PydanticField(
+    reference_count: int | None = Field(
         default=None, description="Number of references (references-count)"
     )
 
     # Additional metadata
-    language: str | None = PydanticField(
+    language: str | None = Field(
         default=None, description="Primary language code"
     )
-    license_url: str | None = PydanticField(default=None, description="License URL")
-    subjects: list[str] = PydanticField(
+    license_url: str | None = Field(default=None, description="License URL")
+    subjects: list[str] = Field(
         default_factory=list, description="Subject areas"
     )
 

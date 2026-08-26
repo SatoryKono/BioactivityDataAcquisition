@@ -117,3 +117,18 @@ def test_rehydrate_provider_health_gauges_delegates_to_preflight_owner() -> None
 
     assert result == 3
     mock_impl.assert_called_once_with(metrics)
+
+
+def test_get_bronze_cleanup_service_delegates_to_services_owner() -> None:
+    expected = MagicMock(name="BronzeCleanupService")
+    owner_module = _owner_module("._services")
+
+    with patch.object(
+        owner_module,
+        "get_bronze_cleanup_service",
+        return_value=expected,
+    ) as mock_impl:
+        result = health_service_access.get_bronze_cleanup_service()
+
+    assert result is expected
+    mock_impl.assert_called_once_with()

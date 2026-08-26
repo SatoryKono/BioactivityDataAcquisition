@@ -1,87 +1,71 @@
-# S1 / #9597 — shrink-only ratchet for cross-owner private-module imports.
+# S20 / #9626 — shrink-only ratchet for cross-owner private-module imports.
 # max_count may only decrease. New pairs require an ADR exemption and a
 # target_removal_wave; they must not raise max_count.
 
 schema_version: 1
 strict_mode: false
-max_count: 19
+max_count: 15
 owner: "@bioetl-architecture"
-linked_issue: "9597"
+linked_issue: "9626"
 ratchet_policy: fail on growth; shrink max_count to live observed_count
 pairs:
   - importer: bioetl/application/composite/helpers/preflight_schema_field_extraction.py
     target: bioetl.application.composite._preflight_types
     owner: "@bioetl-application"
-    target_removal_wave: S3
+    target_removal_wave: residual
   - importer: bioetl/application/composite/helpers/preflight_type_and_aggregation.py
     target: bioetl.application.composite._preflight_types
     owner: "@bioetl-application"
-    target_removal_wave: S3
+    target_removal_wave: residual
   - importer: bioetl/application/services/control_plane/manifest/diagnostics/snapshot_ledger.py
     target: bioetl.application.services.control_plane.replay._historical_snapshot_materialization_modes
     owner: "@bioetl-application"
-    target_removal_wave: S3
+    target_removal_wave: residual
   - importer: bioetl/application/services/control_plane/run_manifest_reproducibility_claims.py
     target: bioetl.application.services.control_plane.replay._historical_claim_reason
     owner: "@bioetl-application"
-    target_removal_wave: S3
-  - importer: bioetl/application/services/lineage/metadata_lineage_fragment_ids.py
-    target: bioetl.domain.lineage._shared
-    owner: "@bioetl-application"
-    target_removal_wave: S3
+    target_removal_wave: residual
   - importer: bioetl/composition/bootstrap/assembly/health_service.py
     target: bioetl.composition.providers._registry_protocols
     owner: "@bioetl-composition"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
     target: bioetl.composition.runtime_builders._run_manifest_refs
     owner: "@bioetl-composition"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
     target: bioetl.composition.runtime_builders._snapshot_mapping_support
     owner: "@bioetl-composition"
-    target_removal_wave: S5
-  - importer: bioetl/composition/factories/pipeline/postrun_assembly.py
-    target: bioetl.application.core.postrun._failure_policy
-    owner: "@bioetl-composition"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/composition/factories/services/common_service_wiring.py
     target: bioetl.composition.factories.dq._context_resolver_support
     owner: "@bioetl-composition"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/composition/health_service_access.py
     target: bioetl.composition.factories.pipeline._preflight_health_monitor
     owner: "@bioetl-composition"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/domain/lineage/_shared.py
     target: bioetl.domain.normalization._control_plane_primitives
     owner: "@bioetl-domain"
-    target_removal_wave: S7
-  - importer: bioetl/domain/ports/workflow_foreign_key_reconciliation.py
-    target: bioetl.domain.workflow._foreign_key_reconciliation_guards
-    owner: "@bioetl-domain"
-    target_removal_wave: S7
+    target_removal_wave: residual
   - importer: bioetl/infrastructure/adapters/_error_handling_support.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/infrastructure/adapters/_health_check_observability.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/infrastructure/adapters/http/_client_retry_flow.py
     target: bioetl.infrastructure.adapters.decorators._retry_support
     owner: "@bioetl-infrastructure"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/infrastructure/control_plane/_file_artifact_lifecycle_refs.py
     target: bioetl.infrastructure.checkpoint._local_checkpoint_io
     owner: "@bioetl-infrastructure"
-    target_removal_wave: S5
+    target_removal_wave: residual
   - importer: bioetl/infrastructure/control_plane/provider_health_evidence.py
     target: bioetl.infrastructure.adapters.http._health_monitor_observability
     owner: "@bioetl-infrastructure"
-    target_removal_wave: S5
-  - importer: bioetl/interfaces/cli/commands/domains/health/observability_backend_failure_details.py
-    target: bioetl.domain.exceptions._redaction
-    owner: "@bioetl-interfaces"
-    target_removal_wave: S2
+    target_removal_wave: residual

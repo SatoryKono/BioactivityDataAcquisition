@@ -16686,16 +16686,6 @@
       "source_lines": 142
     },
     {
-      "coverage_percent": 77.78,
-      "coverage_status": "partially_covered",
-      "covered_lines": 42,
-      "executable_lines": 54,
-      "missing_lines": 12,
-      "module": "bioetl.domain.workflow._foreign_key_reconciliation_guards",
-      "path": "src/bioetl/domain/workflow/_foreign_key_reconciliation_guards.py",
-      "source_lines": 133
-    },
-    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 53,
@@ -16734,6 +16724,16 @@
       "module": "bioetl.domain.workflow.dag",
       "path": "src/bioetl/domain/workflow/dag.py",
       "source_lines": 158
+    },
+    {
+      "coverage_percent": 80.69,
+      "coverage_status": "partially_covered",
+      "covered_lines": 117,
+      "executable_lines": 145,
+      "missing_lines": 28,
+      "module": "bioetl.domain.workflow.foreign_key_reconciliation",
+      "path": "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
+      "source_lines": 304
     },
     {
       "coverage_percent": 100.0,
@@ -41338,16 +41338,6 @@
       "source_lines": 142
     },
     {
-      "coverage_percent": 77.78,
-      "coverage_status": "partially_covered",
-      "covered_lines": 42,
-      "executable_lines": 54,
-      "missing_lines": 12,
-      "module": "bioetl.domain.workflow._foreign_key_reconciliation_guards",
-      "path": "src/bioetl/domain/workflow/_foreign_key_reconciliation_guards.py",
-      "source_lines": 133
-    },
-    {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
       "covered_lines": 53,
@@ -41386,6 +41376,16 @@
       "module": "bioetl.domain.workflow.dag",
       "path": "src/bioetl/domain/workflow/dag.py",
       "source_lines": 158
+    },
+    {
+      "coverage_percent": 80.69,
+      "coverage_status": "partially_covered",
+      "covered_lines": 117,
+      "executable_lines": 145,
+      "missing_lines": 28,
+      "module": "bioetl.domain.workflow.foreign_key_reconciliation",
+      "path": "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
+      "source_lines": 304
     },
     {
       "coverage_percent": 100.0,
@@ -49310,7 +49310,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-25",
+<<<<<<< HEAD
   "source_tree_sha256": "796ca3f13784549acfb5a6b13f94cad63b1c93f1bc3b2d1df47d7cdbfb518362",
+||||||| aba2ded177
+  "source_tree_sha256": "d561c2c978a64b9158b582a0c06de65ea75ec536b55c88784b68e0cdb3b37810",
+=======
+  "source_tree_sha256": "05e0950529a81698922c315c9cab5db7c38b575ece598e76b65e139acaf9daf8",
+>>>>>>> fix/arch-followup-9617-s12-s17-s20-s21
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

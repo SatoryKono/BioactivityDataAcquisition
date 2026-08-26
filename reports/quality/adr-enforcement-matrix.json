@@ -2181,6 +2181,7 @@
         "src/bioetl/composition/contracts/providers.py",
         "src/bioetl/composition/contracts/runtime.py",
         "src/bioetl/composition/entrypoints.py",
+        "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
         "tests/architecture/test_documentation_audit_remediation.py",
@@ -2201,6 +2202,7 @@
         "configs/quality/public_lazy_facade_inventory.yaml",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_domain_aggregate_classification.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
@@ -2211,6 +2213,7 @@
         "src/bioetl/domain/aggregates/batch.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_domain_aggregate_classification.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,

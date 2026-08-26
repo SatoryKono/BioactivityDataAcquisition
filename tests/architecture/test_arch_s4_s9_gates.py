@@ -81,7 +81,11 @@ def test_s5_service_access_seams_are_at_most_two() -> None:
         PipelineRunnerServiceFactoryProtocol,
         QuarantineServiceFactoryProtocol,
     )
-    from bioetl.composition.entrypoints import resolve, register, registered_ports
+    from bioetl.composition._service_registry import (
+        register,
+        registered_ports,
+        resolve,
+    )
     from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
     assert callable(resolve) and callable(register)
@@ -184,6 +188,8 @@ def test_s8_domain_framework_import_ratchet() -> None:
                 if name == "pandas" and rel.startswith(forbidden):
                     pandas_in_forbidden.append(rel)
     assert count <= int(config["max_framework_imports"])
+    assert count == int(config["max_framework_imports"])
+    assert str(config["linked_issue"]) == "9630"
     assert not pandas_in_forbidden
     inventory = load_quality_json("module-coverage-inventory.json")
     summary = inventory["summary"]

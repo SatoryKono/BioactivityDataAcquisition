@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   registry; `get_default_registry()` remains temporarily available for
   compatibility and test-only callers.
 
+- **Architecture residuals after S1–S9 (#9617 / #9620 / #9626 / #9628 / #9630):**
+  composition `*_api` package-root files stay logic-free lazy re-exports;
+  first-party runtime uses `entrypoints` and owner modules. Cross-owner
+  private-import ratchet `max_count` 19→15 with residual wave tags.
+  FK reconciliation Request/Result/guards moved to
+  `domain.workflow.foreign_key_reconciliation`. Domain framework-import cap
+  130→128.
+
 - **Architecture residuals after #9612:** frozen composition `*_api.py` seams
   are 4 (`execution`, `health`, `maintenance`, `registry`); former
   composite/control-plane/observability/resources APIs renamed off the
