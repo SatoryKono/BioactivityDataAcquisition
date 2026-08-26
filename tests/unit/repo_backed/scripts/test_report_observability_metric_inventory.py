@@ -252,12 +252,13 @@ def test_scan_canonical_metric_mentions_prefers_bounded_git_grep(
             stderr="",
         )
 
-    monkeypatch.setattr(Path, "read_text", fail_read_text)
-    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+    with monkeypatch.context() as scoped_patch:
+        scoped_patch.setattr(Path, "read_text", fail_read_text)
+        scoped_patch.setattr(inventory.subprocess, "run", fake_run)
 
-    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
-        "bioetl_git_grep_total": ["docs/03-guides/metrics.md"]
-    }
+        assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+            "bioetl_git_grep_total": ["docs/03-guides/metrics.md"]
+        }
 
 
 def test_scan_canonical_metric_mentions_falls_back_to_rg_before_direct_reads(
@@ -290,12 +291,13 @@ def test_scan_canonical_metric_mentions_falls_back_to_rg_before_direct_reads(
             stderr="",
         )
 
-    monkeypatch.setattr(Path, "read_text", fail_read_text)
-    monkeypatch.setattr(inventory.subprocess, "run", fake_run)
+    with monkeypatch.context() as scoped_patch:
+        scoped_patch.setattr(Path, "read_text", fail_read_text)
+        scoped_patch.setattr(inventory.subprocess, "run", fake_run)
 
-    assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
-        "bioetl_rg_total": ["docs/03-guides/metrics.md"]
-    }
+        assert inventory._scan_canonical_metric_mentions([metric_doc], tmp_path) == {
+            "bioetl_rg_total": ["docs/03-guides/metrics.md"]
+        }
 
 
 def test_scan_canonical_metric_mentions_falls_back_to_direct_reads_in_git_checkout(

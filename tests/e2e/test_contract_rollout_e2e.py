@@ -48,6 +48,7 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from bioetl.infrastructure.storage.versioned_table_resolver import (
     resolve_versioned_table_name,
 )
+from bioetl.infrastructure.validation.pandera_validator import NoOpValidator
 
 
 @pytest.fixture
@@ -110,7 +111,7 @@ def _build_rollout_runtime_services(
             metrics=None,
             audit=None,
             logger=None,
-            silver_validator=None,
+            silver_validator=NoOpValidator(),
             metadata_writer=None,
             metadata_coordinator=None,
             lineage_store=None,

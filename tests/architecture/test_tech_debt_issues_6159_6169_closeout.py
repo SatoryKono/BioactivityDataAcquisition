@@ -147,7 +147,7 @@ def test_issue_6162_compatibility_facades_are_frozen_without_drift() -> None:
         summary["retained_public_export_facade_count"]
         == outcome["retained_public_export_facade_count"]
     )
-    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_entrypoint_burden"] == 0
     assert summary["removed_compatibility_surfaces_with_src_importers"] == 0
     assert summary["removed_compatibility_surfaces_still_present"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0

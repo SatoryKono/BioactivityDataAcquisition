@@ -68,7 +68,7 @@ class TestCreateSilverWriter:
                     transform_version=None,
                     transform_steps=None,
                     flat_structure=False,
-                    silver_validator=None,
+                    silver_validator=MagicMock(),
                 )
             )
 
@@ -94,7 +94,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
             )
         )
 
@@ -122,7 +122,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
             )
         )
 
@@ -173,7 +173,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
                 metadata_atomic_retry_policy=retry_policy,
                 merge_resilience_policy=merge_policy,
             )
@@ -201,7 +201,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
                 metrics=metrics,
             )
         )
@@ -227,7 +227,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
             )
         )
 
@@ -259,7 +259,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
                 contract_rollout_policy=rollout_policy,
             )
         )
@@ -285,7 +285,7 @@ class TestCreateSilverWriter:
                 transform_version=None,
                 transform_steps=None,
                 flat_structure=False,
-                silver_validator=None,
+                silver_validator=MagicMock(),
             )
         )
 

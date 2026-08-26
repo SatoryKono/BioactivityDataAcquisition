@@ -277,7 +277,7 @@ def test_issue_5712_retained_public_compatibility_seams_are_bounded() -> None:
     for key, expected in outcome.items():
         assert summary[key] == expected
 
-    assert summary["retained_public_entrypoint_burden"] == 1
+    assert summary["retained_public_entrypoint_burden"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
     assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
     assert summary["twin_pair_count"] == 0

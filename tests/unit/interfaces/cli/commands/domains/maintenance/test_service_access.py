@@ -46,19 +46,23 @@ def test_service_access_delegates_sync_accessors(
     calls: list[str] = []
 
     entrypoints = ModuleType("bioetl.composition.entrypoints")
-    entrypoints.get_lifecycle_service = (
-        lambda: calls.append("lifecycle") or "lifecycle"
-    )
+    entrypoints.get_lifecycle_service = lambda: calls.append("lifecycle") or "lifecycle"
     entrypoints.get_vacuum_service = lambda: calls.append("vacuum") or "vacuum"
     entrypoints.get_contract_migration_service = lambda: (
         calls.append("contract") or "contract"
     )
-    services = ModuleType("bioetl.composition._services")
-    services.get_bronze_cleanup_service = (
-        lambda: calls.append("bronze") or "bronze"
+    control_plane_access = ModuleType(
+        "bioetl.composition.control_plane_service_access"
+    )
+    control_plane_access.get_bronze_cleanup_service = lambda: (
+        calls.append("bronze") or "bronze"
     )
     monkeypatch.setitem(__import__("sys").modules, entrypoints.__name__, entrypoints)
-    monkeypatch.setitem(__import__("sys").modules, services.__name__, services)
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        control_plane_access.__name__,
+        control_plane_access,
+    )
 
     assert subject.get_lifecycle_service() == "lifecycle"
     assert subject.get_vacuum_service() == "vacuum"

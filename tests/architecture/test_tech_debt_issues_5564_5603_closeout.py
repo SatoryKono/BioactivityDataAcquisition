@@ -19,10 +19,7 @@ from typing import Any
 import pytest
 import yaml
 
-from tests.architecture.quality_artifacts import (
-    MAINTENANCE_API_PATH,
-    REVIEWED_MAINTENANCE_CLI_SEAM,
-)
+from tests.architecture.quality_artifacts import MAINTENANCE_API_PATH
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPATIBILITY_CENSUS = ROOT / "reports/quality/compatibility-importer-census.json"
@@ -105,9 +102,10 @@ def test_issue_5597_retained_public_surfaces_are_bounded_and_owned() -> None:
 
     for row in census["retained_entrypoints"]:
         if row["path"] == MAINTENANCE_API_PATH:
-            assert row["surface_classification"] == "first-party-active"
-            assert row["src_importer_count"] == 1
-            assert row["src_importers"] == [REVIEWED_MAINTENANCE_CLI_SEAM]
+            assert row["surface_classification"] == "external-facing"
+            assert row["internal_callers_zero"] is True
+            assert row["src_importer_count"] == 0
+            assert row["src_importers"] == []
         else:
             assert row["surface_classification"] == "external-facing"
             if row["internal_callers_zero"]:

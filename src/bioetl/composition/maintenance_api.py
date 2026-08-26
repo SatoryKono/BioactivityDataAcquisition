@@ -41,6 +41,7 @@ if TYPE_CHECKING:
 
     async def vacuum_table(table: str, options: VacuumOptions) -> int: ...
 
+
 cleanup_bronze: Callable[[int, bool], Awaitable[BronzeCleanupResult]]
 get_bronze_cleanup_service: Callable[[], BronzeCleanupService]
 get_contract_migration_service: Callable[[], ContractMigrationService]

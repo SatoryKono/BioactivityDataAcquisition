@@ -6,6 +6,9 @@ from bioetl.composition._resource_management import (
     get_checkpoint_runtime_service as get_checkpoint_runtime_service,
 )
 from bioetl.composition._services import get_adr_service as get_adr_service
+from bioetl.composition._services import (
+    get_bronze_cleanup_service as get_bronze_cleanup_service,
+)
 from bioetl.composition._services import get_config_service as get_config_service
 from bioetl.composition._services import get_export_service as get_export_service
 from bioetl.composition._services import (
@@ -53,6 +56,7 @@ from bioetl.composition.config_catalog import (
 __all__ = [
     "bootstrap_control_plane_lifecycle_store",
     "get_adr_service",
+    "get_bronze_cleanup_service",
     "get_checkpoint_runtime_service",
     "get_config_service",
     "get_export_service",

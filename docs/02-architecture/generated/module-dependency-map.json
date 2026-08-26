@@ -1,12 +1,12 @@
 {
   "summary": {
-    "scanned_modules": 2464,
-    "total_internal_imports": 7691,
+    "scanned_modules": 2465,
+    "total_internal_imports": 7688,
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
-    "cross_layer_group_edges_total": 335,
+    "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "f449668eb830ffb9cddc6e0178a31469ca27925094e40886f7f993e86c763864"
+    "source_fingerprint": "16ad643ec960f57b96833dd26e8f8c8a1252c4e1b1d136ecec23e239e93f1c33"
   },
   "layer_edges": [
     {
@@ -24,25 +24,25 @@
     {
       "source": "composition",
       "target": "application",
-      "imports": 190,
+      "imports": 188,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "composition",
-      "imports": 682,
+      "imports": 685,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "domain",
-      "imports": 290,
+      "imports": 287,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 240,
+      "imports": 239,
       "allowed": true
     },
     {
@@ -185,6 +185,11 @@
       "imports": 28
     },
     {
+      "source": "composition.bootstrap",
+      "target": "domain.ports",
+      "imports": 27
+    },
+    {
       "source": "composition.factories",
       "target": "infrastructure.adapters",
       "imports": 27
@@ -193,11 +198,6 @@
       "source": "composition.runtime_builders",
       "target": "domain.control_plane",
       "imports": 27
-    },
-    {
-      "source": "composition.bootstrap",
-      "target": "domain.ports",
-      "imports": 26
     },
     {
       "source": "composition.factories",

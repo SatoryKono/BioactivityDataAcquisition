@@ -15,7 +15,6 @@ from bioetl.composition import (
     _service_protocols,
     _service_registry,
     _services,
-    registry_api,
 )
 from bioetl.composition.factories.datasource import http_client
 from bioetl.composition.factories.pipeline.control_plane_artifacts import (
@@ -78,15 +77,11 @@ def test_lazy_contextual_factory_returns_callable_without_invoking(
         calls.append(data_root)
         return object()
 
-    factory = _service_registry.registered_ports()[
-        QuarantineServiceFactoryProtocol
-    ]
+    factory = _service_registry.registered_ports()[QuarantineServiceFactoryProtocol]
     monkeypatch.setattr(
         _service_registry,
         "import_module",
-        lambda _name: SimpleNamespace(
-            bootstrap_quarantine_service=contextual_factory
-        ),
+        lambda _name: SimpleNamespace(bootstrap_quarantine_service=contextual_factory),
     )
 
     assert factory() is contextual_factory
@@ -100,9 +95,7 @@ def test_lazy_contextual_factory_target_must_be_callable(
         QuarantineServiceFactoryProtocol,
     )
 
-    factory = _service_registry.registered_ports()[
-        QuarantineServiceFactoryProtocol
-    ]
+    factory = _service_registry.registered_ports()[QuarantineServiceFactoryProtocol]
     monkeypatch.setattr(
         _service_registry,
         "import_module",
@@ -181,7 +174,7 @@ def test_pipeline_registration_delegate_preserves_explicit_scope(
     ensure = MagicMock()
     registry = MagicMock()
     monkeypatch.setattr(_services, "_ensure_registrations", ensure)
-    monkeypatch.setattr(registry_api, "create_registry", lambda: registry)
+    monkeypatch.setattr(_services, "create_registry", lambda: registry)
 
     resolved = _services._ensure_pipeline_registrations()
 

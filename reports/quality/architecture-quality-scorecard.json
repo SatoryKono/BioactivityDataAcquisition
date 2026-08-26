@@ -163,14 +163,14 @@
   },
   "diagnostics": {
     "composition_module_cap": 300,
-    "composition_module_count": 294,
+    "composition_module_count": 295,
     "families_at_budget": [
       "application_services_control_plane"
     ],
     "families_at_budget_count": 1,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 100,
-    "lazy_import_observed_count": 101,
+    "lazy_import_observed_count": 100,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -241,7 +241,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "f449668eb830ffb9cddc6e0178a31469ca27925094e40886f7f993e86c763864"
+      "source_fingerprint": "16ad643ec960f57b96833dd26e8f8c8a1252c4e1b1d136ecec23e239e93f1c33"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -260,7 +260,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "c29e1fcf6c649dd964df11edb767b5b268207597600584fc165e5794b0bf1411",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "d561c2c978a64b9158b582a0c06de65ea75ec536b55c88784b68e0cdb3b37810"
+      "source_tree_sha256": "ec5566c8a7963ee5af8c8433f07af0976f6411ce26f03d35356ce8835bcf92e8"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

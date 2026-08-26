@@ -43,7 +43,7 @@ def get_lock_service() -> LockService:
         get_lock_service as _impl,
     )
 
-    return _impl()
+    return cast("LockService", _impl())
 
 
 @typed_group_command(lock, "release")

@@ -414,10 +414,10 @@ def test_retained_entrypoint_owner_usage_map_is_published() -> None:
     maintenance_api = by_path["src/bioetl/composition/maintenance_api.py"]
     assert maintenance_api["owner"] == "bioetl.composition"
     assert maintenance_api["usage_classification"] == (
-        "stable_public_api_with_reviewed_first_party_usage"
+        "stable_public_api_zero_first_party_src"
     )
-    assert maintenance_api["surface_classification"] == "first-party-active"
-    assert maintenance_api["src_importer_count"] == 1
+    assert maintenance_api["surface_classification"] == "external-facing"
+    assert maintenance_api["src_importer_count"] == 0
     assert maintenance_api["test_importer_count"] == 2
     assert payload["summary"]["control_plane_root_src_importer_count"] == 0
 

@@ -26,20 +26,13 @@ def load_source_tree_manifest() -> dict[str, Any]:
     return payload
 
 
-REVIEWED_MAINTENANCE_CLI_SEAM = (
-    "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py"
-)
 MAINTENANCE_API_PATH = "src/bioetl/composition/maintenance_api.py"
 
 
 def assert_retained_entrypoint_src_importers(entry: dict[str, Any]) -> None:
-    """Allow the reviewed maintenance CLI seam; keep other retained facades at zero."""
-    path = str(entry["path"])
-    if path == MAINTENANCE_API_PATH:
-        assert int(entry["src_importer_count"]) == 1
-        assert list(entry.get("src_importers") or []) == [REVIEWED_MAINTENANCE_CLI_SEAM]
-        return
+    """Require retained public entrypoints to have zero first-party importers."""
     assert int(entry["src_importer_count"]) == 0
+    assert list(entry.get("src_importers") or []) == []
 
 
 def load_quality_json(*parts: str) -> Any:

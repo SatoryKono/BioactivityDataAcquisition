@@ -13,15 +13,15 @@ if TYPE_CHECKING:
         RunManifestInspectionResult,
         RunManifestVerifyResult,
     )
-    from bioetl.application.services.control_plane.replay.historical_certification_service import (
-        HistoricalReplayBulkCertificationResult,
-        HistoricalReplayBulkCertificationSpec,
-        HistoricalReplayCertifiabilityInventory,
-    )
     from bioetl.application.services.control_plane.replay.historical_closure_models import (
         HistoricalReplayClaimScopeMode,
         HistoricalReplayClosureReportRecord,
         HistoricalReplayResidualDispositionRecord,
+    )
+    from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+        HistoricalReplayBulkCertificationResult,
+        HistoricalReplayBulkCertificationSpec,
+        HistoricalReplayCertifiabilityInventory,
     )
     from bioetl.application.services.control_plane.replay.historical_identity_models import (
         HistoricalReplayUniverseExternalRecord,

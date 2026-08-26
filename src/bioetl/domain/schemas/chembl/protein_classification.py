@@ -20,7 +20,9 @@ class ProteinClassificationSchema(ETLRecordSchema):
     """Protein Classification validation schema for Silver layer."""
 
     # === Primary Key ===
-    protein_class_id: Series[int] = pa.Field(nullable=False, unique=True, description="Primary key.")
+    protein_class_id: Series[int] = pa.Field(
+        nullable=False, unique=True, description="Primary key."
+    )
 
     # === Foreign Keys ===
     parent_id: Series[pd.Int64Dtype] | None = pa.Field(

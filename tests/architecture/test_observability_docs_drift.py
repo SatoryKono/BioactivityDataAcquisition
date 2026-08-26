@@ -43,12 +43,8 @@ LEGACY_METRICS_PORT_PATH = PROJECT_ROOT / "src/bioetl/domain/ports/metrics_port.
 METRICS_CATALOG_PATH = (
     PROJECT_ROOT / "docs/04-reference/observability/metrics-catalog.md"
 )
-TRACING_GUIDE_PATH = (
-    PROJECT_ROOT / "docs/04-reference/observability/tracing-guide.md"
-)
-LOGGING_GUIDE_PATH = (
-    PROJECT_ROOT / "docs/04-reference/observability/logging-guide.md"
-)
+TRACING_GUIDE_PATH = PROJECT_ROOT / "docs/04-reference/observability/tracing-guide.md"
+LOGGING_GUIDE_PATH = PROJECT_ROOT / "docs/04-reference/observability/logging-guide.md"
 
 
 def test_project_navigator_tracks_package_based_observability_ports() -> None:
