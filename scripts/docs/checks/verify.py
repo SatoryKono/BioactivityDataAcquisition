@@ -62,6 +62,7 @@ def main(argv: list[str] | None = None) -> int:
                     "--classes",
                     "--runtime-mirrors",
                     "--freshness",
+                    "--modules",
                 ],
             )
         )

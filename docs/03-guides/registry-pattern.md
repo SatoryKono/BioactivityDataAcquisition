@@ -35,14 +35,14 @@ runtime shape.
 
 Governance status for the transition-heavy surfaces:
 
-- `bioetl.composition.registry` has been retired. Use
+- bioetl.composition.registry has been retired. Use
   `bioetl.composition.registry_api` for public imports and
   `bioetl.composition.factories.pipeline.registry_core` for registry owner work.
   Pipeline factory registration remains owned by
   `bioetl.composition.factories.pipeline.registry`.
 - pipeline config loading is now canonical through `bioetl.infrastructure.config` and
   `bioetl.infrastructure.config.pipeline_config_api`; the historical
-  `bioetl.infrastructure.config_loader` shim has been removed.
+  bioetl.infrastructure.config_loader shim has been removed.
 
 See the curated ledger in
 [`docs/02-architecture/07-compatibility-facade-inventory.md`](../02-architecture/07-compatibility-facade-inventory.md)

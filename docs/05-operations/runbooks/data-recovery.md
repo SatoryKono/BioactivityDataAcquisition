@@ -49,7 +49,7 @@ ______________________________________________________________________
      # Historical snapshot (read-only). Example Silver path:
      df = pl.read_delta("data/output/silver/chembl/activity", version=5)
      ```
-     Runtime helper: `bioetl.infrastructure.storage.support.retention_time_travel.load_time_travel_table`.
+     Runtime helper: bioetl.infrastructure.storage.support.retention_time_travel.load_time_travel_table.
      VACUUM policy: [vacuum-procedures.md](vacuum-procedures.md).
   1. **Full Rebuild from Bronze**: The supported write-path recovery is rebuild
      from Bronze. Time-travel reads do not mutate Silver/Gold.
