@@ -519,6 +519,73 @@ def test_syft_sbom_is_generated_on_release_and_ghcr_push() -> None:
     assert "sbom/**" in asset_files
 
 
+_WRITE_PERMISSION_KEYS = (
+    "packages",
+    "contents",
+    "id-token",
+    "security-events",
+)
+
+
+def _job_has_write_permission(job: dict[str, Any]) -> bool:
+    perms = job.get("permissions")
+    if not isinstance(perms, dict):
+        return False
+    return any(str(perms.get(key, "")).lower() == "write" for key in _WRITE_PERMISSION_KEYS)
+
+
+def test_write_capable_jobs_disable_checkout_credentials() -> None:
+    missing: list[str] = []
+    for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = _load_yaml(workflow_path)
+        jobs = workflow.get("jobs")
+        if not isinstance(jobs, dict):
+            continue
+        for job_name, job in jobs.items():
+            if not isinstance(job, dict) or not _job_has_write_permission(job):
+                continue
+            for step in job.get("steps") or []:
+                if not isinstance(step, dict):
+                    continue
+                uses = str(step.get("uses", ""))
+                if not uses.startswith("actions/checkout@"):
+                    continue
+                persist = (step.get("with") or {}).get("persist-credentials")
+                if persist is not False:
+                    missing.append(f"{workflow_path.name}:{job_name}")
+    assert not missing, (
+        "write-capable jobs must set persist-credentials: false on checkout:\n"
+        + "\n".join(missing)
+    )
+
+
+def test_named_workflows_declare_top_level_contents_read() -> None:
+    for name in (
+        "branch-hygiene.yml",
+        "contract-governance-fast-check.yml",
+        "schema-governance.yml",
+        "stale.yml",
+    ):
+        workflow = _load_yaml(ROOT / ".github" / "workflows" / name)
+        perms = workflow.get("permissions")
+        assert isinstance(perms, dict), name
+        assert perms.get("contents") == "read", name
+
+
+def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
+    action = (ROOT / ".github" / "actions" / "setup-python-uv" / "action.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "37802adc94f370d6bfd71619e3f0bf239e1f3b78" in action
+    assert 'version: "0.11.26"' in action
+    assert 'default: "3.12"' in action
+    contract = (ROOT / ".github" / "workflows" / "contract-governance-fast-check.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "UV_VERSION" not in contract
+    assert "./.github/actions/setup-python-uv" in contract
+
+
 def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/zizmor.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
@@ -531,9 +598,12 @@ def test_zizmor_workflow_is_path_filtered_and_sha_pinned() -> None:
     labeler = (ROOT / ".github/workflows/labeler.yml").read_text(encoding="utf-8")
     zizmor_config = (ROOT / ".github/zizmor.yml").read_text(encoding="utf-8")
 
-    assert set(triggers) == {"pull_request"}
+    assert "pull_request" in triggers
+    assert "push" in triggers
+    assert triggers["push"]["branches"] == ["main"]
     assert ".github/workflows/**" in triggers["pull_request"]["paths"]
     assert ".github/actions/**" in triggers["pull_request"]["paths"]
+    assert ".github/workflows/**" in triggers["push"]["paths"]
     assert zizmor_step["uses"] == f"zizmorcore/zizmor-action@{zizmor_sha}"
     assert zizmor_step["with"]["min-severity"] == "high"
     assert zizmor_step["with"]["min-confidence"] == "high"
