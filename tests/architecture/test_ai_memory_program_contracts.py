@@ -36,6 +36,10 @@ def test_shared_mcp_memory_requires_explicit_write_enablement() -> None:
     assert "read-write" in bash_wrapper
     assert "read-write" in powershell_wrapper
     assert r".venv-win\Scripts\python.exe" in powershell_wrapper
+    assert ".venv-win/Scripts/python.exe" in bash_wrapper
+    win = bash_wrapper.index(".venv-win/Scripts/python.exe")
+    posix = bash_wrapper.index(".venv/bin/python")
+    assert posix < win
     assert "$explicitMemoryMode" in powershell_wrapper
     assert r"$repoRoot\src" in powershell_wrapper
 
