@@ -93,7 +93,7 @@ ______________________________________________________________________
 
 | Provider             | Pipelines | Rate Limit                 | Auth               |
 | -------------------- | --------- | -------------------------- | ------------------ |
-| **ChEMBL**           | 15        | 3 req/sec                  | Public             |
+| **ChEMBL**           | 15        | 0.1 req/sec (burst 1)      | Public             |
 | **UniProt**          | 2         | 10 req/sec (100 with key)  | API Key (optional) |
 | **PubChem**          | 1         | 5 req/sec                  | Public             |
 | **PubMed**           | 1         | 3 req/sec (10 with key)    | API Key            |

@@ -637,24 +637,25 @@ ______________________________________________________________________
 ### Структура
 
 ```yaml
-# configs/providers/chembl.yaml
+# configs/providers/chembl.yaml (live values; 15 entities)
 source:
   provider_config:
     provider: chembl
     base_url: https://www.ebi.ac.uk/chembl/api/data
     auth_type: public
     client:
-      timeout_sec: 60.0
-      max_retries: 3
+      timeout_sec: 120.0
+      max_retries: 8
+      trust_env: false
     pagination:
       page_size: 1000
       id_batch_size: 20
       strategy: offset
-      max_url_length: 1000
+      max_url_length: 2000
 
   circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
+    failure_threshold: 3
+    recovery_timeout: 3000
 
   rate_limit:
     requests_per_second: 0.1
@@ -663,9 +664,19 @@ source:
 entities:
   - activity
   - assay
+  - assay_parameters
+  - cell_line
+  - compound_record
+  - publication
+  - publication_similarity
+  - publication_term
   - molecule
+  - protein_class
+  - subcellular_fraction
   - target
-  # ... и 8 других entities для ChEMBL
+  - target_component
+  - target_protein_classification
+  - tissue
 ```
 
 Canonical current source pagination contract:

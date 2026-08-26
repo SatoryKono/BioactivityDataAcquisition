@@ -251,21 +251,26 @@ Practical routing rule:
 Published site metadata canonical source находится в `mkdocs.yml`:
 
 - `site_name = BioETL Project`
-- `site_url = https://SatoryKono.github.io/BioactivityDataAcquisition/`
+- `site_url` is **omitted** (GitHub Pages is unpublished; no deploy workflow)
 - `repo_name = SatoryKono/BioactivityDataAcquisition`
 - `repo_url = https://github.com/SatoryKono/BioactivityDataAcquisition`
 
-Verified 2026-04-01: drift между publication policy и текущим MkDocs metadata не
-обнаружен. Разница между site title и repository slug считается intentional,
-но при rename / move MUST обновляться в одном changeset вместе с published
-governance и navigator pages.
+Verified 2026-08-26: MkDocs `site_url` is unpublished on purpose. Разница между
+site title и repository slug считается intentional, но при rename / move MUST
+обновляться в одном changeset вместе с published governance и navigator pages.
 
-Deployment boundary verified 2026-07-10: `.github/workflows/docs.yml` is a
-validation/build workflow, not a GitHub Pages deployment workflow. `docs/site/**`
-remains generated local publication-helper output per
+Deployment boundary: `.github/workflows/docs.yml` is a validation/build
+workflow, not a GitHub Pages deployment workflow. `docs/site/**` remains
+generated local publication-helper output per
 [`03-file-policy.md`](03-file-policy.md) and is ignored by VCS. If publication is
 later enabled, update `mkdocs.yml`, the deployment workflow, and this policy in
 one changeset.
+
+Link-check boundary: `python -m scripts.docs check-links` does not follow
+`.png`/`.svg` hrefs. MkDocs `validation.links.not_found` is `info` (not fail)
+because nav-published raster/vector assets are gated separately: tracked SVG
+baselines by diagram CI, untracked PNG by DOC-GOV-02 / gitignore. Do not treat
+`not_found: info` as permission to ship broken Markdown links.
 
 ## Freshness Protocol
 

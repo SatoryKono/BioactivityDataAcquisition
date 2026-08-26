@@ -98,7 +98,6 @@ def test_domain_config_resolver_exposes_only_expected_public_surface() -> None:
         if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
     }
     assert top_level_defs == {
-        "DomainConfigMapper",
         "PipelineConfigDQResolverProvider",
         "DomainConfigResolver",
         "resolve_domain_pipeline_config",

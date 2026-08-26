@@ -45,6 +45,10 @@ class PipelineConfigLoaderPort(Protocol):
 class DomainConfigMapperPort(Protocol):
     """Protocol for mapping YAML configuration to domain configuration."""
 
-    def __call__(self, yaml_config: PipelineYamlConfigPort) -> PipelineConfig:
+    def __call__(
+        self,
+        yaml_config: PipelineYamlConfigPort,
+        resolved_dq_config: object | None = None,
+    ) -> PipelineConfig:
         """Map YAML config to domain config."""
         ...
