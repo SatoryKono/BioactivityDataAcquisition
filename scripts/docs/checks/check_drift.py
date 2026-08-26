@@ -817,7 +817,27 @@ def check_modules(report: DriftReport) -> None:
 
     module_pattern = re.compile(r"`(bioetl\.[a-z_.]+)`")
 
-    for md_file in sorted(arch_dir.glob("*.md")):
+    files_to_scan: list[Path] = []
+    if arch_dir.exists():
+        files_to_scan.extend(sorted(arch_dir.glob("*.md")))
+    readme = PROJECT_ROOT / "README.md"
+    if readme.exists():
+        files_to_scan.append(readme)
+    for sub in ("03-guides", "05-operations"):
+        d = DOCS_DIR / sub
+        if d.exists():
+            for md in sorted(d.rglob("*.md")):
+                if "99-archive" not in str(md) and md not in files_to_scan:
+                    files_to_scan.append(md)
+    seen: set[Path] = set()
+    unique: list[Path] = []
+    for f in files_to_scan:
+        if f not in seen:
+            seen.add(f)
+            unique.append(f)
+    for md_file in unique:
+        if not md_file.exists():
+            continue
         text = md_file.read_text(encoding="utf-8")
         for match in module_pattern.finditer(text):
             mod_path = match.group(1)
