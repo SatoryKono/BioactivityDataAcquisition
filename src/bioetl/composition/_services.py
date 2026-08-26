@@ -78,7 +78,7 @@ def _ensure_pipeline_registrations(
 ) -> PipelineRegistry:
     """Return an explicit registry with provider and pipeline registrations."""
     if registry is None:
-        registry = registry_api.create_registry()
+        registry = create_registry()
     _ensure_registrations(registry=registry, scope="pipelines")
     return registry
 
@@ -174,7 +174,9 @@ def get_workflow_execution_service(
 def get_workflow_inspection_service() -> WorkflowInspectionServiceProtocol:
     """Build workflow inspection service via the canonical workflow seam."""
     return _resolve(
-        _typed_port[WorkflowInspectionServiceProtocol](WorkflowInspectionServiceProtocol)
+        _typed_port[WorkflowInspectionServiceProtocol](
+            WorkflowInspectionServiceProtocol
+        )
     )
 
 

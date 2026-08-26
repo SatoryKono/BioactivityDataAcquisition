@@ -43,7 +43,7 @@ def get_lifecycle_service() -> MedallionLifecycleServiceProtocol:
 def get_vacuum_service() -> VacuumService:
     """Load the vacuum service through composition on demand."""
     _impl = import_module(_ENTRYPOINTS_MODULE).get_vacuum_service
-    return _impl()
+    return cast("VacuumService", _impl())
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
@@ -55,7 +55,7 @@ def get_bronze_cleanup_service() -> BronzeCleanupService:
 def get_contract_migration_service() -> ContractMigrationService:
     """Load the contract migration service through composition on demand."""
     _impl = import_module(_ENTRYPOINTS_MODULE).get_contract_migration_service
-    return _impl()
+    return cast("ContractMigrationService", _impl())
 
 
 async def preview_cleanup(pipeline: str) -> CleanupPreview:

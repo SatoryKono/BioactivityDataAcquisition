@@ -97,7 +97,8 @@ def test_composite_publication_rebuild_resume_determinism_guard(
             metrics=MagicMock(),
             tracer=MagicMock(),
             storage=MagicMock(),
-            lock=MagicMock(), clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
+            lock=MagicMock(),
+            clock=FixedClock(datetime(2026, 1, 1, tzinfo=UTC)),
         )
         bundle = build_composite_control_plane_bundle(
             config=config,

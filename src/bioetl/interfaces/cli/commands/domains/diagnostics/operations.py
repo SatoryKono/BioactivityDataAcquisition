@@ -34,11 +34,9 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane.forensic import (
-        ForensicRunDiffService,
-    )
-    from bioetl.application.services.control_plane.manifest.inspection_service import (
-        RunManifestInspectionService,
+    from bioetl.application.ports.control_plane import (
+        ForensicRunDiffServiceProtocol,
+        RunManifestInspectionServiceProtocol,
     )
     from bioetl.composition.observability_runtime import (
         MetricsOperatorProfile,
@@ -151,7 +149,7 @@ def emit_checkpoint_diagnostics(
 
 
 def emit_manifest_payload(
-    service: RunManifestInspectionService,
+    service: RunManifestInspectionServiceProtocol,
     *,
     identifier: str,
     output_format: str,
@@ -170,7 +168,7 @@ def emit_manifest_payload(
 
 
 def emit_forensic_run_diff(
-    service: ForensicRunDiffService,
+    service: ForensicRunDiffServiceProtocol,
     *,
     left_identifier: str,
     right_identifier: str,

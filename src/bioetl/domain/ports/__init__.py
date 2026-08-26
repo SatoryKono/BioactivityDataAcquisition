@@ -8,13 +8,18 @@ from bioetl.domain.ports._facade_support import build_export_modules
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.ports.adr": (
-        "AdrDocument", "AdrInfo",
-        "AdrServicePort", "AdrIssueSeverity",
-        "AdrValidationIssue", "AdrValidationReport",
+        "AdrDocument",
+        "AdrInfo",
+        "AdrServicePort",
+        "AdrIssueSeverity",
+        "AdrValidationIssue",
+        "AdrValidationReport",
     ),
     "bioetl.domain.ports.audit": (
-        "AuditEntry", "AuditLayer",
-        "AuditOperation", "AuditPort",
+        "AuditEntry",
+        "AuditLayer",
+        "AuditOperation",
+        "AuditPort",
     ),
     "bioetl.domain.ports.config": (
         "DomainConfigMapperPort",
@@ -40,16 +45,19 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     ),
     "bioetl.domain.ports.entity_type": ("EntityTypeExtractor",),
     "bioetl.domain.ports.pipeline_callbacks": (
-        "GoldFilterCallback", "GoldTransformCallback",
+        "GoldFilterCallback",
+        "GoldTransformCallback",
         "TransformCallback",
     ),
     "bioetl.domain.ports.source_config": (
-        "PaginationConfigLike", "SourceConfigLike",
+        "PaginationConfigLike",
+        "SourceConfigLike",
     ),
     "bioetl.domain.ports.config_mapper": ("DomainConfigMapper",),
     "bioetl.domain.ports.data_normalization": ("DataNormalizationPort",),
     "bioetl.domain.ports.data_source": (
-        "DataSourceFactoryPort", "DataSourcePort",
+        "DataSourceFactoryPort",
+        "DataSourcePort",
         "FilterableDataSourcePort",
     ),
     "bioetl.domain.ports.delta_reader": ("DeltaReaderPort",),
@@ -71,7 +79,8 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "HealthStatusLiteral",
     ),
     "bioetl.domain.ports.idmapping": (
-        "IDMappingPort", "IDMappingSourceReaderPort",
+        "IDMappingPort",
+        "IDMappingSourceReaderPort",
     ),
     "bioetl.domain.ports.metadata": (
         "BronzeMetadataInput",
@@ -123,7 +132,8 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "coerce_silver_dq_analyze_request",
     ),
     "bioetl.domain.ports.resilience": (
-        "CircuitBreakerPort", "RateLimiterPort",
+        "CircuitBreakerPort",
+        "RateLimiterPort",
     ),
     "bioetl.domain.ports.runtime": (
         "BatchIdGeneratorPort",
