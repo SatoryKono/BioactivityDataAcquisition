@@ -91,3 +91,10 @@ def test_scripts_root_matches_wrapper_policy() -> None:
         "scripts/ root is missing canonical top-level directories:\n"
         + "\n".join(f"  - {name}" for name in missing_dirs)
     )
+
+
+def test_catalog_root_allowlist_does_not_list_relocated_grok_cli() -> None:
+    allowlist = _root_allowlist()
+    assert "grok_cli.py" not in allowlist
+    assert "grok_cli_advanced.py" not in allowlist
+    assert (Path("scripts") / "engineering" / "dev" / "grok_cli.py").is_file()
