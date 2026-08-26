@@ -78,7 +78,7 @@ def _ensure_pipeline_registrations(
 ) -> PipelineRegistry:
     """Return an explicit registry with provider and pipeline registrations."""
     if registry is None:
-        registry = registry_api.create_registry()
+        registry = create_registry()
     _ensure_registrations(registry=registry, scope="pipelines")
     return registry
 
