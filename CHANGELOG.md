@@ -20,7 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Prompt Library product/engineering cyclic pack:** fourteen extra-domain
   cards under `docs/00-project/ai/prompts/library/audit/project/new2/`
   (`prompt.audit.project.new2.*`) with library-default `ALLOW_*=true`.
-  They do not replace `cycle/` or `new/`.
+  Files are prefixed `01-`…`14-` by project importance (medallion →
+  dq-contracts → control-plane → providers → http-clients → normalization →
+  cli-compat → security-secrets → vcr-http → qa-gates → github-actions →
+  requirements-trace → ops-runbooks → scripts-inventory). They do not replace
+  `cycle/` or `new/`.
 
 ### Changed
 
