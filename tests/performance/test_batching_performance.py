@@ -4,9 +4,9 @@ Monitors for performance regressions in Bronze write, Silver transform,
 and related data processing operations.
 
 Requirements:
-- REQ-PERF-001: Bronze batch write 1000 records under 1s
-- REQ-PERF-002: Silver transformation 1000 records under 2s
-- REQ-PERF-003: Content hash generation 1000 records under 0.5s
+- Bronze batch write 1000 records under 1s
+- Silver transformation 1000 records under 2s
+- Content hash generation 1000 records under 0.5s
 
 Note: These tests are marked with @pytest.mark.benchmark and excluded from
 standard test runs. Run explicitly with: make bench or pytest -m benchmark

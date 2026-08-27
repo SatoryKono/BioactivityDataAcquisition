@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: os.environ access centralized through Settings.
 
-REQ-ARCH-041: Environment variable access is centralized through Settings.
+REQ-ARCH-001: Environment variable access is centralized through Settings.
 Composition and infrastructure layers should not access os.environ directly.
 Instead, they should receive configuration via Settings (pydantic-settings).
 

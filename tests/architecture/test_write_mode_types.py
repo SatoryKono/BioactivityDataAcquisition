@@ -13,7 +13,7 @@
 Tests that write modes use domain enums (SilverWriteMode, GoldWriteMode)
 instead of Literal strings in domain layer.
 
-REQ-ARCH-041: Type-safe write modes for Medallion policy enforcement.
+REQ-ARCH-001: Type-safe write modes for Medallion policy enforcement.
 See docs/06-architecture-review-consolidated.md R1 for rationale.
 """
 

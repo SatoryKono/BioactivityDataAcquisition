@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test for replay-critical application/composition time seams.
 
-REQ-ARCH-031: Single source of truth for timestamps.
+REQ-ARCH-001: Single source of truth for timestamps.
 Replay-critical runtime and checkpoint paths must receive time explicitly via
 ClockPort or injected timestamp parameters rather than reading wall-clock time
 internally.

@@ -16,7 +16,7 @@ These tests verify that infrastructure adapters:
 - Use atomic write patterns for storage
 
 REQ-OBS-001: Adapters must provide health check for monitoring.
-REQ-ARCH-025: Filterable adapters must implement FilterableDataSourcePort.
+REQ-ARCH-001: Filterable adapters must implement FilterableDataSourcePort.
 REQ-DATA-004: All file writes should be atomic.
 
 See CLAUDE.md §7 Technology Stack and §14 Creating Components.
@@ -597,7 +597,7 @@ class TestAdapterPortCompliance:
     def test_filterable_adapters_implement_protocol(self, src_dir: Path) -> None:
         """Adapters with fetch_filtered MUST implement FilterableDataSourcePort.
 
-        REQ-ARCH-025: Replace duck-typing with explicit Protocol for adapters
+        REQ-ARCH-001: Replace duck-typing with explicit Protocol for adapters
         that support filtering at API level. This ensures type safety and
         enables isinstance() checks instead of hasattr().
         """
@@ -708,7 +708,7 @@ class TestAdapterPortCompliance:
     def test_filtered_data_source_uses_isinstance(self, src_dir: Path) -> None:
         """Current FilteredDataSource MUST use isinstance() for Protocol check.
 
-        REQ-ARCH-026: Replace hasattr() duck-typing with isinstance() check
+        REQ-ARCH-001: Replace hasattr() duck-typing with isinstance() check
         for FilterableDataSourcePort. This enables proper type checking and
         IDE support.
         """

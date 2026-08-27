@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: документация синхронизирована с RULES.md.
 
-REQ-DOC-010: Все ключевые документы MUST ссылаться на актуальную версию RULES.md.
+REQ-DOC-001: Все ключевые документы MUST ссылаться на актуальную версию RULES.md.
 
 Этот тест проверяет:
 1. Версия в RULES.md извлекается корректно
@@ -350,7 +350,7 @@ class TestDocsVersionSync:
     def test_claude_md_synced(self, project_root: Path, rules_version: str) -> None:
         """CLAUDE.md MUST быть синхронизирован с RULES.md.
 
-        REQ-DOC-010: CLAUDE.md является основным справочником для агента.
+        REQ-DOC-001: CLAUDE.md является основным справочником для агента.
         """
         claude_md = (
             project_root
@@ -382,7 +382,7 @@ class TestDocsVersionSync:
     def test_required_docs_synced(self, project_root: Path, rules_version: str) -> None:
         """Ключевые документы MUST ссылаться на актуальную версию RULES.md.
 
-        REQ-DOC-010: Документы в REQUIRED_SYNC_DOCS должны быть синхронизированы.
+        REQ-DOC-001: Документы в REQUIRED_SYNC_DOCS должны быть синхронизированы.
         """
         mismatched, missing_version, not_found = _classify_required_sync_docs(
             project_root=project_root,

@@ -16,8 +16,8 @@ These tests ensure the domain layer follows pure function principles:
 - Low cyclomatic complexity
 - No mutable default arguments
 
-REQ-ARCH-010: Domain layer should be simple and testable.
-REQ-ARCH-014: Domain entities must be immutable.
+REQ-ARCH-001: Domain layer should be simple and testable.
+REQ-ARCH-001: Domain entities must be immutable.
 
 See CLAUDE.md §2 Architecture and §11 Anti-Patterns.
 """
@@ -267,7 +267,7 @@ class TestDomainImmutability:
     ) -> None:
         """Domain Value Objects (dataclasses) must be frozen.
 
-        REQ-ARCH-014: Domain entities and value objects must be immutable
+        REQ-ARCH-001: Domain entities and value objects must be immutable
         to ensure side-effect-free behavior and thread safety.
         """
         domain_path = src_dir / "bioetl" / "domain"
@@ -298,7 +298,7 @@ class TestDomainImmutability:
     ) -> None:
         """Frozen dataclasses should not have mutable default arguments.
 
-        REQ-ARCH-016: Mutable defaults (list, dict, set) in dataclasses
+        REQ-ARCH-001: Mutable defaults (list, dict, set) in dataclasses
         cause shared state issues even if the class is frozen.
         """
         violations = _all_mutable_default_violations(source_ast_cache)
@@ -360,7 +360,7 @@ class TestDomainComplexity:
     ) -> None:
         """Domain layer functions should have low cyclomatic complexity.
 
-        REQ-ARCH-010: Domain logic should be simple and testable.
+        REQ-ARCH-001: Domain logic should be simple and testable.
         Maximum CC = 5 for domain layer functions.
         """
         if importlib.util.find_spec("radon.complexity") is None:
@@ -392,7 +392,7 @@ class TestDomainProtocols:
     def test_domain_layer_uses_protocol_for_ports(self, src_dir: Path) -> None:
         """Domain layer should use Protocol for defining ports.
 
-        REQ-ARCH-009: Ports should be defined using typing.Protocol
+        REQ-ARCH-001: Ports should be defined using typing.Protocol
         for structural subtyping (duck typing with type safety).
         """
         ports_dir = src_dir / "bioetl" / "domain" / "ports"

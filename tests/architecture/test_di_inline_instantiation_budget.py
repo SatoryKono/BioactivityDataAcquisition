@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: inline instantiation budget in application layer.
 
-REQ-ARCH-DI-012:
+REQ-ARCH-001:
 - Application code must avoid ``self.attr = ClassName(...)`` assignments.
 - Dependencies should be assembled in composition and injected.
 - Temporary exceptions may be annotated inline with ``EXC-002``/``EXC-003``.
@@ -180,7 +180,7 @@ def test_application_inline_instantiation_budget_is_zero() -> None:
     violations = _collect_inline_instantiation_violations()
 
     assert not violations, (
-        "REQ-ARCH-DI-012 violation: inline class instantiations found in application "
+        "REQ-ARCH-001 violation: inline class instantiations found in application "
         "layer (`self.attr = ClassName(...)`).\n"
         "Move creation to composition/factory or inject constructor/factory callable.\n"
         "For temporary exceptions annotate line with EXC-002 or EXC-003.\n\n"

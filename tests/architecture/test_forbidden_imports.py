@@ -17,9 +17,9 @@ in appropriate layers:
 - Ports imported only from facade module
 - Legacy normalizers module must not be re-introduced (RF-043)
 
-REQ-ARCH-APP-001: External orchestration frameworks must not be used in application layer.
-REQ-ARCH-OBS-001: Observability initialization only in composition root.
-REQ-ARCH-027: Port protocols must be imported from the facade, with the
+REQ-ARCH-001: External orchestration frameworks must not be used in application layer.
+REQ-ARCH-001: Observability initialization only in composition root.
+REQ-ARCH-001: Port protocols must be imported from the facade, with the
 sanctioned ``bioetl.domain.ports.noop`` sub-facade for operational null objects.
 RF-043: legacy_normalizers path is permanently forbidden.
 
@@ -307,7 +307,7 @@ class TestLocalOnlyPolicy:
     def test_no_cloud_or_distributed_libs(self, src_dir: Path) -> None:
         """Verify no usage of cloud SDKs or distributed systems clients.
 
-        REQ-ARCH-010: The system must run entirely locally without external
+        REQ-ARCH-001: The system must run entirely locally without external
         dependencies like S3, Redis, Kafka, or cloud provider APIs.
         """
         # List of forbidden packages/modules
@@ -373,7 +373,7 @@ class TestOrchestrationIsolation:
     def test_application_layer_no_orchestration_imports(self, src_dir: Path) -> None:
         """Application layer must not import external orchestration frameworks.
 
-        REQ-ARCH-APP-001: External workflow frameworks (Celery, Airflow, etc.)
+        REQ-ARCH-001: External workflow frameworks (Celery, Airflow, etc.)
         must not be imported in application layer. BioETL uses its own
         lightweight PipelineRunner for orchestration.
         """
@@ -402,7 +402,7 @@ class TestObservabilityInitialization:
     def test_metrics_server_only_in_composition(self, src_dir: Path) -> None:
         """Verify start_metrics_server is only called from composition layer.
 
-        REQ-ARCH-OBS-001: Observability initialization should only happen
+        REQ-ARCH-001: Observability initialization should only happen
         in the composition root to ensure single point of responsibility.
         """
         violations = _iter_metrics_server_call_violations(src_dir)
@@ -420,7 +420,7 @@ class TestPortImportFacade:
     def test_ports_imported_only_from_facade(self, src_dir: Path) -> None:
         """All layers MUST import contracts from sanctioned facades only.
 
-        REQ-ARCH-027: Port protocols are accessible via ``bioetl.domain.ports``.
+        REQ-ARCH-001: Port protocols are accessible via ``bioetl.domain.ports``.
         Operational null objects are accessible via ``bioetl.domain.ports.noop``.
         Deeper internal modules remain forbidden to preserve clear public entry points.
         """
@@ -453,7 +453,7 @@ class TestBootstrapAdapterIsolation:
     def test_bootstrap_no_direct_adapter_imports(self, src_dir: Path) -> None:
         """bootstrap_pipeline_runner MUST NOT import concrete adapters directly.
 
-        REQ-ARCH-COMP-001: Composition Root delegates adapter creation to factories.
+        REQ-ARCH-001: Composition Root delegates adapter creation to factories.
         Adding a new provider should only require changes in:
         - providers/registration.py (ProviderRegistry)
         - factories/datasource/data_source_factory.py (get_data_source_creator / DataSourceFactory)
@@ -512,7 +512,7 @@ class TestInterfacesFilesystemAccess:
     def test_interfaces_no_direct_filesystem_traversal(self, src_dir: Path) -> None:
         """Interfaces layer MUST NOT use direct filesystem traversal.
 
-        REQ-ARCH-023: CLI delegates to storage ports, not Path.rglob.
+        REQ-ARCH-001: CLI delegates to storage ports, not Path.rglob.
         """
         interfaces_path = _interfaces_path(src_dir)
 

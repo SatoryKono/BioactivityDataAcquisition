@@ -16,8 +16,8 @@ These tests ensure aggregates follow DDD principles:
 3. Cross-aggregate coordination uses Domain Events
 4. Invariants are protected within aggregate boundaries
 
-REQ-ARCH-020: Aggregates must be units of consistency.
-REQ-ARCH-021: Aggregates communicate via IDs and Domain Events.
+REQ-ARCH-001: Aggregates must be units of consistency.
+REQ-ARCH-001: Aggregates communicate via IDs and Domain Events.
 
 See CLAUDE.md §2 Architecture and docs/RULES.md.
 """
@@ -434,7 +434,7 @@ class TestAggregateBoundaryIsolation:
     def test_no_cross_aggregate_imports(self, aggregates_dir: Path) -> None:
         """Aggregates should not import other aggregate classes.
 
-        REQ-ARCH-020: Each aggregate is a consistency boundary.
+        REQ-ARCH-001: Each aggregate is a consistency boundary.
         Aggregates should reference each other by ID only.
         """
         _assert_aggregates_dir_exists(aggregates_dir)
@@ -474,7 +474,7 @@ class TestAggregateBoundaryIsolation:
     def test_aggregates_use_id_types_for_references(self, aggregates_dir: Path) -> None:
         """Aggregates should use ID types (RunID, BatchID) for cross-references.
 
-        REQ-ARCH-021: Cross-aggregate references must be by ID only,
+        REQ-ARCH-001: Cross-aggregate references must be by ID only,
         not by full aggregate objects.
         """
         if not aggregates_dir.exists():
@@ -493,7 +493,7 @@ class TestAggregateInvariantProtection:
     def test_aggregates_have_validate_invariants(self, src_dir: Path) -> None:
         """Aggregate entities should have _validate_invariants method.
 
-        REQ-ARCH-022: Invariants must be validated internally.
+        REQ-ARCH-001: Invariants must be validated internally.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         _assert_aggregates_dir_exists(aggregates_dir)
@@ -504,7 +504,7 @@ class TestAggregateInvariantProtection:
     ) -> None:
         """Aggregate properties returning collections should return immutable types.
 
-        REQ-ARCH-023: Internal state must be protected from external modification.
+        REQ-ARCH-001: Internal state must be protected from external modification.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         if not aggregates_dir.exists():
@@ -523,7 +523,7 @@ class TestDomainEventsForCoordination:
     def test_aggregates_emit_domain_events(self, src_dir: Path) -> None:
         """Aggregates should emit domain events for state changes.
 
-        REQ-ARCH-024: Cross-aggregate coordination via Domain Events.
+        REQ-ARCH-001: Cross-aggregate coordination via Domain Events.
         Uses AST to detect event class instantiations or references.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
@@ -558,7 +558,7 @@ class TestDomainEventsForCoordination:
     def test_aggregates_have_collect_events_method(self, src_dir: Path) -> None:
         """All aggregates should have collect_events() method.
 
-        REQ-ARCH-025: Events must be collectable for publishing.
+        REQ-ARCH-001: Events must be collectable for publishing.
         Uses AST to find method definitions with the expected name.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
@@ -575,7 +575,7 @@ class TestAggregateConsistencyBoundary:
     def test_aggregate_state_changes_through_methods_only(self, src_dir: Path) -> None:
         """Aggregate state should only change through defined methods.
 
-        REQ-ARCH-026: State changes only via aggregate methods.
+        REQ-ARCH-001: State changes only via aggregate methods.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         _assert_aggregates_dir_exists(aggregates_dir)
@@ -584,7 +584,7 @@ class TestAggregateConsistencyBoundary:
     def test_aggregate_ids_are_immutable(self, src_dir: Path) -> None:
         """Aggregate identifiers should be immutable after creation.
 
-        REQ-ARCH-027: IDs are immutable.
+        REQ-ARCH-001: IDs are immutable.
         """
         aggregates_dir = src_dir / "bioetl" / "domain" / "aggregates"
         _assert_aggregates_dir_exists(aggregates_dir)

@@ -15,8 +15,8 @@ These tests verify that the CLI/runtime bootstrap separation is maintained:
 - cli MAY import from runtime (for runner access)
 - Both MUST import shared code from assembly
 
-REQ-ARCH-BOOT-001: Bootstrap runtime isolation from CLI.
-REQ-ARCH-BOOT-002: CLI/runtime clear separation for maintainability.
+REQ-ARCH-001: Bootstrap runtime isolation from CLI.
+REQ-ARCH-001: CLI/runtime clear separation for maintainability.
 
 See CLAUDE.md §2.1 Matrix of Imports.
 """
@@ -38,7 +38,7 @@ class TestBootstrapLayerBoundaries:
     def test_runtime_does_not_import_cli(self, src_dir: Path) -> None:
         """Runtime bootstrap MUST NOT import from CLI bootstrap.
 
-        REQ-ARCH-BOOT-001: Runtime modules should be independent of CLI-specific
+        REQ-ARCH-001: Runtime modules should be independent of CLI-specific
         services to prevent acmolecule_idental use of NoOp implementations in production
         pipeline execution.
         """
@@ -67,7 +67,7 @@ class TestBootstrapLayerBoundaries:
     def test_bootstrap_package_structure_exists(self, src_dir: Path) -> None:
         """Verify bootstrap package has correct structure.
 
-        REQ-ARCH-BOOT-002: Bootstrap should be split into assembly/cli/runtime.
+        REQ-ARCH-001: Bootstrap should be split into assembly/cli/runtime.
         """
         bootstrap_path = src_dir / "bioetl" / "composition" / "bootstrap"
         assert bootstrap_path.exists(), "Bootstrap package not found"
@@ -91,7 +91,7 @@ class TestBootstrapLayerBoundaries:
     def test_assembly_has_no_noop_imports(self, src_dir: Path) -> None:
         """Assembly modules should not use NoOp implementations directly.
 
-        REQ-ARCH-BOOT-003: Assembly provides pure infrastructure building blocks
+        REQ-ARCH-001: Assembly provides pure infrastructure building blocks
         without NoOp observability hardcoded.
         """
         assembly_path = src_dir / "bioetl" / "composition" / "bootstrap" / "assembly"
@@ -126,7 +126,7 @@ class TestBootstrapLayerBoundaries:
     def test_cli_modules_use_noop_logger(self, src_dir: Path) -> None:
         """CLI modules should use NoOpLogger for administrative operations.
 
-        REQ-ARCH-BOOT-004: CLI operations don't require full observability,
+        REQ-ARCH-001: CLI operations don't require full observability,
         so they should use NoOpLogger to avoid unnecessary overhead.
         """
         cli_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
@@ -161,7 +161,7 @@ class TestBootstrapLayerBoundaries:
     def test_runtime_observability_uses_full_stack(self, src_dir: Path) -> None:
         """Runtime observability should bootstrap full observability stack.
 
-        REQ-ARCH-BOOT-005: Runtime pipeline execution needs full observability
+        REQ-ARCH-001: Runtime pipeline execution needs full observability
         (logging, tracing, metrics, DQ monitoring).
         """
         observability_file = (
@@ -220,7 +220,7 @@ class TestBootstrapLayerBoundaries:
     def test_cli_can_import_runtime(self, src_dir: Path) -> None:
         """CLI modules may import from runtime (for runner access).
 
-        REQ-ARCH-BOOT-006: CLI can use runtime functions when it needs
+        REQ-ARCH-001: CLI can use runtime functions when it needs
         full pipeline execution capabilities.
         """
         cli_path = src_dir / "bioetl" / "composition" / "bootstrap" / "cli"
@@ -237,7 +237,7 @@ class TestBootstrapLayerBoundaries:
     def test_backward_compatibility_re_exports(self, src_dir: Path) -> None:
         """Legacy modules must re-export from new bootstrap package.
 
-        REQ-ARCH-BOOT-007: Maintain backward compatibility through re-exports.
+        REQ-ARCH-001: Maintain backward compatibility through re-exports.
         If the legacy _bootstrap package has been fully removed, the migration
         to bootstrap/ is complete and this test passes.
         """

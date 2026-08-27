@@ -10,9 +10,9 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture tests: Dependency Injection compliance.
 
-REQ-ARCH-DI-001: Application layer MUST NOT instantiate infrastructure.
-REQ-ARCH-DI-002: Factory classes MUST be in composition layer only.
-REQ-ARCH-DI-003: Dependencies MUST be injected through constructors.
+REQ-ARCH-001: Application layer MUST NOT instantiate infrastructure.
+REQ-ARCH-001: Factory classes MUST be in composition layer only.
+REQ-ARCH-001: Dependencies MUST be injected through constructors.
 
 See CLAUDE.md Â§2.2 and Â§11 Anti-Patterns.
 """
@@ -326,7 +326,7 @@ class TestDICompliance:
     ) -> None:
         """Application layer MUST NOT instantiate infrastructure directly.
 
-        REQ-ARCH-DI-001: All dependencies must be injected through constructors.
+        REQ-ARCH-001: All dependencies must be injected through constructors.
         Infrastructure classes should be created in composition layer only.
 
         This test uses AST analysis to find actual instantiation calls,
@@ -359,7 +359,7 @@ class TestDICompliance:
     def test_factories_only_in_composition(self, src_dir: Path) -> None:
         """Factory classes MUST be in composition layer only.
 
-        REQ-ARCH-DI-002: All Factory classes should live in composition/.
+        REQ-ARCH-001: All Factory classes should live in composition/.
         This ensures a single composition root for dependency assembly.
         """
         violations = []
@@ -386,7 +386,7 @@ class TestDICompliance:
     ) -> None:
         """Classes should not create their own dependencies internally.
 
-        REQ-ARCH-DI-003: Dependencies must be passed in __init__, not created.
+        REQ-ARCH-001: Dependencies must be passed in __init__, not created.
         Anti-pattern: self._client = SomeClient() inside __init__.
         """
         violations = []
@@ -416,7 +416,7 @@ class TestDICompliance:
     ) -> None:
         """Application layer must not import httpx directly.
 
-        REQ-ARCH-DI-004: HTTP clients are infrastructure concern.
+        REQ-ARCH-001: HTTP clients are infrastructure concern.
         Application should use DataSourcePort, not httpx.
         """
         violations = _httpx_import_violations(application_python_files)
@@ -487,7 +487,7 @@ class TestCompositionRootIntegrity:
     def test_factories_exist_in_composition(self, src_dir: Path) -> None:
         """Verify factories directory exists with proper factories.
 
-        REQ-ARCH-DI-005: Composition layer must have factories for DI.
+        REQ-ARCH-001: Composition layer must have factories for DI.
         """
         factories_dir = src_dir / "bioetl" / "composition" / "factories"
         assert factories_dir.exists(), (
@@ -556,7 +556,7 @@ class TestInfrastructureIsolation:
     def test_adapters_implement_ports(self, src_dir: Path) -> None:
         """Infrastructure adapters should implement domain ports.
 
-        REQ-ARCH-DI-006: Adapters implement port interfaces.
+        REQ-ARCH-001: Adapters implement port interfaces.
         """
         adapters_path = src_dir / "bioetl" / "infrastructure" / "adapters"
         if not adapters_path.exists():

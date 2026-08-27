@@ -10,8 +10,8 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: проверка форматирования кода с помощью ruff.
 
-REQ-ARCH-050: Consistent code formatting across the codebase.
-REQ-ARCH-051: Consistent import ordering via ruff (isort rules).
+REQ-ARCH-001: Consistent code formatting across the codebase.
+REQ-ARCH-001: Consistent import ordering via ruff (isort rules).
 
 Note: ruff replaces black+isort as the unified formatter and linter.
 """

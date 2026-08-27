@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: structlog только в infrastructure/composition слоях.
 
-REQ-ARCH-032: Application, domain и interfaces слои используют LoggerPort абстракцию.
+REQ-ARCH-001: Application, domain и interfaces слои используют LoggerPort абстракцию.
 См. ADR-006 для обоснования.
 """
 
@@ -105,7 +105,7 @@ class TestNoStructlogInApplicationLayer:
     def test_no_structlog_in_application_layer(self) -> None:
         """Application layer MUST NOT import structlog directly.
 
-        REQ-ARCH-032: Use LoggerPort abstraction instead.
+        REQ-ARCH-001: Use LoggerPort abstraction instead.
         See ADR-006 for rationale.
         """
         violations = _check_structlog_imports(APPLICATION_DIR, EXEMPTED_FILES)
@@ -123,7 +123,7 @@ class TestNoStructlogInInterfacesLayer:
     def test_no_structlog_in_interfaces_layer(self) -> None:
         """Interfaces layer MUST NOT import structlog directly.
 
-        REQ-ARCH-032: Use LoggerPort abstraction instead.
+        REQ-ARCH-001: Use LoggerPort abstraction instead.
         See ADR-006 for rationale.
         """
         violations = _check_structlog_imports(INTERFACES_DIR, EXEMPTED_FILES)
@@ -211,7 +211,7 @@ def _iter_boundlogger_line_violations(py_file: Path, rel_path: Path) -> list[str
 def test_no_structlog_boundlogger_in_application() -> None:
     """Application layer MUST use LoggerPort, not structlog.BoundLogger.
 
-    REQ-ARCH-032: The application layer should be decoupled from
+    REQ-ARCH-001: The application layer should be decoupled from
     concrete logging implementations. Use LoggerPort from domain.ports.
 
     This test ensures that structlog.BoundLogger is not used as a type
