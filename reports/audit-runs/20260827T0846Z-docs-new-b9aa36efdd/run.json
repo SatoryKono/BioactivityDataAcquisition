@@ -9,7 +9,7 @@
   "audit_mode": "full",
   "include_pipeline": true,
   "n": 10,
-  "stopped_after": 1,
+  "stopped_after": 2,
   "early_stop": {
     "reason": "new_issues_i==0 and open_cycle_issues==0",
     "new_issues_i": 0,
@@ -36,7 +36,7 @@
   "pipeline_surface_score": 2,
   "debt_budget_policy": "forbidden_to_increase",
   "skipped_checks": [
-    "python -m scripts.docs verify (full MkDocs --strict): skipped after check-docstrings fail; no docs extra required for skip-build",
+    "python -m scripts.docs verify (full MkDocs --strict): skipped; --skip-build now exit 0",
     "bash scripts/ai/junie/check_junie_mirror.sh --check: skip, no .codex/.junie edits",
     "GitHub issue/PR/merge/close: ALLOW_*=false"
   ],
@@ -51,8 +51,8 @@
     },
     "check-kpi": {
       "exit": 0,
-      "status": "monitoring",
-      "outside_nav": 127,
+      "status": "on_track",
+      "outside_nav": 118,
       "hard_limit": 135
     },
     "generate-cleanup-inventory --check": {
@@ -60,8 +60,8 @@
       "after_update": true
     },
     "verify --skip-build": {
-      "exit": 1,
-      "reason": "check-docstrings functions 88.7% < 90%"
+      "exit": 0,
+      "reason": "check-docstrings functions 90.0% >= 90%"
     }
   }
 }

@@ -14,9 +14,9 @@ Method: `prompt.audit.docs-pipeline`
 | --- | --- |
 | `check-links --links --specs --configs` | 0 |
 | `check-drift --runtime-mirrors --freshness` | 0 |
-| `check-kpi` | 0 (monitoring; outside-nav 127 ≤ hard 135) |
+| `check-kpi` | 0 (on_track; outside-nav 118 ≤ 120) |
 | `generate-cleanup-inventory --check` | 0 after `--update` |
-| `verify --skip-build` | 1 (`functions 88.7% < 90%`) |
+| `verify --skip-build` | 0 (`functions 90.0% >= 90%`) |
 
 Full `verify` (MkDocs `--strict`) not reached: docstring step fails first.
 
@@ -29,8 +29,8 @@ Retired top-level `scripts/docs.py` shims: not restored.
 | ID | P | Outcome |
 | --- | --- | --- |
 | AUD-DOC-001 | P2 | remediated in worktree |
-| AUD-DOC-003 | P2 | remaining; do not raise 90% |
-| AUD-DOC-004 | P3 | remaining; do not raise hard 135 |
+| AUD-DOC-003 | P2 | remediated in worktree (functions 90.0%; threshold unchanged) |
+| AUD-DOC-004 | P3 | remediated in worktree (outside-nav 118 ≤ 120; hard 135 unchanged) |
 
 ## Kit extras
 

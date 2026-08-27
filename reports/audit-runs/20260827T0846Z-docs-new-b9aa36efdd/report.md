@@ -28,10 +28,10 @@ Cycle-run: `20260827T0846Z-docs-new-b9aa36efdd`
 | --- | --- | --- |
 | `python -m scripts.docs check-links --links --specs --configs` | 0 | broken relative links = 0 |
 | `python -m scripts.docs check-drift --runtime-mirrors --freshness` | 0 | 0 errors / 0 warnings |
-| `python -m scripts.docs check-kpi` | 0 | monitoring; outside-nav 127 / hard 135; orphans 0 |
+| `python -m scripts.docs check-kpi` | 0 | **on_track**; outside-nav **118** / hard 135; orphans 0 |
 | `python -m scripts.docs generate-cleanup-inventory --check` | 0 | after `--update` for doc + inventory drift |
-| `python -m scripts.docs verify --skip-build` | **1** | `check-docstrings` functions 88.7% < 90% (missing=795) |
-| `python -m scripts.docs verify` (MkDocs `--strict`) | skipped | blocked by docstring step |
+| `python -m scripts.docs verify --skip-build` | **0** | functions **90.0%** (iteration 2) |
+| `python -m scripts.docs verify` (MkDocs `--strict`) | skipped | not required after skip-build green |
 
 Exit 0 ≠ semantics: link checker does not prove Windows venv instructions.
 
@@ -60,4 +60,4 @@ Restore-SSOT-link for 001/002. Hold 003 (do not raise docstring 90%). Hold 004 (
 
 ## Early-stop
 
-STOP after iteration 1: `new_issues_i==0` ∧ `open_cycle_issues==0`. Cycles 2–10 not invented.
+Operator continued remaining 003/004 as iteration 2. Then STOP: `new_issues_i==0` ∧ `open_cycle_issues==0`.

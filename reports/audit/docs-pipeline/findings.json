@@ -62,6 +62,47 @@
       ]
     },
     {
+      "id": "AUD-DOC-002",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "content",
+      "tags": [
+        "content"
+      ],
+      "path": "docs/03-guides/docs-verification.md:65",
+      "observation": "Windows/Linux fallback used python3 -m venv .venv only; AGENTS.md and getting-started.md require .venv-win on Windows mixed checkout.",
+      "method": "compare docs-verification.md and quick-start.md vs docs/03-guides/getting-started.md and AGENTS.md",
+      "expected": "Onboarding does not tell Windows operators to share a Linux .venv.",
+      "actual": "Before: only POSIX .venv. After: pointer to getting-started.md and .venv-win PowerShell snippet.",
+      "impact": "Wrong bootstrap on Windows; venv collision in mixed checkout.",
+      "root_cause": "POSIX-only fallback copied without the Windows lane.",
+      "remediation": "Restore SSOT link to getting-started.md / .venv-win.",
+      "effort": "S",
+      "automation": "n/a (semantic; check-links cannot prove OS path)",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remediated_worktree",
+      "validation": [
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "evidence": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 70,
+          "observation": "Windows .venv-win fallback added"
+        },
+        {
+          "path": "docs/03-guides/quick-start.md",
+          "line": 96,
+          "observation": "Windows pointer to getting-started.md §2.2 / §2.3"
+        }
+      ]
+    },
+    {
       "id": "AUD-DOC-003",
       "requirement_id": "REQ-DOC-001",
       "priority": "P2",
@@ -74,18 +115,18 @@
         "pipeline"
       ],
       "path": "scripts/docs/checks/check_docstrings.py:42",
-      "observation": "python -m scripts.docs verify --skip-build exits 1: functions 88.7% < 90% threshold (missing=795). tests.yml proof-or-stop producer captures rc then exit 0.",
-      "method": "python -m scripts.docs verify --skip-build; read .github/workflows/tests.yml docs_runtime step; read verify.py",
+      "observation": "Iteration 1: verify --skip-build failed at functions 88.7% < 90%. Iteration 2: Protocol/port public methods documented; functions 90.0% (missing=708). Threshold not raised. tests.yml producer still captures rc then exit 0 (Proof-or-Stop design).",
+      "method": "python -m scripts.docs verify --skip-build; python -m scripts.docs check-docstrings --summary",
       "expected": "Canonical verify chain is fail-closed when docstring coverage is below THRESHOLDS.",
-      "actual": "Local verify fails at check-docstrings. tests.yml always exits 0 after capturing the log. Raising the 90% cap is forbidden.",
-      "impact": "Documented one-command verify is red locally; tests.yml does not fail the producer job on that red.",
-      "root_cause": "Function docstring coverage below frozen 90% gate; producer swallows rc.",
-      "remediation": "Do not raise THRESHOLDS. Pay down missing public function docstrings in src/bioetl, or isolate check-docstrings from docs.yml if product policy changes. Out of docs-content edit scope.",
-      "effort": "L",
+      "actual": "verify --skip-build exit 0; functions 90.0% >= 90%. Remaining 708 undocumented public functions stay below the freeze, not a budget increase.",
+      "impact": "Documented one-command verify --skip-build is green locally.",
+      "root_cause": "Public Protocol methods and one runner attach method lacked docstrings.",
+      "remediation": "Keep THRESHOLDS.functions at 90. Continue docstring paydown later; do not isolate the check.",
+      "effort": "M",
       "automation": "python -m scripts.docs check-docstrings --summary",
       "automated_fix_possible": false,
       "dependencies": [],
-      "outcome": "remaining",
+      "outcome": "remediated_worktree",
       "validation": [
         "python -m scripts.docs verify --skip-build"
       ],
@@ -94,7 +135,7 @@
           "path": "scripts/docs/checks/check_docstrings.py",
           "line": 42,
           "command": "python -m scripts.docs verify --skip-build",
-          "observation": "FAIL: functions: 88.7% < 90% threshold; missing=795"
+          "observation": "functions 90.0% >= 90%; missing=708; verify --skip-build exit 0"
         }
       ]
     },
@@ -111,28 +152,27 @@
         "pipeline"
       ],
       "path": "scripts/docs/checks/report_docs_kpi.py",
-      "observation": "check-kpi outside nav=127 vs directional target <=120 by 2026-12-31; hard limit <=135 not breached; orphans=0.",
-      "method": "python -m scripts.docs check-kpi --json-out",
+      "observation": "Iteration 1: outside-nav 127 vs directional 120. Iteration 2: nine published pages added to mkdocs nav; outside-nav 118; status on_track. Hard limit 135 unchanged.",
+      "method": "python -m scripts.docs check-kpi",
       "expected": "Hard limit outside-nav <=135; directional <=120 by 2026-12-31.",
-      "actual": "127 outside nav; status monitoring; breaches none.",
-      "impact": "No blocking KPI failure; remaining nav-adoption gap.",
-      "root_cause": "Published pages exist outside mkdocs nav (ops/architecture/guides concentration).",
-      "remediation": "Do not raise hard limit. Optionally classify or nav-adopt until 120.",
-      "effort": "M",
+      "actual": "118 outside nav; status on_track; orphans=0; hard limit still 135.",
+      "impact": "Directional KPI target met without raising the hard ceiling.",
+      "root_cause": "Operator/reference pages existed but were omitted from nav.",
+      "remediation": "Keep hard limit 135. Do not expand KPI_EXCLUDED_PREFIXES to hide backlog.",
+      "effort": "S",
       "automation": "python -m scripts.docs check-kpi; docs-kpi-weekly.yml",
       "automated_fix_possible": false,
       "dependencies": [],
-      "outcome": "remaining",
+      "outcome": "remediated_worktree",
       "validation": [
         "python -m scripts.docs check-kpi"
       ],
       "evidence": [
         {
-          "path": "reports/audit-runs/20260827T0846Z-docs-new-b9aa36efdd/iteration-1/kpi.json",
-          "observation": "outside_nav=127, hard_limit=135, orphans=0, status=monitoring"
+          "path": "mkdocs.yml",
+          "observation": "Added REQUIREMENTS.md, github-quick-reference, observability alerting/logging/tracing, control-plane lifecycle, SLI/SLO, generated-artifact-drift and workflow-control-plane runbooks"
         }
       ]
     }
-  ],
-  "domain": "docs-pipeline"
+  ]
 }

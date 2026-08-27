@@ -53,12 +53,16 @@ class ControlPlaneArtifactLifecycleStoreProtocol(Protocol):
         policy: ControlPlaneArtifactLifecyclePolicy,
         *,
         dry_run: bool,
-    ) -> ControlPlaneArtifactLifecyclePlan: ...
+    ) -> ControlPlaneArtifactLifecyclePlan:
+        """Plan artifact lifecycle actions for the selected run."""
+        ...
 
     def apply(
         self,
         plan: ControlPlaneArtifactLifecyclePlan,
-    ) -> ControlPlaneArtifactLifecycleApplyResult: ...
+    ) -> ControlPlaneArtifactLifecycleApplyResult:
+        """Apply a previously built artifact lifecycle plan."""
+        ...
 
 
 class ForensicRunDiffServiceProtocol(Protocol):
@@ -68,7 +72,9 @@ class ForensicRunDiffServiceProtocol(Protocol):
         self,
         left_identifier: str,
         right_identifier: str,
-    ) -> ForensicRunDiffResult: ...
+    ) -> ForensicRunDiffResult:
+        """Compare two retained runs through forensic diff."""
+        ...
 
 
 class HistoricalReplayClosureServiceProtocol(Protocol):
@@ -83,7 +89,9 @@ class HistoricalReplayClosureServiceProtocol(Protocol):
         claim_scope_mode: HistoricalReplayClaimScopeMode = (
             "all_retained_historical_runs"
         ),
-    ) -> HistoricalReplayClosureReportRecord: ...
+    ) -> HistoricalReplayClosureReportRecord:
+        """Build a historical-replay closure report."""
+        ...
 
 
 class HistoricalReplayCorpusServiceProtocol(Protocol):
@@ -91,13 +99,17 @@ class HistoricalReplayCorpusServiceProtocol(Protocol):
 
     def build_certifiability_inventory(
         self,
-    ) -> HistoricalReplayCertifiabilityInventory: ...
+    ) -> HistoricalReplayCertifiabilityInventory:
+        """Build certifiability inventory for the retained corpus."""
+        ...
 
     def certify_retained_corpus(
         self,
         *,
         specs: tuple[HistoricalReplayBulkCertificationSpec, ...],
-    ) -> HistoricalReplayBulkCertificationResult: ...
+    ) -> HistoricalReplayBulkCertificationResult:
+        """Certify retained historical-replay corpus records."""
+        ...
 
 
 class HistoricalReplayUniverseServiceProtocol(Protocol):
@@ -107,7 +119,9 @@ class HistoricalReplayUniverseServiceProtocol(Protocol):
         self,
         *,
         external_records: tuple[HistoricalReplayUniverseExternalRecord, ...] = (),
-    ) -> HistoricalReplayUniverseClosureReportRecord: ...
+    ) -> HistoricalReplayUniverseClosureReportRecord:
+        """Build closure evidence for the full historical-replay universe."""
+        ...
 
 
 class LineageInspectionServiceProtocol(Protocol):
@@ -118,37 +132,53 @@ class LineageInspectionServiceProtocol(Protocol):
         fragment_id: str,
         *,
         semantic: bool = False,
-    ) -> LineageFragmentInspectionResult: ...
+    ) -> LineageFragmentInspectionResult:
+        """Show one persisted lineage fragment."""
+        ...
 
-    def trace(self, dataset_ref: str) -> LineageTraceResult: ...
+    def trace(self, dataset_ref: str) -> LineageTraceResult:
+        """Trace lineage for a dataset reference."""
+        ...
 
-    def explain_run(self, identifier: str) -> LineageRunExplanationResult: ...
+    def explain_run(self, identifier: str) -> LineageRunExplanationResult:
+        """Explain persisted lineage for one run identifier."""
+        ...
 
 
 class RunManifestInspectionServiceProtocol(Protocol):
     """Inspect, compare, and verify persisted run manifests."""
 
-    def show(self, identifier: str) -> RunManifestInspectionResult: ...
+    def show(self, identifier: str) -> RunManifestInspectionResult:
+        """Show a persisted run manifest."""
+        ...
 
     def diff(
         self,
         left_identifier: str,
         right_identifier: str,
-    ) -> RunManifestDiffResult: ...
+    ) -> RunManifestDiffResult:
+        """Diff two persisted run manifests."""
+        ...
 
     def verify(
         self,
         left_identifier: str,
         right_identifier: str,
-    ) -> RunManifestVerifyResult: ...
+    ) -> RunManifestVerifyResult:
+        """Verify two persisted run manifests against each other."""
+        ...
 
 
 class WorkflowInspectionServiceProtocol(Protocol):
     """Inspect persisted workflow execution state."""
 
-    def inspect_latest(self, workflow_name: str) -> WorkflowInspectionResult | None: ...
+    def inspect_latest(self, workflow_name: str) -> WorkflowInspectionResult | None:
+        """Inspect the latest execution of a named workflow."""
+        ...
 
     def inspect_run_id(
         self,
         workflow_run_id: str,
-    ) -> WorkflowInspectionResult | None: ...
+    ) -> WorkflowInspectionResult | None:
+        """Inspect a workflow execution by run id."""
+        ...

@@ -19,12 +19,14 @@ none created; none closed.
 | i | Result |
 | --- | --- |
 | 1 | SSOT command + Windows `.venv-win`; inventory `--update`; remaining docstring 88.7% and outside-nav 127 |
-| 2–10 | STOP (`new_issues_i==0` ∧ `open_cycle_issues==0`) |
+| 2 | functions 90.0%; outside-nav 118 on_track; `verify --skip-build` 0 |
+| 3–10 | STOP (`new_issues_i==0` ∧ `open_cycle_issues==0`) |
 
 ## Remaining (do not raise budgets)
 
-- `check-docstrings` functions 88.7% vs 90% (`AUD-DOC-003`)
-- KPI outside-nav 127 vs directional 120 (`AUD-DOC-004`); hard 135 OK
+- 708 public functions still without docstrings (threshold **met** at 90.0%, cap unchanged)
+- `tests.yml` Proof-or-Stop producer still `exit 0` after capturing verify rc (by design of that job)
+
 
 ## GitHub payloads (not executed)
 

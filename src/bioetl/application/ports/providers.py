@@ -38,25 +38,39 @@ class ProviderSettingsProtocol(Protocol):
     """Minimal settings surface required by provider registration helpers."""
 
     @property
-    def gold_path(self) -> Path: ...
+    def gold_path(self) -> Path:
+        """Gold-layer output path from provider settings."""
+        ...
 
     @property
-    def default_email(self) -> str | None: ...
+    def default_email(self) -> str | None:
+        """Optional default contact email for provider HTTP clients."""
+        ...
 
     @property
-    def strict_error_handling(self) -> bool: ...
+    def strict_error_handling(self) -> bool:
+        """Whether provider failures must fail closed."""
+        ...
 
     @property
-    def pubmed_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def pubmed_api_key(self) -> SecretValueProviderProtocol | None:
+        """Optional PubMed API key wrapper."""
+        ...
 
     @property
-    def uniprot_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def uniprot_api_key(self) -> SecretValueProviderProtocol | None:
+        """Optional UniProt API key wrapper."""
+        ...
 
     @property
-    def openalex_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def openalex_api_key(self) -> SecretValueProviderProtocol | None:
+        """Optional OpenAlex API key wrapper."""
+        ...
 
     @property
-    def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None: ...
+    def semanticscholar_api_key(self) -> SecretValueProviderProtocol | None:
+        """Optional Semantic Scholar API key wrapper."""
+        ...
 
 
 @runtime_checkable
@@ -136,20 +150,30 @@ class SupportAwareDataSourceCreatorProtocol(Protocol):
 class ProviderRegistrarProtocol(Protocol):
     """Minimal registry contract for provider registration assembly."""
 
-    def register(self, name: str, config: ProviderConfig) -> None: ...
+    def register(self, name: str, config: ProviderConfig) -> None:
+        """Register a named provider configuration."""
+        ...
 
-    def is_registered(self, name: str) -> bool: ...
+    def is_registered(self, name: str) -> bool:
+        """Return whether a provider name is registered."""
+        ...
 
-    def list_providers(self) -> list[str]: ...
+    def list_providers(self) -> list[str]:
+        """List registered provider names."""
+        ...
 
-    def clear(self) -> None: ...
+    def clear(self) -> None:
+        """Remove all registered providers."""
+        ...
 
 
 @runtime_checkable
 class ProviderDataSourceAccessProtocol(ProviderRegistrarProtocol, Protocol):
     """Registry contract required by datasource and HTTP-client factories."""
 
-    def get_http_config(self, name: str) -> HttpConfig | None: ...
+    def get_http_config(self, name: str) -> HttpConfig | None:
+        """Return HTTP client config for a provider, if registered."""
+        ...
 
     def create_adapter(
         self,
@@ -158,7 +182,9 @@ class ProviderDataSourceAccessProtocol(ProviderRegistrarProtocol, Protocol):
         logger: LoggerPort | None = None,
         settings: ProviderSettingsProtocol | None = None,
         **kwargs: object,
-    ) -> DataSourcePort: ...
+    ) -> DataSourcePort:
+        """Create a provider adapter for the given name."""
+        ...
 
     def create_data_source(
         self,
@@ -169,6 +195,10 @@ class ProviderDataSourceAccessProtocol(ProviderRegistrarProtocol, Protocol):
         filter_config: InputFilterConfig | None = None,
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
-    ) -> DataSourcePort: ...
+    ) -> DataSourcePort:
+        """Create a data source for the given provider name."""
+        ...
 
-    def build_data_source_creator(self, name: str) -> DataSourceCreatorProtocol: ...
+    def build_data_source_creator(self, name: str) -> DataSourceCreatorProtocol:
+        """Build a data-source creator bound to one provider."""
+        ...

@@ -106,6 +106,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
         return self._services
 
     def attach_run_ledger_service(self, service: RunLedgerService) -> None:
+        """Attach the run-ledger writer used after lock acquisition."""
         self._run_ledger_service = service
 
     def attach_contract_evidence_recorder(
