@@ -105,16 +105,16 @@ pip install -e ".[dev,tests,tracing,docs]"
 
 ```bash
 # CI / single-OS checkout
-uv run python -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+uv run python -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze --required-persistence-profile degraded_observable
 
 # WSL mixed checkout
-"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze --required-persistence-profile degraded_observable
 
 # Windows PowerShell mixed checkout
-.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze --required-persistence-profile degraded_observable
 
 # Console-script form also works after the environment is activated:
-bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
+bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze --required-persistence-profile degraded_observable
 
 # Data will be stored in:
 # - data/output/bronze/chembl/activity/

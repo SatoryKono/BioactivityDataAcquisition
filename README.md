@@ -338,10 +338,10 @@ Then run the ETL pipeline using the CLI:
 
 ```bash
 # Run incremental update for ChEMBL
-python -m bioetl run --pipeline chembl_activity --run-type incremental
+python -m bioetl run --pipeline chembl_activity --run-type incremental --required-persistence-profile degraded_observable
 
 # Run backfill with resume capability
-python -m bioetl run --pipeline chembl_activity --run-type backfill --resume
+python -m bioetl run --pipeline chembl_activity --run-type backfill --resume --required-persistence-profile degraded_observable
 
 # Inspect quarantined records
 python -m bioetl quarantine inspect --pipeline chembl_activity --limit 10
@@ -353,11 +353,11 @@ python -m bioetl checkpoint list --pipeline chembl_activity
 If you do not want to activate the environment, call the interpreter directly:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_publication --limit 50000
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_publication --limit 50000 --required-persistence-profile degraded_observable
 ```
 
 ```bash
-"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_publication --limit 50000
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_publication --limit 50000 --required-persistence-profile degraded_observable
 ```
 
 ## Development

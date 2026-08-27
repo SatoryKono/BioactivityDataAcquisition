@@ -31,10 +31,10 @@ flowchart TB
         subgraph Data["Local filesystem (data/)"]
             Bronze[("📁 bronze/<br/>JSONL+zstd")]
             Silver[("📁 silver/<br/>Delta Lake")]
-            Gold[("📁 gold/<br/>Delta/Parquet")]
-            Quarantine[("📁 quarantine/<br/>Parquet")]
+            Gold[("📁 gold/<br/>Delta")]
+            Quarantine[("📁 quarantine/<br/>Delta")]
             Checkpoints[("📁 checkpoints/<br/>JSON")]
-            Lineage[("📁 lineage/<br/>Parquet")]
+            Lineage[("📁 lineage/<br/>JSONL")]
         end
 
         subgraph Observability["Local Observability"]

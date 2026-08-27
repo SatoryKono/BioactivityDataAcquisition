@@ -9,8 +9,8 @@ git clone <repo-url>
 cd BioactivityDataAcquisition
 git remote -v
 uv sync --extra dev --extra tests --extra tracing
-# Windows/.venv fallback:
-# .venv/Scripts/python.exe -m pip install -e .[dev,tests]
+# Windows/.venv-win fallback (see scripts/engineering/dev/setup_env_windows.ps1):
+# .venv-win/Scripts/python.exe -m pip install -e ".[dev,tests,tracing]"
 
 # 2. Run checks before any changes
 make lint && make test
