@@ -68,6 +68,16 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.cycle.telemetry` | `library/audit/cycle/telemetry.md` | Cyclic audit of observability instrumentation and dashboard data feed |
 | `prompt.audit.cycle.dashboards` | `library/audit/cycle/dashboards.md` | Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates |
 | `prompt.audit.cycle.coderabbit` | `library/audit/cycle/coderabbit.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
+| `prompt.audit.project.new.docs` | `library/audit/project/new/docs.md` | Improved cyclic docs audit — content plus scripts/docs pipeline, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.diagrams` | `library/audit/project/new/diagrams.md` | Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.agents-memory` | `library/audit/project/new/agents-memory.md` | Improved cyclic agents/memory audit — runtime parity check, memory workflow, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.configs` | `library/audit/project/new/configs.md` | Improved cyclic config audit — schema hierarchy, compatibility, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.tests` | `library/audit/project/new/tests.md` | Improved cyclic test-system audit plus bounded LANE retest, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.tech-debt` | `library/audit/project/new/tech-debt.md` | Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.architecture` | `library/audit/project/new/architecture.md` | Improved cyclic architecture audit — 10-category scorecard, plan waves, fail-closed ALLOW, early-stop |
+| `prompt.audit.project.new.telemetry` | `library/audit/project/new/telemetry.md` | Improved cyclic telemetry audit — instrumentation to recording rules, MONITORING fail-closed, early-stop |
+| `prompt.audit.project.new.dashboards` | `library/audit/project/new/dashboards.md` | Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, fail-closed ALLOW, stop when no new issues and no open cycle issues |
+| `prompt.audit.project.new.coderabbit` | `library/audit/project/new/coderabbit.md` | Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, fail-closed ALLOW, early-stop |
 
 ## Active fragments
 
@@ -184,6 +194,16 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.cycle.telemetry` | operator-paste | active | `library/audit/cycle/telemetry.md` |
 | `prompt.audit.cycle.dashboards` | operator-paste | active | `library/audit/cycle/dashboards.md` |
 | `prompt.audit.cycle.coderabbit` | operator-paste | active | `library/audit/cycle/coderabbit.md` |
+| `prompt.audit.project.new.docs` | operator-paste | active | `library/audit/project/new/docs.md` |
+| `prompt.audit.project.new.diagrams` | operator-paste | active | `library/audit/project/new/diagrams.md` |
+| `prompt.audit.project.new.agents-memory` | operator-paste | active | `library/audit/project/new/agents-memory.md` |
+| `prompt.audit.project.new.configs` | operator-paste | active | `library/audit/project/new/configs.md` |
+| `prompt.audit.project.new.tests` | operator-paste | active | `library/audit/project/new/tests.md` |
+| `prompt.audit.project.new.tech-debt` | operator-paste | active | `library/audit/project/new/tech-debt.md` |
+| `prompt.audit.project.new.architecture` | operator-paste | active | `library/audit/project/new/architecture.md` |
+| `prompt.audit.project.new.telemetry` | operator-paste | active | `library/audit/project/new/telemetry.md` |
+| `prompt.audit.project.new.dashboards` | operator-paste | active | `library/audit/project/new/dashboards.md` |
+| `prompt.audit.project.new.coderabbit` | operator-paste | active | `library/audit/project/new/coderabbit.md` |
 | `prompt.campaign.generic-nine-audit-kit` | campaign | archived | `archive/campaigns/generic-nine-audit-kit-2026-08.md` |
 | `prompt.campaign.project-audit-orchestrator-kit` | campaign | archived | `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` |
 | `prompt.campaign.bi-dashboard-audit-kit` | campaign | archived | `archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md` |

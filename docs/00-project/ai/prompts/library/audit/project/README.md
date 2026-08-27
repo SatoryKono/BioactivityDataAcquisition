@@ -64,5 +64,13 @@ that generated-link step was skipped.
 | `prompt.audit.agents-runtime` | [full/audit-agents-runtime.md](full/audit-agents-runtime.md) |
 | `prompt.architecture.cycle` | [full/architecture-cycle.md](full/architecture-cycle.md) |
 
+## Improved source cards (`new/`)
+
+Fail-closed rewrite of the 10 cycle domains (`prompt.audit.project.new.*`).
+These are **source cards** (edit here). They do **not** replace `cycle/` as
+pack SSOT until an operator adopts them. Do not mix with generated `full/`.
+
+Index: [new/README.md](new/README.md).
+
 `library/audit/cycle/run/` is an incomplete same-id copy set — use `full/`
 instead.
