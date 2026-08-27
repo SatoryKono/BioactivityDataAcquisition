@@ -9476,7 +9476,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.factories.services.pipeline_batch_executor_builder",
       "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
-      "source_lines": 199
+      "source_lines": 201
     },
     {
       "coverage_percent": 100.0,
@@ -23646,7 +23646,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.maintenance.service_access",
       "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_lines": 66
+      "source_lines": 64
     },
     {
       "coverage_percent": 100.0,
@@ -34148,7 +34148,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.factories.services.pipeline_batch_executor_builder",
       "path": "src/bioetl/composition/factories/services/pipeline_batch_executor_builder.py",
-      "source_lines": 199
+      "source_lines": 201
     },
     {
       "coverage_percent": 100.0,
@@ -48318,7 +48318,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.maintenance.service_access",
       "path": "src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py",
-      "source_lines": 66
+      "source_lines": 64
     },
     {
       "coverage_percent": 100.0,
@@ -49353,7 +49353,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-26",
-  "source_tree_sha256": "13b38110c2c0b4e1e3444894a09a76ce1bd560893ffa274e06526cf8ed2a6eea",
+  "source_tree_sha256": "b67181372e259ecc423333d9cac06f6310ab30723103bb077497ef78b14a3245",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
