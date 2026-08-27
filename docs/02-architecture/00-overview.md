@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.7 (2026-08-05)*
+*Synced with RULES.md v6.1.11 (2026-08-25)*
 
 ## Architecture health scores (do not collapse)
 

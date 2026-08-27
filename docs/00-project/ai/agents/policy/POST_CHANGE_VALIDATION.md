@@ -17,7 +17,7 @@ Verify changes against the current normative stack:
 - accepted ADRs in `docs/02-architecture/decisions/`
 - `AGENTS.md`
 
-## Applies To
+## Applies To (incl. .devin/**)
 
 - production code
 - tests
