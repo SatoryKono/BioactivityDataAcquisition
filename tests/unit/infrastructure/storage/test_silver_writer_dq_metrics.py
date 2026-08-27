@@ -146,6 +146,74 @@ class TestSilverWriterDQMetrics:
             assert "new_field" in result.schema_drift.new_fields
 
     @pytest.mark.asyncio
+    async def test_compute_dq_metrics_dataframe_uses_schema_only_records(
+        self, noop_logger
+    ):
+        """DataFrame DQ metrics must not materialize records for schema drift."""
+        import polars as pl
+
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        records = pl.DataFrame(
+            {
+                "entity_id": ["CHEMBL123", "CHEMBL456"],
+                "new_field": ["first", "second"],
+            }
+        )
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer._detect_schema_drift = AsyncMock(return_value=None)
+
+        with patch.object(
+            pl.DataFrame,
+            "to_dicts",
+            side_effect=AssertionError("DataFrame rows were materialized"),
+        ):
+            result = await writer._compute_dq_metrics("test.table", records)
+
+        assert result.total_records == 2
+        writer._detect_schema_drift.assert_awaited_once_with(
+            "test.table",
+            [{"entity_id": None, "new_field": None}],
+        )
+
+    @pytest.mark.asyncio
+    async def test_compute_dq_metrics_list_preserves_first_record_schema(
+        self, noop_logger
+    ):
+        """List input must retain the first-record schema-drift contract."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        records = [
+            {"entity_id": "CHEMBL123"},
+            {"entity_id": "CHEMBL456", "late_field": "value"},
+        ]
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer._detect_schema_drift = AsyncMock(return_value=None)
+
+        result = await writer._compute_dq_metrics("test.table", records)
+
+        assert result.total_records == 2
+        writer._detect_schema_drift.assert_awaited_once_with(
+            "test.table",
+            [{"entity_id": None}],
+        )
+
+    @pytest.mark.asyncio
+    async def test_compute_dq_metrics_empty_list_uses_empty_schema_records(
+        self, noop_logger
+    ):
+        """Empty list input must not invent a schema-drift record."""
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        writer = SilverWriter(base_path=str(SILVER_BASE_PATH), logger=noop_logger)
+        writer._detect_schema_drift = AsyncMock(return_value=None)
+
+        result = await writer._compute_dq_metrics("test.table", [])
+
+        assert result.total_records == 0
+        writer._detect_schema_drift.assert_awaited_once_with("test.table", [])
+
+    @pytest.mark.asyncio
     async def test_compute_dq_metrics_no_drift_for_new_table(
         self, noop_logger, valid_records
     ):
