@@ -191,9 +191,8 @@ class MergeMetricsRecorderMixin:
         # Batch evaluation into a single operation to avoid python loop overhead
         import polars as pl
 
-        exprs = [pl.col(col).is_not_null().sum().alias(col) for col in target_cols]
-        counts = df.select(exprs).row(0, named=True)
-        return {col: int(count) / df_len for col, count in counts.items()}
+        counts = df.select(target_cols).null_count().row(0, named=True)
+        return {col: (df_len - int(count)) / df_len for col, count in counts.items()}
 
 
 __all__ = ["MergeMetricsRecorderMixin"]

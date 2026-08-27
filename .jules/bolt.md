@@ -1,0 +1,3 @@
+## 2024-08-27 - [Optimizing Polars Aggregations over Multiple Columns]
+**Learning:** Generating large lists of Polars expressions (e.g., `[pl.col(c).is_not_null().sum() for c in cols]`) and passing them to `.select()` incurs significant Python list comprehension overhead and expression engine compilation time, especially for wide composite DataFrames. Native operations that operate over the whole DataFrame context (like `df.select(cols).null_count()`) bypass this overhead by using optimized Rust paths directly.
+**Action:** When computing aggregations like null counts over many columns, prefer using native DataFrame-level methods (e.g., `df.null_count()`) rather than generating lists of per-column expressions.
