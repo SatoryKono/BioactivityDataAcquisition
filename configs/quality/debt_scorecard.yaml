@@ -446,14 +446,13 @@ hotspot_family_ratchets:
     linked_issue: '#4554'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: Hold duplication (6 clusters), file-growth, and fan-in at the reviewed baseline during
-      core orchestration changes while paying down duplicate clusters toward a future zero-duplication
-      ratchet.
+    expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      core orchestration changes.
     path_prefixes:
     - src/bioetl/application/core/
     bounded_growth_budgets:
       files_ge_250_loc: 0
-      max_internal_fan_in: 10
+      max_internal_fan_in: 7
     metrics:
       duplication_clusters: 0
       files: 194
@@ -463,11 +462,10 @@ hotspot_family_ratchets:
       max_internal_fan_in: 6
       max_internal_fan_in_module: bioetl.application.core.pipeline_span_lifecycle
     trend:
-      status: reduced_2026-08-13_issues_8706_8707_fanin_split
-      next_action: '2026-07-28 PD-05 collapses excess blank lines in application/core, lowering total_loc
-        22735->21805 while files_ge_250_loc remains 0. Bounded-growth budgets stay flat at 0 files_ge_250_loc
-        and max_internal_fan_in 10; no technical-debt budget is increased. Hotspot baseline refreshed
-        via report_hotspot_family_baseline --update.
+      status: reduced_2026-08-27_debt_cycle_fanin_ratchet
+      next_action: '2026-08-27 audit-cycle-tech-debt: ratchet application_core max_internal_fan_in
+        budget 10->7 (live fan-in=6; closeout #6032 requires live < budget). files_ge_250_loc remains 0.
+        No technical-debt budget is increased. Hotspot baseline refreshed via report_hotspot_family_baseline --update.
 
         '
   - name: composition_bootstrap_runtime
@@ -476,9 +474,8 @@ hotspot_family_ratchets:
     linked_issue: '#4548'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: Hold duplication (1 cluster), file-growth, and fan-in at the reviewed baseline during
-      runtime/bootstrap changes while paying down duplicate clusters toward a future zero-duplication
-      ratchet.
+    expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      runtime/bootstrap changes. Duplication clusters are already zero; do not grow fan-in.
     path_prefixes:
     - src/bioetl/composition/bootstrap/runtime/
     bounded_growth_budgets:
@@ -504,8 +501,8 @@ hotspot_family_ratchets:
     linked_issue: '#4477'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: Hold duplication (1 cluster), file-growth, and fan-in at the reviewed baseline during
-      pipeline-factory changes while paying down duplicate clusters toward a future zero-duplication ratchet.
+    expected_action: Hold duplication at zero, file-growth, and fan-in at the reviewed baseline during
+      pipeline-factory changes. files_ge_250_loc budget stays 2 (closeout #5648 pin); live is 0.
     path_prefixes:
     - src/bioetl/composition/factories/pipeline/
     bounded_growth_budgets:
@@ -559,13 +556,13 @@ hotspot_family_ratchets:
     linked_issue: '#6621'
     ratchet_stage: active
     ratchet_scope: duplication-non-growth-plus-bounded-growth
-    expected_action: Keep duplication clusters at 5 while holding file-growth and fan-in at the reviewed
+    expected_action: Keep duplication clusters at zero while holding file-growth and fan-in at the reviewed
       baseline during runtime-builder changes.
     path_prefixes:
     - src/bioetl/composition/runtime_builders/
     bounded_growth_budgets:
       files_ge_250_loc: 0
-      max_internal_fan_in: 5
+      max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
       files: 57
@@ -575,10 +572,9 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:
-      status: reduced_2026-07-28_arch_cont_07_runtime_builders_fan_in
-      next_action: 2026-07-28 ARCH-CONT-07 reduces runtime_builders max_internal_fan_in 4->3 by dropping
-        static facade fan-in on path helpers while preserving the existing bounded budget of 5. No technical-debt
-        budget is increased.
+      status: reduced_2026-08-27_debt_cycle_fanin_ratchet
+      next_action: 2026-08-27 audit-cycle-tech-debt ratchets runtime_builders max_internal_fan_in
+        budget 5->3 to live observed fan-in. No technical-debt budget is increased.
 full_app_duplication_ratchets:
   snapshot_date: '2026-07-07'
   mode: fail-fast

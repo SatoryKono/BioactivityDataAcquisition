@@ -18,7 +18,7 @@
       "files": 194,
       "total_loc": 23419,
       "budget_files_ge_250_loc": 0,
-      "budget_max_internal_fan_in": 10
+      "budget_max_internal_fan_in": 7
     },
     "composition_bootstrap_runtime": {
       "files_ge_250_loc": 0,
@@ -54,7 +54,7 @@
       "files": 57,
       "total_loc": 7224,
       "budget_files_ge_250_loc": 0,
-      "budget_max_internal_fan_in": 5
+      "budget_max_internal_fan_in": 3
     }
   },
   "dead_code": {
