@@ -30,9 +30,9 @@
 Tests hierarchical filter config loading and merge logic.
 
 Requirements:
-- REQ-CONF-010: Hierarchical filter config loading
-- REQ-CONF-011: Filter config merge order (defaults -> provider -> entity)
-- REQ-CONF-012: Inline override support for filters
+- Hierarchical filter config loading
+- Filter config merge order (defaults -> provider -> entity)
+- Inline override support for filters
 """
 
 from __future__ import annotations

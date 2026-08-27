@@ -13,8 +13,8 @@
 Tests end-to-end config loading with real file hierarchy.
 
 Requirements:
-- REQ-CONF-001: Full pipeline config loading with DQ
-- REQ-CONF-002: Hierarchical DQ config resolution
+- Full pipeline config loading with DQ
+- Hierarchical DQ config resolution
 """
 
 from __future__ import annotations

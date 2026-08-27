@@ -1171,7 +1171,7 @@ class TestGoldWriterDeterministicBackoff:
     ):
         """Test that backoff uses fixed delay (0.05s jitter) instead of random.
 
-        Verifies REQ-DETERM-001: GoldWriter must use deterministic backoff
+        Verifies REQ-RETRY-002: GoldWriter must use deterministic backoff
         for reproducible retry behavior. The delay formula is:
         delay = 0.5 * (2 ** attempt) + 0.05
 

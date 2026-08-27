@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Tests for domain layer public API completeness.
 
-REQ-ARCH-027: Domain sub-facades (ports, exceptions, value_objects) must be
+REQ-ARCH-001: Domain sub-facades (ports, exceptions, value_objects) must be
 complete and tested. The top-level domain/__init__.py is a slim facade that
 exposes only subpackages and events; consumers import from sub-facades.
 """
@@ -28,7 +28,7 @@ pytestmark = pytest.mark.architecture
 def test_domain_all_is_complete() -> None:
     """Verify domain/__init__.py __all__ contains all public symbols.
 
-    REQ-ARCH-027: The slim domain facade should only export subpackages
+    REQ-ARCH-001: The slim domain facade should only export subpackages
     and top-level domain objects (events). All other symbols live in
     sub-facades (ports, exceptions, value_objects, entities, etc.).
     """
@@ -112,7 +112,7 @@ def test_domain_all_is_complete() -> None:
 def test_domain_all_symbols_are_importable() -> None:
     """Verify all symbols in domain.__all__ can be imported.
 
-    REQ-ARCH-028: All symbols declared in __all__ must be importable.
+    REQ-ARCH-001: All symbols declared in __all__ must be importable.
     """
     from bioetl import domain
 
@@ -130,7 +130,7 @@ def test_domain_all_symbols_are_importable() -> None:
 def test_domain_subfacade_ports_is_complete() -> None:
     """Verify ports sub-facade exports all essential ports.
 
-    REQ-ARCH-029: Essential port protocols must be available from
+    REQ-ARCH-001: Essential port protocols must be available from
     bioetl.domain.ports.
     """
     from bioetl.domain import ports
@@ -242,7 +242,7 @@ def test_pipeline_context_remains_normative_domain_execution_context() -> None:
 def test_domain_subfacade_exceptions_is_complete() -> None:
     """Verify exceptions sub-facade exports all essential exceptions.
 
-    REQ-ARCH-029: Essential exception classes must be available from
+    REQ-ARCH-001: Essential exception classes must be available from
     bioetl.domain.exceptions.
     """
     from bioetl.domain import exceptions
@@ -261,7 +261,7 @@ def test_domain_subfacade_exceptions_is_complete() -> None:
 def test_domain_subfacade_types_has_essentials() -> None:
     """Verify essential types are importable from bioetl.domain.types.
 
-    REQ-ARCH-029: Essential type definitions must be available from
+    REQ-ARCH-001: Essential type definitions must be available from
     bioetl.domain.types.
     """
     from bioetl.domain import types
@@ -275,7 +275,7 @@ def test_domain_subfacade_types_has_essentials() -> None:
 def test_domain_no_infrastructure_types_in_all() -> None:
     """Verify domain.__all__ does not export infrastructure types.
 
-    REQ-ARCH-030: Domain layer must not expose infrastructure concerns.
+    REQ-ARCH-001: Domain layer must not expose infrastructure concerns.
     """
     from bioetl import domain
 
@@ -302,7 +302,7 @@ def test_domain_no_infrastructure_types_in_all() -> None:
 def test_domain_subfacades_re_export_submodule_symbols() -> None:
     """Validate sub-facades include all public submodule exports.
 
-    REQ-ARCH-031: Sub-facades (ports, exceptions) must re-export all
+    REQ-ARCH-001: Sub-facades (ports, exceptions) must re-export all
     public symbols from their submodules. This ensures that
     ``from bioetl.domain.ports import X`` works for any public port X.
     """

@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture tests: No transformer fallback in BasePipeline.
 
-REQ-ARCH-DI-007: BasePipeline MUST NOT create transformers internally.
+REQ-ARCH-001: BasePipeline MUST NOT create transformers internally.
 Transformers MUST be injected via DI from GenericPipelineFactory.
 
 This ensures all dependency creation is centralized in the composition root.
@@ -47,7 +47,7 @@ class TestNoTransformerFallback:
     def test_no_default_transformer_class_in_basepipeline(self) -> None:
         """BasePipeline must not have default_transformer_class attribute.
 
-        REQ-ARCH-DI-007: Transformers must be injected via DI.
+        REQ-ARCH-001: Transformers must be injected via DI.
         BasePipeline should not have fallback transformer creation.
         """
         base_file = _get_base_path(APPLICATION_DIR) / "core" / "base.py"
@@ -64,13 +64,13 @@ class TestNoTransformerFallback:
             "BasePipeline must not define default_transformer_class.\n"
             "Transformers must be injected via DI from GenericPipelineFactory.\n"
             f"Found: {len(matches)} occurrences in base.py\n"
-            "See REQ-ARCH-DI-007 and CLAUDE.md §2.2"
+            "See REQ-ARCH-001 and CLAUDE.md §2.2"
         )
 
     def test_basepipeline_init_does_not_create_transformer(self) -> None:
         """BasePipeline.__init__ must not create transformers internally.
 
-        REQ-ARCH-DI-007: All transformers must be injected via constructor,
+        REQ-ARCH-001: All transformers must be injected via constructor,
         not created inside __init__.
         """
         base_file = _get_base_path(APPLICATION_DIR) / "core" / "base.py"
@@ -93,13 +93,13 @@ class TestNoTransformerFallback:
             pytest.fail(
                 f"BasePipeline.__init__ contains forbidden pattern: {forbidden_pattern}\n"
                 "Transformers must be injected via DI, not created internally.\n"
-                "See REQ-ARCH-DI-007"
+                "See REQ-ARCH-001"
             )
 
     def test_no_default_transformer_class_in_pipeline_subclasses(self) -> None:
         """Pipeline subclasses must not define default_transformer_class.
 
-        REQ-ARCH-DI-007: All transformers are provided via GenericPipelineFactory.
+        REQ-ARCH-001: All transformers are provided via GenericPipelineFactory.
         Pipeline classes should be simple containers without transformer fallbacks.
         """
         pipelines_path = _get_base_path(PIPELINES_DIR)
@@ -115,13 +115,13 @@ class TestNoTransformerFallback:
             "Transformers are injected via GenericPipelineFactory.\n\n"
             "Violations found:\n"
             + "\n".join(f"  - {v}" for v in violations)
-            + "\n\nSee REQ-ARCH-DI-007 and CLAUDE.md §2.2"
+            + "\n\nSee REQ-ARCH-001 and CLAUDE.md §2.2"
         )
 
     def test_all_factories_have_transformer_class(self) -> None:
         """All pipeline factories must have transformer_class configured.
 
-        REQ-ARCH-DI-007: Since BasePipeline has no fallback, factories
+        REQ-ARCH-001: Since BasePipeline has no fallback, factories
         must provide transformer_class for proper DI.
         """
         factories_file = (
@@ -138,7 +138,7 @@ class TestNoTransformerFallback:
             pytest.fail(
                 f"Factory missing transformer_class:\n{factory_without_transformer[:200]}...\n"
                 "All factories must specify transformer_class for DI.\n"
-                "See REQ-ARCH-DI-007"
+                "See REQ-ARCH-001"
             )
 
 

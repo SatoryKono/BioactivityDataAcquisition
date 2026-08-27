@@ -28,7 +28,7 @@ pytestmark = pytest.mark.architecture
 def test_base_pipeline_does_not_have_gold_methods(src_dir: Path) -> None:
     """BasePipeline MUST NOT implement Gold transformation logic.
 
-    REQ-ARCH-REF-001: should_write_gold and transform_for_gold have been moved
+    REQ-ARCH-001: should_write_gold and transform_for_gold have been moved
     to BaseTransformer. BasePipeline should not re-implement them.
     """
     base_pipeline_file = src_dir / "bioetl/application/core/base.py"

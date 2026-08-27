@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: DI compliance for infrastructure adapter constructors.
 
-REQ-ARCH-DI-012: Infrastructure adapter constructors MUST NOT unconditionally
+REQ-ARCH-001: Infrastructure adapter constructors MUST NOT unconditionally
 instantiate cross-cutting helper services (AdapterErrorHandler, AdapterMetricsRecorder).
 
 These services should be accepted as optional constructor parameters with

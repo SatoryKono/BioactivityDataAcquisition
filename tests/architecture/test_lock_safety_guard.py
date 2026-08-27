@@ -13,7 +13,7 @@
 Verifies that LockPort includes fencing token validation for Safety Guard.
 This prevents split-brain scenarios where lock expires but writer continues.
 
-REQ-ARCH-041: Lock validation before storage writes.
+REQ-ARCH-001: Lock validation before storage writes.
 See CONSOLIDATED_REFACTORING_ANALYSIS.md P1.3 for rationale.
 """
 

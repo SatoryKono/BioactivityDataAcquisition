@@ -97,7 +97,7 @@ from checks that run only for matching paths.
 | Workflow                        | File                | Key Jobs                                                                                                                              | What It Checks                                                                                                                                                                                                                                      |
 | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Lint and Architecture Gates** | `import-linter.yml` | `lint`, `c901-governance`, `arch-tests`, `checks-complete`                                                                            | Ruff lint+format, changed-file formatting enforcement, C901 baseline governance, architecture tests, import-linter, dependency boundary checks                                                                                                      |
-| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, **3.12** fail-fast `test-fast` vs **3.13** coverage `test-matrix` (6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact. `test-matrix` is **not** a GitHub required check. |
+| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, **3.12** fail-fast `test-fast` vs full test matrix (Python 3.13, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact. `test-matrix` is **not** a GitHub required check. |
 | **Type Checking (Strict)**      | `type-checking.yml` | `type-check`                                                                                                                          | mypy strict, NewType/Protocol verification, `Any` usage analysis                                                                                                                                                                                    |
 | **Commit Lint**                 | `commit-lint.yml`   | `commit-lint`                                                                                                                         | Conventional Commits format enforcement                                                                                                                                                                                                             |
 
@@ -144,10 +144,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` are not blocked by a live required-check ruleset. Direct
-push and merge to `main` are allowed. The following checks remain the
-recommended quality gate for pull requests; they are not GitHub-enforced on
-the `main` ref.
+Updates to `main` are blocked by live required-check ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
+push and merge to `main` are blocked when `checks-complete` or `root-hygiene` fail. The following checks are the
+enforced quality gate for pull requests and for the `main` ref.
 
 ### Final always-on required-check set
 
@@ -161,8 +160,7 @@ The final activation set for repository ruleset
 
 Both checks materialize on every PR targeting `main`. The repository ruleset
 `root-hygiene-required-check` remains defined with exactly this always-on set,
-but enforcement is **disabled**. Direct merge allowed; no active required-check
-ruleset. Further ruleset mutations remain external operations that require
+and enforcement is **active**. Direct push/merge to `main` is blocked when required checks fail. Further ruleset mutations remain external operations that require
 explicit maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks

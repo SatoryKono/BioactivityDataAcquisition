@@ -1,0 +1,86 @@
+{
+  "run_id": "20260827T1050Z-req-new2-11a4ba92",
+  "iteration": 1,
+  "findings": [
+    {
+      "id": "AUD-REQ-001",
+      "requirement_id": "REQ-DASH-004",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "orphan-req",
+      "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md:160",
+      "method": "CSV vs markdown inventory; git show origin/main",
+      "observation": "REQ-DASH-004 / DASH-DENSITY-002 is defined in DASHBOARD_REQUIREMENTS.md. origin/main CSV already has the row (172 data rows) but REQUIREMENTS.md still claimed 171 active / 150 MUST and crosswalk.md listed DASH-001..003 only. CSV executable_surface pointed at test_dashboard_presentation_requirements.py instead of the scalar-density tests.",
+      "expected": "REQUIREMENTS.md counts and crosswalk snapshot equal CSV rows; executable_surface names the scalar-density tests.",
+      "actual": "Index/snapshot 171 vs CSV 172; wrong executable_surface.",
+      "impact": "Operators cannot treat the catalog index as SSOT for dashboard scalar density.",
+      "root_cause": "DASH-004 was added to CSV without updating REQUIREMENTS.md / crosswalk.md counts.",
+      "remediation": "Bump catalog to v1.12.6 / 172 / 151 MUST; point CSV at scalar-density tests.",
+      "effort": "S",
+      "validation": [
+        "pytest tests/architecture/test_requirements_traceability_catalog.py"
+      ],
+      "automation": "tests/architecture/test_requirements_traceability_catalog.py",
+      "automated_fix_possible": true,
+      "issue": {
+        "number": 9756,
+        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9756"
+      },
+      "evidence": [
+        {
+          "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
+          "line": 160,
+          "observation": "REQ-DASH-004 / DASH-DENSITY-002 defined"
+        },
+        {
+          "path": "docs/01-requirements/REQUIREMENTS.md",
+          "line": 25,
+          "observation": "origin/main claimed 171 active requirements"
+        }
+      ]
+    },
+    {
+      "id": "AUD-REQ-002",
+      "requirement_id": "GAP",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.99,
+      "status": "PROVEN",
+      "category": "invented-req-id",
+      "path": "tests/architecture/test_layer_dependencies.py:741",
+      "method": "Regex REQ-[A-Z]+(?:-[A-Z]+)*-\\d{3} in tests/ vs CSV catalog",
+      "observation": "tests/ cited IDs absent from the CSV: REQ-ARCH-008+, REQ-CONF-*, REQ-PERF-*, REQ-DOC-010, REQ-DETERM-001, REQ-DQ-010/020/030, REQ-OBS-CONTRACT-001.",
+      "expected": "Every REQ-*-NNN in tests/ is a catalog ID.",
+      "actual": "Invented aliases in architecture, performance, config, and DQ tests.",
+      "impact": "Traceability searches and coverage claims bind to IDs that do not exist.",
+      "root_cause": "Tests used local numbering instead of the crosswalk catalog.",
+      "remediation": "Map to REQ-ARCH-001, REQ-DOC-001, REQ-DQ-001, REQ-RETRY-002, REQ-OBS-001; drop REQ-CONF-* / REQ-PERF-*.",
+      "effort": "M",
+      "validation": [
+        "pytest tests/architecture/test_requirements_traceability_catalog.py"
+      ],
+      "automation": "tests/architecture/test_requirements_traceability_catalog.py",
+      "automated_fix_possible": true,
+      "issue": {
+        "number": 9757,
+        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9757"
+      },
+      "evidence": [
+        {
+          "path": "tests/architecture/test_layer_dependencies.py",
+          "line": 741,
+          "observation": "was REQ-ARCH-008; remapped to REQ-ARCH-001"
+        },
+        {
+          "path": "tests/architecture/test_docs_version_sync.py",
+          "line": 13,
+          "observation": "was REQ-DOC-010; remapped to REQ-DOC-001"
+        }
+      ]
+    }
+  ]
+}

@@ -48,8 +48,8 @@ def _json_import_violations(py_file: Path) -> list[str]:
 def test_no_json_import_in_storage_layer():
     """Storage layer MUST use orjson instead of standard json.
 
-    REQ-PERF-001: Use orjson for high-performance serialization.
-    REQ-ARCH-032: Enforce orjson in storage layer.
+    Use orjson for high-performance serialization.
+    REQ-ARCH-001: Enforce orjson in storage layer.
     """
     violations: list[str] = []
 
@@ -66,5 +66,5 @@ def test_no_json_import_in_storage_layer():
     assert not violations, (
         "Standard 'json' library found in performance-critical modules:\n"
         + "\n".join(f"  - {v}" for v in violations)
-        + "\n\nUse 'orjson' for high-performance serialization (REQ-PERF-001)."
+        + "\n\nUse 'orjson' for high-performance serialization."
     )

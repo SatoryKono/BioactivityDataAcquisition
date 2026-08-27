@@ -461,7 +461,7 @@ def test_allowlists_carry_governance_metadata() -> None:
     assert MIN_HEIGHT_ALLOWLIST, "min_height still has a governed exception"
 
 
-# --- DASH-DENSITY-002: scalar information density (values/area) -------------
+# --- REQ-DASH-004 / DASH-DENSITY-002: scalar information density (values/area) ---
 
 
 def test_scalar_density_types_match_contract() -> None:
@@ -471,7 +471,7 @@ def test_scalar_density_types_match_contract() -> None:
 
 
 def test_scalar_density_survey_runs_on_shipped_dashboards() -> None:
-    """Report-only smoke: DASH-DENSITY-002 machinery runs on the real suite."""
+    """Report-only smoke: REQ-DASH-004 / DASH-DENSITY-002 machinery runs on the real suite."""
     surveyed = 0
     for dashboard_path in get_dashboard_files():
         dashboard = load_dashboard(dashboard_path)
@@ -482,7 +482,7 @@ def test_scalar_density_survey_runs_on_shipped_dashboards() -> None:
 
 
 def test_group_scalar_density_exceeds_first_screen_where_enforced() -> None:
-    """DASH-DENSITY-002 gate. Enforced per-uid (opt-in) after scalar remediation.
+    """REQ-DASH-004 / DASH-DENSITY-002 gate. Enforced per-uid (opt-in) after scalar remediation.
 
     The enforced set is intentionally empty until a dashboard's scalar groups are
     remediated to out-densify its first screen (see layout-budgets.yaml and

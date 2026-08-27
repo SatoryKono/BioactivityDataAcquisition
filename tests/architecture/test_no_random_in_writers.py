@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: запрет random в storage writers.
 
-REQ-ARCH-030: Deterministic writes for reproducibility.
+REQ-ARCH-001: Deterministic writes for reproducibility.
 See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 """
 

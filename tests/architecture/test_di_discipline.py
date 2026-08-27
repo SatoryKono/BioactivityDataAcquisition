@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: DI discipline in application layer.
 
-REQ-ARCH-DI-010: Application layer MUST NOT create infrastructure services.
+REQ-ARCH-001: Application layer MUST NOT create infrastructure services.
 
 Application services (LockRuntimeService, PreflightService, PostrunService,
 MedallionLifecycleService, PipelineObserver) should be created in the composition
@@ -112,7 +112,7 @@ class TestDIDiscipline:
     ) -> None:
         """Application layer must not create infrastructure services.
 
-        REQ-ARCH-DI-010: Services like LockRuntimeService, PreflightService,
+        REQ-ARCH-001: Services like LockRuntimeService, PreflightService,
         PostrunService, MedallionLifecycleService, and PipelineObserver must be
         injected, not created directly in application layer.
 

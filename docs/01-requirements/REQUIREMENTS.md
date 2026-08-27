@@ -1,9 +1,9 @@
 # BioETL Requirements
 
-Version: 1.12.5
+Version: 1.12.6
 Status: active
 Aligned with: RULES.md v6.1.11 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-25)
-Last verified: 2026-08-14
+Last verified: 2026-08-27
 
 ## Purpose and authority
 
@@ -22,9 +22,9 @@ runtime or normative source.
 
 ## Machine-readable traceability
 
-The complete catalog contains **171 active requirements**:
+The complete catalog contains **172 active requirements**:
 
-- 150 `MUST`;
+- 151 `MUST`;
 - 16 `MUST NOT`;
 - 4 `SHOULD`;
 - 1 `MAY`.
@@ -51,7 +51,7 @@ row must also identify a verification method or executable surface.
 | --- | ---: | --- | --- |
 | Architecture and layers | 7 | §1 | ADR-005, ADR-048; `tests/architecture/` |
 | Medallion, data, DQ, replay, composites | 51 | §2, §6.1 | ADR-002, ADR-014, ADR-018, ADR-026, ADR-045, ADR-050; `configs/entities/`, `configs/composites/`, `tests/contract/` |
-| Errors and observability | 42 | §3 | ADR-006, ADR-007, ADR-016, ADR-017, ADR-019, ADR-053; `src/bioetl/infrastructure/observability/`, `grafana/` |
+| Errors and observability | 43 | §3 | ADR-006, ADR-007, ADR-016, ADR-017, ADR-019, ADR-053; `src/bioetl/infrastructure/observability/`, `grafana/` |
 | Code and testing | 25 | §4 | ADR-032, ADR-042, ADR-049; `pyproject.toml`, `tests/` |
 | Operations and control plane | 28 | §5, §6.1 | ADR-010, ADR-044, ADR-046, ADR-047; `src/bioetl/domain/control_plane/run_manifest.py`, `src/bioetl/domain/control_plane/run_ledger.py`, `configs/workflows/` |
 | Documentation | 2 | §6 | `scripts/docs/`, documentation CI checks |
@@ -73,7 +73,7 @@ must be updated together with that artifact.
 | `REQ-BACKFILL-*`, `REQ-CLEAR-*` | Deterministic replay, exclusive rebuild, explicit clear lifecycle (`RULES.md` §2.4, §6.1) | ADR-014, ADR-044, ADR-046 | run manifest, ledger, checkpoint and replay services | replay, reproducibility, lifecycle, and lock tests |
 | `REQ-COMPOSITE-*` | Composite DAG and deterministic merge policy (`RULES.md` §2.9) | ADR-026 | `configs/composites/`, `src/bioetl/domain/composite/` | composite contract, dependency, and golden tests |
 | `REQ-OBS-*`, `REQ-HEALTH-*` | Structured logs, bounded metrics, tracing, provider health (`RULES.md` §3.2–§3.5) | ADR-006, ADR-017, ADR-019 | observability ports/adapters, Prometheus rules, dashboards | observability architecture and metric-governance tests |
-| `REQ-DASH-*` | Dashboard density, typography, palette, and fill placement (`RULES.md` §3.2.3) | ADR-010, ADR-053 | `grafana/dashboards/`, `DASHBOARD_REQUIREMENTS.md` | dashboard presentation and reproducible-render contract tests |
+| `REQ-DASH-*` | Dashboard density, typography, palette, fill placement, and scalar information density (`RULES.md` §3.2.3), including `REQ-DASH-004` / `DASH-DENSITY-002` | ADR-010, ADR-053 | `grafana/dashboards/`, `DASHBOARD_REQUIREMENTS.md` | dashboard presentation, scalar-density, and reproducible-render contract tests |
 | `REQ-TEST-*`, `REQ-GOV-*` | Deterministic tests and change-set gates (`RULES.md` §4.2–§4.5) | ADR-042, ADR-049 | `pyproject.toml`, quality configs and reports | architecture, unit, integration, contract, golden and replay suites |
 | `REQ-CONTRACT-*` | Versioned schemas and synchronized generated artifacts (`RULES.md` §8.1) | ADR-037, ADR-038, ADR-039, ADR-048 | contract registry, Pandera sources, published JSON schemas | contract-registry and generated-artifact drift tests |
 
@@ -118,6 +118,9 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.6 (2026-08-27): added `REQ-DASH-004` (`DASH-DENSITY-002` scalar
+  information density) already published in `DASHBOARD_REQUIREMENTS.md` to the
+  traceability CSV; catalog count 171→172.
 - v1.12.5 (2026-08-16): corrected normative mirror metadata to the current
   `RULES.md` v6.1.11 Dashboard Presentation Contract; requirement semantics and
   counts are unchanged.
