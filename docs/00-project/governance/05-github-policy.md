@@ -144,10 +144,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` are not blocked by a live required-check ruleset. Direct
-push and merge to `main` are allowed. The following checks remain the
-recommended quality gate for pull requests; they are not GitHub-enforced on
-the `main` ref.
+Updates to `main` are blocked by live required-check ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
+push and merge to `main` are blocked when `checks-complete` or `root-hygiene` fail. The following checks are the
+enforced quality gate for pull requests and for the `main` ref.
 
 ### Final always-on required-check set
 
@@ -161,8 +160,7 @@ The final activation set for repository ruleset
 
 Both checks materialize on every PR targeting `main`. The repository ruleset
 `root-hygiene-required-check` remains defined with exactly this always-on set,
-but enforcement is **disabled**. Direct merge allowed; no active required-check
-ruleset. Further ruleset mutations remain external operations that require
+and enforcement is **active**. Direct push/merge to `main` is blocked when required checks fail. Further ruleset mutations remain external operations that require
 explicit maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks

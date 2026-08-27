@@ -28,8 +28,8 @@ def test_e2e_skip_rate_slo_policy_is_complete() -> None:
     payload = yaml.safe_load(_SLO.read_text(encoding="utf-8"))
     assert payload["policy"]["forbid_retries_to_heal_flakes"] is True
     assert payload["policy"]["forbid_assertion_weakening"] is True
-    assert payload["slo"]["max_skip_rate_percent"] <= 15.0
-    assert payload["slo"]["mode"] in {"advisory", "blocking"}
+    assert payload["slo"]["max_skip_rate_percent"] == 15.0
+    assert payload["slo"]["mode"] == "blocking"
     assert "e2e" in payload["slo"]["evaluation_lanes"]
     assert set(payload["telemetry"]["required_fields"]) >= {
         "suite",
@@ -43,3 +43,20 @@ def test_e2e_harness_exposes_skip_reason_builder() -> None:
     source = _E2E_CONFTEST.read_text(encoding="utf-8")
     assert "def build_e2e_skip_reason" in source
     assert "run_pipeline_or_skip_transient" in source or "_skip_transient" in source
+
+
+def test_active_noncritical_cassette_mismatch_is_fail_closed() -> None:
+    """ACTIVE non-critical VCR mismatch must fail closed, not skip (#9729)."""
+    source = (_REPO_ROOT / "tests" / "e2e" / "test_pipeline_matrix_e2e.py").read_text(
+        encoding="utf-8"
+    )
+    assert "INFRA_FLAKY_CASSETTE_MISMATCH" in source
+    assert "pytest.fail(" in source
+    assert (
+        '_build_e2e_fail_reason(\n                    "INFRA_FLAKY_CASSETTE_MISMATCH"'
+        in source
+    )
+    assert (
+        'build_e2e_skip_reason(\n                    "INFRA_FLAKY_CASSETTE_MISMATCH"'
+        not in source
+    )
