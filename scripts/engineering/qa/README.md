@@ -27,6 +27,15 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |
 | `proof-or-stop`                  | `src/memory/proof_cli.py`                             | Plan, capture, assemble, verify, pilot, and explicitly ingest source-bound closeout evidence       |
 | `report-dep-map`                 | `generate_architecture_dependency_map.py`             | Generate/check architecture dependency map                                                        |
+| `report-module-coverage`         | `report_module_coverage_inventory.py`                 | Generate/check module-level coverage inventory and `source_tree_sha256` freshness                 |
+| `check-branch-coverage`          | `check_branch_coverage.py`                            | Enforce branch coverage from `reports/coverage/coverage.xml`                                      |
+| `report-contract-coverage-matrix` | `report_contract_coverage_matrix.py`                 | Generate/check contract coverage matrix for active entity configs                                 |
+| `report-port-adapter-factory-coverage` | `report_port_adapter_factory_coverage.py`       | Generate/check core port-adapter-factory coverage matrix                                          |
+| `report-compatibility-importer-census` | `report_compatibility_importer_census.py`       | Generate/check importer census for sanctioned seams and twin modules                              |
+| `report-dead-code-inventory`     | `report_dead_code_inventory.py`                       | Generate repo-local static dead-code review inventory                                             |
+| `check-docs-drift`               | `check_docs_drift.py`                                 | Documentation forbidden-pattern drift check                                                       |
+| `validate-dq-consistency`        | `validate_dq_consistency.py`                          | Validate DQ policy/config consistency                                                             |
+| `report-observability-metric-inventory` | `report_observability_metric_inventory.py`     | Generate/check registry/runtime/docs observability metric inventory                               |
 | `report-vcr-metadata`            | `report_vcr_metadata_catalog.py`                      | Generate/check canonical VCR metadata catalog                                                     |
 | `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
@@ -42,6 +51,10 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
 | `report-flaky-test-burndown-review` | `report_flaky_test_burndown_review.py`             | Generate/check curated flaky-test review evidence bound to current test governance                 |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
+| `report-lazy-import-inventory`   | `report_lazy_import_inventory.py`                     | Generate/check lazy import inventory                                                          |
+| `report-source-tree-manifest`    | `report_source_tree_manifest.py`                      | Generate/check source tree manifest                                                           |
+| `check-dashboard-performance-budgets` | `check_dashboard_performance_budgets.py`          | Validate dashboard performance budgets                                                        |
+| `report-architecture-quality-scorecard` | `report_architecture_quality_scorecard.py`       | Generate architecture quality scorecard (owner: python scripts/engineering/qa/report_architecture_quality_scorecard.py) |
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
 | `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |
@@ -75,6 +88,15 @@ python -m scripts.engineering.qa <command> [args...]
 | `reduce-architecture-debt`       | Before running the debt-reduction agent; classifies latest tasks into an execution order                                                         | Manual, on-demand                          |
 | `check-terminology`              | After adding domain terms; validates code uses canonical terminology per `glossary.md`                                                           | CI gate (`architecture.yml`)               |
 | `report-dep-map`                 | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate                                             | Pre-commit hook + CI gate                  |
+| `report-module-coverage`         | After `src/bioetl/**/*.py` changes; hash-only refresh with `--allow-missing-coverage-xml`, `--check` for source-tree freshness                   | CI `coverage-verify` + POST_CHANGE_VALIDATION |
+| `check-branch-coverage`          | After coverage XML is produced; blocking branch-coverage gate from the canonical coverage lane                                                   | CI `coverage-verify`                       |
+| `report-contract-coverage-matrix` | After entity/config contract changes; use `--check` for committed matrix drift                                                                | CI quality-and-architecture                |
+| `report-port-adapter-factory-coverage` | After Port/adapter/factory wiring changes; use `--check` for matrix drift                                                                | CI quality-and-architecture                |
+| `report-compatibility-importer-census` | After sanctioned-seam or twin-module import changes; use `--check` for census drift                                                      | CI quality-and-architecture                |
+| `report-dead-code-inventory`     | After deleting or isolating unused modules; use `--check` for committed inventory drift                                                          | CI quality-and-architecture                |
+| `check-docs-drift`               | After docs/runtime-mirror edits; forbidden-pattern and freshness drift check                                                                     | CI docs / architecture                     |
+| `validate-dq-consistency`        | After DQ policy or config edits; validates policy/config consistency                                                                             | CI quality-and-architecture                |
+| `report-observability-metric-inventory` | After metric registry or dashboard PromQL changes; use `--check` for inventory drift                                                   | CI quality-and-architecture                |
 | `report-vcr-metadata`            | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate                   | Architecture / test-governance maintenance |
 | `report-provider-contract-drift` | When reviewing provider-facing API drift in PR/CI; writes a machine-readable replay report and can fail on warnings/breaking drift               | Provider contract replay CI gate           |
 | `report-domain-io-taint-inventory` | After changing Domain imports or I/O-adjacent calls; use `--check` to detect stale or unreviewed taint evidence                               | Architecture governance / CI drift check   |
@@ -88,6 +110,9 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-flaky-test-burndown-review` | After changing the curated flaky inventory or test-governance snapshot; use `--check` to fail on missing or stale review evidence              | Test governance / CI drift check           |
 | `report-dashboard-scenes-parity` | After changing shipped dashboard panels or ADR-053 route mappings; use `--check` to fail closed on parity drift | Optional Scenes shadow parity |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
+| `report-lazy-import-inventory`   | After changing lazy imports; use `--check` for drift                                                                                       | Architecture / lazy import governance      |
+| `report-source-tree-manifest`    | After changing source tree; generates manifest for hash tracking                                                                           | Governance / manifest drift check          |
+| `check-dashboard-performance-budgets` | After changing dashboard performance budgets; validates budgets                                                                        | Dashboard governance / CI drift check      |
 | `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
 | `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
 | `report-debt-governance-gates`   | Before debt-reduction closeout; aggregates quality artifacts into normalized pass/fail/warn fail-fast gates                                      | Architecture debt closeout / CI gate       |
@@ -146,6 +171,17 @@ python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline -
 python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
 python -m scripts.engineering.qa report-debt-governance-gates --check
 python -m scripts.engineering.qa report-debt-governance-gates --update
+python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml
+python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml
+python scripts/engineering/qa/report_architecture_quality_scorecard.py
+python -m scripts.engineering.qa check-branch-coverage
+python -m scripts.engineering.qa report-contract-coverage-matrix --check
+python -m scripts.engineering.qa report-port-adapter-factory-coverage --check
+python -m scripts.engineering.qa report-compatibility-importer-census --check
+python -m scripts.engineering.qa report-dead-code-inventory --check
+python -m scripts.engineering.qa check-docs-drift
+python -m scripts.engineering.qa report-observability-metric-inventory --check
+python -m scripts.engineering.qa validate-dq-consistency
 python -m scripts.engineering.qa validate-technical-debt-audit --json
 python -m scripts.engineering.qa validate-technical-debt-audit --print-semantic-summary
 python -m scripts.engineering.qa run-architecture-audit-read-only
@@ -160,6 +196,9 @@ python -m scripts.engineering.qa check-prometheus-rules
 python -m scripts.engineering.qa check-prometheus-rules --rules-file grafana/prometheus-rules/bioetl_control_plane_current_status.yml
 python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
 python -m scripts.engineering.qa report-dashboard-scalar-density --check
+python -m scripts.engineering.qa report-lazy-import-inventory --check
+python -m scripts.engineering.qa report-source-tree-manifest --check
+python -m scripts.engineering.qa check-dashboard-performance-budgets
 python -m scripts.engineering.qa report-panel-title-inventory --check
 python -m scripts.engineering.qa report-dashboard-promql-scope --check
 python scripts/engineering/qa/report_duplication_baseline.py

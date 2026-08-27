@@ -38,6 +38,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `rate_limit.requests_per_second`. Runbook index table, shutdown, and
   control-plane lifecycle routing repaired.
 
+- **QA gates freshness (#9758, #9759, #9760):** refreshed committed
+  coverage inventory, architecture scorecard, hotspot-family baseline,
+  remote-main baseline, and debt-governance gates without raising caps.
+  QA README documents CI-wired unified commands including
+  `report-module-coverage`. REQ-GOV-007 evidence points at
+  `test_module_coverage_inventory_freshness.py`.
+
 - **Silver DQ fail-closed (#9745, #9746):** `TargetProteinClassificationSchema`
   declares Pandera `Config.unique = ("entity_id",)` matching YAML
   `business_primary_keys`. `bootstrap_storage_adapter` wires an unbound

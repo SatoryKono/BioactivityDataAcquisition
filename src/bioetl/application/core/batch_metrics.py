@@ -224,8 +224,7 @@ class BatchMetricsRecorderService:
     ) -> None:
         """Record bounded labels; ``message`` remains display-only and ignored.
 
-        Pipeline accounting always runs; Prometheus emission is skipped only
-        when the metrics port is unset.
+        Accounting always runs; Prometheus emission requires a configured metrics port.
         """
         reason_code, rule_type, field = _silver_filter_rejection_labels(details)
         if self._metrics is not None:
