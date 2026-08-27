@@ -118,8 +118,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
     @property
     def execution_metrics(self) -> dict[str, int]:
         gold_excluded = getattr(self._executor, "records_gold_excluded_by_contract", 0)
-        if not isinstance(gold_excluded, int):
-            gold_excluded = 0
+        gold_excluded = gold_excluded if isinstance(gold_excluded, int) else 0
         return {
             "records_fetched": int(self._executor.records_fetched),
             "records_bronze": int(self._executor.records_bronze),

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T15:32:54.850877+00:00",
+  "generated_at": "2026-08-27T16:06:18.854708+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1777,
+          "line": 1785,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -9887,7 +9887,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1359,
+          "line": 1367,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10618,7 +10618,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1846,
+          "line": 1854,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -16193,7 +16193,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 368,
+          "line": 371,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         },
@@ -17160,7 +17160,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 364,
+          "line": 362,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19046,7 +19046,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 295,
+          "line": 293,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

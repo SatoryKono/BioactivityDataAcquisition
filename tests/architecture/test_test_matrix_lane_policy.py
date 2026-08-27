@@ -273,6 +273,8 @@ class TestCanonicalTestLanes:
         assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
         assert "integration-replay" in serial_or_bounded
         assert "VCR-backed replay lanes stay serial" in policy["vcr_parallel_policy"]
+        assert "no:xdist" in lanes["unit-fast"]["pytest_args"]
+        assert "no:xdist" in lanes["integration-replay"]["pytest_args"]
         assert "no:xdist" in lanes["performance"]["pytest_args"]
         assert (
             "Benchmark lanes explicitly disable xdist"
@@ -325,6 +327,7 @@ class TestCanonicalTestLanes:
         assert "S6-crosscutting-unit" in lanes["unit-parallel-safe"]["runner_options"]
         assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
         assert "--vcr-record=none" in lanes["integration-replay"]["pytest_args"]
+        assert "no:xdist" in lanes["integration-replay"]["pytest_args"]
         assert (
             lanes["security"]["marker_expression"]
             == "security and not benchmark and not memory"
@@ -429,3 +432,24 @@ class TestCanonicalTestLanes:
                 ),
             },
         ]
+
+    def test_ci_unit_fast_and_vcr_integration_disable_xdist(self) -> None:
+        """serial_or_bounded unit-fast and integration-replay CI stay serial (#9729)."""
+        workflow = (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+
+        unit_fast_idx = workflow.index("Run canonical unit-fast lane")
+        repo_backed_idx = workflow.index("repo-backed-unit:", unit_fast_idx)
+        unit_fast_block = workflow[unit_fast_idx:repo_backed_idx]
+        assert "-n auto" not in unit_fast_block
+        assert "-p no:xdist" in unit_fast_block
+
+        integration_idx = workflow.index("- name: integration\n")
+        security_idx = workflow.index("- name: security\n", integration_idx)
+        integration_block = workflow[integration_idx:security_idx]
+        assert 'xdist_args: "-p no:xdist"' in integration_block
+        assert "-n auto" not in integration_block
+
+        unit_domain_idx = workflow.index("- name: unit-domain\n")
+        unit_app_idx = workflow.index("- name: unit-application\n", unit_domain_idx)
+        unit_domain_block = workflow[unit_domain_idx:unit_app_idx]
+        assert "-n auto" in unit_domain_block

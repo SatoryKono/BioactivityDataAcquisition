@@ -110,6 +110,7 @@ INFRASTRUCTURE_ALLOWED_DOMAIN_IMPORT_PREFIXES = (
     "bioetl.domain.transformations",
     "bioetl.domain.types",
     "bioetl.domain.value_objects",
+    "bioetl.domain.version",
     "bioetl.domain.workflow",
 )
 

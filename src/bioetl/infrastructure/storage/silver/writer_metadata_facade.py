@@ -101,8 +101,7 @@ class SilverWriterMetadataFacade:
         import polars as pl
 
         if isinstance(records, pl.DataFrame):
-            frame = records
-            record_keys = frame.columns
+            frame, record_keys = records, records.columns
         elif records:
             frame = pl.from_dicts(
                 records,
@@ -111,8 +110,7 @@ class SilverWriterMetadataFacade:
             )
             record_keys = list(records[0].keys())
         else:
-            frame = pl.DataFrame()
-            record_keys = []
+            frame, record_keys = pl.DataFrame(), []
         valid_records = len(frame)
         column_stats = {
             column: self._compute_column_stats(frame[column], valid_records)
