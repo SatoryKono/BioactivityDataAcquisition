@@ -44,7 +44,12 @@ class ProviderSettingsProtocol(Protocol):
 
     @property
     def default_email(self) -> str | None:
-        """Optional default contact email for provider HTTP clients."""
+        """Return optional provider HTTP contact metadata.
+
+        The value identifies clients to upstream APIs and is not persisted to
+        Silver. Any future persistence must hash it before storage
+        (REQ-SEC-002).
+        """
         ...
 
     @property
