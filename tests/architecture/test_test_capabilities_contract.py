@@ -66,6 +66,13 @@ def test_setup_plugins_installs_full_test_capability_extra() -> None:
     assert "BIOETL_REQUIRE_TEST_CAPABILITIES" in content
 
 
+def test_setup_plugins_propagates_python_probe_failures() -> None:
+    content = SETUP_PLUGINS_SH.read_text(encoding="utf-8")
+    run_python_body = content.split("run_python() {", 1)[1].split("\n}", 1)[0]
+
+    assert "return 0" not in run_python_body
+
+
 def test_run_pytest_wrapper_escalates_to_full_capabilities_for_optional_surfaces() -> (
     None
 ):

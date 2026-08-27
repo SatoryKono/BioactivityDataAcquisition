@@ -549,7 +549,8 @@ async def test_pipeline_matrix_smoke(
                     "INFRA_FLAKY_CASSETTE_MISMATCH",
                     pipeline_name=pipeline_case.pipeline_name,
                     detail=str(exc),
-                )
+                ),
+                pytrace=False,
             )
         # Some non-critical matrix cassettes prove Bronze/raw payload coverage but
         # still fail Silver due to sparse upstream sample content.
