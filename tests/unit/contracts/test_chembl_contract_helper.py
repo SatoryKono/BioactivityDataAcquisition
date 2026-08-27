@@ -29,17 +29,16 @@ class _StubClient:
 
 
 @pytest.mark.asyncio
-async def test_request_or_skip_does_not_mask_http_500() -> None:
+async def test_request_or_skip_skips_on_transient_http_500() -> None:
     request = httpx.Request("GET", "https://example.org/chembl")
     response = httpx.Response(500, request=request, text="upstream failure")
 
-    result = await _request_or_skip(
-        _StubClient(response=response),  # type: ignore[arg-type]
-        "GET",
-        str(request.url),
-    )
-
-    assert result.status_code == 500
+    with pytest.raises(pytest.skip.Exception, match="HTTP 500"):
+        await _request_or_skip(
+            _StubClient(response=response),  # type: ignore[arg-type]
+            "GET",
+            str(request.url),
+        )
 
 
 @pytest.mark.asyncio

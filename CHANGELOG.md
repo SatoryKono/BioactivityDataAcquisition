@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Game Day DR drill runbook (#9761):** `docs/05-operations/runbooks/game-day.md`
+  annual restore rehearsal with RPO 24h / RTO 4h, linked from the runbook index.
+
 - **Prompt Library improved cyclic pack:** ten operator-paste cards under
   `docs/00-project/ai/prompts/library/audit/project/new/`
   (`prompt.audit.project.new.*`) with library-default `ALLOW_*=true` and
@@ -34,6 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   QA README documents CI-wired unified commands including
   `report-module-coverage`. REQ-GOV-007 evidence points at
   `test_module_coverage_inventory_freshness.py`.
+
+- **Ops runbooks (#9762–#9765):** `data-recovery.md` documents backup inventory
+  and RPO/RTO; `pipeline-failure-recovery.md` reads `reports/logs/bioetl.log`
+  and states there is no `bioetl rollback`; `incident-response.md` routes lock
+  timeouts to `stale-lock.md` and rate limits to provider YAML
+  `rate_limit.requests_per_second`. Runbook index table, shutdown, and
+  control-plane lifecycle routing repaired.
 
 - **Silver DQ fail-closed (#9745, #9746):** `TargetProteinClassificationSchema`
   declares Pandera `Config.unique = ("entity_id",)` matching YAML
