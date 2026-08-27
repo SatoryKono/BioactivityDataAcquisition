@@ -24,30 +24,39 @@ DEFAULT_CONFIG = (
 )
 
 
+def _protocol_base_name(base: ast.expr) -> str | None:
+    """Return the terminal name of a supported protocol base expression."""
+    if isinstance(base, ast.Name):
+        return base.id
+    if isinstance(base, ast.Attribute):
+        return base.attr
+    return None
+
+
+def _protocol_row(node: ast.AST, *, relative_path: str) -> dict[str, Any] | None:
+    """Build an inventory row when ``node`` declares a Protocol class."""
+    if not isinstance(node, ast.ClassDef):
+        return None
+    if "Protocol" not in (_protocol_base_name(base) for base in node.bases):
+        return None
+    return {
+        "name": node.name,
+        "path": relative_path,
+        "line": node.lineno,
+    }
+
+
 def _protocol_rows(root: Path) -> list[dict[str, Any]]:
+    """Collect Protocol declarations from a file or directory tree."""
     files = [root] if root.is_file() else sorted(root.rglob("*.py"))
     rows: list[dict[str, Any]] = []
     for py_file in files:
         tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        rel = py_file.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ClassDef):
-                continue
-            bases: list[str] = []
-            for base in node.bases:
-                if isinstance(base, ast.Name):
-                    bases.append(base.id)
-                elif isinstance(base, ast.Attribute):
-                    bases.append(base.attr)
-            if "Protocol" not in bases:
-                continue
-            rel = py_file.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
-            rows.append(
-                {
-                    "name": node.name,
-                    "path": rel,
-                    "line": node.lineno,
-                }
-            )
+            row = _protocol_row(node, relative_path=rel)
+            if row is not None:
+                rows.append(row)
     return rows
 
 

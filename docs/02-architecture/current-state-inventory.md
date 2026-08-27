@@ -40,7 +40,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
 | Source modules in module coverage inventory | `2467` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1476` fully covered, `978` partially covered, `13` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1582` fully covered, `883` partially covered, `2` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Families at fan-in budget | `1` (`application_services_control_plane` 2/2) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and zero uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `978` modules
+a blanket line/branch coverage guarantee: `883` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -284,7 +284,7 @@ by storage technology. Current owner boundaries:
 
 | Drift | Evidence | Current source of truth | Action |
 | --- | --- | --- | --- |
-| Quality evidence artifacts were stale after source-tree and remote-main drift | `report-module-coverage --check` and `report-debt-governance-gates --check` were previously failing in local audit evidence. | `reports/quality/module-coverage-inventory.json`, `reports/quality/architecture-quality-scorecard.json`, `reports/quality/architecture-debt-remote-main-baseline.json`, `reports/quality/debt-governance-gates.json`. | Refreshed the source-bound `remote_main_baseline`; one shrink-only module-coverage gate failure remains. |
+| Quality evidence artifacts were stale after source-tree and remote-main drift | `report-module-coverage --check` and `report-debt-governance-gates --check` were previously failing in local audit evidence. | `reports/quality/module-coverage-inventory.json`, `reports/quality/architecture-quality-scorecard.json`, `reports/quality/architecture-debt-remote-main-baseline.json`, `reports/quality/debt-governance-gates.json`. | Refreshed the source-bound `remote_main_baseline` and restored all 45 debt-governance gates without increasing budgets. |
 | Architecture audit read-only path was implicit | Existing dev pytest wrappers can run pretest sync before evidence collection. | `python -m scripts.engineering.qa run-architecture-audit-read-only`; `configs/quality/test_matrix.yaml` lane `architecture-read-only-audit`. | Added a diagnostic check-only command and documented its mutation guard in the testing guide. |
 | Control-plane diagnostics role ownership was too implicit | `base_payload_sections.py` mixed code-provenance payload assembly with replay/snapshot payload assembly. | `base_provenance_payloads.py` owns provenance state and payload sections; `base_payload_sections.py` composes provenance, replay, and snapshot payloads. | Moved code-provenance payload assembly into the provenance role module and documented the control-plane role map. |
 | Duplication baseline still reflected the older manifest-diagnostics cluster shape | `reports/quality/duplication-baseline.md` previously reported `129` total clusters with `application=99`. | `reports/quality/duplication-baseline.json` generated on 2026-06-18 reports `127` total clusters with `application=97`, `composition=30`. | Regenerated the report-only duplication baseline after the targeted control-plane diagnostics split. |
@@ -301,12 +301,12 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=87`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.41`, `45` passing gates, and `0` failing gates; `reports/quality/module-coverage-inventory.json` reports `2467` source modules with `0` unmeasured, zero uncovered, and `978` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `44` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `9.41`, `45` passing gates, and zero failing gates; `reports/quality/module-coverage-inventory.json` reports `2467` source modules with zero unmeasured, zero uncovered, and `883` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `44` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts and `reports/quality/total-tech-debt-audit-main-current.md`. | Refreshed the current-state table while keeping module inventory distinct from full line/branch coverage and preserving shrink-only budgets. |
 
 ## Open Questions
 
-- Module coverage currently has `0` unmeasured and zero uncovered source modules
-  in `reports/quality/module-coverage-inventory.json`, while `923` modules remain
+- Module coverage currently has zero unmeasured and zero uncovered source modules
+  in `reports/quality/module-coverage-inventory.json`, while `883` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
 - Hotspot family `application_services_control_plane` sits **at**

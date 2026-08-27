@@ -34,12 +34,15 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
 )
 
 _REGISTRY: dict[type[object], Callable[[], object]] = {}
+_CHECKPOINT_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.checkpoint"
+_STORAGE_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.storage"
+_RUN_MANIFEST_BOOTSTRAP_MODULE = "bioetl.composition.bootstrap.cli.run_manifest"
 
 
 class _TypedPortSelector:
     """Select a Protocol type while preserving a runtime-callable registry key."""
 
-    def __getitem__[T](self, port_type: type[T]) -> Callable[[object], type[T]]:
+    def __getitem__[T](self, port_type: object) -> Callable[[object], type[T]]:
         """Bind the selected Protocol type for one subsequent marker call."""
         del port_type
         return cast("Callable[[object], type[T]]", self)
@@ -143,34 +146,34 @@ _register_lazy_service(
 )
 _register_lazy_service(
     typed_port[CheckpointServiceProtocol](CheckpointServiceProtocol),
-    "bioetl.composition.bootstrap.cli.checkpoint",
+    _CHECKPOINT_BOOTSTRAP_MODULE,
     "bootstrap_checkpoint_service",
 )
 _register_lazy_service(
     typed_port[AuditInspectionServiceProtocol](AuditInspectionServiceProtocol),
-    "bioetl.composition.bootstrap.cli.checkpoint",
+    _CHECKPOINT_BOOTSTRAP_MODULE,
     "bootstrap_audit_inspection_service",
 )
 _register_lazy_service(
     typed_port[BronzeCleanupServiceProtocol](BronzeCleanupServiceProtocol),
-    "bioetl.composition.bootstrap.cli.storage",
+    _STORAGE_BOOTSTRAP_MODULE,
     "bootstrap_bronze_cleanup_service",
 )
 _register_lazy_service(
     typed_port[VacuumServiceProtocol](VacuumServiceProtocol),
-    "bioetl.composition.bootstrap.cli.storage",
+    _STORAGE_BOOTSTRAP_MODULE,
     "bootstrap_vacuum_service",
 )
 _register_lazy_service(
     typed_port[ContractMigrationServiceProtocol](ContractMigrationServiceProtocol),
-    "bioetl.composition.bootstrap.cli.storage",
+    _STORAGE_BOOTSTRAP_MODULE,
     "bootstrap_contract_migration_service",
 )
 _register_lazy_service(
     typed_port[ObservabilityWorkflowServiceProtocol](
         ObservabilityWorkflowServiceProtocol
     ),
-    "bioetl.composition.bootstrap.cli.checkpoint",
+    _CHECKPOINT_BOOTSTRAP_MODULE,
     "bootstrap_observability_workflow_service",
 )
 _register_lazy_service(
@@ -195,7 +198,7 @@ _register_lazy_service(
 )
 _register_lazy_service(
     typed_port[ExportServiceProtocol](ExportServiceProtocol),
-    "bioetl.composition.bootstrap.cli.storage",
+    _STORAGE_BOOTSTRAP_MODULE,
     "bootstrap_export_service",
 )
 _register_lazy_service(
@@ -205,28 +208,28 @@ _register_lazy_service(
 )
 _register_lazy_service(
     typed_port[ForensicRunDiffServiceProtocol](ForensicRunDiffServiceProtocol),
-    "bioetl.composition.bootstrap.cli.run_manifest",
+    _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "bootstrap_forensic_run_diff_service",
 )
 _register_lazy_service(
     typed_port[HistoricalReplayClosureServiceProtocol](
         HistoricalReplayClosureServiceProtocol
     ),
-    "bioetl.composition.bootstrap.cli.run_manifest",
+    _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "bootstrap_historical_replay_closure_service",
 )
 _register_lazy_service(
     typed_port[HistoricalReplayCorpusServiceProtocol](
         HistoricalReplayCorpusServiceProtocol
     ),
-    "bioetl.composition.bootstrap.cli.run_manifest",
+    _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "bootstrap_historical_replay_corpus_service",
 )
 _register_lazy_service(
     typed_port[HistoricalReplayUniverseServiceProtocol](
         HistoricalReplayUniverseServiceProtocol
     ),
-    "bioetl.composition.bootstrap.cli.run_manifest",
+    _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "bootstrap_historical_replay_universe_service",
 )
 _register_lazy_service(
@@ -238,7 +241,7 @@ _register_lazy_service(
     typed_port[RunManifestInspectionServiceProtocol](
         RunManifestInspectionServiceProtocol
     ),
-    "bioetl.composition.bootstrap.cli.run_manifest",
+    _RUN_MANIFEST_BOOTSTRAP_MODULE,
     "bootstrap_run_manifest_service",
 )
 _register_lazy_service(
@@ -248,7 +251,7 @@ _register_lazy_service(
 )
 _register_lazy_contextual_factory(
     typed_port[QuarantineServiceFactoryProtocol](QuarantineServiceFactoryProtocol),
-    "bioetl.composition.bootstrap.cli.checkpoint",
+    _CHECKPOINT_BOOTSTRAP_MODULE,
     "bootstrap_quarantine_service",
 )
 _register_lazy_contextual_factory(
