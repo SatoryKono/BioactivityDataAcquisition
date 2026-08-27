@@ -2,23 +2,23 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-26
+Audit date: 2026-08-27
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: main
 
-Audited commit SHA: `8472592a3cc0a3348b183aec8a265626c5d74727`
+Audited commit SHA: `5af9180c354e4406da4bfdf17d94d6c8efee6aaa`
 
-Evidence surface SHA-256: `baf0e5187eaff73c7cfaef2329f9667e59a2f1f343a924c08d35c6f85986e26e`
+Evidence surface SHA-256: `6caa322b2941e50f3bdaafe40d8762285613734b27e300bac1bb0542bd82d8ef`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "8472592a3cc0a3348b183aec8a265626c5d74727",
-  "evidence_surface_sha256": "baf0e5187eaff73c7cfaef2329f9667e59a2f1f343a924c08d35c6f85986e26e",
+  "audited_commit_sha": "5af9180c354e4406da4bfdf17d94d6c8efee6aaa",
+  "evidence_surface_sha256": "6caa322b2941e50f3bdaafe40d8762285613734b27e300bac1bb0542bd82d8ef",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to origin/main 8472592a3cc0 after measuring 84 previously unmeasured modules (#9678) and restoring 45/45 debt-governance gates. No budget growth.
+Refresh reason: Re-pin to origin/main 5af9180c354e after canonical regen (module-coverage-inventory 2467, 0 unmeasured, source_tree 13b38110) and 45/45 debt-governance gates with --changed-from-ref. No budget growth.
 
 ## Executive summary
 
@@ -92,3 +92,4 @@ python -m scripts.engineering.qa check-exemptions
 ## Guard
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
+
