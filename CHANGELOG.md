@@ -35,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `integration` (VCR replay) shard run serial (`-p no:xdist`). The reviewed
   skip census covers `tests/e2e`. Skip-rate SLO mode is blocking at the
   unchanged 15.0% budget. ACTIVE non-critical cassette mismatch fails closed.
+- **QA gates freshness (#9758, #9759, #9760):** refreshed committed
+  coverage inventory, architecture scorecard, hotspot-family baseline,
+  remote-main baseline, and debt-governance gates without raising caps.
+  QA README documents CI-wired unified commands including
+  `report-module-coverage`. REQ-GOV-007 evidence points at
+  `test_module_coverage_inventory_freshness.py`.
 
 - **Ops runbooks (#9762–#9765):** `data-recovery.md` documents backup inventory
   and RPO/RTO; `pipeline-failure-recovery.md` reads `reports/logs/bioetl.log`
