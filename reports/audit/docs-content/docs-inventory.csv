@@ -1,0 +1,8 @@
+path,type,audience,owner,last_change,status,score,priority,evidence
+README.md,index,eng,BioETL Team,origin/main,ok,3,P3,purpose+config count checked
+docs/03-guides/getting-started.md,tutorial,eng,BioETL Team,origin/main,canonical,3,P1,Windows .venv-win SSOT
+docs/03-guides/quick-start.md,tutorial,eng,BioETL Team,2026-08-27,remediated,2,P1,AUD-DOC-002
+docs/03-guides/docs-verification.md,how-to,eng,BioETL Team,2026-08-27,remediated,2,P1,AUD-DOC-002
+docs/05-operations/runbooks/generated-artifact-drift-workflow.md,runbook,ops,BioETL Team,2026-08-27,remediated,2,P2,AUD-DOC-001
+mkdocs.yml,nav,eng,BioETL Team,origin/main,ok,2,P3,check-links nav ok
+scripts/docs/__main__.py,tooling,eng,BioETL Team,origin/main,canonical,3,P2,dispatcher SSOT

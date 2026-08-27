@@ -1,0 +1,6 @@
+path,type,audience,owner,last_change,status,score,priority,evidence
+scripts/docs/checks/verify.py,pipeline,eng,BioETL Team,origin/main,fail_closed_docstrings,2,P2,verify --skip-build exit 1
+scripts/docs/checks/check_docstrings.py,pipeline,eng,BioETL Team,origin/main,threshold_miss,2,P2,functions 88.7<90
+.github/workflows/tests.yml,ci,eng,BioETL Team,origin/main,fail_open_producer,2,P2,docs_runtime exit 0 after capture
+.github/workflows/docs.yml,ci,eng,BioETL Team,origin/main,includes_verify,2,P2,unskipped verify
+docs/reports/generated/documentation-cleanup-inventory.json,generated,eng,BioETL Team,2026-08-27,synced,2,P2,--update after drift

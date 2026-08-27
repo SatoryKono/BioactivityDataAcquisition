@@ -1,0 +1,4 @@
+path,type,audience,owner,last_change,status,score,priority,evidence
+docs/05-operations/runbooks/generated-artifact-drift-workflow.md,runbook,ops,BioETL Team,2026-08-27,remediated,2,P2,cleanup-inventory dispatcher vs submodule
+docs/03-guides/docs-verification.md,how-to,eng,BioETL Team,2026-08-27,remediated,2,P1,.venv vs .venv-win
+docs/03-guides/quick-start.md,tutorial,eng,BioETL Team,2026-08-27,remediated,2,P1,.venv vs .venv-win

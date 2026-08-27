@@ -1,0 +1,3 @@
+path,type,audience,owner,last_change,status,score,priority,evidence
+docs/03-guides/quick-start.md,tutorial,eng,BioETL Team,2026-08-27,updated,2,P3,Last verified bumped 2026-06-19 to 2026-08-27 after Windows note
+docs/00-project/00-map.md,index,eng,BioETL Team,2026-08-14,stale_header,2,P3,Last verified older than RULES body; not paid down (map not re-verified end-to-end)
