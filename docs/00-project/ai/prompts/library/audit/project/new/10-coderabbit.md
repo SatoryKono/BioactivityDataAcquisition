@@ -73,7 +73,7 @@ max_body_lines: 250
 
 Улучшает `prompt.audit.cycle.coderabbit` +
 `prompt.audit.coderabbit-project-cycle`. **CodeRabbit is not SSOT.**
-Гони **после** `prompt.audit.project.new.docs` … `dashboards` (домены 1–9),
+Гони **после** доменов `01`–`09` (`architecture` … `diagrams`),
 иначе CR-шум не отличить от известных P0/P1.
 
 Library defaults: **`ALLOW_*=true`**,
@@ -104,7 +104,8 @@ Library defaults: **`ALLOW_*=true`**,
 
 ## Domain matrix (`INCLUDE_DOMAINS=all`)
 
-Use **this** pack’s cards: `prompt.audit.project.new.docs` … `dashboards`,
+Use **this** pack’s cards: `01-architecture` … `09-diagrams`
+(`prompt.audit.project.new.*` except this card),
 plus `prompt.audit.github-actions` and `prompt.audit.repo-tree-cycle`.
 Split any leaf ≥ MAX_FILES_PER_SCOPE files.
 
