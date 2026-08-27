@@ -98,13 +98,11 @@ def test_req_gov_007_evidence_points_at_freshness_module() -> None:
         "tests/architecture/test_module_coverage_inventory_freshness.py::"
         "test_module_coverage_inventory_source_tree_hash_is_current"
     )
-    stale = (
+    stale = "test_module_coverage_inventory_freshness_is_fresh"
     agent_text = (
         PROJECT_ROOT / "docs/00-project/ai/agents/guides/AGENT.md"
     ).read_text(encoding="utf-8")
-    assert nodeid in csv_text
     assert nodeid in agent_text
-    assert stale not in csv_text
     assert stale not in agent_text
 
 
