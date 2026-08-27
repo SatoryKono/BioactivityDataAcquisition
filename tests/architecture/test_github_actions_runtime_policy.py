@@ -836,9 +836,7 @@ def test_windows_atomic_write_stress_pytest_path_exists() -> None:
     workflow = _load_yaml(ARCHITECTURE_WORKFLOW)
     job = workflow["jobs"]["windows-atomic-write-stress-nightly"]
     runs = "\n".join(
-        str(step.get("run") or "")
-        for step in job["steps"]
-        if isinstance(step, dict)
+        str(step.get("run") or "") for step in job["steps"] if isinstance(step, dict)
     )
     assert WINDOWS_ATOMIC_REL in runs
     assert "tests/unit/infrastructure/storage/test_atomic.py" not in runs

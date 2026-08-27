@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.infrastructure.adapters._base_headers import BIOETL_USER_AGENT
 from bioetl.infrastructure.adapters.semanticscholar.request_headers import (
     build_semanticscholar_headers,
 )
@@ -46,7 +47,7 @@ def test_build_semanticscholar_headers_includes_content_type_and_api_key() -> No
     )
 
     assert headers == {
-        "User-Agent": "BioETL/1.0",
+        "User-Agent": BIOETL_USER_AGENT,
         "Accept": "application/json",
         "Content-Type": "application/json",
         "x-api-key": "real-api-key",
@@ -61,7 +62,7 @@ def test_build_semanticscholar_headers_skips_placeholder_api_key() -> None:
     )
 
     assert headers == {
-        "User-Agent": "BioETL/1.0",
+        "User-Agent": BIOETL_USER_AGENT,
         "Accept": "application/json",
     }
 

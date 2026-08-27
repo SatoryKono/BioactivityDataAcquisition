@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T07:27:34.210268+00:00",
+  "generated_at": "2026-08-27T09:14:02.991007+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -2591,7 +2591,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 276,
+          "line": 280,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2652,7 +2652,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 254,
+          "line": 258,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 47,
+      "reference_count": 48,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1771,
+          "line": 1777,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -4993,37 +4993,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 161,
+          "line": 165,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 202,
+          "line": 206,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 203,
+          "line": 207,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 204,
+          "line": 208,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 206,
+          "line": 210,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 207,
+          "line": 211,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -7794,7 +7794,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 204,
+      "reference_count": 206,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8026,7 +8026,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 41,
+      "reference_count": 42,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -9887,7 +9887,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1353,
+          "line": 1359,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10618,7 +10618,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1840,
+          "line": 1846,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -10913,7 +10913,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -12116,7 +12116,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 376,
+      "reference_count": 382,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -17088,7 +17088,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 340,
+          "line": 364,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17106,7 +17106,7 @@
         },
         {
           "path": "tests/architecture/test_github_actions_runtime_policy.py",
-          "line": 23,
+          "line": 24,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import check_github_actions_runtime_policy as policy"
         }
@@ -18974,7 +18974,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 271,
+          "line": 295,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

@@ -71,11 +71,8 @@ def _is_retryable_error(
     """Return True when exception is retryable by policy."""
     if isinstance(
         exc,
-        httpx.ConnectError
-        | httpx.ConnectTimeout
-        | httpx.ReadTimeout
-        | httpx.ReadError
-        | httpx.WriteError
+        httpx.TimeoutException
+        | httpx.NetworkError
         | httpx.ProtocolError
         | httpx.ProxyError,
     ):

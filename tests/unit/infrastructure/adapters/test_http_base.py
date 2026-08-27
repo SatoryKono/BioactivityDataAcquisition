@@ -41,6 +41,7 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import (
+    BIOETL_USER_AGENT,
     BaseHttpAdapter,
     build_json_accept_headers,
     build_mailto_user_agent_headers,
@@ -308,7 +309,7 @@ class TestHealthCheckLogging:
         headers = build_mailto_user_agent_headers("bioetl@example.org")
 
         assert headers == {
-            "User-Agent": "BioETL/1.0 (mailto:bioetl@example.org)",
+            "User-Agent": f"{BIOETL_USER_AGENT} (mailto:bioetl@example.org)",
             "Accept": "application/json",
         }
 

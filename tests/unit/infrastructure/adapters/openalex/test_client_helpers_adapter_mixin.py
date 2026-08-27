@@ -32,6 +32,7 @@ from __future__ import annotations
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.infrastructure.adapters._base_headers import BIOETL_USER_AGENT
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -107,5 +108,5 @@ def test_build_headers_without_mailto_uses_generic_user_agent() -> None:
 
     headers = harness._build_headers()
 
-    assert headers["User-Agent"] == "BioETL/1.0"
+    assert headers["User-Agent"] == BIOETL_USER_AGENT
     assert headers["Accept"] == "application/json"

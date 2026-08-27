@@ -12,6 +12,7 @@ to circuit breaker assessment on failure.
 from __future__ import annotations
 
 __all__ = [
+    "BIOETL_USER_AGENT",
     "BaseHttpAdapter",
     "build_json_accept_headers",
     "build_mailto_user_agent_headers",
@@ -26,6 +27,7 @@ from bioetl.domain.ports import (
     MetricsPort,
 )
 from bioetl.infrastructure.adapters._base_headers import (
+    BIOETL_USER_AGENT,
     build_json_accept_headers,
     build_mailto_user_agent_headers,
 )

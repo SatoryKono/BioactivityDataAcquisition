@@ -451,6 +451,8 @@ def test_log_retry_uses_reason_when_no_status_code(
         httpx.ConnectError("conn refused"),
         httpx.ConnectTimeout("timed out"),
         httpx.ReadTimeout("read timeout"),
+        httpx.WriteTimeout("write timeout"),
+        httpx.PoolTimeout("pool timeout"),
         httpx.ReadError("read error"),
         httpx.WriteError("write error"),
     ],

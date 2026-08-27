@@ -37,6 +37,7 @@ import pytest
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
 from bioetl.domain.resilience import RetryConfig
+from bioetl.infrastructure.adapters._base_headers import BIOETL_USER_AGENT
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
@@ -81,7 +82,7 @@ class TestUnifiedHTTPClientInit:
         )
         assert client.timeout == pytest.approx(30.0)
         assert client.run_id is None
-        assert client.user_agent == "BioETL/5.0.0"
+        assert client.user_agent == BIOETL_USER_AGENT
         assert client.contact_email is None
         assert client._client is None
 
@@ -171,7 +172,7 @@ class TestUnifiedHTTPClientContextManager:
 
         async with client:
             headers = client._client.headers
-            assert headers["User-Agent"] == "BioETL/5.0.0"
+            assert headers["User-Agent"] == BIOETL_USER_AGENT
 
     @pytest.mark.asyncio
     async def test_aenter_sets_custom_user_agent(
@@ -201,7 +202,7 @@ class TestUnifiedHTTPClientContextManager:
 
         async with client:
             headers = client._client.headers
-            assert headers["User-Agent"] == "BioETL/5.0.0 (support@example.com)"
+            assert headers["User-Agent"] == f"{BIOETL_USER_AGENT} (support@example.com)"
 
     @pytest.mark.asyncio
     async def test_aenter_with_custom_user_agent_and_email(

@@ -50,3 +50,20 @@ def test_runtime_adapters_use_sanctioned_http_surface_only() -> None:
         "Runtime adapters must route HTTP through the sanctioned "
         "`infrastructure.adapters.http` surface:\n" + "\n".join(violations)
     )
+
+
+@pytest.mark.architecture
+def test_runtime_adapters_do_not_hardcode_stale_user_agent_literals() -> None:
+    """Product User-Agent must come from BIOETL_USER_AGENT, not frozen literals."""
+    forbidden = ("BioETL/1.0", "BioETL/5.0.0")
+    violations: list[str] = []
+    for path in sorted(ADAPTER_ROOT.rglob("*.py")):
+        content = path.read_text(encoding="utf-8")
+        for token in forbidden:
+            if token in content:
+                violations.append(f"{path.relative_to(ROOT)}: {token}")
+
+    assert not violations, (
+        "Adapter User-Agent must use BIOETL_USER_AGENT / package version:\n"
+        + "\n".join(violations)
+    )
