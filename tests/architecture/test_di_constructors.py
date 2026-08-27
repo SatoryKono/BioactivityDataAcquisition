@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: DI violations in __init__ constructors.
 
-REQ-ARCH-DI-011: Application layer MUST NOT instantiate services in __init__.
+REQ-ARCH-001: Application layer MUST NOT instantiate services in __init__.
 
 Problem: Current tests don't catch patterns like `self.x = SomeService()` in constructors.
 This test uses AST analysis to detect forbidden service instantiations specifically
@@ -289,7 +289,7 @@ class TestDIConstructors:
     ) -> None:
         """Application layer __init__ methods MUST NOT instantiate services.
 
-        REQ-ARCH-DI-011: Services like LockRuntimeService, PreflightService,
+        REQ-ARCH-001: Services like LockRuntimeService, PreflightService,
         MedallionLifecycleService, etc. must be injected via constructor
         parameters, not created inside __init__.
 

@@ -42,37 +42,37 @@ EDGE_DEFINITIONS = (
         "domain",
         "composition",
         ("bioetl.composition",),
-        "REQ-ARCH-MATRIX-001",
+        "REQ-ARCH-001",
     ),
     (
         "domain",
         "interfaces",
         ("bioetl.interfaces",),
-        "REQ-ARCH-MATRIX-002",
+        "REQ-ARCH-001",
     ),
     (
         "application",
         "infrastructure",
         ("bioetl.infrastructure",),
-        "REQ-ARCH-MATRIX-003",
+        "REQ-ARCH-001",
     ),
     (
         "application",
         "composition",
         ("bioetl.composition",),
-        "REQ-ARCH-MATRIX-004",
+        "REQ-ARCH-001",
     ),
     (
         "application",
         "interfaces",
         ("bioetl.interfaces",),
-        "REQ-ARCH-MATRIX-005",
+        "REQ-ARCH-001",
     ),
     (
         "composition",
         "interfaces",
         ("bioetl.interfaces",),
-        "REQ-ARCH-MATRIX-006",
+        "REQ-ARCH-001",
     ),
 )
 

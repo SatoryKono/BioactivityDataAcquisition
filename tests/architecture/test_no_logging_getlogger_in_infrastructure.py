@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: no logging.getLogger in infrastructure layer.
 
-REQ-ARCH-033: Infrastructure layer components MUST use LoggerPort
+REQ-ARCH-001: Infrastructure layer components MUST use LoggerPort
 for structured logging to guarantee run_id inclusion in all log entries.
 
 Components that use logging.getLogger() instead of LoggerPort may produce
@@ -181,7 +181,7 @@ class TestNoLoggingGetLoggerInInfrastructure:
     def test_no_logging_getlogger_imports(self) -> None:
         """Infrastructure layer MUST NOT use logging.getLogger.
 
-        REQ-ARCH-033: Use LoggerPort injection instead of logging.getLogger()
+        REQ-ARCH-001: Use LoggerPort injection instead of logging.getLogger()
         to ensure all logs include run_id and other context fields.
         """
         violations = _check_logging_getlogger_imports(INFRASTRUCTURE_DIR, ALLOWED_FILES)
@@ -196,7 +196,7 @@ class TestNoLoggingGetLoggerInInfrastructure:
     def test_no_getlogger_calls(self) -> None:
         """Infrastructure layer MUST NOT call getLogger().
 
-        REQ-ARCH-033: All logging must go through LoggerPort for proper
+        REQ-ARCH-001: All logging must go through LoggerPort for proper
         context binding (run_id, pipeline_name, etc.).
         """
         violations = _check_getlogger_calls(INFRASTRUCTURE_DIR, ALLOWED_FILES)

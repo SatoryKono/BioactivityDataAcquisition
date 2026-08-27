@@ -1,0 +1,9 @@
+{
+  "iteration": 1,
+  "actions": [
+    "Sync REQUIREMENTS.md and crosswalk.md to 172 rows including REQ-DASH-004",
+    "Point CSV executable_surface at scalar-density tests",
+    "Remap invented test REQ-* to catalog IDs",
+    "Add architecture catalog ratchet"
+  ]
+}

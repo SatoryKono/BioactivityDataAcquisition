@@ -15,7 +15,7 @@ Tests that all publication pipeline configs have:
 
 This ensures reproducible extraction via full scans with deduplication on Silver.
 
-REQ-ARCH-051: Publication pipelines MUST use loading_strategy=full_scan_only.
+REQ-ARCH-001: Publication pipelines MUST use loading_strategy=full_scan_only.
 """
 
 from __future__ import annotations

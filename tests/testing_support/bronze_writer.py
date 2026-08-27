@@ -1187,7 +1187,7 @@ class TestBronzeWriterLoggerInjection:
 
 @pytest.mark.unit
 class TestBronzeWriterMetadataDeterminism:
-    """Tests for metadata determinism (REQ-ARCH-030)."""
+    """Tests for metadata determinism (REQ-ARCH-001)."""
 
     @pytest.mark.asyncio
     async def test_compressed_payload_bitwise_identical_on_repeated_calls(
@@ -1253,7 +1253,7 @@ class TestBronzeWriterMetadataDeterminism:
     ) -> None:
         """Test that metadata files are bitwise identical on repeated writes.
 
-        Verifies REQ-ARCH-030: Deterministic writes for reproducibility.
+        Verifies REQ-ARCH-001: Deterministic writes for reproducibility.
         Uses sort_keys=True and separators=(',', ':') to ensure consistent output.
         """
         writer = BronzeWriter(

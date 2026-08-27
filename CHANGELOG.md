@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Requirements traceability (#9756, #9757):** `REQUIREMENTS.md` / crosswalk
+  snapshot synced to 172 rows including `REQ-DASH-004` / `DASH-DENSITY-002`.
+  Tests cite catalog `REQ-*` IDs only; invented aliases (REQ-ARCH family past
+  CSV 001-007, `REQ-CONF-*`, `REQ-PERF-*`, `REQ-DOC-010`, `REQ-DETERM-001`,
+  `REQ-DQ-010/020/030`) mapped to existing rows or dropped. No new IDs invented.
+
 - **Ops runbooks (#9762–#9765):** `data-recovery.md` documents backup inventory
   and RPO/RTO; `pipeline-failure-recovery.md` reads `reports/logs/bioetl.log`
   and states there is no `bioetl rollback`; `incident-response.md` routes lock

@@ -31,8 +31,8 @@ Tests validation logic for standalone DQ configuration files.
 Covers ThresholdsConfig and DQConfigFile schema validation.
 
 Requirements:
-- REQ-CONF-001: DQ thresholds validation
-- REQ-CONF-002: Field validation configuration
+- DQ thresholds validation
+- Field validation configuration
 """
 
 from __future__ import annotations

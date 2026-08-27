@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: no print() in docstring examples in non-domain layers.
 
-REQ-ARCH-034: Application, composition, interfaces, and infrastructure layers
+REQ-ARCH-001: Application, composition, interfaces, and infrastructure layers
 MUST use LoggerPort in docstring examples instead of print().
 
 Domain layer is exempt since pure function examples conventionally show
@@ -155,7 +155,7 @@ class TestNoPrintInDocstrings:
     def test_no_print_in_docstring_examples(self, layer_dir: Path) -> None:
         """Non-domain layers MUST use LoggerPort in docstring examples.
 
-        REQ-ARCH-034: Docstring examples should demonstrate proper
+        REQ-ARCH-001: Docstring examples should demonstrate proper
         structured logging patterns, not print() statements.
 
         Domain layer is exempt since pure functions conventionally

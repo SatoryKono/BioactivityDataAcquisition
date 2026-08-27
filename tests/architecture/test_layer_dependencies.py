@@ -738,7 +738,7 @@ def test_infrastructure_does_not_import_application(
 ) -> None:
     """Infrastructure layer must not import from application layer.
 
-    REQ-ARCH-008: Infrastructure is at the outer layer and should only
+    REQ-ARCH-001: Infrastructure is at the outer layer and should only
     implement domain ports, not depend on application services.
     """
     infra_path = src_dir / "bioetl" / "infrastructure"
@@ -759,7 +759,7 @@ def test_no_empty_source_files(
 ) -> None:
     """Source tree must not contain empty Python files (except __init__.py).
 
-    REQ-ARCH-011: Empty files indicate dead code or incomplete implementation.
+    REQ-ARCH-001: Empty files indicate dead code or incomplete implementation.
     Only __init__.py files are allowed to be empty (for package markers).
     """
     bioetl_path = src_dir / "bioetl"
@@ -798,7 +798,7 @@ def test_no_orphan_directories(
 ) -> None:
     """Source tree must not contain orphan directories with only empty files.
 
-    REQ-ARCH-012: Directories with only __init__.py or empty files are dead code.
+    REQ-ARCH-001: Directories with only __init__.py or empty files are dead code.
     Directories that have subdirectories with content are not considered orphan.
     """
     bioetl_path = src_dir / "bioetl"
@@ -842,7 +842,7 @@ def test_orphan_directory_detection_uses_cached_python_inventory(
 def test_dead_code_vulture(src_dir: Path) -> None:
     """Detect dead code using vulture static analysis (slow).
 
-    REQ-ARCH-013: No unused code should exist in the codebase.
+    REQ-ARCH-001: No unused code should exist in the codebase.
     """
     unused = _dead_code_findings(src_dir)
 
@@ -859,7 +859,7 @@ def test_application_layer_no_infrastructure_imports(
 ) -> None:
     """Application layer must not import from infrastructure.
 
-    REQ-ARCH-APP-002: Application layer depends on domain ports,
+    REQ-ARCH-001: Application layer depends on domain ports,
     not concrete infrastructure implementations.
     """
     application_path = src_dir / "bioetl" / "application"
@@ -900,7 +900,7 @@ def test_application_layer_no_third_party_infrastructure_libs(
 ) -> None:
     """Application layer must not import third-party infrastructure libraries.
 
-    REQ-ARCH-APP-003: Libraries like deltalake, httpx, requests belong in the
+    REQ-ARCH-001: Libraries like deltalake, httpx, requests belong in the
     infrastructure layer only. Application code must use domain ports to access
     their functionality.
     """
@@ -925,7 +925,7 @@ def test_infrastructure_does_not_import_interfaces(
 ) -> None:
     """Infrastructure layer must not import from interfaces layer.
 
-    REQ-ARCH-015: Interfaces (Driving Adapters) depend on Infrastructure,
+    REQ-ARCH-001: Interfaces (Driving Adapters) depend on Infrastructure,
     not the other way around. Prevents circular dependencies.
     """
     infra_path = src_dir / "bioetl" / "infrastructure"
@@ -945,7 +945,7 @@ def test_infrastructure_does_not_import_composition(
 ) -> None:
     """Infrastructure layer must not import from composition layer.
 
-    REQ-ARCH-017: Composition is the assembly layer. Infrastructure
+    REQ-ARCH-001: Composition is the assembly layer. Infrastructure
     must not depend on it to maintain proper dependency direction.
     See CLAUDE.md §2.1 Matrix of Imports.
     """
@@ -968,7 +968,7 @@ def test_no_hasattr_duck_typing_in_application(
 ) -> None:
     """Application layer should not use hasattr for port method checks.
 
-    REQ-ARCH-017: The application layer should rely on explicit port contracts
+    REQ-ARCH-001: The application layer should rely on explicit port contracts
     (Protocols) instead of duck-typing with hasattr. Using hasattr to check
     for port methods indicates missing contract definitions.
 
@@ -997,7 +997,7 @@ def test_no_hasattr_duck_typing_in_application(
 def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
     """All BioETLError subclasses MUST have explicit error_type attribute.
 
-    REQ-ARCH-020: Deterministic error classification requires explicit mapping.
+    REQ-ARCH-001: Deterministic error classification requires explicit mapping.
     This ensures ErrorClassifier uses the error_type attribute instead of
     keyword matching for domain exceptions.
     """
@@ -1012,7 +1012,7 @@ def test_all_bioetl_exceptions_have_error_type(src_dir: Path) -> None:
 def test_observability_ports_have_close_method(src_dir: Path) -> None:
     """MetricsPort and TracingPort MUST define close() method.
 
-    REQ-ARCH-021: Proper lifecycle management for observability resources.
+    REQ-ARCH-001: Proper lifecycle management for observability resources.
     """
     observability_pkg = src_dir / "bioetl" / "domain" / "ports" / "observability"
     observability_file = src_dir / "bioetl" / "domain" / "ports" / "observability.py"
@@ -1049,7 +1049,7 @@ def test_observability_ports_have_close_method(src_dir: Path) -> None:
 def test_storage_maintenance_port_has_preview_cleanup(src_dir: Path) -> None:
     """StorageMaintenancePort MUST define preview_cleanup() for CLI dry-run.
 
-    REQ-ARCH-022: CLI delegates all storage operations to port.
+    REQ-ARCH-001: CLI delegates all storage operations to port.
     """
     storage_file = src_dir / "bioetl" / "domain" / "ports" / "storage_maintenance.py"
     assert storage_file.exists(), "Domain storage maintenance port file not found"
@@ -1063,7 +1063,7 @@ def test_storage_maintenance_port_has_preview_cleanup(src_dir: Path) -> None:
 def test_error_classifier_uses_error_type_attribute(src_dir: Path) -> None:
     """ErrorClassifier SHOULD use error_type attribute for BioETLError.
 
-    REQ-ARCH-024: Deterministic error classification.
+    REQ-ARCH-001: Deterministic error classification.
     """
     classifier_file = src_dir / "bioetl" / "domain" / "error_classifier.py"
     assert classifier_file.exists(), "Error classifier not found"

@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: datetime.now()/utcnow() only in application/composition layers.
 
-REQ-ARCH-031: Single source of truth for timestamps.
+REQ-ARCH-001: Single source of truth for timestamps.
 Timestamps should be created in application layer and passed down.
 See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 

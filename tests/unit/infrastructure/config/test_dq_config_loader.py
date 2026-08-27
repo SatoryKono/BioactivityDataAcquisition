@@ -30,9 +30,9 @@
 Tests hierarchical config loading and merge logic.
 
 Requirements:
-- REQ-CONF-001: Hierarchical DQ config loading
-- REQ-CONF-002: Config merge order (defaults -> provider -> entity)
-- REQ-CONF-003: Inline override support
+- Hierarchical DQ config loading
+- Config merge order (defaults -> provider -> entity)
+- Inline override support
 """
 
 from __future__ import annotations
