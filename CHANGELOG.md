@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `business_primary_keys`. `bootstrap_storage_adapter` wires an unbound
   `PanderaSilverValidator(strict=True)` instead of `NoOpValidator`, so Silver
   writes without a bound schema fail closed. Gold factory wiring is unchanged.
+- **CLI reference covers `bioetl report` (#9748):** published `cli.md` documents
+  `report show|list|diff|prune` and lists `GET /healthz`. Architecture ratchet
+  requires a `### \`name\`` heading for every root Click command.
 
 - **HTTP client retry and User-Agent (#9742, #9743):** `UnifiedHTTPClient`
   retries `httpx.PoolTimeout` and `httpx.WriteTimeout` as `TimeoutException`.
