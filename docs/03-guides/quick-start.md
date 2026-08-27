@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
@@ -92,6 +92,9 @@ python3 -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev,tests,tracing]"
 ```
+
+On Windows PowerShell use `.venv-win` instead of `.venv`; see
+[getting-started.md](getting-started.md) §2.2 / §2.3.
 
 If you need MkDocs/site tooling, install the separate docs toolchain as well:
 
