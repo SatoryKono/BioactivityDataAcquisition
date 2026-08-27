@@ -39,8 +39,16 @@ def test_composite_protocols_remain_declaration_only_and_measured() -> None:
                 for decorator in member.decorator_list
                 if isinstance(decorator, ast.Name)
             ] == ["property"]
-            assert len(member.body) == 1
-            expression = member.body[0]
+            # Allow optional docstring preceding the ellipsis (docstring + ...)
+            if len(member.body) == 2:
+                doc_expr, ellipsis_expr = member.body
+                assert isinstance(doc_expr, ast.Expr)
+                assert isinstance(doc_expr.value, ast.Constant)
+                assert isinstance(doc_expr.value.value, str)
+                expression = ellipsis_expr
+            else:
+                assert len(member.body) == 1
+                expression = member.body[0]
             assert isinstance(expression, ast.Expr)
             assert isinstance(expression.value, ast.Constant)
             assert expression.value.value is Ellipsis
