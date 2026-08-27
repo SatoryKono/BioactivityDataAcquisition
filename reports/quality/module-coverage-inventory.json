@@ -49353,7 +49353,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-26",
+<<<<<<< HEAD
   "source_tree_sha256": "ca530d6017af17a51a1815f4160298ebfa1ddc159f46d77c0a647c28b6961800",
+||||||| 4406e258a7
+  "source_tree_sha256": "9ce8da705333b94d965b5857bb837b44c4f0f20b066b7bd7bd0d71e7c827e417",
+=======
+  "source_tree_sha256": "7143e860882237b9e0240c756361204e01ebde21d03f7656c715e7f6aa09ca16",
+>>>>>>> fix/issue-9752-sonar-s3358
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
