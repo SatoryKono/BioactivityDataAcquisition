@@ -63,9 +63,9 @@ anti_patterns:
   - Admin merge bypass from an audit prompt
   - Secrets/tokens in CR logs, issues, or commits
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [audit, cycle, coderabbit, project, exhaustive, operator]
-summary: Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, fail-closed ALLOW, early-stop
+summary: Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, ALLOW_* true, early-stop
 max_body_lines: 250
 ---
 
@@ -76,7 +76,7 @@ max_body_lines: 250
 Гони **после** `prompt.audit.project.new.docs` … `dashboards` (домены 1–9),
 иначе CR-шум не отличить от известных P0/P1.
 
-Library defaults: **`ALLOW_*=false`**,
+Library defaults: **`ALLOW_*=true`**,
 **`CODERABBIT=required-then-agent`**. Пустые циклы запрещены.
 
 ## Params
@@ -94,10 +94,10 @@ Library defaults: **`ALLOW_*=false`**,
 | `MAX_FILES_PER_SCOPE` | `300` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `MAX_WAVES_PER_ITERATION` | `3` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
 | `WORK_BRANCH` | `fix/cr-cycle-new-<shortsha>` |

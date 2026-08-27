@@ -11,7 +11,7 @@ ______________________________________________________________________
 # Improved cyclic pack (`prompt.audit.project.new.*`)
 
 Десять operator-paste карточек: те же объекты, что у
-[`prompt.audit.cycle.*`](../../cycle/README.md), с fail-closed `ALLOW_*`,
+[`prompt.audit.cycle.*`](../../cycle/README.md), с `ALLOW_*=true`,
 ранним STOP (нет новых issue **и** нет open cycle-issue) и обязательным
 `requirement_id`. Не runtime SSOT и **пока не заменяют** `library/audit/cycle/`.
 

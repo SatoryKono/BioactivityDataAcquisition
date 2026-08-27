@@ -54,10 +54,10 @@ anti_patterns:
   - Fixing only a docs mirror without a runtime plan
   - Conversation dumps or secrets in memory handoffs
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Auto-running destructive agent scripts
 tags: [audit, agents, memory, runtime, scripts, cycle, operator]
-summary: Improved cyclic agents/memory audit — runtime parity check, memory workflow, fail-closed ALLOW, early-stop
+summary: Improved cyclic agents/memory audit — runtime parity check, memory workflow, ALLOW_* true, early-stop
 max_body_lines: 230
 ---
 
@@ -67,7 +67,7 @@ max_body_lines: 230
 `prompt.audit.agents-runtime`. Runtime SSOT = `.codex/**` ≡ `.junie/**`
 (+ `.devin/**` when present). Prompt Library — operator aid only.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 
 ## Params
 
@@ -79,10 +79,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `CONTOURS` | `runtime,scripts,memory` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

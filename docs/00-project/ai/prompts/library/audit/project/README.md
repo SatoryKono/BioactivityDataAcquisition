@@ -66,7 +66,8 @@ that generated-link step was skipped.
 
 ## Improved source cards (`new/`)
 
-Fail-closed rewrite of the 10 cycle domains (`prompt.audit.project.new.*`).
+Improved rewrite of the 10 cycle domains (`prompt.audit.project.new.*`)
+with library-default `ALLOW_*=true`.
 These are **source cards** (edit here). They do **not** replace `cycle/` as
 pack SSOT until an operator adopts them. Do not mix with generated `full/`.
 

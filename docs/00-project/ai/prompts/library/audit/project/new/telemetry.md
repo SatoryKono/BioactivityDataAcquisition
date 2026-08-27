@@ -54,7 +54,7 @@ anti_patterns:
   - Data FAIL from a screenshot (belongs to dashboards cycle)
   - Empty vs zero treated as the same alerting state
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [audit, observability, telemetry, metrics, prometheus, cycle, operator]
 summary: Improved cyclic telemetry audit — instrumentation to recording rules, MONITORING fail-closed, early-stop
 max_body_lines: 230
@@ -66,7 +66,7 @@ max_body_lines: 230
 `prompt.observability.grafana-audit.data-integrity` (lineage only, не visual).
 Skill: **observability-prometheus**. Visual/layout → `prompt.audit.project.new.dashboards`.
 
-Library defaults: **`ALLOW_*=false`**, **`MONITORING=false`**.
+Library defaults: **`ALLOW_*=true`**, **`MONITORING=false`**.
 Не стартовать `docker-compose.monitoring.yml` без явного OK оператора.
 
 ## Params
@@ -79,10 +79,10 @@ Library defaults: **`ALLOW_*=false`**, **`MONITORING=false`**.
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `MONITORING` | `false` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

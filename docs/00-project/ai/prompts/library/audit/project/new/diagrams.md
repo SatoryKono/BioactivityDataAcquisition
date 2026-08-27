@@ -50,11 +50,11 @@ anti_patterns:
   - Unpinned npx -y in production CI
   - Huge code-level diagrams of the entire monorepo
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Committing binary render churn without policy
   - Closing issues against unmerged PR heads as if they were origin/main
 tags: [audit, diagrams, mermaid, cycle, scripts, operator]
-summary: Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, fail-closed ALLOW, early-stop
+summary: Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, ALLOW_* true, early-stop
 max_body_lines: 220
 ---
 
@@ -64,7 +64,7 @@ max_body_lines: 220
 Skill: **technical-designer-mermaid** (BioETL mode, ADR-040). Loop:
 `prompt.audit.orchestrator`.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 
 ## Params
 
@@ -75,10 +75,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

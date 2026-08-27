@@ -717,49 +717,49 @@ entries:
     status: active
     class: operator-paste
     tags: [audit, docs, cycle, content, pipeline, scripts, operator]
-    summary: Improved cyclic docs audit — content plus scripts/docs pipeline, fail-closed ALLOW, early-stop
+    summary: Improved cyclic docs audit — content plus scripts/docs pipeline, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.diagrams
     path: library/audit/project/new/diagrams.md
     status: active
     class: operator-paste
     tags: [audit, diagrams, mermaid, cycle, scripts, operator]
-    summary: Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, fail-closed ALLOW, early-stop
+    summary: Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.agents-memory
     path: library/audit/project/new/agents-memory.md
     status: active
     class: operator-paste
     tags: [audit, agents, memory, runtime, scripts, cycle, operator]
-    summary: Improved cyclic agents/memory audit — runtime parity check, memory workflow, fail-closed ALLOW, early-stop
+    summary: Improved cyclic agents/memory audit — runtime parity check, memory workflow, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.configs
     path: library/audit/project/new/configs.md
     status: active
     class: operator-paste
     tags: [audit, configs, schema, cycle, operator]
-    summary: Improved cyclic config audit — schema hierarchy, compatibility, fail-closed ALLOW, early-stop
+    summary: Improved cyclic config audit — schema hierarchy, compatibility, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.tests
     path: library/audit/project/new/tests.md
     status: active
     class: operator-paste
     tags: [audit, tests, cycle, quality, operator]
-    summary: Improved cyclic test-system audit plus bounded LANE retest, fail-closed ALLOW, early-stop
+    summary: Improved cyclic test-system audit plus bounded LANE retest, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.tech-debt
     path: library/audit/project/new/tech-debt.md
     status: active
     class: operator-paste
     tags: [audit, debt, cycle, quality, operator]
-    summary: Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, fail-closed ALLOW, early-stop
+    summary: Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.architecture
     path: library/audit/project/new/architecture.md
     status: active
     class: operator-paste
     tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
-    summary: Improved cyclic architecture audit — 10-category scorecard, plan waves, fail-closed ALLOW, early-stop
+    summary: Improved cyclic architecture audit — 10-category scorecard, plan waves, ALLOW_* true, early-stop
 
   - id: prompt.audit.project.new.telemetry
     path: library/audit/project/new/telemetry.md
@@ -774,14 +774,14 @@ entries:
     status: active
     class: operator-paste
     tags: [observability, dashboard, grafana, render, design, cycle, operator]
-    summary: Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, fail-closed ALLOW, stop when no new issues and no open cycle issues
+    summary: Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, ALLOW_* true, stop when no new issues and no open cycle issues
 
   - id: prompt.audit.project.new.coderabbit
     path: library/audit/project/new/coderabbit.md
     status: active
     class: operator-paste
     tags: [audit, cycle, coderabbit, project, exhaustive, operator]
-    summary: Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, fail-closed ALLOW, early-stop
+    summary: Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, ALLOW_* true, early-stop
 
   # --- archived campaigns (discoverability; not default paste) ---
   - id: prompt.campaign.generic-nine-audit-kit
