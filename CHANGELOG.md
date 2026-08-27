@@ -41,6 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   view to foundation, and refreshed generated inventories/hashes so
   `arch-tests`/`checks-complete` can pass. No quality caps raised.
 
+- **VCR/e2e skip policy (#9729):** CI `unit-fast` and the test-matrix
+  `integration` (VCR replay) shard run serial (`-p no:xdist`). The reviewed
+  skip census covers `tests/e2e`. Skip-rate SLO mode is blocking at the
+  unchanged 15.0% budget. ACTIVE non-critical cassette mismatch fails closed.
+
 - **Ops runbooks (#9762–#9765):** `data-recovery.md` documents backup inventory
   and RPO/RTO; `pipeline-failure-recovery.md` reads `reports/logs/bioetl.log`
   and states there is no `bioetl rollback`; `incident-response.md` routes lock
