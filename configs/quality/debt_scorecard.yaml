@@ -632,12 +632,12 @@ supporting_scripts_governance:
   metrics:
     zero_reference_supporting_script_count:
       current_count: 0
-      max_count: 15
+      max_count: 0
       owner: '@bioetl-platform'
       linked_issue: '#7039'
       ratchet_policy: Zero-reference supporting scripts must stay triaged with owner metadata; count may
-        only decrease after removal. Ratcheted 32 to 21 (TD-02) then 17 to 15 (TD2-06 issue 7039); target
-        remains 0.
+        only decrease after removal. Ratcheted 32 to 21 (TD-02) then 17 to 15 (TD2-06 issue 7039); 2026-08-27
+        audit-cycle-new ratcheted leftover max_count 15->0 to live observed 0. Target remains 0.
     untriaged_zero_reference_supporting_script_count:
       current_count: 0
       max_count: 0
