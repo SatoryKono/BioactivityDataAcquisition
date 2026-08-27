@@ -55,6 +55,7 @@ runtime path.
 - [Pipeline Failure - Critical](runbooks/pipeline-failure-critical.md)
 - [Pipeline Failure - DQ](runbooks/pipeline-failure-dq.md)
 - [Data Recovery](runbooks/data-recovery.md)
+- [Game Day](runbooks/game-day.md)
 
 ### Maintenance
 
