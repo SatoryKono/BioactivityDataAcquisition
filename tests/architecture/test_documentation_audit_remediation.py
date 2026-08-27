@@ -43,6 +43,7 @@ def test_operator_docs_use_current_readiness_endpoint() -> None:
     assert "/health/ready" in rules_text
     assert "GET /ready" not in rules_text
     assert "/health/ready" in cli_text
+    assert "/healthz" in cli_text
 
 
 def test_cli_reference_covers_checkpoint_inspection_commands() -> None:
@@ -60,6 +61,17 @@ def test_cli_reference_covers_checkpoint_inspection_commands() -> None:
     )
     missing = [fragment for fragment in expected_fragments if fragment not in text]
     assert not missing, f"CLI checkpoint inspection coverage drifted: {missing}"
+
+
+def test_cli_reference_documents_every_root_command() -> None:
+    """QG-DOC-001: every registered root Click command has a ### `name` heading."""
+    from importlib import import_module
+
+    cli_main = import_module("bioetl.interfaces.cli.main")
+    text = CLI_DOC.read_text(encoding="utf-8")
+    names = set(cli_main._EAGER_COMMANDS) | set(cli_main._LAZY_COMMAND_SPECS)
+    missing = [name for name in sorted(names) if f"### `{name}`" not in text]
+    assert not missing, f"cli.md missing root command headings: {missing}"
 
 
 def test_write_mode_docs_match_domain_enums() -> None:
