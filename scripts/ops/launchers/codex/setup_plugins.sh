@@ -162,7 +162,6 @@ run_python() {
     else
         "$PYTHON_BIN" "$@"
     fi
-    return 0
 }
 
 pytest_only_stamp_file() {

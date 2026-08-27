@@ -1,6 +1,12 @@
 {
   "schema_version": "1.0",
+<<<<<<< HEAD
   "generated_at": "2026-08-27T15:21:21.047394+00:00",
+||||||| fb5bfb35ee
+  "generated_at": "2026-08-27T11:12:25.955268+00:00",
+=======
+  "generated_at": "2026-08-27T15:11:22.071353+00:00",
+>>>>>>> fix/stream-c-9729-9723
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -17160,7 +17166,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 364,
+          "line": 362,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19046,7 +19052,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 295,
+          "line": 293,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
