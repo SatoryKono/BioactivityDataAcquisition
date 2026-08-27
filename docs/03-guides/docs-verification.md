@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-20'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
@@ -64,6 +64,16 @@ Fallback without `uv`:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
+pip install -e ".[dev,tests,tracing,docs]"
+```
+
+On Windows PowerShell do not share a Linux `.venv`. Use the mixed-checkout
+path in [getting-started.md](getting-started.md) (`setup_env_windows.ps1` /
+`.venv-win`) or:
+
+```powershell
+py -3.12 -m venv .venv-win
+.\.venv-win\Scripts\Activate.ps1
 pip install -e ".[dev,tests,tracing,docs]"
 ```
 

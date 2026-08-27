@@ -62,6 +62,47 @@
       ]
     },
     {
+      "id": "AUD-DOC-002",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 0.95,
+      "status": "PROVEN",
+      "category": "content",
+      "tags": [
+        "content"
+      ],
+      "path": "docs/03-guides/docs-verification.md:65",
+      "observation": "Windows/Linux fallback used python3 -m venv .venv only; AGENTS.md and getting-started.md require .venv-win on Windows mixed checkout.",
+      "method": "compare docs-verification.md and quick-start.md vs docs/03-guides/getting-started.md and AGENTS.md",
+      "expected": "Onboarding does not tell Windows operators to share a Linux .venv.",
+      "actual": "Before: only POSIX .venv. After: pointer to getting-started.md and .venv-win PowerShell snippet.",
+      "impact": "Wrong bootstrap on Windows; venv collision in mixed checkout.",
+      "root_cause": "POSIX-only fallback copied without the Windows lane.",
+      "remediation": "Restore SSOT link to getting-started.md / .venv-win.",
+      "effort": "S",
+      "automation": "n/a (semantic; check-links cannot prove OS path)",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remediated_worktree",
+      "validation": [
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
+      "evidence": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 70,
+          "observation": "Windows .venv-win fallback added"
+        },
+        {
+          "path": "docs/03-guides/quick-start.md",
+          "line": 96,
+          "observation": "Windows pointer to getting-started.md §2.2 / §2.3"
+        }
+      ]
+    },
+    {
       "id": "AUD-DOC-003",
       "requirement_id": "REQ-DOC-001",
       "priority": "P2",
@@ -133,6 +174,5 @@
         }
       ]
     }
-  ],
-  "domain": "docs-pipeline"
+  ]
 }

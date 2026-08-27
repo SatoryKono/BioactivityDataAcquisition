@@ -1,0 +1,6 @@
+{"phase": "A", "action": "docs-content", "result": "AUD-DOC-002 P1 onboarding; AUD-DOC-001 command SSOT"}
+{"phase": "B", "action": "docs-pipeline", "result": "links/drift/kpi exit 0; verify --skip-build exit 1 docstring; inventory --update after doc edits"}
+{"phase": "C", "action": "plan", "result": "restore-SSOT-link for 001/002; hold 003/004"}
+{"phase": "D", "action": "issues", "result": "ALLOW_ISSUE_WRITE=false; new_issues_i=0"}
+{"phase": "E", "action": "fix", "result": "3 docs + generate-cleanup-inventory --update"}
+{"phase": "F", "action": "validate", "result": "check-links 0; inventory check 0; ALLOW_CLOSE=false"}

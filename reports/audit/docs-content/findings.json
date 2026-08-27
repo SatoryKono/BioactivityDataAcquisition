@@ -1,583 +1,107 @@
 {
-  "schema_version": 1,
-  "domain_id": "docs-content",
-  "prompt_id": "prompt.audit.docs-content",
-  "head_sha": "5af9180c354e4406da4bfdf17d94d6c8efee6aaa",
-  "branch": "fix/stream-a-quality-9717",
+  "schema_version": "finding-schema-v1",
+  "prompt_id": "prompt.audit.project.new.docs",
+  "run_id": "20260827T0846Z-docs-new-b9aa36efdd",
+  "marker": "Cycle-run: 20260827T0846Z-docs-new-b9aa36efdd",
+  "audit_mode": "full",
+  "mode": "full",
+  "language": "ru",
+  "scope": [
+    "README.md",
+    "docs/",
+    "mkdocs.yml",
+    "scripts/docs/"
+  ],
+  "audited_on": "2026-08-27",
+  "base_sha": "b9aa36efdd678fb8bb2f12ec4ce5f7dc07260f9b",
   "surface_score": 2,
+  "content_surface_score": 2,
+  "pipeline_surface_score": 2,
+  "blocked": false,
+  "debt_budget_policy": "forbidden_to_increase",
+  "require_gh_tracking": false,
+  "new_issues": [],
+  "open_cycle_issues": [],
   "findings": [
     {
-      "id": "DOCS-001",
+      "id": "AUD-DOC-001",
       "requirement_id": "REQ-DOC-001",
-      "path": "docs/03-guides/quick-start.md:45",
-      "observation": "Quick Start Option A ставит extras dev,tests,tracing и одновременно называет этот набор каноном, равным make install, хотя Makefile install использует dev,tests,tests_full,export.",
-      "method": "Сравнение README.md:166-172, docs/03-guides/quick-start.md:45-51, docs/03-guides/getting-started.md:63-134, docs/03-guides/running-pipelines.md:59-60, Makefile:98-99, pyproject.toml optional-dependencies.",
-      "expected": "Один канонический extra-set для bootstrap; второй набор явно помечен как subset, без отождествления с make install.",
-      "actual": "README честно различает minimal local-dev (tracing) и make install; quick-start:51 и running-pipelines:59 приравнивают uv sync tracing-набор к make install; getting-started канонизирует make install с tests_full+export.",
-      "impact": "Контрибьютор не знает, какой sync обязателен; Excel export (extra export) отсутствует после README Option A; путаница при онбординге.",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.97,
+      "status": "PROVEN",
+      "category": "pipeline",
+      "tags": [
+        "pipeline",
+        "content"
+      ],
+      "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md:74",
+      "observation": "Runbook documented python -m scripts.docs.checks.documentation_cleanup_inventory instead of the unified dispatcher python -m scripts.docs generate-cleanup-inventory.",
+      "method": "read runbook vs scripts/docs/__main__.py COMMANDS and scripts/docs/README.md",
+      "expected": "Active entry points use python -m scripts.docs <cmd>.",
+      "actual": "Before paydown: submodule path. After: generate-cleanup-inventory --check|--update.",
+      "impact": "Operators bypass the unified docs CLI; CI/docs-verification examples diverge from the runbook.",
+      "root_cause": "Runbook listed the implementation module instead of the dispatcher alias.",
+      "remediation": "Restore SSOT link to python -m scripts.docs generate-cleanup-inventory.",
+      "effort": "S",
+      "automation": "docs.yml verify includes generate-cleanup-inventory --check",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remediated_worktree",
+      "validation": [
+        "rg generate-cleanup-inventory docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+        "python -m scripts.docs generate-cleanup-inventory --check"
+      ],
+      "evidence": [
+        {
+          "path": "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+          "line": 74,
+          "observation": "Table now uses python -m scripts.docs generate-cleanup-inventory --check|--update"
+        }
+      ]
+    },
+    {
+      "id": "AUD-DOC-002",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P1",
+      "severity": "High",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "command-drift",
+      "category": "content",
+      "tags": [
+        "content"
+      ],
+      "path": "docs/03-guides/docs-verification.md:65",
+      "observation": "Windows/Linux fallback used python3 -m venv .venv only; AGENTS.md and getting-started.md require .venv-win on Windows mixed checkout.",
+      "method": "compare docs-verification.md and quick-start.md vs docs/03-guides/getting-started.md and AGENTS.md",
+      "expected": "Onboarding does not tell Windows operators to share a Linux .venv.",
+      "actual": "Before: only POSIX .venv. After: pointer to getting-started.md and .venv-win PowerShell snippet.",
+      "impact": "Wrong bootstrap on Windows; venv collision in mixed checkout.",
+      "root_cause": "POSIX-only fallback copied without the Windows lane.",
+      "remediation": "Restore SSOT link to getting-started.md / .venv-win.",
+      "effort": "S",
+      "automation": "n/a (semantic; check-links cannot prove OS path)",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remediated_worktree",
+      "validation": [
+        "python -m scripts.docs check-links --links --specs --configs"
+      ],
       "evidence": [
+        {
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 70,
+          "observation": "Windows .venv-win fallback added"
+        },
         {
           "path": "docs/03-guides/quick-start.md",
-          "line": 45,
-          "command": "read quick-start Option A vs Makefile install",
-          "observation": "uv sync --extra dev --extra tests --extra tracing; строка 51 называет это каноном вместе с make install"
-        },
-        {
-          "path": "Makefile",
-          "line": 99,
-          "command": "read Makefile install target",
-          "observation": "uv sync --extra dev --extra tests --extra tests_full --extra export"
-        },
-        {
-          "path": "README.md",
-          "line": 172,
-          "command": "read README Option A notes",
-          "observation": "README явно пишет, что tracing-набор не равен make install"
+          "line": 96,
+          "observation": "Windows pointer to getting-started.md §2.2 / §2.3"
         }
-      ],
-      "root_cause": "Несколько онбординг-страниц обновлялись независимо; README зафиксировал split, зеркала нет.",
-      "remediation": "В quick-start.md и running-pipelines.md убрать отождествление tracing-набора с make install; оставить одну таблицу: operator=make install, minimal local-dev=dev+tests+tracing, docs extra отдельно.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"make install\" docs/03-guides/quick-start.md docs/03-guides/running-pipelines.md README.md",
-        "diff extras vs Makefile install target"
-      ],
-      "automation": "Тест/линтер narrative parity на bootstrap extras в README+getting-started+quick-start.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-002",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/03-guides/getting-started.md:124",
-      "observation": "В одном getting-started соседствуют Windows fallback py -3.12 и mixed-checkout wrappers, которые создают venv на Python 3.13.",
-      "method": "Чтение getting-started.md:31-43,91-128 и сверка с scripts/engineering/dev/setup_env_windows.ps1:48 и setup_env_wsl.sh:58; README.md:141-154.",
-      "expected": "Документированный runtime baseline совпадает с командами mixed-checkout bootstrap.",
-      "actual": "Docs: baseline 3.12, CI defaults 3.12, manual Windows `py -3.12 -m venv .venv-win`. Wrappers: `uv venv --python 3.13` / `py -3.13`. Оба интерпретатора supported в pyproject, но инструкции противоречат друг другу.",
-      "impact": "Онбординг на Windows/WSL получает 3.13, тогда как текст требует 3.12; расхождение с CI default 3.12.",
-      "confidence": "high",
-      "confidence_score": 0.93,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "runtime-version-drift",
-      "evidence": [
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 127,
-          "command": "read section 2.3 Windows fallback",
-          "observation": "py -3.12 -m venv .venv-win"
-        },
-        {
-          "path": "scripts/engineering/dev/setup_env_windows.ps1",
-          "line": 48,
-          "command": "read setup_env_windows.ps1 uv venv",
-          "observation": "uv venv $VenvDir --python 3.13 --allow-existing"
-        },
-        {
-          "path": "README.md",
-          "line": 152,
-          "command": "read runtime compatibility policy",
-          "observation": "Python runtime baseline: 3.12 for local development, onboarding, and CI defaults"
-        }
-      ],
-      "root_cause": "Wrappers переведены на 3.13; онбординг-текст оставил 3.12 как единственный baseline без оговорки для mixed-checkout.",
-      "remediation": "В getting-started и README явно: baseline CI=3.12; mixed-checkout scripts pin 3.13; убрать голый py -3.12 как единственный Windows fallback либо синхронизировать скрипты на 3.12.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"python 3.1[23]\" docs/03-guides/getting-started.md scripts/engineering/dev/setup_env_windows.ps1 scripts/engineering/dev/setup_env_wsl.sh"
-      ],
-      "automation": "Документный assert: getting-started Windows fallback interpreter == wrapper --python.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-003",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/03-guides/github-workflow-diagrams.md:141",
-      "observation": "Релизная sequence-диаграмма утверждает CI-тест на Python 3.11, 3.12 и 3.13.",
-      "method": "Чтение github-workflow-diagrams.md:134-144; .github/workflows/release.yml python-version; tests.yml python-version; pyproject.toml requires-python.",
-      "expected": "Описание релизного CI совпадает с workflow и requires-python (>=3.12, без 3.11).",
-      "actual": "release.yml: python-version 3.13 only; tests.yml: 3.12 (основные job) и matrix 3.13; 3.11 в CI нет. README помечает 3.10/3.11 как deprecated.",
-      "impact": "Оператор релиза ожидает матрицу 3.11; инструкция устарела и противоречит compatibility policy.",
-      "confidence": "high",
-      "confidence_score": 0.96,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "stale-ci-instruction",
-      "evidence": [
-        {
-          "path": "docs/03-guides/github-workflow-diagrams.md",
-          "line": 141,
-          "command": "read release mermaid sequence",
-          "observation": "CI->>CI: Test on Py 3.11, 3.12, 3.13"
-        },
-        {
-          "path": ".github/workflows/release.yml",
-          "line": 40,
-          "command": "rg python-version .github/workflows/release.yml",
-          "observation": "python-version: \"3.13\" (и matrix [\"3.13\"])"
-        }
-      ],
-      "root_cause": "Диаграмма не обновлена после снятия 3.11 из classifiers/CI.",
-      "remediation": "Заменить строку диаграммы на фактические версии (3.12/3.13 по tests.yml, 3.13 по release.yml).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"3\\.11\" docs/03-guides/github-workflow-diagrams.md .github/workflows/release.yml"
-      ],
-      "automation": "CI/docs drift check на упоминания Python 3.10/3.11 вне archive.",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-004",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/00-project/ai/agents/guides/CLAUDE.md:508",
-      "observation": "CLAUDE.md даёт несуществующую цель make security и устаревшие якоря coverage/mypy.",
-      "method": "rg make security Makefile; чтение CLAUDE.md:9,217,236,508; Makefile:107-112,370-371; tests.yml coverage fail-under; wc runner.py.",
-      "expected": "AI-зеркало ссылается на существующие make-цели и актуальные строки CI/Makefile; RULES version header совпадает.",
-      "actual": "make security отсутствует. Есть security-check = pytest tests/security/. Coverage gate: Makefile:112 и tests.yml:1374, не Makefile:63 / tests.yml:158. RULES header v6.1.11, CLAUDE «синхронизировано с v6.1.5». PipelineRunner файл 222 строки, не 189.",
-      "impact": "Агент/контрибьютор запускает мёртвую security-команду и опирается на ложные line-якоря при верификации.",
-      "confidence": "high",
-      "confidence_score": 0.94,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "stale-ai-mirror",
-      "evidence": [
-        {
-          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
-          "line": 508,
-          "command": "rg make security Makefile",
-          "observation": "Документ: make security — osv-scanner + pip-audit + Bandit; Makefile цели security нет"
-        },
-        {
-          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
-          "line": 236,
-          "command": "read Makefile test target and tests.yml fail-under",
-          "observation": "CLAUDE: Makefile:63 и tests.yml:158; факт: Makefile:112 --cov-fail-under=85, tests.yml:1374 coverage report --fail-under=85"
-        },
-        {
-          "path": "src/bioetl/application/core/runner.py",
-          "line": 48,
-          "command": "line count runner.py",
-          "observation": "class PipelineRunner; файл 222 строк vs CLAUDE «189 строк»"
-        }
-      ],
-      "root_cause": "AI-зеркало не проходило freshness-синхронизацию якорей после сдвига Makefile/CI.",
-      "remediation": "Заменить make security на make security-check (pytest) и отдельно описать pip-audit/OSV из security.yml; обновить line refs или убрать номера строк; выровнять RULES version с header.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"^security\" Makefile",
-        "rg -n \"Makefile:63|tests.yml:158|make security\" docs/00-project/ai/agents/guides/CLAUDE.md"
-      ],
-      "automation": "scripts.docs check-drift --freshness / runtime-mirrors для CLAUDE.md line-anchors.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-005",
-      "requirement_id": "REQ-DOC-001",
-      "path": ".github/SECURITY.md:107",
-      "observation": "Security Policy в блоке dependency scanning предлагает make security-check как проверку известных уязвимостей, тогда как цель запускает pytest tests/security/.",
-      "method": "Чтение .github/SECURITY.md:102-108 и Makefile:370-371; сравнение с CLAUDE.md:508 и cheatsheets/cli-commands.md:555.",
-      "expected": "Команда в security policy соответствует фактическому scanner/test target.",
-      "actual": "security-check = `$(RUN) pytest tests/security/ -q`. pip-audit указан отдельной строкой. Cheatsheet корректно пишет «Security тесты». CLAUDE путает с osv/pip-audit/Bandit.",
-      "impact": "Читатель политики думает, что make security-check = dependency CVE scan; реальный CVE-скан — CI security.yml / pip-audit.",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "security-docs",
-      "evidence": [
-        {
-          "path": ".github/SECURITY.md",
-          "line": 107,
-          "command": "read Security Scanning section",
-          "observation": "# Check for known vulnerabilities / make security-check"
-        },
-        {
-          "path": "Makefile",
-          "line": 371,
-          "command": "read security-check target",
-          "observation": "$(RUN) pytest tests/security/ -q"
-        }
-      ],
-      "root_cause": "Имя цели security-check перегружено относительно pytest security suite.",
-      "remediation": "В SECURITY.md подписать make security-check как pytest tests/security/; для CVE оставить pip-audit и ссылку на .github/workflows/security.yml.",
-      "effort": "S",
-      "dependencies": ["DOCS-004"],
-      "validation": [
-        "rg -n \"security-check\" Makefile .github/SECURITY.md docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-006",
-      "requirement_id": "REQ-DOC-002",
-      "path": "docs/03-guides/running-pipelines.md:546",
-      "observation": "How-to running-pipelines рисует quarantine/_delta_log/, тогда как getting-started и local-storage-layout показывают quarantine/common.quarantine, что совпадает с UnifiedQuarantineAdapter.",
-      "method": "Сравнение running-pipelines.md:530-548, getting-started.md:232-255, local-storage-layout.md:62-65, src/bioetl/infrastructure/quarantine/unified.py:6,120.",
-      "expected": "Одинаковая раскладка data/output/quarantine во всех active how-to.",
-      "actual": "running-pipelines: quarantine/_delta_log/; getting-started и local-storage-layout: common.quarantine/; код: unified table common.quarantine.",
-      "impact": "Оператор ищет карантин не там; ложный инцидент «пропали quarantine files».",
-      "confidence": "high",
-      "confidence_score": 0.92,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "layout-contradiction",
-      "evidence": [
-        {
-          "path": "docs/03-guides/running-pipelines.md",
-          "line": 546,
-          "command": "read data directory tree",
-          "observation": "quarantine/ then _delta_log/"
-        },
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 253,
-          "command": "read Data Directory Structure",
-          "observation": "quarantine/common.quarantine/"
-        },
-        {
-          "path": "src/bioetl/infrastructure/quarantine/unified.py",
-          "line": 6,
-          "command": "read UnifiedQuarantineAdapter contract",
-          "observation": "REQ-QUARANTINE-001: Unified table common.quarantine"
-        }
-      ],
-      "root_cause": "running-pipelines не синхронизирован с ADR-025/unified quarantine path.",
-      "remediation": "Заменить дерево в running-pipelines.md на common.quarantine (как local-storage-layout.md).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"quarantine\" docs/03-guides/running-pipelines.md docs/03-guides/local-storage-layout.md"
-      ],
-      "automation": "Golden tree snippet shared across getting-started/running-pipelines/local-storage-layout.",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-007",
-      "requirement_id": "REQ-DOC-001",
-      "path": "README.md:583",
-      "observation": "README «Run All Tests» через run-tests cov покрывает tests/ кроме memory, тогда как CONTRIBUTING и cheatsheet предписывают make test, который игнорирует e2e и contract.",
-      "method": "README.md:582-586; scripts/engineering/dev/run_tests.py:77-88; Makefile:111-112; .github/CONTRIBUTING.md:16; docs/03-guides/cheatsheets/cli-commands.md:535.",
-      "expected": "Онбординг и contributing описывают один и тот же локальный test gate или явно разные suite.",
-      "actual": "run-tests cov: TESTS_ROOT + -m not memory + cov-fail-under=85. make test: pytest tests/ --ignore=tests/e2e --ignore=tests/contract --cov-fail-under=85.",
-      "impact": "Контрибьютор по README запускает более широкий (медленнее/хрупче) набор, чем make test из CONTRIBUTING.",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "test-command-drift",
-      "evidence": [
-        {
-          "path": "README.md",
-          "line": 585,
-          "command": "read Testing / Run All Tests",
-          "observation": "uv run python -m scripts.engineering.dev run-tests cov"
-        },
-        {
-          "path": "Makefile",
-          "line": 112,
-          "command": "read make test",
-          "observation": "pytest tests/ --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-fail-under=85"
-        }
-      ],
-      "root_cause": "Два локальных «полного» прогона без таблицы соответствия.",
-      "remediation": "В README пометить run-tests cov как широкий coverage-прогон; для pre-commit/contributor gate сослаться на make test (без e2e/contract).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"run-tests cov|make test\" README.md .github/CONTRIBUTING.md docs/03-guides/cheatsheets/cli-commands.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-008",
-      "requirement_id": "REQ-DOC-001",
-      "path": ".github/CONTRIBUTING.md:13",
-      "observation": "Windows fallback в CONTRIBUTING ставит .venv и pip install -e .[dev,tests] без кавычек, вопреки mixed-checkout .venv-win и quoted extras в README.",
-      "method": "Чтение .github/CONTRIBUTING.md:6-16 vs README.md:190-202,229-238 и getting-started.md:124-129.",
-      "expected": "Windows fallback = .venv-win и quoted extras, согласованные с README.",
-      "actual": "Комментарий: `.venv/Scripts/python.exe -m pip install -e .[dev,tests]` (unquoted character-class в PowerShell; каталог .venv, не .venv-win; extras без tracing/docs).",
-      "impact": "Копипаст в PowerShell может не установить extras; конфликт с mixed-checkout .venv-win.",
-      "confidence": "high",
-      "confidence_score": 0.88,
-      "status": "PROVEN",
-      "priority": "P2",
-      "severity": "Medium",
-      "category": "windows-bootstrap",
-      "evidence": [
-        {
-          "path": ".github/CONTRIBUTING.md",
-          "line": 13,
-          "command": "read Quick Start fallback comment",
-          "observation": ".venv/Scripts/python.exe -m pip install -e .[dev,tests]"
-        },
-        {
-          "path": "README.md",
-          "line": 238,
-          "command": "read Option B pip fallback",
-          "observation": "pip install -e \".[dev,tests,tracing,docs]\" with quotes"
-        }
-      ],
-      "root_cause": "Старый Windows fallback не обновлён после введения .venv-win.",
-      "remediation": "Заменить комментарий на setup_env_windows.ps1 или quoted `pip install -e \".[dev,tests]\"` с `.venv-win`.",
-      "effort": "S",
-      "dependencies": ["DOCS-001", "DOCS-002"],
-      "validation": [
-        "rg -n \"\\.venv\" .github/CONTRIBUTING.md README.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-009",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/03-guides/cheatsheets/cli-commands.md:740",
-      "observation": "Таблица cheatsheet называет make test-deps установкой test-only зависимостей, хотя цель только импортирует пакеты.",
-      "method": "cheatsheets/cli-commands.md:544 vs :740; Makefile:101-102.",
-      "expected": "Описание make test-deps = verify imports, как в строке 544 cheatsheet и Makefile.",
-      "actual": "Строка 544 верна («Проверка тестовых зависимостей»); таблица :740 пишет «Install test-only dependencies». Makefile: python -c import pytest, pytest_cov, ...",
-      "impact": "Оператор думает, что test-deps ставит пакеты; при отсутствии extras команда только падает на import.",
-      "confidence": "high",
-      "confidence_score": 0.91,
-      "status": "PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "cheatsheet-drift",
-      "evidence": [
-        {
-          "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 740,
-          "command": "read Core Make table",
-          "observation": "make test-deps | Install test-only dependencies"
-        },
-        {
-          "path": "Makefile",
-          "line": 102,
-          "command": "read test-deps target",
-          "observation": "import pytest, pytest_cov, pytest_asyncio, hypothesis, vcr"
-        }
-      ],
-      "root_cause": "Две подписи одной цели в одном файле.",
-      "remediation": "В таблице :740 заменить Install на Verify/import-check.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"test-deps\" docs/03-guides/cheatsheets/cli-commands.md Makefile"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-010",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/04-reference/environment-variables.md:26",
-      "observation": "Справочник env помечает BIOETL_OPENALEX_API_KEY как Required=No без оговорки production-like, которую дают README и getting-started.",
-      "method": "environment-variables.md:23-27; getting-started.md:173-175; README.md:251.",
-      "expected": "Одинаковая обязательность ключа: optional locally, required for production-like OpenAlex.",
-      "actual": "Reference table: Required No. getting-started: required for production-like OpenAlex runs. README: should set for production-like.",
-      "impact": "Оператор prod-like OpenAlex может пропустить ключ, читая только reference.",
-      "confidence": "high",
-      "confidence_score": 0.86,
-      "status": "PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "env-docs-contradiction",
-      "evidence": [
-        {
-          "path": "docs/04-reference/environment-variables.md",
-          "line": 26,
-          "command": "read OpenAlex table",
-          "observation": "BIOETL_OPENALEX_API_KEY | ... | No"
-        },
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 174,
-          "command": "read Secrets section",
-          "observation": "BIOETL_OPENALEX_API_KEY is required for production-like OpenAlex runs"
-        }
-      ],
-      "root_cause": "Partial reference не копирует production-like caveat.",
-      "remediation": "В environment-variables.md сменить Required на «No locally / Yes production-like» или сноску как в getting-started.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"BIOETL_OPENALEX_API_KEY\" docs/04-reference/environment-variables.md docs/03-guides/getting-started.md README.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-011",
-      "requirement_id": "REQ-DOC-002",
-      "path": "docs/03-guides/local-storage-layout.md:47",
-      "observation": "В одном дереве data/output control/ описан дважды (полный ADR-044 набор и усечённый повтор).",
-      "method": "Чтение local-storage-layout.md:22-68.",
-      "expected": "Один блок control/ с полным набором манифестов/ledger.",
-      "actual": "Строки 47-53: control/ с workflow_*; строки 58-61: повтор control/ с усечённым списком.",
-      "impact": "Редакторская путаница; риск, что оператор сочтёт второй блок актуальным subset.",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "editorial",
-      "evidence": [
-        {
-          "path": "docs/03-guides/local-storage-layout.md",
-          "line": 47,
-          "command": "read Directory Structure",
-          "observation": "control/ listed with run_manifest, run_ledger, workflow_* "
-        },
-        {
-          "path": "docs/03-guides/local-storage-layout.md",
-          "line": 58,
-          "command": "read Directory Structure",
-          "observation": "second control/ block with run_manifest, run_ledger, workflow_manifest only"
-        }
-      ],
-      "root_cause": "Copy-paste при расширении ADR-047 paths.",
-      "remediation": "Удалить второй блок control/ (строки 58-61).",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"control/\" docs/03-guides/local-storage-layout.md"
-      ],
-      "automation": "n/a",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-012",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/00-project/00-map.md:10",
-      "observation": "Навигатор имеет Last verified 2026-08-14 при Last updated 2026-08-25 и дублирует docs/03-data-model в дереве структуры.",
-      "method": "Чтение 00-map.md:10-16,142-149.",
-      "expected": "Last verified >= Last updated; дерево docs/ без дублей каталогов.",
-      "actual": "Last verified: 2026-08-14; synced/updated 2026-08-25. 03-data-model появляется на строках 142 и 148 с разными подписями.",
-      "impact": "Слабый freshness-сигнал для главного навигатора; дерево вводит в заблуждение по роли 03-data-model.",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "freshness",
-      "evidence": [
-        {
-          "path": "docs/00-project/00-map.md",
-          "line": 10,
-          "command": "read header",
-          "observation": "Last verified: '2026-08-14'"
-        },
-        {
-          "path": "docs/00-project/00-map.md",
-          "line": 16,
-          "command": "read subtitle",
-          "observation": "Last updated: 2026-08-25"
-        },
-        {
-          "path": "docs/00-project/00-map.md",
-          "line": 142,
-          "command": "read Documentation Structure tree",
-          "observation": "03-data-model listed twice (142 and 148)"
-        }
-      ],
-      "root_cause": "Обновление тела без bump Last verified; дерево копилось аддитивно.",
-      "remediation": "Выровнять Last verified; оставить один узел 03-data-model с актуальной ролью.",
-      "effort": "S",
-      "dependencies": [],
-      "validation": [
-        "rg -n \"03-data-model|Last verified|Last updated\" docs/00-project/00-map.md"
-      ],
-      "automation": "scripts.docs check-drift --freshness",
-      "automated_fix_possible": true
-    },
-    {
-      "id": "DOCS-013",
-      "requirement_id": "REQ-DOC-001",
-      "path": "docs/04-reference/cli.md:9",
-      "observation": "CLI reference Last verified 2026-07-06 при живом CLI и product 6.1.0; поле Version документа 6.1.4 может читаться как версия продукта.",
-      "method": "cli.md:9-21; pyproject.toml:7 version 6.1.0; наличие команд в src подтверждено выборочно (list-pipelines, --no-cached-bronze, lock release).",
-      "expected": "Last verified близко к текущему HEAD для published CLI; Version не путается с package version.",
-      "actual": "Last verified / дата обновления 2026-07-06; Version 6.1.4 vs package 6.1.0. Выборочные команды всё ещё существуют в коде (не доказан функциональный drift опций).",
-      "impact": "Оператор не знает, свеж ли reference; путаница SemVer документа vs пакета. Полный drift опций не доказан.",
-      "confidence": "medium",
-      "confidence_score": 0.6,
-      "status": "NOT_PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "freshness",
-      "evidence": [
-        {
-          "path": "docs/04-reference/cli.md",
-          "line": 9,
-          "command": "read CLI header",
-          "observation": "Last verified: '2026-07-06'; Version: 6.1.4"
-        },
-        {
-          "path": "pyproject.toml",
-          "line": 7,
-          "command": "read project.version",
-          "observation": "version = \"6.1.0\""
-        }
-      ],
-      "root_cause": "Не выполнялся полный diff CLI Click options vs cli.md.",
-      "remediation": "Прогнать инвентарь Click-команд против cli.md и обновить Last verified; пометить Version как doc version.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "python -m bioetl --help",
-        "сверка групп с docs/04-reference/cli.md headings"
-      ],
-      "automation": "Generated CLI reference from Click или contract test help text.",
-      "automated_fix_possible": false
-    },
-    {
-      "id": "DOCS-014",
-      "requirement_id": "REQ-DOC-001",
-      "path": "README.md:642",
-      "observation": "Полный обход относительных ссылок по всем 1444 docs/*.md не выполнялся; выборка 11 файлов дала 278 OK / 0 missing.",
-      "method": "Локальный Python-резолвер markdown-ссылок на README и 10 docs/entrypoints. Полный scripts.docs check-links не запускался (граница docs-pipeline).",
-      "expected": "Либо полный check-links, либо явный NOT_PROVEN на остаток корпуса.",
-      "actual": "11 файлов чистые. Остальной корпус docs/00-05 и docs/00-project/ai не резолвился пофайлово в этом аудите.",
-      "impact": "Возможны битые ссылки вне выборки; не утверждается отсутствие broken links в docs/.",
-      "confidence": "medium",
-      "confidence_score": 0.55,
-      "status": "NOT_PROVEN",
-      "priority": "P3",
-      "severity": "Low",
-      "category": "coverage-gap",
-      "evidence": [
-        {
-          "path": "README.md",
-          "line": 92,
-          "command": "python resolve relative links in 11 files",
-          "observation": "278 OK, 0 missing, 13 external skipped"
-        }
-      ],
-      "root_cause": "SCOPE широкий; полный линк-гейт отнесён к docs-pipeline.",
-      "remediation": "В docs-pipeline прогоне зафиксировать check-links --links; не дублировать генераторы MkDocs здесь.",
-      "effort": "M",
-      "dependencies": [],
-      "validation": [
-        "python -m scripts.docs check-links --links"
-      ],
-      "automation": "CI docs.yml already runs check-links; reuse evidence from that job.",
-      "automated_fix_possible": false
+      ]
     }
-  ]
+  ],
+  "domain": "docs-content"
 }
