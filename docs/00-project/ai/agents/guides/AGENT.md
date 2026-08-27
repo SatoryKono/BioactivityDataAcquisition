@@ -99,7 +99,7 @@ Operational rule:
 - команда (только hash, без нового `coverage.xml`):
   `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
 - проверка:
-  `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`
+  `pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current`
 - полная перегенерация inventory (когда изменились coverage-метрики) — через
   lane `coverage-verify` / `python -m scripts.engineering.qa report-module-coverage`
 - на cloud-synced checkout (например Google Drive) дождись синхронизации перед
