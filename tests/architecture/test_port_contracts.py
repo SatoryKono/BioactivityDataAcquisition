@@ -905,7 +905,7 @@ class TestJsonEncoderPortContract:
 
     JsonEncoderPort defines the contract for JSON serialization.
     Implementations MUST guarantee deterministic output for reproducibility.
-    See RULES.md §2.8 - Content Hashing and REQ-ARCH-030 - Deterministic Writes.
+    See RULES.md §2.8 - Content Hashing and REQ-ARCH-001 - Deterministic Writes.
     """
 
     REQUIRED_METHODS = ["dumps", "dumps_canonical", "loads"]

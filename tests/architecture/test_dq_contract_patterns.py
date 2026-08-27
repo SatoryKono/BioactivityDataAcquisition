@@ -16,9 +16,9 @@ These tests ensure the contract-based DQ system follows proper architectural pat
 - Policy resolution follows deterministic patterns
 - Provenance tracking is implemented correctly
 
-REQ-DQ-010: DQ contracts must be immutable and thread-safe
-REQ-DQ-020: Contract references must be consistent across layers
-REQ-DQ-030: Policy resolution must be deterministic
+REQ-DQ-001: DQ contracts must be immutable and thread-safe
+REQ-DQ-001: Contract references must be consistent across layers
+REQ-DQ-001: Policy resolution must be deterministic
 """
 
 from __future__ import annotations

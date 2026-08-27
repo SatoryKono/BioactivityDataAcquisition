@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: current time creation is restricted in the domain layer.
 
-REQ-ARCH-031: Single source of truth for timestamps.
+REQ-ARCH-001: Single source of truth for timestamps.
 Domain business paths must receive timestamps explicitly instead of creating
 them implicitly at read/transition time.
 See docs/02-architecture/decisions/ADR-014-deterministic-writes.md

@@ -4,8 +4,8 @@ Monitors memory consumption for large datasets to detect memory leaks
 and excessive memory usage patterns.
 
 Requirements:
-- REQ-PERF-004: Memory usage should be linear with dataset size
-- REQ-PERF-005: No memory leaks in long-running operations
+- Memory usage should be linear with dataset size
+- No memory leaks in long-running operations
 """
 
 from __future__ import annotations

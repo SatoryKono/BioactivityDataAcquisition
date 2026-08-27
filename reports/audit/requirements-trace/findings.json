@@ -1,0 +1,40 @@
+[
+  {
+    "id": "AUD-REQ-001",
+    "requirement_id": "REQ-DASH-004",
+    "priority": "P1",
+    "severity": "High",
+    "confidence": "high",
+    "confidence_score": 0.98,
+    "status": "PROVEN",
+    "category": "orphan-req",
+    "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md:160",
+    "observation": "REQ-DASH-004 existed in DASHBOARD_REQUIREMENTS.md and later in CSV, but REQUIREMENTS.md/crosswalk.md still claimed 171 rows.",
+    "expected": "Index counts equal CSV row_count.",
+    "actual": "171 in index vs 172 in CSV.",
+    "impact": "Catalog index is not SSOT.",
+    "remediation": "Sync counts; point executable_surface at scalar-density tests.",
+    "effort": "S",
+    "automation": "tests/architecture/test_requirements_traceability_catalog.py",
+    "automated_fix_possible": true
+  },
+  {
+    "id": "AUD-REQ-002",
+    "requirement_id": "GAP",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "confidence_score": 0.99,
+    "status": "PROVEN",
+    "category": "invented-req-id",
+    "path": "tests/architecture/test_layer_dependencies.py:741",
+    "observation": "tests/ cited REQ-* IDs not in the traceability CSV.",
+    "expected": "Test REQ-*-NNN ⊆ CSV.",
+    "actual": "Invented ARCH/CONF/PERF/DOC/DETERM/DQ aliases.",
+    "impact": "False traceability.",
+    "remediation": "Map to catalog IDs or drop fake IDs.",
+    "effort": "M",
+    "automation": "tests/architecture/test_requirements_traceability_catalog.py",
+    "automated_fix_possible": true
+  }
+]
