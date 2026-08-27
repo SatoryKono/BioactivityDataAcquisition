@@ -71,10 +71,12 @@ ______________________________________________________________________
 - **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
 - **Action**:
   1. Check the provider's status page for global issues.
-  1. Reduce the rate limit in the pipeline config (`configs/entities/{provider}/{entity}.yaml`):
+  1. Reduce the rate limit in the **provider** config
+     (`configs/providers/{provider}.yaml`), not entity YAML:
      ```yaml
-     rate-limit:
-       requests-per-second: 2  # Decrease from 5
+     source:
+       rate_limit:
+         requests_per_second: 2  # Decrease from the current value
      ```
   1. Redeploy/Restart the pipeline.
 
@@ -96,11 +98,11 @@ ______________________________________________________________________
 - **Action**:
   1. Check for stuck local Python processes running this pipeline.
   1. Identify the lock owner `run-id` from logs (or from the failed run context).
-  1. Manually release the lock:
-     ```bash
-     bioetl lock release --pipeline chembl_activity --run-id <RUN_ID>
-     ```
-  1. Investigate why the job took so long (performance regression?).
+  1. Follow [Stale Lock](stale-lock.md): if a worker is still alive, do **not**
+     steal the lock; stop the duplicate or wait. If the holder is dead, kill
+     any zombie process and start a new `bioetl run`. `bioetl lock release` only
+     affects the **current process** MemoryLock (ADR-010); it is not
+     cross-process crash recovery and it is not Redis.
 
 
 
