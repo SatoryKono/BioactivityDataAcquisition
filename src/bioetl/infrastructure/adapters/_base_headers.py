@@ -4,13 +4,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.domain.version import get_version
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 __all__ = [
+    "BIOETL_USER_AGENT",
     "build_json_accept_headers",
     "build_mailto_user_agent_headers",
 ]
+
+BIOETL_USER_AGENT = f"BioETL/{get_version()}"
 
 
 def build_json_accept_headers(
@@ -33,4 +38,4 @@ def build_json_accept_headers(
 
 def build_mailto_user_agent_headers(mailto: str) -> dict[str, str]:
     """Build the canonical polite-pool header set for mailto-aware providers."""
-    return build_json_accept_headers(f"BioETL/1.0 (mailto:{mailto})")
+    return build_json_accept_headers(f"{BIOETL_USER_AGENT} (mailto:{mailto})")

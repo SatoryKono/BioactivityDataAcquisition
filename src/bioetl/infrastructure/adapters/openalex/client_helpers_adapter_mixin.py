@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import (
+    BIOETL_USER_AGENT,
     build_json_accept_headers,
     build_mailto_user_agent_headers,
 )
@@ -49,7 +50,7 @@ class OpenAlexAdapterHelpersMixin:
         """
         if self.mailto:
             return build_mailto_user_agent_headers(self.mailto)
-        return build_json_accept_headers("BioETL/1.0")
+        return build_json_accept_headers(BIOETL_USER_AGENT)
 
     def _build_base_params(self) -> dict[str, str]:
         """Build base query parameters with mailto for polite pool.
