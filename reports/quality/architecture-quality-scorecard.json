@@ -165,9 +165,10 @@
     "composition_module_cap": 300,
     "composition_module_count": 295,
     "families_at_budget": [
-      "application_services_control_plane"
+      "application_services_control_plane",
+      "composition_runtime_builders"
     ],
-    "families_at_budget_count": 1,
+    "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 97,
     "lazy_import_observed_count": 97,
@@ -191,9 +192,10 @@
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
-      "application_services_control_plane"
+      "application_services_control_plane",
+      "composition_runtime_builders"
     ],
-    "families_at_budget_count": 1,
+    "families_at_budget_count": 2,
     "hotspot_budget_warning_count": 0,
     "hotspot_family_count": 5,
     "layer_violations": 0,

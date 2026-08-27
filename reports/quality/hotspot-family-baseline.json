@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 1
+    "budget_review_notes": 3
   },
   "families": [
     {
@@ -25,10 +25,12 @@
       "max_internal_fan_in_module": "bioetl.application.core.pipeline_span_lifecycle",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
-        "max_internal_fan_in": 10
+        "max_internal_fan_in": 7
       },
       "budget_warnings": [],
-      "budget_review_notes": []
+      "budget_review_notes": [
+        "near_budget:max_internal_fan_in=6/7"
+      ]
     },
     {
       "name": "composition_bootstrap_runtime",
@@ -119,10 +121,12 @@
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
-        "max_internal_fan_in": 5
+        "max_internal_fan_in": 3
       },
       "budget_warnings": [],
-      "budget_review_notes": []
+      "budget_review_notes": [
+        "at_budget:max_internal_fan_in=3/3"
+      ]
     }
   ]
 }
