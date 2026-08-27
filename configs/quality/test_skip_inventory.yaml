@@ -6,6 +6,7 @@ source_of_truth:
   integration_vcr_policy_path: configs/quality/integration_vcr_policy.yaml
   contract_root: tests/contract/
   integration_root: tests/integration/
+  e2e_root: tests/e2e/
   # Unit and architecture suppressions are not in this census.
   # Unconditional @pytest.mark.skip is forbidden there by
   # tests/architecture/test_test_skip_inventory.py (#9130).
