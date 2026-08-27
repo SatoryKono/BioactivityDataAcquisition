@@ -64,6 +64,37 @@ def _infrastructure_import_violation(py_file: Path) -> str | None:
     return None
 
 
+def _imported_modules(node: ast.AST) -> tuple[str, ...]:
+    """Return absolute module names represented by one import node."""
+    if isinstance(node, ast.Import):
+        return tuple(alias.name for alias in node.names)
+    if isinstance(node, ast.ImportFrom) and node.module:
+        return (node.module,)
+    return ()
+
+
+def _is_composition_implementation_import(module: str) -> bool:
+    """Return whether a module crosses the composition contracts boundary."""
+    if not module.startswith("bioetl.composition"):
+        return False
+    return module != "bioetl.composition.contracts" and not module.startswith(
+        "bioetl.composition.contracts."
+    )
+
+
+def _composition_contract_import_violations(
+    py_file: Path,
+    tree: ast.AST,
+) -> list[str]:
+    """Return forbidden composition imports found in one parsed contracts file."""
+    return [
+        f"{py_file}: composition/contracts imports {module}"
+        for node in ast.walk(tree)
+        for module in _imported_modules(node)
+        if _is_composition_implementation_import(module)
+    ]
+
+
 def check_composition_contracts_isolation(base_path: Path) -> list[str]:
     """composition/contracts must not import composition implementation modules."""
     violations: list[str] = []
@@ -75,20 +106,7 @@ def check_composition_contracts_isolation(base_path: Path) -> list[str]:
         if tree is None:
             violations.append(f"{py_file}: syntax error")
             continue
-        for node in ast.walk(tree):
-            modules: list[str] = []
-            if isinstance(node, ast.Import):
-                modules.extend(alias.name for alias in node.names)
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                modules.append(node.module)
-            for module in modules:
-                if not module.startswith("bioetl.composition"):
-                    continue
-                if module == "bioetl.composition.contracts" or module.startswith(
-                    "bioetl.composition.contracts."
-                ):
-                    continue
-                violations.append(f"{py_file}: composition/contracts imports {module}")
+        violations.extend(_composition_contract_import_violations(py_file, tree))
     return violations
 
 

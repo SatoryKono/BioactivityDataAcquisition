@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `8472592a3cc0a3348b183aec8a265626c5d74727`
 
-Evidence surface SHA-256: `2dee28875aaf612d8614350ab08fc8b007a4810da0c4e948d8f7d1985eb0b4db`
+Evidence surface SHA-256: `baf0e5187eaff73c7cfaef2329f9667e59a2f1f343a924c08d35c6f85986e26e`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "8472592a3cc0a3348b183aec8a265626c5d74727",
-  "evidence_surface_sha256": "2dee28875aaf612d8614350ab08fc8b007a4810da0c4e948d8f7d1985eb0b4db",
+  "evidence_surface_sha256": "baf0e5187eaff73c7cfaef2329f9667e59a2f1f343a924c08d35c6f85986e26e",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1476,
+    "fully_covered_module_count": 1582,
     "layer_violation_count": 0,
-    "no_executable_lines_module_count": 13,
-    "partially_covered_module_count": 978,
+    "no_executable_lines_module_count": 2,
+    "partially_covered_module_count": 883,
     "source_module_count": 2467,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -50,12 +50,12 @@ Refresh reason: Re-pin to origin/main 8472592a3cc0 after measuring 84 previously
 
 1. Debt-governance gates: **45 pass / 0 fail** (45/45 debt-governance gates).
 1. Release status: **debt-governance gates passing**.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score 9.41.
+1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2467**
-   - fully_covered: **1476**
-   - partially_covered: **978**
-   - no_executable_lines: **13**
+   - fully_covered: **1582**
+   - partially_covered: **883**
+   - no_executable_lines: **2**
    - uncovered: **0**
    - unmeasured: **0**
    - check: fully + partial + no_exec + uncovered + unmeasured = 2467 == source_module_count
@@ -64,27 +64,30 @@ Refresh reason: Re-pin to origin/main 8472592a3cc0 after measuring 84 previously
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.
 1. Layer violations: **0**.
 
+## Retained facade importer census
+
+| Facade | Source importers | Test importers |
+| --- | ---: | ---: |
+| `bioetl.domain.composite.config` | 0 | 40 |
+| `bioetl.application.composite.merger` | 0 | 5 |
+
 ## Evidence anchors
 
-- 
-eports/quality/module-coverage-inventory.json
-- 
-eports/quality/architecture-quality-scorecard.json
-- 
-eports/quality/debt-governance-gates.json
-- 
-eports/quality/contract-coverage-matrix.json
+- reports/quality/module-coverage-inventory.json
+- reports/quality/architecture-quality-scorecard.json
+- reports/quality/debt-governance-gates.json
+- reports/quality/contract-coverage-matrix.json
 - configs/quality/debt_scorecard.yaml
 - configs/quality/constructor_waivers.yaml
 
 ## Validation
 
-`	ext
+```text
 python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml
 python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main
 python -m scripts.engineering.qa validate-technical-debt-audit --json
 python -m scripts.engineering.qa check-exemptions
-`
+```
 
 ## Guard
 

@@ -33,7 +33,7 @@
   "coverage_tail_status": {
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
-    "below_85_module_count": 70,
+    "below_85_module_count": 66,
     "below_85_branch_file_count": 552,
     "ranked_low_tail_modules": 6,
     "owner_tests_status": "focused_owner_tests_added"

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3453 |
-| Tracked doc-like files | 3453 |
+| Doc-like files | 3513 |
+| Tracked doc-like files | 3513 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3453 |
+| tracked | 3513 |
 
 ## Lifecycle Counts
 
@@ -37,12 +37,12 @@
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 56 |
+| issue_pack | 57 |
 | live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 868 |
+| working_report | 876 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -51,7 +51,7 @@
 | active_draft | 278 |
 | guide | 4 |
 | index | 4 |
-| issue_pack | 56 |
+| issue_pack | 57 |
 | live_issue_mirror | 8 |
 
 ## Status Counts
@@ -62,8 +62,8 @@
 | Archived | 170 |
 | Canonical | 72 |
 | Deprecated | 8 |
-| Generated | 1092 |
-| Working | 1366 |
+| Generated | 1143 |
+| Working | 1375 |
 
 ## Surface Families
 
@@ -73,16 +73,16 @@
 | archive | 170 |
 | canonical | 72 |
 | duplicate | 8 |
-| generated | 1092 |
-| working | 1366 |
+| generated | 1143 |
+| working | 1375 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 334 |
-| archive-after-migration | 875 |
-| generate-automatically | 1092 |
+| archive-after-github-state-check | 335 |
+| archive-after-migration | 883 |
+| generate-automatically | 1143 |
 | keep | 1136 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 8 |
@@ -359,7 +359,7 @@
 | architecture-diagram-description-indexes | `scripts/diagrams/render/generate_description_indexes.py` | tracked_curated_generated_doc |
 | architecture-diagram-package-family-sources | `scripts/diagrams/render/generate_package_family_class_diagrams.py` | tracked_curated_generated_doc |
 | architecture-diagram-render-artifacts | `docs/02-architecture/diagrams/tooling/render.sh` | tracked_curated_generated_doc |
-| chembl-field-matrix-generated-docs | `scripts/docs/matrix/generate_field_matrix.py` | tracked_curated_generated_doc |
+| chembl-field-matrix-generated-docs | `scripts/docs/matrix/generate_field_matrix.py` | ignored_local_output |
 | ci-quality-integral-gate-report | `scripts/engineering/ci/quality_integral_gate.py` | working_output |
 | committed-test-telemetry-baseline-summary-layer | `scripts/engineering/ci/update_test_telemetry_baseline.py` | tracked_quality_baseline |
 | compatibility-facade-snapshot-generated-doc | `scripts/engineering/qa/generate_compatibility_facade_snapshot.py` | tracked_curated_generated_doc |
