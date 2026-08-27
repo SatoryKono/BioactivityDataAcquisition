@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: Informational
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-04-01'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
@@ -45,15 +45,15 @@ ______________________________________________________________________
 | [Incident Response](incident-response.md)                   | Coordination + routing layer for alert triage and escalation | P1       |
 | [Pipeline Failure - Critical](pipeline-failure-critical.md) | Critical pipeline failure handling                           | P0       |
 | [Pipeline Failure - DQ](pipeline-failure-dq.md)             | Data Quality failure handling                                | P1       |
-| [Pipeline Failure Recovery](pipeline-failure-recovery.md)   | General pipeline recovery procedures                         | P1       |
+| [Pipeline Failure Recovery](pipeline-failure-recovery.md)   | Resume/rebuild/manual rollback (there is no `bioetl rollback`) | P1       |
 
 ### Data Management
 
 | Runbook                                                 | Description                                        | Priority |
 | ------------------------------------------------------- | -------------------------------------------------- | -------- |
 | [Data Recovery](data-recovery.md)                       | Steps to recover from data corruption or loss (DR) | P0/P1    |
+| [Game Day](game-day.md)                                 | Annual DR restore drill; RPO 24h / RTO 4h          | P1       |
 | [Quarantine Management](quarantine-management.md)       | Managing quarantined records                       | P2       |
-
 | [Backfill/Rebuild](backfill-rebuild.md)                 | Data backfill and rebuild procedures               | P2       |
 | [Schema Evolution](schema-evolution.md)                 | Handling schema changes                            | P2       |
 | [Canonical Semantic Field Unification](canonical-semantic-field-unification.md) | Registry-driven canonical field rename/drift prevention runbook | P2 |
@@ -67,6 +67,7 @@ ______________________________________________________________________
 | [Codex WSL/Docker Sandbox Troubleshooting](codex-wsl-docker-sandbox-troubleshooting.md) | Optional Codex sandbox failure triage with a guarded WSL recovery path | P2       |
 | [Neo4j Backend Recovery Quick Start](neo4j-backend-recovery-quick-start.md) | Short recovery checklist for local Neo4j backend incidents           | P2       |
 | [Stale Lock](stale-lock.md)                                                 | Handling stale lock situations                                       | P1       |
+| [Graceful Shutdown](../../03-guides/pipeline-lifecycle.md#graceful-shutdown) | SIGTERM/SIGINT: finish batch, save checkpoint, release lock          | P1       |
 | [Vacuum Procedures](vacuum-procedures.md)                                   | Delta Lake vacuum maintenance                                        | P2       |
 | [Windows C:→D: Migration](windows-c-to-d-migration.md)                      | Workstation migration plan execution (user/developer applications)      | P2       |
 | [Scaling and Performance Tuning](scaling.md)                                | Local-only performance tuning (vertical scaling + Delta maintenance) | P3       |
@@ -100,6 +101,8 @@ ______________________________________________________________________
   operator runbook for the supported inspection surface.
 - Use [Workflow Control-Plane Recovery](workflow-control-plane.md) for
   declarative workflow manifest / ledger / execution-state triage.
+- Use [Control-Plane Lifecycle](../control-plane-lifecycle.md) for dry-run/apply
+  cleanup of manifests, ledgers, checkpoints, lineage, and cached Bronze.
 - Use [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
   and [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
   and [ADR-047](../../02-architecture/decisions/ADR-047-workflow-control-plane.md)
