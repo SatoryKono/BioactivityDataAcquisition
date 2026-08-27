@@ -93,18 +93,26 @@ class SilverWriterMetadataFacade:
         quarantined_count: int = 0,
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
-        """Compute batch DQ metrics with schema drift information."""
+        """Compute batch DQ metrics with schema drift information.
+
+        S3358 fix: explicit branches avoid nested conditional; DataFrame path
+        uses columns without to_dicts materialization.
+        """
         import polars as pl
 
-        frame = (
-            records
-            if isinstance(records, pl.DataFrame)
-            else pl.from_dicts(
+        if isinstance(records, pl.DataFrame):
+            frame = records
+            record_keys = frame.columns
+        elif records:
+            frame = pl.from_dicts(
                 records,
                 strict=False,
                 infer_schema_length=None,
             )
-        )
+            record_keys = list(records[0].keys())
+        else:
+            frame = pl.DataFrame()
+            record_keys = []
         valid_records = len(frame)
         column_stats = {
             column: self._compute_column_stats(frame[column], valid_records)
@@ -112,16 +120,14 @@ class SilverWriterMetadataFacade:
             if column
             not in {"_run_id", "_run_type", "_source_batch_id", "_ingestion_ts"}
         }
-        normalized_records = (
-            frame.to_dicts() if isinstance(records, pl.DataFrame) else records
-        )
+        schema_drift_records = [dict.fromkeys(record_keys)] if record_keys else []
         return BatchDQMetrics(
             total_records=valid_records + quarantined_count,
             valid_records=valid_records,
             error_records=quarantined_count,
             column_stats=column_stats,
             schema_drift=await self._detect_schema_drift(
-                table_name, normalized_records
+                table_name, schema_drift_records
             ),
             validation_errors=tuple(validation_errors or ()),
         )

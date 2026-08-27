@@ -29,6 +29,19 @@ ______________________________________________________________________
 
 - Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
 - Required access: repository checkout, local shell, logs, configuration, and relevant data/control-plane artifacts.
+- **RPO**: 24 hours. **RTO**: 4 hours (RULES §5.5).
+- **Backup cadence**: at least daily copy or snapshot of the local data root
+  so a restore can meet RPO. Minimum inventory:
+  - `data/output/bronze`
+  - `data/output/silver`
+  - `data/output/gold`
+  - `data/output/checkpoints`
+  - `data/output/control`
+- Store backups **outside** the live data root (another disk, volume snapshot,
+  or dated directory). This is a local filesystem copy; ADR-010 does not
+  require S3/Redis/Docker.
+- Annual rehearsal: [Game Day](game-day.md). There is no `bioetl rollback`
+  command; rebuild uses `bioetl run --pipeline <name> --run-type rebuild --yes`.
 
 ## Procedure
 
@@ -56,7 +69,7 @@ ______________________________________________________________________
      - Delete the corrupted data from the Silver/Gold tables.
      - Run the pipeline with the `--run-type rebuild` flag. This will re-process all data from Bronze.
      ```bash
-     bioetl run --pipeline <pipeline-name> --run-type rebuild
+     bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
      ```
 
 ### Scenario 2: Bronze Data Loss or Corruption
@@ -81,7 +94,7 @@ ______________________________________________________________________
      rm data/output/checkpoints/{pipeline-name}.json
 
      # Re-run the pipeline (will start from scratch)
-     bioetl run --pipeline <pipeline-name> --run-type rebuild
+     bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
      ```
      - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline-name}.json`.
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.

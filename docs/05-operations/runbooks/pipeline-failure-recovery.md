@@ -47,14 +47,21 @@ ______________________________________________________________________
 
 ### 2. Capture recovery evidence
 
-Collect the minimum state you need before changing anything:
+Collect the minimum state you need before changing anything.
+
+Canonical application logs are JSON lines at `reports/logs/bioetl.log`
+(not a `logs/` directory).
 
 ```bash
-# Recent errors
-grep -r "error\|ERROR\|exception" logs/ | tail -50
+# Recent errors — default runtime log
+# Git Bash / jq:
+jq -c 'select((.level // .event // "") | tostring | test("error|ERROR|exception"; "i"))' reports/logs/bioetl.log
+# PowerShell (last 50 lines if jq is unavailable):
+Get-Content -Path reports/logs/bioetl.log -Tail 50
 
 # Checkpoint owner and progress
-cat data/output/checkpoints/{pipeline}.json
+# Git Bash: cat data/output/checkpoints/{pipeline}.json
+# PowerShell: Get-Content data/output/checkpoints/<pipeline>.json
 
 # Control-plane state
 bioetl run-manifest show <run-id|manifest-id> --format json
@@ -112,7 +119,7 @@ If the checkpoint is corrupted, incompatible, or the pipeline cannot safely
 resume:
 
 ```bash
-bioetl run --pipeline <pipeline-name> --run-type rebuild
+bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
 ```
 
 Use rebuild when:
@@ -133,7 +140,7 @@ before rebuilding:
 # Example path; adjust provider/entity
 mv data/output/silver/<provider>/<entity> data/output/silver/<provider>/<entity>.bak
 rm data/output/checkpoints/<pipeline>.json
-bioetl run --pipeline <pipeline-name> --run-type rebuild
+bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
 ```
 
 After validation succeeds, remove the backup intentionally.
@@ -176,6 +183,11 @@ Escalate to development/architecture ownership when:
 
 ## Rollback
 
+- There is **no** `bioetl rollback` command in the Local-Only runtime
+  (RULES §8.2 / REQ-ROLLBACK-001). Manual rollback is restore of a previous
+  local artifact or the backup-then-rebuild path in §6.
+- DQ / quality failures MUST NOT trigger an application version rollback
+  (REQ-ROLLBACK-002); keep the current code and rebuild or quarantine data.
 - Revert partial mitigation changes if they worsen the situation.
 - Restore backups before attempting an alternate rebuild path.
 
