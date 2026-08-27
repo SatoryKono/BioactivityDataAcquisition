@@ -93,7 +93,11 @@ class SilverWriterMetadataFacade:
         quarantined_count: int = 0,
         validation_errors: Sequence[str] | None = None,
     ) -> BatchDQMetrics:
-        """Compute batch DQ metrics with schema drift information."""
+        """Compute batch DQ metrics with schema drift information.
+
+        S3358 fix: explicit branches avoid nested conditional; DataFrame path
+        uses columns without to_dicts materialization.
+        """
         import polars as pl
 
         if isinstance(records, pl.DataFrame):
