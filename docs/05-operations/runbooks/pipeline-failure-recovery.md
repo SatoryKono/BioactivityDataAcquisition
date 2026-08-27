@@ -119,7 +119,7 @@ If the checkpoint is corrupted, incompatible, or the pipeline cannot safely
 resume:
 
 ```bash
-bioetl run --pipeline <pipeline-name> --run-type rebuild
+bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
 ```
 
 Use rebuild when:
@@ -140,7 +140,7 @@ before rebuilding:
 # Example path; adjust provider/entity
 mv data/output/silver/<provider>/<entity> data/output/silver/<provider>/<entity>.bak
 rm data/output/checkpoints/<pipeline>.json
-bioetl run --pipeline <pipeline-name> --run-type rebuild
+bioetl run --pipeline <pipeline-name> --run-type rebuild --yes
 ```
 
 After validation succeeds, remove the backup intentionally.
@@ -183,6 +183,11 @@ Escalate to development/architecture ownership when:
 
 ## Rollback
 
+- There is **no** `bioetl rollback` command in the Local-Only runtime
+  (RULES §8.2 / REQ-ROLLBACK-001). Manual rollback is restore of a previous
+  local artifact or the backup-then-rebuild path in §6.
+- DQ / quality failures MUST NOT trigger an application version rollback
+  (REQ-ROLLBACK-002); keep the current code and rebuild or quarantine data.
 - Revert partial mitigation changes if they worsen the situation.
 - Restore backups before attempting an alternate rebuild path.
 
