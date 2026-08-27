@@ -101,7 +101,78 @@
           "observation": "Windows pointer to getting-started.md §2.2 / §2.3"
         }
       ]
+    },
+    {
+      "id": "AUD-DOC-003",
+      "requirement_id": "REQ-DOC-001",
+      "priority": "P2",
+      "severity": "Medium",
+      "confidence": "high",
+      "confidence_score": 0.98,
+      "status": "PROVEN",
+      "category": "pipeline",
+      "tags": [
+        "pipeline"
+      ],
+      "path": "scripts/docs/checks/check_docstrings.py:42",
+      "observation": "python -m scripts.docs verify --skip-build exits 1: functions 88.7% < 90% threshold (missing=795). tests.yml proof-or-stop producer captures rc then exit 0.",
+      "method": "python -m scripts.docs verify --skip-build; read .github/workflows/tests.yml docs_runtime step; read verify.py",
+      "expected": "Canonical verify chain is fail-closed when docstring coverage is below THRESHOLDS.",
+      "actual": "Local verify fails at check-docstrings. tests.yml always exits 0 after capturing the log. Raising the 90% cap is forbidden.",
+      "impact": "Documented one-command verify is red locally; tests.yml does not fail the producer job on that red.",
+      "root_cause": "Function docstring coverage below frozen 90% gate; producer swallows rc.",
+      "remediation": "Do not raise THRESHOLDS. Pay down missing public function docstrings in src/bioetl, or isolate check-docstrings from docs.yml if product policy changes. Out of docs-content edit scope.",
+      "effort": "L",
+      "automation": "python -m scripts.docs check-docstrings --summary",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remaining",
+      "validation": [
+        "python -m scripts.docs verify --skip-build"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/docs/checks/check_docstrings.py",
+          "line": 42,
+          "command": "python -m scripts.docs verify --skip-build",
+          "observation": "FAIL: functions: 88.7% < 90% threshold; missing=795"
+        }
+      ]
+    },
+    {
+      "id": "AUD-DOC-004",
+      "requirement_id": "REQ-DOC-002",
+      "priority": "P3",
+      "severity": "Low",
+      "confidence": "high",
+      "confidence_score": 0.9,
+      "status": "PROVEN",
+      "category": "pipeline",
+      "tags": [
+        "pipeline"
+      ],
+      "path": "scripts/docs/checks/report_docs_kpi.py",
+      "observation": "check-kpi outside nav=127 vs directional target <=120 by 2026-12-31; hard limit <=135 not breached; orphans=0.",
+      "method": "python -m scripts.docs check-kpi --json-out",
+      "expected": "Hard limit outside-nav <=135; directional <=120 by 2026-12-31.",
+      "actual": "127 outside nav; status monitoring; breaches none.",
+      "impact": "No blocking KPI failure; remaining nav-adoption gap.",
+      "root_cause": "Published pages exist outside mkdocs nav (ops/architecture/guides concentration).",
+      "remediation": "Do not raise hard limit. Optionally classify or nav-adopt until 120.",
+      "effort": "M",
+      "automation": "python -m scripts.docs check-kpi; docs-kpi-weekly.yml",
+      "automated_fix_possible": false,
+      "dependencies": [],
+      "outcome": "remaining",
+      "validation": [
+        "python -m scripts.docs check-kpi"
+      ],
+      "evidence": [
+        {
+          "path": "reports/audit-runs/20260827T0846Z-docs-new-b9aa36efdd/iteration-1/kpi.json",
+          "observation": "outside_nav=127, hard_limit=135, orphans=0, status=monitoring"
+        }
+      ]
     }
-  ],
-  "domain": "docs-content"
+  ]
 }
