@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
@@ -17,7 +17,7 @@ BioETL command-line interface (CLI) - основной способ взаимо
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
 **Версия:** 6.1.4
-**Дата обновления:** 2026-07-06
+**Дата обновления:** 2026-08-27
 **Статус покрытия:** published command and operator surface
 
 > **Boundary:** this page is the CLI command reference (what commands exist and their options).
@@ -678,6 +678,60 @@ See also:
 
 ______________________________________________________________________
 
+### `report` — Инспекция run reports
+
+Локальные pipeline/workflow run reports (`reports/run-reports` по умолчанию).
+Не путать с `run-manifest universe-report`.
+
+**Синтаксис:**
+
+```bash
+bioetl report [COMMAND] [OPTIONS]
+```
+
+#### `report show` — Показать один report
+
+```bash
+bioetl report show --pipeline <NAME> [--run-id <UUID>] [--latest] [--json]
+bioetl report show --workflow <NAME> [--workflow-run-id <UUID>] [--latest] [--json]
+```
+
+| Опция | Описание |
+| --- | --- |
+| `--pipeline` | Имя пайплайна |
+| `--run-id` | Pipeline run id |
+| `--workflow` | Имя workflow |
+| `--workflow-run-id` | Workflow run id |
+| `--latest` | Читать `_latest` pointer |
+| `--root` | Корень reports (default `reports/run-reports`) |
+| `--json` | Печать JSON вместо markdown |
+
+Нужен `--pipeline` или `--workflow`.
+
+#### `report list` — Список недавних reports
+
+```bash
+bioetl report list [--pipeline <NAME>] [--workflow <NAME>] [--limit 20] [--root PATH]
+```
+
+#### `report diff` — Diff двух pipeline runs
+
+```bash
+bioetl report diff --pipeline <NAME> --run-id-a <UUID> --run-id-b <UUID> [--root PATH]
+```
+
+Печатает JSON (funnel / top reasons).
+
+#### `report prune` — Удаление старых report directories
+
+По умолчанию dry-run. `--apply` удаляет.
+
+```bash
+bioetl report prune --kind pipeline|workflow [--owner <NAME>] [--max-count N] [--max-age-days N] [--apply] [--root PATH]
+```
+
+______________________________________________________________________
+
 ### `adr` — Работа с ADR
 
 Утилиты для просмотра и валидации архитектурных решений (Architecture Decision Records).
@@ -1177,6 +1231,7 @@ Quarantine Explorer / `:8081`). Control-plane helpers live under
 **Endpoints:**
 
 - `GET /health` — общий статус
+- `GET /healthz` — alias of `/health` (kube-style liveness/readiness clients)
 - `GET /health/live` — Kubernetes liveness probe
 - `GET /health/ready` — Kubernetes readiness probe
 - `GET /health/providers` — детальный статус провайдеров
