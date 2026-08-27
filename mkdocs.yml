@@ -158,6 +158,7 @@ nav:
   - "Project Rules":
       - "Normative Sources": 00-project/NORMATIVE_SOURCES.md
       - "RULES": 00-project/RULES.md
+      - "Requirements": 01-requirements/REQUIREMENTS.md
       - "Dashboard Requirements": 01-requirements/DASHBOARD_REQUIREMENTS.md
       - "Requirements Traceability Crosswalk": 01-requirements/traceability/requirements-traceability-crosswalk.md
       - "Rules Summary": 00-project/rules-summary.md
@@ -287,6 +288,7 @@ nav:
       - "Running Pipelines": 03-guides/running-pipelines.md
       - "Workflows": 03-guides/workflows.md
       - "GitHub Local Workflow": 03-guides/github-local-workflow.md
+      - "GitHub Quick Reference": 03-guides/github-quick-reference.md
       - "Pipeline Configuration": 03-guides/pipeline-configuration.md
       - "Config Merge Strategy": 03-guides/config-merge-strategy.md
       - "Pipeline Dataflow Documentation": 03-guides/pipeline-dataflow-documentation.md
@@ -465,6 +467,9 @@ nav:
           - "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
       - Observability:
           - "Metrics Catalog": 04-reference/observability/metrics-catalog.md
+          - "Alerting Guide": 04-reference/observability/alerting-guide.md
+          - "Logging Guide": 04-reference/observability/logging-guide.md
+          - "Tracing Guide": 04-reference/observability/tracing-guide.md
       - Normalization:
           - "ChEMBL": 04-reference/normalization/chembl-normalization-overview.md
           - Overview: 04-reference/normalization/non-chembl-normalization-overview.md
@@ -512,6 +517,8 @@ nav:
       - "Performance Tuning": 05-operations/performance-tuning.md
       - "DQ Investigation Procedures": 05-operations/dq-investigation-procedures.md
       - "Lock Contention Resolution": 05-operations/lock-contention-resolution.md
+      - "Control Plane Lifecycle": 05-operations/control-plane-lifecycle.md
+      - "SLI/SLO Baseline": 05-operations/sli-slo-baseline.md
       - "Common Error Patterns": 05-operations/troubleshooting/common-errors.md
       - Runbooks:
           - "Index": 05-operations/runbooks/index.md
@@ -536,6 +543,8 @@ nav:
           - "Traceability Wave 5 Closeout Pack": 05-operations/runbooks/traceability-wave5-closeout-pack.md
           - "Scaling": 05-operations/runbooks/scaling.md
           - "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
+          - "Generated Artifact Drift": 05-operations/runbooks/generated-artifact-drift-workflow.md
+          - "Workflow Control Plane": 05-operations/runbooks/workflow-control-plane.md
       - "Performance Baselines": 05-operations/performance-baselines.md
       - "VACUUM & Retention": 05-operations/vacuum-retention.md
       - Tooling:

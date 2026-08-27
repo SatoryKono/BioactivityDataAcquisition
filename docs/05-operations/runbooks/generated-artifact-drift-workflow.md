@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-08-25'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
@@ -71,7 +71,7 @@ code. Use the individual rows below to diagnose a specific artifact family.
 | Module coverage measurements | Live green `coverage-verify` with `--fail-under=85` | `python -m scripts.engineering.qa report-module-coverage --refresh-from-coverage-xml` only inside that trusted green lane. Never use a partial local `coverage.xml`. |
 | Module coverage monotonic adoption | SHA-bound combined coverage XML plus `--enforce-module-thresholds block-regression --fail-on-regression` | `python -m scripts.engineering.qa report-module-coverage --refresh-nonregressing-from-coverage-xml --enforce-module-thresholds block-regression --fail-on-regression`; adds absent rows and accepts only equal or improved measurements. |
 | Test governance snapshots | `python -m scripts.engineering.qa.report_test_governance_audit --check` | `python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json` |
-| Documentation cleanup inventory | `python -m scripts.docs.checks.documentation_cleanup_inventory --check` | `python -m scripts.docs.checks.documentation_cleanup_inventory --update` |
+| Documentation cleanup inventory | `python -m scripts.docs generate-cleanup-inventory --check` | `python -m scripts.docs generate-cleanup-inventory --update` |
 | Architecture dependency map | `python -m scripts.engineering.qa.generate_architecture_dependency_map --check` | `python -m scripts.engineering.qa.generate_architecture_dependency_map --update` |
 | Committed test telemetry | `pytest tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py` | `python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent <percent> --source-branch main --source-commit <reachable-commit> --source-run-id <run-id>` |
 | Compatibility importer census | `python -m scripts.engineering.qa report-compatibility-importer-census --check` | `python -m scripts.engineering.qa report-compatibility-importer-census` |

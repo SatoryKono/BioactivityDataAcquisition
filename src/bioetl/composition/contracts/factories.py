@@ -47,22 +47,30 @@ class ObservabilityApiModule(Protocol):
         retry_count: int = 3,
         retry_delay: float = 1.0,
         logger: LoggerPort | None = None,
-    ) -> bool: ...
+    ) -> bool:
+        """Start the Prometheus metrics HTTP server."""
+        ...
 
 
 class ServiceBundleDeps(Protocol):
     """Subset of dependencies required by pipeline creation internals."""
 
     @property
-    def load_pipeline_config(self) -> Callable[[str], PipelineYamlConfig]: ...
+    def load_pipeline_config(self) -> Callable[[str], PipelineYamlConfig]:
+        """Load YAML pipeline configuration by name."""
+        ...
 
     @property
-    def yaml_config_to_domain(self) -> DomainConfigMapper: ...
+    def yaml_config_to_domain(self) -> DomainConfigMapper:
+        """Mapper from YAML pipeline config to domain config."""
+        ...
 
     @property
     def compute_config_hash(
         self,
-    ) -> Callable[[PipelineYamlConfig | dict[str, object]], str]: ...
+    ) -> Callable[[PipelineYamlConfig | dict[str, object]], str]:
+        """Stable hash of a pipeline configuration payload."""
+        ...
 
 
 class BuildPipelineServicesFn(Protocol):
@@ -86,28 +94,42 @@ class BuildPipelineServicesFn(Protocol):
 
 
 class FactoryLike(Protocol):
+    """Structural factory surface used by pipeline construction internals."""
+
     @property
-    def pipeline_name(self) -> str: ...
+    def pipeline_name(self) -> str:
+        """Registered pipeline name for this factory."""
+        ...
 
     @property
     def _create_data_source(self) -> DataSourceCreatorProtocol: ...
 
     @property
-    def pipeline_class(self) -> type[object]: ...
+    def pipeline_class(self) -> type[object]:
+        """Pipeline class constructed by this factory."""
+        ...
 
     @property
-    def provider(self) -> str: ...
+    def provider(self) -> str:
+        """Provider identifier bound to this factory."""
+        ...
 
     @property
-    def transformer_class(self) -> type[object] | None: ...
+    def transformer_class(self) -> type[object] | None:
+        """Optional transformer class for this factory."""
+        ...
 
     @property
-    def pandera_silver_schema(self) -> object | None: ...
+    def pandera_silver_schema(self) -> object | None:
+        """Optional Pandera Silver schema for this factory."""
+        ...
 
     def create_with_services(
         self,
         request: _CreatePipelineWithServicesRequest,
-    ) -> object: ...
+    ) -> object:
+        """Construct a pipeline instance with an injected service bundle."""
+        ...
 
 
 class LoggerBindableObservability(Protocol):

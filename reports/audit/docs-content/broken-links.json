@@ -1,0 +1,5 @@
+{
+  "broken_relative_links": [],
+  "check": "python -m scripts.docs check-links --links --specs --configs",
+  "exit": 0
+}
