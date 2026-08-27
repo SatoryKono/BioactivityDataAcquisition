@@ -4,8 +4,8 @@ Monitors latency for external API adapter calls to detect performance
 regressions in network operations.
 
 Requirements:
-- REQ-PERF-006: Adapter calls should complete within expected time limits
-- REQ-PERF-007: No excessive latency in retry scenarios
+- Adapter calls should complete within expected time limits
+- No excessive latency in retry scenarios
 """
 
 from __future__ import annotations

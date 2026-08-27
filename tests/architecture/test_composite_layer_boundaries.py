@@ -157,7 +157,7 @@ class TestDomainCompositeLayerBoundaries:
     def test_domain_composite_no_application_imports(self, src_dir: Path) -> None:
         """domain/composite MUST NOT import from bioetl.application.
 
-        REQ-ARCH-FSM-001: FSM state enum and transition rules are pure domain logic.
+        REQ-ARCH-001: FSM state enum and transition rules are pure domain logic.
         They must not depend on application layer orchestration.
         """
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
@@ -176,7 +176,7 @@ class TestDomainCompositeLayerBoundaries:
     def test_domain_composite_no_infrastructure_imports(self, src_dir: Path) -> None:
         """domain/composite MUST NOT import from bioetl.infrastructure.
 
-        REQ-ARCH-FSM-002: FSM state enum must not depend on I/O implementations.
+        REQ-ARCH-001: FSM state enum must not depend on I/O implementations.
         """
         domain_composite_path = src_dir / "bioetl" / "domain" / "composite"
         assert domain_composite_path.exists(), "domain/composite not found"
@@ -193,7 +193,7 @@ class TestDomainCompositeLayerBoundaries:
     def test_fsm_state_uses_only_standard_library(self, src_dir: Path) -> None:
         """FSM state module MUST use only standard library imports.
 
-        REQ-ARCH-FSM-003: CompositePipelineState should be portable
+        REQ-ARCH-001: CompositePipelineState should be portable
         and not depend on external packages (except typing).
         """
         state_file = src_dir / "bioetl" / "domain" / "composite" / "state.py"
@@ -230,7 +230,7 @@ class TestCoordinatorIsolation:
     def test_coordinator_no_fsm_state_import(self, src_dir: Path) -> None:
         """EnrichmentCoordinatorService MUST NOT import CompositePipelineState.
 
-        REQ-ARCH-FSM-004: Coordinator is a delegated service that runs enrichers.
+        REQ-ARCH-001: Coordinator is a delegated service that runs enrichers.
         It should not know about FSM states - that's Runner's responsibility.
         """
         coordinator_file = (
@@ -252,7 +252,7 @@ class TestCoordinatorIsolation:
     def test_coordinator_no_checkpoint_import(self, src_dir: Path) -> None:
         """EnrichmentCoordinatorService MUST NOT import checkpoint classes.
 
-        REQ-ARCH-FSM-005: Coordinator should not directly manage checkpoints.
+        REQ-ARCH-001: Coordinator should not directly manage checkpoints.
         Checkpoint management is Runner's responsibility.
         """
         coordinator_file = (
@@ -278,7 +278,7 @@ class TestMergerIsolation:
     def test_merger_no_fsm_state_import(self, src_dir: Path) -> None:
         """MergeService MUST NOT import CompositePipelineState.
 
-        REQ-ARCH-FSM-006: Merger is a delegated service for joining data.
+        REQ-ARCH-001: Merger is a delegated service for joining data.
         It should not know about FSM states.
         """
         merger_file = src_dir / "bioetl" / "application" / "composite" / "merger.py"
@@ -294,7 +294,7 @@ class TestMergerIsolation:
     def test_merger_no_checkpoint_import(self, src_dir: Path) -> None:
         """MergeService MUST NOT import checkpoint classes at module level.
 
-        REQ-ARCH-FSM-007: Merger should not directly manage checkpoints.
+        REQ-ARCH-001: Merger should not directly manage checkpoints.
         """
         merger_file = src_dir / "bioetl" / "application" / "composite" / "merger.py"
         assert merger_file.exists(), "application/composite/merger.py not found"
@@ -314,7 +314,7 @@ class TestKeyExtractorIsolation:
     def test_key_extractor_no_fsm_state_import(self, src_dir: Path) -> None:
         """KeyExtractorService MUST NOT import CompositePipelineState.
 
-        REQ-ARCH-FSM-008: KeyExtractor is a delegated service for extracting keys.
+        REQ-ARCH-001: KeyExtractor is a delegated service for extracting keys.
         It should not know about FSM states.
         """
         key_extractor_file = (
@@ -338,7 +338,7 @@ class TestRunnerFSMOwnership:
     def test_runner_imports_fsm_state(self, src_dir: Path) -> None:
         """CompositePipelineRunner MUST import CompositePipelineState.
 
-        REQ-ARCH-FSM-009: Runner is responsible for FSM state transitions.
+        REQ-ARCH-001: Runner is responsible for FSM state transitions.
         It must import the state enum from domain layer.
         """
         runner_file = _get_composite_runner_file(src_dir)
@@ -361,7 +361,7 @@ class TestRunnerFSMOwnership:
     def test_runner_uses_fsm_transitions(self, src_dir: Path) -> None:
         """CompositePipelineRunner SHOULD use FSM state transitions.
 
-        REQ-ARCH-FSM-010: Runner should have methods for state transitions.
+        REQ-ARCH-001: Runner should have methods for state transitions.
         """
         runner_file = _get_composite_runner_file(src_dir)
         assert runner_file.exists(), (
@@ -388,7 +388,7 @@ class TestCheckpointFSMIntegration:
     def test_checkpoint_state_has_fsm_field(self, src_dir: Path) -> None:
         """CompositeCheckpointState MUST have FSM state field.
 
-        REQ-ARCH-FSM-011: Checkpoint must persist FSM state for resume.
+        REQ-ARCH-001: Checkpoint must persist FSM state for resume.
         """
         content = _checkpoint_module_content(src_dir)
 
@@ -410,7 +410,7 @@ class TestCheckpointFSMIntegration:
     def test_checkpoint_imports_fsm_from_domain(self, src_dir: Path) -> None:
         """Checkpoint module MUST import FSM state from domain layer.
 
-        REQ-ARCH-FSM-012: Application imports domain, not vice versa.
+        REQ-ARCH-001: Application imports domain, not vice versa.
         """
         content = _checkpoint_module_content(src_dir)
 
@@ -432,7 +432,7 @@ class TestFSMDomainExports:
     def test_fsm_exported_from_domain_composite(self, src_dir: Path) -> None:
         """CompositePipelineState MUST be exported from domain/composite/__init__.py.
 
-        REQ-ARCH-FSM-013: FSM state should be importable from package root.
+        REQ-ARCH-001: FSM state should be importable from package root.
         """
         init_file = src_dir / "bioetl" / "domain" / "composite" / "__init__.py"
         assert init_file.exists(), "domain/composite/__init__.py not found"
@@ -457,7 +457,7 @@ class TestFSMDomainExports:
     def test_fsm_in_package_all(self, src_dir: Path) -> None:
         """FSM exports MUST be in __all__ list.
 
-        REQ-ARCH-FSM-014: Public API should be explicit.
+        REQ-ARCH-001: Public API should be explicit.
         """
         init_file = src_dir / "bioetl" / "domain" / "composite" / "__init__.py"
         assert init_file.exists(), "domain/composite/__init__.py not found"

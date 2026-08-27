@@ -126,7 +126,7 @@ def test_domain_layer_contains_no_infrastructure_dependencies(
     src_dir: Path,
     source_ast_cache: dict[Path, ast.Module],
 ) -> None:
-    """REQ-ARCH-DOM-001: Domain must not import infrastructure dependencies."""
+    """REQ-ARCH-001: Domain must not import infrastructure dependencies."""
     violations = [
         violation
         for py_file, tree in _iter_domain_modules(

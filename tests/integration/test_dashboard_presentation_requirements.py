@@ -172,6 +172,7 @@ def test_dashboard_requirements_are_normatively_routed() -> None:
         "REQ-DASH-001",
         "REQ-DASH-002",
         "REQ-DASH-003",
+        "REQ-DASH-004",
         "D_area = A_data / A_total",
         "12pt = 16px",
         "14pt = 18.6667px",

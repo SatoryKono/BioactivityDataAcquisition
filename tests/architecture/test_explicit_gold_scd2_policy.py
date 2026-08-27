@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture test: explicit Gold SCD2 policy for SCD2-candidate configs.
 
-REQ-ARCH-052: SCD2-candidate entity configs MUST explicitly declare
+REQ-ARCH-001: SCD2-candidate entity configs MUST explicitly declare
 `pipeline.sink.gold.mode: scd2` and a complete canonical `scd_config`.
 """
 

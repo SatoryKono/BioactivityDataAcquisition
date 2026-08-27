@@ -1006,7 +1006,7 @@ class TestPrometheusMetricsGauge:
 class TestRequiredMetricsSmoke:
     """Smoke tests for required metrics per observability contract.
 
-    REQ-OBS-CONTRACT-001: All metrics defined in docs/contracts/observability.md
+    REQ-OBS-001: All metrics defined in docs/contracts/observability.md
     MUST be registered and exportable.
     """
 

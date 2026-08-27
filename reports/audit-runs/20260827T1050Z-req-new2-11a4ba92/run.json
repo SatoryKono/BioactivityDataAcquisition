@@ -1,0 +1,21 @@
+{
+  "run_id": "20260827T1050Z-req-new2-11a4ba92",
+  "cycle_marker": "Cycle-run: 20260827T1050Z-req-new2-11a4ba92",
+  "prompt_id": "prompt.audit.project.new2.requirements-trace",
+  "repo": "SatoryKono/BioactivityDataAcquisition",
+  "work_branch": "fix/req-trace-cycle-new2-9933fa42",
+  "base_branch": "main",
+  "mode": "full",
+  "language": "ru",
+  "n": 10,
+  "scope": ["docs/01-requirements/", "tests/"],
+  "allow": {
+    "issue_write": true,
+    "push": true,
+    "merge": true,
+    "close": true
+  },
+  "max_issues_per_iteration": 5,
+  "issues": [9756, 9757],
+  "debt_budget_delta": 0
+}

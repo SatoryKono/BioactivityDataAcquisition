@@ -10,7 +10,7 @@
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Architecture tests for validator enforcement in composition factories.
 
-REQ-ARCH-VAL-001: Composition factories MUST NOT use NoOp validators for
+REQ-ARCH-001: Composition factories MUST NOT use NoOp validators for
 Gold/Silver validation in production pipelines.
 """
 

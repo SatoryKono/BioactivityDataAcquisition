@@ -1,4 +1,4 @@
-"""Unit tests for the scalar information-density survey (DASH-DENSITY-002)."""
+"""Unit tests for the scalar information-density survey (REQ-DASH-004 / DASH-DENSITY-002)."""
 
 from __future__ import annotations
 
