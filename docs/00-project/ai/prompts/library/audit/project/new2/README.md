@@ -15,7 +15,7 @@ Medallion, HTTP-клиенты, DQ, control-plane, провайдеры, CLI, VC
 inventory, GHA-цикл, секреты, нормализация, REQ-trace, ops, QA-gates.
 
 Не runtime SSOT. Не заменяют `cycle/` и `new/`. Loop:
-`prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=false`**.
+`prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=true`**.
 
 Порядок: **A (1–5) → B (6–10) → C (11–14)**. После A–C — CodeRabbit
 (`prompt.audit.project.new.coderabbit` или `prompt.audit.cycle.coderabbit`).

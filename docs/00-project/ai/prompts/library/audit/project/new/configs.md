@@ -54,9 +54,9 @@ anti_patterns:
   - Raising quality/debt budgets or exemptions
   - Editing .env without explicit per-task approval
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [audit, configs, schema, cycle, operator]
-summary: Improved cyclic config audit — schema hierarchy, compatibility, fail-closed ALLOW, early-stop
+summary: Improved cyclic config audit — schema hierarchy, compatibility, ALLOW_* true, early-stop
 max_body_lines: 230
 ---
 
@@ -65,7 +65,7 @@ max_body_lines: 230
 Улучшает `prompt.audit.cycle.configs`. Role: `.codex/agents/py-config-bot.md`
 (Junie peer). Loop: `prompt.audit.orchestrator`.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 **УВЕЛИЧИВАТЬ бюджеты техдолга ЗАПРЕЩЕНО.**
 
 ## Params
@@ -77,10 +77,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

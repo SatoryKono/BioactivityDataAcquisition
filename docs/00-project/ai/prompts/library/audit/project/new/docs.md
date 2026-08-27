@@ -51,12 +51,12 @@ anti_patterns:
   - Counting Markdown files instead of verifying procedures
   - Treating generator exit 0 as semantic correctness
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Closing issues against unmerged PR heads as if they were origin/main
   - Publishing docs from MODE=audit
   - Returning retired top-level scripts/docs shims
 tags: [audit, docs, cycle, content, pipeline, scripts, operator]
-summary: Improved cyclic docs audit — content plus scripts/docs pipeline, fail-closed ALLOW, early-stop
+summary: Improved cyclic docs audit — content plus scripts/docs pipeline, ALLOW_* true, early-stop
 max_body_lines: 220
 ---
 
@@ -66,8 +66,7 @@ max_body_lines: 220
 Loop: `prompt.audit.orchestrator`. Два disjoint-контура: `content` /
 `pipeline`.
 
-Library defaults: **`ALLOW_*=false`**. Mutations только если оператор явно
-ставил `true`. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Operator full-run: issue/push/merge/close включены по умолчанию. Пустые циклы запрещены.
 
 ## Params
 
@@ -79,10 +78,10 @@ Library defaults: **`ALLOW_*=false`**. Mutations только если опер�
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
 | `INCLUDE_PIPELINE` | `true` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

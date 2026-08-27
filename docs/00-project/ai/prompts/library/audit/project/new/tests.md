@@ -53,10 +53,10 @@ anti_patterns:
   - Retries as a flaky fix
   - Inventing a coverage target the project does not define
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Confusing MODE=full with LANE=full
 tags: [audit, tests, cycle, quality, operator]
-summary: Improved cyclic test-system audit plus bounded LANE retest, fail-closed ALLOW, early-stop
+summary: Improved cyclic test-system audit plus bounded LANE retest, ALLOW_* true, early-stop
 max_body_lines: 240
 ---
 
@@ -66,7 +66,7 @@ max_body_lines: 240
 `prompt.tests.cycle` (не путать: LANE=full ≠ MODE=full). Method:
 `prompt.audit.tests-system`. Loop: `prompt.audit.orchestrator`.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 **УВЕЛИЧИВАТЬ skip/xfail/debt бюджеты ЗАПРЕЩЕНО.**
 
 ## Params
@@ -79,10 +79,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `LANGUAGE` | `ru` |
 | `LANE` | `unit` (`unit` \| `arch` \| `fast` \| `full`) |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `MAX_FIXES_PER_CYCLE` | `8` |
 | `BASE_BRANCH` | `main` |

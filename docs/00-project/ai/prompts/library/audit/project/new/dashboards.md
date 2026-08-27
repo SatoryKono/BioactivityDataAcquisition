@@ -63,10 +63,10 @@ anti_patterns:
   - One GitHub issue per cosmetic nit when uid+requirement_id+root_cause is shared
   - Closing issues against unmerged PR heads as if they were origin/main
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Raising forensic timeout or debt budgets
 tags: [observability, dashboard, grafana, render, design, cycle, operator]
-summary: Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, fail-closed ALLOW, stop when no new issues and no open cycle issues
+summary: Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, ALLOW_* true, stop when no new issues and no open cycle issues
 max_body_lines: 260
 ---
 
@@ -77,8 +77,8 @@ max_body_lines: 260
 Skill: **observability-dashboard**. Data-plane gaps first:
 `prompt.audit.project.new.telemetry`.
 
-Library defaults: **`ALLOW_*=false`**, **`MONITORING=false`**,
-**`ALLOW_MERGE=false`**. Не второй full-pass на том же SHA.
+Library defaults: **`ALLOW_*=true`**, **`MONITORING=false`**.
+Не второй full-pass на том же SHA.
 
 ## Params
 
@@ -95,10 +95,10 @@ Library defaults: **`ALLOW_*=false`**, **`MONITORING=false`**,
 | `ZOOM` | `100` (Tier-2 `200` = **browser** zoom) |
 | `USER_ROLE` | `operator` |
 | `MONITORING` | `false` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `10` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |
@@ -136,7 +136,7 @@ density-scalar, manual-validation **only** if MONITORING=true.
 
 PROVEN P0–P2 (P3 if blocks `USER_ROLE=operator`). One issue per
 `uid + requirement_id + root_cause`. Title `[<uid>][<DASH-id>][P#]`.
-Cap MAX_ISSUES. `ALLOW_ISSUE_WRITE=false` → payloads only.
+Cap MAX_ISSUES. Если ALLOW_ISSUE_WRITE=false → только payloads.
 
 ### 3. Fix-to-close
 

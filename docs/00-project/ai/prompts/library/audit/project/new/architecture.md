@@ -59,9 +59,9 @@ anti_patterns:
   - Mass layer moves without a migration plan
   - C4 container assumed to mean Docker
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
-summary: Improved cyclic architecture audit — 10-category scorecard, plan waves, fail-closed ALLOW, early-stop
+summary: Improved cyclic architecture audit — 10-category scorecard, plan waves, ALLOW_* true, early-stop
 max_body_lines: 260
 ---
 
@@ -72,7 +72,7 @@ Domain method: `prompt.architecture.review`. Scorecard SSOT:
 `reports/quality/architecture-quality-scorecard.json`. Loop:
 `prompt.audit.orchestrator`.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 **УВЕЛИЧИВАТЬ бюджеты техдолга ЗАПРЕЩЕНО.**
 
 ## Params
@@ -87,10 +87,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `INCLUDE_PIPELINE` | `true` |
 | `LAYERS` | `all` |
 | `SCORE_SOURCE` | `live+committed` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `MAX_WAVES_PER_ITERATION` | `3` |
 | `BASE_BRANCH` | `main` |

@@ -55,9 +55,9 @@ anti_patterns:
   - Non-atomic data writes (skip temp→replace)
   - Raising debt budgets
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [audit, medallion, bronze, silver, gold, quarantine, replay, cycle, operator]
-summary: Cyclic Medallion write-path audit — Bronze/Silver/Gold, quarantine, determinism, fail-closed ALLOW, early-stop
+summary: Cyclic Medallion write-path audit — Bronze/Silver/Gold, quarantine, determinism, ALLOW_* true, early-stop
 max_body_lines: 230
 ---
 
@@ -65,7 +65,7 @@ max_body_lines: 230
 
 Не заменяет `prompt.audit.project.new.architecture`. Объект: **write-path**
 Bronze → Silver → Gold, quarantine, replay clocks. Loop:
-`prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=false`**.
+`prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=true`**.
 
 ## Params
 
@@ -76,10 +76,10 @@ Bronze → Silver → Gold, quarantine, replay clocks. Loop:
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

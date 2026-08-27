@@ -53,17 +53,17 @@ anti_patterns:
   - Weakening Pandera so invalid Gold passes
   - Export without QC sidecars / meta.yaml checksums
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
   - Raising debt budgets
 tags: [audit, dq, pandera, contracts, gold, cycle, operator]
-summary: Cyclic DQ/Pandera contract audit — schemas, column_order, QC sidecars, fail-closed ALLOW, early-stop
+summary: Cyclic DQ/Pandera contract audit — schemas, column_order, QC sidecars, ALLOW_* true, early-stop
 max_body_lines: 230
 ---
 
 # Cyclic DQ / Pandera / Gold contract audit
 
 ADR-027 / ADR-045 / ADR-018. Не YAML-иерархия (`prompt.audit.project.new.configs`).
-Loop: `prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=false`**.
+Loop: `prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=true`**.
 
 ## Params
 
@@ -74,10 +74,10 @@ Loop: `prompt.audit.orchestrator`. Library defaults: **`ALLOW_*=false`**.
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

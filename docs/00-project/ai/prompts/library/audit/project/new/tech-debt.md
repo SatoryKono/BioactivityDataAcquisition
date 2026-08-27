@@ -51,9 +51,9 @@ anti_patterns:
   - Treating every style nit as technical debt
   - Deleting residual pins without regenerating via SSOT scripts
   - Empty form cycles
-  - ALLOW_* true by library default
+  - Mutations without PROVEN + requirement_id
 tags: [audit, debt, cycle, quality, operator]
-summary: Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, fail-closed ALLOW, early-stop
+summary: Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, ALLOW_* true, early-stop
 max_body_lines: 220
 ---
 
@@ -62,7 +62,7 @@ max_body_lines: 220
 Улучшает `prompt.audit.cycle.tech-debt` + `prompt.audit.tech-debt-cycle`.
 Method: `prompt.audit.tech-debt`. Loop: `prompt.audit.orchestrator`.
 
-Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещены.
+Library defaults: **`ALLOW_*=true`**. Пустые циклы запрещены.
 **УВЕЛИЧИВАТЬ бюджеты техдолга ЗАПРЕЩЕНО.**
 
 ## Params
@@ -74,10 +74,10 @@ Library defaults: **`ALLOW_*=false`**. Пустые циклы запрещен�
 | `MODE` | `full` (`audit` \| `audit+issues` \| `full`) |
 | `LANGUAGE` | `ru` |
 | `AUDIT_MODE` | `full` \| `differential` |
-| `ALLOW_ISSUE_WRITE` | `false` |
-| `ALLOW_PUSH` | `false` |
-| `ALLOW_MERGE` | `false` |
-| `ALLOW_CLOSE` | `false` |
+| `ALLOW_ISSUE_WRITE` | `true` |
+| `ALLOW_PUSH` | `true` |
+| `ALLOW_MERGE` | `true` |
+| `ALLOW_CLOSE` | `true` |
 | `MAX_ISSUES_PER_ITERATION` | `5` |
 | `BASE_BRANCH` | `main` |
 | `REPO` | `SatoryKono/BioactivityDataAcquisition` |

@@ -34,8 +34,9 @@ max_body_lines: 140
 # BioETL — полный аудит проекта (pack)
 
 Не runtime SSOT. Язык: `{{LANGUAGE}}`. Полные тексты (фрагменты уже
-вшиты): [full/](full/). Улучшенные source-карточки (fail-closed):
-[new/](new/README.md) (`prompt.audit.project.new.*`).
+вшиты): [full/](full/). Улучшенные source-карточки (`ALLOW_*=true`):
+[new/](new/README.md) (`prompt.audit.project.new.*`), [new2/](new2/README.md)
+(`prompt.audit.project.new2.*`).
 
 ## Params
 
