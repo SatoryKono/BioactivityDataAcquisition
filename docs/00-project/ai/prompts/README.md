@@ -79,6 +79,7 @@ docs/00-project/ai/prompts/
 | `prompt.audit.cycle.dashboards` | [library/audit/cycle/dashboards.md](library/audit/cycle/dashboards.md) | Cyclic **dashboard** audit (`DASHBOARD_REQUIREMENTS.md`) |
 | `prompt.audit.cycle.coderabbit` | [library/audit/cycle/coderabbit.md](library/audit/cycle/coderabbit.md) | Cyclic **full project + CodeRabbit** |
 | `prompt.audit.project.new.*` | [library/audit/project/new/](library/audit/project/new/README.md) | Improved 10-domain cyclic pack (`ALLOW_*=true`, early-stop) |
+| `prompt.audit.project.new2.*` | [library/audit/project/new2/](library/audit/project/new2/README.md) | Product/engineering cyclic pack (`ALLOW_*=true`, early-stop) |
 | `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
 | `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
 | `prompt.tests.speed-optimization` | [library/tests/speed-optimization-loop.md](library/tests/speed-optimization-loop.md) | Test speed loop |
@@ -139,6 +140,7 @@ kit-specific extras. Archive megaprompts (opt-in only):
 | Dual-agent cycle + external audit prompt + CR + peer review | `prompt.audit.dual-agent-cycle` (`OUTER_CYCLES=1`; ALLOW_* false) |
 | Cyclic 10-domain pack (docs → CR) | `prompt.audit.cyclic-pack` → `prompt.audit.cycle.*` in [library/audit/cycle/](library/audit/cycle/README.md) |
 | Improved 10-domain pack (`ALLOW_*=true`) | `prompt.audit.project.new.*` in [library/audit/project/new/](library/audit/project/new/README.md) |
+| Product/engineering cyclic pack (`ALLOW_*=true`) | `prompt.audit.project.new2.*` in [library/audit/project/new2/](library/audit/project/new2/README.md) |
 | Sequential audit + issues/fix/close | `prompt.audit.sequential-run` |
 | Cyclic project architecture | `prompt.architecture.cycle` |
 | Exhaustive project audit + CodeRabbit | `prompt.audit.coderabbit-project-cycle` |
