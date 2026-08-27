@@ -24,7 +24,7 @@ help:
 	@echo "  make test-deps             Verify test extras import"
 	@echo "  make setup-plugins         Install local pytest/pre-commit plugins"
 	@echo "  make test                  Run stable local tests with coverage"
-	@echo "  make lint                  Run ruff and mypy checks"
+	@echo "  make lint  # fast subset; CI runs mypy --strict --no-incremental                  Run ruff and mypy checks"
 	@echo "  make test-fast             Run fast non-slow tests"
 	@echo "  make test-cov-fast-stable  Run fast coverage check"
 	@echo "  make test-coverage         Run stable tests with canonical coverage gate"
