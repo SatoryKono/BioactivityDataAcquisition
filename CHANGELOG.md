@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **QA remote-main baseline freshness (#9774):** regenerated
+  `architecture-debt-remote-main-baseline` and `debt-governance-gates` so
+  `generated_artifact_drift` is green. No quality caps raised.
+
 - **Ops runbooks (#9762–#9765):** `data-recovery.md` documents backup inventory
   and RPO/RTO; `pipeline-failure-recovery.md` reads `reports/logs/bioetl.log`
   and states there is no `bioetl rollback`; `incident-response.md` routes lock
