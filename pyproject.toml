@@ -212,7 +212,6 @@ addopts = [
     "-p", "no:benchmark",
     "--strict-markers",
     "--strict-config",
-    "-m", "not benchmark and not slow",
     "--import-mode=importlib",
 ]
 # required_plugins check moved to CI for compatibility
