@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `5af9180c354e4406da4bfdf17d94d6c8efee6aaa`
 
-Evidence surface SHA-256: `6caa322b2941e50f3bdaafe40d8762285613734b27e300bac1bb0542bd82d8ef`
+Evidence surface SHA-256: `cc647a7d04daecce7742f80277b0957b31fb261447abd74a6012fd678b8dc761`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "5af9180c354e4406da4bfdf17d94d6c8efee6aaa",
-  "evidence_surface_sha256": "6caa322b2941e50f3bdaafe40d8762285613734b27e300bac1bb0542bd82d8ef",
+  "evidence_surface_sha256": "cc647a7d04daecce7742f80277b0957b31fb261447abd74a6012fd678b8dc761",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -92,4 +92,3 @@ python -m scripts.engineering.qa check-exemptions
 ## Guard
 
 - **REJECTED_POLICY:** any increase of tech-debt budgets / exemptions / hotspot caps
-
