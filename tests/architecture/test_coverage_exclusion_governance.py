@@ -39,6 +39,7 @@ def test_composite_protocols_remain_declaration_only_and_measured() -> None:
                 for decorator in member.decorator_list
                 if isinstance(decorator, ast.Name)
             ] == ["property"]
+            # Allow optional docstring preceding the ellipsis (docstring + ...)
             assert 1 <= len(member.body) <= 2
             if len(member.body) == 2:
                 docstring = member.body[0]
