@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T06:52:44.355599+00:00",
+  "generated_at": "2026-08-27T07:27:34.210268+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -11600,7 +11600,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 331,
+          "line": 330,
           "source_group": "build",
           "text": "# only (type-checking.yml / run_mypy.* / Zed Type check / zed_mypy.py)."
         },
