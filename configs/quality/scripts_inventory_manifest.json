@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T09:14:02.991007+00:00",
+  "generated_at": "2026-08-27T11:12:25.955268+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -7794,7 +7794,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 206,
+      "reference_count": 207,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -11243,7 +11243,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",

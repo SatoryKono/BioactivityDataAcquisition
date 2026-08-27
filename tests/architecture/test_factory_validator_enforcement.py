@@ -64,7 +64,9 @@ class TestFactoryValidatorEnforcement:
     def test_storage_bootstrap_does_not_wire_noop_silver_validator(
         self, src_dir: Path
     ) -> None:
-        path = src_dir / "bioetl" / "composition" / "bootstrap" / "assembly" / "storage.py"
+        path = (
+            src_dir / "bioetl" / "composition" / "bootstrap" / "assembly" / "storage.py"
+        )
         content = path.read_text(encoding="utf-8")
         assert "NoOpValidator" not in content
         assert "PanderaSilverValidator" in content
