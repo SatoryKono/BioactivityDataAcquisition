@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CI architecture-full naming and unit version split (#9738, #9739, #9740):**
+  `architecture-full` is documented as the non-slow gate (pre-commit ≡ CI
+  `arch-tests` ≡ `test_matrix` architecture). IDE slow sweep is
+  `pytest-architecture-slow-governance`. Windows nightly atomic-write pytest
+  targets `tests/integration/infrastructure/storage/test_atomic.py`. `test-fast`
+  is pinned to CPython 3.12 vs `test-matrix` 3.13 for coverage-verify.
+
 - **Architecture-full point ratchets (#9643):** `PublicationTermSchema`
   composite uniqueness is an immutable tuple so `ruff_error_count` stays
   at budget 0. No LOC/hotspot/Any caps were raised.

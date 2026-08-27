@@ -808,7 +808,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-  # Fast tests run first for quick feedback
+  # Fast tests run first for quick feedback.
+  # CPython 3.12 fail-fast compatibility lane (BioETL baseline). No coverage.
+  # Unit paths overlap test-matrix by interpreter split, not by duplicate 3.13
+  # full-tree: test-matrix unit-* shards are 3.13-only for coverage-verify (#9740).
   test-fast:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -823,6 +826,7 @@ jobs:
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
         with:
+          python-version: "3.12"
           enable-pytest-cache: "true"
           pytest-cache-prefix: "pytest-fast"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
@@ -1088,7 +1092,9 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  # Full test matrix runs in parallel for comprehensive coverage
+  # Coverage-bound shards on CPython 3.13 only. Not a GitHub required check
+  # (path-scoped; see 05-github-policy.md §3). Version split vs test-fast (3.12)
+  # is intentional compatibility vs coverage (#9740). Do not drop coverage-verify.
   test-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 15

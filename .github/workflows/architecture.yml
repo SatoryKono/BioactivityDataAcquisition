@@ -89,4 +89,4 @@ jobs:
                 uses: ./.github/actions/setup-python-uv
 
             -   name: Run Windows atomic lock stress tests
-                run: uv run --frozen --no-build pytest tests/unit/infrastructure/storage/test_atomic.py -k "windows_lock_stress" -m "slow and serial" -q --tb=short
+                run: uv run --frozen --no-build pytest tests/integration/infrastructure/storage/test_atomic.py -k "windows_lock_stress" -m "slow and serial" -q --tb=short
