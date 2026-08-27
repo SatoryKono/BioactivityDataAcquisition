@@ -55,6 +55,10 @@ from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.time import SystemClock
+from bioetl.infrastructure.validation.pandera_validator import (
+    NoOpValidator,
+    PanderaSilverValidator,
+)
 
 TEST_ROOT = synthetic_test_root("bioetl-storage-bootstrap")
 BRONZE_PATH = TEST_ROOT / "bronze"
@@ -156,6 +160,25 @@ class TestBootstrapStorageBundle:
         assert metadata_coordinator.run_context.pipeline_name == "cli-storage-preview"
         assert metadata_coordinator.run_context.provider == "cli"
         assert metadata_coordinator.run_context.entity == "maintenance"
+
+    @patch("bioetl.composition.bootstrap.assembly.storage.get_settings")
+    def test_wires_strict_pandera_silver_validator(
+        self,
+        mock_settings: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """Bootstrap Silver must fail closed without a bound schema (#9746)."""
+        mock_settings.return_value = _make_storage_settings(tmp_path)
+
+        result = bootstrap_cli_storage_adapter()
+        validator = result.silver._silver_validator
+
+        assert not isinstance(validator, NoOpValidator)
+        assert isinstance(validator, PanderaSilverValidator)
+        assert validator._strict is True
+        assert validator._schema is None
+        failed = validator.validate([{"entity_id": "unbound"}])
+        assert failed.valid is False
 
 
 @pytest.mark.unit

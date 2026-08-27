@@ -55,3 +55,5 @@ def test_shared_storage_assembly_does_not_generate_runtime_identity() -> None:
     assert "uuid4(" not in text
     assert "current_utc_time" not in text
     assert "run_context: RunContext" in text
+    assert "NoOpValidator" not in text
+    assert "PanderaSilverValidator" in text
