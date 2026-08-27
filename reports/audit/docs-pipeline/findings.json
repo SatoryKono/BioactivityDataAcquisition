@@ -1,29 +1,13 @@
 {
-  "schema": "prompt.fragment.finding-schema/v1.2.0",
   "domain_id": "docs-pipeline",
   "prompt_id": "prompt.audit.docs-pipeline",
-  "prompt_version": "1.2.0",
-  "audit_mode": "full",
-  "mode": "audit",
-  "language": "ru",
-  "require_gh_tracking": false,
+  "head": "5af9180c354e4406da4bfdf17d94d6c8efee6aaa",
+  "branch": "fix/stream-a-quality-9717",
+  "audited_at": "2026-08-27",
   "surface_score": 2,
-  "surface_score_legend": {
-    "3": "One-command clean build; pinned toolchain; deterministic; links/API in CI",
-    "2": "Pipeline reproducible; some semantic checks still manual",
-    "1": "Hidden preconditions, generated drift, or unpredictable publish",
-    "0": "Build broken, leaks secrets, or publishes dangerously wrong material"
-  },
-  "generated_at": "2026-08-26",
-  "checkout_ref": "refs/heads/master20260825-21",
-  "skipped_live_commands": [
-    "python -m scripts.docs verify",
-    "python -m scripts.docs check-links --report-json ...",
-    "python -m scripts.docs build-site --strict",
-    "python -m memory.tooling.workflow pre-task / post-task"
-  ],
+  "blocked": false,
+  "proven_count": 10,
   "p0_p1_count": 0,
-  "proven_count": 16,
   "findings": [
     {
       "id": "DOCS-PIPE-001",
@@ -33,628 +17,364 @@
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "link-integrity",
-      "path": "scripts/docs/checks/check_links.py:667-668",
-      "observation": "Канонический link-check намеренно пропускает относительные цели .png/.svg, а mkdocs --strict понижает missing-file до info, поэтому битые image-ссылки не валят ни check-links, ни strict build.",
-      "method": "static inspection of check_broken_links and mkdocs.yml validation.links; no live check-links run",
-      "expected": "File-level integrity for published image targets is enforced by python -m scripts.docs check-links and/or mkdocs build --strict, as claimed in mkdocs.yml comments.",
-      "actual": "check_broken_links continues on raw_target.endswith(('.png', '.svg')); mkdocs validation.links.not_found is info so --strict does not fail missing files. Comment in mkdocs.yml incorrectly attributes file-level integrity to check-links.",
-      "impact": "Published pages can ship broken diagram/image links while CI reports green. Generator/build exit 0 is not semantic correctness for visuals.",
-      "root_cause": "Temporary-missing PNG/SVG during local/CI render was handled by disabling file-not-found in both MkDocs and check-links instead of scoping the exemption to untracked png/ trees.",
-      "remediation": "Stop skipping .svg (tracked) in check_broken_links; keep PNG exemption only for gitignored **/png/**. Raise mkdocs not_found at least for non-png targets, or add an explicit image-existence runner in check-links and assert it in tests/architecture/test_check_doc_links_guardrails.py.",
+      "category": "verify-drift-subset",
+      "path": "scripts/docs/checks/verify.py:53-66",
+      "observation": "Канонический verify вызывает check-drift с явными флагами --ports --classes --runtime-mirrors --freshness --modules и тем самым отключает run_all, включая --ai-surfaces, check_providers и check_glossary.",
+      "method": "inspection verify.py + check_drift.py _run_checks/main",
+      "expected": "One-command verify покрывает тот же drift-набор, что unflagged python -m scripts.docs check-drift, либо README честно перечисляет subset.",
+      "actual": "verify.py:61-66 передаёт пять флагов; check_drift.py:1876-1890 включает check_ai_surfaces только при run_all or args.ai_surfaces; check_providers/check_glossary только при run_all. scripts/docs/README.md:77 утверждает, что CI verify ловит AI-surface regressions.",
+      "impact": "Локальный/one-command путь пропускает ERROR-уровень ai-surfaces. В CI это частично закрыто tests/architecture/test_ai_runtime_governance_links.py в docs.yml docs-governance, но verify как «полная цепочка» врёт.",
+      "root_cause": "Explicit flag list в verify уже, чем unflagged check-drift.",
+      "remediation": "Добавить --ai-surfaces в verify drift step либо вызывать check-drift без флагов; синхронизировать README.",
       "effort": "S",
-      "automation": "tests/architecture/test_check_doc_links_guardrails.py + docs.yml validate-mkdocs",
-      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg -n \"endswith\\((\\.png\" scripts/docs/checks/check_links.py",
-        "python -m scripts.docs check-links --links"
+        "rg -n \"ai-surfaces|--ports\" scripts/docs/checks/verify.py",
+        "python -m scripts.docs verify --skip-build --skip-links --skip-docstrings --skip-cleanup-inventory (после фикса сравнить с unflagged check-drift)"
       ],
+      "automation": "architecture test: verify.py drift argv contains --ai-surfaces or is unflagged",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "scripts/docs/checks/check_links.py",
-          "line": 667,
-          "command": "read_file scripts/docs/checks/check_links.py offset 655",
-          "observation": "if raw_target.endswith(('.png', '.svg')): continue"
+          "path": "scripts/docs/checks/verify.py",
+          "line": 61,
+          "command": "read verify.py drift argv",
+          "observation": "flags: --ports --classes --runtime-mirrors --freshness --modules; no --ai-surfaces"
         },
         {
-          "path": "mkdocs.yml",
-          "line": 95,
-          "command": "read_file mkdocs.yml offset 88",
-          "observation": "validation.links.not_found: info; comment claims check-links enforces file-level integrity"
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 1882,
+          "command": "read _run_checks",
+          "observation": "ai_surfaces gated on run_all or args.ai_surfaces; providers/glossary only if run_all"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-002",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "publish-path",
-      "path": "mkdocs.yml:3",
-      "observation": "site_url указывает на GitHub Pages, но живой URL отдаёт 404, а в репозитории нет workflow с pages: permissions или mkdocs gh-deploy.",
-      "method": "web_fetch of site_url; grep of .github/workflows for pages/gh-deploy; read publication policy",
-      "expected": "Advertised site_url either serves the current MkDocs site or is not published as a live github.io URL until a deploy workflow exists.",
-      "actual": "https://SatoryKono.github.io/BioactivityDataAcquisition/ returns GitHub Pages 404. docs.yml is validation/build only (policy 2026-07-10). No pages job under .github/workflows.",
-      "impact": "Operators and MkDocs metadata advertise a public site that does not exist. No PR preview/publish path; local docs/site remains the only publication helper.",
-      "root_cause": "Publication metadata was set to github.io while deploy was never enabled; policy documents the non-deploy boundary but leaves a live-looking site_url.",
-      "remediation": "Either add an explicit GitHub Pages workflow and keep site_url, or change site_url to repo_url / omit github.io until publication is enabled, updating mkdocs.yml and docs/00-project/governance/06-doc-publication-policy.md in one changeset as the policy already requires.",
+      "category": "build-path-split",
+      "path": "scripts/docs/checks/verify.py:99-112",
+      "observation": "verify strict-build вызывает python -m mkdocs напрямую, минуя packaged build-site; mkdocs.yml site_dir=site, а mkdocs_build.py пишет в docs/site.",
+      "method": "inspection verify.py, mkdocs_build.py, mkdocs.yml",
+      "expected": "Единый build entrypoint python -m scripts.docs build-site; согласованный site_dir с governance.",
+      "actual": "verify.py:105-111 argv = [sys.executable, -m, mkdocs, build, --strict, --clean, --site-dir, temp]. mkdocs.yml:7 site_dir: site. scripts/docs/build/mkdocs_build.py:14-15 _DEFAULT_SITE_DIR=docs/site, _LEGACY_SITE_DIR=site. docs/00-project/governance/03-file-policy.md:237 приписывает docs/site/** tooling из mkdocs.yml.",
+      "impact": "Два выходных каталога HTML; operator build-site и CI verify не один путь. Локальный mkdocs build без router оставляет root site/.",
+      "root_cause": "verify исторически зовёт mkdocs module; router появился отдельно.",
+      "remediation": "verify должен вызывать scripts.docs.build.mkdocs_build с --strict и явным temp --site-dir; согласовать mkdocs.yml site_dir с 03-file-policy.",
       "effort": "S",
-      "automation": "docs.yml or a dedicated pages workflow; architecture test that site_url host matches an enabled deploy job",
-      "automated_fix_possible": false,
-      "dependencies": [],
+      "dependencies": ["DOCS-PIPE-003"],
       "validation": [
-        "curl -I https://SatoryKono.github.io/BioactivityDataAcquisition/",
-        "rg -n \"pages:|gh-deploy|github.io\" .github/workflows mkdocs.yml"
+        "rg -n \"mkdocs\" scripts/docs/checks/verify.py scripts/docs/build/mkdocs_build.py mkdocs.yml"
       ],
+      "automation": "extend test_docs_build_site_router.py to assert verify does not call python -m mkdocs",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "mkdocs.yml",
-          "line": 3,
-          "command": "web_fetch https://SatoryKono.github.io/BioactivityDataAcquisition/",
-          "observation": "site_url set; live response is GitHub Pages 404 'There isn't a GitHub Pages site here.'"
+          "path": "scripts/docs/checks/verify.py",
+          "line": 105,
+          "command": "read strict-build step",
+          "observation": "sys.executable -m mkdocs build --strict --clean --site-dir tempfile"
         },
         {
-          "path": "docs/00-project/governance/06-doc-publication-policy.md",
-          "line": 263,
-          "command": "read_file docs/00-project/governance/06-doc-publication-policy.md offset 248",
-          "observation": "Policy states docs.yml is validation/build, not GitHub Pages deployment"
+          "path": "mkdocs.yml",
+          "line": 7,
+          "command": "read site_dir",
+          "observation": "site_dir: site"
+        },
+        {
+          "path": "scripts/docs/build/mkdocs_build.py",
+          "line": 14,
+          "command": "read defaults",
+          "observation": "_DEFAULT_SITE_DIR = repo/docs/site"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-003",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "site-assets",
-      "path": "mkdocs.yml:147-152",
-      "observation": "MkDocs extra_javascript/extra_css ссылаются на docs/assets/... файлы, которых нет в дереве docs/ (каталог assets отсутствует).",
-      "method": "list_dir docs/; grep mermaid-init.js and mermaid-responsive.css under docs/ and scripts/; mkdocs.yml has no docs_dir override",
-      "expected": "extra_javascript/extra_css paths exist under docs_dir so the built site can initialize Mermaid.",
-      "actual": "docs/assets does not exist. Only references are mkdocs.yml extra_javascript: assets/javascripts/mermaid-init.js and extra_css: assets/stylesheets/mermaid-responsive.css. Theme CSS lives under docs/02-architecture/diagrams/theme/, not the MkDocs assets paths.",
-      "impact": "Built HTML will reference missing JS/CSS. Mermaid fences may not initialize. Combined with DOCS-PIPE-001, missing visual assets are unlikely to fail --strict.",
-      "root_cause": "Custom Mermaid init was wired in mkdocs.yml without committing the asset files; mkdocs-mermaid2-plugin is in the docs extra but not enabled as a plugin.",
-      "remediation": "Add the missing files under docs/assets/ or retarget extra_* to tracked theme files; alternatively enable a pinned mermaid plugin and drop dangling extra_* paths. Add a CI assertion that every extra_javascript/extra_css path exists.",
+      "category": "operator-guide-drift",
+      "path": "docs/03-guides/docs-verification.md:78-81",
+      "observation": "Published operator guide описывает verify без --modules и как strict MkDocs «through the in-repo helper chain»; код verify включает --modules и зовёт python -m mkdocs.",
+      "method": "diff docs-verification.md + scripts/docs/README.md vs verify.py",
+      "expected": "Операторская инструкция совпадает с фактическими шагами verify.",
+      "actual": "docs-verification.md:79-81 lists --ports --classes --runtime-mirrors --freshness and helper chain. scripts/docs/README.md:46 omits --modules and ai-surfaces. verify.py:61-66 has --modules; build is mkdocs module not build-site.",
+      "impact": "Операторы недооценивают/переоценивают one-command; checklist merge (build-site --strict) расходится с тем, что делает verify в CI.",
+      "root_cause": "Docs не обновлены после добавления --modules и router.",
+      "remediation": "Обновить docs-verification.md и scripts/docs/README.md под verify.py; не раздувать IA.",
       "effort": "S",
-      "automation": "architecture test over mkdocs.yml extra_javascript/extra_css paths",
-      "automated_fix_possible": false,
-      "dependencies": ["DOCS-PIPE-010"],
+      "dependencies": ["DOCS-PIPE-001", "DOCS-PIPE-002"],
       "validation": [
-        "Test-Path docs/assets/javascripts/mermaid-init.js",
-        "python -m scripts.docs build-site --strict"
+        "rg -n \"--modules|helper chain|build-site\" docs/03-guides/docs-verification.md scripts/docs/README.md scripts/docs/checks/verify.py"
       ],
+      "automation": "contract test: README/verify flag list parsed from verify.py",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "mkdocs.yml",
-          "line": 148,
-          "command": "list_dir docs/",
-          "observation": "extra_javascript/extra_css set; docs/assets directory absent from checkout listing"
+          "path": "docs/03-guides/docs-verification.md",
+          "line": 79,
+          "command": "read Verification Flow",
+          "observation": "documented drift flags omit --modules; claims in-repo helper chain"
+        },
+        {
+          "path": "scripts/docs/README.md",
+          "line": 46,
+          "command": "read Commands table verify row",
+          "observation": "ports/classes/runtime-mirrors/freshness; no --modules/--ai-surfaces"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-004",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
-      "confidence_score": 0.92,
+      "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "api-reference",
-      "path": "README.md:102",
-      "observation": "Корневой README рекламирует API Reference как Full API documentation with mkdocstrings, но в docs нет директив ::: bioetl, а слойные страницы явно curated и тест запрещает autogen-формулировки.",
-      "method": "grep '::: bioetl' in md/yml; read docs/04-reference/api/index.md and application.md; read tests/architecture/test_api_reference_public_facades.py",
-      "expected": "If mkdocstrings is the published API generator, pages are generated from public API. If the surface is curated, README/toolchain must not claim autogen via mkdocstrings.",
-      "actual": "mkdocstrings plugin is enabled in mkdocs.yml with allow_inspection/show_source, but no ::: identifiers exist. API landing pages say curated published reference. test_api_layer_pages_are_curated_not_autogenerated forbids 'Autogenerated from source code'. README still claims mkdocstrings.",
-      "impact": "Readers expect generated current API; they get a curated subset. Plugin cost and inspection surface are enabled without producing API pages. Semantic API-vs-code coverage is only the curated symbol tables.",
-      "root_cause": "Toolchain kept mkdocstrings while API docs were converted to curated pages (#9690) without updating the root documentation index claim.",
-      "remediation": "Change README.md API row to curated reference (no mkdocstrings claim). Either remove unused mkdocstrings plugin from mkdocs.yml/docs extra or add explicit ::: pages for sanctioned public facades.",
+      "category": "exit-0-not-semantic",
+      "path": "scripts/docs/checks/check_drift.py:973-980",
+      "observation": "check_providers и check_glossary пишут WARNING; main() возвращает 1 только если error_count>0. Даже unflagged check-drift пропускает provider/glossary drift с exit 0. Prompt anti-pattern: generator/checker exit 0 ≠ semantic correctness.",
+      "method": "inspection check_drift.py check_providers/check_glossary/main",
+      "expected": "Семантический drift провайдеров/глоссария либо блокирует gate, либо явно помечен advisory и исключён из «canonical chain».",
+      "actual": "check_drift.py:977 WARNING providers; 1013 WARNING glossary; 1945 return 1 if report.error_count else 0. verify всё равно не вызывает эти checkers (DOCS-PIPE-001).",
+      "impact": "Новый adapter directory без ссылки в docs/04-reference/providers/README.md не валит docs pipeline.",
+      "root_cause": "WARNING severity + fail-on-ERROR policy.",
+      "remediation": "Поднять providers/glossary до ERROR или добавить отдельный blocking pytest; задокументировать advisory, если так задумано.",
       "effort": "S",
-      "automation": "test_api_reference_public_facades.py already guards curated pages; add assertion that README does not claim autogen",
-      "automated_fix_possible": true,
-      "dependencies": [],
+      "dependencies": ["DOCS-PIPE-001"],
       "validation": [
-        "rg -n \"::: \" docs mkdocs.yml",
-        "rg -n mkdocstrings README.md mkdocs.yml pyproject.toml"
+        "rg -n \"WARNING\" scripts/docs/checks/check_drift.py -g \"*\" --glob none",
+        "read check_providers/check_glossary/main return"
       ],
+      "automation": "test: injected missing provider name in README fixture fails check-drift",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "README.md",
-          "line": 102,
-          "command": "read_file README.md offset 92",
-          "observation": "API Reference described as Full API documentation with mkdocstrings"
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 977,
+          "command": "read check_providers",
+          "observation": "severity WARNING for adapter not referenced in provider docs"
         },
         {
-          "path": "tests/architecture/test_api_reference_public_facades.py",
-          "line": 43,
-          "command": "read_file tests/architecture/test_api_reference_public_facades.py",
-          "observation": "test_api_layer_pages_are_curated_not_autogenerated"
-        },
-        {
-          "path": "mkdocs.yml",
-          "line": 121,
-          "command": "grep ::: bioetl",
-          "observation": "mkdocstrings plugin enabled; no ::: bioetl pages found"
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 1945,
+          "command": "read main return",
+          "observation": "return 1 if report.error_count else 0"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-005",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P2",
       "severity": "Medium",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "ci-path-filter",
-      "path": ".github/workflows/docs.yml:18-19",
-      "observation": "docs.yml path-filters включают .codex/skills/** и .devin/skills/**, но не .codex/agents/**, .junie/** и .devin/agents/**, хотя verify/docs-governance гоняют runtime-mirrors и test_runtime_agent_docs_drift.",
-      "method": "read docs.yml on.push/on.pull_request paths; compare with skills-consistency.yml and tests.yml architecture selections",
-      "expected": "Changes to canonical runtime sources that feed published mirrors trigger the docs pipeline that runs check-drift --runtime-mirrors and test_runtime_agent_docs_drift.py.",
-      "actual": "docs.yml lists .codex/skills/** and .devin/skills/** only. skills-consistency.yml covers agents/skills parity but not scripts.docs check-drift. tests.yml does not invoke test_runtime_agent_docs_drift.py. Weekly docs-kpi-weekly.yml is the delayed backstop.",
-      "impact": "Agent-profile-only PRs can merge with drifted published mirrors until Monday KPI or an unrelated docs path change.",
-      "root_cause": "Path filters were expanded for skills inventory, not for equal-peer runtime agent trees.",
-      "remediation": "Add .codex/agents/**, .junie/**, and .devin/agents/** to both push and pull_request path filters in docs.yml (and the matching test_docs_governance_workflow assertions).",
-      "effort": "S",
-      "automation": "tests/architecture/test_docs_governance_workflow.py",
-      "automated_fix_possible": true,
+      "category": "modules-scan-scope",
+      "path": "scripts/docs/checks/check_drift.py:809-821",
+      "observation": "check_modules/--modules сканирует только docs/02-architecture/*.md (glob, не rglob), root README.md, docs/03-guides/** и docs/05-operations/**. Nested 02-architecture, 00-project и 04-reference не входят. README уже в scope (отличие от исторического #9670 README-only).",
+      "method": "inspection _module_docs_to_scan",
+      "expected": "Либо полный published surface для module-path drift, либо явный documented bound.",
+      "actual": "arch_dir.glob('*.md') + README + _active_markdown_files(03-guides, 05-operations). Нет 00-project/04-reference/nested architecture.",
+      "impact": "Сломанный `bioetl.*` путь в RULES.md, contracts или nested architecture docs не ловится --modules.",
+      "root_cause": "Bounded scanner без контрактного списка деревьев в operator docs.",
+      "remediation": "Задокументировать scope в check_drift docstring/README или расширить _module_docs_to_scan до published 00-05 с исключениями generated/archive.",
+      "effort": "M",
       "dependencies": [],
       "validation": [
-        "rg -n \"\\.codex/agents\" .github/workflows/docs.yml",
-        "rg -n test_runtime_agent_docs_drift .github/workflows"
+        "read scripts/docs/checks/check_drift.py:809-821"
       ],
+      "automation": "unit test listing scanned roots",
+      "automated_fix_possible": false,
       "evidence": [
         {
-          "path": ".github/workflows/docs.yml",
-          "line": 18,
-          "command": "read_file .github/workflows/docs.yml offset 12",
-          "observation": "paths include .codex/skills/** and .devin/skills/** only"
-        },
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 21,
-          "command": "read_file .github/workflows/skills-consistency.yml offset 17",
-          "observation": "skills-consistency covers .codex/agents and .junie but runs mirror/parity scripts, not check-drift"
+          "path": "scripts/docs/checks/check_drift.py",
+          "line": 812,
+          "command": "read _module_docs_to_scan",
+          "observation": "files_to_scan.extend(sorted(arch_dir.glob('*.md'))); README appended; 03-guides and 05-operations rglob"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-006",
       "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.88,
+      "confidence_score": 0.95,
       "status": "PROVEN",
-      "category": "verify-chain",
-      "path": "scripts/docs/checks/verify.py:53-67",
-      "observation": "Каноническая команда python -m scripts.docs verify не включает passports check и check-drift --ai-surfaces, хотя оба есть в toolchain и CI/доках как отдельные обязательные шаги.",
-      "method": "read verify.py step list vs docs.yml jobs, TOOLS.md, and check_drift._run_checks",
-      "expected": "The documented one-command path matches the CI docs gate: links, drift (including ai-surfaces), passports, cleanup inventory, strict build.",
-      "actual": "verify runs check-links, check-drift --ports --classes --runtime-mirrors --freshness --modules, check-docstrings, cleanup-inventory --check, mkdocs --strict. It never calls scripts.docs passports check or --ai-surfaces. Passports live only in docs-governance; --ai-surfaces is only reachable via unflagged check-drift or an explicit flag that verify does not pass (so run_all is false and ai-surfaces is skipped).",
-      "impact": "Local/CI 'verify' green is not the full docs chain. Operators following docs/03-guides/docs-verification.md can miss passport drift and AI-surface policy regressions.",
-      "root_cause": "verify was assembled as a subset; later gates (passports, ai-surfaces) were added beside it rather than into it.",
-      "remediation": "Add passports check and --ai-surfaces to verify.py (with skip flags). Keep docs.yml passports step or collapse it into verify to avoid duplication.",
+      "category": "ci-duplicate-work",
+      "path": ".github/workflows/docs.yml:216-231",
+      "observation": "validate-mkdocs сначала гоняет полный check-links --report-json, затем python -m scripts.docs verify, который снова запускает полный check-links.",
+      "method": "inspection docs.yml + verify.py steps",
+      "expected": "Один полный check-links на job с артефактом JSON.",
+      "actual": "docs.yml:216 check-links --report-json; :231 verify; verify.py:40-51 всегда добавляет unflagged check-links unless --skip-links.",
+      "impact": "Двойной CI time на docs PRs; не correctness bug.",
+      "root_cause": "Artifact step добавлен рядом с canonical verify без skip-links.",
+      "remediation": "verify --skip-links после отдельного check-links, либо встроить --report-json в verify.",
       "effort": "S",
-      "automation": "unit test of verify step argv; docs.yml already has passports check",
-      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg -n passports scripts/docs/checks/verify.py",
-        "rg -n ai-surfaces scripts/docs/checks/verify.py"
+        "read .github/workflows/docs.yml:216-231"
       ],
+      "automation": "workflow lint / comment contract test",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "scripts/docs/checks/verify.py",
-          "line": 53,
-          "command": "read_file scripts/docs/checks/verify.py",
-          "observation": "drift argv has ports/classes/runtime-mirrors/freshness/modules; no ai-surfaces; no passports step"
-        },
-        {
-          "path": "scripts/docs/checks/check_drift.py",
-          "line": 1876,
-          "command": "read_file scripts/docs/checks/check_drift.py offset 1873",
-          "observation": "check_ai_surfaces runs only when run_all or --ai-surfaces; verify sets explicit flags so run_all is false"
-        },
-        {
           "path": ".github/workflows/docs.yml",
-          "line": 135,
-          "command": "read_file .github/workflows/docs.yml offset 134",
-          "observation": "passports check is a separate docs-governance step, not part of verify"
+          "line": 216,
+          "command": "read validate-mkdocs steps",
+          "observation": "check-links --report-json then verify"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-007",
       "requirement_id": "GAP",
-      "priority": "P2",
-      "severity": "Medium",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "local-precondition",
-      "path": "scripts/docs/build_docs_site.sh:30-46",
-      "observation": "Shell-транспорт build_docs_site.sh берёт первый python/python3, у которого import mkdocs успешен, и не знает про .venv-win; это скрытое developer-local состояние относительно uv --frozen.",
-      "method": "read build_docs_site.sh and compare with CI uv run --frozen and agent-memory Windows .venv-win rule",
-      "expected": "Local docs build uses the pinned project interpreter (uv / .venv / .venv-win) so output matches CI.",
-      "actual": "Priority is: PATH python with mkdocs, else python3 with mkdocs, else .venv/bin/python, else Windows .venv via cmd.exe. A stray system MkDocs wins over the lockfile. .venv-win is never probed.",
-      "impact": "Local site/link/strict results can diverge from CI (plugin versions, Material, mkdocstrings). Hidden precondition for 'one-command' shell users.",
-      "root_cause": "Compatibility adapter prefers any MkDocs-capable interpreter over the project extra.",
-      "remediation": "Resolve interpreter via scripts/engineering/dev/run_project_python.py (or uv run --frozen) and probe .venv-win on Windows before PATH python. Or deprecate the shell adapter in README in favor of python -m scripts.docs build-site only.",
+      "category": "artifact-determinism",
+      "path": "scripts/docs/checks/check_links.py:1421-1434",
+      "observation": "--report-json пишет timestamp=datetime.now(UTC) и path.write_text без temp→replace.",
+      "method": "inspection _write_json_report",
+      "expected": "Детерминированный CI-артефакт (omit clock или SOURCE_DATE_EPOCH) и атомарная запись.",
+      "actual": "check_links.py:1422 timestamp now(UTC); 1432 write_text. Артефакт reports/docs-link-check-report.json в docs.yml.",
+      "impact": "Повторный прогон на том же дереве даёт другой JSON; частичная запись при crash.",
+      "root_cause": "Report helper не следует repo artifact contract.",
+      "remediation": "Убрать timestamp или сделать opt-in; atomic os.replace.",
       "effort": "S",
-      "automation": "n/a (shell adapter); prefer deleting the adapter from operator docs",
-      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "read scripts/docs/build_docs_site.sh",
-        "rg -n venv-win scripts/docs/build_docs_site.sh"
+        "read scripts/docs/checks/check_links.py:1412-1434"
       ],
+      "automation": "unit test: two reports without timestamp field are equal",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "scripts/docs/build_docs_site.sh",
-          "line": 30,
-          "command": "read_file scripts/docs/build_docs_site.sh",
-          "observation": "if python import mkdocs; elif python3; elif .venv; elif .venv/Scripts; else exit 1 — no .venv-win"
+          "path": "scripts/docs/checks/check_links.py",
+          "line": 1422,
+          "command": "read _write_json_report",
+          "observation": "timestamp datetime.now(UTC); write_text not atomic"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-008",
-      "requirement_id": "REQ-DOC-001",
-      "priority": "P2",
-      "severity": "Medium",
+      "requirement_id": "GAP",
+      "priority": "P3",
+      "severity": "Low",
       "confidence": "high",
-      "confidence_score": 0.88,
+      "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "link-integrity",
-      "path": "scripts/docs/checks/check_links.py:1214",
-      "observation": "check-links сканирует только docs/, не корневые README.md/AGENTS.md, хотя REQ-DOC-001 требует, чтобы active entry points не вели на archive как на текущие требования, а README содержит ключевые docs-ссылки.",
-      "method": "read _run_links_checks and _collect_link_scan_files; confirm DOCS_DIR-only walk",
-      "expected": "Active entry points (README.md, AGENTS.md) are included in the same relative-link gate as docs/.",
-      "actual": "check_broken_links(DOCS_DIR) walks docs/ plus mkdocs nav files under docs/. Root README.md is out of scope. MD_LINK_RE also ignores https/mailto, so external README badges are unchecked (acceptable) but relative docs links in README are also unchecked.",
-      "impact": "Broken relative links in the primary GitHub landing page do not fail docs.yml validate-mkdocs / verify.",
-      "root_cause": "Scanner rooted at DOCS_DIR; root docs were left to other ad-hoc checks (legacy slug test, forbidden-path script).",
-      "remediation": "Include README.md and AGENTS.md in _collect_link_scan_files (or a dedicated entrypoint runner) and cover with a unit test.",
+      "category": "generator-not-in-ci",
+      "path": "scripts/docs/build/generate_docs_export.py:239-320",
+      "observation": "generate-docs-export вставляет date.today() (local TZ) в merged artifact и не вызывается ни одним workflow; --check ловит только unresolved paths.",
+      "method": "inspection generate_docs_export.py + grep .github",
+      "expected": "Tracked/generated export либо UTC+check в CI, либо явно manual-only без date в содержимом.",
+      "actual": "generate_export_content uses date.today(); write_text non-atomic; no matches in .github for generate-docs-export.",
+      "impact": "Nondeterministic helper export; нет CI freshness для merged snapshot.",
+      "root_cause": "Manual export tool with local calendar date.",
+      "remediation": "date в UTC из env/commit или убрать date из payload; optional --check в docs job если artifact tracked.",
       "effort": "S",
-      "automation": "tests/architecture/test_check_doc_links_guardrails.py",
-      "automated_fix_possible": true,
       "dependencies": [],
       "validation": [
-        "rg -n \"check_broken_links\\(DOCS_DIR\\)\" scripts/docs/checks/check_links.py"
+        "rg generate-docs-export .github",
+        "read generate_docs_export.py:239-250"
       ],
+      "automation": "n/a unless export becomes CI-tracked",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "scripts/docs/checks/check_links.py",
-          "line": 1214,
-          "command": "read_file scripts/docs/checks/check_links.py offset 1211",
-          "observation": "broken = check_broken_links(DOCS_DIR)"
-        },
-        {
-          "path": "scripts/docs/common/paths.py",
-          "line": 9,
-          "command": "read_file scripts/docs/common/paths.py",
-          "observation": "DOCS_DIR = PROJECT_ROOT / 'docs'"
+          "path": "scripts/docs/build/generate_docs_export.py",
+          "line": 240,
+          "command": "read generate_export_content",
+          "observation": "today = date.today().isoformat() written into YAML frontmatter"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-009",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.9,
       "status": "PROVEN",
-      "category": "dual-entrypoint",
-      "path": "scripts/docs_parity_check.py:65-67",
-      "observation": "Рядом с каноническим python -m scripts.data_quality check-entity-config-parity остаётся scripts/docs_parity_check.py с порогом is_critical при parity_percentage < 85, что может дать ложный green относительно fail-closed CI.",
-      "method": "read scripts/docs_parity_check.py and scripts/ci_check_docs_parity.sh; compare with docs.yml docs-config parity gate",
-      "expected": "A single fail-closed parity entrypoint. Compatibility wrappers only dispatch to the canonical module.",
-      "actual": "CI docs.yml runs python -m scripts.data_quality check-entity-config-parity. scripts/ci_check_docs_parity.sh correctly wraps that module. scripts/docs_parity_check.py is a separate implementation with 85%/90%/95% bands. docs/03-guides/docs-parity-gate.md still documents the old script and a GitLab/pip example.",
-      "impact": "Operators following the guide can run a weaker checker and believe parity passed.",
-      "root_cause": "Legacy script not retired after package entrypoint became canonical.",
-      "remediation": "Make scripts/docs_parity_check.py a thin wrapper that execs the canonical module (or delete it and update the guide). Keep only the fail-closed gate.",
+      "category": "pre-commit-subset",
+      "path": ".pre-commit-config.yaml:295-311",
+      "observation": "docs-check-links и docs-check-drift — stages:[manual] и subset flags (--links --specs --configs; --ports --classes), слабее CI unflagged/verify.",
+      "method": "inspection .pre-commit-config.yaml",
+      "expected": "Либо default-stage hooks с тем же набором, что CI, либо явная пометка «manual subset, CI is the gate».",
+      "actual": "pre-commit:297-308 manual + partial. CI docs.yml unflagged check-links + verify drift subset.",
+      "impact": "Локальный pre-commit по умолчанию не гоняет docs; даже manual hook пропускает nav growth / ai-surfaces.",
+      "root_cause": "Cost: full check-links too heavy for default pre-commit.",
+      "remediation": "Оставить manual, но в README hooks явно сказать, что полный gate — docs.yml; опционально добавить --not-in-nav-growth в manual links hook.",
       "effort": "S",
-      "automation": "scripts inventory / lifecycle registry",
-      "automated_fix_possible": true,
-      "dependencies": ["DOCS-PIPE-015"],
+      "dependencies": [],
       "validation": [
-        "rg -n is_critical scripts/docs_parity_check.py",
-        "rg -n check-entity-config-parity .github/workflows/docs.yml"
+        "read .pre-commit-config.yaml:295-311"
       ],
+      "automation": "n/a",
+      "automated_fix_possible": true,
       "evidence": [
         {
-          "path": "scripts/docs_parity_check.py",
-          "line": 65,
-          "command": "read_file scripts/docs_parity_check.py offset 65",
-          "observation": "is_critical returns parity_percentage < 85.0 or missing_docs > 5"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 219,
-          "command": "read_file .github/workflows/docs.yml offset 219",
-          "observation": "CI uses python -m scripts.data_quality check-entity-config-parity"
+          "path": ".pre-commit-config.yaml",
+          "line": 295,
+          "command": "read docs-check-links/docs-check-drift",
+          "observation": "manual stage; check-links --links --specs --configs; check-drift --ports --classes"
         }
       ]
     },
     {
       "id": "DOCS-PIPE-010",
-      "requirement_id": "GAP",
+      "requirement_id": "REQ-DOC-001",
       "priority": "P3",
       "severity": "Low",
       "confidence": "high",
       "confidence_score": 0.85,
       "status": "PROVEN",
-      "category": "toolchain-pin",
-      "path": "pyproject.toml:175",
-      "observation": "docs extra пинит mkdocs-mermaid2-plugin, но в mkdocs.yml plugins его нет; рендер завязан на отсутствующие extra_javascript.",
-      "method": "grep mkdocs-mermaid2-plugin / mermaid2 across yml/py/md; read pyproject docs extra and mkdocs plugins",
-      "expected": "Pinned docs extra packages are actually used by mkdocs.yml, or they are not installed.",
-      "actual": "pyproject.toml docs extra includes mkdocs-mermaid2-plugin>=1.1. mkdocs.yml plugins are search and mkdocstrings only. Mermaid is a superfences custom fence plus missing extra_javascript.",
-      "impact": "Lockfile/CI docs extra carries an unused plugin; operators may think Mermaid2 is active.",
-      "root_cause": "Plugin added to extra, then replaced by custom JS that was not committed.",
-      "remediation": "Remove mkdocs-mermaid2-plugin from the docs extra or enable it in mkdocs.yml and drop dangling extra_javascript. Coordinate with DOCS-PIPE-003.",
+      "category": "verify-incomplete-vs-ci",
+      "path": "scripts/docs/checks/verify.py:18-116",
+      "observation": "verify не включает passports check. CI закрывает passports в docs.yml docs-governance и release.yml --require-clean-source; nightly generate пишет в /tmp без --require-clean-source.",
+      "method": "inspection verify.py vs docs.yml/release.yml/architecture-docs-nightly.yml",
+      "expected": "Documented one-command либо включает passports, либо явно говорит «passports отдельно».",
+      "actual": "verify steps: links, drift subset, docstrings, cleanup inventory, mkdocs. docs.yml:141 passports check. release.yml:47 passports check --require-clean-source. nightly:30 generate to /tmp without --require-clean-source.",
+      "impact": "Оператор verify на clean checkout не повторяет passport gate. Nightly generate без clean-source безопасен из-за /tmp output.",
+      "root_cause": "verify scoped to markdown/mkdocs; passports — соседний job.",
+      "remediation": "Добавить optional passports check в verify или одну строку в docs-verification.md: passports check is a separate CI job.",
       "effort": "S",
-      "automation": "optional test that every docs-extra mkdocs plugin is listed in mkdocs.yml",
-      "automated_fix_possible": true,
       "dependencies": ["DOCS-PIPE-003"],
       "validation": [
-        "rg -n mermaid2 mkdocs.yml pyproject.toml"
+        "rg -n \"passports\" scripts/docs/checks/verify.py .github/workflows/docs.yml"
       ],
-      "evidence": [
-        {
-          "path": "pyproject.toml",
-          "line": 175,
-          "command": "read_file pyproject.toml offset 169",
-          "observation": "mkdocs-mermaid2-plugin>=1.1 in docs extra"
-        },
-        {
-          "path": "mkdocs.yml",
-          "line": 119,
-          "command": "read_file mkdocs.yml offset 119",
-          "observation": "plugins: search, mkdocstrings only"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-011",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "ci-toolchain",
-      "path": ".github/workflows/docs.yml:121",
-      "observation": "docs-governance пинит python-version 3.13, а validate-mkdocs (strict build, check-links, verify) использует default 3.12 из setup-python-uv.",
-      "method": "read docs.yml jobs vs .github/actions/setup-python-uv/action.yml default",
-      "expected": "Docs governance tests and the MkDocs/verify chain use the same pinned CPython.",
-      "actual": "docs-governance: python-version 3.13, extras default 'dev tracing'. validate-mkdocs: uv-extras docs, no python-version (default 3.12).",
-      "impact": "Low today, but plugin/interpreter skew can make architecture tests pass on 3.13 while the published site is built on 3.12.",
-      "root_cause": "Job copied different setup snippets; action default remains 3.12.",
-      "remediation": "Pin both jobs to the same python-version (project baseline 3.12 unless docs extra requires 3.13).",
-      "effort": "S",
-      "automation": "test_docs_governance_workflow.py can assert a single python-version literal",
+      "automation": "n/a",
       "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "rg -n python-version .github/workflows/docs.yml .github/actions/setup-python-uv/action.yml"
-      ],
-      "evidence": [
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 121,
-          "command": "read_file .github/workflows/docs.yml offset 118",
-          "observation": "docs-governance python-version 3.13"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 201,
-          "command": "read_file .github/workflows/docs.yml offset 201",
-          "observation": "validate-mkdocs sets uv-extras docs only"
-        },
-        {
-          "path": ".github/actions/setup-python-uv/action.yml",
-          "line": 12,
-          "command": "read_file .github/actions/setup-python-uv/action.yml offset 7",
-          "observation": "default python-version 3.12"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-012",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "verify-chain",
-      "path": "scripts/docs/checks/verify.py:105-111",
-      "observation": "verify вызывает python -m mkdocs build напрямую, минуя канонический scripts.docs build-site (staging в docs/site, cleanup legacy site/).",
-      "method": "compare verify.py strict-build argv with scripts/docs/build/mkdocs_build.py",
-      "expected": "All MkDocs builds go through python -m scripts.docs build-site so flags/site-dir policy stay in one place.",
-      "actual": "verify uses sys.executable -m mkdocs build --strict --clean --site-dir <temp>. build-site stages then copies to docs/site and removes root site/. CI verify therefore never exercises the packaged build-site path.",
-      "impact": "Future build-site guards (interpreter, extra flags, asset checks) will not apply to the CI strict build.",
-      "root_cause": "verify inlined mkdocs to avoid writing docs/site in CI, instead of calling build-site with an explicit --site-dir.",
-      "remediation": "Change verify to invoke scripts.docs.build.mkdocs_build with --strict --clean --site-dir <temp> (build-site already respects explicit --site-dir).",
-      "effort": "S",
-      "automation": "unit test of verify argv",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "rg -n mkdocs scripts/docs/checks/verify.py scripts/docs/build/mkdocs_build.py"
-      ],
       "evidence": [
         {
           "path": "scripts/docs/checks/verify.py",
-          "line": 105,
-          "command": "read_file scripts/docs/checks/verify.py offset 99",
-          "observation": "strict-build argv is -m mkdocs build --strict --clean --site-dir temp"
-        },
-        {
-          "path": "scripts/docs/build/mkdocs_build.py",
-          "line": 51,
-          "command": "read_file scripts/docs/build/mkdocs_build.py",
-          "observation": "explicit --site-dir is passed through to mkdocs; default path stages to docs/site"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-013",
-      "requirement_id": "REQ-DX-002",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "pre-commit",
-      "path": ".pre-commit-config.yaml:294-310",
-      "observation": "Локальные pre-commit хуки docs-check-links/docs-check-drift стоят на stages: [manual] и гоняют урезанные флаги, слабее CI verify.",
-      "method": "read .pre-commit-config.yaml docs hooks vs verify.py and docs.yml",
-      "expected": "Default local pre-commit for docs edits is at least as strict as the subset needed to catch PR-blocking failures, or is clearly labeled manual-only.",
-      "actual": "docs-check-links: check-links --links --specs --configs, stages manual. docs-check-drift: --ports --classes only, stages manual. Full runners (legacy, nav, runtime-mirrors, passports, strict build) are CI-only.",
-      "impact": "Default git commit does not run docs gates. Manual hook still misses governance/legacy/nav/runtime-mirrors.",
-      "root_cause": "Hooks were marked manual to keep commit latency down; flags were never aligned with verify.",
-      "remediation": "Point manual hooks at python -m scripts.docs verify --skip-build (or document that only CI is authoritative). If kept, add --legacy-paths and --runtime-mirrors.",
-      "effort": "S",
-      "automation": ".pre-commit-config.yaml",
-      "automated_fix_possible": true,
-      "dependencies": ["DOCS-PIPE-006"],
-      "validation": [
-        "rg -n docs-check-links -A 8 .pre-commit-config.yaml"
-      ],
-      "evidence": [
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 294,
-          "command": "read_file .pre-commit-config.yaml offset 294",
-          "observation": "docs-check-links uses --links --specs --configs and stages: [manual]"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-014",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.85,
-      "status": "PROVEN",
-      "category": "dual-entrypoint",
-      "path": "scripts/generate_adr_registry.py:1-10",
-      "observation": "Генератор ADR registry живёт вне unified python -m scripts.docs, при том что scripts/docs/README запрещает возвращать ad-hoc top-level script modules без ADR.",
-      "method": "read scripts/generate_adr_registry.py, scripts/documentation_governance_check.py, scripts/docs/README.md, grep workflows",
-      "expected": "Docs generators are dispatched via python -m scripts.docs <command> with --check in CI.",
-      "actual": "ADR registry generator is scripts/generate_adr_registry.py. documentation_governance_check.py imports it. tests exist under tests/unit/scripts and tests/architecture/test_adr_registry_governance_sync.py. No docs.yml step and no scripts.docs command.",
-      "impact": "Operators following scripts/docs/README will not find the ADR registry generator. Two docs-tooling styles coexist.",
-      "root_cause": "Historical scripts/ root generators were not migrated when scripts/docs became the unified CLI.",
-      "remediation": "Register generate-adr-registry (and optionally governance-check) under scripts.docs COMMANDS, or document them as a separate owned family in scripts/docs/README with a lifecycle registry entry.",
-      "effort": "M",
-      "automation": "scripts.docs __main__.py COMMANDS + docs.yml --check",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "rg -n generate_adr_registry scripts/docs/__main__.py",
-        "rg -n generate_adr_registry .github/workflows"
-      ],
-      "evidence": [
-        {
-          "path": "scripts/generate_adr_registry.py",
-          "line": 8,
-          "command": "read_file scripts/generate_adr_registry.py offset 1",
-          "observation": "Usage: python scripts/generate_adr_registry.py"
-        },
-        {
-          "path": "scripts/docs/README.md",
-          "line": 30,
-          "command": "read_file scripts/docs/README.md offset 26",
-          "observation": "Top-level scripts/docs/*.py shims retired; do not reintroduce ad-hoc top-level script modules without ADR"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-015",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "high",
-      "confidence_score": 0.9,
-      "status": "PROVEN",
-      "category": "operator-path",
-      "path": "docs/03-guides/docs-parity-gate.md:16-44",
-      "observation": "Операторский гайд parity-gate документирует несуществующий job docs-parity-check, actions/checkout@v4, pip install pyyaml и bash scripts/ci_check_docs_parity.sh вместо текущего docs.yml шага.",
-      "method": "read docs/03-guides/docs-parity-gate.md vs .github/workflows/docs.yml validate-mkdocs steps",
-      "expected": "Operator docs for the docs pipeline cite the live workflow job/step and canonical python -m entrypoint.",
-      "actual": "Guide says the gate runs in docs.yml via 'Run docs-config parity gate' (true) but the GitHub Actions example is a parallel fictional workflow using unpinned v4 actions, pip, and the compatibility shell. Manual section still lists python3 scripts/docs_parity_check.py.",
-      "impact": "Wrong local reproduction of a CI gate (pairs with DOCS-PIPE-009).",
-      "root_cause": "Guide not rewritten after the package entrypoint landed.",
-      "remediation": "Replace examples with the live docs.yml snippet: uv run --frozen --no-build python -m scripts.data_quality check-entity-config-parity. Remove GitLab/pip/old-script paths or mark them historical.",
-      "effort": "S",
-      "automation": "optional snippet-sync test against docs.yml step name",
-      "automated_fix_possible": true,
-      "dependencies": ["DOCS-PIPE-009"],
-      "validation": [
-        "rg -n docs-parity-check docs/03-guides/docs-parity-gate.md .github/workflows/docs.yml"
-      ],
-      "evidence": [
-        {
-          "path": "docs/03-guides/docs-parity-gate.md",
-          "line": 26,
-          "command": "read_file docs/03-guides/docs-parity-gate.md offset 16",
-          "observation": "Example job docs-parity-check uses checkout@v4, setup-python@v4, pip, bash scripts/ci_check_docs_parity.sh"
+          "line": 39,
+          "command": "read verify steps list",
+          "observation": "no passports step"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 219,
-          "command": "read_file .github/workflows/docs.yml offset 219",
-          "observation": "Live step is uv run python -m scripts.data_quality check-entity-config-parity"
-        }
-      ]
-    },
-    {
-      "id": "DOCS-PIPE-016",
-      "requirement_id": "GAP",
-      "priority": "P3",
-      "severity": "Low",
-      "confidence": "medium",
-      "confidence_score": 0.75,
-      "status": "PROVEN",
-      "category": "failure-semantics",
-      "path": "scripts/docs/checks/check_drift.py:1945",
-      "observation": "check-drift завершается 0 при любом числе WARNING; в verify это означает, что предупреждения дрейфа (например ports facade re-export) не блокируют docs pipeline.",
-      "method": "read DriftReport.error_count vs warning_count and main() return; sample WARNING adds in check_ports/check_classes",
-      "expected": "Documented failure semantics: either warnings are non-blocking by design and listed, or verify treats WARNING as fail.",
-      "actual": "main returns 1 only if report.error_count. WARNING issues are printed but PASS. Examples: missing domain-layer doc is WARNING; port not re-exported in facade is WARNING.",
-      "impact": "Partial drift can accumulate without failing python -m scripts.docs verify or weekly --runtime-mirrors (runtime-mirrors themselves are ERROR).",
-      "root_cause": "Two-level severity without a --fail-on-warning switch in the verify chain.",
-      "remediation": "Document that WARNING is informational, or add --fail-on-warning for verify/CI. Do not raise debt budgets.",
-      "effort": "S",
-      "automation": "verify.py / check-drift CLI flag",
-      "automated_fix_possible": true,
-      "dependencies": [],
-      "validation": [
-        "rg -n \"return 1 if report.error_count\" scripts/docs/checks/check_drift.py"
-      ],
-      "evidence": [
-        {
-          "path": "scripts/docs/checks/check_drift.py",
-          "line": 1945,
-          "command": "read_file scripts/docs/checks/check_drift.py offset 1938",
-          "observation": "return 1 if report.error_count else 0"
-        },
-        {
-          "path": "scripts/docs/checks/check_drift.py",
-          "line": 761,
-          "command": "read_file scripts/docs/checks/check_drift.py offset 750",
-          "observation": "Port exists but not re-exported in ports facade is WARNING"
+          "line": 141,
+          "command": "read docs-governance",
+          "observation": "python -m scripts.docs passports check"
         }
       ]
     }
