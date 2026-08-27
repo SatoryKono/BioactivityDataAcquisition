@@ -45,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `bioetl.domain.version` for HTTP User-Agent, synced local-deployment mermaid
   view to foundation, and refreshed generated inventories/hashes so
   `arch-tests`/`checks-complete` can pass. No quality caps raised.
-
 - **VCR/e2e skip policy (#9729):** CI `unit-fast` and the test-matrix
   `integration` (VCR replay) shard run serial (`-p no:xdist`). The reviewed
   skip census covers `tests/e2e`. Skip-rate SLO mode is blocking at the
