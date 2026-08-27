@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,30 @@ from scripts.engineering.qa import report_vcr_metadata_catalog as module
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_rg_reference_scan_normalizes_windows_owner_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    token = "test_windows_owner_path"
+    event = {
+        "type": "match",
+        "data": {
+            "path": {"text": r"tests\e2e\test_owner.py"},
+            "submatches": [{"match": {"text": token}}],
+        },
+    }
+    result = subprocess.CompletedProcess(
+        args=["rg"],
+        returncode=0,
+        stdout=json.dumps(event) + "\n",
+        stderr="",
+    )
+    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: result)
+
+    owners = module._run_rg_reference_scan(repo_root=tmp_path, tokens=[token])
+
+    assert owners[token] == {"tests/e2e/test_owner.py"}
 
 
 def test_legacy_metadata_owner_aliases_reference_live_surfaces() -> None:
