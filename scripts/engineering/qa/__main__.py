@@ -64,6 +64,8 @@ Commands:
     report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
     report-private-import-inventory Generate/check shrink-only private-import ratchet
     report-composition-protocol-inventory Generate/check S3 Protocol placement inventory
+    report-lazy-import-inventory Generate/check lazy-import inventory
+    report-source-tree-manifest Generate/check unified source-tree manifest
     refresh-governance-artifacts Refresh/check committed governance artifacts
     validate-technical-debt-audit Validate and resolve the SHA-pinned current technical-debt audit
     run-architecture-audit-read-only Run check-only architecture evidence diagnostics
@@ -74,6 +76,7 @@ Commands:
     test-health          Summarize recent test-health run JSON artifacts
     proof-or-stop        Plan, assemble, verify, pilot, or ingest source-bound evidence
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
+    check-dashboard-performance-budgets Validate dashboard performance budget invariants
     check-prometheus-rules Validate Prometheus rules with deterministic promtool preflight
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary

@@ -74,6 +74,47 @@ def test_cli_reference_documents_every_root_command() -> None:
     assert not missing, f"cli.md missing root command headings: {missing}"
 
 
+def test_qa_readme_documents_ci_wired_qa_commands() -> None:
+    """Every unified QA command invoked from tests.yml appears in the QA README."""
+    import re
+
+    workflow = (PROJECT_ROOT / ".github/workflows/tests.yml").read_text(
+        encoding="utf-8"
+    )
+    readme = (PROJECT_ROOT / "scripts/engineering/qa/README.md").read_text(
+        encoding="utf-8"
+    )
+    commands = sorted(
+        set(re.findall(r"python -m scripts\.engineering\.qa ([a-z0-9-]+)", workflow))
+    )
+    assert commands, "tests.yml must invoke at least one unified QA command"
+    missing = [name for name in commands if f"`{name}`" not in readme]
+    assert not missing, f"QA README missing CI-wired commands: {missing}"
+
+
+def test_req_gov_007_evidence_points_at_freshness_module() -> None:
+    """REQ-GOV-007 closeout evidence must cite the live hash-freshness nodeid."""
+    nodeid = (
+        "tests/architecture/test_module_coverage_inventory_freshness.py::"
+        "test_module_coverage_inventory_source_tree_hash_is_current"
+    )
+    stale = (
+        "test_module_coverage_inventory.py::"
+        "test_module_coverage_inventory_source_tree_hash_is_current"
+    )
+    csv_text = (
+        PROJECT_ROOT
+        / "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv"
+    ).read_text(encoding="utf-8")
+    agent_text = (
+        PROJECT_ROOT / "docs/00-project/ai/agents/guides/AGENT.md"
+    ).read_text(encoding="utf-8")
+    assert nodeid in csv_text
+    assert nodeid in agent_text
+    assert stale not in csv_text
+    assert stale not in agent_text
+
+
 def test_write_mode_docs_match_domain_enums() -> None:
     """Active docs must agree with domain write-mode enums."""
     silver_values = [member.name for member in SilverWriteMode]
