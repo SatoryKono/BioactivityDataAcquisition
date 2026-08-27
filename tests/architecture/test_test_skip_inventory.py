@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import Path
 
 import pytest
@@ -21,7 +22,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs" / "quality" / "test_skip_inventory.yaml"
-SCAN_ROOTS = (ROOT / "tests" / "contract", ROOT / "tests" / "integration")
+SCAN_ROOT_KEYS = ("contract_root", "integration_root", "e2e_root")
 REPLAY_CRITICAL_GATES = (
     ROOT
     / "tests"
@@ -42,9 +43,14 @@ def _load_inventory() -> dict[str, object]:
     return yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8"))
 
 
+def _scan_roots() -> tuple[Path, ...]:
+    source_of_truth = _load_inventory()["source_of_truth"]
+    return tuple(ROOT / str(source_of_truth[key]) for key in SCAN_ROOT_KEYS)
+
+
 def _iter_python_files() -> list[Path]:
     files: list[Path] = []
-    for root in SCAN_ROOTS:
+    for root in _scan_roots():
         files.extend(root.rglob("*.py"))
     return sorted(files)
 
@@ -94,6 +100,10 @@ def test_test_skip_inventory_schema_is_reviewable() -> None:
     assert payload["policy_scope"] == "test_skip_inventory"
     assert payload["owner"] == "@bioetl-platform"
     assert payload["linked_issue"] == 5007
+    sot = payload["source_of_truth"]
+    assert sot["contract_root"] == "tests/contract/"
+    assert sot["integration_root"] == "tests/integration/"
+    assert sot["e2e_root"] == "tests/e2e/"
     assert sorted(payload["allowed_categories"]) == [
         "conditional_environment_guard",
         "git_diff_scope_guard",
@@ -143,7 +153,7 @@ def test_test_skip_inventory_tracks_current_live_skip_surfaces() -> None:
 
     allowed_categories = set(payload["allowed_categories"])
     for path, entry in tracked.items():
-        assert entry["suite"] in {"contract", "integration"}, path
+        assert entry["suite"] in {"contract", "integration", "e2e"}, path
         assert entry["category"] in allowed_categories, path
         assert str(entry["owner"]).startswith("@bioetl-"), path
         assert str(entry["linked_issue"]).startswith("#"), path
@@ -194,5 +204,24 @@ def test_unit_and_architecture_forbid_unconditional_skip_marker() -> None:
     assert not offenders, (
         "Unconditional @pytest.mark.skip is not inventoried for unit/architecture. "
         "Use skipif with a reason, or move the skip into the reviewed contract/"
-        "integration census:\n" + "\n".join(offenders)
+        "integration/e2e census:\n" + "\n".join(offenders)
     )
+
+
+def test_e2e_matrix_replay_deferred_matches_inventory() -> None:
+    """PR e2e-smoke exclusions are reviewed, not silent pytest.skip sites (#9729)."""
+    payload = _load_inventory()
+    deferred = payload["e2e_matrix_replay_deferred"]
+    listed = [str(name) for name in deferred["pipelines"]]
+    source = (ROOT / "tests" / "e2e" / "test_pipeline_matrix_e2e.py").read_text(
+        encoding="utf-8"
+    )
+    match = re.search(
+        r"MATRIX_REPLAY_DEFERRED_PIPELINES: frozenset\[str\] = frozenset\(\s*\{([^}]+)\}\s*\)",
+        source,
+        flags=re.S,
+    )
+    assert match is not None
+    declared = re.findall(r'"([^"]+)"', match.group(1))
+    assert listed == declared
+    assert str(deferred["linked_issue"]) == "#9729"
