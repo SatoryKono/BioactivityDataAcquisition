@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CLI reference covers `bioetl report` (#9748):** published `cli.md` documents
+  `report show|list|diff|prune` and lists `GET /healthz`. Architecture ratchet
+  requires a `### \`name\`` heading for every root Click command.
+
 - **HTTP client retry and User-Agent (#9742, #9743):** `UnifiedHTTPClient`
   retries `httpx.PoolTimeout` and `httpx.WriteTimeout` as `TimeoutException`.
   Adapter User-Agent is `BIOETL_USER_AGENT` from package version instead of
