@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Prompt Library improved cyclic pack:** ten operator-paste cards under
+  `docs/00-project/ai/prompts/library/audit/project/new/`
+  (`prompt.audit.project.new.*`) with fail-closed `ALLOW_*` and early-stop.
+  They do not replace `prompt.audit.cycle.*` as pack SSOT.
+
 ### Changed
 
 - **CI architecture-full naming and unit version split (#9738, #9739, #9740):**
