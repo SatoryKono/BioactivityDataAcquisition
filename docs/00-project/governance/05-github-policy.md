@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-21'
+  Last verified: '2026-08-27'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-14*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-08-27*
 
 ______________________________________________________________________
 
@@ -97,7 +97,7 @@ from checks that run only for matching paths.
 | Workflow                        | File                | Key Jobs                                                                                                                              | What It Checks                                                                                                                                                                                                                                      |
 | ------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Lint and Architecture Gates** | `import-linter.yml` | `lint`, `c901-governance`, `arch-tests`, `checks-complete`                                                                            | Ruff lint+format, changed-file formatting enforcement, C901 baseline governance, architecture tests, import-linter, dependency boundary checks                                                                                                      |
-| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, fast unit feedback, full test matrix (Python 3.13, 6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact |
+| **Tests**                       | `tests.yml`         | `smoke-check`, `governance-preflight`, `config-schema-preflight`, `test-fast`, `test-matrix`, `coverage-verify`, `duration-telemetry` | VCR cassettes, config validation, governance preflight, smoke tests, **3.12** fail-fast `test-fast` vs **3.13** coverage `test-matrix` (6 groups), scoped pytest/Hypothesis cache fingerprints, final combined 85% coverage gate, slow-test telemetry artifact. `test-matrix` is **not** a GitHub required check. |
 | **Type Checking (Strict)**      | `type-checking.yml` | `type-check`                                                                                                                          | mypy strict, NewType/Protocol verification, `Any` usage analysis                                                                                                                                                                                    |
 | **Commit Lint**                 | `commit-lint.yml`   | `commit-lint`                                                                                                                         | Conventional Commits format enforcement                                                                                                                                                                                                             |
 
@@ -184,6 +184,30 @@ pending and block an unrelated PR.
 Docs-only PRs should still go through documentation governance via `docs.yml`:
 the lightweight `docs-governance` job runs architecture doc-sync / drift tests
 without pulling the full heavy test matrix into documentation-only changesets.
+
+### Architecture lane names (`architecture-full`)
+
+`architecture-full` is the **non-slow** architecture gate. The three operator
+surfaces below MUST stay 1:1 (same pytest marker expression). Do **not** brand
+the slow sweep as `architecture-full`. Do **not** add `test-matrix` or
+`coverage-verify` as unconditional GitHub required checks while those workflows
+use `paths-ignore` (#9738, #9723).
+
+| Surface | Name | Markers / command | GitHub required? |
+| --- | --- | --- | --- |
+| Pre-commit hook (manual) | `architecture-full` | `pytest tests/architecture/ -m "not slow and not benchmark and not memory"` | No (local `stages: [manual]`) |
+| CI job | `arch-tests` in `import-linter.yml` | same markers | Only as part of `checks-complete` **if** ruleset enforcement is enabled (currently disabled, #9723) |
+| `test_matrix` lane | `architecture` | same `marker_expression` | No |
+| IDE daily | `pytest-architecture` | `architecture and not slow and not benchmark and not memory` | No |
+| IDE / local slow | `pytest-architecture-slow-governance` | `architecture and not benchmark and not memory` (includes slow) | No |
+| `test_matrix` slow lane | `architecture-slow-governance` | same as IDE slow | No (nightly / full audit; not PR `arch-tests`) |
+| `tests.yml` job `test-matrix` | 6 path groups on Python **3.13** | not architecture | No (path-scoped; not always-on) |
+| `tests.yml` job `test-fast` | unit-fast on Python **3.12** | fail-fast compatibility, no coverage | No |
+| `coverage-verify` | combined 85% | `tests.yml` | Path-scoped only (§3 path-scoped table) |
+
+`test-fast` (3.12, no coverage) and `test-matrix` unit shards (3.13, coverage)
+share unit **paths** on purpose as a version split, not as two copies of the
+same interpreter (#9740). Do not drop `coverage-verify`.
 
 ### Additional recommended checks
 

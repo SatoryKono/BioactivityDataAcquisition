@@ -31,7 +31,7 @@ $RequiredRunConfigs = @(
     "Pytest_Coverage.xml",
     "Pytest_Debug.xml",
     "Pytest_Architecture.xml",
-    "Pytest_Architecture_Full.xml",
+    "Pytest_Architecture_Slow_Governance.xml",
     "Mypy_Full.xml",
     "Ruff_Check.xml",
     "Ruff_Format_Check.xml",
@@ -193,7 +193,7 @@ if (-not $DryRun) {
 Write-Host ""
 Write-Log "hint" "Post-sync checklist:"
 Write-Host "  1. Interpreter: `$PROJECT_DIR`\.venv-win\Scripts\python.exe (editable install, no PYTHONPATH)"
-Write-Host "  2. Run Configurations: pytest-fast, pytest-architecture, pytest-architecture-full, pytest-debug, pytest-coverage, mypy-full, ruff-check, quality-gate, BioETL smoke (offline fixture)"
+Write-Host "  2. Run Configurations: pytest-fast, pytest-architecture, pytest-architecture-slow-governance, pytest-debug, pytest-coverage, mypy-full, ruff-check, quality-gate, BioETL smoke (offline fixture)"
 Write-Host "  3. Formatter: Ruff only (Black disabled in Actions on Save)"
 Write-Host "  4. AI: exactly one inline completion provider"
 Write-Host "  5. Do not commit .idea/workspace.xml, shelves, SDK paths, MCP tokens, or .env"

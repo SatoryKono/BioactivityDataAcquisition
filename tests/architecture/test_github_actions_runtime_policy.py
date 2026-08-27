@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
+import re
 import subprocess
 from typing import Any, cast
 
@@ -763,3 +764,102 @@ def test_security_policy_lists_canonical_supply_chain_scanners() -> None:
         "zizmor",
     ):
         assert needle in security_md
+
+
+ARCHITECTURE_FULL_MARKERS = "not slow and not benchmark and not memory"
+WINDOWS_ATOMIC_REL = "tests/integration/infrastructure/storage/test_atomic.py"
+RETIRED_IDE_ARCH_FULL = "pytest-architecture-full"
+IDE_SLOW_ARCH_NAME = "pytest-architecture-slow-governance"
+
+
+def _pytest_marker_expression(command: str) -> str:
+    match = re.search(r'-m\s+"([^"]+)"', command)
+    assert match is not None, command
+    return str(match.group(1))
+
+
+def test_architecture_full_hook_matches_ci_arch_tests_and_test_matrix() -> None:
+    """GHA-021 / #9738: architecture-full ≡ arch-tests ≡ test_matrix architecture."""
+    pre_commit = yaml.safe_load(
+        (ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    )
+    hook_entry = ""
+    for repo in pre_commit.get("repos", []):
+        for hook in repo.get("hooks", []):
+            if hook.get("id") == "architecture-full":
+                hook_entry = str(hook.get("entry") or "")
+                break
+    assert hook_entry, "missing pre-commit hook architecture-full"
+    hook_markers = _pytest_marker_expression(hook_entry.replace("\n", " "))
+
+    import_linter = _load_yaml(ALWAYS_ON_REQUIRED_CHECKS["checks-complete"])
+    arch_runs = [
+        str(step.get("run") or "")
+        for step in import_linter["jobs"]["arch-tests"]["steps"]
+        if isinstance(step, dict)
+    ]
+    pytest_run = next(run for run in arch_runs if "pytest tests/architecture/" in run)
+    ci_markers = _pytest_marker_expression(pytest_run)
+
+    matrix = yaml.safe_load(
+        (ROOT / "configs/quality/test_matrix.yaml").read_text(encoding="utf-8")
+    )
+    lane_markers = str(
+        matrix["test_lanes"]["lanes"]["architecture"]["marker_expression"]
+    )
+
+    assert hook_markers == ARCHITECTURE_FULL_MARKERS
+    assert ci_markers == ARCHITECTURE_FULL_MARKERS
+    assert lane_markers == ARCHITECTURE_FULL_MARKERS
+
+    policy = GITHUB_POLICY.read_text(encoding="utf-8")
+    assert "### Architecture lane names (`architecture-full`)" in policy
+    assert "`arch-tests`" in policy
+    assert IDE_SLOW_ARCH_NAME in policy
+    assert RETIRED_IDE_ARCH_FULL not in policy
+    assert "unconditional GitHub required checks" in policy
+
+
+def test_ide_slow_architecture_sweep_is_not_named_architecture_full() -> None:
+    """GHA-021 / #9738: IDE slow sweep must not be branded architecture-full."""
+    run_dir = ROOT / "configs/ide/pycharm/runConfigurations"
+    assert not (run_dir / "Pytest_Architecture_Full.xml").exists()
+    slow_xml = run_dir / "Pytest_Architecture_Slow_Governance.xml"
+    text = slow_xml.read_text(encoding="utf-8")
+    assert f'name="{IDE_SLOW_ARCH_NAME}"' in text
+    assert RETIRED_IDE_ARCH_FULL not in text
+    assert "architecture and not benchmark and not memory" in text
+
+
+def test_windows_atomic_write_stress_pytest_path_exists() -> None:
+    """GHA-022 / #9739: nightly Windows job must point at the live integration module."""
+    workflow = _load_yaml(ARCHITECTURE_WORKFLOW)
+    job = workflow["jobs"]["windows-atomic-write-stress-nightly"]
+    runs = "\n".join(
+        str(step.get("run") or "")
+        for step in job["steps"]
+        if isinstance(step, dict)
+    )
+    assert WINDOWS_ATOMIC_REL in runs
+    assert "tests/unit/infrastructure/storage/test_atomic.py" not in runs
+    assert "windows_lock_stress" in runs
+    assert (ROOT / WINDOWS_ATOMIC_REL).is_file()
+
+
+def test_test_fast_and_test_matrix_use_distinct_python_versions() -> None:
+    """GHA-023 / #9740: 3.12 fail-fast vs 3.13 coverage; keep coverage-verify."""
+    workflow = _load_yaml(TESTS_WORKFLOW)
+    fast_versions: list[str] = []
+    for step in workflow["jobs"]["test-fast"]["steps"]:
+        if not isinstance(step, dict):
+            continue
+        uses = str(step.get("uses") or "")
+        if uses.endswith("setup-python-uv"):
+            pinned = (step.get("with") or {}).get("python-version")
+            fast_versions.append(str(pinned))
+    assert fast_versions == ["3.12"]
+    matrix_versions = workflow["jobs"]["test-matrix"]["strategy"]["matrix"][
+        "python-version"
+    ]
+    assert matrix_versions == ["3.13"]
+    assert "coverage-verify" in workflow["jobs"]

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="pytest-architecture-full" type="tests" factoryName="py.test">
+  <configuration default="false" name="pytest-architecture-slow-governance" type="tests" factoryName="py.test">
     <module name="BioactivityDataAcquisition2" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -14,7 +14,7 @@
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/architecture&quot;" />
     <option name="_new_targetType" value="PATH" />
-    <option name="ADDITIONAL_ARGUMENTS" value="--no-cov --record-mode=none -v" />
+    <option name="ADDITIONAL_ARGUMENTS" value="--no-cov --record-mode=none -m &quot;architecture and not benchmark and not memory&quot; -v" />
     <option name="PARAMS" value="" />
     <method v="2" />
   </configuration>
