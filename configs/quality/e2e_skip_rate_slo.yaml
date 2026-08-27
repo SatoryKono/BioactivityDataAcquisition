@@ -5,7 +5,8 @@ schema_version: 1
 owner: "@bioetl-platform"
 linked_issues:
   - 6604
-reviewed_on: "2026-07-27"
+  - 9729
+reviewed_on: "2026-08-27"
 
 policy:
   forbid_retries_to_heal_flakes: true
@@ -20,7 +21,8 @@ skip_categories:
   - strict_persistence_snapshot_gap
 
 slo:
-  # Advisory until three consecutive nightly samples establish a baseline.
+  # PR e2e-matrix-health.yml matrix-smoke-blocking run3 is the 3-sample gate.
+  # Budget stays 15.0%; do not raise it and do not add pytest reruns (#9729).
   mode: blocking
   max_skip_rate_percent: 15.0
   min_executed_tests_for_evaluation: 5
@@ -41,5 +43,6 @@ telemetry:
 enforcement:
   architecture_test: tests/architecture/test_e2e_skip_rate_slo_policy.py
   promotion_path: >-
-    Collect skip telemetry for three nightly runs; if rate stays under budget,
-    promote mode from advisory to blocking in CI e2e summary job.
+    PR job e2e-matrix-health.yml matrix-smoke-blocking already enforces skip-rate
+    on run3 at max_skip_rate 0.15. Config mode is blocking; max_skip_rate_percent
+    remains 15.0.

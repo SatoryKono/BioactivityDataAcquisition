@@ -270,3 +270,97 @@ entries:
     vcr_related: false
     review_date: "2026-07-27"
     rationale: Reviewed skip/importorskip surface tracked for governance.
+  - path: tests/e2e/conftest.py
+    suite: e2e
+    category: live_endpoint_unavailability
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 2
+    vcr_related: true
+    review_date: "2026-08-27"
+    rationale: >
+      Shared e2e harness skips on transient upstream exhaustion (429) and when
+      cassette playback cannot satisfy strict persistence snapshot policy.
+  - path: tests/e2e/test_advanced_scenarios_e2e.py
+    suite: e2e
+    category: optional_local_fixture_absence
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 4
+    vcr_related: true
+    review_date: "2026-08-27"
+    rationale: >
+      Advanced e2e scenarios skip when cassette/policy envelope or Bronze
+      fallback cannot materialize Silver Delta tables.
+  - path: tests/e2e/test_chembl_publication_term_e2e.py
+    suite: e2e
+    category: optional_local_fixture_absence
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 3
+    vcr_related: true
+    review_date: "2026-08-27"
+    rationale: >
+      Derived publication_term e2e skips when the cassette sample has no
+      mesh_terms/keywords payload or Silver records.
+  - path: tests/e2e/test_full_pipeline_chain_e2e.py
+    suite: e2e
+    category: optional_local_fixture_absence
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 1
+    vcr_related: true
+    review_date: "2026-08-27"
+    rationale: Chain e2e skips isolation assertions when cassette sample has no Silver molecule records.
+  - path: tests/e2e/test_pipeline_matrix_e2e.py
+    suite: e2e
+    category: replay_fixture_pointer_guard
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 5
+    vcr_related: true
+    review_date: "2026-08-27"
+    rationale: >
+      Matrix smoke skips on missing cassettes, derived-entity coverage in a
+      dedicated module, 429, healthcheck cassette mismatch, or empty derived
+      payload. ACTIVE non-critical VCR mismatch is fail-closed, not a skip.
+  - path: tests/e2e/test_pipeline_with_schema_drift_e2e.py
+    suite: e2e
+    category: optional_local_fixture_absence
+    owner: "@bioetl-platform"
+    linked_issue: "#9729"
+    lifecycle: permanent_policy
+    reviewed_skip_calls: 3
+    vcr_related: false
+    review_date: "2026-08-27"
+    rationale: Schema-drift e2e importorskips when optional deltalake is absent.
+e2e_matrix_replay_deferred:
+  owner: "@bioetl-platform"
+  linked_issue: "#9729"
+  review_date: "2026-08-27"
+  rationale: >
+    Sixteen pipelines stay out of PR e2e-smoke via MATRIX_REPLAY_DEFERRED_PIPELINES
+    selection exclusion, not pytest.skip. Do not expand PR smoke to this set
+    without a dedicated owner and cassette contract.
+  pipelines:
+    - chembl_cell_line
+    - chembl_tissue
+    - chembl_compound_record
+    - chembl_assay_parameters
+    - chembl_protein_class
+    - chembl_publication_similarity
+    - chembl_publication_term
+    - chembl_subcellular_fraction
+    - chembl_target_component
+    - chembl_target_protein_classification
+    - composite_activity
+    - composite_assay
+    - composite_molecule
+    - composite_publication
+    - composite_target
+    - uniprot_idmapping
