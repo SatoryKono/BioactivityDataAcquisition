@@ -21,7 +21,7 @@ skip_categories:
 
 slo:
   # Advisory until three consecutive nightly samples establish a baseline.
-  mode: advisory
+  mode: blocking
   max_skip_rate_percent: 15.0
   min_executed_tests_for_evaluation: 5
   evaluation_lanes:

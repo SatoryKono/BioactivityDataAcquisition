@@ -841,7 +841,7 @@ jobs:
             --ignore=tests/unit/scripts \
             --ignore=tests/unit/repo_backed \
             -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
-            -n auto --dist loadscope --max-worker-restart=0 \
+            -n 0 --dist no --max-worker-restart=0 \
             -q --tb=short \
             --junitxml=reports/test-telemetry/junit-fast.xml
 
@@ -1147,7 +1147,7 @@ jobs:
           export COVERAGE_FILE="reports/coverage/.coverage.${{ matrix.test-group.name }}"
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "not serial and not memory and not fs_contract and not subprocess_backed" \
-            -n auto --dist loadscope --max-worker-restart=0 \
+            -n 0 --dist no --max-worker-restart=0 \
             -q --tb=short \
             --junitxml=reports/test-telemetry/junit.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
