@@ -1,0 +1,14 @@
+{
+  "iteration": 1,
+  "paydown": [
+    "supporting_scripts zero_reference max_count 15->0",
+    "remote-main baseline re-pin 2caccbe446 -> 1a46a2e394",
+    "adr-enforcement-matrix --update"
+  ],
+  "rejected_policy": [
+    "raise any debt budget",
+    "application_core fan-in 7->6",
+    "bootstrap fan-in 3->2",
+    "factories files_ge_250_loc 2->0 without SSOT closeout revision"
+  ]
+}

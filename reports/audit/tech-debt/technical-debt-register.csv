@@ -1,8 +1,4 @@
 id,path,line,type,evidence,age,risk,blast_radius,effort,owner,priority
-AUD-TD-021,configs/quality/debt_scorecard.yaml,456,architecture,fan-in budget application_core 10->7 runtime_builders 5->3,2026-08-27,paydown_landed,hotspot families,S,@bioetl-architecture,P2
-AUD-TD-005,configs/quality/lazy_import_ratchet.yaml,5,architecture,max_count=97 observed=97 target=60,linked_9620,change_cost,composition/application facades,L,@bioetl-architecture,P2
-AUD-TD-006,configs/quality/private_import_ratchet.yaml,6,architecture,15/15 private import pairs strict_mode=false,linked_9626,layer_boundary_friction,application+composition+domain+infrastructure,L,@bioetl-architecture,P2
-AUD-TD-007,configs/quality/debt_scorecard.yaml,256,data/schema,config_count 27/27 unique_parameter_count 419/419,linked_4818,shrink_before_grow_freeze,entity+composite configs,M,@bioetl-config,P2
-AUD-TD-008,configs/quality/debt_scorecard.yaml,537,architecture,control_plane max_internal_fan_in 2/2,linked_6818,hard_freeze,src/bioetl/application/services/control_plane,M,@bioetl-platform,P2
-AUD-TD-010,configs/quality/assertless_ratchet.yaml,5,tests,max_assertless_tests=87 target=77,linked_9605,assertion_strength,test-governance,M,@bioetl-architecture,P2
-AUD-TD-022,tests/architecture/test_tech_debt_issues_5648_5654_closeout.py,234,tests,files_ge_250_loc budget pinned ==2 while live=0,linked_5648,blocked_ratchet,composition_factories_pipeline,M,@bioetl-platform,P2
+AUD-TD-N-001,reports/quality/architecture-debt-remote-main-baseline.json,108,ci,remote-main pin 2caccbe446 -> 1a46a2e394 after #9741,2026-08-27,stale_release_gate,debt-governance-gates,S,@bioetl-architecture,P2
+AUD-TD-N-002,configs/quality/debt_scorecard.yaml,639,architecture,zero-ref supporting-scripts max_count 15->0 (live 0),2026-08-27,leftover_cap,scripts inventory gate,S,@bioetl-platform,P2
+AUD-TD-N-003,configs/quality/lazy_import_ratchet.yaml,5,architecture,freeze cluster lazy 97 private 15 config 27/419 assertless 87,linked_9727,change_cost,composition/application,L,@bioetl-architecture,P2
