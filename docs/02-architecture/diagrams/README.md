@@ -115,7 +115,7 @@ These artifacts are intentionally outside primary nav but linked here for discov
 
 ______________________________________________________________________
 
-## Architecture Diagrams (48 core)
+## Architecture Diagrams (52 core (49-52 added))
 
 | #   | Diagram                                | File                                                | Description                                                                           |
 | --- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |

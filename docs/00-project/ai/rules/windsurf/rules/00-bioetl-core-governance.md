@@ -5,7 +5,7 @@ description: "Core BioETL governance and invariants"
 
 # BioETL Core Governance
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (v6.1.5), `docs/01-requirements/REQUIREMENTS.md` (v1.12, 168 reqs), `docs/02-architecture/decisions/` (ADR-001…ADR-050).
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (v6.1.11), `docs/01-requirements/REQUIREMENTS.md` (v1.12, 168 reqs), `docs/02-architecture/decisions/` (ADR-001…ADR-050).
 
 Condensed AI guidance — **does not replace** canonical RULES/ADR. On conflict, canonical text + executable gates win.
 

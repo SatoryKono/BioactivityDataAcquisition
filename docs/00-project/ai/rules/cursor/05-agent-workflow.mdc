@@ -9,10 +9,11 @@ alwaysApply: true
 
 ## Precedence
 
-1. Runtime source: `.codex/agents/`; use `.gemini/**` only when a tracked runtime tree is added and verified in the same change
-2. `docs/00-project/RULES.md`
-3. `docs/01-requirements/REQUIREMENTS.md`
-4. Accepted ADRs in `docs/02-architecture/decisions/`
+1. Runtime source: .codex/agents/ + .junie/agents/ + .devin/agents/ (equal peers); use .gemini/** only when tracked and verified
+1a. docs/00-project/NORMATIVE_SOURCES.md
+2. docs/00-project/RULES.md
+3. docs/01-requirements/REQUIREMENTS.md
+4. Accepted ADRs in docs/02-architecture/decisions/
 
 ## Before Editing
 
