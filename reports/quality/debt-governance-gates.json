@@ -37,17 +37,17 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": "not_evaluated_without_changed_from_ref",
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
     {
-      "current": "13b38110c2c0b4e1e3444894a09a76ce1bd560893ffa274e06526cf8ed2a6eea",
-      "limit": "13b38110c2c0b4e1e3444894a09a76ce1bd560893ffa274e06526cf8ed2a6eea",
+      "current": "b67181372e259ecc423333d9cac06f6310ab30723103bb077497ef78b14a3245",
+      "limit": "b67181372e259ecc423333d9cac06f6310ab30723103bb077497ef78b14a3245",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2467,
-        "source_tree_sha256": "13b38110c2c0b4e1e3444894a09a76ce1bd560893ffa274e06526cf8ed2a6eea",
+        "source_tree_sha256": "b67181372e259ecc423333d9cac06f6310ab30723103bb077497ef78b14a3245",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2467,
-        "source_tree_sha256": "13b38110c2c0b4e1e3444894a09a76ce1bd560893ffa274e06526cf8ed2a6eea",
+        "source_tree_sha256": "b67181372e259ecc423333d9cac06f6310ab30723103bb077497ef78b14a3245",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },

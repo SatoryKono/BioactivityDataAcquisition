@@ -576,9 +576,9 @@ def test_named_workflows_declare_top_level_contents_read() -> None:
 
 
 def test_canonical_uv_action_pair_is_setup_python_uv() -> None:
-    action = (ROOT / ".github" / "actions" / "setup-python-uv" / "action.yml").read_text(
-        encoding="utf-8"
-    )
+    action = (
+        ROOT / ".github" / "actions" / "setup-python-uv" / "action.yml"
+    ).read_text(encoding="utf-8")
     assert "37802adc94f370d6bfd71619e3f0bf239e1f3b78" in action
     assert 'version: "0.11.26"' in action
     assert 'default: "3.12"' in action

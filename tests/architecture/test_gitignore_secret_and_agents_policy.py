@@ -65,8 +65,12 @@ def test_runtime_guides_start_at_agents_and_runtime_maps() -> None:
 
 
 def test_junie_runtime_matches_codex_wsl_python_and_narrow_parity_claim() -> None:
-    junie = (ROOT / ".junie" / "agents" / "JUNIE-RUNTIME.md").read_text(encoding="utf-8")
-    codex = (ROOT / ".codex" / "agents" / "CODEX-RUNTIME.md").read_text(encoding="utf-8")
+    junie = (ROOT / ".junie" / "agents" / "JUNIE-RUNTIME.md").read_text(
+        encoding="utf-8"
+    )
+    codex = (ROOT / ".codex" / "agents" / "CODEX-RUNTIME.md").read_text(
+        encoding="utf-8"
+    )
     needle = "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
     assert needle in junie
     assert needle in codex

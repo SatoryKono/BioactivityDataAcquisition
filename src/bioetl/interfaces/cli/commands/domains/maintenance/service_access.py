@@ -47,9 +47,7 @@ def get_vacuum_service() -> VacuumService:
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Load the bronze cleanup service through composition on demand."""
-    candidate = import_module(
-        _CONTROL_PLANE_ACCESS_MODULE
-    ).get_bronze_cleanup_service()
+    candidate = import_module(_CONTROL_PLANE_ACCESS_MODULE).get_bronze_cleanup_service()
     return cast("BronzeCleanupService", candidate)
 
 
