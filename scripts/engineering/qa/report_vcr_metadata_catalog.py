@@ -234,7 +234,7 @@ def _run_rg_reference_scan(
         if event.get("type") != "match":
             continue
         data = event["data"]
-        owner = data["path"]["text"]
+        owner = data["path"]["text"].replace("\\", "/")
         for submatch in data.get("submatches", []):
             token = submatch["match"]["text"]
             owners_by_token.setdefault(token, set()).add(owner)
