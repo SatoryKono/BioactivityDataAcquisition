@@ -200,6 +200,17 @@ def _run_rg_reference_scan(
     repo_root: Path,
     tokens: list[str],
 ) -> dict[str, set[str]]:
+    """
+    Find Python files that reference the specified tokens.
+    
+    Parameters:
+        repo_root (Path): Repository root used as the scan working directory.
+        tokens (list[str]): Fixed strings to search for.
+    
+    Returns:
+        dict[str, set[str]]: Mapping of each matched token to repository-relative
+        paths of files containing it.
+    """
     if not tokens:
         return {}
     try:
