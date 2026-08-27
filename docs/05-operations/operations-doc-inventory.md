@@ -15,6 +15,7 @@ Last reviewed: 2026-05-26
 - `docs/05-operations/control-plane-lifecycle.md`
 - `docs/05-operations/vacuum-retention.md`
 - `docs/05-operations/runbooks/*.md` (кроме явно помеченных duplicate/obsolete ниже).
+- `docs/05-operations/runbooks/game-day.md` — ежегодный DR restore drill (RPO/RTO).
 
 ## Duplicate (de-duplicated)
 
