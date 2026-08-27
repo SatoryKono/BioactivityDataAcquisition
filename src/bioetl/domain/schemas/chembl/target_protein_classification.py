@@ -171,3 +171,4 @@ class TargetProteinClassificationSchema(ETLRecordSchema):
         strict = True
         ordered = False
         coerce = True
+        unique = ("entity_id",)
