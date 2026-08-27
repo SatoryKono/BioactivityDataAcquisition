@@ -12,7 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Prompt Library improved cyclic pack:** ten operator-paste cards under
   `docs/00-project/ai/prompts/library/audit/project/new/`
   (`prompt.audit.project.new.*`) with library-default `ALLOW_*=true` and
-  early-stop. They do not replace `prompt.audit.cycle.*` as pack SSOT.
+  early-stop. Files are prefixed `01-`…`10-` by project importance
+  (architecture → configs → tests → tech-debt → docs → agents-memory →
+  telemetry → dashboards → diagrams → coderabbit). They do not replace
+  `prompt.audit.cycle.*` as pack SSOT.
+
+- **Prompt Library product/engineering cyclic pack:** fourteen extra-domain
+  cards under `docs/00-project/ai/prompts/library/audit/project/new2/`
+  (`prompt.audit.project.new2.*`) with library-default `ALLOW_*=true`.
+  They do not replace `cycle/` or `new/`.
 
 ### Changed
 

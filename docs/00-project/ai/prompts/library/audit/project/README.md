@@ -73,5 +73,11 @@ pack SSOT until an operator adopts them. Do not mix with generated `full/`.
 
 Index: [new/README.md](new/README.md).
 
+## Product / engineering cards (`new2/`)
+
+Fourteen extra-domain cyclic cards (`prompt.audit.project.new2.*`) with
+library-default `ALLOW_*=true`. They do **not** replace `cycle/` or `new/`.
+Index: [new2/README.md](new2/README.md).
+
 `library/audit/cycle/run/` is an incomplete same-id copy set — use `full/`
 instead.
