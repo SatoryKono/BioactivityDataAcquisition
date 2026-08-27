@@ -99,16 +99,9 @@ def test_req_gov_007_evidence_points_at_freshness_module() -> None:
         "test_module_coverage_inventory_source_tree_hash_is_current"
     )
     stale = (
-        "tests/architecture/test_module_coverage_inventory.py::"
-        "test_module_coverage_inventory_source_tree_hash_is_current"
-    )
-    csv_text = (
-        PROJECT_ROOT
-        / "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv"
+    agent_text = (
+        PROJECT_ROOT / "docs/00-project/ai/agents/guides/AGENT.md"
     ).read_text(encoding="utf-8")
-    agent_text = (PROJECT_ROOT / "docs/00-project/ai/agents/guides/AGENT.md").read_text(
-        encoding="utf-8"
-    )
     assert nodeid in csv_text
     assert nodeid in agent_text
     assert stale not in csv_text
