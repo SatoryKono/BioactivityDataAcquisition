@@ -72,10 +72,10 @@ ______________________________________________________________________
 bioetl config list-pipelines
 
 # Запуск пайплайна с ограничением (для тестирования)
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 
 # Запуск полного пайплайна
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity --required-persistence-profile degraded_observable
 
 # Инспекция control-plane артефактов завершённого запуска
 bioetl run-manifest show <RUN-ID>
@@ -85,11 +85,11 @@ bioetl run-manifest show <RUN-ID>
 интерпретатор без явной активации окружения:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 ```
 
 ```bash
-"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 ```
 
 ### Run Manifest и Run Ledger
@@ -177,7 +177,7 @@ ______________________________________________________________________
 Обрабатывает только новые записи с момента последнего успешного запуска:
 
 ```bash
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity --required-persistence-profile degraded_observable
 ```
 
 ### Backfill Run
@@ -186,13 +186,13 @@ bioetl run --pipeline chembl_activity
 
 ```bash
 # С подтверждением
-bioetl run --pipeline chembl_activity --run-type backfill
+bioetl run --pipeline chembl_activity --run-type backfill --required-persistence-profile degraded_observable
 
 # Без подтверждения
-bioetl run --pipeline chembl_activity --run-type backfill --yes
+bioetl run --pipeline chembl_activity --run-type backfill --yes --required-persistence-profile degraded_observable
 
 # Предпросмотр очистки
-bioetl run --pipeline chembl_activity --run-type backfill --dry-run
+bioetl run --pipeline chembl_activity --run-type backfill --dry-run --required-persistence-profile degraded_observable
 ```
 
 ### Full Rebuild
@@ -201,13 +201,13 @@ bioetl run --pipeline chembl_activity --run-type backfill --dry-run
 
 ```bash
 # С подтверждением
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild --required-persistence-profile degraded_observable
 
 # Без подтверждения
-bioetl run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes --required-persistence-profile degraded_observable
 
 # Предпросмотр очистки
-bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run --required-persistence-profile degraded_observable
 ```
 
 ______________________________________________________________________
@@ -219,7 +219,7 @@ ______________________________________________________________________
 Для тестирования ограничьте количество обрабатываемых записей:
 
 ```bash
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 ```
 
 ### Resume (продолжение прерванного запуска)
@@ -227,15 +227,15 @@ bioetl run --pipeline chembl_activity --limit 100
 Если пайплайн был прерван, продолжите с checkpoint:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl_activity --resume --required-persistence-profile degraded_observable
 ```
 
 Если оператору нужен не mutable latest pointer, а конкретный historical
 occurrence, используйте explicit selector:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
-bioetl run --pipeline chembl_activity --resume-manifest-id manifest-parent-001
+bioetl run --pipeline chembl_activity --resume-run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87 --required-persistence-profile degraded_observable
+bioetl run --pipeline chembl_activity --resume-manifest-id manifest-parent-001 --required-persistence-profile degraded_observable
 ```
 
 `--resume` означает восстановление из checkpoint state, а не strict exact replay.
@@ -286,7 +286,7 @@ identity.
 ### Debug логирование
 
 ```bash
-bioetl run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug --required-persistence-profile degraded_observable
 ```
 
 ### Bronze Cache (use-cached-bronze)
@@ -298,16 +298,16 @@ BioETL поддерживает запуск пайплайнов на осно�
 
 ```bash
 # Использовать кеш Bronze-слоя
-bioetl run --pipeline chembl_activity --use-cached-bronze
+bioetl run --pipeline chembl_activity --use-cached-bronze --required-persistence-profile degraded_observable
 
 # Принудительно запросить свежие данные из API
-bioetl run --pipeline chembl_activity --no-cached-bronze
+bioetl run --pipeline chembl_activity --no-cached-bronze --required-persistence-profile degraded_observable
 
 # Фильтрация кеша по дате
-bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20
+bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20 --required-persistence-profile degraded_observable
 
 # Указание кастомного пути к кешу
-bioetl run --pipeline chembl_activity --cached-bronze-path ./my-cache
+bioetl run --pipeline chembl_activity --cached-bronze-path ./my-cache --required-persistence-profile degraded_observable
 ```
 
 Если пользователь запрашивает `bioetl run --exact-replay` без
@@ -327,7 +327,7 @@ and input snapshot IDs while `run_id` and `manifest_id` remain occurrence-only.
 Обрабатывать только записи с указанными ID:
 
 ```bash
-bioetl run --pipeline chembl_activity \
+bioetl run --pipeline chembl_activity \ --required-persistence-profile degraded_observable
     --input-csv data/filter-ids.csv \
     --filter-column molecule_id \
     --filter-field molecule_id
@@ -421,7 +421,7 @@ bioetl lock check --pipeline chembl_activity --run-id <UUID>
 1. Запустите пайплайн повторно:
 
    ```bash
-   bioetl run --pipeline chembl_activity
+   bioetl run --pipeline chembl_activity --required-persistence-profile degraded_observable
    ```
 
 1. Используйте `bioetl lock release ...` только если вы отлаживаете lock state в том же процессе, где lock был создан.
@@ -440,11 +440,11 @@ ______________________________________________________________________
 
 ```bash
 # Via флаг
-bioetl run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl_activity --debug --required-persistence-profile degraded_observable
 
 # Via переменную окружения
 export BIOETL_LOG_LEVEL=DEBUG
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl_activity --required-persistence-profile degraded_observable
 ```
 
 | Уровень   | Использование               |
@@ -492,10 +492,10 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Docker main / Grafana Ops HTTP identity: :8000
-bioetl run --pipeline chembl_activity --health-port 8000
+bioetl run --pipeline chembl_activity --health-port 8000 --required-persistence-profile degraded_observable
 
 # Отключить
-bioetl run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server --required-persistence-profile degraded_observable
 ```
 
 **Endpoints:**

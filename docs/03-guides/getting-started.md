@@ -213,13 +213,13 @@ To verify the end-to-end flow, run a sample pipeline (e.g., ChEMBL Activity).
 
 ```bash
 # CI / single-OS checkout
-uv run python -m bioetl run --pipeline chembl_activity --limit 100
+uv run python -m bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 
 # WSL mixed checkout
-"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100
+"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 
 # Windows PowerShell mixed checkout
-.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100
+.\.venv-win\Scripts\python.exe -m bioetl run --pipeline chembl_activity --limit 100 --required-persistence-profile degraded_observable
 ```
 
 This command will:
