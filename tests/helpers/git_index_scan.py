@@ -97,7 +97,7 @@ def _build_git_grep_command(
     pathspecs: tuple[str, ...],
     excluded_prefixes: tuple[str, ...],
 ) -> list[str]:
-    command = ["git", "grep", "-n", "-F"]
+    command = ["git", "-c", "color.grep=false", "grep", "-n", "-F"]
     for pattern in patterns:
         command.extend(("-e", pattern))
     command.append("--")
