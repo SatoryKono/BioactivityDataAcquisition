@@ -37,11 +37,11 @@
       "status": "pass"
     },
     {
-      "current": "not_evaluated_without_changed_from_ref",
+      "current": 0,
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
+      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
@@ -236,7 +236,7 @@
     },
     {
       "current": 0,
-      "limit": 15,
+      "limit": 0,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "4603631cd5eca3dd31ae56ee6f265bd6aa7fb66ae15e4da16dd0e317257670d6",
+      "current": "a087a5876578b57e4c2006251bc874f78a142820cd738d018e4aeffa93c372e5",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
