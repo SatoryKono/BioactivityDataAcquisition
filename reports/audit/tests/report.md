@@ -4,7 +4,7 @@
 - Base: `origin/main@9933fa425bd537e2ae615c9e29c9bee1c706a638`
 - Scope: `tests/ configs/quality/ pyproject.toml`
 - Audit mode: full; execution lane: canonical `unit-fast`
-- Outcome: 3 PROVEN findings; 1 fixed locally; 3 cycle issues remain open.
+- Outcome: 4 PROVEN findings; 2 fixed locally; 4 cycle issues remain open.
 
 ## Executive result
 
@@ -30,6 +30,7 @@ VCR mismatches still skip instead of failing closed.
 | TEST-NEW-001 | REQ-TEST-005 | P1 | PROVEN, external blocker | #9723 |
 | TEST-NEW-002 | REQ-TEST-005 | P2 | PROVEN, source drift | #9729 |
 | TEST-NEW-003 | REQ-GOV-004 | P2 | PROVEN, fixed locally | #9751 |
+| TEST-NEW-004 | REQ-SEC-002 | P1 | PROVEN, fixed locally | #9768 |
 
 ## Command evidence
 
@@ -55,6 +56,8 @@ machine artifacts by repository policy.
   repository rules because the requested SCOPE does not authorize GitHub
   settings changes.
 - #9729 spans CI/E2E surfaces outside the bounded unit fix and remains open.
+- #9768 binds provider contact metadata to non-persistent transport semantics;
+  the security shard passes without adding an allowlist entry.
 - Optional dependency and OS-specific skips were observed but not classified as
   defects without CI/environment proof.
 - No flaky test was claimed: the reviewed flaky inventory is empty and this run

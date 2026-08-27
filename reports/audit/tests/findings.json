@@ -13,10 +13,10 @@
     "pyproject.toml"
   ],
   "summary": {
-    "proven": 3,
-    "fixed_local": 1,
-    "open_cycle_issues": 3,
-    "new_issues": 1,
+    "proven": 4,
+    "fixed_local": 2,
+    "open_cycle_issues": 4,
+    "new_issues": 2,
     "reopened_issues": 2,
     "skip_budget_delta": 0,
     "xfail_budget_delta": 0,
@@ -178,6 +178,49 @@
         {
           "artifact": "iteration-1/unit-final-sha.xml",
           "observation": "final rebased SHA: 21616 tests, 0 failures, 0 errors, 19 skipped"
+        }
+      ]
+    },
+    {
+      "id": "TEST-NEW-004",
+      "requirement_id": "REQ-SEC-002",
+      "priority": "P1",
+      "severity": "High",
+      "confidence": "high",
+      "confidence_score": 1.0,
+      "status": "PROVEN",
+      "resolution": "fixed_local",
+      "category": "security-contract-false-positive",
+      "path": "src/bioetl/application/ports/providers.py:46",
+      "method": "CI failure, local reproduction, git blame, source-contract inspection, full security-shard retest",
+      "observation": "The PII scanner classified ProviderSettingsProtocol.default_email as Silver PII because its transport-only semantics were not explicit in the port contract.",
+      "expected": "Provider contact metadata is explicitly non-persistent; any future Silver persistence requires hashing under REQ-SEC-002.",
+      "actual": "The original one-line docstring named an email but did not state its persistence boundary or hashing obligation.",
+      "impact": "The security shard failed and consequently withheld its coverage shard, producing downstream aggregate coverage regressions.",
+      "root_cause": "A source-bound transport contact property lacked the security semantics needed by the repository's fail-closed PII gate.",
+      "remediation": "Document the non-persistent transport boundary and future hashing obligation at the port; do not grow the allowlist.",
+      "effort": "S",
+      "dependencies": [],
+      "validation": [
+        "pytest tests/security -q",
+        "module coverage source-tree hash refresh and clean-tree guard"
+      ],
+      "automation": "existing security shard",
+      "automated_fix_possible": true,
+      "issue": {
+        "number": 9768,
+        "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/9768",
+        "state": "OPEN",
+        "action": "created"
+      },
+      "evidence": [
+        {
+          "command": "pytest tests/security/test_security.py::TestPIIHandling::test_silver_layer_uses_hashing",
+          "observation": "before: providers.py default_email was the only violation"
+        },
+        {
+          "command": "pytest tests/security -q",
+          "observation": "after: 63 passed"
         }
       ]
     }
