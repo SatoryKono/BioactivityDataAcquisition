@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **HTTP client retry and User-Agent (#9742, #9743):** `UnifiedHTTPClient`
+  retries `httpx.PoolTimeout` and `httpx.WriteTimeout` as `TimeoutException`.
+  Adapter User-Agent is `BIOETL_USER_AGENT` from package version instead of
+  hardcoded `BioETL/5.0.0` / `BioETL/1.0`.
+
 - **CI architecture-full naming and unit version split (#9738, #9739, #9740):**
   `architecture-full` is documented as the non-slow gate (pre-commit ≡ CI
   `arch-tests` ≡ `test_matrix` architecture). IDE slow sweep is

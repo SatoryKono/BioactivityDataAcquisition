@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import httpx
 
 from bioetl.domain.resilience import RetryConfig
+from bioetl.domain.version import get_version
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,
 )
@@ -46,7 +47,7 @@ class UnifiedHTTPClient(
     timeout: float = 30.0
     read_timeout_multiplier: float = 2.0
     run_id: RunID | None = None  # pyright: ignore[reportIncompatibleVariableOverride]
-    user_agent: str = "BioETL/5.0.0"
+    user_agent: str = f"BioETL/{get_version()}"
     contact_email: str | None = None
     provider: str = "unknown"
     max_connections: int = 50

@@ -37,6 +37,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from bioetl.infrastructure.adapters._base_headers import BIOETL_USER_AGENT
 from bioetl.infrastructure.adapters.semanticscholar.fallback import (
     SemanticScholarTitleFallbackHandler,
     TitleFallbackHandler,
@@ -194,7 +195,7 @@ class TestSemanticScholarTitleFallbackHandler:
         )
 
         headers = handler._build_headers()
-        assert headers["User-Agent"] == "BioETL/1.0"
+        assert headers["User-Agent"] == BIOETL_USER_AGENT
         assert headers["Accept"] == "application/json"
         assert "x-api-key" not in headers
 
