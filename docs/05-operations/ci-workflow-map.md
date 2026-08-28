@@ -40,7 +40,7 @@ the human index.
 | `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence on self-hosted `[self-hosted, bioetl-observability]`; `workflow_dispatch` only — see isolation notes in `docs/04-reference/github-actions-workflows.md` |
 | `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
 | `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
-| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct) |
+| `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion of the scanned image |
 | `docs.yml` | Docs & Diagrams | MkDocs, links, mermaid lint, render, drift |
 | `docs-kpi-weekly.yml` | Docs KPI Weekly | Documentation navigation KPI plus calendar freshness/runtime-mirror drift |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |

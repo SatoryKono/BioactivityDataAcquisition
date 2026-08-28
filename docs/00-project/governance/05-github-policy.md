@@ -119,7 +119,7 @@ from checks that run only for matching paths.
 | **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python SAST uploaded to GitHub code scanning                                                            |
 | **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
-| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, Trivy image scanning (CRITICAL+HIGH), Syft SBOM; GHCR push on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
+| **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact; the exact scanned image is promoted without rebuild to GHCR on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
 
 ### 2.4 Code Hygiene
 
@@ -362,7 +362,8 @@ File: `.github/dependabot.yml`
 - `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the
   pinned-action allowlist across `.github/workflows/**` and composite actions
   under `.github/actions/**`.
-- Trivy scans Docker images for CRITICAL and HIGH vulnerabilities
+- Trivy records CRITICAL, HIGH, MEDIUM, and UNKNOWN findings and blocks the
+  Docker image on CRITICAL, HIGH, or MEDIUM vulnerabilities
 - `pip-audit --strict` checks all Python dependencies
 - `detect-secrets` prevents credential leaks in commits
 
