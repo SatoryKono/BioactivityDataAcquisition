@@ -37,4 +37,5 @@ def test_git_grep_uses_posix_ere_digit_class(
 
     assert matrix._git_grep_reference_lines(tmp_path) == []
     assert matrix._GIT_ADR_REFERENCE_PATTERN in captured_command
+    assert "--no-color" in captured_command
     assert r"ADR-\d{3}" not in captured_command

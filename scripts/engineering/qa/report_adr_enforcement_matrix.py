@@ -166,6 +166,7 @@ def _git_grep_reference_lines(repo_root: Path) -> list[tuple[str, str]] | None:
                 [
                     "git",
                     "grep",
+                    "--no-color",
                     "--untracked",
                     "-I",
                     "-E",
