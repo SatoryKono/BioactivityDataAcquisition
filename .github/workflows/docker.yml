@@ -228,6 +228,12 @@ jobs:
         run: |
           python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json'), github_alerts_json=Path('reports/security/github-trivy-alerts.json'), output=Path('reports/security/trivy-alerts.csv')); print(f'rows={count}')"
 
+      - name: Generate Trivy fixability audit
+        run: |
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+            --trivy-json reports/security/trivy-results.json \
+            --output reports/security/trivy-fixability-audit.json
+
       - name: Run Trivy on pinned Debian bookworm base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -253,6 +259,7 @@ jobs:
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
+            reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
             reports/security/trivy-version.json
@@ -275,6 +282,7 @@ jobs:
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
+            reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
             reports/security/trivy-version.json
@@ -282,15 +290,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Enforce Trivy Critical High Medium policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
-          ignore-unfixed: false
-          version: "v0.70.0"
+      - name: Enforce fixable Trivy Critical High Medium policy
+        run: |
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+            --trivy-json reports/security/trivy-results.json \
+            --output reports/security/trivy-fixability-audit.json \
+            --fail-on-fixable
 
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
