@@ -29,6 +29,10 @@ PRIVATE_BIND_NETWORKS = tuple(
     ipaddress.ip_network(cidr)
     for cidr in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 )
+ALLOWED_CLIENT_NETWORKS = (
+    ipaddress.ip_network("127.0.0.0/8"),
+    *PRIVATE_BIND_NETWORKS,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,8 +49,10 @@ def parse_allow_cidrs(values: Sequence[str]) -> tuple[ipaddress.IPv4Network, ...
         network = ipaddress.ip_network(value, strict=False)
         if not isinstance(network, ipaddress.IPv4Network):
             raise ValueError("WSL proxy currently supports IPv4 client CIDRs only")
-        if network.prefixlen == 0:
-            raise ValueError("an unrestricted client CIDR is forbidden")
+        if not any(network.subnet_of(allowed) for allowed in ALLOWED_CLIENT_NETWORKS):
+            raise ValueError(
+                "client CIDRs must stay within loopback or RFC1918 private ranges"
+            )
         networks.append(network)
     return tuple(networks)
 
@@ -72,6 +78,12 @@ def build_bind_policy(
         raise ValueError("non-loopback bind must use a private WSL adapter address")
     if not address.is_loopback and not networks:
         raise ValueError("non-loopback bind requires at least one --allow-cidr")
+    if (
+        not address.is_unspecified
+        and not address.is_loopback
+        and not any(address in network for network in networks)
+    ):
+        raise ValueError("non-loopback bind must belong to an allowed client CIDR")
     if not networks:
         networks = (ipaddress.ip_network("127.0.0.0/8"),)
     return str(address), networks

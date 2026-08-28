@@ -244,6 +244,42 @@ class TestUnifiedHTTPClientRequestMethods:
     """Tests for GET, POST, HEAD request methods."""
 
     @pytest.mark.asyncio
+    async def test_manual_redirect_mode_returns_3xx_without_following_location(
+        self, http_client, mock_circuit_breaker
+    ):
+        """Manual redirect callers must receive 3xx before validating Location."""
+        seen: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            seen.append(str(request.url))
+            return httpx.Response(
+                302,
+                headers={"Location": "https://evil.example/idmapping/results/x"},
+                request=request,
+            )
+
+        async def invoke(callable_, *args, **kwargs):
+            return await callable_(*args, **kwargs)
+
+        transport_client = httpx.AsyncClient(
+            transport=httpx.MockTransport(handler),
+            follow_redirects=True,
+        )
+        mock_circuit_breaker.call.side_effect = invoke
+        http_client._client = transport_client
+        try:
+            response = await http_client.get(
+                "https://rest.uniprot.org/idmapping/status/x",
+                follow_redirects=False,
+            )
+        finally:
+            await transport_client.aclose()
+            http_client._client = None
+
+        assert response.status_code == 302
+        assert seen == ["https://rest.uniprot.org/idmapping/status/x"]
+
+    @pytest.mark.asyncio
     async def test_get_success(self, http_client, mock_circuit_breaker):
         """Test successful GET request."""
         mock_response = MagicMock(spec=httpx.Response)
