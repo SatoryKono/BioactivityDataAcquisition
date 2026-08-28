@@ -1,149 +1,149 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/ci-actions-main-20260828
-refreshed_at_utc: '2026-08-28T12:15:44.880818+00:00'
+source_branch: main
+refreshed_at_utc: '2026-08-28T12:37:26.373275+00:00'
 refresh_status: captured
-source_commit: e331747c4a632e0c616e0bfdb6bcbfafb4a8897d
-source_run_id: '33168461811'
-source_tree_sha256: 2a118cbf07c3dc2e667d81829401f5cfe5b45f2b28a8b05651d38d4984e2e7ce
+source_commit: 09ab9ac286bacb7eee3324e950603539a5c62ee6
+source_run_id: '33149935203'
+source_tree_sha256: 280d7fef036693810d8c32d5aa4f94aaeeda43ac64d6689dcf7d6b5d7d1dbc64
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: C:\Users\Fedor\AppData\Local\Temp\bioetl-pr-9822-33168461811-coverage-report\coverage-report\coverage\coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: C:\Users\Fedor\AppData\Local\Temp\bioetl-pr-9822-33168461811-telemetry\test-duration-telemetry\slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
-  actual_percent: 96.56
+  actual_percent: 96.54
   threshold_satisfied: true
 duration_telemetry:
-  total_cases: 49250
+  total_cases: 49226
   top_slowest:
-  - duration_s: 14.784
+  - duration_s: 21.002
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check
-  - duration_s: 13.094
+  - duration_s: 17.322
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing
-  - duration_s: 10.938
-    source: junit-repo-backed-unit.xml
-    test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation
-  - duration_s: 9.247
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
-  - duration_s: 8.86
-    source: junit-unit-scripts-tooling.xml
-    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic
-  - duration_s: 8.707
+  - duration_s: 11.988
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant
-  - duration_s: 8.188
-    source: junit.integration.xml
-    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
-  - duration_s: 7.433
+  - duration_s: 10.945
+    source: junit-repo-backed-unit.xml
+    test: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation
+  - duration_s: 10.759
     source: junit-unit-scripts-tooling.xml
-    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale
-  - duration_s: 7.357
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic
+  - duration_s: 10.126
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact
-  - duration_s: 7.306
+  - duration_s: 10.102
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_tolerates_unavailable_remote_main_baseline_builder
-  - duration_s: 6.911
+  - duration_s: 10.019
+    source: junit-unit-scripts-tooling.xml
+    test: tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale
+  - duration_s: 9.509
+    source: junit-contract-confidence.xml
+    test: tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]
+  - duration_s: 8.287
+    source: junit.integration.xml
+    test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
+  - duration_s: 7.271
+    source: junit.unit-other.xml
+    test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
+  - duration_s: 7.205
+    source: junit.unit-other.xml
+    test: tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction::test_matches_registry_list
+  - duration_s: 6.906
     source: junit-repo-backed-unit.xml
     test: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories
-  - duration_s: 6.003
+  - duration_s: 6.004
     source: junit-unit-scripts-tooling.xml
     test: tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover
-  - duration_s: 5.845
+  - duration_s: 5.577
     source: junit-track-d.xml
     test: tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts
-  - duration_s: 5.085
-    source: junit-unit-scripts-tooling.xml
-    test: tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors
-  - duration_s: 4.847
-    source: junit.integration.xml
-    test: tests.integration.config.test_chembl_dq_catalog_sync::test_audited_chembl_dq_enum_fields_are_synced_to_catalog_rows
-  - duration_s: 4.783
+  - duration_s: 4.844
     source: junit-contract-confidence.xml
     test: tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming
-  - duration_s: 4.334
+  - duration_s: 4.833
+    source: junit.integration.xml
+    test: tests.integration.config.test_chembl_dq_catalog_sync::test_audited_chembl_dq_enum_fields_are_synced_to_catalog_rows
+  - duration_s: 4.767
+    source: junit-unit-scripts-tooling.xml
+    test: tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types
+  - duration_s: 4.254
     source: junit-repo-backed-unit.xml
     test: tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item
       Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name
       'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set
       for test MCP]
-  - duration_s: 4.234
-    source: junit.unit-other.xml
-    test: tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness
-  - duration_s: 4.221
-    source: junit.unit-other.xml
-    test: tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI::test_list_keys_returns_list
-  - duration_s: 4.062
+  - duration_s: 4.138
     source: junit-contract-confidence.xml
     test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_exposes_shared_chembl_policy_surfaces
-  - duration_s: 4.056
+  - duration_s: 4.136
     source: junit-contract-confidence.xml
     test: tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope
-  - duration_s: 4.048
+  - duration_s: 4.118
     source: junit-contract-confidence.xml
     test: tests.contract.test_normalization_cross_layer_contracts::test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible
-  - duration_s: 3.934
-    source: junit-repo-backed-unit.xml
-    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213
-  - duration_s: 3.838
-    source: junit-contract-confidence.xml
-    test: tests.contract.test_chembl_case_and_ontology_consistency::test_chembl_ontology_identifier_families_are_profile_and_matrix_aligned[profile0-chembl_assay-bao_format-bao:0000190-BAO_0000190]
-  - duration_s: 3.792
-    source: junit-repo-backed-unit.xml
-    test: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_field_matrix__is_deterministic__61401586
+  - duration_s: 4.1
+    source: junit-unit-scripts-tooling.xml
+    test: tests.unit.scripts.test_normalization_governance_cli_smoke::test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke
+  - duration_s: 4.008
+    source: junit-unit-scripts-tooling.xml
+    test: tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_returns_non_zero_when_fallback_business_budget_is_exceeded
+  - duration_s: 3.999
+    source: junit-unit-scripts-tooling.xml
+    test: tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified
   top_slowest_zones:
+  - zone: tests.unit.scripts.docs.passports.test_passport_projector
+    test_count: 4
+    total_duration_s: 47.748
+    max_duration_s: 21.002
   - zone: tests.unit.scripts.qa.test_report_debt_governance_gates
     test_count: 4
-    total_duration_s: 35.19
-    max_duration_s: 13.094
-  - zone: tests.unit.scripts.docs.passports.test_passport_projector
-    test_count: 3
-    total_duration_s: 32.351
-    max_duration_s: 14.784
+    total_duration_s: 47.569
+    max_duration_s: 17.322
   - zone: tests.integration.ci.test_track_d_fixture_control_plane_linkage
     test_count: 2
-    total_duration_s: 14.033
-    max_duration_s: 8.188
+    total_duration_s: 13.864
+    max_duration_s: 8.287
   - zone: tests.contract.test_normalization_cross_layer_contracts
     test_count: 3
-    total_duration_s: 12.166
-    max_duration_s: 4.062
+    total_duration_s: 12.392
+    max_duration_s: 4.138
   - zone: tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery
     test_count: 1
-    total_duration_s: 10.938
-    max_duration_s: 10.938
+    total_duration_s: 10.945
+    max_duration_s: 10.945
   - zone: tests.contract.test_provider_contract_drift_replay
     test_count: 1
-    total_duration_s: 9.247
-    max_duration_s: 9.247
-  - zone: tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix
-    test_count: 2
-    total_duration_s: 7.726
-    max_duration_s: 3.934
+    total_duration_s: 9.509
+    max_duration_s: 9.509
+  - zone: tests.unit.composition.factories.pipeline.test_registry
+    test_count: 1
+    total_duration_s: 7.271
+    max_duration_s: 7.271
+  - zone: tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction
+    test_count: 1
+    total_duration_s: 7.205
+    max_duration_s: 7.205
   - zone: tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures
     test_count: 1
-    total_duration_s: 6.911
-    max_duration_s: 6.911
+    total_duration_s: 6.906
+    max_duration_s: 6.906
   - zone: tests.unit.scripts.ops.test_recover_renderer
     test_count: 1
-    total_duration_s: 6.003
-    max_duration_s: 6.003
-  - zone: tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv
-    test_count: 1
-    total_duration_s: 5.085
-    max_duration_s: 5.085
+    total_duration_s: 6.004
+    max_duration_s: 6.004
   execution_context:
-    executed_count: 49250
+    executed_count: 49226
     explicit_exclusions:
     - lane: live-provider-contracts
       reason: scheduled network-owned workflow
@@ -168,35 +168,35 @@ duration_telemetry:
     - junit.unit-infrastructure.xml
     - junit.unit-other.xml
     junit_testcase_duration_sum_s:
-      junit-contract-confidence.xml: 79.931
-      junit-fast.xml: 121.267
-      junit-memory.xml: 2.297
-      junit-repo-backed-unit.xml: 159.235
-      junit-track-d.xml: 7.203
-      junit-unit-filesystem-contracts.xml: 2.44
-      junit-unit-scripts-tooling.xml: 139.984
-      junit-unit-subprocess-backed.xml: 0.208
-      junit.integration.xml: 138.47
-      junit.security.xml: 11.593
-      junit.unit-application.xml: 48.027
-      junit.unit-domain.xml: 129.492
-      junit.unit-infrastructure.xml: 38.578
-      junit.unit-other.xml: 46.537
+      junit-contract-confidence.xml: 81.452
+      junit-fast.xml: 113.466
+      junit-memory.xml: 3.391
+      junit-repo-backed-unit.xml: 157.431
+      junit-track-d.xml: 6.752
+      junit-unit-filesystem-contracts.xml: 2.706
+      junit-unit-scripts-tooling.xml: 179.863
+      junit-unit-subprocess-backed.xml: 0.202
+      junit.integration.xml: 137.535
+      junit.security.xml: 11.522
+      junit.unit-application.xml: 48.293
+      junit.unit-domain.xml: 150.319
+      junit.unit-infrastructure.xml: 44.931
+      junit.unit-other.xml: 70.111
     lane_wall_time_s:
-      junit-contract-confidence.xml: 89.777
-      junit-fast.xml: 195.281
-      junit-memory.xml: 2.357
-      junit-repo-backed-unit.xml: 174.996
-      junit-track-d.xml: 11.261
-      junit-unit-filesystem-contracts.xml: 109.786
-      junit-unit-scripts-tooling.xml: 152.5
-      junit-unit-subprocess-backed.xml: 93.775
-      junit.integration.xml: 163.518
-      junit.security.xml: 11.389
-      junit.unit-application.xml: 66.334
-      junit.unit-domain.xml: 100.733
-      junit.unit-infrastructure.xml: 50.695
-      junit.unit-other.xml: 44.306
+      junit-contract-confidence.xml: 91.747
+      junit-fast.xml: 183.564
+      junit-memory.xml: 3.497
+      junit-repo-backed-unit.xml: 173.508
+      junit-track-d.xml: 10.006
+      junit-unit-filesystem-contracts.xml: 110.035
+      junit-unit-scripts-tooling.xml: 196.001
+      junit-unit-subprocess-backed.xml: 93.626
+      junit.integration.xml: 161.809
+      junit.security.xml: 11.406
+      junit.unit-application.xml: 66.362
+      junit.unit-domain.xml: 115.504
+      junit.unit-infrastructure.xml: 59.281
+      junit.unit-other.xml: 69.017
     lane_wall_time_source: junit_testsuite_time
     worker_mode: 'mixed: xdist unit/integration; serial contracts/repo-backed/memory'
 slow_governance_cache_probe:

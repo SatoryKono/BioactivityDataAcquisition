@@ -1,14 +1,14 @@
 {
-  "source_branch": "fix/ci-actions-main-20260828",
-  "source_commit": "e331747c4a632e0c616e0bfdb6bcbfafb4a8897d",
-  "source_run_id": "33168461811",
-  "source_tree_sha256": "2a118cbf07c3dc2e667d81829401f5cfe5b45f2b28a8b05651d38d4984e2e7ce",
-  "refreshed_at_utc": "2026-08-28T12:15:44.880818+00:00",
+  "source_branch": "main",
+  "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
+  "source_run_id": "33149935203",
+  "source_tree_sha256": "280d7fef036693810d8c32d5aa4f94aaeeda43ac64d6689dcf7d6b5d7d1dbc64",
+  "refreshed_at_utc": "2026-08-28T12:37:26.373275+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.56,
+  "coverage_percent": 96.54,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.56,
+    "actual_percent": 96.54,
     "threshold_satisfied": true
   }
 }
