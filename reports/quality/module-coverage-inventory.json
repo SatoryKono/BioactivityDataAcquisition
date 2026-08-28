@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "921b1dd6752722e4ddd34c2850c97977e39628c32e028297fce97174e37085f7",
+  "coverage_xml_sha256": "2b380df365ab16540e3aa90261b2ae58d0ee7b950d5634120b05ec125dfed62b",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -22546,11 +22546,11 @@
       "source_lines": 139
     },
     {
-      "coverage_percent": 84.62,
-      "coverage_status": "partially_covered",
-      "covered_lines": 22,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 26,
       "executable_lines": 26,
-      "missing_lines": 4,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.silver.operations.metadata_finalization_operations",
       "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
       "source_lines": 133
@@ -47198,11 +47198,11 @@
       "source_lines": 139
     },
     {
-      "coverage_percent": 84.62,
-      "coverage_status": "partially_covered",
-      "covered_lines": 22,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 26,
       "executable_lines": 26,
-      "missing_lines": 4,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.silver.operations.metadata_finalization_operations",
       "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_finalization_operations.py",
       "source_lines": 133
@@ -49468,9 +49468,9 @@
     "source_module_count": 2465,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1568,
+      "fully_covered": 1569,
       "no_executable_lines": 4,
-      "partially_covered": 893,
+      "partially_covered": 892,
       "uncovered": 0,
       "unmeasured": 0
     },
