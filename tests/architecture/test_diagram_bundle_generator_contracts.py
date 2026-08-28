@@ -138,7 +138,12 @@ def test_bundle_generator_falls_back_to_png_when_svg_missing(tmp_path: Path) -> 
         ("Bronze<br/>Delta", "Bronze Delta"),
         ("<strong>Gold</strong> output", "Gold output"),
         ("Visible<!-- internal note --> tail", "Visible tail"),
-        ("literal --!> marker", "literal --!> marker"),
+        ("literal --!> marker", "literal --!&gt; marker"),
+        (
+            "&lt;script&gt;alert(1)&lt;/script&gt;",
+            "&lt;script&gt;alert(1)&lt;/script&gt;",
+        ),
+        ("&lt;img src=x onerror=alert(1)&gt;", "&lt;img src=x onerror=alert(1)&gt;"),
     ],
 )
 def test_mermaid_label_text_uses_structural_html_parsing(

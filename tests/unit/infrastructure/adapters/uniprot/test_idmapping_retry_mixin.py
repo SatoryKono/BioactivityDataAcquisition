@@ -138,6 +138,10 @@ async def test_poll_until_ready_returns_redirect_url() -> None:
     )
 
     results_url = await host._poll_until_ready("job-1")
+    host.http_client.get.assert_awaited_once_with(
+        "https://rest.uniprot.org/idmapping/status/job-1",
+        follow_redirects=False,
+    )
 
     assert results_url == "https://rest.uniprot.org/idmapping/uniprotkb/results/job-1"
     host.logger.debug.assert_called_once()

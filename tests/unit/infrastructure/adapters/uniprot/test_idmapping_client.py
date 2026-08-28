@@ -351,6 +351,29 @@ class TestUniProtIDMappingClient:
         with pytest.raises(ValueError, match="UniProt ID mapping"):
             idmapping_client._get_next_page_url({"Link": f'<{url}>; rel="next"'})
 
+    @pytest.mark.asyncio
+    async def test_results_redirect_is_validated_before_next_request(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        response = MagicMock()
+        response.status_code = 302
+        response.headers = {"location": "https://evil.example/idmapping/results/job-1"}
+        mock_http_client.get = AsyncMock(return_value=response)
+
+        with pytest.raises(ValueError, match="UniProt ID mapping"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
+
+        mock_http_client.get.assert_awaited_once_with(
+            "https://rest.uniprot.org/idmapping/results/job-1",
+            follow_redirects=False,
+        )
+
     def test_get_next_page_url_no_link_header(self, idmapping_client):
         """Test handling of missing Link header."""
         headers = {}
