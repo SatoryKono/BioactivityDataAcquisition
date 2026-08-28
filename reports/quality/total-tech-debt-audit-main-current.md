@@ -6,19 +6,19 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/sonar-postmerge-ci-closeout-20260828
+Audited branch: fix/gh-actions-repair-20260828
 
-Audited commit SHA: `aee0c4e867a93e41d765fd9879ec2e1c3c386823`
+Audited commit SHA: `f96f65c01afc159ffe28ad8897b1e1e121ec2a3a`
 
-Evidence surface SHA-256: `0f5941f8a1d4b6615fa0d4874f52b95982dc172ff38c8cdb8339cbe07c56b6cb`
+Evidence surface SHA-256: `b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "aee0c4e867a93e41d765fd9879ec2e1c3c386823",
-  "evidence_surface_sha256": "0f5941f8a1d4b6615fa0d4874f52b95982dc172ff38c8cdb8339cbe07c56b6cb",
+  "audited_commit_sha": "f96f65c01afc159ffe28ad8897b1e1e121ec2a3a",
+  "evidence_surface_sha256": "b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",

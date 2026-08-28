@@ -50,12 +50,12 @@
   ],
   "outcomes": {
     "5729": {
-      "coverage_actual_percent": 96.54,
-      "coverage_percent": 96.54,
-      "refreshed_at_utc": "2026-08-28T09:08:59.714038+00:00",
-      "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-      "source_run_id": "github-33149935203-1",
-      "source_tree_sha256": "062cd907c2933ce724209f61c72ab1b3b45ae678a97153d34248d2939ca7beed"
+      "coverage_actual_percent": 96.56,
+      "coverage_percent": 96.56,
+      "refreshed_at_utc": "2026-08-28T12:26:25.861620+00:00",
+      "source_commit": "3f7e5f4e7299db8e60a020bf397324d472c5403e",
+      "source_run_id": "33168400380",
+      "source_tree_sha256": "bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53"
     },
     "5730": {
       "minimum_coverage_percent": 54.0,
