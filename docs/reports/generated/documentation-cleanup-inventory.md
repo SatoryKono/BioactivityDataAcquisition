@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3588 |
-| Tracked doc-like files | 3588 |
+| Doc-like files | 3571 |
+| Tracked doc-like files | 3571 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3588 |
+| tracked | 3571 |
 
 ## Lifecycle Counts
 
@@ -58,22 +58,22 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 746 |
+| Active | 747 |
 | Archived | 170 |
 | Canonical | 72 |
 | Deprecated | 8 |
-| Generated | 1169 |
+| Generated | 1151 |
 | Working | 1423 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 746 |
+| active | 747 |
 | archive | 170 |
 | canonical | 72 |
 | duplicate | 8 |
-| generated | 1169 |
+| generated | 1151 |
 | working | 1423 |
 
 ## Recommended Actions
@@ -82,8 +82,8 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 929 |
-| generate-automatically | 1169 |
-| keep | 1138 |
+| generate-automatically | 1151 |
+| keep | 1139 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 8 |
 
@@ -376,8 +376,8 @@
 | dashboard-scenes-parity-ledger | `scripts/engineering/qa/report_dashboard_scenes_parity.py` | tracked_quality_evidence |
 | dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |
 | debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |
+| docker-security-baseline-reports | `.github/workflows/docker.yml` | ignored_ci_output |
 | docker-stability-runbooks-generated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
-| docker-trivy-sarif-security-report | `.github/workflows/docker.yml` | ignored_ci_output |
 | docs-export-merged-markdown | `scripts/docs/build/generate_docs_export.py` | ignored_local_export |
 | docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |
 | documentation-cleanup-inventory | `scripts/docs/checks/documentation_cleanup_inventory.py` | tracked_curated_generated_doc |
