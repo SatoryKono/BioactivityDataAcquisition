@@ -261,11 +261,7 @@ PR merges and direct pushes to `main` are not blocked by required status
 checks. Repo-side evidence is the live repository ruleset state plus the
 workflows that still materialize the recommended checks on pull requests.
 
-Activated and re-verified on `2026-08-19` with repository admin credentials via
-the GitHub REST API (closeout for #8619 / parent #8607; after the 2026-08-11
-activation the live state drifted to `enforcement=disabled`, and later the same
-day the operator explicitly allowed direct push to `main`, so enforcement was
-set back to `disabled`).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782).
 
 Live GitHub enforcement state:
 
@@ -535,11 +531,11 @@ ______________________________________________________________________
 
 
 ### Evidence (2026-08-28)
-``json
+```json
 {
   "name": "root-hygiene-required-check",
   "enforcement": "active"
 }
-``
+```
 
-**Rollback:** gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled
+`Rollback: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled`
