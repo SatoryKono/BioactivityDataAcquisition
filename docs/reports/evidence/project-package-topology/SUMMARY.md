@@ -24,8 +24,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2467` with
-`source_tree_sha256=3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327`.
+`source_module_count=2465` with
+`source_tree_sha256=7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -33,7 +33,7 @@ and related module-coverage inventory hash-only reconcile.
 
 Refresh note (2026-08-25): ARCH-VG hash-only reconcile after composition/domain
 facade closeout. Source baseline is
-`source_module_count=2467` with the updated `source_tree_sha256` above; the
+`source_module_count=2465` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -92,6 +92,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327`
+- source_tree_sha256: `7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6`
 
-`source_module_count=2467`
+`source_module_count=2465`

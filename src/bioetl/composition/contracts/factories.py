@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     CachedBronzeContext = object
     DataSourceCreatorProtocol = object
-    DomainConfigMapper = object
+    DomainConfigMapperPort = object
     InputFilterConfig = object
     MetadataCoordinator = object
     PipelineService = object
@@ -61,7 +61,7 @@ class ServiceBundleDeps(Protocol):
         ...
 
     @property
-    def yaml_config_to_domain(self) -> DomainConfigMapper:
+    def yaml_config_to_domain(self) -> DomainConfigMapperPort:
         """Mapper from YAML pipeline config to domain config."""
         ...
 

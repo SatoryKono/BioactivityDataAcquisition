@@ -46,7 +46,6 @@ if TYPE_CHECKING:
         get_runtime_observability_publication_contract,
         is_canonical_runtime_observability_emitter,
     )
-    from bioetl.domain.version import get_version
 
 __all__ = [
     "DomainEventObservabilityEnvelope",
@@ -65,7 +64,6 @@ __all__ = [
     "deterministic_identity",
     "error_types",
     "get_runtime_observability_publication_contract",
-    "get_version",
     "is_canonical_runtime_observability_emitter",
     "immutability",
     "lineage",
@@ -128,7 +126,6 @@ _ATTRIBUTE_EXPORTS = {
         _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "get_runtime_observability_publication_contract",
     ),
-    "get_version": ("bioetl.domain.version", "get_version"),
     "is_canonical_runtime_observability_emitter": (
         _RUNTIME_OBSERVABILITY_PUBLICATION_CONTRACT_MODULE,
         "is_canonical_runtime_observability_emitter",

@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327",
-      "limit": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327",
+      "current": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
+      "limit": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -56,16 +56,16 @@
     },
     {
       "current": {
-        "source_module_count": 2467,
-        "source_tree_sha256": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327",
+        "source_module_count": 2465,
+        "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2467,
-        "source_tree_sha256": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327",
+        "source_module_count": 2465,
+        "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 84
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,13 +74,13 @@
       "status": "pass"
     },
     {
-      "current": 84,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "c211fa943e9ef60e74e3898af8c471f2aac94f4f30aa8bb88690fa005c7cccd8",
+      "current": "90ee0a353ba1e1f9b5ea3b6c60cc2ebeee8756342687b2e85ae9e451c6b9618d",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",

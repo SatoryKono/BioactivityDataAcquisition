@@ -1,9 +1,9 @@
 %% Title: Package Family: infrastructure/config (Part 1/2)
-%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 1/2; modules: _retry_settings, contract_policy_validation, domain_config_resolver, _path_settings, _pipeline_settings, _base.
+%% Covers: AST-derived supplemental package-family inventory slice for src/bioetl/infrastructure/config; part 1/2; modules: _retry_settings, contract_policy_validation, _path_settings, _pipeline_settings, domain_config_resolver, _base.
 %% Components: top-level classes grouped by source module.
 %% @version 1.0.0
 %% @type    classDiagram
-%% @date    2026-08-26
+%% @date    2026-08-28
 %% @level   Package Family / Inventory Slice
 %% @nodes   30
 %% @reference Generated supplemental package-family slice used to keep node density within the class-diagram readability budget (<= 30).
@@ -21,12 +21,6 @@ classDiagram
         class _SchemaBuilder
     }
 
-    namespace domain_config_resolver {
-        class DomainConfigMapper
-        class DomainConfigResolver
-        class PipelineConfigDQResolverProvider
-    }
-
     namespace path_settings {
         class StoragePathSettingsMixin
         class _StoragePathSettingsHost
@@ -35,6 +29,11 @@ classDiagram
     namespace pipeline_settings {
         class ControlPlaneSettings
         class PipelineSettings
+    }
+
+    namespace domain_config_resolver {
+        class DomainConfigResolver
+        class PipelineConfigDQResolverProvider
     }
 
     namespace base {
@@ -103,6 +102,10 @@ classDiagram
 
     namespace protein_class_target_type_loader {
         class ProteinClassTargetTypeMappingLoader
+    }
+
+    namespace publication_controlled_vocabulary_loader {
+        class PublicationControlledVocabularyLoader
     }
 
     BaseConfigLoader <|-- FilterConfigLoader

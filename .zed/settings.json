@@ -64,7 +64,7 @@
   "redact_private_values": true,
   "languages": {
     "Python": {
-      "format_on_save": "on",
+      "format_on_save": "off",
       "formatter": {
         "language_server": {
           "name": "ruff"
@@ -169,7 +169,8 @@
   "terminal": {
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VCR_RECORD_MODE": "none"
+      "VCR_RECORD_MODE": "none",
+      "VIRTUAL_ENV": ".venv-win"
     },
     "detect_venv": {
       "on": {
