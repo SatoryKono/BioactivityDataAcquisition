@@ -1,40 +1,27 @@
-# Multi-stage build for bioetl: dependencies → runtime
-# Stage 1: Builder (install dependencies with uv)
+# Multi-stage build for bioetl: dependencies → shell-less runtime
+# All stages derive from one immutable Wolfi base image digest.
 # docker:S8431 — pin by digest only (no tag+digest).
-# Upstream: python:3.12-slim-bookworm (Python 3.12.14), retrieved 2026-08-16.
-# pandas==2.2.3 has no cp314 wheel; a 3.14 digest breaks uv sync --no-build.
-FROM python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134 AS builder
+FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS builder
 
+USER 0
 WORKDIR /app
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Network-resilient install knobs for Docker Desktop / flaky registry paths.
-# Parallel cutover builds without these timeouts hang or fail mid-pip/uv.
-ENV PIP_DEFAULT_TIMEOUT=180 \
-    PIP_RETRIES=10 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    UV_HTTP_TIMEOUT=300 \
+ENV UV_HTTP_TIMEOUT=300 \
     UV_CONCURRENT_DOWNLOADS=4 \
     UV_LINK_MODE=copy \
     UV_NO_PROGRESS=1
 
-# Install build dependencies and the pinned binary uv wheel.
-# Debian security packages track moving distro revisions (no stable =version pins).
-# hadolint ignore=DL3008
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        ca-certificates \
-        libffi-dev \
-        libssl-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && python -m pip install --only-binary=:all: --no-cache-dir \
-        pip==26.1.2 \
-        uv==0.11.26 \
-        --index-url https://pypi.org/simple \
-        --default-timeout=180 --retries=10 \
+# Public Wolfi packages are version-pinned; no compiler is needed because the
+# locked third-party environment is binary-only.
+RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
+    && apk add --no-cache \
+        bash=5.3-r12 \
+        python-3.13=3.13.15-r2 \
+        uv=0.11.26-r0 \
+    && python3.13 --version \
     && uv --version
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Copy package metadata and source required by setuptools/uv build resolution.
 COPY pyproject.toml uv.lock ./
@@ -43,64 +30,61 @@ COPY src/ ./src/
 # Local project: build a wheel, then install that binary artifact pinned by pyproject version.
 RUN printf '# BioETL\n' > README.md \
     && UV_NO_BUILD=1 UV_HTTP_TIMEOUT=300 uv sync --no-dev --frozen --no-build --no-install-project \
-        --directory /app \
+        --python /usr/bin/python3.13 --directory /app \
     && UV_HTTP_TIMEOUT=300 uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app \
-    && BIOETL_VERSION="$(python -c "import tomllib; \
+    && BIOETL_VERSION="$(python3.13 -c "import tomllib; \
 print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
     && UV_HTTP_TIMEOUT=300 uv pip install --python /app/.venv/bin/python --no-deps \
         --only-binary :all: --no-index \
         --find-links=/tmp/bioetl-wheels "bioetl==${BIOETL_VERSION}" \
-    && rm -rf /tmp/bioetl-wheels
+    && rm -rf /tmp/bioetl-wheels \
+    && mkdir -p /app/logs
 
-# Stage 2: Runtime (minimal image)
-# docker:S8431 — pin by digest only (no tag+digest).
-FROM python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134
+# End every stage as non-root; the runtime copy preserves explicit ownership.
+USER 65532:65532
 
+# Prepare the supported Python 3.13 runtime filesystem. Keep the apk database so
+# Trivy can audit every installed OS package, while removing executable package
+# manager and shell surfaces before the final scratch stage.
+FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS runtime-root
+
+USER 0
+RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
+    && apk add --no-cache \
+        python-3.13=3.13.15-r2 \
+        tzdata=2026c-r0 \
+    && python3.13 --version \
+    && mkdir -p /runtime-fs/tmp \
+    && chown 65532:65532 /runtime-fs/tmp \
+    && chmod 0700 /runtime-fs/tmp \
+    && rm -f /bin/sh /bin/busybox /sbin/apk /usr/bin/apk
+USER 65532:65532
+
+# Final runtime contains only the audited Wolfi root, locked venv, and configs.
+FROM scratch
+
+COPY --from=runtime-root /etc /etc
+COPY --from=runtime-root /lib /lib
+COPY --from=runtime-root /lib64 /lib64
+COPY --from=runtime-root /usr /usr
+COPY --from=runtime-root /runtime-fs/ /
 WORKDIR /app
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Install runtime dependencies and create non-root user for security.
-# Debian security packages track moving distro revisions (no stable =version pins).
-# hadolint ignore=DL3008
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-    && python -m pip install --only-binary=:all: --no-cache-dir pip==26.1.2 \
-        --index-url https://pypi.org/simple \
-        --default-timeout=180 --retries=10 \
-    && groupadd -r -g 999 bioetl \
-    && useradd -r -u 999 -g bioetl bioetl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy virtual environment from builder
-COPY --from=builder /app/.venv /app/.venv
-
-# Runtime executes the wheel installed into the builder venv. Copy configs as
-# root-owned data; do not copy src/ or set PYTHONPATH to /app/src (that would
-# shadow the wheel).
+COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv
 COPY --chown=root:root configs/ ./configs/
+COPY --from=builder --chown=65532:65532 /app/logs /app/logs
 
-# Create logs directory
-RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs
-
-# Enable the venv
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Switch to non-root user
-USER 999:999
+USER 65532:65532
 
-# Expose metrics ports
 EXPOSE 8000 8081
 
-# Canonical CLI entrypoint so docker-compose can pass subcommands only.
 ENTRYPOINT ["bioetl"]
 
-# Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
     CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).read()"]
 
-# Default command (override via docker-compose)
 CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]

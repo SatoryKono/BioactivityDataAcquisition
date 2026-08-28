@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to the current reachable main commit after canonical regeneration of CI evidence. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Re-pinned to a reachable current-main commit after canonical regeneration on the merged worktree. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 

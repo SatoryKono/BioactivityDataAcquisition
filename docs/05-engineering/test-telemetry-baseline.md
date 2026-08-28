@@ -30,9 +30,9 @@ trend evidence only.
 - Source branch: `main`
 - Source commit: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 - Source run id: `33182085116`
-- Source tree sha256: `52e87bd699a83e8081e886cfda30be776250f34c6a82dfd04869065fae564a93`
+- Source tree sha256: `7d63e3721d2a70bca978ed9351497307f018961a8af06f87a58703bb09df5445`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-28T17:03:18.036516+00:00`
+- Refreshed at (UTC): `2026-08-28T19:15:29.269756+00:00`
 
 ## Branch-accurate provenance (#5729)
 
