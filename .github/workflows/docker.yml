@@ -166,15 +166,45 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${GITHUB_SHA}"
-            echo "base_image=python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+            echo "runtime_python=python-3.13=3.13.15-r2"
+            echo "builder_uv=uv=0.11.26-r0"
+            echo "setuptools_build_constraint=setuptools==83.0.0"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
             docker run --rm --entrypoint python "${IMAGE_REF}" --version
-            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
+            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import grp, importlib.util, os, pwd, shutil, stat, sys, tempfile; assert sys.version_info[:3] == (3, 13, 15); assert (os.getuid(), os.getgid()) == (999, 999); assert pwd.getpwuid(999).pw_name == "bioetl"; assert pwd.getpwuid(999).pw_shell == "/sbin/nologin"; assert grp.getgrgid(999).gr_name == "bioetl"; assert importlib.util.find_spec("pip") is None; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o1777; assert (os.stat("/app/configs").st_uid, os.stat("/app/configs").st_gid) == (0, 0); assert not os.access("/app/configs", os.W_OK); forbidden_paths = ("/bin/sh", "/bin/ash", "/bin/bash", "/bin/busybox", "/usr/bin/sh", "/usr/bin/ash", "/usr/bin/bash", "/usr/bin/busybox", "/sbin/apk", "/usr/bin/apk"); assert not any(os.path.lexists(path) for path in forbidden_paths); assert all(shutil.which(name) is None for name in ("sh", "ash", "bash", "busybox", "apk", "pip", "pip3", "pip3.13")); handle = tempfile.NamedTemporaryFile(dir="/tmp", delete=True); handle.close(); marker = "/app/logs/.runtime-security-probe"; open(marker, "wb").close(); os.unlink(marker); print("python=3.13.15 uid=999 gid=999 identity=bioetl shell=absent apk=absent pip=absent tmp=01777 configs=root-readonly logs=writable")'
           } > reports/security/bioetl-image-provenance.txt 2>&1
           docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
             > reports/security/bioetl-image-id.txt
           docker run --rm --entrypoint python "${IMAGE_REF}" -c 'from importlib.metadata import distributions; print("\n".join(sorted("{}=={}".format(d.metadata["Name"], d.version) for d in distributions())))' \
             > reports/security/bioetl-pip-freeze.txt
+
+      - name: Prove default image health contract
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          container_id="$(docker run --detach --rm "${IMAGE_REF}")"
+          cleanup() {
+            docker rm --force "${container_id}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          health_status="starting"
+          for _ in $(seq 1 60); do
+            health_status="$(docker inspect "${container_id}" --format '{{.State.Health.Status}}')"
+            if [ "${health_status}" = "healthy" ]; then
+              break
+            fi
+            if [ "$(docker inspect "${container_id}" --format '{{.State.Running}}')" != "true" ]; then
+              docker logs "${container_id}"
+              exit 1
+            fi
+            sleep 2
+          done
+          test "${health_status}" = "healthy"
+          docker exec "${container_id}" python -c 'import urllib.request; response = urllib.request.urlopen("http://127.0.0.1:8000/health/live", timeout=3); assert response.status == 200; response.read(); print("health_live=ok docker_health=healthy")'
+          cleanup
+          trap - EXIT
 
       - name: Run full Trivy JSON evidence scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -234,11 +264,10 @@ jobs:
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json
 
-      - name: Run Trivy on pinned Debian bookworm base image
+      - name: Run Trivy on pinned Wolfi runtime base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          # Base digest recorded by the pinned Python amd64 manifest.
-          image-ref: "debian@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143"
+          image-ref: "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
           format: "json"
           output: "reports/security/trivy-base-results.json"
           severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
@@ -296,6 +325,16 @@ jobs:
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json \
             --fail-on-fixable
+
+      - name: Enforce full Trivy Critical High Medium zero policy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: "bioetl:${{ github.sha }}"
+          format: "table"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          exit-code: "1"
+          ignore-unfixed: false
+          version: "v0.70.0"
 
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
