@@ -84,6 +84,7 @@ def test_tests_do_not_reintroduce_hardcoded_network_drive_skips() -> None:
                 "git",
                 "--no-optional-locks",
                 "grep",
+                "--no-color",
                 "--cached",
                 "-n",
                 "-F",

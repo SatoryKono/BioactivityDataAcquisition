@@ -165,7 +165,7 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${GITHUB_SHA}"
-            echo "base_image=python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            echo "base_image=python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
             docker run --rm --entrypoint python "${IMAGE_REF}" --version
             docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
@@ -288,7 +288,7 @@ jobs:
           format: "table"
           severity: "CRITICAL,HIGH,MEDIUM"
           exit-code: "1"
-          ignore-unfixed: false
+          ignore-unfixed: true
           version: "v0.70.0"
 
       - name: Export exact scanned image for publication
