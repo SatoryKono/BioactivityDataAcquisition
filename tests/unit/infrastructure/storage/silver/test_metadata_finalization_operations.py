@@ -117,7 +117,9 @@ async def test_finalize_result_writes_metadata_and_uses_none_for_absent_source_b
             assert request.table_name == "silver.publication"
             return context
 
-        async def _write_silver_metadata(self, request: _SilverMetadataWriteRequest) -> None:
+        async def _write_silver_metadata(
+            self, request: _SilverMetadataWriteRequest
+        ) -> None:
             written_requests.append(request)
 
     def fake_build_silver_write_result(**kwargs: object) -> None:
@@ -143,7 +145,9 @@ async def test_finalize_result_writes_metadata_and_uses_none_for_absent_source_b
         start_perf=1.0,
     )
 
-    result = await operations.finalize_silver_write_result_operation(MetadataOps(), request)
+    result = await operations.finalize_silver_write_result_operation(
+        MetadataOps(), request
+    )
 
     assert result is None
     assert len(written_requests) == 1
