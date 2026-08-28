@@ -1,3 +1,2 @@
 # Failure Frequency Summary
-
-No failures detected.
+- test_something: 20% failure frequency

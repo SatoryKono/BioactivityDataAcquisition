@@ -5,32 +5,43 @@
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 8000,
-    "passed": 8000,
-    "failed": 0,
-    "skipped": 40,
-    "coverage_pct": 88.0,
-    "median_duration_ms": 100000,
-    "p95_duration_ms": 300000
+    "total_tests": 150,
+    "passed": 135,
+    "failed": 15,
+    "skipped": 0,
+    "coverage_pct": 82.0,
+    "median_duration_ms": 45,
+    "p95_duration_ms": 200
   },
   "metrics_after": {
-    "total_tests": 8000,
-    "passed": 8000,
+    "total_tests": 180,
+    "passed": 180,
     "failed": 0,
-    "skipped": 40,
-    "coverage_pct": 88.0,
-    "median_duration_ms": 100000,
-    "p95_duration_ms": 300000
+    "skipped": 0,
+    "coverage_pct": 90.0,
+    "median_duration_ms": 40,
+    "p95_duration_ms": 150
   },
   "actions": {
-    "tests_fixed": 0,
-    "tests_added": 0,
-    "tests_optimized": 0,
-    "flaky_found": 0,
-    "flaky_fixed": 0,
+    "tests_fixed": 15,
+    "tests_added": 30,
+    "tests_optimized": 1,
+    "flaky_found": 3,
+    "flaky_fixed": 3,
     "flaky_quarantined": 0
   },
-  "top_failures": [],
-  "files_changed": [],
-  "recommendations": []
+  "top_failures": [
+    {
+      "test_id": "test_L2-domain-unit",
+      "failure_frequency": 0.2,
+      "error_type": "AssertionError",
+      "category": "State"
+    }
+  ],
+  "files_changed": [
+    "file1.py"
+  ],
+  "recommendations": [
+    "Rec"
+  ]
 }

@@ -1,46 +1,46 @@
-# Test Report: tests/unit/domain/
+# Test Report: tests/unit/domain/schemas/
 
 **Дата**: 2026-02-26 12:00
-**Agent ID**: L2-domain-unit
-**Agent Level**: L2
-**Scope**: tests/unit/domain/
+**Agent ID**: L3-schemas
+**Agent Level**: L3
+**Scope**: tests/unit/domain/schemas/
 **Source**: src/
 
 ## Summary
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
-| Total tests | 150 | 180 | +30 | |
-| Passed | 135 | 180 | +45 | |
-| Failed | 15 | 0 | -15 | ✅ |
+| Total tests | 50 | 60 | +10 | |
+| Passed | 45 | 60 | +15 | |
+| Failed | 5 | 0 | -5 | ✅ |
 | Coverage | 82.0% | 90.0% | +8.0% | ✅ ≥85% |
-| Flaky tests | 3 | 0 | -3 | |
+| Flaky tests | 1 | 0 | -1 | |
 | Median time | 45ms | 40ms | -5ms | |
 | p95 time | 200ms | 150ms | -50ms | |
 
 ## Fixed Tests
 | # | Test ID | Category | Root Cause | Fix | Evidence |
 |:-:|---------|----------|------------|-----|----------|
-| 1 | test_L2-domain-unit_1 | State | Bug | Fix | `file:1` |
+| 1 | test_L3-schemas_1 | State | Bug | Fix | `file:1` |
 
 ## Regression Tests Added (for fixed bugs)
 | # | Test | Covers Bug | File |
 |:-:|------|-----------|------|
-| 1 | test_reg_L2-domain-unit | Bug | test_a.py |
+| 1 | test_reg_L3-schemas | Bug | test_a.py |
 
 ## New Tests Created
 | # | File | Tests Added | Covers Module | Coverage Delta |
 |:-:|------|:-----------:|---------------|:--------------:|
-| 1 | test_new_L2-domain-unit.py | 30 | mod.py | +8.0% |
+| 1 | test_new_L3-schemas.py | 10 | mod.py | +8.0% |
 
 ## Optimized Tests
 | # | Test ID | Before | After | Optimization |
 |:-:|---------|:------:|:-----:|-------------|
-| 1 | test_opt_L2-domain-unit | 1s | 0.1s | Opt |
+| 1 | test_opt_L3-schemas | 1s | 0.1s | Opt |
 
 ## Flaky Tests Detected
 | # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
 |:-:|---------|:--------------:|:-------------:|-----------------|
-| 1 | test_flaky_L2-domain-unit | 20% | fixed | State |
+| 1 | test_flaky_L3-schemas | 20% | fixed | State |
 
 ## Remaining Issues
 | # | Test ID | Issue | Severity | Suggested Action |
@@ -53,10 +53,3 @@
 
 ## Risks & Requires Manual Review
 - None
-
-## L3 Agents (если оркестратор)
-| # | L3 Agent | Scope | Status | Key Findings |
-|:-:|----------|-------|:------:|-------------|
-| 1 | L3-schemas | scope | DONE | OK |
-| 2 | L3-services | scope | DONE | OK |
-| 3 | L3-value-objects | scope | DONE | OK |
