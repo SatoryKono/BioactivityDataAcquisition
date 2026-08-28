@@ -1267,6 +1267,8 @@
         "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/01-requirements/traceability/requirements-traceability-crosswalk.md",
         "docs/03-guides/publication-validation-guide.md",
         "docs/04-reference/publication-validation-index.md",
         "docs/05-operations/runbooks/publication-validation-runbook.md",
@@ -2204,7 +2206,6 @@
       "implementation_owner_paths": [
         "configs/quality/public_lazy_facade_inventory.yaml",
         "docs/00-project/RULES.md",
-        "docs/00-project/architecture-index.md",
         "src/bioetl/domain/aggregates/batch.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",

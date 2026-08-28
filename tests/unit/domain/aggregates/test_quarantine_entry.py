@@ -363,6 +363,13 @@ class TestQuarantineEntryEncapsulation:
         with pytest.raises(AttributeError):
             quarantine_entry.entry_id = "new-id"  # type: ignore
 
+    def test_run_id_and_batch_id_are_readable(
+        self, quarantine_entry: QuarantineEntry, run_id: RunID, batch_id: BatchID
+    ) -> None:
+        """#9793: mixin accessors for run_id/batch_id must be exercised."""
+        assert quarantine_entry.run_id == run_id
+        assert quarantine_entry.batch_id == batch_id
+
     def test_error_code_is_immutable(self, quarantine_entry: QuarantineEntry) -> None:
         """Invariant: error_code cannot be changed."""
         with pytest.raises(AttributeError):

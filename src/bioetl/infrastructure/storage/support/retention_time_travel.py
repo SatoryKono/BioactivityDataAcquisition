@@ -33,8 +33,7 @@ async def load_time_travel_table(
         try:
             if version is not None:
                 return delta_table_factory(table_path, version=version)
-            if timestamp is None:
-                raise ValueError("Must specify either version or timestamp")
+            assert timestamp is not None
             timestamp_str = timestamp.isoformat()
             return delta_table_factory(
                 table_path,
