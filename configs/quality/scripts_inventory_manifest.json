@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T06:50:13.267329+00:00",
+  "generated_at": "2026-08-28T09:11:42.702230+00:00",
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -10293,7 +10293,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 257,
+      "reference_count": 258,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",

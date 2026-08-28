@@ -84,30 +84,30 @@
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 0,
+        "adr_enforcement_blocking_gap_count": 57,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 9.2,
+      "score": 0.0,
       "weight": 0.09,
-      "weighted_score": 0.828
+      "weighted_score": 0.0
     },
     {
       "evidence_metrics": {
         "contract_blocking_issue_count": 0,
         "dashboarded_without_declaration_count": 0,
-        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_emission_count": 164,
         "layer_violations": 0,
         "runtime_cardinality_review_required_count": 0,
         "runtime_cardinality_threshold_violation_count": 0
       },
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
-      "score": 9.0,
+      "score": 0.0,
       "weight": 0.08,
-      "weighted_score": 0.72
+      "weighted_score": 0.0
     },
     {
       "evidence_metrics": {
@@ -179,16 +179,16 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
-  "interpretation": "good_targeted_improvements",
+  "integral_score": 7.86,
+  "interpretation": "satisfactory_system_refactoring_required",
   "metrics": {
     "accepted_adr_count": 57,
-    "adr_enforcement_blocking_gap_count": 0,
+    "adr_enforcement_blocking_gap_count": 57,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "contract_blocking_issue_count": 0,
     "dashboarded_without_declaration_count": 0,
-    "dashboarded_without_emission_count": 0,
+    "dashboarded_without_emission_count": 164,
     "dq_blocking_issue_count": 0,
     "expired_compat_count": 0,
     "families_at_budget": [
@@ -219,7 +219,7 @@
   "source_artifacts": {
     "adr_enforcement_matrix": {
       "accepted_adr_count": 57,
-      "blocking_gap_count": 0,
+      "blocking_gap_count": 57,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -266,7 +266,7 @@
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
-      "dashboarded_without_emission_count": 0,
+      "dashboarded_without_emission_count": 164,
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
