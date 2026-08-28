@@ -1,14 +1,14 @@
 {
-  "source_branch": "main",
-  "source_commit": "3f7e5f4e7299db8e60a020bf397324d472c5403e",
-  "source_run_id": "33168400380",
-  "source_tree_sha256": "bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53",
-  "refreshed_at_utc": "2026-08-28T12:26:25.861620+00:00",
+  "source_branch": "chore/governance-artifact-refresh",
+  "source_commit": "5db3fd6e4374ed79c137fa302e44b7de3e5aa284",
+  "source_run_id": "33189617079",
+  "source_tree_sha256": "52e87bd699a83e8081e886cfda30be776250f34c6a82dfd04869065fae564a93",
+  "refreshed_at_utc": "2026-08-28T16:41:57.472868+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.56,
+  "coverage_percent": 96.57,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.56,
+    "actual_percent": 96.57,
     "threshold_satisfied": true
   }
 }
