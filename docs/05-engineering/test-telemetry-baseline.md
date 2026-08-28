@@ -27,10 +27,10 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/gh-actions-repair-20260828`
+- Source branch: `main`
 - Source commit: `3f7e5f4e7299db8e60a020bf397324d472c5403e`
 - Source run id: `33168400380`
-- Source tree sha256: `7315c65000fe4a0a75227ec1cb48285e4e2ab1d31f4ee7b1850111a56f37f9ef`
+- Source tree sha256: `bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-08-28T12:26:25.861620+00:00`
 

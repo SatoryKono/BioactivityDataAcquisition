@@ -1,12 +1,12 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/gh-actions-repair-20260828
+source_branch: main
 refreshed_at_utc: '2026-08-28T12:26:25.861620+00:00'
 refresh_status: captured
 source_commit: 3f7e5f4e7299db8e60a020bf397324d472c5403e
 source_run_id: '33168400380'
-source_tree_sha256: 7315c65000fe4a0a75227ec1cb48285e4e2ab1d31f4ee7b1850111a56f37f9ef
+source_tree_sha256: bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
