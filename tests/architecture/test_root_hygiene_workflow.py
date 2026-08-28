@@ -121,4 +121,3 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     assert "Enforcement: `active`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
     assert "Direct merge allowed; no active required-check ruleset" in policy
-
