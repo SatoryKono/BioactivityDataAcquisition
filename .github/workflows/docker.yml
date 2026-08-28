@@ -94,7 +94,7 @@ jobs:
         uses: hadolint/hadolint-action@2a66e89f53d0771bb131a7fa31f3136336094aa6 # v3.4.0
         with:
           dockerfile: ${{ matrix.dockerfile }}
-          # Repo policy: DL3008 ignored for moving Debian security package revisions.
+          # Repo policy keeps distro security package revisions moving.
           config: .hadolint.yaml
 
   docker-compose-validate:
@@ -166,10 +166,13 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${GITHUB_SHA}"
-            echo "base_image=python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
+            echo "runtime_python=python-3.13=3.13.15-r2"
+            echo "builder_uv=uv=0.11.26-r0"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
             docker run --rm --entrypoint python "${IMAGE_REF}" --version
             docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
+            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import os, stat, tempfile; metadata = os.stat("/tmp"); assert stat.S_IMODE(metadata.st_mode) == 0o700; assert metadata.st_uid == os.getuid() == 65532; assert metadata.st_gid == os.getgid() == 65532; handle = tempfile.NamedTemporaryFile(delete=False); name = handle.name; handle.write(b"bioetl"); handle.close(); os.unlink(name); print("tempfile=ok")'
           } > reports/security/bioetl-image-provenance.txt 2>&1
           docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
             > reports/security/bioetl-image-id.txt
@@ -234,11 +237,10 @@ jobs:
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json
 
-      - name: Run Trivy on pinned Debian bookworm base image
+      - name: Run Trivy on pinned Wolfi runtime base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          # Base digest recorded by the pinned Python amd64 manifest.
-          image-ref: "debian@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143"
+          image-ref: "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
           format: "json"
           output: "reports/security/trivy-base-results.json"
           severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
