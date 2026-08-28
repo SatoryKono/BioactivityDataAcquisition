@@ -1,14 +1,14 @@
 {
-  "source_branch": "main",
-  "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "source_run_id": "33149935203",
-  "source_tree_sha256": "441b8149517c2a4056af4f6936dec09e786ec4561ef7a63a907a0c6fda15c20a",
-  "refreshed_at_utc": "2026-08-28T09:03:34.651937+00:00",
+  "source_branch": "fix/gh-actions-repair-20260828",
+  "source_commit": "3f7e5f4e7299db8e60a020bf397324d472c5403e",
+  "source_run_id": "33168400380",
+  "source_tree_sha256": "7315c65000fe4a0a75227ec1cb48285e4e2ab1d31f4ee7b1850111a56f37f9ef",
+  "refreshed_at_utc": "2026-08-28T12:26:25.861620+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.54,
+  "coverage_percent": 96.56,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.54,
+    "actual_percent": 96.56,
     "threshold_satisfied": true
   }
 }
