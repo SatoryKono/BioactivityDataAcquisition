@@ -1,0 +1,14 @@
+{
+  "iteration": 2,
+  "waves": [
+    {
+      "id": "wave2",
+      "status": "done"
+    },
+    {
+      "id": "wave3",
+      "status": "done"
+    }
+  ],
+  "debt_effect": "flat"
+}
