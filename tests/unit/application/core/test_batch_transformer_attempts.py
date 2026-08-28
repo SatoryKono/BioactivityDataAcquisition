@@ -254,6 +254,7 @@ async def test_transform_attempt_projects_runtime_dq_warning_flags(
 @pytest.mark.asyncio
 async def test_transform_attempt_returns_empty_outcome_for_none_result() -> None:
     """Трансформация без записи Silver формирует пустой результат."""
+
     async def transform(_ctx, _record, _index):
         return None
 
