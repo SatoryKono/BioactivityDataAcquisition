@@ -6,7 +6,7 @@ All serialization operations use sorted keys and compact output for
 deterministic results per RULES.md §2.8.1.
 
 Requirements:
-- REQ-ARCH-030: Deterministic writes for reproducibility
+- Architecture (RULES 6.1 determinism): Deterministic writes for reproducibility (see REQ-GOV-002 / REQ-ARCH-003)
 - REQ-ID-001 to REQ-ID-008: Content hash algorithm
 
 This module provides a functional API that wraps the JsonEncoderPort

@@ -3,9 +3,9 @@
 Implements audit logging requirements for write operations across all
 Medallion layers (Bronze, Silver, Gold).
 
-Requirements:
-- REQ-AUDIT-001: Each write operation must be logged
-- REQ-AUDIT-002: Audit log must contain run_id, timestamp, records_count, table
+Requirements (mapped to canonical REQ-LINEAGE-001 / REQ-OBS-001):
+- Audit write operation logging
+- Audit log fields: run_id, timestamp, records_count, table
 """
 
 from __future__ import annotations
