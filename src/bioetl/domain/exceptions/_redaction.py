@@ -23,9 +23,9 @@ _SECRET_MARKERS = (
 _SECRET_HEADER = re.compile(
     r"(?im)\b(authorization|cookie|credential|private[_-]?key)\b\s*[:=]\s*[^\r\n]*"
 )
-_INLINE_SECRET = re.compile(
+_INLINE_SECRET_PREFIX = re.compile(
     r"(?i)\b(password|passwd|token|secret|api[_-]?key|credential|private[_-]?key)\b"
-    r'\s*[:=]\s*("(?:\\.|[^"])*"|\'(?:\\.|[^\'])*\'|[^\s,;&]+)'
+    r"\s*[:=]\s*"
 )
 # Character classes omit a-z under (?i) to avoid S5869 duplicate-range findings.
 _BEARER_SECRET = re.compile(r"(?i)\bBearer\s+[-A-Z0-9._~+/=]+")
@@ -43,9 +43,40 @@ def _redact_inline_secrets(value: str) -> str:
         lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}",
         value,
     )
-    return _INLINE_SECRET.sub(
-        lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}", redacted
-    )
+    parts: list[str] = []
+    cursor = 0
+    while match := _INLINE_SECRET_PREFIX.search(redacted, cursor):
+        parts.append(redacted[cursor : match.start()])
+        parts.append(f"{match.group(1)}={_REDACTED_PLACEHOLDER}")
+        cursor = _inline_secret_value_end(redacted, match.end())
+    parts.append(redacted[cursor:])
+    return "".join(parts)
+
+
+def _inline_secret_value_end(value: str, start: int) -> int:
+    """Return the end of one inline secret value using a linear scan."""
+    if start >= len(value):
+        return start
+    quote = value[start]
+    if quote not in {'"', "'"}:
+        cursor = start
+        while (
+            cursor < len(value)
+            and not value[cursor].isspace()
+            and value[cursor] not in ",;&"
+        ):
+            cursor += 1
+        return cursor
+
+    cursor = start + 1
+    while cursor < len(value):
+        if value[cursor] == "\\":
+            cursor = min(cursor + 2, len(value))
+            continue
+        cursor += 1
+        if value[cursor - 1] == quote:
+            return cursor
+    return len(value)
 
 
 def _redact_url_hostname(parsed: SplitResult) -> str:
