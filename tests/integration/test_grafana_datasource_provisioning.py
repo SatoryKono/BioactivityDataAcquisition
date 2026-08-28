@@ -85,12 +85,10 @@ def test_ops_http_compose_targets_main_health_server() -> None:
     for name in _REMOVED_MONITORING_SERVICES:
         assert name not in monitoring["services"]
 
-    assert bioetl["entrypoint"] == ["/bin/sh", "-c"]
+    assert bioetl["entrypoint"] == ["bioetl"]
     command = bioetl["command"]
-    assert isinstance(command, list) and len(command) == 1
-    command_script = str(command[0])
-    assert "bioetl health server --host 0.0.0.0 --port 8000" in command_script
-    assert "bioetl quarantine serve" not in command_script
+    assert command == ["health", "server", "--host", "0.0.0.0", "--port", "8000"]
+    assert "quarantine" not in command
     assert any("8000:8000" in str(port) for port in bioetl["ports"])
     assert not any("8081:8081" in str(port) for port in bioetl["ports"])
     assert "quarantine-explorer" not in str(bioetl.get("networks", {}))
