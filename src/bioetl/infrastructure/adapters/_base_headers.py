@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.domain.version import get_version
+from bioetl import get_version
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
