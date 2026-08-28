@@ -30,7 +30,7 @@ trend evidence only.
 - Source branch: `fix/redos-inline-secret-20260828`
 - Source commit: `c7754a0a73cab6f38866af26da4c69790b70044e`
 - Source run id: `33192008237`
-- Source tree sha256: `8846fdc0a086a158b584fb0e8f8aac36298269eaaa79a859759e236120b9e8a5`
+- Source tree sha256: `a4116b4d3c506b2c11b5c03232eb6ce1ee22aadb9d1e8c7bbaec8eaf33cab8dc`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-08-28T17:27:44.817166+00:00`
 

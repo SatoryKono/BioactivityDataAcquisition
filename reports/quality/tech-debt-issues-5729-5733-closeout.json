@@ -53,9 +53,9 @@
       "coverage_actual_percent": 96.56,
       "coverage_percent": 96.56,
       "refreshed_at_utc": "2026-08-28T12:26:25.861620+00:00",
-      "source_commit": "3f7e5f4e7299db8e60a020bf397324d472c5403e",
+      "source_commit": "c7754a0a73cab6f38866af26da4c69790b70044e",
       "source_run_id": "33168400380",
-      "source_tree_sha256": "bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53"
+      "source_tree_sha256": "a4116b4d3c506b2c11b5c03232eb6ce1ee22aadb9d1e8c7bbaec8eaf33cab8dc"
     },
     "5730": {
       "minimum_coverage_percent": 54.0,

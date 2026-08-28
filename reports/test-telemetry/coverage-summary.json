@@ -2,7 +2,7 @@
   "source_branch": "fix/redos-inline-secret-20260828",
   "source_commit": "c7754a0a73cab6f38866af26da4c69790b70044e",
   "source_run_id": "33192008237",
-  "source_tree_sha256": "8846fdc0a086a158b584fb0e8f8aac36298269eaaa79a859759e236120b9e8a5",
+  "source_tree_sha256": "a4116b4d3c506b2c11b5c03232eb6ce1ee22aadb9d1e8c7bbaec8eaf33cab8dc",
   "refreshed_at_utc": "2026-08-28T17:27:44.817166+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.56,
