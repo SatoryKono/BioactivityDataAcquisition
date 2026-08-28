@@ -1,6 +1,7 @@
 """Minimal HTTP CONNECT proxy for WSL2 -> Windows VPN tunnel.
 
-Listens on 0.0.0.0:3128 so WSL2 can reach it via the Windows host IP.
+Defaults to loopback. Non-loopback listeners require an explicit client CIDR;
+wildcard binding additionally requires an explicit opt-in flag.
 Supports both HTTP CONNECT (for HTTPS) and plain HTTP forwarding.
 
 Usage:
@@ -12,15 +13,22 @@ Usage:
 from __future__ import annotations
 
 import logging
+import argparse
+import ipaddress
 import select
 import socket
 import threading
+from collections.abc import Sequence
 from urllib.parse import urlsplit
 
-LISTEN_HOST = "0.0.0.0"
+LISTEN_HOST = "127.0.0.1"
 LISTEN_PORT = 3128
 BUFFER_SIZE = 65536
 CONNECT_TIMEOUT = 10
+PRIVATE_BIND_NETWORKS = tuple(
+    ipaddress.ip_network(cidr)
+    for cidr in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +36,56 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 log = logging.getLogger("wsl-proxy")
+
+
+def parse_allow_cidrs(values: Sequence[str]) -> tuple[ipaddress.IPv4Network, ...]:
+    """Parse an explicit IPv4 client allowlist."""
+    networks: list[ipaddress.IPv4Network] = []
+    for value in values:
+        network = ipaddress.ip_network(value, strict=False)
+        if not isinstance(network, ipaddress.IPv4Network):
+            raise ValueError("WSL proxy currently supports IPv4 client CIDRs only")
+        if network.prefixlen == 0:
+            raise ValueError("an unrestricted client CIDR is forbidden")
+        networks.append(network)
+    return tuple(networks)
+
+
+def build_bind_policy(
+    bind_host: str,
+    *,
+    allow_wildcard: bool,
+    allow_cidrs: Sequence[str],
+) -> tuple[str, tuple[ipaddress.IPv4Network, ...]]:
+    """Validate bind scope and return the effective client allowlist."""
+    address = ipaddress.ip_address(bind_host)
+    if not isinstance(address, ipaddress.IPv4Address):
+        raise ValueError("WSL proxy currently supports IPv4 bind addresses only")
+    networks = parse_allow_cidrs(allow_cidrs)
+    if address.is_unspecified and not allow_wildcard:
+        raise ValueError("wildcard bind requires --allow-wildcard")
+    if (
+        not address.is_unspecified
+        and not address.is_loopback
+        and not any(address in network for network in PRIVATE_BIND_NETWORKS)
+    ):
+        raise ValueError("non-loopback bind must use a private WSL adapter address")
+    if not address.is_loopback and not networks:
+        raise ValueError("non-loopback bind requires at least one --allow-cidr")
+    if not networks:
+        networks = (ipaddress.ip_network("127.0.0.0/8"),)
+    return str(address), networks
+
+
+def is_client_allowed(peer_ip: str, networks: Sequence[ipaddress.IPv4Network]) -> bool:
+    """Return whether a peer belongs to the configured client allowlist."""
+    try:
+        address = ipaddress.ip_address(peer_ip)
+    except ValueError:
+        return False
+    return isinstance(address, ipaddress.IPv4Address) and any(
+        address in network for network in networks
+    )
 
 
 def relay(src: socket.socket, dst: socket.socket) -> None:
@@ -144,16 +202,42 @@ def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
         client.close()
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--bind-host", default=LISTEN_HOST)
+    parser.add_argument("--port", type=int, default=LISTEN_PORT)
+    parser.add_argument("--allow-wildcard", action="store_true")
+    parser.add_argument("--allow-cidr", action="append", default=[])
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    if not 1 <= args.port <= 65535:
+        raise ValueError("proxy port must be between 1 and 65535")
+    bind_host, allowed_networks = build_bind_policy(
+        args.bind_host,
+        allow_wildcard=args.allow_wildcard,
+        allow_cidrs=args.allow_cidr,
+    )
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((LISTEN_HOST, LISTEN_PORT))
+    server.bind((bind_host, args.port))
     server.listen(128)
-    log.info("WSL proxy listening on %s:%d", LISTEN_HOST, LISTEN_PORT)
+    log.info(
+        "WSL proxy listening on %s:%d for %s",
+        bind_host,
+        args.port,
+        ",".join(str(network) for network in allowed_networks),
+    )
 
     try:
         while True:
             client, addr = server.accept()
+            if not is_client_allowed(addr[0], allowed_networks):
+                log.warning("Rejected proxy client outside allowlist: %s", addr[0])
+                client.close()
+                continue
             thread = threading.Thread(
                 target=handle_client,
                 args=(client, addr),

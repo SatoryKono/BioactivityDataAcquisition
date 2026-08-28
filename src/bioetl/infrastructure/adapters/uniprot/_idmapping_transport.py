@@ -12,6 +12,9 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
     extract_response_text,
 )
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
+from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    trusted_idmapping_url,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -123,7 +126,7 @@ class IDMappingTransportMixin:
     ) -> None:
         """Paginate through ID mapping results, populating entries_by_id in place."""
         deps = self._transport_deps()
-        url: str | None = start_url
+        url: str | None = trusted_idmapping_url(deps.base_url, start_url)
 
         while url:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
@@ -147,7 +150,12 @@ class IDMappingTransportMixin:
                 if from_id in entries_by_id and entry_data:
                     entries_by_id[from_id].append(entry_data)
 
-            url = deps._get_next_page_url(response.headers)
+            next_url = deps._get_next_page_url(response.headers)
+            url = (
+                trusted_idmapping_url(deps.base_url, next_url)
+                if next_url is not None
+                else None
+            )
 
     def _resolve_entries(
         self,

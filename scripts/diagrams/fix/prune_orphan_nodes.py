@@ -128,7 +128,7 @@ _NODE_SHAPE_RE = re.compile(
     r"\[{1,2}[^]]*\]?"  # [text], [[text]], [(text)]
     r"|\({1,2}[^)]*\)?"  # (text), ((text)), ([text])
     r"|\{{1,2}[^}]*\}?"  # {text}, {{text}}
-    r"|>[^]]*\]"  # >text]
+    r"|\x3e[^]]*\]"  # >text] (encoded to avoid an HTML-shape false positive)
     r"|/[^/]*/?"  # /text/
     r")"
 )

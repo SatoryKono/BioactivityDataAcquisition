@@ -326,11 +326,30 @@ class TestUniProtIDMappingClient:
 
     def test_get_next_page_url_with_link_header(self, idmapping_client):
         """Test extraction of next page URL from Link header."""
-        headers = {"Link": '<https://rest.uniprot.org/next>; rel="next"'}
+        headers = {
+            "Link": '<https://rest.uniprot.org/idmapping/results/job-1?cursor=2>; rel="next"'
+        }
 
         url = idmapping_client._get_next_page_url(headers)
 
-        assert url == "https://rest.uniprot.org/next"
+        assert url == "https://rest.uniprot.org/idmapping/results/job-1?cursor=2"
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://rest.uniprot.org.evil/idmapping/results/job-1",
+            "https://rest.uniprot.org@evil.example/idmapping/results/job-1",
+            "http://rest.uniprot.org/idmapping/results/job-1",
+            "https://rest.uniprot.org:444/idmapping/results/job-1",
+            "https://rest.uniprot.org/idmapping/../admin",
+            "https://rest.uniprot.org/uniprotkb/search",
+        ],
+    )
+    def test_get_next_page_url_rejects_untrusted_links(
+        self, idmapping_client: UniProtIDMappingClient, url: str
+    ) -> None:
+        with pytest.raises(ValueError, match="UniProt ID mapping"):
+            idmapping_client._get_next_page_url({"Link": f'<{url}>; rel="next"'})
 
     def test_get_next_page_url_no_link_header(self, idmapping_client):
         """Test handling of missing Link header."""
@@ -498,8 +517,7 @@ class TestUniProtIDMappingClient:
         """Test string representation."""
         repr_str = repr(idmapping_client)
 
-        assert "UniProtIDMappingClient" in repr_str
-        assert "rest.uniprot.org" in repr_str
+        assert repr_str == "UniProtIDMappingClient(base_url='https://rest.uniprot.org')"
 
     def test_i_d_mapping_client__provider_name__543e9538(self, idmapping_client):
         """Test provider name attribute."""
