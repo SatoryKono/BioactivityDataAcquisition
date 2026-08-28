@@ -12,13 +12,13 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 97.11,
+    "application_core_covered_line_percent": 96.98,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 66,
+    "remaining_below_85_module_count": 68,
     "reason": "Issue #5244 requires zero below-tier production modules; #5272 is locally closeable, but the parent epic remains open while 66 production modules are still below the default floor."
   },
   "evidence": [
