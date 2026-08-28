@@ -49351,6 +49351,7 @@
   "schema_version": 1,
 <<<<<<< HEAD
   "snapshot_date": "2026-08-26",
+<<<<<<< HEAD
 ||||||| 3aba8559a5
   "snapshot_date": "2026-08-26",
 <<<<<<< HEAD
@@ -49364,6 +49365,11 @@
   "snapshot_date": "2026-08-27",
 >>>>>>> master20260828-1
   "source_tree_sha256": "840f36b8895ccedbd758abe51e9d8c53858372e2317e4816dd7f5ba5ac70987c",
+||||||| 9e584e6efb
+  "source_tree_sha256": "840f36b8895ccedbd758abe51e9d8c53858372e2317e4816dd7f5ba5ac70987c",
+=======
+  "source_tree_sha256": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327",
+>>>>>>> origin/fix/sonar-closeout-current-main-20260828
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

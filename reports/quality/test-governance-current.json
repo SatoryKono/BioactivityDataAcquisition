@@ -1125,12 +1125,7 @@
   "intentional_no_exception_contract": 86,
   "markerless_examples": [],
   "markerless_test_functions": 0,
-  "parse_errors": [
-    {
-      "error": "'(' was never closed (test_documentation_audit_remediation.py, line 101)",
-      "path": "tests/architecture/test_documentation_audit_remediation.py"
-    }
-  ],
+  "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -1994,12 +1989,7 @@
     },
     "markerless_examples": [],
     "markerless_test_functions": 0,
-    "parse_errors": [
-      {
-        "error": "'(' was never closed (test_documentation_audit_remediation.py, line 101)",
-        "path": "tests/architecture/test_documentation_audit_remediation.py"
-      }
-    ],
+    "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
@@ -2057,12 +2047,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2380,
-    "total_test_functions": 25055,
+    "total_test_functions": 25068,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "25181fd762a7b6960a6cc001d4eb16e8436cab1aeb9a2bc721398568766137ce",
+  "source_tree_sha256": "b0f93f08e7d748af87d4119468f365b2f284fb73aa04b068521acb7455dffecc",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2123,7 +2113,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2380,
-  "total_test_functions": 25055,
+  "total_test_functions": 25068,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
