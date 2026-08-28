@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T19:11:53.575329+00:00",
+  "generated_at": "2026-08-28T06:18:14.521233+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -11484,7 +11484,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 101,
+          "line": 93,
           "source_group": "other",
           "text": "- `zed_env_doctor.py` - Environment health checks"
         },
@@ -11545,7 +11545,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 98,
+          "line": 90,
           "source_group": "other",
           "text": "- `zed_lint_imports.py` - Run import-linter with `.importlinter` config"
         },
@@ -11594,7 +11594,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 99,
+          "line": 91,
           "source_group": "other",
           "text": "- `zed_mypy.py` - Run mypy matching CI scope (`src/bioetl` only)"
         },
@@ -11627,7 +11627,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 97,
+          "line": 89,
           "source_group": "other",
           "text": "- `zed_pytest_lane.py` - Run pytest with marker expressions (Windows-safe)"
         },
@@ -11684,7 +11684,7 @@
       "references": [
         {
           "path": ".zed/README.md",
-          "line": 100,
+          "line": 92,
           "source_group": "other",
           "text": "- `zed_run.py` - Run local pipeline"
         },

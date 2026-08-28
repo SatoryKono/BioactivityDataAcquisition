@@ -499,9 +499,20 @@ def _candidate_import_paths_via_rg(
     )
     if invalid_names:
         raise ValueError(f"invalid measured module names: {invalid_names!r}")
-    pattern = "|".join(re.escape(name) for name in sorted(measured_module_names))
+    pattern_args = [
+        argument
+        for name in sorted(measured_module_names)
+        for argument in ("-e", re.escape(name))
+    ]
     command = ensure_safe_cli_argv(
-        [rg_binary, "-l", "-g", "*.py", "-e", pattern, str(src_root.resolve())]
+        [
+            rg_binary,
+            "-l",
+            "-g",
+            "*.py",
+            *pattern_args,
+            str(src_root.resolve()),
+        ]
     )
     result = subprocess.run(
         command,

@@ -53,7 +53,6 @@ _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
         "PaginationConfigLike",
         "SourceConfigLike",
     ),
-    "bioetl.domain.ports.config_mapper": ("DomainConfigMapper",),
     "bioetl.domain.ports.data_normalization": ("DataNormalizationPort",),
     "bioetl.domain.ports.data_source": (
         "DataSourceFactoryPort",

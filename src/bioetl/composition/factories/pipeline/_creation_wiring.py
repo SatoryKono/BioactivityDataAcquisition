@@ -12,7 +12,7 @@ from bioetl.application.core.wiring.factory import (
     ShutdownSignal,
 )
 from bioetl.application.core.wiring.transformer import BaseTransformer
-from bioetl.application.ports.pipeline import DomainConfigMapper
+from bioetl.application.ports.pipeline import DomainConfigMapperPort
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
@@ -147,7 +147,7 @@ def _create_pipeline_with_services_impl(
         yaml_config,
         configs_root=resolve_configs_root(),
         relaxed_dq=request.settings.pipeline.relaxed_dq,
-        domain_mapper=cast("DomainConfigMapper", deps.yaml_config_to_domain),
+        domain_mapper=cast("DomainConfigMapperPort", deps.yaml_config_to_domain),
     )
 
     services = build_pipeline_services_fn(

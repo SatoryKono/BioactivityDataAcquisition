@@ -256,8 +256,3 @@ non_aggregate_root_modules:
       path: src/bioetl/domain/types_config_validation.py,
       <<: *support_module,
     }
-  - {
-      module: bioetl.domain.version,
-      path: src/bioetl/domain/version.py,
-      <<: *support_module,
-    }

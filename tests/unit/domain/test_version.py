@@ -26,7 +26,7 @@
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
 # PD6 residual test mock/fixture surface — product NewTypes/Ports stay strict (#7048).
-"""Unit tests for domain version module."""
+"""Unit tests for package version metadata."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ from importlib.metadata import PackageNotFoundError
 import pytest
 
 import bioetl as version_module
-from bioetl.domain.version import get_version
+from bioetl import get_version
 
 
 @pytest.mark.unit
