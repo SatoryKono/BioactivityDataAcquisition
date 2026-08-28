@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         MetricsPort,
     )
     from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.infrastructure.config.domain_config_resolver import DomainConfigMapper
+    from bioetl.domain.ports import DomainConfigMapperPort
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from bioetl.application.ports.pipeline import BaseServicesFactoryProtocol
@@ -41,7 +41,7 @@ class ServiceBundleDependencies:
     """Explicit dependency set for service-bundle wiring."""
 
     load_pipeline_config: Callable[[str], PipelineYamlConfig]
-    yaml_config_to_domain: DomainConfigMapper
+    yaml_config_to_domain: DomainConfigMapperPort
     compute_config_hash: Callable[[PipelineYamlConfig | dict[str, object]], str]
     base_services_factory: BaseServicesFactoryProtocol
 
@@ -50,7 +50,7 @@ def resolve_service_bundle_dependencies(
     *,
     override: ServiceBundleDependencies | None,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
-    yaml_config_to_domain_fn: DomainConfigMapper,
+    yaml_config_to_domain_fn: DomainConfigMapperPort,
     compute_config_hash_fn: Callable[[PipelineYamlConfig | dict[str, object]], str],
     base_services_factory: BaseServicesFactoryProtocol,
 ) -> ServiceBundleDependencies:

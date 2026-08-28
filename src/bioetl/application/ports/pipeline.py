@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.domain.ports import (  # type: ignore[attr-defined]
-    DomainConfigMapper,
+    DomainConfigMapperPort,
     EntityTypeExtractor,
 )
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 __all__ = [
     "BaseServicesFactoryProtocol",
     "ContractPolicyLoaderProtocol",
-    "DomainConfigMapper",
+    "DomainConfigMapperPort",
     "EntityTypeExtractor",
     "PipelineRunnerProtocol",
     "RegistryEntryProtocol",

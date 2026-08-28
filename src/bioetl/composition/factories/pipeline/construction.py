@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from bioetl.composition.factories.pipeline.construction_types import (
     ContractPolicyLoaderProtocol,
-    DomainConfigMapper,
+    DomainConfigMapperPort,
 )
 from bioetl.composition.factories.pipeline.entity_type_extractor import (
     EntityTypeExtractor,
@@ -29,7 +29,7 @@ from bioetl.infrastructure.config.domain_config_resolver import (
 
 __all__ = [
     "ContractPolicyLoaderProtocol",
-    "DomainConfigMapper",
+    "DomainConfigMapperPort",
     "DomainConfigResolver",
     "EntityTypeExtractor",
     "RunContextFactory",
