@@ -6,9 +6,9 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/gh-actions-repair-20260828
+Audited branch: main
 
-Audited commit SHA: `f96f65c01afc159ffe28ad8897b1e1e121ec2a3a`
+Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 
 Evidence surface SHA-256: `67b31093c2fe7276547191cc63ac71194ae91f9ba0e64f27b14b89f90452ee79`
 
@@ -17,7 +17,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "f96f65c01afc159ffe28ad8897b1e1e121ec2a3a",
+  "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
   "evidence_surface_sha256": "67b31093c2fe7276547191cc63ac71194ae91f9ba0e64f27b14b89f90452ee79",
   "metrics": {
     "architecture_integral_score": 9.41,
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical regeneration on origin/main e862d6dbf6. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Re-pin to the current reachable main commit after canonical regeneration of CI evidence. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
