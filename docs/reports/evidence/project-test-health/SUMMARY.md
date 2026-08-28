@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-08-20"
+last_verified: "2026-08-28"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -36,10 +36,11 @@ must be refreshed after each full test campaign.
 
 ## Freshness note
 
-Refreshed on 2026-08-20 during documentation cycle audit
-(`prompt.audit.cycle.docs`, pin origin/main@d297d3d14b, live base c22e7b01b3):
-canonical source paths still exist; interpretation stays backlog signal only
-pending the next full pytest telemetry artifact. Recurrence of #7419.
+Re-verified on 2026-08-28 during the Sonar closeout campaign
+(`fix/sonar-closeout-current-main-20260827@35904a9e72`): all canonical source
+paths still exist, and the tracked test-module inventory contains 2380 files.
+Interpretation remains backlog signal only pending the complete full-pytest
+telemetry receipt. Recurrence of #7419.
 
 This is a non-canonical repo-only evidence layer. The canonical sources of truth are:
 - `configs/quality/test_matrix.yaml`

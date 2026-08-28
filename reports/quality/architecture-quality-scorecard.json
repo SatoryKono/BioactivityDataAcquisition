@@ -84,15 +84,15 @@
     },
     {
       "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 57,
+        "adr_enforcement_blocking_gap_count": 0,
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 0.0,
+      "score": 9.2,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.828
     },
     {
       "evidence_metrics": {
@@ -179,11 +179,11 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 8.58,
+  "integral_score": 9.41,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 57,
-    "adr_enforcement_blocking_gap_count": 57,
+    "adr_enforcement_blocking_gap_count": 0,
     "adr_enforcement_manual_exception_count": 0,
     "compatibility_test_file_count": 0,
     "contract_blocking_issue_count": 0,
@@ -219,7 +219,7 @@
   "source_artifacts": {
     "adr_enforcement_matrix": {
       "accepted_adr_count": 57,
-      "blocking_gap_count": 57,
+      "blocking_gap_count": 0,
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
     },
@@ -243,7 +243,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "85189f85aa68dd3edf1557a0b69f747654f10795390500eeb61e629f7a564a24"
+      "source_fingerprint": "ab8dc5226cbdc592aff72b77c247858bd8596780d86d809acc3dfa4aee55e322"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -262,7 +262,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "421a06364a3e363dc377b666e816007a08f04ed4c1d46a13b0f6f71b7cfce6bb",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "840f36b8895ccedbd758abe51e9d8c53858372e2317e4816dd7f5ba5ac70987c"
+      "source_tree_sha256": "3927bac4770ed7e1c51cada2686c85de9e62c30aaaca2f9af178f64f432a7327"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

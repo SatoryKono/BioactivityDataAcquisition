@@ -34,7 +34,7 @@ from importlib.metadata import PackageNotFoundError
 
 import pytest
 
-import bioetl.domain.version as version_module
+import bioetl as version_module
 from bioetl.domain.version import get_version
 
 
@@ -72,3 +72,12 @@ class TestGetVersion:
         monkeypatch.setattr(version_module, "_pkg_version", missing_package_version)
 
         assert version_module.get_version() == "unknown"
+
+    def test_uses_installed_version_when_declared_version_is_empty(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Installed metadata remains the fallback for an empty declaration."""
+        monkeypatch.setattr(version_module, "__version__", "")
+        monkeypatch.setattr(version_module, "_pkg_version", lambda _: "6.2.0")
+
+        assert version_module.get_version() == "6.2.0"
