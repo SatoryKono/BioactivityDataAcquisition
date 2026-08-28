@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T09:11:42.702230+00:00",
+  "generated_at": "2026-08-28T09:46:11.031765+00:00",
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -7794,7 +7794,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 201,
+      "reference_count": 203,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8026,7 +8026,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 40,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -10925,7 +10925,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -12128,7 +12128,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 391,
+      "reference_count": 397,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
