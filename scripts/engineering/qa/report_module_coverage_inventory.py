@@ -8,6 +8,7 @@ import ast
 import hashlib
 import json
 import os
+import re
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -137,6 +138,20 @@ def _sha256(path: Path) -> str | None:
     if not path.exists():
         return None
     return hashlib.sha256(_normalize_source_bytes(path.read_bytes())).hexdigest()
+
+
+def _coverage_xml_sha256(path: Path) -> str | None:
+    """Hash semantic coverage XML while ignoring its generation timestamp."""
+    if not path.exists():
+        return None
+    normalized = _normalize_source_bytes(path.read_bytes())
+    normalized = re.sub(
+        rb'(?<=\stimestamp=")[^"]*(?=")',
+        b"<normalized>",
+        normalized,
+        count=1,
+    )
+    return hashlib.sha256(normalized).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -878,7 +893,7 @@ def build_module_coverage_inventory(
         "snapshot_date": snapshot_date or date.today().isoformat(),
         "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
         "coverage_xml_path": _repo_relative(coverage_xml, repo_root),
-        "coverage_xml_sha256": _sha256(coverage_xml),
+        "coverage_xml_sha256": _coverage_xml_sha256(coverage_xml),
         "measurement_mode": (
             "coverage_xml" if coverage_xml_exists else "source_tree_only"
         ),
