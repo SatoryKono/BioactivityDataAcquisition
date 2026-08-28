@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3597 |
-| Tracked doc-like files | 3597 |
-| Ignored local docs/reports files | 0 |
+| Doc-like files | 3618 |
+| Tracked doc-like files | 3613 |
+| Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
@@ -18,7 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3597 |
+| ignored_local | 5 |
+| tracked | 3613 |
 
 ## Lifecycle Counts
 
@@ -42,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 922 |
+| working_report | 938 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -63,7 +64,7 @@
 | Canonical | 72 |
 | Deprecated | 8 |
 | Generated | 1177 |
-| Working | 1423 |
+| Working | 1444 |
 
 ## Surface Families
 
@@ -74,14 +75,14 @@
 | canonical | 72 |
 | duplicate | 8 |
 | generated | 1177 |
-| working | 1423 |
+| working | 1444 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 929 |
+| archive-after-migration | 950 |
 | generate-automatically | 1177 |
 | keep | 1139 |
 | reconcile-with-github-state | 8 |
@@ -128,6 +129,22 @@
 | `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
 | `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/crosswalk-delta.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/orphan-req.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/requirement-graph.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/untraced-tests.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/final-summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/delta.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/validation.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/delta.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/run.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-code-drift.csv` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.json` | Working | 0 | archive-after-migration |
@@ -155,22 +172,6 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/blocked-evidence.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/preflight.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
