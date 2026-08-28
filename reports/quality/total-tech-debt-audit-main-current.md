@@ -10,7 +10,7 @@ Audited branch: fix/gh-actions-repair-20260828
 
 Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 
-Evidence surface SHA-256: `b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e`
+Evidence surface SHA-256: `743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
-  "evidence_surface_sha256": "b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e",
+  "evidence_surface_sha256": "743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,11 +29,11 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1569,
+    "fully_covered_module_count": 1570,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
     "partially_covered_module_count": 892,
-    "source_module_count": 2465,
+    "source_module_count": 2466,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
@@ -52,13 +52,13 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
-   - source_module_count: **2465**
-   - fully_covered: **1569**
+   - source_module_count: **2466**
+   - fully_covered: **1570**
    - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
-   - check: fully + partial + no_exec + uncovered + unmeasured = 2465 == source_module_count
+   - check: fully + partial + no_exec + uncovered + unmeasured = 2466 == source_module_count
 1. Contract coverage matrix schema: **contract-coverage-matrix-v3** (v3: strict Gold required for availability).
 1. Constructor waivers (shrink-only inventory): **1** entries.
 1. Compatibility transition/sunset/expired: **0/0/0**; twin pairs: **0**.

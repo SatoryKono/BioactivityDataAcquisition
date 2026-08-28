@@ -271,8 +271,10 @@ class TestUniProtIDMappingClient:
         submit_response.json.return_value = []
         mock_http_client.post = AsyncMock(return_value=submit_response)
 
-        with pytest.raises(IDMappingJobError, match="malformed response"):
+        with pytest.raises(IDMappingJobError, match="malformed response") as exc_info:
             await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert exc_info.value.job_id == "unknown"
 
     @pytest.mark.asyncio
     async def test_map_ids_direct_string_mapping(
