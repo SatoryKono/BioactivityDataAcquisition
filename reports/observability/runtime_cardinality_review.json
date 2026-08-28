@@ -1,16 +1,33 @@
 {
-  "approved_thresholds": {},
-  "degraded_reasons": [
-    "no reviewed runtime-cardinality metrics require live evidence"
-  ],
-  "generated_at": "2026-08-28T09:10:36Z",
-  "label_keys": {},
+  "approved_thresholds": {
+    "bioetl_checkpoint_load_events_total": 500,
+    "bioetl_checkpoint_saved_at_seconds": 500,
+    "bioetl_health_check_latency_seconds": 500
+  },
+  "degraded_reasons": [],
+  "generated_at": "2026-08-20T11:22:06Z",
+  "label_keys": {
+    "bioetl_checkpoint_load_events_total": [
+      "pipeline",
+      "status"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
+      "pipeline"
+    ],
+    "bioetl_health_check_latency_seconds": [
+      "provider"
+    ]
+  },
   "live_observed_series": {},
   "live_threshold_violations": [],
   "local_cardinality_fallback_allowed": true,
-  "local_observed_series": {},
+  "local_observed_series": {
+    "bioetl_checkpoint_load_events_total": 0,
+    "bioetl_checkpoint_saved_at_seconds": 0,
+    "bioetl_health_check_latency_seconds": 0
+  },
   "local_threshold_violations": [],
-  "mode": "no_reviewed_metrics",
+  "mode": "local_cardinality_fallback",
   "observed_label_values": {},
   "prometheus_base_url": null,
   "prometheus_base_url_source": "unconfigured",
@@ -18,10 +35,14 @@
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",
   "query_errors": {},
   "review_required_metrics": [],
-  "reviewed_metrics": [],
+  "reviewed_metrics": [
+    "bioetl_checkpoint_load_events_total",
+    "bioetl_checkpoint_saved_at_seconds",
+    "bioetl_health_check_latency_seconds"
+  ],
   "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --summary-out \"$GITHUB_STEP_SUMMARY\" --fail-on-degraded-live-review",
-  "source_revision": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "source_worktree_dirty": true,
+  "source_revision": "b16562eb92a296e64f374587947c3bc4fde9c659",
+  "source_worktree_dirty": false,
   "static_threshold_violations": [],
   "status": "passed"
 }
