@@ -93,7 +93,7 @@ Use it when you need to answer:
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request` | Optional helper-image and compose validation |
+| `docker.yml` | `Docker Build & Compose Validation` | `workflow_dispatch`, `push`, `pull_request` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
 | `release.yml` | _(unnamed in YAML)_ | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
 

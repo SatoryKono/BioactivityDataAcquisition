@@ -104,7 +104,6 @@ class _FakeHttp:
         self._response = response
 
     async def get(self, *args: Any, **kwargs: Any) -> _FakeResponse:
-        await asyncio.sleep(0)
         del args, kwargs
         return self._response
 
