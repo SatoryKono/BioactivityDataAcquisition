@@ -151,6 +151,11 @@ def test_bundle_generator_falls_back_to_png_when_svg_missing(tmp_path: Path) -> 
         ("[click](javascript:alert(1))", r"\[click\](javascript:alert(1))"),
         ("`raw code`", r"\`raw code\`"),
         ("&lt;https://evil.example&gt;", "&lt;https://evil.example&gt;"),
+        ("safe&#10;# injected", "safe # injected"),
+        ("safe&#10;---", "safe ---"),
+        ("safe&#13;tail", "safe tail"),
+        ("safe\u2028tail", "safe tail"),
+        ("safe\x00tail", "safe tail"),
     ],
 )
 def test_mermaid_label_text_uses_structural_html_parsing(

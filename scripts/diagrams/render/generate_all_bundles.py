@@ -16,6 +16,7 @@ import html
 import os
 import re
 import sys
+import unicodedata
 from datetime import datetime
 from html.parser import HTMLParser
 from pathlib import Path
@@ -56,7 +57,17 @@ def _mermaid_label_text(label: str) -> str:
     parser = _MermaidLabelTextExtractor()
     parser.feed(label)
     parser.close()
-    text = html.escape("".join(parser.parts).strip(), quote=False)
+    visible: list[str] = []
+    pending_space = False
+    for character in "".join(parser.parts):
+        if character.isspace() or unicodedata.category(character).startswith("C"):
+            pending_space = bool(visible)
+            continue
+        if pending_space:
+            visible.append(" ")
+            pending_space = False
+        visible.append(character)
+    text = html.escape("".join(visible), quote=False)
     for marker in ("\\", "`", "[", "]", "!"):
         text = text.replace(marker, f"\\{marker}")
     return text
