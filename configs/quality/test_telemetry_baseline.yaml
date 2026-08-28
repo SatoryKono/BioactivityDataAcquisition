@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-28T08:40:39.422330+00:00'
+refreshed_at_utc: '2026-08-28T09:03:34.651937+00:00'
 refresh_status: captured
 source_commit: 09ab9ac286bacb7eee3324e950603539a5c62ee6
 source_run_id: '33149935203'
@@ -13,7 +13,7 @@ freshness_guard:
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
-  coverage_percent_fallback: 96.54
+  coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
