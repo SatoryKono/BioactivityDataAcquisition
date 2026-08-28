@@ -21,6 +21,7 @@ import pytest
 import yaml
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
+    _coverage_xml_sha256,
     main as module_coverage_inventory_main,
 )
 from tests.architecture import _module_coverage_inventory_support as inventory_support
@@ -39,6 +40,30 @@ GATES_PATH = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 COVERAGE_TAIL_CLOSEOUT_PATH = (
     ROOT / "reports" / "quality" / "issue-5376-coverage-tail-closeout.json"
 )
+
+
+@pytest.mark.architecture
+def test_coverage_xml_digest_ignores_only_generation_timestamp(
+    tmp_path: Path,
+) -> None:
+    coverage_xml = tmp_path / "coverage.xml"
+    coverage_xml.write_text(
+        '<coverage timestamp="100"><line number="1" hits="1" /></coverage>\n',
+        encoding="utf-8",
+    )
+    initial_digest = _coverage_xml_sha256(coverage_xml)
+
+    coverage_xml.write_text(
+        '<coverage timestamp="200"><line number="1" hits="1" /></coverage>\n',
+        encoding="utf-8",
+    )
+    assert _coverage_xml_sha256(coverage_xml) == initial_digest
+
+    coverage_xml.write_text(
+        '<coverage timestamp="200"><line number="1" hits="0" /></coverage>\n',
+        encoding="utf-8",
+    )
+    assert _coverage_xml_sha256(coverage_xml) != initial_digest
 
 
 @pytest.mark.architecture

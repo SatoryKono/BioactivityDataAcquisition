@@ -6,19 +6,19 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/sonar-postmerge-ci-closeout-20260828
+Audited branch: fix/gh-actions-repair-20260828
 
-Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
+Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 
-Evidence surface SHA-256: `00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8`
+Evidence surface SHA-256: `b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
-  "evidence_surface_sha256": "00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8",
+  "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
+  "evidence_surface_sha256": "b86e77d013b57f00b47f0c322fa968d7cf69025e20e4d0f328d76a83ac37720e",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1568,
+    "fully_covered_module_count": 1569,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 893,
+    "partially_covered_module_count": 892,
     "source_module_count": 2465,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -53,8 +53,8 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2465**
-   - fully_covered: **1568**
-   - partially_covered: **893**
+   - fully_covered: **1569**
+   - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
