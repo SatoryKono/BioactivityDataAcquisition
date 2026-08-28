@@ -262,6 +262,19 @@ class TestUniProtIDMappingClient:
         assert "No jobId" in str(exc_info.value)
 
     @pytest.mark.asyncio
+    async def test_map_ids_rejects_malformed_submission_payload(
+        self, idmapping_client, mock_http_client
+    ):
+        """Reject a successful submission response whose JSON is not an object."""
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = []
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+
+        with pytest.raises(IDMappingJobError, match="malformed response"):
+            await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+    @pytest.mark.asyncio
     async def test_map_ids_direct_string_mapping(
         self, idmapping_client, mock_http_client
     ):
