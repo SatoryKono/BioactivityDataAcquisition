@@ -1035,7 +1035,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv==0.11.26" in dockerfile
     assert (
         dockerfile.count(
-            "python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            "python@sha256:4427763a1ba36f5aa8f656a03e5d00f3b8d61f5dd950c73df6c14f8c7640f8ab"
         )
         == 2
     )
