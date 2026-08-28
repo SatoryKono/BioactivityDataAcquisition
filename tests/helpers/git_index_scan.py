@@ -97,6 +97,16 @@ def _build_git_grep_command(
     pathspecs: tuple[str, ...],
     excluded_prefixes: tuple[str, ...],
 ) -> list[str]:
+    """Build a Git grep command for fixed-string, line-numbered searches with excluded path prefixes.
+    
+    Parameters:
+        patterns: Literal strings to search for.
+        pathspecs: Git pathspecs defining the search scope.
+        excluded_prefixes: Path prefixes to exclude from the search.
+    
+    Returns:
+        The Git grep command and its arguments.
+    """
     command = ["git", "-c", "color.grep=false", "grep", "-n", "-F"]
     for pattern in patterns:
         command.extend(("-e", pattern))
