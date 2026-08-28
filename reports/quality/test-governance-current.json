@@ -949,14 +949,7 @@
     }
   },
   "assertless_total_candidates": 87,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1130,10 +1123,8 @@
     ]
   },
   "intentional_no_exception_contract": 86,
-  "markerless_examples": [
-    "tests/unit/domain/registry/test_publication_data.py:30"
-  ],
-  "markerless_test_functions": 1,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -1996,10 +1987,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/unit/domain/registry/test_publication_data.py:30"
-    ],
-    "markerless_test_functions": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2063,7 +2052,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "18e7effdbee9cc49774dafca9e438a72e970e277fa23dc16a32030a0bf211a7d",
+  "source_tree_sha256": "d716677f8e292c612a3ec5065a9caa251346cbebda8a1820eacf02e171c8a5d2",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2072,10 +2061,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
-    "markerless_examples": [
-      "tests/unit/domain/registry/test_publication_data.py:30"
-    ],
-    "markerless_test_functions": 1,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0

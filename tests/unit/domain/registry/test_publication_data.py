@@ -9,6 +9,9 @@ from bioetl.domain.registry.publication_data import (
 )
 
 
+pytestmark = pytest.mark.unit
+
+
 @pytest.mark.parametrize(
     ("entity_type", "provider"),
     [
