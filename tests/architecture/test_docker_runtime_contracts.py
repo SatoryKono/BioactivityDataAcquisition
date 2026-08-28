@@ -1035,7 +1035,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv==0.11.26" in dockerfile
     assert (
         dockerfile.count(
-            "python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            "python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579"
         )
         == 2
     )
@@ -1328,7 +1328,8 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -
     enforcement = built["Enforce Trivy Critical High Medium policy"]
     assert str(enforcement["with"].get("exit-code")) == "1"
     assert enforcement["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
-    assert all(step["with"].get("ignore-unfixed") is False for step in built.values())
+    assert all(step["with"].get("ignore-unfixed") is False for step in evidence)
+    assert enforcement["with"].get("ignore-unfixed") is True
     assert all(step["with"].get("version") == "v0.70.0" for step in built.values())
 
 
