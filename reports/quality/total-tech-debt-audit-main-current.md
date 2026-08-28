@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: fix/gh-actions-repair-20260828
 
-Audited commit SHA: `12145f7e34b0e0930c9c7d5941c317db9a82186d`
+Audited commit SHA: `3c42ccaaa99dee920642d9ddad8de9a0bab6b051`
 
-Evidence surface SHA-256: `b079731857814da4465d532ce481aa1fae7c2c58e7fcb6e7cb348ceef730fcd1`
+Evidence surface SHA-256: `31b7a241ecbac7d157d58e2fc94bffd3823d2bc94da0e7845ddca7f83f300822`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "12145f7e34b0e0930c9c7d5941c317db9a82186d",
-  "evidence_surface_sha256": "b079731857814da4465d532ce481aa1fae7c2c58e7fcb6e7cb348ceef730fcd1",
+  "audited_commit_sha": "3c42ccaaa99dee920642d9ddad8de9a0bab6b051",
+  "evidence_surface_sha256": "31b7a241ecbac7d157d58e2fc94bffd3823d2bc94da0e7845ddca7f83f300822",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
