@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T16:34:33.875087+00:00",
+  "generated_at": "2026-08-28T17:18:29.539855+00:00",
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 412
+      "tests": 411
     }
   },
   "scripts": [
@@ -909,25 +909,25 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 285,
+          "line": 280,
           "source_group": "docs",
           "text": "**Layer 1: Codex WSL bootstrap** (`scripts/ai/codex/helper/setup-wsl.sh`)"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 298,
+          "line": 293,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 325,
+          "line": 319,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\" 2>/dev/null"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 382,
+          "line": 375,
           "source_group": "docs",
           "text": "bash \"$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh\""
         },
@@ -3718,7 +3718,7 @@
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 237,
+          "line": 232,
           "source_group": "docs",
           "text": "| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |"
         }
@@ -3743,7 +3743,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 237,
+          "line": 232,
           "source_group": "docs",
           "text": "| `filesystem` | `scripts/ai/mcp/mcp_filesystem_wrapper.sh` (WSL) / `scripts/ai/mcp/mcp_filesystem_wrapper.ps1` (Windows) | Repo-scoped file access (host-native absolute root) |"
         },
@@ -5940,13 +5940,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 340,
+          "line": 333,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 425,
+          "line": 418,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -5997,7 +5997,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 447,
+          "line": 440,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6074,7 +6074,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 436,
+          "line": 429,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6152,13 +6152,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 343,
+          "line": 336,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 430,
+          "line": 423,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6501,13 +6501,13 @@
         },
         {
           "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
-          "line": 93,
+          "line": 69,
           "source_group": "tests",
           "text": "\"scripts/diagrams/fix/differentiate_linkstyle.py\","
         },
         {
           "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
-          "line": 111,
+          "line": 87,
           "source_group": "tests",
           "text": "\"scripts/diagrams/fix/differentiate_linkstyle.py\","
         },
@@ -6588,7 +6588,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 442,
+          "line": 435,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -6606,7 +6606,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
-          "line": 78,
+          "line": 54,
           "source_group": "tests",
           "text": "\"scripts/diagrams/fix/harmonize_link_styles.py\","
         }
@@ -6617,7 +6617,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -6884,7 +6884,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 380,
+          "line": 373,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
@@ -6929,7 +6929,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 383,
+          "line": 376,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7049,7 +7049,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 167,
+          "line": 164,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -7654,7 +7654,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_tooling_fail_closed.py",
-          "line": 125,
+          "line": 101,
           "source_group": "tests",
           "text": "text = (ROOT / \"scripts/diagrams/svg2png.mjs\").read_text(encoding=\"utf-8\")"
         },
@@ -7689,7 +7689,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 373,
+          "line": 366,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -10397,7 +10397,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 231,
+          "line": 226,
           "source_group": "docs",
           "text": "The generated workspace config from `python -m scripts.engineering.dev setup-mcp`"
         },
@@ -10448,19 +10448,19 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 178,
+          "line": 173,
           "source_group": "docs",
           "text": "> via `~/.bashrc` → `scripts/engineering/dev/bash/.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 306,
+          "line": 300,
           "source_group": "docs",
           "text": "environment variables (set by `scripts/engineering/dev/bash/.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 329,
+          "line": 323,
           "source_group": "docs",
           "text": "source \"$BIOETL_DIR/scripts/engineering/dev/bash/.wsl_proxy_env.sh\" 2>/dev/null"
         },
@@ -18195,13 +18195,13 @@
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 122,
+          "line": 117,
           "source_group": "docs",
           "text": "scripts\\ops\\codex-exec.bat \"fix the bug\"        # full-auto"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 146,
+          "line": 141,
           "source_group": "docs",
           "text": "- by default, `scripts\\ops\\codex.bat` and `scripts\\ops\\codex-exec.bat` use the"
         },
@@ -18252,19 +18252,19 @@
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 120,
+          "line": 115,
           "source_group": "docs",
           "text": "scripts\\ops\\codex.bat                           # interactive"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 121,
+          "line": 116,
           "source_group": "docs",
           "text": "scripts\\ops\\codex.bat \"add retry logic\"         # interactive with prompt"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 146,
+          "line": 141,
           "source_group": "docs",
           "text": "- by default, `scripts\\ops\\codex.bat` and `scripts\\ops\\codex-exec.bat` use the"
         },
@@ -18691,7 +18691,7 @@
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 131,
+          "line": 126,
           "source_group": "docs",
           "text": "scripts\\ops\\install-codex-cmd.bat"
         },
@@ -18775,7 +18775,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 261,
+          "line": 256,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/codex-exec.sh` verify the persisted workspace"
         },
@@ -18946,7 +18946,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 260,
+          "line": 255,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/codex.sh`, and"
         },
@@ -19872,7 +19872,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 248,
+          "line": 246,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19940,7 +19940,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 249,
+          "line": 247,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -20795,7 +20795,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1193,
+          "line": 1206,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -21839,7 +21839,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -21855,9 +21855,15 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 84,
+          "line": 83,
           "source_group": "docs",
-          "text": "scripts\\ops\\runtime\\wsl\\start-wsl-proxy.bat 172.30.32.1 172.30.32.0/20"
+          "text": "scripts\\ops\\start-wsl-proxy.bat"
+        },
+        {
+          "path": "docs/03-guides/development/codex-wsl2-setup.md",
+          "line": 353,
+          "source_group": "docs",
+          "text": "If not listening, run `scripts\\ops\\start-wsl-proxy.bat`."
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -21882,12 +21888,6 @@
           "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 293,
-          "source_group": "docs",
-          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
@@ -21896,7 +21896,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -21918,13 +21918,13 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 90,
+          "line": 89,
           "source_group": "docs",
-          "text": "python scripts\\ops\\runtime\\wsl\\wsl_proxy.py --bind-host 172.30.32.1 --allow-cidr 172.30.32.0/20"
+          "text": "python scripts\\ops\\wsl_proxy.py"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 301,
+          "line": 296,
           "source_group": "docs",
           "text": "**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)"
         },
@@ -22937,7 +22937,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1130,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -23005,7 +23005,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1130,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
