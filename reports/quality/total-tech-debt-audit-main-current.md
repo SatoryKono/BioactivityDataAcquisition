@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: fix/codeql-zizmor-20260828
 
-Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
+Audited commit SHA: `f44e698411ec7a472606d094e0305aedb5b6ef89`
 
-Evidence surface SHA-256: `fed6927807cee345af99d9f6aecd786550461c65a333a22bb3c37aac8b984634`
+Evidence surface SHA-256: `743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
-  "evidence_surface_sha256": "fed6927807cee345af99d9f6aecd786550461c65a333a22bb3c37aac8b984634",
+  "audited_commit_sha": "f44e698411ec7a472606d094e0305aedb5b6ef89",
+  "evidence_surface_sha256": "743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1569,
+    "fully_covered_module_count": 1570,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 893,
+    "partially_covered_module_count": 892,
     "source_module_count": 2466,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -53,8 +53,8 @@ Refresh reason: Reconcile the PR #9821 evidence surface after merging current `o
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2466**
-   - fully_covered: **1569**
-   - partially_covered: **893**
+   - fully_covered: **1570**
+   - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**

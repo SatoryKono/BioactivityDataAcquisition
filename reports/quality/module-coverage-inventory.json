@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "cc444ab9e50f25142a710fecd0dc784ff96fc160d70efaaeb17c1a5f6df76dbb",
+  "coverage_xml_sha256": "c8b0eadfda312c76e64292c184a5f81d8708ed36ad7a45270b576f532eaa9bf3",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -18738,12 +18738,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 80,
-      "executable_lines": 80,
+      "covered_lines": 91,
+      "executable_lines": 91,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot._idmapping_parser",
       "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py",
-      "source_lines": 175
+      "source_lines": 192
     },
     {
       "coverage_percent": 100.0,
@@ -18756,14 +18756,14 @@
       "source_lines": 178
     },
     {
-      "coverage_percent": 98.98,
-      "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 98,
-      "missing_lines": 1,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 92,
+      "executable_lines": 92,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot._idmapping_transport",
       "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py",
-      "source_lines": 245
+      "source_lines": 241
     },
     {
       "coverage_percent": 86.21,
@@ -43400,12 +43400,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 80,
-      "executable_lines": 80,
+      "covered_lines": 91,
+      "executable_lines": 91,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot._idmapping_parser",
       "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_parser.py",
-      "source_lines": 175
+      "source_lines": 192
     },
     {
       "coverage_percent": 100.0,
@@ -43418,14 +43418,14 @@
       "source_lines": 178
     },
     {
-      "coverage_percent": 98.98,
-      "coverage_status": "partially_covered",
-      "covered_lines": 97,
-      "executable_lines": 98,
-      "missing_lines": 1,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 92,
+      "executable_lines": 92,
+      "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.uniprot._idmapping_transport",
       "path": "src/bioetl/infrastructure/adapters/uniprot/_idmapping_transport.py",
-      "source_lines": 245
+      "source_lines": 241
     },
     {
       "coverage_percent": 86.21,
@@ -49488,9 +49488,9 @@
     "source_module_count": 2466,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1569,
+      "fully_covered": 1570,
       "no_executable_lines": 4,
-      "partially_covered": 893,
+      "partially_covered": 892,
       "uncovered": 0,
       "unmeasured": 0
     },
