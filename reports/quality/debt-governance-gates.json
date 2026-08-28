@@ -37,17 +37,17 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": "not_evaluated_without_changed_from_ref",
       "limit": 0,
       "metric": "budget_increase_count",
       "name": "debt_scorecard_budget_no_growth",
-      "remediation": "Lower or revert increased scorecard budgets; debt budgets must be flat or decreasing.",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
       "status": "pass"
     },
     {
-      "current": "90235a21d2ab76908394afb33373384e85213c1524447fabc4ad18fadf494c70",
-      "limit": "90235a21d2ab76908394afb33373384e85213c1524447fabc4ad18fadf494c70",
+      "current": "344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6",
+      "limit": "344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,13 +57,13 @@
     {
       "current": {
         "source_module_count": 2466,
-        "source_tree_sha256": "90235a21d2ab76908394afb33373384e85213c1524447fabc4ad18fadf494c70",
+        "source_tree_sha256": "344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2466,
-        "source_tree_sha256": "90235a21d2ab76908394afb33373384e85213c1524447fabc4ad18fadf494c70",
+        "source_tree_sha256": "344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -379,16 +379,16 @@
       "status": "pass"
     },
     {
-      "current": true,
-      "limit": true,
-      "metric": "inventory_matches_current_static_report",
+      "current": 0,
+      "limit": 0,
+      "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_inventory_freshness",
-      "remediation": "Regenerate reports/observability/runtime_cardinality_inventory.json before merging metric, dashboard, or alert-rule changes.",
+      "remediation": "Refresh runtime cardinality inventory evidence before merging metric, dashboard, or alert-rule changes.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "changed_metric_surface_count",
       "name": "observability_touched_metric_review_freshness",

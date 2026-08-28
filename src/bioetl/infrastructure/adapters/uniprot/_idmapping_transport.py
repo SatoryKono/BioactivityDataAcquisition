@@ -9,10 +9,7 @@ from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 import httpx
 
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.adapters.common.response_shapes import (
-    extract_response_items,
-    extract_response_text,
-)
+from bioetl.infrastructure.adapters.common.response_shapes import extract_response_text
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
 from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
     trusted_idmapping_url,
@@ -41,6 +38,12 @@ class IDMappingTransportDependencies(Protocol):
         self,
         mapping: JsonDict,  # Any: untyped API JSON
     ) -> tuple[str | None, JsonDict | None]: ...
+
+    def _append_mapping_results(
+        self,
+        data: object,
+        entries_by_id: dict[str, list[JsonDict]],
+    ) -> bool: ...
 
     def _get_next_page_url(self, headers: Mapping[str, str]) -> str | None: ...
 
@@ -157,15 +160,8 @@ class IDMappingTransportMixin:
 
             redirect_count = 0
 
-            data = response.json()
-            if not isinstance(data, dict):
+            if not deps._append_mapping_results(response.json(), entries_by_id):
                 break
-            for mapping in extract_response_items(data, "results"):
-                if not isinstance(mapping, dict):
-                    continue
-                from_id, entry_data = deps._parse_mapping_entry(mapping)
-                if from_id in entries_by_id and entry_data:
-                    entries_by_id[from_id].append(entry_data)
 
             next_url = deps._get_next_page_url(response.headers)
             url = trusted_idmapping_url(deps.base_url, next_url) if next_url else None

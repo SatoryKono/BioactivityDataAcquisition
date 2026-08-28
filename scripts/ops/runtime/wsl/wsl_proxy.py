@@ -25,12 +25,14 @@ LISTEN_HOST = "127.0.0.1"
 LISTEN_PORT = 3128
 BUFFER_SIZE = 65536
 CONNECT_TIMEOUT = 10
-PRIVATE_BIND_NETWORKS = tuple(
-    ipaddress.ip_network(cidr)
-    for cidr in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+LOOPBACK_NETWORK = ipaddress.IPv4Network((0x7F000000, 8))
+PRIVATE_BIND_NETWORKS = (
+    ipaddress.IPv4Network((0x0A000000, 8)),
+    ipaddress.IPv4Network((0xAC100000, 12)),
+    ipaddress.IPv4Network((0xC0A80000, 16)),
 )
 ALLOWED_CLIENT_NETWORKS = (
-    ipaddress.ip_network("127.0.0.0/8"),
+    LOOPBACK_NETWORK,
     *PRIVATE_BIND_NETWORKS,
 )
 
@@ -85,7 +87,7 @@ def build_bind_policy(
     ):
         raise ValueError("non-loopback bind must belong to an allowed client CIDR")
     if not networks:
-        networks = (ipaddress.ip_network("127.0.0.0/8"),)
+        networks = (LOOPBACK_NETWORK,)
     return str(address), networks
 
 

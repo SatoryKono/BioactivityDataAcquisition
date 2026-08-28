@@ -49330,7 +49330,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-28",
-  "source_tree_sha256": "90235a21d2ab76908394afb33373384e85213c1524447fabc4ad18fadf494c70",
+  "source_tree_sha256": "344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
