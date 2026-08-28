@@ -201,7 +201,8 @@ def build_fixability_audit(payload: Mapping[str, Any]) -> dict[str, object]:
     unfixed_or_deferred = [
         row
         for row in all_findings
-        if row["severity"] in BLOCKING_SEVERITIES and not is_fixable_blocking_finding(row)
+        if row["severity"] in BLOCKING_SEVERITIES
+        and not is_fixable_blocking_finding(row)
     ]
     severity_counts = {
         severity: sum(1 for row in all_findings if row["severity"] == severity)
