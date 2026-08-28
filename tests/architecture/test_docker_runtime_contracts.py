@@ -1035,11 +1035,11 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv==0.11.26" in dockerfile
     assert (
         dockerfile.count(
-            "python@sha256:4427763a1ba36f5aa8f656a03e5d00f3b8d61f5dd950c73df6c14f8c7640f8ab"
+            "python@sha256:a249c9f47e05708dd367f3fe8ada03cf347390fad66fb8b0518c0ef55ae3cb84"
         )
         == 2
     )
-    assert "python:3.12-slim-bookworm" in dockerfile
+    assert "python:3.12-slim-trixie" in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
         not in dockerfile
@@ -1353,7 +1353,7 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     base_scan = next(
         step
         for step in steps
-        if step.get("name") == "Run Trivy on pinned Debian bookworm base image"
+        if step.get("name") == "Run Trivy on pinned Debian trixie base image"
     )
     assert base_scan["with"]["format"] == "json"
     assert base_scan["with"]["output"] == ("reports/security/trivy-base-results.json")
