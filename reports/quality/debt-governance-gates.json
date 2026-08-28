@@ -253,13 +253,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -416,15 +416,17 @@
     },
     {
       "current": {
-        "artifacts": [],
-        "count": 0
+        "artifacts": [
+          "adr_enforcement_matrix"
+        ],
+        "count": 1
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -449,7 +451,7 @@
   ],
   "schema_version": 1,
   "stale_artifacts": {
-    "adr_enforcement_matrix": false,
+    "adr_enforcement_matrix": true,
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
@@ -463,16 +465,16 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.86,
-    "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
+    "architecture_quality_scorecard_integral_score": 8.69,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 6,
     "failing_gates": [
-      "test_governance_budget_violations",
       "observability_dashboarded_without_emission",
       "observability_alerted_without_emission",
       "observability_unused_declared_metrics",
       "observability_release_review_status",
-      "adr_enforcement_blocking_gaps"
+      "adr_enforcement_blocking_gaps",
+      "generated_artifact_drift"
     ],
     "gate_count": 45,
     "pass_count": 39,

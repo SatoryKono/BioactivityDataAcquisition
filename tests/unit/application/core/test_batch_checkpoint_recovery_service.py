@@ -222,6 +222,7 @@ async def test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager(
     metrics.set_gauge.assert_not_called()
 
 
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_shutdown_checkpoint_failure_is_recorded(
     checkpoint_manager: AsyncMock,

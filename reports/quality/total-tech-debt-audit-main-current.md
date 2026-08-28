@@ -10,7 +10,7 @@ Audited branch: fix/sonar-postmerge-ci-closeout-20260828
 
 Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
 
-Evidence surface SHA-256: `00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8`
+Evidence surface SHA-256: `79441b59c3580e04f46e45cfee35de121d807d14d66c5c67b3580b949bb9578d`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,21 +18,21 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
-  "evidence_surface_sha256": "00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8",
+  "evidence_surface_sha256": "79441b59c3580e04f46e45cfee35de121d807d14d66c5c67b3580b949bb9578d",
   "metrics": {
-    "architecture_integral_score": 9.41,
+    "architecture_integral_score": 8.69,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 6,
+    "debt_gate_pass_count": 39,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1568,
+    "fully_covered_module_count": 1569,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 893,
+    "partially_covered_module_count": 892,
     "source_module_count": 2465,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -48,13 +48,13 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (45 debt-governance gates).
+1. Debt-governance gates: **39 pass / 6 fail** (45 debt-governance gates).
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
+1. Architecture quality integral score: **8.69** (`good_targeted_improvements`). Integral score `8.69`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2465**
-   - fully_covered: **1568**
-   - partially_covered: **893**
+   - fully_covered: **1569**
+   - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
