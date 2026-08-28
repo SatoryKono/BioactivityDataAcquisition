@@ -1,0 +1,16 @@
+{
+  "iteration": 2,
+  "csv_rows": 172,
+  "tests_covered": 66,
+  "untraced": 106,
+  "orphan_generic": 116,
+  "invented": {
+    "src": 0,
+    "docs": 12,
+    "tests": 0,
+    "docs_detail": 12
+  },
+  "wave2_file": "tests/architecture/test_req_traceability_bindings_wave2.py",
+  "status": "ready for push",
+  "docs_invented_note": "12 docs invented are RULES 7.x protocol anchors (REQ-ARCH-030/031/040/041) + ADR-033 REQ-VAL-001..008 — historical, not executable crosswalk; accepted per #9803 close/reopen (P1 stays open until CSV bulk sync)."
+}
