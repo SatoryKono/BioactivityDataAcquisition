@@ -2,9 +2,9 @@
 
 Implements RULES.md §3.5 - Centralized health state management.
 
-Requirements:
-- REQ-OBS-010: provider_health_status metric
-- REQ-ERR-015: Automatic state transitions
+Requirements (canonical):
+- REQ-HEALTH-001..003: provider health checks
+- REQ-CB-001..005: CircuitBreaker state transitions
 
 State transitions per RULES.md §3.5:
 - Healthy → Degraded: 1-2 consecutive errors
