@@ -6,9 +6,9 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/gh-actions-repair-20260828
+Audited branch: fix/codeql-zizmor-20260828
 
-Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
+Audited commit SHA: `8e4223b98b5491184c7f65424804cd3e159bda46`
 
 Evidence surface SHA-256: `743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311`
 
@@ -17,7 +17,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
+  "audited_commit_sha": "8e4223b98b5491184c7f65424804cd3e159bda46",
   "evidence_surface_sha256": "743eedf38c1701d89278a06900914ef1191f1b54f3605f76b2788904e19a5311",
   "metrics": {
     "architecture_integral_score": 9.41,
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical regeneration on origin/main e862d6dbf6. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Re-pin after canonical telemetry regeneration from Tests run 33204402376 at PR SHA 8e4223b98b. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
