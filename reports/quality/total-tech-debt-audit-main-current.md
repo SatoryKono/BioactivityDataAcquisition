@@ -10,7 +10,7 @@ Audited branch: fix/sonar-postmerge-ci-closeout-20260828
 
 Audited commit SHA: `aee0c4e867a93e41d765fd9879ec2e1c3c386823`
 
-Evidence surface SHA-256: `c2e542f146b1d21d5fbe98416249a7fb9ddf58ca164771b8906d33d676ea6f69`
+Evidence surface SHA-256: `0f5941f8a1d4b6615fa0d4874f52b95982dc172ff38c8cdb8339cbe07c56b6cb`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "aee0c4e867a93e41d765fd9879ec2e1c3c386823",
-  "evidence_surface_sha256": "c2e542f146b1d21d5fbe98416249a7fb9ddf58ca164771b8906d33d676ea6f69",
+  "evidence_surface_sha256": "0f5941f8a1d4b6615fa0d4874f52b95982dc172ff38c8cdb8339cbe07c56b6cb",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1568,
+    "fully_covered_module_count": 1569,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 893,
+    "partially_covered_module_count": 892,
     "source_module_count": 2465,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -53,8 +53,8 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2465**
-   - fully_covered: **1568**
-   - partially_covered: **893**
+   - fully_covered: **1569**
+   - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**

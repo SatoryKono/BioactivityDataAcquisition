@@ -120,12 +120,15 @@ def export_trivy_baseline_csv(
     github_alerts_json: Path | None = None,
 ) -> int:
     """Write deterministic RF-001 CSV evidence and return the row count."""
-    payload = json.loads(trivy_json.read_text(encoding="utf-8"))
+    safe_trivy = resolve_output_path(trivy_json)
+    payload = json.loads(safe_trivy.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("Trivy JSON root must be an object")
     github_alerts: object | None = None
-    if github_alerts_json is not None and github_alerts_json.is_file():
-        github_alerts = json.loads(github_alerts_json.read_text(encoding="utf-8"))
+    if github_alerts_json is not None:
+        safe_alerts = resolve_output_path(github_alerts_json)
+        if safe_alerts.is_file():
+            github_alerts = json.loads(safe_alerts.read_text(encoding="utf-8"))
     rows = trivy_baseline_rows(payload, github_alerts=github_alerts)
     safe_output = resolve_output_path(output)
     safe_output.parent.mkdir(parents=True, exist_ok=True)
@@ -230,7 +233,8 @@ def build_fixability_audit(payload: Mapping[str, Any]) -> dict[str, object]:
 
 def write_fixability_audit(*, trivy_json: Path, output: Path) -> dict[str, object]:
     """Записать audit-отчёт в repository-bounded путь и вернуть его payload."""
-    payload = json.loads(trivy_json.read_text(encoding="utf-8"))
+    safe_trivy = resolve_output_path(trivy_json)
+    payload = json.loads(safe_trivy.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("Trivy JSON root must be an object")
     audit = build_fixability_audit(payload)
@@ -259,7 +263,10 @@ def parse_fixability_gate_args(argv: Sequence[str] | None = None) -> argparse.Na
 def main(argv: Sequence[str] | None = None) -> int:
     """Сформировать audit и применить merge-gate policy без suppression SARIF."""
     args = parse_fixability_gate_args(argv)
-    audit = write_fixability_audit(trivy_json=args.trivy_json, output=args.output)
+    audit = write_fixability_audit(
+        trivy_json=resolve_output_path(args.trivy_json),
+        output=resolve_output_path(args.output),
+    )
     summary = audit["summary"]
     assert isinstance(summary, Mapping)
     blocking = summary["fixable_blocking_findings"]

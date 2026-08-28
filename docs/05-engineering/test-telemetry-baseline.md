@@ -30,7 +30,7 @@ trend evidence only.
 - Source branch: `main`
 - Source commit: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 - Source run id: `github-33149935203-1`
-- Source tree sha256: `9cb498145191d5412653796b9921c0ca8e81a5ffa319f73a9ab9f44cbb008649`
+- Source tree sha256: `062cd907c2933ce724209f61c72ab1b3b45ae678a97153d34248d2939ca7beed`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-08-28T09:08:59.714038+00:00`
 
