@@ -12,14 +12,14 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 97.11,
+    "application_core_covered_line_percent": 97.25,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
   "parent_epic_status": {
     "status": "not_closeable_under_current_definition_of_done",
-    "remaining_below_85_module_count": 66,
-    "reason": "Issue #5244 requires zero below-tier production modules; #5272 is locally closeable, but the parent epic remains open while 66 production modules are still below the default floor."
+    "remaining_below_85_module_count": 65,
+    "reason": "Issue #5244 requires zero below-tier production modules; #5272 is locally closeable, but the parent epic remains open while 65 production modules are still below the default floor."
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
@@ -34,5 +34,5 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Application core coverage improved significantly (49.09% -> 97.11%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules are zero. Parent epic #5244 stays open while 66 production modules remain below the default coverage floor."
+  "notes": "Application core coverage improved significantly (49.09% -> 97.25%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules are zero. Parent epic #5244 stays open while 65 production modules remain below the default coverage floor."
 }
