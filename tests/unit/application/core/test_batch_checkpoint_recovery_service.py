@@ -220,3 +220,33 @@ async def test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager(
 
     checkpoint_manager.save_checkpoint.assert_awaited_once_with(1)
     metrics.set_gauge.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_shutdown_checkpoint_failure_is_recorded(
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+    metrics: MagicMock,
+    tracer: MagicMock,
+) -> None:
+    """Ошибка shutdown checkpoint локализуется и наблюдаема."""
+    checkpoint_manager._operation_errors = (OSError,)
+    checkpoint_manager.save_checkpoint.side_effect = OSError("disk unavailable")
+    recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        pipeline_name="chembl_activity",
+    )
+
+    await recovery_service.save_checkpoint_on_shutdown(
+        records_fetched=4,
+        resume_offset=6,
+    )
+
+    logger.warning.assert_called_once()
+    assert logger.warning.call_args.kwargs["records_processed"] == 10
+    assert logger.warning.call_args.kwargs["error_type"] == "OSError"
+    metrics.increment_counter.assert_called_once()
+    metrics.observe_histogram.assert_called_once()
