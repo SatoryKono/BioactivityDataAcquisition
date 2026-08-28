@@ -19,6 +19,7 @@ from scripts.engineering.common.repo_paths import REPO_ROOT
 BRANCH_TELEMETRY_DIR = Path("reports/test-telemetry")
 TELEMETRY_FRESHNESS_MAX_AGE_DAYS = 45
 UNKNOWN_LABEL = "<unknown>"
+SUPPORTED_SOURCE_EVENTS = ("pull_request", "push", "workflow_dispatch", "schedule")
 
 # Coverage, JUnit, YAML, and JSON inputs are heterogeneous external artifacts.
 # Keep their dynamic values confined to this report-materialization boundary.
@@ -114,6 +115,17 @@ def _parse_args() -> argparse.Namespace:
         "--source-run-id",
         default="",
         help="CI run identifier associated with the captured baseline.",
+    )
+    parser.add_argument(
+        "--source-event",
+        choices=SUPPORTED_SOURCE_EVENTS,
+        default="push",
+        help="GitHub Actions event that produced the captured artifacts.",
+    )
+    parser.add_argument(
+        "--source-run-url",
+        default="",
+        help="Canonical GitHub Actions URL for the captured source run.",
     )
     parser.add_argument(
         "--coverage-threshold",
@@ -309,6 +321,8 @@ def build_baseline_payload(
     source_run_id: str,
     coverage_threshold: float,
     source_tree_sha256: str | None = None,
+    source_event: str = "push",
+    source_run_url: str = "",
 ) -> TelemetryPayload:
     resolved_coverage_percent = (
         _read_coverage_percent(coverage_xml_path)
@@ -338,6 +352,8 @@ def build_baseline_payload(
         "refresh_status": status,
         "source_commit": source_commit or None,
         "source_run_id": source_run_id or None,
+        "source_event": source_event,
+        "source_run_url": source_run_url or None,
         "source_tree_sha256": source_tree_sha256,
         "freshness_guard": {
             "timestamp_field": "refreshed_at_utc",
@@ -418,6 +434,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
     duration = payload["duration_telemetry"]
     source_commit = payload.get("source_commit") or "pending"
     source_run_id = payload.get("source_run_id") or "pending"
+    source_event = payload.get("source_event") or "pending"
+    source_run_url = payload.get("source_run_url") or "pending"
     coverage_actual = coverage["actual_percent"]
     coverage_display = (
         "pending" if coverage_actual is None else f"{float(coverage_actual):.2f}%"
@@ -459,6 +477,8 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         f"- Source branch: `{payload['source_branch']}`",
         f"- Source commit: `{source_commit}`",
         f"- Source run id: `{source_run_id}`",
+        f"- Source event: `{source_event}`",
+        f"- Source run URL: `{source_run_url}`",
         f"- Source tree sha256: `{payload.get('source_tree_sha256') or 'pending'}`",
         f"- Refresh status: `{payload['refresh_status']}`",
         f"- Refreshed at (UTC): `{payload['refreshed_at_utc']}`",
@@ -472,9 +492,12 @@ def render_baseline_markdown(payload: TelemetryPayload) -> str:
         "  and rejects future/stale `refreshed_at_utc` values.",
         "- `source_commit` must remain an ancestor of HEAD; exact `source_commit == HEAD`",
         "  is opt-in via `BIOETL_REQUIRE_TELEMETRY_SOURCE_COMMIT_EQUALS_HEAD=1`.",
+        "- A non-main source branch is accepted only for a `pull_request` run;",
+        "  the run URL and id keep that pre-merge evidence independently auditable.",
         "- Refresh command:",
         "  `python -m scripts.engineering.ci.update_test_telemetry_baseline`",
-        "  `--source-commit <sha> --source-run-id <run-id>`.",
+        "  `--source-commit <sha> --source-run-id <run-id>`",
+        "  `--source-event <event> --source-run-url <url>`.",
         "",
         "## Coverage",
         "",
@@ -544,6 +567,8 @@ def render_branch_telemetry_markdown(payload: TelemetryPayload) -> str:
         "",
         f"Source commit: `{payload.get('source_commit') or 'pending'}`",
         f"Source run id: `{payload.get('source_run_id') or 'pending'}`",
+        f"Source event: `{payload.get('source_event') or 'pending'}`",
+        f"Source run URL: `{payload.get('source_run_url') or 'pending'}`",
         f"Refresh status: `{payload['refresh_status']}`",
         f"Collected test cases: `{total_cases_display}`",
         f"Freshness guard: `<={int(payload['freshness_guard']['max_age_days'])} days`",
@@ -582,6 +607,8 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "source_branch": payload["source_branch"],
                 "source_commit": payload.get("source_commit"),
                 "source_run_id": payload.get("source_run_id"),
+                "source_event": payload.get("source_event"),
+                "source_run_url": payload.get("source_run_url"),
                 "source_tree_sha256": payload.get("source_tree_sha256"),
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
@@ -596,6 +623,8 @@ def build_branch_telemetry_reports(payload: TelemetryPayload) -> dict[str, str]:
                 "source_branch": payload["source_branch"],
                 "source_commit": payload.get("source_commit"),
                 "source_run_id": payload.get("source_run_id"),
+                "source_event": payload.get("source_event"),
+                "source_run_url": payload.get("source_run_url"),
                 "source_tree_sha256": payload.get("source_tree_sha256"),
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
@@ -684,6 +713,8 @@ def main() -> int:
         source_branch=args.source_branch,
         source_commit=args.source_commit,
         source_run_id=args.source_run_id,
+        source_event=args.source_event,
+        source_run_url=args.source_run_url,
         coverage_threshold=args.coverage_threshold,
         source_tree_sha256=compute_test_telemetry_source_tree_sha256(),
     )

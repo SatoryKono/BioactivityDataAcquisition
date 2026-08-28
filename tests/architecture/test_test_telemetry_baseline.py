@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 import yaml
@@ -38,7 +39,19 @@ def test_test_telemetry_baseline_contract_is_present_and_scoped() -> None:
 
     assert payload["policy_scope"] == "test_telemetry_baseline"
     assert payload["workflow_path"] == ".github/workflows/tests.yml"
-    assert payload["source_branch"] == "main"
+    source_branch = str(payload["source_branch"])
+    source_event = str(payload["source_event"])
+    source_run_id = str(payload["source_run_id"])
+    source_run_url = str(payload["source_run_url"])
+    assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", source_branch)
+    assert ".." not in source_branch
+    assert source_event in {"pull_request", "push", "workflow_dispatch", "schedule"}
+    if source_branch != "main":
+        assert source_event == "pull_request"
+    assert source_run_url == (
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/"
+        f"{source_run_id}"
+    )
     assert payload["artifact_inputs"]["coverage_xml"] == "reports/coverage/coverage.xml"
     assert (
         payload["artifact_inputs"]["slowest_tests_json"]
