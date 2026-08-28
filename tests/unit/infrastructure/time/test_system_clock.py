@@ -67,3 +67,18 @@ def test_system_clock_now_uses_system_timestamp(
     )
 
     assert clock.now() == expected
+
+
+@pytest.mark.unit
+def test_current_utc_time_uses_system_clock_adapter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """REQ restore #9793: current_utc_time must go through SystemClock."""
+    from bioetl.infrastructure.time.system_clock import current_utc_time
+
+    expected = datetime(2024, 1, 15, 12, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.time.system_clock.time.time",
+        lambda: expected.timestamp(),
+    )
+    assert current_utc_time() == expected

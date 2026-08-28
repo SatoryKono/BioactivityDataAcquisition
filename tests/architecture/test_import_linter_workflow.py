@@ -8,7 +8,8 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture tests for the non-skippable import-linter CI gate."""
+"""Architecture tests for the non-skippable import-linter CI gate.REQ-GOV-008: Import Linter is a change-set gate.
+"""
 
 from __future__ import annotations
 

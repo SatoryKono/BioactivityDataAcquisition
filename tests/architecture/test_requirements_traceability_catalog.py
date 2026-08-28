@@ -105,3 +105,31 @@ def test_requirement_ids_in_tests_are_in_crosswalk_csv() -> None:
         "tests/ cites REQ IDs missing from the crosswalk CSV:\n"
         + "\n".join(f"  {req_id}: {sorted(set(found[req_id]))}" for req_id in invented)
     )
+
+
+def test_requirement_ids_in_rules_adr_and_src_are_in_crosswalk_csv() -> None:
+    """RULES, accepted ADR, and src/bioetl must not invent REQ-* IDs (#9803)."""
+    catalog = set(_catalog_ids())
+    rules = _ROOT / "docs" / "00-project" / "RULES.md"
+    adr_root = _ROOT / "docs" / "02-architecture" / "decisions"
+    src_root = _ROOT / "src" / "bioetl"
+    found: dict[str, list[str]] = {}
+    for path in [rules, *sorted(adr_root.glob("ADR-*.md")), *sorted(src_root.rglob("*.py"))]:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        rel = path.relative_to(_ROOT).as_posix()
+        for match in _REQ_ID_RE.finditer(text):
+            found.setdefault(match.group(0), []).append(rel)
+    invented = sorted(req_id for req_id in found if req_id not in catalog)
+    assert not invented, (
+        "RULES/ADR/src cite REQ IDs missing from the crosswalk CSV:\n"
+        + "\n".join(f"  {req_id}: {sorted(set(found[req_id]))}" for req_id in invented)
+    )
+
+
+def test_req_arch_040_041_protocol_headings_present_in_rules() -> None:
+    """REQ-ARCH-040/041 protocol headings must remain in RULES.md."""
+    text = (_ROOT / "docs" / "00-project" / "RULES.md").read_text(encoding="utf-8")
+    assert "Обязательная Двойная Верификация (REQ-ARCH-040)" in text
+    assert "Причины Ложных Утверждений (REQ-ARCH-041)" in text

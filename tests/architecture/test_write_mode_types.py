@@ -15,6 +15,7 @@ instead of Literal strings in domain layer.
 
 REQ-ARCH-001: Type-safe write modes for Medallion policy enforcement.
 See docs/06-architecture-review-consolidated.md R1 for rationale.
+REQ-DATA-008 REQ-GOV-009: write-mode enums and governance of silver write policy.
 """
 
 from __future__ import annotations
