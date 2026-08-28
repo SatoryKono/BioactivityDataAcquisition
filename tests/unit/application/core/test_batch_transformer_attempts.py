@@ -190,3 +190,89 @@ async def test_transform_record_attempt_processing_error_path() -> None:
     assert outcome.filtered_entry is None
     assert outcome.dq_entry is not None
     batch_metrics.track_error.assert_called()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_transform_attempt_projects_runtime_dq_warning_flags(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Предупреждения runtime DQ не блокируют обработку и проецируются в Silver."""
+    from bioetl.domain.behavior import dq_rule_evaluator
+    from bioetl.domain.types.dq_contracts import DQDisposition
+
+    warning = MagicMock()
+    warning.disposition = DQDisposition.WARN
+    warning.severity = "error"
+    monkeypatch.setattr(
+        dq_rule_evaluator,
+        "evaluate_dq_rules_for_record",
+        lambda *_args, **_kwargs: [warning],
+    )
+    monkeypatch.setattr(
+        dq_rule_evaluator,
+        "select_highest_priority_disposition",
+        lambda _outcomes: DQDisposition.WARN,
+    )
+
+    async def transform(_ctx, record, _index):
+        return {"entity_id": record["id"], "value": record["value"]}
+
+    outcome = await transform_record_attempt(
+        context=_attempt_context(),
+        error_classifier=MagicMock(),
+        batch_metrics=MagicMock(),
+        transform=transform,
+        gold_filter=lambda _ctx, _rec: True,
+        gold_transform=lambda _ctx, rec: {**rec, "gold": True},
+        dq_config=MagicMock(),
+        normalization_processor=None,
+        debug_export_service=None,
+        raw_record={"id": "dq-warning", "value": 10},
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_transform_attempt_projects_runtime_dq_warning_flags"
+        ),
+        index=3,
+    )
+
+    assert outcome.silver_record == {
+        "entity_id": "dq-warning",
+        "value": 10,
+        "_dq_warn": True,
+        "_dq_error": True,
+    }
+    assert outcome.gold_record == {
+        "entity_id": "dq-warning",
+        "value": 10,
+        "_dq_warn": True,
+        "_dq_error": True,
+        "gold": True,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_transform_attempt_returns_empty_outcome_for_none_result() -> None:
+    """Трансформация без записи Silver формирует пустой результат."""
+    async def transform(_ctx, _record, _index):
+        return None
+
+    outcome = await transform_record_attempt(
+        context=_attempt_context(),
+        error_classifier=MagicMock(),
+        batch_metrics=MagicMock(),
+        transform=transform,
+        gold_filter=lambda _ctx, _rec: True,
+        gold_transform=lambda _ctx, rec: rec,
+        dq_config=None,
+        normalization_processor=None,
+        debug_export_service=None,
+        raw_record={"id": "empty"},
+        batch_id=deterministic_batch_uuid_from_callsite(
+            "test_transform_attempt_returns_empty_outcome_for_none_result"
+        ),
+        index=4,
+    )
+
+    assert outcome.silver_record is None
+    assert outcome.gold_record is None
