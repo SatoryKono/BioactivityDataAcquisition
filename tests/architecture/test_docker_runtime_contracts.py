@@ -1066,6 +1066,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         "python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26"
         in dockerfile
     )
+    assert "python -m pip uninstall --yes pip" in dockerfile
     assert "useradd -r -u 999 -g bioetl bioetl" in dockerfile
     assert "USER 999:999" in dockerfile
     assert "USER bioetl" not in dockerfile
