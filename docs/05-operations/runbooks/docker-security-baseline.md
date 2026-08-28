@@ -1,7 +1,7 @@
 # Docker security baseline
 
-Use this runbook to reproduce the RF-001 image baseline without changing the
-runtime image. Generated files stay under `reports/security/`, are ignored by
+Use this runbook to reproduce the current RF-001/RF-002 image baseline.
+Generated files stay under `reports/security/`, are ignored by
 Git, and are attached by `docker.yml` as the bounded
 `bioetl-security-baseline-<sha>` workflow artifact.
 
@@ -19,8 +19,11 @@ docker build --pull --no-cache `
 docker image inspect "bioetl:$baselineSha" --format '{{.Id}} {{json .RepoDigests}}'
 ```
 
-The Dockerfile pins both stages to the same immutable Python image digest. Do
-not substitute a mutable tag when collecting closure evidence.
+The Dockerfile pins one immutable Wolfi base digest for its builder and runtime
+root stages. Direct Wolfi packages pin Python `3.13.15-r2` and `uv 0.11.26-r0`;
+the final scratch stage copies the audited runtime root and locked environment.
+Do not substitute mutable tags or unpinned package versions when collecting
+closure evidence.
 
 ## Runtime versions
 
@@ -32,11 +35,14 @@ docker run --rm --entrypoint uv "bioetl-builder:$baselineSha" `
   pip freeze --python /app/.venv/bin/python
 ```
 
-The CI artifact additionally records the final image ID, source SHA, runtime
-Python version, runtime `pip` presence, installed packages, Trivy version/DB metadata, and the
-GitHub Trivy alert snapshot used to populate `alert_number` where an existing
-alert identity is available. The current least-privilege runtime image has no
-`pip` module; package inventory is read through `importlib.metadata` instead.
+The CI artifact additionally records the final image ID, source SHA, Wolfi base
+and direct package identities, runtime Python version, runtime `pip` presence, installed
+packages, Trivy version/DB metadata, and the GitHub Trivy alert snapshot used to
+populate `alert_number` where an existing alert identity is available. The
+current least-privilege runtime image has no `pip` module; package inventory is
+read through `importlib.metadata` instead. The runtime is shell-less, has no
+package manager, and runs as the Chainguard non-root account `65532:65532`;
+Compose therefore invokes `bioetl` directly instead of using `/bin/sh -c`.
 
 ## Trivy reproduction
 
@@ -54,8 +60,10 @@ trivy image --severity CRITICAL,HIGH,MEDIUM --exit-code 1 `
 ```
 
 The first two commands are evidence collection and do not hide findings. The
-last command is the enforcement boundary and must remain blocking. RF-001 may
-therefore expose a known red gate; RF-002 owns removal of those findings.
+last command is the enforcement boundary and must remain blocking. RF-002 moved
+the runtime to the pinned Wolfi image and upgraded `deltalake`, `arro3-core`,
+`pyarrow`, and `pandas` to binary-wheel releases compatible with Python 3.14;
+the expected strict-gate result is zero findings and exit code `0`.
 
 The SBOM is generated in the same `docker-build` job from the same local image
 reference as the Trivy scan. On `main`, that exact image is exported after the
@@ -68,8 +76,8 @@ image ID.
 The workflow artifact contains:
 
 - `trivy-results.sarif` and `trivy-results.json`;
-- `trivy-base-results.json` for the exact pinned Debian base digest;
-- `bioetl.spdx.json`;
+- `trivy-base-results.json` for the exact pinned distro base digest;
+- **bioetl.spdx.json**;
 - `trivy-alerts.csv` with
   `alert_number,CVE,package,installed,fixed,layer,status`;
 - Trivy/GitHub metadata and runtime provenance files.
