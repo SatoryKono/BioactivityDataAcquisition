@@ -16,7 +16,7 @@
       "max_internal_fan_in": 6,
       "helper_function_ratio": 0.374,
       "files": 194,
-      "total_loc": 23420,
+      "total_loc": 23418,
       "budget_files_ge_250_loc": 0,
       "budget_max_internal_fan_in": 7
     },
@@ -68,12 +68,12 @@
   },
   "module_coverage": {
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 84
   },
   "closeout_program": {
     "tech_debt_closeout_test_file_count": 51,
     "tech_debt_closeout_test_function_count": 262,
-    "tech_debt_closeout_test_loc": 10489,
+    "tech_debt_closeout_test_loc": 10485,
     "closeout_files_using_live_residual_helpers": 8,
     "fold_into_generic_inventory_count": 60,
     "retained_public_entrypoint_count": 12,
