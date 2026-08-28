@@ -49310,7 +49310,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-28",
-  "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
+  "source_tree_sha256": "875aff773cf8a2234360936b50bec819c6ddfdc80e7c71200a247e5c37e97059",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
