@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.application.ports.pipeline import (
     ContractPolicyLoaderProtocol,
-    DomainConfigMapper,
+    DomainConfigMapperPort,
     SchemaBuilderProtocol as _SchemaBuilder,
 )
 from bioetl.composition.factories.pipeline.entity_type_extractor import (
@@ -13,7 +13,7 @@ from bioetl.composition.factories.pipeline.entity_type_extractor import (
 
 __all__ = [
     "ContractPolicyLoaderProtocol",
-    "DomainConfigMapper",
+    "DomainConfigMapperPort",
     "EntityTypeExtractor",
     "_SchemaBuilder",
 ]

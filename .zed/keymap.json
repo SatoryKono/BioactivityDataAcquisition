@@ -79,7 +79,6 @@
     "ctrl-alt-space": "editor::ShowSignatureHelp",
     "ctrl-shift-a": "editor::ToggleCodeActions",
     "ctrl-k ctrl-s": "editor::ToggleStickyScroll",
-    "ctrl-k ctrl-m": "editor::ToggleMinimap",
     "ctrl-k ctrl-w": "editor::ToggleWordWrap",
     "ctrl-k ctrl-z": "editor::ToggleSoftWrap",
     "ctrl-shift-enter": "terminal::Spawn",
