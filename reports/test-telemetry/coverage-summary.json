@@ -1,14 +1,14 @@
 {
   "source_branch": "main",
-  "source_commit": "43546a3daf6203e9d36f9fdf30b299e8954a0ccf",
+  "source_commit": "cd136e832aeca521569f5d9b62637cbf659870da",
   "source_run_id": "33159969914",
   "source_tree_sha256": "d832ad9cef3e2b494bda935173889ae671ba06442af8dfea1d26aba719b08204",
-  "refreshed_at_utc": "2026-08-28T11:37:04.228218+00:00",
+  "refreshed_at_utc": "2026-08-28T11:37:49.284619+00:00",
   "refresh_status": "captured",
-  "coverage_percent": null,
+  "coverage_percent": 96.54,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": null,
-    "threshold_satisfied": null
+    "actual_percent": 96.54,
+    "threshold_satisfied": true
   }
 }
