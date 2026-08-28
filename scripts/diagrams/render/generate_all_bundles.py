@@ -12,6 +12,7 @@ Produces class-diagrams-quality descriptions by parsing mermaid metadata:
 from __future__ import annotations
 
 import argparse
+import html
 import os
 import re
 import sys
@@ -55,7 +56,7 @@ def _mermaid_label_text(label: str) -> str:
     parser = _MermaidLabelTextExtractor()
     parser.feed(label)
     parser.close()
-    return "".join(parser.parts).strip()
+    return html.escape("".join(parser.parts).strip(), quote=False)
 
 
 # Collection definitions: (dir_name, file_ext, output_name, collection_title)

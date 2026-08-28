@@ -127,10 +127,21 @@ class IDMappingTransportMixin:
         """Paginate through ID mapping results, populating entries_by_id in place."""
         deps = self._transport_deps()
         url: str | None = trusted_idmapping_url(deps.base_url, start_url)
+        redirect_count = 0
 
         while url:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
-                response = await deps.http_client.get(url)
+                response = await deps.http_client.get(url, follow_redirects=False)
+
+            if response.status_code in {301, 302, 303, 307, 308}:
+                redirect_count += 1
+                if redirect_count > 3:
+                    raise ValueError("UniProt ID mapping redirect limit exceeded")
+                location = response.headers.get("location")
+                if not location:
+                    raise ValueError("UniProt ID mapping redirect omitted Location")
+                url = trusted_idmapping_url(deps.base_url, location)
+                continue
 
             if response.status_code != 200:
                 deps.logger.warning(
@@ -139,6 +150,8 @@ class IDMappingTransportMixin:
                     status_code=response.status_code,
                 )
                 break
+
+            redirect_count = 0
 
             data = response.json()
             if not isinstance(data, dict):
