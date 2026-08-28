@@ -76,10 +76,33 @@ def test_check_redirect_to_results_supports_redirect_and_non_response_objects() 
     redirected = _response(url="https://rest.uniprot.org/idmapping/results/job-1")
 
     assert (
-        IDMappingRetryMixin._check_redirect_to_results(redirected)
+        IDMappingRetryMixin._check_redirect_to_results(
+            redirected, base_url="https://rest.uniprot.org"
+        )
         == "https://rest.uniprot.org/idmapping/results/job-1"
     )
-    assert IDMappingRetryMixin._check_redirect_to_results(object()) is None
+    assert (
+        IDMappingRetryMixin._check_redirect_to_results(
+            object(), base_url="https://rest.uniprot.org"
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://rest.uniprot.org.evil/idmapping/results/job-1",
+        "https://rest.uniprot.org@evil.example/idmapping/results/job-1",
+        "http://rest.uniprot.org/idmapping/results/job-1",
+        "https://rest.uniprot.org:444/idmapping/results/job-1",
+    ],
+)
+def test_check_redirect_to_results_rejects_cross_origin_url(url: str) -> None:
+    with pytest.raises(ValueError, match="UniProt ID mapping"):
+        IDMappingRetryMixin._check_redirect_to_results(
+            _response(url=url), base_url="https://rest.uniprot.org"
+        )
 
 
 def test_resolve_job_status_prefers_results_then_redirect_then_payload() -> None:
