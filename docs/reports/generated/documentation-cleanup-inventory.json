@@ -62192,6 +62192,34 @@
     {
       "canonical_successor": null,
       "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/05-operations/runbooks/docker-security-baseline.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "05-operations",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
       "commit_policy": "tracked_curated_generated_doc",
       "declared_class": "internal-published",
       "declared_status": "active",
@@ -100428,6 +100456,27 @@
       ]
     },
     {
+      "commit_policy": "ignored_ci_output",
+      "generator": ".github/workflows/docker.yml",
+      "id": "docker-security-baseline-reports",
+      "notes": "Reproducible Docker security evidence is uploaded as a bounded CI artifact and SARIF is sent to the Security tab; generated scan outputs remain untracked.",
+      "output_kind": "security_report",
+      "outputs": [
+        "reports/security/trivy-results.sarif",
+        "reports/security/trivy-results.json",
+        "reports/security/trivy-base-results.json",
+        "reports/security/trivy-alerts.csv",
+        "reports/security/trivy-version.json",
+        "reports/security/github-trivy-alerts.json",
+        "reports/security/bioetl.spdx.json",
+        "reports/security/bioetl-image-provenance.txt",
+        "reports/security/bioetl-image-id.txt",
+        "reports/security/bioetl-pip-freeze.txt",
+        "reports/security/baseline.sha256",
+        "reports/security/bioetl-scanned-image.tar.zst"
+      ]
+    },
+    {
       "commit_policy": "tracked_curated_generated_doc",
       "generator": "manual closeout plus architecture QA verification",
       "id": "docker-stability-runbooks-generated-docs",
@@ -100436,16 +100485,6 @@
       "outputs": [
         "docs/05-operations/runbooks/docker-compose-project-migration.md",
         "docs/05-operations/runbooks/docker-stability.md"
-      ]
-    },
-    {
-      "commit_policy": "ignored_ci_output",
-      "generator": ".github/workflows/docker.yml",
-      "id": "docker-trivy-sarif-security-report",
-      "notes": "Trivy SARIF is uploaded from reports/security rather than repository root.",
-      "output_kind": "security_report",
-      "outputs": [
-        "reports/security/trivy-results.sarif"
       ]
     },
     {
@@ -100906,9 +100945,9 @@
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 336,
-      "archive-after-migration": 934,
+      "archive-after-migration": 929,
       "generate-automatically": 1151,
-      "keep": 1138,
+      "keep": 1139,
       "reconcile-with-github-state": 8,
       "replace-with-link": 8
     },
@@ -100921,7 +100960,7 @@
       "03-guides": 122,
       "04-reference": 330,
       "05-engineering": 2,
-      "05-operations": 87,
+      "05-operations": 88,
       "99-archive": 170,
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
@@ -100943,24 +100982,23 @@
       "security": 2
     },
     "by_status": {
-      "Active": 746,
+      "Active": 747,
       "Archived": 170,
       "Canonical": 72,
       "Deprecated": 8,
       "Generated": 1151,
-      "Working": 1428
+      "Working": 1423
     },
     "by_surface_family": {
-      "active": 746,
+      "active": 747,
       "archive": 170,
       "canonical": 72,
       "duplicate": 8,
       "generated": 1151,
-      "working": 1428
+      "working": 1423
     },
     "by_tracking_state": {
-      "ignored_local": 5,
-      "tracked": 3570
+      "tracked": 3571
     },
     "docs_reports_local_count": 40,
     "duplicate_group_count": 2,
@@ -100976,8 +101014,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3575,
-    "total_doc_like_ignored_local": 5,
-    "total_doc_like_tracked": 3570
+    "total_doc_like": 3571,
+    "total_doc_like_ignored_local": 0,
+    "total_doc_like_tracked": 3571
   }
 }

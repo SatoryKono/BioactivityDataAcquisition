@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `5b19ac248cf6f8ab4a3554cf62eaf2547a23ff11`
-- Source run id: `32935853676`
-- Source tree sha256: `eef3f57084eaccadd034ee9a5da285e8f23b59f15fd6d490f078a080f5e47c46`
+- Source commit: `3f7e5f4e7299db8e60a020bf397324d472c5403e`
+- Source run id: `33168400380`
+- Source tree sha256: `bbcc0a534e9b590c942ef33672a075657b5711d3c5c1f0a46779ddba93feef53`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-28T05:51:38.598505+00:00`
+- Refreshed at (UTC): `2026-08-28T12:26:25.861620+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -50,43 +50,43 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.44%`
+- Actual coverage: `96.56%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry
 
-- Total collected test cases: `49169`
+- Total collected test cases: `49236`
 - Freshness guard: `<=45 days` via `refreshed_at_utc`
 
 ### Top Slowest Tests
 
 | Rank | Duration (s) | Test | Source |
 |---:|---:|---|---|
-| 1 | `21.321` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-unit-scripts-tooling.xml` |
-| 2 | `12.364` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit-unit-scripts-tooling.xml` |
-| 3 | `11.015` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-unit-scripts-tooling.xml` |
-| 4 | `10.962` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
-| 5 | `9.315` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
-| 6 | `7.505` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
-| 7 | `7.427` | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity::test_all_factories_have_pipeline_name` | `junit.unit-other.xml` |
-| 8 | `7.333` | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories` | `junit-repo-backed-unit.xml` |
-| 9 | `6.335` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit-track-d.xml` |
-| 10 | `6.004` | `tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover` | `junit-unit-scripts-tooling.xml` |
+| 1 | `15.018` | `tests.unit.scripts.docs.passports.test_passport_projector::test_cli_generate_and_check` | `junit-unit-scripts-tooling.xml` |
+| 2 | `13.322` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing` | `junit-unit-scripts-tooling.xml` |
+| 3 | `11.019` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
+| 4 | `9.246` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
+| 5 | `9.245` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit-unit-scripts-tooling.xml` |
+| 6 | `8.482` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit.integration.xml` |
+| 7 | `8.158` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-unit-scripts-tooling.xml` |
+| 8 | `7.664` | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors` | `junit-unit-scripts-tooling.xml` |
+| 9 | `7.528` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.xml` |
+| 10 | `7.511` | `tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness` | `junit.unit-other.xml` |
 
 ### Top Slow Zones
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 4 | 48.631 | 21.321 |
-| 2 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.354 | 4.199 |
-| 3 | `tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix` | 3 | 12.165 | 4.141 |
-| 4 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.962 | 10.962 |
-| 5 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.315 | 9.315 |
-| 6 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.505 | 7.505 |
-| 7 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity` | 1 | 7.427 | 7.427 |
-| 8 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 7.333 | 7.333 |
-| 9 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 1 | 6.335 | 6.335 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 35.855 | 13.322 |
+| 2 | `tests.unit.scripts.docs.passports.test_passport_projector` | 3 | 32.421 | 15.018 |
+| 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 14.651 | 8.482 |
+| 4 | `tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix` | 3 | 12.35 | 4.239 |
+| 5 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.192 | 4.074 |
+| 6 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 11.019 | 11.019 |
+| 7 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.246 | 9.246 |
+| 8 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 7.664 | 7.664 |
+| 9 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.511 | 7.511 |
+| 10 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 7.407 | 7.407 |
 
 ## Refresh Procedure
 
