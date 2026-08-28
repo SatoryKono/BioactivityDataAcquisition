@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import httpx
 
+from bioetl import get_version
 from bioetl.domain.resilience import RetryConfig
-from bioetl.domain.version import get_version
 from bioetl.infrastructure.adapters.http.client_context_mixin import (
     HTTPClientContextMixin,
 )
