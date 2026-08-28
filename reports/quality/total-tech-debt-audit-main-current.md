@@ -8,7 +8,7 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: fix/sonar-closeout-current-main-20260828
 
-Audited commit SHA: `e77c463bababa9091d5049b70f29a9bd6218588c`
+Audited commit SHA: `d24495a82815f2f667cbb8e5ad9e4954b24a44af`
 
 Evidence surface SHA-256: `1b76bcf63f57ce02d328fdc51cb06922de66484ae6d361ee0aa5ec80885de556`
 
@@ -17,7 +17,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "e77c463bababa9091d5049b70f29a9bd6218588c",
+  "audited_commit_sha": "d24495a82815f2f667cbb8e5ad9e4954b24a44af",
   "evidence_surface_sha256": "1b76bcf63f57ce02d328fdc51cb06922de66484ae6d361ee0aa5ec80885de556",
   "metrics": {
     "architecture_integral_score": 9.41,
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to branch closeout SHA e77c463bab after canonical regeneration on origin/main 9e584e6efb. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Re-pin to branch closeout SHA d24495a828 after canonical regeneration on origin/main 9e584e6efb. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
