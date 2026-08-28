@@ -1310,7 +1310,9 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     built = {
@@ -1344,6 +1346,7 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     )
     assert "steps.validate-baseline.outcome == 'success'" in upload["if"]
     assert "reports/security/baseline.sha256" in upload["with"]["path"]
+    assert "reports/security/trivy-fixability-audit.json" in upload["with"]["path"]
     assert upload["with"]["if-no-files-found"] == "error"
     assert upload["with"]["retention-days"] == 30
     assert any(
@@ -1361,7 +1364,10 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )
-    assert step_names.index("Enforce Trivy Critical High Medium policy") < (
+    assert step_names.index("Generate Trivy fixability audit") < step_names.index(
+        "Validate complete security baseline"
+    )
+    assert step_names.index("Enforce fixable Trivy Critical High Medium policy") < (
         step_names.index("Export exact scanned image for publication")
     )
 

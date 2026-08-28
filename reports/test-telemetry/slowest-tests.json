@@ -20,7 +20,7 @@
     {
       "duration_s": 11.988,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing"
     },
     {
       "duration_s": 10.945,
@@ -75,7 +75,7 @@
     {
       "duration_s": 6.004,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover"
+      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic"
     },
     {
       "duration_s": 5.577,
@@ -95,7 +95,7 @@
     {
       "duration_s": 4.767,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
     },
     {
       "duration_s": 4.254,
@@ -147,7 +147,7 @@
     {
       "duration_s": 11.988,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing"
     },
     {
       "duration_s": 10.945,
@@ -202,7 +202,7 @@
     {
       "duration_s": 6.004,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover"
+      "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic"
     },
     {
       "duration_s": 5.577,
@@ -222,7 +222,7 @@
     {
       "duration_s": 4.767,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
     },
     {
       "duration_s": 4.254,
@@ -262,7 +262,7 @@
   ],
   "top_slowest_zones": [
     {
-      "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
+      "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
       "test_count": 4,
       "total_duration_s": 47.748,
       "max_duration_s": 21.002
@@ -280,7 +280,7 @@
       "max_duration_s": 8.287
     },
     {
-      "zone": "tests.contract.test_normalization_cross_layer_contracts",
+      "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
       "test_count": 3,
       "total_duration_s": 12.392,
       "max_duration_s": 4.138
