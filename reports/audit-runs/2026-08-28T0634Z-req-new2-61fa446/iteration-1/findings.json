@@ -1,0 +1,94 @@
+[
+  {
+    "id": "REQ-TRACE-001",
+    "requirement_id": "REQ-ARCH-004",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "status": "PROVEN",
+    "category": "traceability_orphan",
+    "evidence": [
+      {
+        "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv:6",
+        "observation": "executable_surface is generic without file/test path; 137/172 generic, 106/132 untraced generic"
+      }
+    ],
+    "expected": "Every REQ has concrete executable_surface (tests/... src/... mypy/ruff command or file path)",
+    "actual": "137/172 (79.6%) generic; top: REQ-DX-*, REQ-CHECKPOINT-*, REQ-ANOMALY-*, REQ-LOCK-*, REQ-PARTITION-* have only \"Check...\" without path",
+    "impact": "Traceability unverifiable by test runner; file-count proxy risk (anti-pattern)",
+    "root_cause": "Crosswalk rows use review/grep verification without path-level executable evidence",
+    "remediation": "Replace generic executable_surface with concrete test path or command in 20-row batches; prioritize MUST 113 among 132 untraced",
+    "effort": "L",
+    "validation": [
+      "csv.DictReader row count 172; is_concrete heuristic 25 concrete vs 137 generic"
+    ],
+    "automated_fix_possible": false
+  },
+  {
+    "id": "REQ-TRACE-002",
+    "requirement_id": "REQ-GOV-001",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "status": "PROVEN",
+    "category": "traceability_untraced",
+    "evidence": [
+      {
+        "path": "tests/",
+        "observation": "40/172 REQ traced in tests; 132 (76.7%) never mentioned; 26 concrete untraced could be bound to existing test paths"
+      }
+    ],
+    "expected": "Each active REQ traceable to tests/ or src/ path; bidirect graph consistent",
+    "actual": "26 concrete untraced (REQ-GOV-001 mypy, REQ-DATA-007 _delta_log, REQ-DELTA-001 import deltalake, REQ-GOV-008 .importlinter, REQ-LOAD-002 test_force_full_scan, REQ-PYTHON-001 ruff FA etc) have concrete surface but no test mention",
+    "impact": "76.7% requirements have no automated regression; manual verification only",
+    "root_cause": "Tests lack REQ-* markers (e.g., @pytest.mark with requirement_id or comment)",
+    "remediation": "Add REQ-* tags to existing tests that already exercise the surface (e.g., tag architecture tests with REQ-GOV-001/008, contract tests with REQ-GOV-009, lint gates with REQ-PYTHON-001)",
+    "effort": "M",
+    "validation": [
+      "grep -r REQ- tests/ --include=\"*.py\" | wc -l ; pattern scan 40 ids"
+    ],
+    "automated_fix_possible": false
+  },
+  {
+    "id": "REQ-TRACE-003",
+    "requirement_id": "GAP",
+    "priority": "P1",
+    "severity": "High",
+    "confidence": "high",
+    "status": "RESOLVED",
+    "category": "traceability_drift",
+    "evidence": [
+      {
+        "path": "docs/00-project/RULES.md:1184,1478 + docs/02-architecture/decisions/ADR-033",
+        "observation": "REQ-ARCH-030/031/040/041 cited in RULES but absent from CSV 172"
+      },
+      {
+        "path": "src/bioetl/domain/ports/serialization.py",
+        "observation": "REQ-ARCH-030 also cited in src without CSV row"
+      },
+      {
+        "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+        "observation": "no rows for REQ-ARCH-030/031/040/041"
+      },
+      {
+        "path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
+        "observation": "REQ-VAL-001..008 cited in ADR-033, absent from CSV"
+      },
+      {
+        "path": "src/bioetl/domain/ports/audit.py",
+        "observation": "REQ-AUDIT-001/002, REQ-ARCH-011/012/013, REQ-CONF-001, REQ-ERR-015, REQ-OBS-010 in src without CSV rows"
+      }
+    ],
+    "expected": "All REQ-* cited in RULES/ADR/src must exist in canonical crosswalk CSV and REQUIREMENTS.md delegation",
+    "actual": "12 invented in docs (REQ-ARCH-030/031/040/041 + REQ-VAL-001..008) and 9 invented in src (REQ-ARCH-011/012/013/030, REQ-AUDIT-001/002, REQ-CONF-001, REQ-ERR-015, REQ-OBS-010); tests invented 0",
+    "impact": "Traceability drift: code/docs reference requirements not in SSOT; audit cannot prove coverage for invented IDs; violates anti-pattern",
+    "root_cause": "RULES/ADR/src added REQ markers without CSV sync (maintenance rule 1-2 not followed)",
+    "remediation": "Wave1: add missing REQ rows to CSV (or remove markers from src/RULES/ADR-033). Wave2: run docs link/version checks and architecture gate",
+    "effort": "M",
+    "validation": [
+      "csv uniq 172 vs docs scan 184 unique (12 drift); src scan 9 drift; tests 0 drift"
+    ],
+    "automated_fix_possible": false,
+    "resolution": "CSV 172->192 on origin/main includes all invented; src 0 invented verified"
+  }
+]
