@@ -4,10 +4,15 @@ permissions:
   contents: read
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, master, develop]
     paths:
       - "Dockerfile.bioetl"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "src/**"
+      - "configs/**"
       - "docker-compose*.yml"
       - "scripts/ops/runtime/docker/**"
       - "scripts/engineering/qa/docker_stability_campaign/**"
@@ -23,6 +28,10 @@ on:
     branches: [main, master, develop]
     paths:
       - "Dockerfile.bioetl"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "src/**"
+      - "configs/**"
       - "docker-compose*.yml"
       - "scripts/ops/runtime/docker/**"
       - "scripts/engineering/qa/docker_stability_campaign/**"
@@ -123,6 +132,8 @@ jobs:
     permissions:
       contents: read
       security-events: write
+    env:
+      TRIVY_CACHE_DIR: .trivycache
 
     steps:
       - name: Checkout code
@@ -147,27 +158,155 @@ jobs:
       - name: Prepare security reports directory
         run: mkdir -p reports/security
 
-      - name: Run Trivy vulnerability scanner
+      - name: Capture image and runtime provenance
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          {
+            echo "source_sha=${GITHUB_SHA}"
+            echo "base_image=python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
+            docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
+            docker run --rm --entrypoint python "${IMAGE_REF}" --version
+            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
+          } > reports/security/bioetl-image-provenance.txt 2>&1
+          docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
+            > reports/security/bioetl-image-id.txt
+          docker run --rm --entrypoint python "${IMAGE_REF}" -c 'from importlib.metadata import distributions; print("\n".join(sorted("{}=={}".format(d.metadata["Name"], d.version) for d in distributions())))' \
+            > reports/security/bioetl-pip-freeze.txt
+
+      - name: Run full Trivy JSON evidence scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: "bioetl:${{ github.sha }}"
+          format: "json"
+          output: "reports/security/trivy-results.json"
+          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
+          exit-code: "0"
+          ignore-unfixed: false
+          version: "v0.70.0"
+
+      - name: Run full Trivy SARIF evidence scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: "bioetl:${{ github.sha }}"
           format: "sarif"
           output: "reports/security/trivy-results.sarif"
-          severity: "CRITICAL,HIGH"
-          exit-code: "1"
+          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
+          exit-code: "0"
+          ignore-unfixed: false
+          version: "v0.70.0"
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6 # v2
-        if: always()
+        uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        if: always() && !cancelled()
         with:
           sarif_file: "reports/security/trivy-results.sarif"
 
-      - name: Run Trivy on debian:bookworm-slim base image
+      - name: Generate SBOM for the scanned local image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: "bioetl:${{ github.sha }}"
+          format: spdx-json
+          output-file: reports/security/bioetl.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Capture Trivy and GitHub alert metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          trivy version --format json > reports/security/trivy-version.json
+          gh api --paginate --slurp \
+            "/repos/${REPOSITORY}/code-scanning/alerts?state=open&tool_name=Trivy&per_page=100" \
+            > reports/security/github-trivy-alerts.json
+
+      - name: Export deterministic Trivy baseline CSV
+        run: |
+          python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json'), github_alerts_json=Path('reports/security/github-trivy-alerts.json'), output=Path('reports/security/trivy-alerts.csv')); print(f'rows={count}')"
+
+      - name: Run Trivy on pinned Debian bookworm base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: "debian:bookworm-slim"
+          # Base digest recorded by the pinned Python amd64 manifest.
+          image-ref: "debian@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143"
+          format: "json"
+          output: "reports/security/trivy-base-results.json"
+          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
+          exit-code: "0"
+          ignore-unfixed: false
+          version: "v0.70.0"
+
+      - name: Validate complete security baseline
+        id: validate-baseline
+        if: always() && !cancelled()
+        run: |
+          set -euo pipefail
+          required=(
+            reports/security/bioetl-image-id.txt
+            reports/security/bioetl-image-provenance.txt
+            reports/security/bioetl-pip-freeze.txt
+            reports/security/bioetl.spdx.json
+            reports/security/github-trivy-alerts.json
+            reports/security/trivy-alerts.csv
+            reports/security/trivy-base-results.json
+            reports/security/trivy-results.json
+            reports/security/trivy-results.sarif
+            reports/security/trivy-version.json
+          )
+          for evidence in "${required[@]}"; do
+            test -s "${evidence}"
+          done
+          sha256sum "${required[@]}" > reports/security/baseline.sha256
+
+      - name: Upload reproducible security baseline
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        if: always() && !cancelled() && steps.validate-baseline.outcome == 'success'
+        with:
+          name: bioetl-security-baseline-${{ github.sha }}
+          path: |
+            reports/security/bioetl-image-id.txt
+            reports/security/bioetl-image-provenance.txt
+            reports/security/bioetl-pip-freeze.txt
+            reports/security/bioetl.spdx.json
+            reports/security/github-trivy-alerts.json
+            reports/security/trivy-alerts.csv
+            reports/security/trivy-base-results.json
+            reports/security/trivy-results.json
+            reports/security/trivy-results.sarif
+            reports/security/trivy-version.json
+            reports/security/baseline.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce Trivy Critical High Medium policy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: "bioetl:${{ github.sha }}"
           format: "table"
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          exit-code: "1"
+          ignore-unfixed: false
+          version: "v0.70.0"
+
+      - name: Export exact scanned image for publication
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: docker save "${IMAGE_REF}" | zstd -T0 -10 -o reports/security/bioetl-scanned-image.tar.zst
+
+      - name: Transfer exact scanned image to publish job
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: bioetl-scanned-image-${{ github.sha }}
+          path: |
+            reports/security/bioetl-scanned-image.tar.zst
+            reports/security/bioetl-image-id.txt
+          if-no-files-found: error
+          retention-days: 1
 
   docker-push:
     runs-on: ubuntu-latest
@@ -183,13 +322,21 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - name: Download exact scanned image
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          persist-credentials: false
+          name: bioetl-scanned-image-${{ github.sha }}
+          path: scanned-image
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      - name: Load exact scanned image
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          zstd -d -c scanned-image/bioetl-scanned-image.tar.zst | docker load
+          expected_id="$(cat scanned-image/bioetl-image-id.txt)"
+          actual_id="$(docker image inspect "${IMAGE_REF}" --format '{{.Id}}')"
+          test "${actual_id}" = "${expected_id}"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -207,17 +354,21 @@ jobs:
           owner="$(echo "${REPO_OWNER}" | tr '[:upper:]' '[:lower:]')"
           echo "image_base=ghcr.io/${owner}/bioactivitydataacquisition" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push image to GHCR
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
-        with:
-          context: .
-          file: Dockerfile.bioetl
-          push: true
-          tags: |
-            ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
-            ${{ steps.ghcr.outputs.image_base }}:${{ github.ref_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Tag and push exact scanned image to GHCR
+        env:
+          IMAGE_REF: bioetl:${{ github.sha }}
+          IMAGE_BASE: ${{ steps.ghcr.outputs.image_base }}
+        run: |
+          set -euo pipefail
+          expected_id="$(cat scanned-image/bioetl-image-id.txt)"
+          sha_ref="${IMAGE_BASE}:${GITHUB_SHA}"
+          branch_ref="${IMAGE_BASE}:${GITHUB_REF_NAME}"
+          docker tag "${IMAGE_REF}" "${sha_ref}"
+          docker tag "${IMAGE_REF}" "${branch_ref}"
+          docker push "${sha_ref}"
+          docker push "${branch_ref}"
+          remote_config="$(docker manifest inspect "${sha_ref}" | jq -r '.config.digest')"
+          test "${remote_config}" = "${expected_id}"
 
       - name: Generate GHCR image SBOM
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0

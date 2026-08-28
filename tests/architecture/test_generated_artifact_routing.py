@@ -331,8 +331,8 @@ def test_runtime_log_default_routes_under_reports_logs() -> None:
     assert 'Path("logs") / "bioetl.log"' not in script
 
 
-def test_trivy_sarif_routes_under_reports_security() -> None:
-    """Docker Trivy SARIF output must avoid repository root."""
+def test_docker_security_baseline_routes_under_reports_security() -> None:
+    """Docker security outputs must remain ignored CI evidence outside root."""
     workflow = (ROOT / ".github" / "workflows" / "docker.yml").read_text(
         encoding="utf-8"
     )
@@ -352,7 +352,22 @@ def test_trivy_sarif_routes_under_reports_security() -> None:
     assert "sarif_file: 'trivy-results.sarif'" not in workflow
     assert "output: 'trivy-results.sarif'" not in ci_fix_script
     assert "sarif_file: 'trivy-results.sarif'" not in ci_fix_script
-    assert "reports/security/trivy-results.sarif" in routed_outputs
+    expected_outputs = {
+        "reports/security/trivy-results.sarif",
+        "reports/security/trivy-results.json",
+        "reports/security/trivy-base-results.json",
+        "reports/security/trivy-alerts.csv",
+        "reports/security/trivy-version.json",
+        "reports/security/github-trivy-alerts.json",
+        "reports/security/bioetl.spdx.json",
+        "reports/security/bioetl-image-provenance.txt",
+        "reports/security/bioetl-image-id.txt",
+        "reports/security/bioetl-pip-freeze.txt",
+        "reports/security/baseline.sha256",
+        "reports/security/bioetl-scanned-image.tar.zst",
+    }
+    assert expected_outputs <= routed_outputs
+    assert all(path in workflow for path in expected_outputs)
 
 
 def test_contract_junit_xml_routes_under_reports_junit() -> None:

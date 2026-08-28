@@ -1290,17 +1290,13 @@ def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     job = workflow["jobs"]["docker-push"]
-    tags = ""
-    persist_credentials = None
-    for step in job["steps"]:
-        if str(step.get("uses", "")).startswith("docker/build-push-action@"):
-            tags = str(step.get("with", {}).get("tags", ""))
-        if str(step.get("uses", "")).startswith("actions/checkout@"):
-            persist_credentials = step.get("with", {}).get("persist-credentials")
+    rendered = json.dumps(job)
 
     assert job.get("environment") == "ghcr-publish"
-    assert ":latest" not in tags
-    assert persist_credentials is False
+    assert ":latest" not in rendered
+    assert "docker/build-push-action@" not in rendered
+    assert "bioetl-scanned-image-${{ github.sha }}" in rendered
+    assert "docker manifest inspect" in rendered
 
 
 def test_docker_push_requires_all_validation_jobs() -> None:
@@ -1314,15 +1310,72 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_blocks_on_high_critical() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
-    built = [
-        step
+    built = {
+        str(step.get("name")): step
         for step in steps
         if step.get("uses", "").startswith("aquasecurity/trivy-action@")
         and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
-    ]
-    assert len(built) == 1
-    assert str(built[0]["with"].get("exit-code")) == "1"
-    assert built[0]["with"]["severity"] == "CRITICAL,HIGH"
+    }
+    evidence = [step for name, step in built.items() if "evidence scan" in name]
+    assert {step["with"]["format"] for step in evidence} == {"json", "sarif"}
+    assert all(str(step["with"].get("exit-code")) == "0" for step in evidence)
+    assert all(
+        step["with"]["severity"] == "CRITICAL,HIGH,MEDIUM,UNKNOWN" for step in evidence
+    )
+    enforcement = built["Enforce Trivy Critical High Medium policy"]
+    assert str(enforcement["with"].get("exit-code")) == "1"
+    assert enforcement["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
+    assert all(step["with"].get("ignore-unfixed") is False for step in built.values())
+    assert all(step["with"].get("version") == "v0.70.0" for step in built.values())
+
+
+def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    step_names = [str(step.get("name")) for step in steps]
+    upload = next(
+        step
+        for step in steps
+        if step.get("name") == "Upload reproducible security baseline"
+    )
+    assert "steps.validate-baseline.outcome == 'success'" in upload["if"]
+    assert "reports/security/baseline.sha256" in upload["with"]["path"]
+    assert upload["with"]["if-no-files-found"] == "error"
+    assert upload["with"]["retention-days"] == 30
+    assert any(
+        step.get("name") == "Generate SBOM for the scanned local image"
+        and step["with"]["output-file"] == "reports/security/bioetl.spdx.json"
+        for step in steps
+    )
+    base_scan = next(
+        step
+        for step in steps
+        if step.get("name") == "Run Trivy on pinned Debian bookworm base image"
+    )
+    assert base_scan["with"]["format"] == "json"
+    assert base_scan["with"]["output"] == ("reports/security/trivy-base-results.json")
+    assert step_names.index("Validate complete security baseline") < step_names.index(
+        "Upload reproducible security baseline"
+    )
+    assert step_names.index("Enforce Trivy Critical High Medium policy") < (
+        step_names.index("Export exact scanned image for publication")
+    )
+
+
+def test_docker_security_gate_covers_dependency_build_inputs() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    trigger = workflow.get("on", workflow.get(True))
+    assert isinstance(trigger, dict)
+    for event in ("push", "pull_request"):
+        paths = set(trigger[event]["paths"])
+        assert {
+            "Dockerfile.bioetl",
+            "pyproject.toml",
+            "uv.lock",
+            "src/**",
+            "configs/**",
+            ".dockerignore",
+        } <= paths

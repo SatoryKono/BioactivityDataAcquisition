@@ -28,6 +28,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import subprocess
 import time
@@ -38,8 +39,89 @@ import pytest
 from scripts.engineering.qa.docker_stability_campaign import commands, faults, model
 from scripts.engineering.qa.docker_stability_campaign import runner as campaign
 from scripts.engineering.qa.docker_stability_campaign import promotion
+from scripts.engineering.qa.docker_stability_campaign import trivy_baseline
 
 pytestmark = pytest.mark.repo_backed
+
+
+def test_trivy_baseline_csv_is_deterministic_and_joins_github_alerts(
+    tmp_path: Path,
+) -> None:
+    trivy_json = tmp_path / "trivy.json"
+    alerts_json = tmp_path / "alerts.json"
+    output = tmp_path / "baseline.csv"
+    trivy_json.write_text(
+        json.dumps(
+            {
+                "Results": [
+                    {
+                        "Target": "bioetl:test",
+                        "Vulnerabilities": [
+                            {
+                                "VulnerabilityID": "CVE-2026-0002",
+                                "PkgName": "pip",
+                                "InstalledVersion": "25.0.1",
+                                "FixedVersion": "26.1.2",
+                                "Status": "fixed",
+                                "Layer": {"DiffID": "sha256:layer"},
+                            },
+                            {
+                                "VulnerabilityID": "CVE-2026-0001",
+                                "PkgName": "libc6",
+                                "InstalledVersion": "2.36-9",
+                                "FixedVersion": "",
+                            },
+                        ],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    alerts_json.write_text(
+        json.dumps(
+            [
+                [
+                    {
+                        "number": 42,
+                        "rule": {"id": "CVE-2026-0002"},
+                        "most_recent_instance": {
+                            "message": {
+                                "text": (
+                                    "Package: pip\nInstalled Version: 25.0.1\n"
+                                    "Vulnerability CVE-2026-0002"
+                                )
+                            }
+                        },
+                    }
+                ]
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    count = trivy_baseline.export_trivy_baseline_csv(
+        trivy_json=trivy_json,
+        github_alerts_json=alerts_json,
+        output=output,
+    )
+
+    assert count == 2
+    with output.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert tuple(rows[0]) == trivy_baseline.TRIVY_BASELINE_COLUMNS
+    assert [row["CVE"] for row in rows] == ["CVE-2026-0001", "CVE-2026-0002"]
+    assert rows[0]["alert_number"] == ""
+    assert rows[0]["layer"] == "bioetl:test"
+    assert rows[1] == {
+        "alert_number": "42",
+        "CVE": "CVE-2026-0002",
+        "package": "pip",
+        "installed": "25.0.1",
+        "fixed": "26.1.2",
+        "layer": "sha256:layer",
+        "status": "fixed",
+    }
 
 
 def _passing_state() -> dict[str, object]:
