@@ -10,7 +10,7 @@ Audited branch: fix/sonar-postmerge-ci-closeout-20260828
 
 Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
 
-Evidence surface SHA-256: `00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8`
+Evidence surface SHA-256: `4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
-  "evidence_surface_sha256": "00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8",
+  "evidence_surface_sha256": "4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",

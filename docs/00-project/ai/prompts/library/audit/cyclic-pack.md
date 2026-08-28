@@ -24,7 +24,8 @@ max_body_lines: 160
 
 # Cyclic audit pack (tests / docs / tech-debt / repo hygiene / …)
 
-Полные paste-тексты (фрагменты inlined): [project/full/](project/full/) (`prompt.audit.project.pack`).
+Снимок полных paste-текстов: [materialized-v3](project/materialized-v3/README.md).
+Редактируемые source cards маршрутизирует `prompt.audit.project.pack`.
 
 **Десять** канонических циклических аудитов живут в
 [cycle/](cycle/README.md) (`prompt.audit.cycle.*`). Старые циклы

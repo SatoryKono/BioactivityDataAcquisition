@@ -1,7 +1,7 @@
 [
   {
     "label": "Environment: verify",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_env_doctor.py"
     ],
@@ -13,7 +13,7 @@
   },
   {
     "label": "Format: code",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_run.py",
       "-m",
@@ -29,7 +29,7 @@
   },
   {
     "label": "Check: lint",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_run.py",
       "-m",
@@ -47,7 +47,7 @@
   },
   {
     "label": "Check: types",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_run.py",
       "-m",
@@ -64,7 +64,7 @@
   },
   {
     "label": "Test: current file",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "file",
@@ -86,7 +86,7 @@
   },
   {
     "label": "Test: nearest symbol",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "nearest",
@@ -106,7 +106,7 @@
   },
   {
     "label": "Test: smoke",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "smoke"
@@ -124,7 +124,7 @@
   },
   {
     "label": "Test: unit-fast",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "unit-fast"
@@ -142,7 +142,7 @@
   },
   {
     "label": "Test: unit",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "unit"
@@ -160,7 +160,7 @@
   },
   {
     "label": "Test: architecture-fast",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "architecture-fast"
@@ -178,7 +178,7 @@
   },
   {
     "label": "Test: integration-replay",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "integration-replay"
@@ -196,7 +196,7 @@
   },
   {
     "label": "Test: contracts",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "contracts"
@@ -214,7 +214,7 @@
   },
   {
     "label": "Test: security",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "security"
@@ -232,7 +232,7 @@
   },
   {
     "label": "Test: e2e-smoke",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "e2e-smoke"
@@ -250,7 +250,7 @@
   },
   {
     "label": "Test: failed last run",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "failed"
@@ -268,7 +268,7 @@
   },
   {
     "label": "Coverage: local estimate (85%)",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_pytest_lane.py",
       "coverage-local"
@@ -286,7 +286,7 @@
   },
   {
     "label": "Check: architecture imports",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_lint_imports.py"
     ],
@@ -298,7 +298,7 @@
   },
   {
     "label": "Audit: security",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_run.py",
       "-m",
@@ -316,7 +316,7 @@
   },
   {
     "label": "Audit: dependencies",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_run.py",
       "-m",
@@ -333,7 +333,7 @@
   },
   {
     "label": "Audit: dead code",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_vulture.py"
     ],
@@ -345,7 +345,7 @@
   },
   {
     "label": "Audit: complexity",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/engineering/dev/zed_xenon.py"
     ],
@@ -357,7 +357,7 @@
   },
   {
     "label": "Check: MCP manifests",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/ai/codex/setup_mcp.py",
       "--check",
@@ -372,7 +372,7 @@
   },
   {
     "label": "Generate: MCP tracked manifests",
-    "command": "python",
+    "command": "$ZED_WORKTREE_ROOT/.venv-win/Scripts/python.exe",
     "args": [
       "scripts/ai/codex/setup_mcp.py",
       "--skip-codex",
