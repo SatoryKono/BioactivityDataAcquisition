@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-27T15:30:02.135677+00:00",
+  "generated_at": "2026-08-28T07:36:59.133258+00:00",
   "summary": {
     "total_scripts": 603,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 410
+      "tests": 411
     }
   },
   "scripts": [
@@ -17160,7 +17160,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 364,
+          "line": 362,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19046,7 +19046,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 295,
+          "line": 293,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -21817,7 +21817,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
