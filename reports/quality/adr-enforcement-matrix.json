@@ -6,15 +6,38 @@
       "category": "Storage",
       "decision_date": "2025-05-20",
       "decision_path": "docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/generate_adr_registry.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/docs/test_generate_adr_registry.py",
+        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
+        "docs/00-project/glossary.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/05-operations/vacuum-retention.md",
+        "scripts/generate_adr_registry.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/docs/test_generate_adr_registry.py",
+        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Delta Lake vs Parquet"
     },
     {
@@ -22,15 +45,39 @@
       "category": "Architecture",
       "decision_date": "2025-05-20",
       "decision_path": "docs/02-architecture/decisions/ADR-002-medallion-architecture.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/diagrams/render/pipeline_dataflow_render.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/docs/test_generate_adr_registry.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/07-architecture__prompt.audit.cycle.architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/11-medallion__prompt.audit.project.new2.medallion.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/01-medallion.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/publication-validation-index.md",
+        "docs/05-operations/vacuum-retention.md",
+        "scripts/diagrams/render/pipeline_dataflow_render.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py",
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/docs/test_generate_adr_registry.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Medallion Architecture"
     },
     {
@@ -38,15 +85,18 @@
       "category": "Data Modeling",
       "decision_date": "2025-05-20",
       "decision_path": "docs/02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Pydantic vs Dataclasses"
     },
     {
@@ -54,15 +104,39 @@
       "category": "Architecture",
       "decision_date": "2025-12-18",
       "decision_path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/architecture/test_interfaces_no_infrastructure.py",
+        "tests/unit/domain/ports/test_port_dtos.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/07-architecture__prompt.audit.cycle.architecture.md",
+        "docs/00-project/glossary.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/tutorials/create-new-pipeline-15min.md",
+        "docs/04-reference/api/composition.md",
+        "docs/04-reference/api/domain/ports.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "src/bioetl/application/core/base.py",
+        "src/bioetl/application/core/quarantine_manager.py",
+        "src/bioetl/composition/__init__.py",
+        "tests/architecture/test_interfaces_no_infrastructure.py",
+        "tests/unit/domain/ports/test_port_dtos.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Composition Layer Separation"
     },
     {
@@ -70,15 +144,25 @@
       "category": "Observability",
       "decision_date": "2025-12-18",
       "decision_path": "docs/02-architecture/decisions/ADR-006-logger-metrics-ports.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_no_structlog_in_application_interfaces.py",
+        "tests/architecture/test_port_contracts.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/04-reference/api/domain/ports.md",
+        "tests/architecture/test_no_structlog_in_application_interfaces.py",
+        "tests/architecture/test_port_contracts.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Logger and Metrics Ports"
     },
     {
@@ -86,15 +170,36 @@
       "category": "Resilience",
       "decision_date": "2025-12-22",
       "decision_path": "docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/e2e/test_pipeline_circuit_breaker_e2e.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/integration/test_runner_lifecycle.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metrics.py",
+        "tests/unit/infrastructure/test_circuit_breaker_degradation.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/AGENT.md",
+        "docs/00-project/ai/agents/guides/CLAUDE.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "grafana/README.md",
+        "src/bioetl/domain/exceptions/network/timeout.py",
+        "src/bioetl/infrastructure/adapters/chembl/health.py",
+        "src/bioetl/infrastructure/adapters/http/health.py",
+        "tests/e2e/test_pipeline_circuit_breaker_e2e.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/integration/test_runner_lifecycle.py",
+        "tests/unit/infrastructure/observability/test_prometheus_metrics.py",
+        "tests/unit/infrastructure/test_circuit_breaker_degradation.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Circuit Breaker Implementation"
     },
     {
@@ -102,15 +207,19 @@
       "category": "Data Fetching",
       "decision_date": "2025-12-22",
       "decision_path": "docs/02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "PaginatedFetcherMixin Design"
     },
     {
@@ -118,15 +227,175 @@
       "category": "Deployment",
       "decision_date": "2025-12-23",
       "decision_path": "docs/02-architecture/decisions/ADR-010-local-only-deployment.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/docker_helper_contracts.yaml",
+        "configs/quality/docker_runtime_contracts.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_lifecycle_registry.json",
+        "scripts/ops/observability/check_prometheus_rules_health.py",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
+        "scripts/ops/observability/grafana/recover_renderer.py",
+        "scripts/ops/runtime/docker/runtime_manager.py",
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/architecture/test_docs_root_surface_governance_alignment.py",
+        "tests/architecture/test_forbidden_imports.py",
+        "tests/integration/test_dashboard_structural_invariants.py",
+        "tests/unit/application/test_pipeline_config.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
+        "tests/unit/scripts/test_generate_adr_registry.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/docker_helper_contracts.yaml",
+        "configs/quality/docker_runtime_contracts.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_lifecycle_registry.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/AGENT.md",
+        "docs/00-project/ai/agents/guides/CODEX.md",
+        "docs/00-project/ai/agents/guides/GEMINI.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/REGISTRY.yaml",
+        "docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md",
+        "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
+        "docs/00-project/ai/prompts/fragments/dashboard-requirements-audit.md",
+        "docs/00-project/ai/prompts/generated/CATALOG.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/coderabbit-project-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/agents-memory.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/coderabbit.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/configs.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/dashboards.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/run/agents-memory.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/run/configs.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/run/dashboards.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/telemetry.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/07-architecture__prompt.audit.cycle.architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/23-ops-runbooks__prompt.audit.project.new2.ops-runbooks.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/master-orchestrator-v1__full-project-audit.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/01-architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/02-configs.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/09-diagrams.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/README.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/13-ops-runbooks.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/README.md",
+        "docs/00-project/ai/prompts/library/audit/sequential-run.md",
+        "docs/00-project/ai/prompts/library/observability/dashboard-audit-cycle.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/consolidate.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/data.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/evidence.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/layout.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/reverify.md",
+        "docs/00-project/ai/prompts/library/observability/grafana-six/visual.md",
+        "docs/00-project/ai/rules/windsurf/rules/08-operations.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
+        "docs/00-project/architecture-index.md",
+        "docs/00-project/governance/03-file-policy.md",
+        "docs/00-project/governance/06-doc-publication-policy.md",
+        "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
+        "docs/00-project/index.md",
+        "docs/00-project/rules-summary.md",
+        "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/cli-commands.md",
+        "docs/03-guides/coderabbit-audit-playbook.md",
+        "docs/03-guides/dashboards/README.md",
+        "docs/03-guides/dashboards/dashboard-extension-human.md",
+        "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
+        "docs/03-guides/docs-verification.md",
+        "docs/03-guides/getting-started.md",
+        "docs/03-guides/grafana-dashboard-configuration.md",
+        "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/quick-start.md",
+        "docs/03-guides/running-pipelines.md",
+        "docs/03-guides/troubleshooting.md",
+        "docs/03-guides/tutorials/monitoring-alerts-setup.md",
+        "docs/03-guides/workflows.md",
+        "docs/04-reference/api/infrastructure.md",
+        "docs/04-reference/environment-variables.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/04-reference/templates/adr-template.md",
+        "docs/04-reference/templates/pipeline-review-checklist.md",
+        "docs/04-reference/templates/pipeline-spec-template.md",
+        "docs/04-reference/templates/provider-spec-template.md",
+        "docs/04-reference/templates/runbook-template.md",
+        "docs/05-operations/01-monitoring-guide.md",
+        "docs/05-operations/README.md",
+        "docs/05-operations/archive-index.md",
+        "docs/05-operations/ci-workflow-map.md",
+        "docs/05-operations/deployment/README.md",
+        "docs/05-operations/deployment/deployment-guide.md",
+        "docs/05-operations/deployment/k8s-deployment.yaml",
+        "docs/05-operations/deployment/k8s-monitoring.yaml",
+        "docs/05-operations/deployment/k8s-networking.yaml",
+        "docs/05-operations/deployment/k8s-summary.md",
+        "docs/05-operations/deployment/mcp-neo4j-memory-final-summary.md",
+        "docs/05-operations/deployment/mcp-neo4j-memory-summary.md",
+        "docs/05-operations/deployment/neo4j-memory-setup.md",
+        "docs/05-operations/lock-contention-resolution.md",
+        "docs/05-operations/performance-baselines.md",
+        "docs/05-operations/performance-tuning.md",
+        "docs/05-operations/runbooks/backfill-rebuild.md",
+        "docs/05-operations/runbooks/checkpoint-debugging.md",
+        "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
+        "docs/05-operations/runbooks/data-recovery.md",
+        "docs/05-operations/runbooks/docker-compose-project-migration.md",
+        "docs/05-operations/runbooks/docker-image-resource-promotion.md",
+        "docs/05-operations/runbooks/docker-stability.md",
+        "docs/05-operations/runbooks/game-day.md",
+        "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
+        "docs/05-operations/runbooks/incident-response.md",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/merge-campaign.md",
+        "docs/05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md",
+        "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
+        "docs/05-operations/runbooks/observability-checklist.md",
+        "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        "docs/05-operations/runbooks/pipeline-failure-dq.md",
+        "docs/05-operations/runbooks/pipeline-failure-recovery.md",
+        "docs/05-operations/runbooks/publication-validation-runbook.md",
+        "docs/05-operations/runbooks/quarantine-management.md",
+        "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "docs/05-operations/runbooks/scaling.md",
+        "docs/05-operations/runbooks/schema-evolution.md",
+        "docs/05-operations/runbooks/stale-lock.md",
+        "docs/05-operations/runbooks/traceability-adoption-checklist.md",
+        "docs/05-operations/runbooks/traceability-signal-ownership.md",
+        "docs/05-operations/runbooks/traceability-tabletop-drills.md",
+        "docs/05-operations/runbooks/traceability-wave5-closeout-pack.md",
+        "docs/05-operations/runbooks/vacuum-procedures.md",
+        "docs/05-operations/runbooks/workflow-control-plane.md",
+        "docs/05-operations/sli-slo-baseline.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "docs/05-operations/vacuum-retention.md",
+        "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+        "grafana/README.md",
+        "scripts/ops/observability/check_prometheus_rules_health.py",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
+        "scripts/ops/observability/grafana/recover_renderer.py",
+        "scripts/ops/runtime/docker/runtime_manager.py",
+        "src/bioetl/composition/entrypoints.py",
+        "src/bioetl/domain/locking.py",
+        "src/bioetl/infrastructure/observability/tracing.py",
+        "src/bioetl/interfaces/http/_processed_records_table_support.py",
+        "tests/architecture/test_docker_runtime_contracts.py",
+        "tests/architecture/test_docs_root_surface_governance_alignment.py",
+        "tests/architecture/test_forbidden_imports.py",
+        "tests/integration/test_dashboard_structural_invariants.py",
+        "tests/unit/application/test_pipeline_config.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py",
+        "tests/unit/scripts/test_generate_adr_registry.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Local-Only Deployment"
     },
     {
@@ -134,15 +403,19 @@
       "category": "Data Loading",
       "decision_date": "2025-12-23",
       "decision_path": "docs/02-architecture/decisions/ADR-011-remove-watermark-mechanism.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/04-reference/providers/chembl/activity.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Remove Watermark Mechanism"
     },
     {
@@ -150,15 +423,20 @@
       "category": "Storage",
       "decision_date": "2025-12-23",
       "decision_path": "docs/02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/pipeline-lifecycle.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Storage Clear Contract and Run ID"
     },
     {
@@ -166,15 +444,20 @@
       "category": "Storage",
       "decision_date": "2025-12-24",
       "decision_path": "docs/02-architecture/decisions/ADR-013-async-storage-cleanup.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/pipeline-lifecycle.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Async Storage Cleanup"
     },
     {
@@ -182,15 +465,92 @@
       "category": "Reproducibility",
       "decision_date": "2025-12-24",
       "decision_path": "docs/02-architecture/decisions/ADR-014-deterministic-writes.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "scripts/ops/data/vacuum_delta.py",
+        "tests/architecture/test_column_order.py",
+        "tests/architecture/test_deterministic_identity_documentation_governance.py",
+        "tests/architecture/test_domain_unit_test_purity.py",
+        "tests/architecture/test_medallion_invariants.py",
+        "tests/architecture/test_no_datetime_now_in_domain.py",
+        "tests/architecture/test_no_datetime_now_in_infrastructure.py",
+        "tests/architecture/test_no_fstring_in_logs.py",
+        "tests/architecture/test_no_random_in_writers.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/security/test_security.py",
+        "tests/testing_support/bronze_writer.py",
+        "tests/unit/domain/test_entities.py",
+        "tests/unit/infrastructure/factories/test_factories.py",
+        "tests/unit/infrastructure/factories/test_storage_adapter.py",
+        "tests/unit/infrastructure/storage/test_gold_writer.py",
+        "tests/unit/infrastructure/test_storage.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/01-medallion.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
+        "docs/00-project/governance/03-file-policy.md",
+        "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/docs-verification.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/03-guides/testing.md",
+        "docs/03-guides/tutorials/create-new-pipeline-15min.md",
+        "docs/03-guides/tutorials/debug-medallion-layers.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/04-reference/publication-validation-index.md",
+        "docs/04-reference/templates/adr-template.md",
+        "docs/05-operations/performance-baselines.md",
+        "docs/05-operations/performance-tuning.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "scripts/ops/data/vacuum_delta.py",
+        "src/bioetl/composition/factories/storage/write_mixin.py",
+        "src/bioetl/domain/entities/base.py",
+        "src/bioetl/domain/ports/quality/quarantine.py",
+        "src/bioetl/domain/ports/storage/bronze_port.py",
+        "src/bioetl/domain/ports/storage/gold_port.py",
+        "src/bioetl/domain/resilience.py",
+        "src/bioetl/domain/schemas/column_order.py",
+        "src/bioetl/infrastructure/adapters/cached_bronze_data_source.py",
+        "src/bioetl/infrastructure/quarantine/_lifecycle.py",
+        "src/bioetl/infrastructure/quarantine/unified.py",
+        "src/bioetl/infrastructure/storage/delta/arrow_converter.py",
+        "src/bioetl/infrastructure/storage/gold/validation_mixin.py",
+        "tests/architecture/test_column_order.py",
+        "tests/architecture/test_deterministic_identity_documentation_governance.py",
+        "tests/architecture/test_domain_unit_test_purity.py",
+        "tests/architecture/test_medallion_invariants.py",
+        "tests/architecture/test_no_datetime_now_in_domain.py",
+        "tests/architecture/test_no_datetime_now_in_infrastructure.py",
+        "tests/architecture/test_no_fstring_in_logs.py",
+        "tests/architecture/test_no_random_in_writers.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py",
+        "tests/security/test_security.py",
+        "tests/testing_support/bronze_writer.py",
+        "tests/unit/domain/test_entities.py",
+        "tests/unit/infrastructure/factories/test_factories.py",
+        "tests/unit/infrastructure/factories/test_storage_adapter.py",
+        "tests/unit/infrastructure/storage/test_gold_writer.py",
+        "tests/unit/infrastructure/test_storage.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Deterministic Writes and Retries"
     },
     {
@@ -198,15 +558,26 @@
       "category": "Lifecycle",
       "decision_date": "2025-12-24",
       "decision_path": "docs/02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/AGENT.md",
+        "docs/00-project/index.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/pipeline-lifecycle.md",
+        "docs/05-operations/README.md",
+        "docs/05-operations/lock-contention-resolution.md",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Pipeline Services Lifecycle"
     },
     {
@@ -214,15 +585,19 @@
       "category": "Resilience",
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-016-error-handling-strategy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Error Handling Strategy"
     },
     {
@@ -230,15 +605,43 @@
       "category": "Observability",
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/e2e/test_resilience_scenarios_e2e.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/telemetry.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/08-telemetry__prompt.audit.cycle.telemetry.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
+        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
+        "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/docs-verification.md",
+        "docs/03-guides/metrics-monitoring.md",
+        "docs/03-guides/observability-guide.md",
+        "docs/03-guides/prometheus-metrics-export.md",
+        "docs/03-guides/tutorials/monitoring-alerts-setup.md",
+        "docs/04-reference/api/domain/ports.md",
+        "docs/04-reference/components/config-runtime-artifacts.md",
+        "docs/04-reference/contracts/observability.md",
+        "docs/05-operations/01-monitoring-guide.md",
+        "docs/05-operations/runbooks/observability-checklist.md",
+        "docs/05-operations/sli-slo-baseline.md",
+        "grafana/README.md",
+        "src/bioetl/infrastructure/observability/tracing.py",
+        "tests/e2e/test_resilience_scenarios_e2e.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Observability Architecture"
     },
     {
@@ -246,15 +649,98 @@
       "category": "Data Quality",
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_architecture_audit_closeout_gates.py",
+        "tests/architecture/test_explicit_gold_scd2_policy.py",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_schema_stability.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/field_registry/canonical_registry.json",
+        "configs/field_registry/generic_field_ownership.yaml",
+        "configs/field_registry/ontology_unit_semantic_roles.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/01-medallion.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/02-dq-contracts.md",
+        "docs/00-project/glossary.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/silver-schema-testing-guide.md",
+        "docs/03-guides/tutorials/create-new-pipeline-15min.md",
+        "docs/03-guides/tutorials/debug-medallion-layers.md",
+        "docs/04-reference/contracts/canonical-field-registry.md",
+        "docs/04-reference/contracts/dq-contracts.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/passports/generated/pipelines/chembl_activity.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_assay.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_assay_parameters.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_cell_line.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_compound_record.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_molecule.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_protein_class.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_publication.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_publication_similarity.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_publication_term.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_subcellular_fraction.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_target.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_target_component.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_target_protein_classification.json",
+        "docs/04-reference/passports/generated/pipelines/chembl_tissue.json",
+        "docs/04-reference/passports/generated/pipelines/crossref_publication.json",
+        "docs/04-reference/passports/generated/pipelines/openalex_publication.json",
+        "docs/04-reference/passports/generated/pipelines/pubchem_compound.json",
+        "docs/04-reference/passports/generated/pipelines/pubmed_publication.json",
+        "docs/04-reference/passports/generated/pipelines/semanticscholar_publication.json",
+        "docs/04-reference/passports/generated/pipelines/uniprot_idmapping.json",
+        "docs/04-reference/passports/generated/pipelines/uniprot_protein.json",
+        "docs/04-reference/passports/pipeline-passport-guide.md",
+        "docs/04-reference/passports/pipelines/chembl-activity.md",
+        "docs/04-reference/passports/pipelines/chembl-assay-parameters.md",
+        "docs/04-reference/passports/pipelines/chembl-assay.md",
+        "docs/04-reference/passports/pipelines/chembl-cell-line.md",
+        "docs/04-reference/passports/pipelines/chembl-compound-record.md",
+        "docs/04-reference/passports/pipelines/chembl-molecule.md",
+        "docs/04-reference/passports/pipelines/chembl-protein-class.md",
+        "docs/04-reference/passports/pipelines/chembl-publication-similarity.md",
+        "docs/04-reference/passports/pipelines/chembl-publication-term.md",
+        "docs/04-reference/passports/pipelines/chembl-publication.md",
+        "docs/04-reference/passports/pipelines/chembl-subcellular-fraction.md",
+        "docs/04-reference/passports/pipelines/chembl-target-component.md",
+        "docs/04-reference/passports/pipelines/chembl-target-protein-classification.md",
+        "docs/04-reference/passports/pipelines/chembl-target.md",
+        "docs/04-reference/passports/pipelines/chembl-tissue.md",
+        "docs/04-reference/passports/pipelines/crossref-publication.md",
+        "docs/04-reference/passports/pipelines/openalex-publication.md",
+        "docs/04-reference/passports/pipelines/pubchem-compound.md",
+        "docs/04-reference/passports/pipelines/pubmed-publication.md",
+        "docs/04-reference/passports/pipelines/semanticscholar-publication.md",
+        "docs/04-reference/passports/pipelines/uniprot-idmapping.md",
+        "docs/04-reference/passports/pipelines/uniprot-protein.md",
+        "docs/05-operations/runbooks/canonical-semantic-field-unification.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "scripts/docs/passports/projector.py",
+        "src/bioetl/domain/contracts/gold/_composite_gold_common_schema.py",
+        "tests/architecture/test_architecture_audit_closeout_gates.py",
+        "tests/architecture/test_explicit_gold_scd2_policy.py",
+        "tests/architecture/test_gold_schema_contracts.py",
+        "tests/architecture/test_gold_strict_validation_policy.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_schema_stability.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Gold Strict Validation"
     },
     {
@@ -262,15 +748,28 @@
       "category": "Observability",
       "decision_date": "2025-12-26",
       "decision_path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/telemetry.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/metrics-monitoring.md",
+        "docs/03-guides/tutorials/monitoring-alerts-setup.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Observability Port Enforcement"
     },
     {
@@ -278,15 +777,20 @@
       "category": "Architecture",
       "decision_date": "2025-12-16",
       "decision_path": "docs/02-architecture/decisions/ADR-020-basepipeline-decomposition.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "src/bioetl/application/core/pipeline_services.py",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "BasePipeline Decomposition"
     },
     {
@@ -294,15 +798,21 @@
       "category": "Domain Model",
       "decision_date": "2025-12-29",
       "decision_path": "docs/02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/CLAUDE.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/04-reference/domain/aggregates.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "DDD Aggregates Adoption"
     },
     {
@@ -310,15 +820,22 @@
       "category": "Observability",
       "decision_date": "2025-12-30",
       "decision_path": "docs/02-architecture/decisions/ADR-022-tracing-noop.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/telemetry.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "grafana/README.md",
+        "src/bioetl/infrastructure/observability/tracing.py",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "NoOp Tracing for Local-Only"
     },
     {
@@ -326,15 +843,18 @@
       "category": "Observability",
       "decision_date": "2026-01-06",
       "decision_path": "docs/02-architecture/decisions/ADR-023-entity-type-patterns.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Entity Type Patterns"
     },
     {
@@ -342,15 +862,54 @@
       "category": "Architecture",
       "decision_date": "2026-01-06",
       "decision_path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/engineering/qa/naming_audit.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_naming_ambiguity_classifier.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_naming_conventions.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/test_year_validation.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/naming_exceptions.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/governance/02-naming-policy.md",
+        "docs/03-guides/silver-schema-testing-guide.md",
+        "scripts/engineering/qa/naming_audit.py",
+        "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+        "src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py",
+        "src/bioetl/application/pipelines/chembl/publication_term_transformer.py",
+        "src/bioetl/application/pipelines/chembl/publication_transformer.py",
+        "src/bioetl/domain/entities/_chembl_reference_models.py",
+        "src/bioetl/domain/registry/__init__.py",
+        "src/bioetl/domain/registry/publication_data.py",
+        "src/bioetl/domain/schemas/chembl/publication_similarity.py",
+        "src/bioetl/domain/schemas/chembl/publication_term.py",
+        "src/bioetl/infrastructure/adapters/chembl/entity_mapper.py",
+        "src/bioetl/infrastructure/adapters/pubchem/_detail_models.py",
+        "src/bioetl/infrastructure/adapters/pubchem/models.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_naming_ambiguity_classifier.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_naming_conventions.py",
+        "tests/e2e/test_chembl_publication_e2e.py",
+        "tests/e2e/test_chembl_publication_term_e2e.py",
+        "tests/unit/application/core/test_publication_term_data_source.py",
+        "tests/unit/domain/registry/test_publication_registry.py",
+        "tests/unit/domain/schemas/test_year_validation.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Entity Naming Unification"
     },
     {
@@ -358,15 +917,33 @@
       "category": "Configuration",
       "decision_date": "2026-01-19",
       "decision_path": "docs/02-architecture/decisions/ADR-025-pipeline-config-unification.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "tests/architecture/test_path_contracts.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/governance/03-file-policy.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/file-path-audit-report.md",
+        "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/04-reference/pipelines/README.md",
+        "scripts/docs/fixers/fix_links_explicit.py",
+        "src/bioetl/composition/bootstrap/assembly/storage.py",
+        "src/bioetl/composition/factories/dq/_context_resolver_support.py",
+        "tests/architecture/test_path_contracts.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Pipeline Config Unification"
     },
     {
@@ -374,15 +951,81 @@
       "category": "Architecture",
       "decision_date": "2026-01-15",
       "decision_path": "docs/02-architecture/decisions/ADR-026-composite-pipeline-pattern.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_composite_layer_boundaries.py",
+        "tests/integration/composite/test_molecule_pipeline.py",
+        "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/composite/test_dependency_coordinator.py",
+        "tests/unit/application/composite/test_runner_robustness.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/composites/activity.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/field_groups/publication.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/publication.yaml",
+        "configs/composites/target.yaml",
+        "configs/field_registry/canonical_registry.json",
+        "configs/field_registry/generic_field_ownership.yaml",
+        "configs/field_registry/ontology_unit_semantic_roles.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/master-orchestrator-v1__full-project-audit.md",
+        "docs/00-project/ai/rules/windsurf/rules/03-testing.md",
+        "docs/00-project/ai/rules/windsurf/rules/04-patterns.md",
+        "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
+        "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
+        "docs/00-project/glossary.md",
+        "docs/00-project/index.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/03-guides/pipeline-lifecycle.md",
+        "docs/04-reference/api/application.md",
+        "docs/04-reference/cli.md",
+        "docs/04-reference/contracts/canonical-field-registry.md",
+        "docs/04-reference/passports/manual/pipelines/composite_activity.yaml",
+        "docs/04-reference/pipeline-catalog.md",
+        "docs/04-reference/pipelines/README.md",
+        "docs/04-reference/pipelines/composites.md",
+        "docs/05-operations/runbooks/canonical-semantic-field-unification.md",
+        "src/bioetl/application/composite/__init__.py",
+        "src/bioetl/application/composite/aggregator.py",
+        "src/bioetl/application/composite/column_renamer.py",
+        "src/bioetl/application/composite/dependency_coordinator.py",
+        "src/bioetl/application/composite/dependency_key_resolvers.py",
+        "src/bioetl/application/composite/helpers/dependency_chained_key_resolver.py",
+        "src/bioetl/application/composite/join_planner.py",
+        "src/bioetl/application/composite/key_extractor.py",
+        "src/bioetl/application/composite/merge_service.py",
+        "src/bioetl/application/composite/preflight_validator.py",
+        "src/bioetl/domain/composite/__init__.py",
+        "src/bioetl/domain/composite/aggregation.py",
+        "src/bioetl/domain/composite/lineage.py",
+        "src/bioetl/domain/composite/state.py",
+        "src/bioetl/domain/composite/strategy.py",
+        "src/bioetl/domain/value_objects/column_order.py",
+        "src/bioetl/domain/value_objects/column_qualifier.py",
+        "src/bioetl/infrastructure/config/field_group_loader.py",
+        "src/bioetl/infrastructure/schemas/__init__.py",
+        "src/bioetl/infrastructure/schemas/composite_config.py",
+        "src/bioetl/interfaces/cli/commands/adr.py",
+        "tests/architecture/test_composite_layer_boundaries.py",
+        "tests/integration/composite/test_molecule_pipeline.py",
+        "tests/unit/application/composite/test_composite_activity.py",
+        "tests/unit/application/composite/test_dependency_coordinator.py",
+        "tests/unit/application/composite/test_runner_robustness.py",
+        "tests/unit/interfaces/cli/commands/test_adr_commands.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Composite Pipeline Pattern"
     },
     {
@@ -390,15 +1033,51 @@
       "category": "Data Quality",
       "decision_date": "2026-01-19",
       "decision_path": "docs/02-architecture/decisions/ADR-027-dq-rules-externalization.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/validation/lint_config_paths.py",
+        "tests/architecture/test_composite_dq_externalization.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_validations.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/composites/activity.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/publication.yaml",
+        "configs/composites/target.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
+        "docs/00-project/ai/prompts/library/architecture/architecture-cycle.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/12-dq-contracts__prompt.audit.project.new2.dq-contracts.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/02-dq-contracts.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/data-quality-rules.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/dq-configuration.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/03-guides/silver-schema-testing-guide.md",
+        "docs/04-reference/contracts/dq-contracts.md",
+        "docs/04-reference/pipelines/README.md",
+        "docs/04-reference/publication-validation-index.md",
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/validation/lint_config_paths.py",
+        "tests/architecture/test_composite_dq_externalization.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/contract/silver_schemas/README.md",
+        "tests/contract/silver_schemas/test_validations.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "DQ Rules Externalization"
     },
     {
@@ -406,15 +1085,46 @@
       "category": "Configuration",
       "decision_date": "2026-02-09",
       "decision_path": "docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/validation/lint_config_paths.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/unit/domain/models/test_filter.py",
+        "tests/unit/infrastructure/schemas/test_filter_config.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/_schema/pipeline.json",
+        "configs/composites/activity.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/publication.yaml",
+        "configs/composites/target.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/04-reference/pipelines/README.md",
+        "scripts/docs/checks/check_links.py",
+        "scripts/schema/validation/lint_config_paths.py",
+        "src/bioetl/composition/providers/registration_bio.py",
+        "src/bioetl/domain/models/filter.py",
+        "src/bioetl/infrastructure/config/__init__.py",
+        "src/bioetl/infrastructure/config/config_ci_contract.py",
+        "src/bioetl/infrastructure/config/filter_config_loader.py",
+        "src/bioetl/infrastructure/config_loader_filtering.py",
+        "src/bioetl/infrastructure/schemas/filter_config.py",
+        "src/bioetl/infrastructure/schemas/pipeline_config.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/unit/domain/models/test_filter.py",
+        "tests/unit/infrastructure/schemas/test_filter_config.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Filter Rules Externalization"
     },
     {
@@ -422,15 +1132,46 @@
       "category": "Data Modeling",
       "decision_date": "2026-01-23",
       "decision_path": "docs/02-architecture/decisions/ADR-029-output-metadata-unification.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/schema/validation/lint_config_paths.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_metadata_output_contract.py",
+        "tests/unit/application/services/test_metadata_coordinator.py",
+        "tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py",
+        "tests/unit/domain/models/test_metadata_output.py",
+        "tests/unit/infrastructure/storage/test_metadata_writer.py",
+        "tests/unit/infrastructure/test_config_dynamic.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/composites/publication.yaml",
+        "configs/composites/target.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/glossary.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "scripts/schema/validation/lint_config_paths.py",
+        "src/bioetl/domain/mapping/publication_fields.py",
+        "src/bioetl/domain/models/_metadata_bronze.py",
+        "src/bioetl/domain/models/_metadata_gold.py",
+        "src/bioetl/domain/models/_metadata_silver.py",
+        "src/bioetl/domain/models/metadata.py",
+        "src/bioetl/domain/ports/metadata/coordinator.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_metadata_output_contract.py",
+        "tests/unit/application/services/test_metadata_coordinator.py",
+        "tests/unit/application/services/test_metadata_coordinator_runtime_profiles.py",
+        "tests/unit/domain/models/test_metadata_output.py",
+        "tests/unit/infrastructure/storage/test_metadata_writer.py",
+        "tests/unit/infrastructure/test_config_dynamic.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Output Metadata Unification"
     },
     {
@@ -438,15 +1179,20 @@
       "category": "Data Fetching",
       "decision_date": "2026-01-26",
       "decision_path": "docs/02-architecture/decisions/ADR-030-publication-pagination-strategy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Publication Pagination Strategy"
     },
     {
@@ -454,15 +1200,37 @@
       "category": "Data Loading",
       "decision_date": "2026-01-26",
       "decision_path": "docs/02-architecture/decisions/ADR-031-loading-strategy-formalization.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/unit/application/core/test_checkpoint_manager.py",
+        "tests/unit/domain/test_medallion.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/_schema/pipeline.json",
+        "configs/base/pipeline.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/AGENT.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
+        "docs/00-project/glossary.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/config-merge-strategy.md",
+        "src/bioetl/application/core/lifecycle/checkpoint_manager.py",
+        "src/bioetl/domain/config/pipeline.py",
+        "src/bioetl/infrastructure/schemas/pipeline_config.py",
+        "src/bioetl/infrastructure/schemas/source_config.py",
+        "tests/architecture/test_config_ci_invariants.py",
+        "tests/architecture/test_force_full_scan_publication.py",
+        "tests/unit/application/core/test_checkpoint_manager.py",
+        "tests/unit/domain/test_medallion.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Loading Strategy Formalization"
     },
     {
@@ -470,15 +1238,31 @@
       "category": "HTTP/Networking",
       "decision_date": "2026-01-28",
       "decision_path": "docs/02-architecture/decisions/ADR-032-unified-http-client.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/15-http-clients__prompt.audit.project.new2.http-clients.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/05-http-clients.md",
+        "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
+        "docs/00-project/ai/rules/windsurf/rules/04-patterns.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/prometheus-metrics-export.md",
+        "docs/03-guides/tutorials/monitoring-alerts-setup.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/04-reference/publications/publication-processing-workflows.md",
+        "docs/05-operations/performance-tuning.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Unified HTTP Client Pattern"
     },
     {
@@ -486,15 +1270,23 @@
       "category": "Data Quality",
       "decision_date": "2026-02-06",
       "decision_path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/unit/scripts/test_generate_adr_registry.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/publication-validation-guide.md",
+        "docs/04-reference/publication-validation-index.md",
+        "docs/05-operations/runbooks/publication-validation-runbook.md",
+        "tests/unit/scripts/test_generate_adr_registry.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Publication Metadata Validation Strategy"
     },
     {
@@ -502,15 +1294,21 @@
       "category": "Architecture",
       "decision_date": "2026-02-15",
       "decision_path": "docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/contract/test_gold_pk_consistency.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "tests/contract/test_gold_pk_consistency.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Schema\u2194Domain Configuration Pairs"
     },
     {
@@ -518,15 +1316,26 @@
       "category": "Data Modeling",
       "decision_date": "2026-02-17",
       "decision_path": "docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/schema/analysis/generate_json_field_typing_inventory.py",
+        "tests/architecture/test_non_chembl_json_field_typing_policy.py",
+        "tests/unit/domain/schemas/test_constants_yaml.py",
+        "tests/unit/infrastructure/schemas/test_silver.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/naming_exceptions.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/rules/windsurf/rules/01-data-quality.md",
+        "scripts/schema/analysis/generate_json_field_typing_inventory.py",
+        "tests/architecture/test_non_chembl_json_field_typing_policy.py",
+        "tests/unit/domain/schemas/test_constants_yaml.py",
+        "tests/unit/infrastructure/schemas/test_silver.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "JSON Field Typing Policy (Silver\u2194Gold)"
     },
     {
@@ -534,15 +1343,70 @@
       "category": "Data Quality",
       "decision_date": "2026-02-18",
       "decision_path": "docs/02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/engineering/repo/split_testing_roadmap_issue.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/naming_exceptions.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/04-reference/contracts/dq-contracts.md",
+        "docs/04-reference/pipelines/chembl/01-protein-class-spec.md",
+        "docs/04-reference/pipelines/chembl/02-cell-line-spec.md",
+        "docs/04-reference/pipelines/chembl/03-molecule-spec.md",
+        "docs/04-reference/pipelines/chembl/04-target-spec.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/04-reference/pipelines/chembl/06-assay-spec.md",
+        "docs/04-reference/pipelines/chembl/07-publication-spec.md",
+        "docs/04-reference/pipelines/chembl/08-assay-parameters-spec.md",
+        "docs/04-reference/pipelines/chembl/09-compound-record-spec.md",
+        "docs/04-reference/pipelines/chembl/10-target-component-spec.md",
+        "docs/04-reference/pipelines/chembl/11-target-protein-classification-spec.md",
+        "docs/04-reference/pipelines/chembl/12-publication-similarity-spec.md",
+        "docs/04-reference/pipelines/chembl/13-publication-term-spec.md",
+        "docs/04-reference/pipelines/chembl/14-subcellular-fraction-spec.md",
+        "docs/04-reference/pipelines/chembl/15-tissue-spec.md",
+        "docs/04-reference/pipelines/composite/01-publication-spec.md",
+        "docs/04-reference/pipelines/composite/02-molecule-spec.md",
+        "docs/04-reference/pipelines/composite/03-target-spec.md",
+        "docs/04-reference/pipelines/composite/04-activity-spec.md",
+        "docs/04-reference/pipelines/composite/05-assay-spec.md",
+        "docs/04-reference/pipelines/crossref/01-publication-spec.md",
+        "docs/04-reference/pipelines/openalex/01-publication-spec.md",
+        "docs/04-reference/pipelines/pubchem/01-compound-spec.md",
+        "docs/04-reference/pipelines/pubmed/01-publication-spec.md",
+        "docs/04-reference/pipelines/semanticscholar/01-publication-spec.md",
+        "docs/04-reference/pipelines/uniprot/01-protein-spec.md",
+        "docs/04-reference/pipelines/uniprot/02-idmapping-spec.md",
+        "docs/04-reference/providers/chembl/activity.md",
+        "docs/04-reference/providers/chembl/assay-parameters.md",
+        "docs/04-reference/providers/chembl/assay.md",
+        "docs/04-reference/providers/chembl/cell-line.md",
+        "docs/04-reference/providers/chembl/compound-record.md",
+        "docs/04-reference/providers/chembl/molecule.md",
+        "docs/04-reference/providers/chembl/protein-class.md",
+        "docs/04-reference/providers/chembl/publication-similarity.md",
+        "docs/04-reference/providers/chembl/publication-term.md",
+        "docs/04-reference/providers/chembl/publication.md",
+        "docs/04-reference/providers/chembl/subcellular-fraction.md",
+        "docs/04-reference/providers/chembl/target-component.md",
+        "docs/04-reference/providers/chembl/target-protein-classification.md",
+        "docs/04-reference/providers/chembl/target.md",
+        "docs/04-reference/providers/chembl/tissue.md",
+        "docs/04-reference/providers/crossref/publication.md",
+        "docs/04-reference/providers/openalex/publication.md",
+        "docs/04-reference/providers/pubchem/compound.md",
+        "docs/04-reference/providers/pubmed/publication.md",
+        "docs/04-reference/providers/semanticscholar/publication.md",
+        "docs/04-reference/providers/uniprot/idmapping.md",
+        "docs/04-reference/providers/uniprot/protein.md",
+        "scripts/engineering/repo/split_testing_roadmap_issue.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Gold Contract Versioning Policy"
     },
     {
@@ -550,15 +1414,25 @@
       "category": "Data Contracts",
       "decision_date": "2026-02-18",
       "decision_path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/naming_exceptions.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/05-operations/troubleshooting/common-errors.md"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Canonical Schema Source and Generation"
     },
     {
@@ -566,15 +1440,24 @@
       "category": "Configuration",
       "decision_date": "2026-02-16",
       "decision_path": "docs/02-architecture/decisions/ADR-038-enum-externalization.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_enforcement_matrix.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/naming_exceptions.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/data-quality-rules.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "tests/architecture/test_adr_enforcement_matrix.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "ChEMBL Enum Values Externalization to YAML"
     },
     {
@@ -582,15 +1465,33 @@
       "category": "Configuration",
       "decision_date": "2026-02-24",
       "decision_path": "docs/02-architecture/decisions/ADR-039-unified-entity-config-format.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_config_ci_invariants.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/field_registry/canonical_registry.json",
+        "configs/field_registry/generic_field_ownership.yaml",
+        "configs/field_registry/ontology_unit_semantic_roles.yaml",
+        "configs/naming_exceptions.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/rules/bioetl-ai-rules.md",
+        "docs/00-project/glossary.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/pipeline-configuration.md",
+        "docs/04-reference/contracts/canonical-field-registry.md",
+        "docs/04-reference/pipelines/chembl/05-activity-spec.md",
+        "docs/05-operations/runbooks/canonical-semantic-field-unification.md",
+        "tests/architecture/test_config_ci_invariants.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Unified Entity Config Format"
     },
     {
@@ -598,15 +1499,62 @@
       "category": "Documentation",
       "decision_date": "2026-02-25",
       "decision_path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/diagrams/__main__.py",
+        "scripts/diagrams/fix/convert_provider_diagrams.py",
+        "scripts/diagrams/fix/harmonize_link_styles.py",
+        "scripts/diagrams/fix/prune_orphan_nodes.py",
+        "scripts/diagrams/lint/lint_diagrams.py",
+        "scripts/diagrams/render/pipeline_dataflow_render.py",
+        "scripts/docs/checks/check_drift.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/policy/agent-orchestration-rules.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/REGISTRY.yaml",
+        "docs/00-project/ai/prompts/archive/campaigns/documentation_diagrams_audit.md",
+        "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
+        "docs/00-project/ai/prompts/generated/CATALOG.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/diagrams.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/run/diagrams.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/02-diagrams__prompt.audit.cycle.diagrams.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/09-diagrams.md",
+        "docs/00-project/ai/prompts/library/audit/project/new/README.md",
+        "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
+        "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
+        "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/index.md",
+        "docs/05-operations/ci-workflow-map.md",
+        "scripts/diagrams/__main__.py",
+        "scripts/diagrams/fix/convert_provider_diagrams.py",
+        "scripts/diagrams/fix/harmonize_link_styles.py",
+        "scripts/diagrams/fix/prune_orphan_nodes.py",
+        "scripts/diagrams/lint/lint_diagrams.py",
+        "scripts/diagrams/render/pipeline_dataflow_render.py",
+        "scripts/docs/checks/check_drift.py",
+        "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
+        "tests/architecture/test_diagram_lint_policy_rules.py",
+        "tests/architecture/test_documentation_cleanup_inventory.py",
+        "tests/unit/scripts/diagrams/test_convert_provider_diagrams.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Diagram Governance and Layout Policy"
     },
     {
@@ -614,15 +1562,22 @@
       "category": "Architecture",
       "decision_date": "2026-03-04",
       "decision_path": "docs/02-architecture/decisions/ADR-041-naming-policy-skills-agents.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/layered_suffix_policy.yaml",
+        "tests/architecture/test_layer_aware_suffix_policy.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/layered_suffix_policy.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/governance/02-naming-policy.md",
+        "tests/architecture/test_layer_aware_suffix_policy.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Naming Policy for Skills, Agents, Commands"
     },
     {
@@ -630,15 +1585,31 @@
       "category": "Testing",
       "decision_date": "2026-03-09",
       "decision_path": "docs/02-architecture/decisions/ADR-042-testing-strategy-matrix.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/test_matrix.yaml",
+        "tests/architecture/test_test_matrix_lane_policy.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/test_matrix.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/agents/guides/TEST_LANE_MENTAL_MODEL.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/testing.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "tests/architecture/test_test_matrix_lane_policy.py",
+        "tests/unit/infrastructure/adr/test_fs_adr_service.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Testing Strategy Matrix & Fixture Gov."
     },
     {
@@ -646,15 +1617,22 @@
       "category": "Documentation",
       "decision_date": "2026-03-09",
       "decision_path": "docs/02-architecture/decisions/ADR-043-documentation-knowledge-management.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_doc_crossref_integrity.py",
+        "tests/unit/memory/test_rag_indexing.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/governance/01-documentation-governance-style-guide.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "tests/architecture/test_doc_crossref_integrity.py",
+        "tests/unit/memory/test_rag_indexing.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Documentation & Knowledge Management"
     },
     {
@@ -662,15 +1640,44 @@
       "category": "Reproducibility",
       "decision_date": "2026-03-24",
       "decision_path": "docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_control_plane_runtime_docs_alignment.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/domain/ports/test_control_plane_port_exports.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/13-control-plane__prompt.audit.project.new2.control-plane.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/03-control-plane.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/README.md",
+        "docs/00-project/governance/01-documentation-governance-style-guide.md",
+        "docs/00-project/governance/06-doc-publication-policy.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/run-lifecycle.md",
+        "docs/03-guides/workflows.md",
+        "docs/04-reference/api/domain/ports.md",
+        "docs/04-reference/cli.md",
+        "docs/04-reference/contracts/README.md",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "docs/04-reference/domain/control-plane.md",
+        "docs/04-reference/domain/invariants.md",
+        "docs/04-reference/templates/index.md",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "src/bioetl/domain/ports/control_plane/__init__.py",
+        "tests/architecture/test_control_plane_runtime_docs_alignment.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/domain/ports/test_control_plane_port_exports.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Run Manifest & Ledger Control Plane"
     },
     {
@@ -678,15 +1685,46 @@
       "category": "Data Quality",
       "decision_date": "2026-03-26",
       "decision_path": "docs/02-architecture/decisions/ADR-045-dq-contract-system.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/documentation_governance_check.py",
+        "tests/architecture/test_gold_strict_validation_policy.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/base/contract_registry.yaml",
+        "configs/field_registry/canonical_registry.json",
+        "configs/field_registry/generic_field_ownership.yaml",
+        "configs/field_registry/ontology_unit_semantic_roles.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/02-dq-contracts.md",
+        "docs/00-project/ai/rules/windsurf/rules/10-error-resilience.md",
+        "docs/00-project/architecture-index.md",
+        "docs/00-project/governance/01-documentation-governance-style-guide.md",
+        "docs/00-project/governance/06-doc-publication-policy.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/data-quality-rules.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "docs/04-reference/cli.md",
+        "docs/04-reference/contracts/README.md",
+        "docs/04-reference/contracts/canonical-field-registry.md",
+        "docs/04-reference/contracts/dq-contracts.md",
+        "docs/04-reference/contracts/gold-schemas.md",
+        "docs/04-reference/contracts/run-manifest-ledger.md",
+        "docs/05-operations/runbooks/canonical-semantic-field-unification.md",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "scripts/documentation_governance_check.py",
+        "tests/architecture/test_gold_strict_validation_policy.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Data Quality Contract System"
     },
     {
@@ -694,15 +1732,31 @@
       "category": "Reproducibility",
       "decision_date": "2026-05-06",
       "decision_path": "docs/02-architecture/decisions/ADR-046-checkpoint-vs-ledger-resume.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_documentation_audit_remediation.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/memory/gh-issues-documentation-update.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/03-control-plane.md",
+        "docs/00-project/governance/documentation-update-plan.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/run-lifecycle.md",
+        "docs/04-reference/domain/control-plane.md",
+        "docs/04-reference/domain/invariants.md",
+        "docs/04-reference/domain/workflow-state-machine.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "docs/05-operations/runbooks/workflow-control-plane.md",
+        "docs/05-operations/troubleshooting/common-errors.md",
+        "tests/architecture/test_documentation_audit_remediation.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Checkpoint Versus Ledger-Based Resume"
     },
     {
@@ -710,15 +1764,93 @@
       "category": "Reproducibility",
       "decision_date": "2026-05-08",
       "decision_path": "docs/02-architecture/decisions/ADR-047-workflow-control-plane.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_documentation_audit_remediation.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/audit/project/new2/03-control-plane.md",
+        "docs/00-project/architecture-index.md",
+        "docs/00-project/glossary.md",
+        "docs/00-project/governance/05-github-policy.md",
+        "docs/00-project/governance/documentation-update-plan.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/local-storage-layout.md",
+        "docs/03-guides/replay-guide.md",
+        "docs/03-guides/workflows.md",
+        "docs/04-reference/api/domain/ports.md",
+        "docs/04-reference/domain/control-plane.md",
+        "docs/04-reference/domain/invariants.md",
+        "docs/04-reference/domain/workflow-state-machine.md",
+        "docs/04-reference/passports/generated/workflows/chembl_activity.json",
+        "docs/04-reference/passports/generated/workflows/chembl_assay.json",
+        "docs/04-reference/passports/generated/workflows/chembl_assay_parameters.json",
+        "docs/04-reference/passports/generated/workflows/chembl_baseline.json",
+        "docs/04-reference/passports/generated/workflows/chembl_cell_line.json",
+        "docs/04-reference/passports/generated/workflows/chembl_compound_record.json",
+        "docs/04-reference/passports/generated/workflows/chembl_core.json",
+        "docs/04-reference/passports/generated/workflows/chembl_molecule.json",
+        "docs/04-reference/passports/generated/workflows/chembl_protein_class.json",
+        "docs/04-reference/passports/generated/workflows/chembl_publication.json",
+        "docs/04-reference/passports/generated/workflows/chembl_publication_similarity.json",
+        "docs/04-reference/passports/generated/workflows/chembl_publication_term.json",
+        "docs/04-reference/passports/generated/workflows/chembl_reference_pack.json",
+        "docs/04-reference/passports/generated/workflows/chembl_subcellular_fraction.json",
+        "docs/04-reference/passports/generated/workflows/chembl_target.json",
+        "docs/04-reference/passports/generated/workflows/chembl_target_component.json",
+        "docs/04-reference/passports/generated/workflows/chembl_target_protein_classification.json",
+        "docs/04-reference/passports/generated/workflows/chembl_tissue.json",
+        "docs/04-reference/passports/generated/workflows/crossref_publication.json",
+        "docs/04-reference/passports/generated/workflows/openalex_publication.json",
+        "docs/04-reference/passports/generated/workflows/pubchem_compound.json",
+        "docs/04-reference/passports/generated/workflows/publication_provider_pack.json",
+        "docs/04-reference/passports/generated/workflows/pubmed_publication.json",
+        "docs/04-reference/passports/generated/workflows/semanticscholar_publication.json",
+        "docs/04-reference/passports/generated/workflows/uniprot_idmapping.json",
+        "docs/04-reference/passports/generated/workflows/uniprot_protein.json",
+        "docs/04-reference/passports/generated/workflows/uniprot_support_pack.json",
+        "docs/04-reference/passports/manual/workflows/chembl_core.yaml",
+        "docs/04-reference/passports/workflows/chembl-activity.md",
+        "docs/04-reference/passports/workflows/chembl-assay-parameters.md",
+        "docs/04-reference/passports/workflows/chembl-assay.md",
+        "docs/04-reference/passports/workflows/chembl-baseline.md",
+        "docs/04-reference/passports/workflows/chembl-cell-line.md",
+        "docs/04-reference/passports/workflows/chembl-compound-record.md",
+        "docs/04-reference/passports/workflows/chembl-core.md",
+        "docs/04-reference/passports/workflows/chembl-molecule.md",
+        "docs/04-reference/passports/workflows/chembl-protein-class.md",
+        "docs/04-reference/passports/workflows/chembl-publication-similarity.md",
+        "docs/04-reference/passports/workflows/chembl-publication-term.md",
+        "docs/04-reference/passports/workflows/chembl-publication.md",
+        "docs/04-reference/passports/workflows/chembl-reference-pack.md",
+        "docs/04-reference/passports/workflows/chembl-subcellular-fraction.md",
+        "docs/04-reference/passports/workflows/chembl-target-component.md",
+        "docs/04-reference/passports/workflows/chembl-target-protein-classification.md",
+        "docs/04-reference/passports/workflows/chembl-target.md",
+        "docs/04-reference/passports/workflows/chembl-tissue.md",
+        "docs/04-reference/passports/workflows/crossref-publication.md",
+        "docs/04-reference/passports/workflows/openalex-publication.md",
+        "docs/04-reference/passports/workflows/pubchem-compound.md",
+        "docs/04-reference/passports/workflows/publication-provider-pack.md",
+        "docs/04-reference/passports/workflows/pubmed-publication.md",
+        "docs/04-reference/passports/workflows/semanticscholar-publication.md",
+        "docs/04-reference/passports/workflows/uniprot-idmapping.md",
+        "docs/04-reference/passports/workflows/uniprot-protein.md",
+        "docs/04-reference/passports/workflows/uniprot-support-pack.md",
+        "docs/04-reference/workflow-catalog.md",
+        "docs/05-operations/runbooks/index.md",
+        "docs/05-operations/runbooks/workflow-control-plane.md",
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_documentation_audit_remediation.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Workflow Control Plane for Declarative Workflows"
     },
     {
@@ -726,15 +1858,35 @@
       "category": "Architecture",
       "decision_date": "2026-05-26",
       "decision_path": "docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_pandera_schema_boundary_policy.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/audit/cycle/architecture.md",
+        "docs/00-project/ai/rules/windsurf/rules/00-architecture.md",
+        "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
+        "docs/00-project/ai/rules/windsurf/rules/11-schema-evolution.md",
+        "docs/00-project/glossary.md",
+        "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/04-reference/domain/entities.md",
+        "docs/04-reference/domain/invariants.md",
+        "docs/04-reference/domain/value-objects.md",
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "src/bioetl/domain/README.md",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_pandera_schema_boundary_policy.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Domain Schema Boundary and Runtime Pandera Compatibility"
     },
     {
@@ -742,15 +1894,20 @@
       "category": "Architecture",
       "decision_date": "2026-05-26",
       "decision_path": "docs/02-architecture/decisions/ADR-049-context-aware-loc-target-policy.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "tests/architecture/test_adr_registry_governance_sync.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Context-Aware LOC Target Policy"
     },
     {
@@ -758,15 +1915,46 @@
       "category": "Data Quality",
       "decision_date": "2026-06-15",
       "decision_path": "docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "scripts/data_quality/run_silver_gold_filter_parity.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_silver_filter_boundary_inventory.py",
+        "tests/architecture/test_silver_filter_identity_surface.py",
+        "tests/snapshots/pipeline_configs.json",
+        "tests/unit/infrastructure/config/test_filter_config_loader.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/entities/chembl/activity.yaml",
+        "configs/entities/chembl/assay.yaml",
+        "configs/entities/chembl/molecule.yaml",
+        "configs/entities/chembl/publication_term.yaml",
+        "configs/entities/chembl/target.yaml",
+        "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
+        "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
+        "docs/00-project/ai/rules/windsurf/rules/01-data-quality.md",
+        "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/cheatsheets/pipeline-config.md",
+        "grafana/dashboards/bioetl-dq-v2.json",
+        "scripts/data_quality/inventory_silver_filters_migration.py",
+        "scripts/data_quality/run_silver_gold_filter_parity.py",
+        "src/bioetl/domain/filtering/silver_config.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_silver_filter_boundary_inventory.py",
+        "tests/architecture/test_silver_filter_identity_surface.py",
+        "tests/snapshots/pipeline_configs.json",
+        "tests/unit/infrastructure/config/test_filter_config_loader.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Silver Structural and Gold Semantic Filter Boundary"
     },
     {
@@ -774,15 +1962,30 @@
       "category": "Architecture",
       "decision_date": "2026-07-27",
       "decision_path": "docs/02-architecture/decisions/ADR-051-quarantine-entry-aggregate-surface.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/constructor_waivers.yaml",
+        "configs/quality/domain_aggregate_classification.yaml",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/constructor_waivers.yaml",
+        "configs/quality/domain_aggregate_classification.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "docs/03-guides/tutorials/quarantine-system.md",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/domain/aggregates/test_quarantine_entry.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "QuarantineEntry Wide Constructor as Intentional Aggregate Surface"
     },
     {
@@ -790,15 +1993,27 @@
       "category": "Architecture",
       "decision_date": "2026-07-28",
       "decision_path": "docs/02-architecture/decisions/ADR-052-infrastructure-config-package-root-public-api.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_public_lazy_facade_inventory.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/cheatsheets/adr-matrix.md",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_public_lazy_facade_inventory.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Infrastructure Config Package Root as Permanent Public API"
     },
     {
@@ -806,15 +2021,49 @@
       "category": "Observability",
       "decision_date": "2026-07-28",
       "decision_path": "docs/02-architecture/decisions/ADR-053-optional-grafana-scenes-app-shell.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "scripts/engineering/qa/README.md",
+        "scripts/engineering/qa/__main__.py",
+        "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+        "scripts/ops/observability/grafana/dashboard_context_links.py",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_dashboard_scenes_contract.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/library/observability/dashboard-full-cycle.md",
+        "docs/00-project/ai/prompts/library/observability/dashboard-manual-validation.md",
+        "docs/00-project/rules-summary.md",
+        "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/coderabbit-audit-playbook.md",
+        "docs/03-guides/dashboards/README.md",
+        "docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md",
+        "docs/03-guides/dashboards/dashboard-system-2.0-phase2-residual.md",
+        "docs/03-guides/dashboards/dashboard-v2-usage.md",
+        "docs/03-guides/dashboards/operator-ux-v2.md",
+        "grafana/README.md",
+        "grafana/plugins/bioetl-scenes-app/CHANGELOG.md",
+        "grafana/plugins/bioetl-scenes-app/README.md",
+        "grafana/plugins/bioetl-scenes-app/docs/scenes-parity-ledger.json",
+        "scripts/engineering/qa/README.md",
+        "scripts/engineering/qa/__main__.py",
+        "scripts/engineering/qa/report_dashboard_scenes_parity.py",
+        "scripts/ops/observability/grafana/dashboard_context_links.py",
+        "scripts/ops/observability/grafana/generate_dux4_issue_pack.py",
+        "tests/architecture/test_adr_enforcement_matrix.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_dashboard_scenes_contract.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Optional Grafana Scenes App Shell as Presentation Adapter"
     },
     {
@@ -822,15 +2071,24 @@
       "category": "Documentation",
       "decision_date": "2026-07-29",
       "decision_path": "docs/02-architecture/decisions/ADR-054-passport-documentation-projections.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/governance/documentation-update-plan.md",
+        "docs/04-reference/passports/index.md",
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Evidence-Backed Passport Documentation Projections"
     },
     {
@@ -838,15 +2096,27 @@
       "category": "Architecture",
       "decision_date": "2026-07-29",
       "decision_path": "docs/02-architecture/decisions/ADR-055-workflow-reconciliation-data-step-ownership.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_passport_documentation_projections.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/04-reference/passports/index.md",
+        "docs/04-reference/passports/manual/workflows/chembl_baseline.yaml",
+        "docs/04-reference/passports/manual/workflows/chembl_core.yaml",
+        "docs/04-reference/passports/workflows/chembl-baseline.md",
+        "docs/04-reference/passports/workflows/chembl-core.md",
+        "scripts/docs/passports/projector.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_passport_documentation_projections.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Workflow Reconciliation Data-Step Ownership"
     },
     {
@@ -854,15 +2124,22 @@
       "category": "Governance",
       "decision_date": "2026-08-09",
       "decision_path": "docs/02-architecture/decisions/ADR-056-proof-or-stop-lifecycle-control.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_proof_or_stop_contract.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "docs/04-reference/contracts/README.md",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_proof_or_stop_contract.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Proof-or-Stop Lifecycle Control"
     },
     {
@@ -870,15 +2147,24 @@
       "category": "Configuration",
       "decision_date": "2026-08-10",
       "decision_path": "docs/02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_source_config_usage.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/README.md",
+        "docs/00-project/00-map.md",
+        "docs/00-project/RULES.md",
+        "docs/00-project/ai/prompts/fragments/project-requirements-audit.md",
+        "docs/01-requirements/REQUIREMENTS.md",
+        "src/bioetl/infrastructure/config/_base.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_source_config_usage.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Deterministic Runtime Config Authority and Identity"
     },
     {
@@ -886,15 +2172,39 @@
       "category": "Architecture",
       "decision_date": "2026-08-25",
       "decision_path": "docs/02-architecture/decisions/ADR-058-layered-port-registries.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+        "tests/unit/domain/ports/test_adr_058_lazy_owner_modules.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "docs/00-project/RULES.md",
+        "src/bioetl/application/README.md",
+        "src/bioetl/application/ports/__init__.py",
+        "src/bioetl/application/ports/dq.py",
+        "src/bioetl/application/ports/health.py",
+        "src/bioetl/application/ports/metrics.py",
+        "src/bioetl/application/ports/operations.py",
+        "src/bioetl/application/ports/pipeline.py",
+        "src/bioetl/application/ports/providers.py",
+        "src/bioetl/application/ports/storage.py",
+        "src/bioetl/composition/contracts/factories.py",
+        "src/bioetl/composition/contracts/providers.py",
+        "src/bioetl/composition/contracts/runtime.py",
+        "src/bioetl/composition/entrypoints.py",
+        "src/bioetl/domain/workflow/foreign_key_reconciliation.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_documentation_audit_remediation.py",
+        "tests/unit/application/ports/test_application_ports_no_factory_aliases.py",
+        "tests/unit/domain/ports/test_adr_058_lazy_owner_modules.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Layered Port Registries"
     },
     {
@@ -902,15 +2212,27 @@
       "category": "Architecture",
       "decision_date": "2026-08-25",
       "decision_path": "docs/02-architecture/decisions/ADR-059-package-cohesion-budgets.md",
-      "enforcement_owner_paths": [],
-      "gap_reasons": [
-        "missing_implementation_owner",
-        "missing_enforcement_owner"
+      "enforcement_owner_paths": [
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_domain_aggregate_classification.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
-      "implementation_owner_paths": [],
+      "gap_reasons": [],
+      "implementation_owner_paths": [
+        "configs/quality/public_lazy_facade_inventory.yaml",
+        "docs/00-project/RULES.md",
+        "docs/00-project/architecture-index.md",
+        "src/bioetl/domain/aggregates/batch.py",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/architecture/test_arch_s4_s9_gates.py",
+        "tests/architecture/test_domain_aggregate_classification.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
+      ],
       "manual_exception": null,
       "owner": "BioETL Team",
-      "status": "gap",
+      "status": "enforced",
       "title": "Package Cohesion Budgets"
     }
   ],
@@ -922,10 +2244,10 @@
   },
   "summary": {
     "accepted_adr_count": 57,
-    "blocking_gap_count": 57,
-    "enforced_adr_count": 0,
+    "blocking_gap_count": 0,
+    "enforced_adr_count": 57,
     "manual_exception_count": 0,
-    "missing_enforcement_owner_count": 57,
-    "missing_implementation_owner_count": 57
+    "missing_enforcement_owner_count": 0,
+    "missing_implementation_owner_count": 0
   }
 }

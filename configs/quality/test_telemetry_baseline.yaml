@@ -2,11 +2,11 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-28T12:39:22.877029+00:00'
+refreshed_at_utc: '2026-08-28T13:46:26.926300+00:00'
 refresh_status: captured
 source_commit: 09ab9ac286bacb7eee3324e950603539a5c62ee6
 source_run_id: '33149935203'
-source_tree_sha256: a456e4115fd579021fdc012ec6acfe4bcd300f798533c2fa9f650957f534c4d9
+source_tree_sha256: 19b2f9ff131af2e33f76b54032e7d1b00e65f8811194233ba68d62bbc42f87d9
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
