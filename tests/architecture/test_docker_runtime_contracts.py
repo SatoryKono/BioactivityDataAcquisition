@@ -1311,7 +1311,9 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_plus() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     built = {
@@ -1332,7 +1334,7 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_
         if step.get("name") == "Enforce fixable Trivy Critical High Medium policy"
     )
     enforcement_command = str(enforcement["run"])
-    assert "trivy_fixability_gate" in enforcement_command
+    assert "trivy_baseline" in enforcement_command
     assert "--fail-on-fixable" in enforcement_command
     assert "reports/security/trivy-results.json" in enforcement_command
     assert "reports/security/trivy-fixability-audit.json" in enforcement_command

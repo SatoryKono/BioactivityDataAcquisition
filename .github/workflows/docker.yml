@@ -229,7 +229,7 @@ jobs:
 
       - name: Generate Trivy fixability audit
         run: |
-          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_fixability_gate \
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json
 
@@ -291,7 +291,7 @@ jobs:
 
       - name: Enforce fixable Trivy Critical High Medium policy
         run: |
-          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_fixability_gate \
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json \
             --fail-on-fixable

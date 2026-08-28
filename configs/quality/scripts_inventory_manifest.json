@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T11:20:55.894081+00:00",
+  "generated_at": "2026-08-28T11:39:54.448687+00:00",
   "summary": {
-    "total_scripts": 605,
+    "total_scripts": 604,
     "status_counts": {
-      "active": 339,
+      "active": 338,
       "supporting": 266
     },
     "reference_group_coverage": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 412
+      "tests": 411
     }
   },
   "scripts": [
@@ -10293,7 +10293,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 259,
+      "reference_count": 258,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -13570,34 +13570,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
           "line": 42,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import ("
         }
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
       "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint."
-    },
-    {
-      "path": "scripts/engineering/qa/docker_stability_campaign/trivy_fixability_gate.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
-          "line": 8,
-          "source_group": "tests",
-          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_fixability_gate import ("
-        }
-      ]
     },
     {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",

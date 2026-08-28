@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from scripts.engineering.qa.docker_stability_campaign.trivy_fixability_gate import (
-    build_audit,
+from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import (
+    build_fixability_audit,
     main,
 )
 
@@ -58,7 +58,7 @@ def _payload() -> dict[str, object]:
 
 
 def test_audit_keeps_all_findings_but_blocks_only_fixable_severity_findings() -> None:
-    audit = build_audit(_payload())
+    audit = build_fixability_audit(_payload())
 
     assert audit["policy"] == {
         "blocking_severities": ["CRITICAL", "HIGH", "MEDIUM"],
@@ -102,13 +102,16 @@ def test_cli_writes_deterministic_audit_and_fails_for_fixable_finding(
 
     assert main(["--trivy-json", str(trivy_json), "--output", str(output)]) == 0
     expected = output.read_text(encoding="utf-8")
-    assert main(
-        [
-            "--trivy-json",
-            str(trivy_json),
-            "--output",
-            str(output),
-            "--fail-on-fixable",
-        ]
-    ) == 1
+    assert (
+        main(
+            [
+                "--trivy-json",
+                str(trivy_json),
+                "--output",
+                str(output),
+                "--fail-on-fixable",
+            ]
+        )
+        == 1
+    )
     assert output.read_text(encoding="utf-8") == expected
