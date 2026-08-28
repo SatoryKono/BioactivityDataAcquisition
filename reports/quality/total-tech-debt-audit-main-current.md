@@ -6,9 +6,9 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/sonar-postmerge-ci-closeout-20260828
+Audited branch: fix/gh-actions-repair-20260828
 
-Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
+Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 
 Evidence surface SHA-256: `8b6643e0bc8be807818b94b8fd6b06ab72930629005700ff207faa2f92eecea4`
 

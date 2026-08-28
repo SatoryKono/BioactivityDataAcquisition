@@ -998,7 +998,9 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
                     if line.startswith("FROM ")
                 ]
                 assert from_lines
-                assert all("@sha256:" in line for line in from_lines), dockerfile
+                assert all(
+                    "@sha256:" in line or line == "FROM scratch" for line in from_lines
+                ), dockerfile
 
 
 def test_readiness_and_build_tools_fail_closed() -> None:
@@ -1032,14 +1034,27 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(
         encoding="utf-8"
     )
-    assert "uv==0.11.26" in dockerfile
+    assert "uv=0.11.26-r0" in dockerfile
     assert (
         dockerfile.count(
             "python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579"
         )
         == 2
     )
-    assert "python:3.12-slim-bookworm" in dockerfile
+    assert "python-3.13=3.13.15-r2" in dockerfile
+    assert "python-3.14" not in dockerfile
+    assert "FROM scratch" in dockerfile
+    assert "COPY --from=runtime-root /etc /etc" in dockerfile
+    assert "COPY --from=runtime-root /lib /lib" in dockerfile
+    assert "COPY --from=runtime-root /lib64 /lib64" in dockerfile
+    assert "COPY --from=runtime-root /usr /usr" in dockerfile
+    assert "mkdir -p /runtime-fs/tmp" in dockerfile
+    assert "chown 65532:65532 /runtime-fs/tmp" in dockerfile
+    assert "chmod 0700 /runtime-fs/tmp" in dockerfile
+    assert "chmod 1777" not in dockerfile
+    assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
+    assert "COPY --from=runtime-root / /" not in dockerfile
+    assert "COPY --chown=root:root configs/ ./configs/" in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
         not in dockerfile
@@ -1061,13 +1076,12 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert (
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
-    assert dockerfile.count('SHELL ["/bin/bash", "-o", "pipefail", "-c"]') == 2
-    assert (
-        "python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26"
-        in dockerfile
-    )
-    assert "useradd -r -u 999 -g bioetl bioetl" in dockerfile
-    assert "USER 999:999" in dockerfile
+    assert dockerfile.count('SHELL ["/bin/bash", "-o", "pipefail", "-c"]') == 1
+    assert "python -m pip install" not in dockerfile
+    assert "USER 65532:65532" in dockerfile
+    assert "apt-get" not in dockerfile
+    assert "rm -f /bin/sh /bin/busybox /sbin/apk /usr/bin/apk" in dockerfile
+    assert "COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv" in dockerfile
     assert "USER bioetl" not in dockerfile
     assert (
         'CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('
@@ -1076,9 +1090,9 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "CMD python -c" not in dockerfile
     # Default main surface is health/metrics only on :8000 (Quarantine Explorer UI removed).
     bioetl_service = main["services"]["bioetl"]
-    assert bioetl_service["entrypoint"] == ["/bin/sh", "-c"]
+    assert bioetl_service["entrypoint"] == ["bioetl"]
     bioetl_command = " ".join(map(str, bioetl_service["command"]))
-    assert "bioetl health server --host 0.0.0.0 --port 8000" in bioetl_command
+    assert bioetl_command == "health server --host 0.0.0.0 --port 8000"
     assert "quarantine serve" not in bioetl_command
     assert bioetl_service["ports"] == ["127.0.0.1:8000:8000"]
     bioetl_health = " ".join(map(str, bioetl_service["healthcheck"]["test"]))
@@ -1310,7 +1324,9 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     built = {
@@ -1344,6 +1360,7 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     )
     assert "steps.validate-baseline.outcome == 'success'" in upload["if"]
     assert "reports/security/baseline.sha256" in upload["with"]["path"]
+    assert "reports/security/trivy-fixability-audit.json" in upload["with"]["path"]
     assert upload["with"]["if-no-files-found"] == "error"
     assert upload["with"]["retention-days"] == 30
     assert any(
@@ -1354,14 +1371,17 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     base_scan = next(
         step
         for step in steps
-        if step.get("name") == "Run Trivy on pinned Debian bookworm base image"
+        if step.get("name") == "Run Trivy on pinned Wolfi runtime base image"
     )
     assert base_scan["with"]["format"] == "json"
     assert base_scan["with"]["output"] == ("reports/security/trivy-base-results.json")
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )
-    assert step_names.index("Enforce Trivy Critical High Medium policy") < (
+    assert step_names.index("Generate Trivy fixability audit") < step_names.index(
+        "Validate complete security baseline"
+    )
+    assert step_names.index("Enforce fixable Trivy Critical High Medium policy") < (
         step_names.index("Export exact scanned image for publication")
     )
 
