@@ -1,0 +1,42 @@
+{
+  "BioETL REQ Traceability Row": {
+    "prefix": "bioetl-req",
+    "description": "Requirement traceability CSV row fragment (172 req, REQUIREMENTS.md)",
+    "body": [
+      "REQ-${1:ARCH}-${2:001},MUST,${3:1. Architecture},docs/00-project/RULES.md,${4:1. Layers},${5:ADR-005},${6:Verification method},${7:executable_surface},confirmed"
+    ]
+  },
+  "BioETL Finding Schema": {
+    "prefix": "bioetl-finding",
+    "description": "Finding JSON fragment (finding-schema.md, prompts/audit)",
+    "body": [
+      "{",
+      "  \"id\": \"${1:ARCH-001}\",",
+      "  \"requirement_id\": \"${2:GAP}\",",
+      "  \"priority\": \"${3:P2}\",",
+      "  \"severity\": \"${4:Medium}\",",
+      "  \"confidence\": \"${5:high}\",",
+      "  \"status\": \"${6:PROVEN}\",",
+      "  \"category\": \"${7:module_boundaries_coupling}\",",
+      "  \"path\": \"${8:src/bioetl/composition/}\",",
+      "  \"observation\": \"${9:One factual claim}\",",
+      "  \"method\": \"${10:Command/test/inspection}\",",
+      "  \"expected\": \"${11:Expected state}\",",
+      "  \"actual\": \"${12:Observed state}\",",
+      "  \"impact\": \"${13:Specific impact}\",",
+      "  \"remediation\": \"${14:Smallest safe remediation}\",",
+      "  \"effort\": \"${15:S}\",",
+      "  \"automated_fix_possible\": false",
+      "}"
+    ]
+  },
+  "BioETL Architecture Gate Check": {
+    "prefix": "bioetl-arch-gate",
+    "description": "Architecture program gate check scaffold (lint-imports + checker)",
+    "body": [
+      "PYTHONPATH=src lint-imports  # 6 kept 0 broken (.importlinter)",
+      "PYTHONPATH=src python -m scripts.engineering.qa check-architecture  # Rule §1",
+      "PYTHONPATH=src python -c \"from bioetl.infrastructure.quality.architecture_quality_scorecard import build_architecture_quality_scorecard; print(build_architecture_quality_scorecard()['integral_score'])\""
+    ]
+  }
+}
