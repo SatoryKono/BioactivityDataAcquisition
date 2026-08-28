@@ -8,7 +8,7 @@ This port abstracts JSON serialization operations to allow:
 - Feature flag control over serialization strategy
 
 Requirements:
-- REQ-ARCH-030: Deterministic writes for reproducibility
+- Architecture (RULES 6.1 determinism): Deterministic writes for reproducibility (see REQ-GOV-002 / REQ-ARCH-003)
 - All implementations MUST produce identical output for identical input
 """
 
