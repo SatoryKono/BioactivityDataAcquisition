@@ -1048,6 +1048,9 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "COPY --from=runtime-root /lib /lib" in dockerfile
     assert "COPY --from=runtime-root /lib64 /lib64" in dockerfile
     assert "COPY --from=runtime-root /usr /usr" in dockerfile
+    assert "mkdir -p /runtime-fs/tmp" in dockerfile
+    assert "chmod 1777 /runtime-fs/tmp" in dockerfile
+    assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
     assert "COPY --from=runtime-root / /" not in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"

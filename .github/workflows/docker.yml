@@ -171,6 +171,7 @@ jobs:
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
             docker run --rm --entrypoint python "${IMAGE_REF}" --version
             docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
+            docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import os, stat, tempfile; assert stat.S_IMODE(os.stat("/tmp").st_mode) == 0o1777; handle = tempfile.NamedTemporaryFile(delete=False); name = handle.name; handle.write(b"bioetl"); handle.close(); os.unlink(name); print("tempfile=ok")'
           } > reports/security/bioetl-image-provenance.txt 2>&1
           docker image inspect "${IMAGE_REF}" --format '{{.Id}}' \
             > reports/security/bioetl-image-id.txt
