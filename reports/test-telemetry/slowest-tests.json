@@ -318,10 +318,10 @@
       "max_duration_s": 6.891
     },
     {
-      "zone": "tests.unit.scripts.ops.test_recover_renderer",
+      "zone": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity",
       "test_count": 1,
-      "total_duration_s": 6.004,
-      "max_duration_s": 6.004
+      "total_duration_s": 6.688,
+      "max_duration_s": 6.688
     }
   ],
   "execution_context": {

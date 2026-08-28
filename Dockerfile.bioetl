@@ -55,7 +55,7 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         tzdata=2026c-r0 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \
-    && chmod 1777 /runtime-fs/tmp \
+    && chown 65532:65532 /runtime-fs/tmp \n    && chmod 0700 /runtime-fs/tmp \
     && rm -f /bin/sh /bin/busybox /sbin/apk /usr/bin/apk
 USER 65532:65532
 
