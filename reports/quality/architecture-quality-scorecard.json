@@ -30,9 +30,9 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 9.0,
+      "score": 0.0,
       "weight": 0.09,
-      "weighted_score": 0.81
+      "weighted_score": 0.0
     },
     {
       "evidence_metrics": {
@@ -74,13 +74,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 84
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 9.9,
+      "score": 0.0,
       "weight": 0.12,
-      "weighted_score": 1.188
+      "weighted_score": 0.0
     },
     {
       "evidence_metrics": {
@@ -213,7 +213,7 @@
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 84
   },
   "schema_version": 1,
   "source_artifacts": {
@@ -260,7 +260,7 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "421a06364a3e363dc377b666e816007a08f04ed4c1d46a13b0f6f71b7cfce6bb",
+      "coverage_xml_sha256": "8e96c24561143c734517ffb530992fd185119321cfdbeedd1310b284bf93a18c",
       "path": "reports/quality/module-coverage-inventory.json",
       "source_tree_sha256": "840f36b8895ccedbd758abe51e9d8c53858372e2317e4816dd7f5ba5ac70987c"
     },
