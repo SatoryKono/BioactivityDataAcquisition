@@ -61,9 +61,9 @@ trivy image --severity CRITICAL,HIGH,MEDIUM --exit-code 1 `
 
 The first two commands are evidence collection and do not hide findings. The
 last command is the enforcement boundary and must remain blocking. RF-002 moved
-the runtime to the pinned Wolfi image and upgraded `deltalake`, `arro3-core`,
-`pyarrow`, and `pandas` to binary-wheel releases compatible with Python 3.14;
-the expected strict-gate result is zero findings and exit code `0`.
+the supported Python 3.13 runtime to the pinned Wolfi/scratch image without
+changing the governed data-stack versions; the expected strict-gate result is
+zero findings and exit code `0`.
 
 The SBOM is generated in the same `docker-build` job from the same local image
 reference as the Trivy scan. On `main`, that exact image is exported after the

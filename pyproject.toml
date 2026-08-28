@@ -21,11 +21,11 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "pyyaml>=6.0",
     "polars>=1.0",
-    "deltalake>=1.6.3,<2.0",
-    "arro3-core==0.8.1",  # ABI3 wheel shared by supported CPython runtimes.
-    "pyarrow>=25.0.1,<26.0",
+    "deltalake>=0.18,<1.0",
+    "arro3-core==0.6.5",  # Pin for Windows compatibility with deltalake 1.4.x (exposes arro3.core.types)
+    "pyarrow>=15.0,<26.0",
     "zstandard>=0.22",
-    "pandas>=3.0.5,<4.0",  # CPython 3.14 wheels avoid runtime source builds.
+    "pandas>=2.0,<2.3",  # Pin to 2.2.x series for reliable pre-built wheels on Windows (2.3.x requires Meson build)
     # Validation
     "pandera>=0.20",
     # Providers (RULES.md Appendix A)
