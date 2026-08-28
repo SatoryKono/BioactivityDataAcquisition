@@ -56,7 +56,10 @@ def _mermaid_label_text(label: str) -> str:
     parser = _MermaidLabelTextExtractor()
     parser.feed(label)
     parser.close()
-    return html.escape("".join(parser.parts).strip(), quote=False)
+    text = html.escape("".join(parser.parts).strip(), quote=False)
+    for marker in ("\\", "`", "[", "]", "!"):
+        text = text.replace(marker, f"\\{marker}")
+    return text
 
 
 # Collection definitions: (dir_name, file_ext, output_name, collection_title)

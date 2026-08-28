@@ -30,9 +30,26 @@ def test_wildcard_requires_opt_in_and_nonempty_allowlist() -> None:
         )
     with pytest.raises(ValueError, match="allow-cidr"):
         wsl_proxy.build_bind_policy("0.0.0.0", allow_wildcard=True, allow_cidrs=[])
-    with pytest.raises(ValueError, match="unrestricted"):
+    with pytest.raises(ValueError, match="loopback or RFC1918"):
         wsl_proxy.build_bind_policy(
             "0.0.0.0", allow_wildcard=True, allow_cidrs=["0.0.0.0/0"]
+        )
+
+
+@pytest.mark.parametrize(
+    "allow_cidrs",
+    [
+        ["0.0.0.0/1", "128.0.0.0/1"],
+        ["8.0.0.0/8"],
+        ["203.0.113.0/24"],
+    ],
+)
+def test_allowlist_rejects_public_or_composed_unrestricted_ranges(
+    allow_cidrs: list[str],
+) -> None:
+    with pytest.raises(ValueError, match="loopback or RFC1918"):
+        wsl_proxy.build_bind_policy(
+            "0.0.0.0", allow_wildcard=True, allow_cidrs=allow_cidrs
         )
 
 
@@ -54,6 +71,15 @@ def test_explicit_wsl_bind_enforces_client_subnet() -> None:
     assert wsl_proxy.is_client_allowed("172.30.47.254", networks)
     assert not wsl_proxy.is_client_allowed("172.30.48.1", networks)
     assert not wsl_proxy.is_client_allowed("not-an-ip", networks)
+
+
+def test_explicit_wsl_bind_must_belong_to_client_allowlist() -> None:
+    with pytest.raises(ValueError, match="belong to an allowed client CIDR"):
+        wsl_proxy.build_bind_policy(
+            "172.30.32.1",
+            allow_wildcard=False,
+            allow_cidrs=["192.168.50.0/24"],
+        )
 
 
 @pytest.mark.parametrize("value", ["not-a-cidr", "::1/128"])
