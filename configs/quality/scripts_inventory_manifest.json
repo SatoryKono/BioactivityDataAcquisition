@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T12:25:27.840355+00:00",
+  "generated_at": "2026-08-28T16:16:50.840593+00:00",
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -13570,13 +13570,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
           "line": 42,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import ("
         }
       ],
       "owner": "@bioetl-platform",
