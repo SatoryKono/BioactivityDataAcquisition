@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T12:25:27.840355+00:00",
+  "generated_at": "2026-08-28T16:10:47.274156+00:00",
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -7794,7 +7794,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 201,
+      "reference_count": 203,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8026,7 +8026,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 40,
+      "reference_count": 41,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -10925,7 +10925,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -12128,7 +12128,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 391,
+      "reference_count": 397,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13570,13 +13570,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
           "line": 42,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -20789,7 +20795,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1192,
+          "line": 1193,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22931,7 +22937,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1130,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22999,7 +23005,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1130,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
