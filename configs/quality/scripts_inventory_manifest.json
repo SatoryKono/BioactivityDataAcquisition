@@ -19884,7 +19884,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 248,
+          "line": 246,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19952,7 +19952,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 249,
+          "line": 247,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -20807,7 +20807,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1192,
+          "line": 1206,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22949,7 +22949,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -23017,7 +23017,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
