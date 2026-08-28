@@ -1,8 +1,5 @@
 name: Docker Build & Compose Validation
 
-permissions:
-  contents: read
-
 on:
   workflow_dispatch:
   push:
@@ -82,6 +79,8 @@ jobs:
 
   docker-lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
     strategy:
       matrix:
@@ -100,6 +99,8 @@ jobs:
 
   docker-compose-validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 5
     steps:
       - name: Checkout code

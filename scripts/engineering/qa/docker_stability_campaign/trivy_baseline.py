@@ -51,6 +51,38 @@ def _github_trivy_alert_index(payload: object) -> dict[tuple[str, str, str], str
     return index
 
 
+def _mapping_list(value: object, *, label: str) -> list[Mapping[str, Any]]:
+    """Return mapping items from a Trivy list or reject an invalid shape."""
+    if not isinstance(value, list):
+        raise ValueError(f"Trivy JSON {label} must be a list")
+    return [item for item in value if isinstance(item, Mapping)]
+
+
+def _trivy_baseline_row(
+    vulnerability: Mapping[str, Any],
+    *,
+    target: str,
+    alert_index: Mapping[tuple[str, str, str], str],
+) -> dict[str, str]:
+    """Normalize one Trivy vulnerability into the baseline CSV schema."""
+    cve = str(vulnerability.get("VulnerabilityID") or "")
+    package = str(vulnerability.get("PkgName") or "")
+    installed = str(vulnerability.get("InstalledVersion") or "")
+    if not cve or not package or not installed:
+        raise ValueError("Trivy vulnerability is missing identity fields")
+    layer = vulnerability.get("Layer")
+    layer_id = str(layer.get("DiffID") or "") if isinstance(layer, Mapping) else ""
+    return {
+        "alert_number": alert_index.get((cve, package, installed), ""),
+        "CVE": cve,
+        "package": package,
+        "installed": installed,
+        "fixed": str(vulnerability.get("FixedVersion") or ""),
+        "layer": layer_id or target,
+        "status": str(vulnerability.get("Status") or "affected"),
+    }
+
+
 def trivy_baseline_rows(
     payload: Mapping[str, Any],
     *,
@@ -59,38 +91,19 @@ def trivy_baseline_rows(
     """Normalize Trivy image JSON into the RF-001 baseline CSV schema."""
     alert_index = _github_trivy_alert_index(github_alerts)
     rows: list[dict[str, str]] = []
-    results = payload.get("Results", [])
-    if not isinstance(results, list):
-        raise ValueError("Trivy JSON Results must be a list")
-    for result in results:
-        if not isinstance(result, Mapping):
-            continue
+    for result in _mapping_list(payload.get("Results", []), label="Results"):
         target = str(result.get("Target") or "")
-        vulnerabilities = result.get("Vulnerabilities") or []
-        if not isinstance(vulnerabilities, list):
-            raise ValueError("Trivy JSON Vulnerabilities must be a list")
+        vulnerabilities = _mapping_list(
+            result.get("Vulnerabilities") or [],
+            label="Vulnerabilities",
+        )
         for vulnerability in vulnerabilities:
-            if not isinstance(vulnerability, Mapping):
-                continue
-            cve = str(vulnerability.get("VulnerabilityID") or "")
-            package = str(vulnerability.get("PkgName") or "")
-            installed = str(vulnerability.get("InstalledVersion") or "")
-            if not cve or not package or not installed:
-                raise ValueError("Trivy vulnerability is missing identity fields")
-            layer = vulnerability.get("Layer")
-            layer_id = (
-                str(layer.get("DiffID") or "") if isinstance(layer, Mapping) else ""
-            )
             rows.append(
-                {
-                    "alert_number": alert_index.get((cve, package, installed), ""),
-                    "CVE": cve,
-                    "package": package,
-                    "installed": installed,
-                    "fixed": str(vulnerability.get("FixedVersion") or ""),
-                    "layer": layer_id or target,
-                    "status": str(vulnerability.get("Status") or "affected"),
-                }
+                _trivy_baseline_row(
+                    vulnerability,
+                    target=target,
+                    alert_index=alert_index,
+                )
             )
     return sorted(
         rows,
