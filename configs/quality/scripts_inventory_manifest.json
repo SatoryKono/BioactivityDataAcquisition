@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T11:14:58.204250+00:00",
+  "generated_at": "2026-08-28T11:20:55.894081+00:00",
   "summary": {
     "total_scripts": 605,
     "status_counts": {
-      "active": 338,
-      "orphan": 1,
+      "active": 339,
       "supporting": 266
     },
     "reference_group_coverage": {
@@ -16,7 +15,7 @@
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 411
+      "tests": 412
     }
   },
   "scripts": [
@@ -10294,7 +10293,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 258,
+      "reference_count": 259,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -13588,10 +13587,17 @@
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/trivy_fixability_gate.py",
       "type": "py",
-      "status": "orphan",
+      "status": "active",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_fixability_gate import ("
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
