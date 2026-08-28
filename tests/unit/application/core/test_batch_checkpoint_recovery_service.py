@@ -45,6 +45,7 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 def checkpoint_manager() -> AsyncMock:
     manager = AsyncMock()
     manager.save_checkpoint = AsyncMock()
+    manager._operation_errors = (RuntimeError,)
     return manager
 
 
@@ -105,6 +106,20 @@ async def test_save_periodic_checkpoint_skips_when_interval_not_reached(
 
 
 @pytest.mark.asyncio
+async def test_save_periodic_checkpoint_skips_nonpositive_interval(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+) -> None:
+    await service.save_periodic_checkpoint(
+        records_fetched=10,
+        resume_offset=0,
+        checkpoint_interval=0,
+    )
+
+    checkpoint_manager.save_checkpoint.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_save_periodic_checkpoint_persists_total_processed(
     service: BatchCheckpointRecoveryService,
     checkpoint_manager: AsyncMock,
@@ -157,6 +172,27 @@ async def test_save_checkpoint_on_exception_logs_recovery_warning(
     kwargs = logger.warning.call_args.kwargs
     assert kwargs["records_processed"] == 10
     assert kwargs["error_type"] == "ValueError"
+
+
+@pytest.mark.asyncio
+async def test_save_checkpoint_on_shutdown_logs_checkpoint_error(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+) -> None:
+    checkpoint_manager.save_checkpoint.side_effect = RuntimeError("disk unavailable")
+
+    await service.save_checkpoint_on_shutdown(
+        records_fetched=4,
+        resume_offset=6,
+    )
+
+    logger.warning.assert_called_once()
+    assert logger.warning.call_args.kwargs == {
+        "records_processed": 10,
+        "error_type": "RuntimeError",
+        "reason": "checkpoint_save_failed_on_shutdown",
+    }
 
 
 @pytest.mark.asyncio

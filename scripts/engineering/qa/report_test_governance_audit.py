@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import difflib
 import hashlib
 import json
 import os
@@ -1440,6 +1441,19 @@ def _check_json_artifact(path: Path, payload: dict[str, Any]) -> bool:
     if actual == expected:
         return True
     print(f"[drift] mismatch: {safe_path}")
+    diff = difflib.unified_diff(
+        actual.splitlines(),
+        expected.splitlines(),
+        fromfile="committed",
+        tofile="generated",
+        n=2,
+        lineterm="",
+    )
+    for index, line in enumerate(diff):
+        if index >= 120:
+            print("[drift] diff truncated after 120 lines")
+            break
+        print(line)
     return False
 
 
