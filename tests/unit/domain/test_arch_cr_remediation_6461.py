@@ -67,6 +67,15 @@ def test_redaction_covers_basic_auth_and_cookie() -> None:
     assert "[REDACTED]" in redacted
 
 
+def test_redaction_preserves_escaped_quotes_without_exposing_secret() -> None:
+    secret = r"alpha\" beta"
+
+    redacted = _redact_string(f'password="{secret}" safe-tail')
+
+    assert secret not in redacted
+    assert redacted == "password=[REDACTED] safe-tail"
+
+
 def test_redaction_handles_cyclic_context() -> None:
     payload: dict[str, object] = {"token": "secret-value"}
     payload["self"] = payload
