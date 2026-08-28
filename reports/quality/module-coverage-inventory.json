@@ -1,10 +1,7 @@
 {
-  "additive_coverage_xml_path": "coverage.xml",
-  "additive_coverage_xml_sha256": "c81ff5a643b21780b2888fdd7d06ba6bd2ea315d713189495f70db640ae06b98",
-  "additive_measured_module_count": 2461,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "28aaa980500b1f81bf10a934b0e6d562ac023ffe50e49c58649802c0da47ba17",
+  "coverage_xml_sha256": "c3bf68f58a8a4041128b92edf1aca5588b7ad85e4d0f90b040d61ba0808625e1",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
