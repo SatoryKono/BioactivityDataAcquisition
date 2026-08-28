@@ -36,6 +36,15 @@
     "**/coverage",
     "**/htmlcov",
     "**/reports/coverage",
+    "**/reports",
+    "**/reports/audit-runs",
+    "**/logs",
+    "**/data",
+    "**/.codex",
+    "**/.claude",
+    "**/.junie",
+    "**/.devin",
+    "**/htmlcov",
     "**/target",
     "**/generated",
     "**/data/debug_exports"
@@ -55,7 +64,7 @@
   "redact_private_values": true,
   "languages": {
     "Python": {
-      "format_on_save": "off",
+      "format_on_save": "on",
       "formatter": {
         "language_server": {
           "name": "ruff"
@@ -160,8 +169,7 @@
   "terminal": {
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VCR_RECORD_MODE": "none",
-      "VIRTUAL_ENV": ".venv-win"
+      "VCR_RECORD_MODE": "none"
     },
     "detect_venv": {
       "on": {
@@ -435,79 +443,6 @@
   "telemetry": {
     "diagnostics": false,
     "metrics": false
-  },
-  "tasks": {
-    "version": "1",
-    "tasks": [
-      {
-        "label": "Lint (ruff + mypy)",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_lint_imports"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Type Check (mypy)",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_mypy"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Test: Smoke",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_pytest_lane",
-          "smoke"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Test: Unit Fast",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_pytest_lane",
-          "unit-fast"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Test: Architecture",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_pytest_lane",
-          "architecture"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Test: Current File",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_pytest_lane",
-          "file",
-          "$ZED_FILE"
-        ],
-        "cwd": "$ZED_PROJECT"
-      },
-      {
-        "label": "Run Local Pipeline",
-        "command": "python",
-        "args": [
-          "-m",
-          "scripts.engineering.dev.zed_run"
-        ],
-        "cwd": "$ZED_PROJECT"
-      }
-    ]
   },
   "show_sign_in": true,
   "ui_font_family": "JetBrains Mono",

@@ -12,20 +12,16 @@ This directory contains Zed editor configuration optimized for BioETL developmen
 ## Recent Improvements
 
 ### 1. Python Auto-Formatting Enabled
-- Changed `format_on_save` from `off` to `on` for Python
-- Uses Ruff as formatter with automatic import organization
-- Matches CI formatting behavior
+- `languages.Python.format_on_save: on` (was `off` before Wave 1) — uses Ruff as formatter with `source.organizeImports.ruff: true`
+- `soft_wrap: preferred_line_length` (88, matches `pyproject.toml max_line_length` + `.editorconfig max_line_length 88`)
+- `Markdown.format_on_save: off` intentionally — preserves `requirements-traceability-crosswalk` tables
+- `YAML/JSON/Docker Compose: on` — consistent with `.editorconfig indent_size 2` for those types
 
-### 2. Project-Specific Tasks Added
-Access via `Ctrl+Shift+P` → "Tasks" or `Ctrl+Shift+T`:
+### 2. Project-Specific Tasks (SSOT: `.zed/tasks.json`)
+SSOT — `.zed/tasks.json` (25 lanes). `settings.json:tasks` removed in Wave 1 (Zed merges both, `tasks.json` wins). Access via `Ctrl+Shift+P` → "Tasks" or `Ctrl+Shift+T`:
 
-- **Lint (ruff + mypy)** - Run import linting
-- **Type Check (mypy)** - Run strict type checking on `src/bioetl`
-- **Test: Smoke** - Run smoke test suite
-- **Test: Unit Fast** - Run fast unit tests
-- **Test: Architecture** - Run architecture contract tests
-- **Test: Current File** - Run tests for the currently open file
-- **Run Local Pipeline** - Execute a local pipeline run
+- **Format: code / Check: lint / Check: types / Test: current file** + full lanes: `smoke`, `unit-fast`, `architecture-fast`, `integration-replay`, `contracts`, `security`, `e2e-smoke`, `coverage-local`, `architecture imports`, `dead code`, `complexity`, `dependencies`, `MCP manifests`
+- Legacy short list in `settings.json` kept for back-compat until 2026-08, now `tasks.json` only
 
 ### 3. Code Lenses Enabled
 - Test code lenses for quick test execution
@@ -74,20 +70,16 @@ Comprehensive keymap with:
 ## Terminal Configuration
 
 - Environment variables set automatically:
-  - `PYTHONDONTWRITEBYTECODE=1`
-  - `VCR_RECORD_MODE=none`
-  - `VIRTUAL_ENV=.venv-win`
-- Font: JetBrains Mono, size 14
-- Line height: Comfortable
-- Auto-detects virtual environments
+  - `PYTHONDONTWRITEBYTECODE=1`, `VCR_RECORD_MODE=none` (Wave 1: `VIRTUAL_ENV=.venv-win` removed — `detect_venv` resolves per-OS: `.venv-win` / `.venv` / `.venv-wsl`)
+- Font: JetBrains Mono, size 14 — Line height: Comfortable — Auto-detects virtual environments (see `AGENTS.md` routes)
 
 ## File Scan Exclusions
 
-Large directories and caches are excluded from file scanning for performance:
+Large directories and caches are excluded from file scanning for performance (Wave 1 extended):
 - `.git`, `.svn`, `.hg`, `.jj`, `CVS`
 - `node_modules`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`
 - `.venv*`, `venv`, `env`
-- `dist`, `build`, `coverage`, `htmlcov`, `reports/coverage`
+- `dist`, `build`, `coverage`, `htmlcov`, `reports/coverage`, `reports`, `reports/audit-runs` (80+ dirs), `logs`, `data`, `.codex`, `.claude`, `.junie`, `.devin`
 - `target`, `generated`, `data/debug_exports`
 
 ## Helper Scripts
