@@ -1,7 +1,5 @@
 name: Docker Build & Compose Validation
 
-permissions:
-  contents: read
 
 on:
   workflow_dispatch:
