@@ -1,0 +1,3 @@
+## 2023-10-27 - Polars FFI Overhead from large pl.Expr lists
+**Learning:** Generating a large Python list of Polars expressions (e.g. `[pl.col(c).is_not_null().sum() for c in cols]`) and evaluating it inside `.select()` causes severe FFI overhead. For wide dataframes (10,000 columns), creating and passing these expressions crossing the Python/Rust boundary is exceptionally slow.
+**Action:** Use native dataframe-level aggregation methods directly, such as `df.select(target_cols).null_count()`, and perform simple scalar arithmetic (like computing coverage from null counts) entirely in Python after extracting the row result.
