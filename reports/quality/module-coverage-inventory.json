@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "28aaa980500b1f81bf10a934b0e6d562ac023ffe50e49c58649802c0da47ba17",
+  "coverage_xml_sha256": "cac637ef848299b837beb30394c1a450e06d8b75961764cc74124939207f4802",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -12823,7 +12823,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.exceptions.base_exceptions",
       "path": "src/bioetl/domain/exceptions/base_exceptions.py",
-      "source_lines": 264
+      "source_lines": 263
     },
     {
       "coverage_percent": 88.0,
@@ -14388,8 +14388,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 16,
-      "executable_lines": 16,
+      "covered_lines": 15,
+      "executable_lines": 15,
       "missing_lines": 0,
       "module": "bioetl.domain.ports._facade_support",
       "path": "src/bioetl/domain/ports/_facade_support.py",
@@ -19358,8 +19358,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 34,
-      "executable_lines": 34,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.config.domain_config_resolver",
       "path": "src/bioetl/infrastructure/config/domain_config_resolver.py",
@@ -37475,7 +37475,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.exceptions.base_exceptions",
       "path": "src/bioetl/domain/exceptions/base_exceptions.py",
-      "source_lines": 264
+      "source_lines": 263
     },
     {
       "coverage_percent": 88.0,
@@ -39040,8 +39040,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 16,
-      "executable_lines": 16,
+      "covered_lines": 15,
+      "executable_lines": 15,
       "missing_lines": 0,
       "module": "bioetl.domain.ports._facade_support",
       "path": "src/bioetl/domain/ports/_facade_support.py",
@@ -44010,8 +44010,8 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 34,
-      "executable_lines": 34,
+      "covered_lines": 33,
+      "executable_lines": 33,
       "missing_lines": 0,
       "module": "bioetl.infrastructure.config.domain_config_resolver",
       "path": "src/bioetl/infrastructure/config/domain_config_resolver.py",
