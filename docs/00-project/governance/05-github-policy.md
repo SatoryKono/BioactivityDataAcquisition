@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined: `checks-complete` + `root-hygiene`; not GitHub-enforced). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active** (defined: `checks-complete` + `root-hygiene`; not GitHub-enforced). See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -261,18 +261,14 @@ PR merges and direct pushes to `main` are not blocked by required status
 checks. Repo-side evidence is the live repository ruleset state plus the
 workflows that still materialize the recommended checks on pull requests.
 
-Activated and re-verified on `2026-08-19` with repository admin credentials via
-the GitHub REST API (closeout for #8619 / parent #8607; after the 2026-08-11
-activation the live state drifted to `enforcement=disabled`, and later the same
-day the operator explicitly allowed direct push to `main`, so enforcement was
-set back to `disabled`).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782).
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: `disabled`.
-- Direct merge allowed; no active required-check ruleset.
+- Enforcement: `active`.
+- Direct updates to main are blocked by the active rule.
 - Defined (inactive) required status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
 - The ruleset has no bypass actors (`current_user_can_bypass: never`).
@@ -286,7 +282,7 @@ Live GitHub enforcement state:
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains **disabled** and is not part of the active gate set.
+remains **active** and is not part of the active gate set.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -532,3 +528,14 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
+
+
+### Evidence (2026-08-28)
+```json
+{
+  "name": "root-hygiene-required-check",
+  "enforcement": "active"
+}
+```
+
+`Rollback: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled`

@@ -83,7 +83,7 @@ class RuntimeConfig:
     # Controls explicit storage maintenance (vacuum, old file removal)
     optimize_storage: bool = False
 
-    # Medallion invariants validation (REQ-CONF-001)
+    # Medallion invariants validation (see REQ-DATA-001..010 / REQ-SCHEMA-*)
     # When True, Medallion config violations fail the pipeline
     # When False, violations are logged as warnings
     strict_validation: bool = False
