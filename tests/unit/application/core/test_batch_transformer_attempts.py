@@ -39,9 +39,15 @@ from bioetl.application.core.batch_transformer_attempts import (
     _resolve_gold_filter_details,
     transform_record_attempt,
 )
+from bioetl.application.core.batch_transformer_attempt_success import (
+    _apply_runtime_dq_outcomes,
+    _resolve_gold_filter_details as _resolve_success_gold_filter_details,
+)
+from bioetl.domain.behavior import dq_rule_evaluator
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.filtering import FilterOperator, GoldColumnFilter, GoldFilterConfig
 from bioetl.domain.types import ErrorType
+from bioetl.domain.types.dq_contracts import DQDisposition
 
 
 class _GoldFilterOwner:
@@ -54,6 +60,25 @@ class _GoldFilterOwner:
 
     def should_write_gold(self, _context, record: dict[str, object]) -> bool:
         return self._gold_filters.should_include(record)
+
+
+class _LegacyGoldFilterWithoutEvaluator:
+    _gold_filters = object()
+
+    def should_write_gold(self, _context, _record: dict[str, object]) -> bool:
+        return False
+
+
+class _UnstructuredGoldFilterEvaluator:
+    class _Filters:
+        @staticmethod
+        def evaluate(_record: dict[str, object]) -> object:
+            return object()
+
+    gold_filters = _Filters()
+
+    def should_write_gold(self, _context, _record: dict[str, object]) -> bool:
+        return False
 
 
 @pytest.mark.unit
@@ -79,6 +104,62 @@ def test_resolve_gold_filter_details_returns_structured_decision() -> None:
     assert details["operator"] == "not_in"
     assert details["actual"] == "BAO_0000218"
     assert details["expected"] == ["BAO_0000218"]
+
+
+@pytest.mark.unit
+def test_resolve_gold_filter_details_handles_legacy_non_evaluator() -> None:
+    owner = _LegacyGoldFilterWithoutEvaluator()
+
+    details = _resolve_success_gold_filter_details(
+        owner.should_write_gold,
+        {"bao_format": "BAO_0000218"},
+    )
+
+    assert details is None
+
+
+@pytest.mark.unit
+def test_resolve_gold_filter_details_ignores_unstructured_evaluator_result() -> None:
+    owner = _UnstructuredGoldFilterEvaluator()
+
+    details = _resolve_success_gold_filter_details(
+        owner.should_write_gold,
+        {"bao_format": "BAO_0000218"},
+    )
+
+    assert details is None
+
+
+@pytest.mark.unit
+def test_apply_runtime_dq_outcomes_projects_warn_and_error_flags(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    outcome = MagicMock(
+        disposition=DQDisposition.WARN,
+        severity="error",
+        rule_id="runtime.warn",
+    )
+    monkeypatch.setattr(
+        dq_rule_evaluator,
+        "evaluate_dq_rules_for_record",
+        lambda _record, _config: [outcome],
+    )
+    monkeypatch.setattr(
+        dq_rule_evaluator,
+        "select_highest_priority_disposition",
+        lambda _outcomes: DQDisposition.WARN,
+    )
+
+    projected = _apply_runtime_dq_outcomes(
+        silver_record={"entity_id": "1"},
+        dq_config=MagicMock(),
+    )
+
+    assert projected == {
+        "entity_id": "1",
+        "_dq_warn": True,
+        "_dq_error": True,
+    }
 
 
 def _attempt_context() -> MagicMock:
