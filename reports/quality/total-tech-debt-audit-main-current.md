@@ -8,17 +8,17 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: fix/sonar-postmerge-ci-closeout-20260828
 
-Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
+Audited commit SHA: `aee0c4e867a93e41d765fd9879ec2e1c3c386823`
 
-Evidence surface SHA-256: `00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8`
+Evidence surface SHA-256: `c2e542f146b1d21d5fbe98416249a7fb9ddf58ca164771b8906d33d676ea6f69`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
-  "evidence_surface_sha256": "00ac9c8868cad9b61efb8314af5790b72da7237e6097fa64e90bd033cabd30e8",
+  "audited_commit_sha": "aee0c4e867a93e41d765fd9879ec2e1c3c386823",
+  "evidence_surface_sha256": "c2e542f146b1d21d5fbe98416249a7fb9ddf58ca164771b8906d33d676ea6f69",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",

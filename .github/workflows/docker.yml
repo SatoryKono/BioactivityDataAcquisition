@@ -165,7 +165,7 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${GITHUB_SHA}"
-            echo "base_image=python@sha256:a249c9f47e05708dd367f3fe8ada03cf347390fad66fb8b0518c0ef55ae3cb84"
+            echo "base_image=python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
             docker run --rm --entrypoint python "${IMAGE_REF}" --version
             docker run --rm --entrypoint python "${IMAGE_REF}" -c 'import importlib.util; spec = importlib.util.find_spec("pip"); print("pip=" + ("absent" if spec is None else "present"))'
@@ -227,11 +227,11 @@ jobs:
         run: |
           python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json'), github_alerts_json=Path('reports/security/github-trivy-alerts.json'), output=Path('reports/security/trivy-alerts.csv')); print(f'rows={count}')"
 
-      - name: Run Trivy on pinned Debian trixie base image
+      - name: Run Trivy on pinned Debian bookworm base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           # Base digest recorded by the pinned Python amd64 manifest.
-          image-ref: "debian@sha256:abc9cb88a5587630d7f915f47b23b0668fe250fbfc6457aa4d52b534c1bbf73f"
+          image-ref: "debian@sha256:362e64223cc0da95422b3b13c045186fc0a81250e765d31c025fbddf257f6143"
           format: "json"
           output: "reports/security/trivy-base-results.json"
           severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"

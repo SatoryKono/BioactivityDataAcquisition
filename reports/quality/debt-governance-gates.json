@@ -253,13 +253,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -316,31 +316,31 @@
       "status": "pass"
     },
     {
-      "current": 164,
+      "current": 0,
       "limit": 0,
       "metric": "dashboarded_without_emission",
       "name": "observability_dashboarded_without_emission",
       "remediation": "Add runtime emission for dashboarded metrics or remove dashboard references.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 48,
+      "current": 0,
       "limit": 0,
       "metric": "alerted_without_emission",
       "name": "observability_alerted_without_emission",
       "remediation": "Add runtime emission for alerted metrics or retire stale alert rules.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 163,
+      "current": 0,
       "limit": 0,
       "metric": "unused_declared_metrics",
       "name": "observability_unused_declared_metrics",
       "remediation": "Emit, retire, or explicitly allowlist unused declared metrics.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -367,7 +367,7 @@
       "name": "observability_release_review_status",
       "remediation": "Run live observability cardinality review without degraded release evidence.",
       "source_artifact": "reports/observability/runtime_cardinality_review.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -397,13 +397,13 @@
       "status": "pass"
     },
     {
-      "current": 57,
+      "current": 0,
       "limit": 0,
       "metric": "blocking_gap_count",
       "name": "adr_enforcement_blocking_gaps",
       "remediation": "Add enforcement owner tests/scripts or reviewed manual exception markers for accepted ADRs.",
       "source_artifact": "reports/quality/adr-enforcement-matrix.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": "31f85dc07eb00f699dc01b4ec5431b8a8e19b5617c1f938f11ed92c659a131fb",
@@ -458,25 +458,18 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 6,
-    "pass": 39,
+    "fail": 0,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.86,
-    "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 6,
-    "failing_gates": [
-      "test_governance_budget_violations",
-      "observability_dashboarded_without_emission",
-      "observability_alerted_without_emission",
-      "observability_unused_declared_metrics",
-      "observability_release_review_status",
-      "adr_enforcement_blocking_gaps"
-    ],
+    "architecture_quality_scorecard_integral_score": 9.41,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 45,
-    "pass_count": 39,
-    "release_gate_status": "failing",
+    "pass_count": 45,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
