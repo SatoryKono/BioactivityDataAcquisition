@@ -36,13 +36,16 @@ docker run --rm --entrypoint uv "bioetl-builder:$baselineSha" `
 ```
 
 The CI artifact additionally records the final image ID, source SHA, Wolfi base
-and direct package identities, runtime Python version, runtime `pip` presence, installed
-packages, Trivy version/DB metadata, and the GitHub Trivy alert snapshot used to
-populate `alert_number` where an existing alert identity is available. The
-current least-privilege runtime image has no `pip` module; package inventory is
-read through `importlib.metadata` instead. The runtime is shell-less, has no
-package manager, and runs as the Chainguard non-root account `65532:65532`;
-Compose therefore invokes `bioetl` directly instead of using `/bin/sh -c`.
+and direct package identities, runtime Python version, runtime `pip` presence,
+installed packages, Trivy version/DB metadata, and the GitHub Trivy alert
+snapshot used to populate `alert_number` where an existing alert identity is
+available. The current least-privilege runtime image has no `pip` module;
+package inventory is read through `importlib.metadata` instead. The runtime is
+shell-less, has no package manager, and runs as the Chainguard non-root account
+`65532:65532`; Compose therefore invokes `bioetl` directly instead of using
+`/bin/sh -c`. Its private `/tmp` is owned by the runtime account with mode
+`0700`, preventing cross-user writes while preserving Python temporary-file
+support.
 
 ## Trivy reproduction
 
@@ -77,7 +80,7 @@ The workflow artifact contains:
 
 - `trivy-results.sarif` and `trivy-results.json`;
 - `trivy-base-results.json` for the exact pinned distro base digest;
-- **bioetl.spdx.json**;
+- `bioetl.spdx.json`;
 - `trivy-alerts.csv` with
   `alert_number,CVE,package,installed,fixed,layer,status`;
 - Trivy/GitHub metadata and runtime provenance files.

@@ -88,7 +88,7 @@ def test_ops_http_compose_targets_main_health_server() -> None:
     assert bioetl["entrypoint"] == ["bioetl"]
     command = bioetl["command"]
     assert command == ["health", "server", "--host", "0.0.0.0", "--port", "8000"]
-    assert "quarantine" not in command
+    assert "quarantine" not in str(command)
     assert any("8000:8000" in str(port) for port in bioetl["ports"])
     assert not any("8081:8081" in str(port) for port in bioetl["ports"])
     assert "quarantine-explorer" not in str(bioetl.get("networks", {}))
