@@ -11,11 +11,10 @@ from typing import Protocol
 
 import pytest
 
-from bioetl.domain.ports import config_mapper as config_mapper_mod
 from bioetl.domain.ports import entity_type as entity_type_mod
 from bioetl.domain.ports import pipeline_callbacks as pipeline_callbacks_mod
 from bioetl.domain.ports import source_config as source_config_mod
-from bioetl.domain.ports.config_mapper import DomainConfigMapper
+from bioetl.domain.ports import DomainConfigMapperPort
 from bioetl.domain.ports.entity_type import EntityTypeExtractor
 from bioetl.domain.ports.pipeline_callbacks import (
     GoldFilterCallback,
@@ -27,13 +26,12 @@ from bioetl.domain.ports.source_config import PaginationConfigLike, SourceConfig
 pytestmark = pytest.mark.unit
 
 _OWNER_MODULES = (
-    config_mapper_mod,
     entity_type_mod,
     pipeline_callbacks_mod,
     source_config_mod,
 )
 _OWNER_PROTOCOLS = (
-    DomainConfigMapper,
+    DomainConfigMapperPort,
     EntityTypeExtractor,
     GoldFilterCallback,
     GoldTransformCallback,

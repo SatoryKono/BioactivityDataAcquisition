@@ -865,6 +865,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
     },
+    "scripts/engineering/qa/docker_stability_campaign/trivy_baseline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/docker_stability_campaign/promotion.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable.",

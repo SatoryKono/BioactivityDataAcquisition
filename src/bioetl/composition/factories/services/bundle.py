@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         SilverValidatorPort,
         TracingPort,
     )
-    from bioetl.infrastructure.config.domain_config_resolver import DomainConfigMapper
+    from bioetl.domain.ports import DomainConfigMapperPort
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
@@ -157,7 +157,7 @@ def _resolve_service_bundle_dependencies(
     return resolve_service_bundle_dependencies(
         override=override,
         load_pipeline_config_fn=load_pipeline_config,
-        yaml_config_to_domain_fn=cast("DomainConfigMapper", yaml_config_to_domain),
+        yaml_config_to_domain_fn=cast("DomainConfigMapperPort", yaml_config_to_domain),
         compute_config_hash_fn=compute_config_hash,
         base_services_factory=_resolve_base_services_factory(),
     )

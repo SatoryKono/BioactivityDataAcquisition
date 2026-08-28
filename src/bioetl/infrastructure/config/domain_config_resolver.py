@@ -20,8 +20,7 @@ from bioetl.infrastructure.config.pipeline_dq_resolution import (
     resolve_pipeline_dq_config,
 )
 
-DomainConfigMapper = DomainConfigMapperPort
-_DEFAULT_DOMAIN_MAPPER = cast(DomainConfigMapper, yaml_config_to_domain)
+_DEFAULT_DOMAIN_MAPPER = cast(DomainConfigMapperPort, yaml_config_to_domain)
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig
@@ -45,7 +44,7 @@ class DomainConfigResolver:
 
     configs_root: Path = field(default_factory=resolve_configs_root)
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader
-    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER
+    domain_mapper: DomainConfigMapperPort = _DEFAULT_DOMAIN_MAPPER
 
     def resolve(
         self,
@@ -71,7 +70,7 @@ def resolve_domain_pipeline_config(
     configs_root: Path | None = None,
     relaxed_dq: bool = False,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
-    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER,
+    domain_mapper: DomainConfigMapperPort = _DEFAULT_DOMAIN_MAPPER,
 ) -> PipelineConfig:
     """Resolve domain config from an already validated YAML pipeline config."""
     resolver = DomainConfigResolver(
@@ -89,7 +88,7 @@ def load_domain_pipeline_config(
     relaxed_dq: bool = False,
     yaml_loader: Callable[[str], PipelineYamlConfig] = load_pipeline_config,
     dq_resolver_provider: PipelineConfigDQResolverProvider = DQConfigLoader,
-    domain_mapper: DomainConfigMapper = _DEFAULT_DOMAIN_MAPPER,
+    domain_mapper: DomainConfigMapperPort = _DEFAULT_DOMAIN_MAPPER,
 ) -> PipelineConfig:
     """Load domain config through the canonical function-based config flow."""
     root = resolve_configs_root(configs_root)
@@ -107,7 +106,6 @@ def load_domain_pipeline_config(
 
 
 __all__ = [
-    "DomainConfigMapper",
     "DomainConfigResolver",
     "load_domain_pipeline_config",
     "resolve_domain_pipeline_config",

@@ -749,10 +749,21 @@ routes:
       - docs/00-project/ai/skills/local/
     notes: AI runtime memory sheets, prompt templates, and local skill docs are machine-local helpers and not committed.
 
-  - id: docker-trivy-sarif-security-report
+  - id: docker-security-baseline-reports
     generator: .github/workflows/docker.yml
     output_kind: security_report
     commit_policy: ignored_ci_output
     outputs:
       - reports/security/trivy-results.sarif
-    notes: Trivy SARIF is uploaded from reports/security rather than repository root.
+      - reports/security/trivy-results.json
+      - reports/security/trivy-base-results.json
+      - reports/security/trivy-alerts.csv
+      - reports/security/trivy-version.json
+      - reports/security/github-trivy-alerts.json
+      - reports/security/bioetl.spdx.json
+      - reports/security/bioetl-image-provenance.txt
+      - reports/security/bioetl-image-id.txt
+      - reports/security/bioetl-pip-freeze.txt
+      - reports/security/baseline.sha256
+      - reports/security/bioetl-scanned-image.tar.zst
+    notes: Reproducible Docker security evidence is uploaded as a bounded CI artifact and SARIF is sent to the Security tab; generated scan outputs remain untracked.
