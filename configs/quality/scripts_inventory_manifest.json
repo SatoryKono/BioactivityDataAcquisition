@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T06:18:14.521233+00:00",
+  "generated_at": "2026-08-28T06:50:13.267329+00:00",
   "summary": {
-    "total_scripts": 603,
+    "total_scripts": 604,
     "status_counts": {
       "active": 338,
-      "supporting": 265
+      "supporting": 266
     },
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
       "ci": 82,
-      "docs": 250,
+      "docs": 251,
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 410
+      "tests": 411
     }
   },
   "scripts": [
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 48,
+      "reference_count": 42,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4977,7 +4977,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 69,
+      "reference_count": 46,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -5816,7 +5816,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 81,
+      "reference_count": 80,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -7794,7 +7794,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 207,
+      "reference_count": 201,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8026,7 +8026,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 42,
+      "reference_count": 40,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -8171,8 +8171,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
+          "line": 51,
+          "source_group": "docs",
+          "text": "scripts/ai/prompts/compile.py lint.py verify.py"
+        },
+        {
+          "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/_plan-v3.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "verify.py"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 46,
@@ -10913,7 +10925,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 44,
+      "reference_count": 43,
       "references": [
         {
           "path": ".github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md",
@@ -12116,7 +12128,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 404,
+      "reference_count": 391,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13284,7 +13296,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import commands, faults, model"
         }
@@ -13340,7 +13352,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import commands, faults, model"
         }
@@ -13426,7 +13438,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
-          "line": 40,
+          "line": 41,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import promotion"
         }
@@ -13552,6 +13564,25 @@
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-10-15",
       "next_step": "Retain as the shared stage-state, baseline, and restoration helper behind the opt-in Docker stability campaign; keep resumability evidence atomic and fail-closed."
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/trivy_baseline.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
+          "line": 42,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint."
     },
     {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
@@ -13744,7 +13775,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 424,
+          "line": 439,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14485,7 +14516,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 427,
+          "line": 442,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -16254,13 +16285,13 @@
       "references": [
         {
           "path": ".github/workflows/docker.yml",
-          "line": 14,
+          "line": 19,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 29,
+          "line": 38,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
@@ -17945,7 +17976,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
@@ -17984,16 +18015,16 @@
           "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
         },
         {
-          "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cycle-agents-memory.md",
-          "line": 337,
-          "source_group": "docs",
-          "text": "- Helper: `bash scripts/memory/run_workflow.sh …` (venv + `PYTHONPATH=src`)"
+          "path": "scripts/memory/README.md",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "- `bash scripts/memory/run_workflow.sh …` — preferred agent entry for"
         },
         {
-          "path": "docs/00-project/ai/prompts/library/audit/project/full/audit-cycle-agents-memory.md",
-          "line": 359,
-          "source_group": "docs",
-          "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
+          "path": "tests/architecture/test_ai_memory_program_contracts.py",
+          "line": 48,
+          "source_group": "tests",
+          "text": "\"\"\"run_workflow.sh must discover .venv-win on native Windows (#9121).\"\"\""
         }
       ]
     },
