@@ -93,10 +93,10 @@
       "coverage_actual_percent": 96.56,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-28T16:08:36.969716+00:00",
+      "refreshed_at_utc": "2026-08-28T17:10:45.043340+00:00",
       "slowest_total_cases": 49236,
-      "source_commit": "e254c42e8c490bd74cba0b324384f0139096e15d",
-      "source_run_id": "33166028819",
+      "source_commit": "aa5128f37cb4dba0b93817f94e7a88313637d233",
+      "source_run_id": "33192324427",
       "top_slow_zone": {
         "max_duration_s": 13.322,
         "test_count": 4,

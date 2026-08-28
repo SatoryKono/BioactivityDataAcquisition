@@ -10,7 +10,7 @@ Audited branch: fix/codeql-zizmor-20260828
 
 Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
 
-Evidence surface SHA-256: `8868e85fe929a738263ce7fe2f2c83c097b511bee5c02a76fadc496c8c32ffa9`
+Evidence surface SHA-256: `58c2a5d1217a49bfac337369be60f1854263d51cee72577bb336554705e1371b`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
-  "evidence_surface_sha256": "8868e85fe929a738263ce7fe2f2c83c097b511bee5c02a76fadc496c8c32ffa9",
+  "evidence_surface_sha256": "58c2a5d1217a49bfac337369be60f1854263d51cee72577bb336554705e1371b",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
