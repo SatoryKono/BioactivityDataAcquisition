@@ -22,13 +22,16 @@ ENV PIP_DEFAULT_TIMEOUT=180 \
 # Debian security packages track moving distro revisions (no stable =version pins).
 # hadolint ignore=DL3008
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
         libffi-dev \
         libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26 \
+    && python -m pip install --only-binary=:all: --no-cache-dir \
+        pip==26.1.2 \
+        uv==0.11.26 \
         --index-url https://pypi.org/simple \
         --default-timeout=180 --retries=10 \
     && uv --version
@@ -60,8 +63,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Debian security packages track moving distro revisions (no stable =version pins).
 # hadolint ignore=DL3008
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
+    && python -m pip install --only-binary=:all: --no-cache-dir pip==26.1.2 \
+        --index-url https://pypi.org/simple \
+        --default-timeout=180 --retries=10 \
     && groupadd -r -g 999 bioetl \
     && useradd -r -u 999 -g bioetl bioetl \
     && rm -rf /var/lib/apt/lists/*

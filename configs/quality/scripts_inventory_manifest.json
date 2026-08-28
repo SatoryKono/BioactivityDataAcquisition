@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-28T09:46:11.031765+00:00",
+  "generated_at": "2026-08-28T11:14:58.204250+00:00",
   "summary": {
-    "total_scripts": 604,
+    "total_scripts": 605,
     "status_counts": {
       "active": 338,
+      "orphan": 1,
       "supporting": 266
     },
     "reference_group_coverage": {
@@ -13585,6 +13586,14 @@
       "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint."
     },
     {
+      "path": "scripts/engineering/qa/docker_stability_campaign/trivy_fixability_gate.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
       "type": "py",
       "status": "active",
@@ -20789,7 +20798,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1192,
+          "line": 1193,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -22931,7 +22940,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1130,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22999,7 +23008,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1130,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

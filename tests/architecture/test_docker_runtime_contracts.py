@@ -1033,6 +1033,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         encoding="utf-8"
     )
     assert "uv==0.11.26" in dockerfile
+    assert dockerfile.count("apt-get upgrade -y") == 2
+    assert dockerfile.count("pip==26.1.2") == 2
     assert (
         dockerfile.count(
             "python@sha256:a116514e19457bcb7af7efe9c3dd0b9b71e85b317694e7882a1c52aa15a78134"
@@ -1062,10 +1064,9 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
     )
     assert dockerfile.count('SHELL ["/bin/bash", "-o", "pipefail", "-c"]') == 2
-    assert (
-        "python -m pip install --only-binary=:all: --no-cache-dir uv==0.11.26"
-        in dockerfile
-    )
+    assert "python -m pip install --only-binary=:all: --no-cache-dir" in dockerfile
+    assert dockerfile.count("pip==26.1.2") == 2
+    assert "uv==0.11.26" in dockerfile
     assert "useradd -r -u 999 -g bioetl bioetl" in dockerfile
     assert "USER 999:999" in dockerfile
     assert "USER bioetl" not in dockerfile
@@ -1310,7 +1311,7 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_fixable_medium_plus() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     built = {
@@ -1325,9 +1326,16 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -
     assert all(
         step["with"]["severity"] == "CRITICAL,HIGH,MEDIUM,UNKNOWN" for step in evidence
     )
-    enforcement = built["Enforce Trivy Critical High Medium policy"]
-    assert str(enforcement["with"].get("exit-code")) == "1"
-    assert enforcement["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
+    enforcement = next(
+        step
+        for step in steps
+        if step.get("name") == "Enforce fixable Trivy Critical High Medium policy"
+    )
+    enforcement_command = str(enforcement["run"])
+    assert "trivy_fixability_gate" in enforcement_command
+    assert "--fail-on-fixable" in enforcement_command
+    assert "reports/security/trivy-results.json" in enforcement_command
+    assert "reports/security/trivy-fixability-audit.json" in enforcement_command
     assert all(step["with"].get("ignore-unfixed") is False for step in built.values())
     assert all(step["with"].get("version") == "v0.70.0" for step in built.values())
 
@@ -1343,6 +1351,7 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     )
     assert "steps.validate-baseline.outcome == 'success'" in upload["if"]
     assert "reports/security/baseline.sha256" in upload["with"]["path"]
+    assert "reports/security/trivy-fixability-audit.json" in upload["with"]["path"]
     assert upload["with"]["if-no-files-found"] == "error"
     assert upload["with"]["retention-days"] == 30
     assert any(
@@ -1360,7 +1369,10 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert step_names.index("Validate complete security baseline") < step_names.index(
         "Upload reproducible security baseline"
     )
-    assert step_names.index("Enforce Trivy Critical High Medium policy") < (
+    assert step_names.index("Generate Trivy fixability audit") < step_names.index(
+        "Validate complete security baseline"
+    )
+    assert step_names.index("Enforce fixable Trivy Critical High Medium policy") < (
         step_names.index("Export exact scanned image for publication")
     )
 
