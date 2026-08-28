@@ -2,31 +2,31 @@
 
 Lifecycle status: current
 
-Audit date: 2026-08-27
+Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: main
+Audited branch: fix/sonar-closeout-current-main-20260828
 
-Audited commit SHA: `3aba8559a58038cd9ff9a90621f19ea39b930a2f`
+Audited commit SHA: `7f7fc8f547bfadd4e66a373b5658cd1dbf480616`
 
-Evidence surface SHA-256: `ea019616620e39076728f5306e722cb459edb715f581f51f1fb0c1062c3ef321`
+Evidence surface SHA-256: `1b76bcf63f57ce02d328fdc51cb06922de66484ae6d361ee0aa5ec80885de556`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "3aba8559a58038cd9ff9a90621f19ea39b930a2f",
-  "evidence_surface_sha256": "ea019616620e39076728f5306e722cb459edb715f581f51f1fb0c1062c3ef321",
+  "audited_commit_sha": "7f7fc8f547bfadd4e66a373b5658cd1dbf480616",
+  "evidence_surface_sha256": "1b76bcf63f57ce02d328fdc51cb06922de66484ae6d361ee0aa5ec80885de556",
   "metrics": {
-    "architecture_integral_score": 8.58,
+    "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 1,
-    "debt_gate_pass_count": 44,
+    "debt_gate_fail_count": 0,
+    "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1582,
@@ -44,13 +44,13 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to origin/main 3aba8559a580 after canonical regeneration and repair of unresolved merge markers in generated quality artifacts. The generated debt-governance evidence now records 44/45 passing gates; the independent ADR enforcement ownership gap is tracked in #9789. No budget growth.
+Refresh reason: Re-pin to branch closeout SHA 7f7fc8f547 after canonical regeneration on origin/main 9e584e6efb. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
-1. Debt-governance gates: **44 pass / 1 fail** (45 debt-governance gates).
-1. Release status: **blocked by ADR enforcement ownership**; the independent remediation is tracked in #9789.
-1. Architecture quality integral score: **8.58** (`good_targeted_improvements`). Integral score `8.58`.
+1. Debt-governance gates: **45 pass / 0 fail** (45 debt-governance gates).
+1. Release status: **passing**; no blocking debt-governance gaps remain.
+1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2467**
    - fully_covered: **1582**
