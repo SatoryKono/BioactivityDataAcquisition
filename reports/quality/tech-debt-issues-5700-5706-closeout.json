@@ -93,14 +93,14 @@
       "coverage_actual_percent": 96.56,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-28T12:26:25.861620+00:00",
-      "slowest_total_cases": 49236,
-      "source_commit": "3f7e5f4e7299db8e60a020bf397324d472c5403e",
-      "source_run_id": "33168400380",
+      "refreshed_at_utc": "2026-08-28T16:59:59.372728+00:00",
+      "slowest_total_cases": 49239,
+      "source_commit": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
+      "source_run_id": "33182085116",
       "top_slow_zone": {
-        "max_duration_s": 13.322,
+        "max_duration_s": 17.747,
         "test_count": 4,
-        "total_duration_s": 35.855,
+        "total_duration_s": 48.084,
         "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates"
       }
     },
