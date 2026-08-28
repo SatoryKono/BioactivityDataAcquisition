@@ -1,23 +1,26 @@
 """Minimal HTTP CONNECT proxy for WSL2 -> Windows VPN tunnel.
 
-Listens on 0.0.0.0:3128 so WSL2 can reach it via the Windows host IP.
-Supports both HTTP CONNECT (for HTTPS) and plain HTTP forwarding.
+Listens on loopback by default. To expose the proxy to the WSL virtual network,
+explicitly supply the Windows host address for that interface with --listen-host.
+Wildcard addresses are intentionally rejected.
 
 Usage:
-    python scripts/ops/runtime/wsl/wsl_proxy.py          # foreground
-    pythonw scripts/ops/runtime/wsl/wsl_proxy.py         # background (no console)
-    start /B python scripts/ops/runtime/wsl/wsl_proxy.py # background via cmd
+    python scripts/ops/runtime/wsl/wsl_proxy.py
+    python scripts/ops/runtime/wsl/wsl_proxy.py --listen-host <wsl-host-ip>
+    pythonw scripts/ops/runtime/wsl/wsl_proxy.py
 """
 
 from __future__ import annotations
 
+import argparse
+import ipaddress
 import logging
 import select
 import socket
 import threading
 from urllib.parse import urlsplit
 
-LISTEN_HOST = "0.0.0.0"
+LISTEN_HOST = "127.0.0.1"
 LISTEN_PORT = 3128
 BUFFER_SIZE = 65536
 CONNECT_TIMEOUT = 10
@@ -144,12 +147,28 @@ def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
         client.close()
 
 
-def main() -> None:
+def _parse_listen_settings(argv: list[str] | None = None) -> tuple[str, int]:
+    """Parse explicit non-wildcard listener settings."""
+    parser = argparse.ArgumentParser(description="Run the local WSL HTTP proxy.")
+    parser.add_argument("--listen-host", default=LISTEN_HOST)
+    parser.add_argument("--listen-port", type=int, default=LISTEN_PORT)
+    args = parser.parse_args(argv)
+    try:
+        listen_address = ipaddress.IPv4Address(args.listen_host)
+    except ipaddress.AddressValueError:
+        parser.error("listener address must be a concrete IPv4 address")
+    if listen_address.is_unspecified:
+        parser.error("wildcard listener addresses are not permitted")
+    return str(listen_address), args.listen_port
+
+
+def main(argv: list[str] | None = None) -> None:
+    listen_host, listen_port = _parse_listen_settings(argv)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((LISTEN_HOST, LISTEN_PORT))
+    server.bind((listen_host, listen_port))
     server.listen(128)
-    log.info("WSL proxy listening on %s:%d", LISTEN_HOST, LISTEN_PORT)
+    log.info("WSL proxy listening on %s:%d", listen_host, listen_port)
 
     try:
         while True:
