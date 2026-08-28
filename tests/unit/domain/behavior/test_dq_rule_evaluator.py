@@ -43,6 +43,7 @@ from bioetl.domain.config.validation import (
     FieldValidation,
 )
 from bioetl.domain.behavior.dq_rule_evaluator import (
+    _require_dq_rule_outcome,
     evaluate_dq_rules_for_record,
     select_highest_priority_disposition,
 )
@@ -57,6 +58,10 @@ pytestmark = pytest.mark.unit
 
 class TestSelectHighestPriorityDisposition:
     """Tests for select_highest_priority_disposition function."""
+
+    def test_replacement_guard_rejects_non_outcome(self) -> None:
+        with pytest.raises(TypeError, match="did not preserve DQRuleOutcome"):
+            _require_dq_rule_outcome(object())
 
     def test_empty_outcomes_returns_pass(self):
         """Empty outcomes list should return PASS disposition."""
