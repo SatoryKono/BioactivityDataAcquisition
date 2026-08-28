@@ -67,6 +67,23 @@ def test_redaction_covers_basic_auth_and_cookie() -> None:
     assert "[REDACTED]" in redacted
 
 
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ('token="escaped\\"quote"', "token=[REDACTED]"),
+        ("password='escaped\\'quote'", "password=[REDACTED]"),
+    ],
+)
+def test_redaction_handles_escaped_quotes(text: str, expected: str) -> None:
+    assert _redact_string(text) == expected
+
+
+def test_redaction_handles_long_unterminated_escaped_secret() -> None:
+    text = 'token="' + ("\\" * 30_000) + "&"
+
+    assert _redact_string(text) == "token=[REDACTED]&"
+
+
 def test_redaction_handles_cyclic_context() -> None:
     payload: dict[str, object] = {"token": "secret-value"}
     payload["self"] = payload
