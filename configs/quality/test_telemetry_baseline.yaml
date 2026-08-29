@@ -2,11 +2,11 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-08-28T19:15:29.269756+00:00'
+refreshed_at_utc: '2026-08-29T01:22:27.025840+00:00'
 refresh_status: captured
-source_commit: 72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4
-source_run_id: '33182085116'
-source_tree_sha256: 7d63e3721d2a70bca978ed9351497307f018961a8af06f87a58703bb09df5445
+source_commit: b3b326d75200eca40bcb91803ebe2528678777e6
+source_run_id: '33224655453'
+source_tree_sha256: 19ad0ea0e4968bcf98efb222f4c7224767278c3ba556384154d033f20117996e
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
@@ -15,10 +15,24 @@ artifact_inputs:
   coverage_log: null
   coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
-  junit_inputs: []
+  junit_inputs:
+  - /tmp/pr9812-junit-telemetry/9706467344/junit-memory.xml
+  - /tmp/pr9812-junit-telemetry/9706467521/junit.security.xml
+  - /tmp/pr9812-junit-telemetry/9706467880/junit-track-d.xml
+  - /tmp/pr9812-junit-telemetry/9706482871/junit-contract-confidence.xml
+  - /tmp/pr9812-junit-telemetry/9706483234/junit.unit-application.xml
+  - /tmp/pr9812-junit-telemetry/9706483718/junit.unit-infrastructure.xml
+  - /tmp/pr9812-junit-telemetry/9706485239/junit.unit-other.xml
+  - /tmp/pr9812-junit-telemetry/9706488110/junit-unit-filesystem-contracts.xml
+  - /tmp/pr9812-junit-telemetry/9706492861/junit-unit-subprocess-backed.xml
+  - /tmp/pr9812-junit-telemetry/9706498878/junit.unit-domain.xml
+  - /tmp/pr9812-junit-telemetry/9706511299/junit-repo-backed-unit.xml
+  - /tmp/pr9812-junit-telemetry/9706511841/junit.integration.xml
+  - /tmp/pr9812-junit-telemetry/9706519683/junit-unit-scripts-tooling.xml
+  - /tmp/pr9812-junit-telemetry/9706525075/junit-fast.xml
 coverage:
   threshold_percent: 85.0
-  actual_percent: 96.56
+  actual_percent: 96.57
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 49239

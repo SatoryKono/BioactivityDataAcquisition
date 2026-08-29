@@ -140,10 +140,10 @@
         "name": "collect_test_governance_report",
         "second_duration_s": 0.001
       },
-      "refreshed_at_utc": "2026-08-28T19:15:29.269756+00:00",
+      "refreshed_at_utc": "2026-08-29T01:22:27.025840+00:00",
       "slow_governance_lane": "S7-architecture-slow-governance",
-      "telemetry_source_commit": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
-      "telemetry_source_run_id": "33182085116"
+      "telemetry_source_commit": "b3b326d75200eca40bcb91803ebe2528678777e6",
+      "telemetry_source_run_id": "33224655453"
     },
     "5711": {
       "no_executable_line_modules": 2,
