@@ -25,7 +25,7 @@ _SECRET_HEADER = re.compile(
 )
 _INLINE_SECRET = re.compile(
     r"(?i)\b(password|passwd|token|secret|api[_-]?key|credential|private[_-]?key)\b"
-    r'\s*[:=]\s*("(?:\\.|[^"])*"|\'(?:\\.|[^\'])*\'|[^\s,;&]+)'
+    r'\s*[:=]\s*("(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'|[^\s,;&]+)'
 )
 # Character classes omit a-z under (?i) to avoid S5869 duplicate-range findings.
 _BEARER_SECRET = re.compile(r"(?i)\bBearer\s+[-A-Z0-9._~+/=]+")
