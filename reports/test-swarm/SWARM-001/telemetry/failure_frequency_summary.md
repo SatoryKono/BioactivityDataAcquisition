@@ -1,3 +1,1 @@
-# Failure Frequency Summary
-
-No failures detected.
+# Failure Frequency Summary\n\nNo failures observed.\n

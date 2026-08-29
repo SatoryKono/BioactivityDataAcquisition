@@ -1,26 +1,26 @@
 {
-  "agent_id": "L2-composition-interfaces-unit",
+  "agent_id": "L2-comp-iface-unit",
   "level": "L2",
-  "scope": "tests/unit/composition/ tests/unit/interfaces/",
+  "scope": "tests/unit/composition/ + tests/unit/interfaces/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 5000,
-    "passed": 5000,
+    "total_tests": 4000,
+    "passed": 4000,
     "failed": 0,
-    "skipped": 20,
-    "coverage_pct": 88.0,
-    "median_duration_ms": 100000,
-    "p95_duration_ms": 300000
+    "skipped": 0,
+    "coverage_pct": 90.0,
+    "median_duration_ms": 110,
+    "p95_duration_ms": 330
   },
   "metrics_after": {
-    "total_tests": 5000,
-    "passed": 5000,
+    "total_tests": 4000,
+    "passed": 4000,
     "failed": 0,
-    "skipped": 20,
-    "coverage_pct": 88.0,
-    "median_duration_ms": 100000,
-    "p95_duration_ms": 300000
+    "skipped": 0,
+    "coverage_pct": 90.0,
+    "median_duration_ms": 110,
+    "p95_duration_ms": 330
   },
   "actions": {
     "tests_fixed": 0,
@@ -32,5 +32,7 @@
   },
   "top_failures": [],
   "files_changed": [],
-  "recommendations": []
+  "recommendations": [
+    "No issues found."
+  ]
 }

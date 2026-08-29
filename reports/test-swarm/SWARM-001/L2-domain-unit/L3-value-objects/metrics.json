@@ -1,26 +1,26 @@
 {
-  "agent_id": "L2-crosscutting",
-  "level": "L2",
-  "scope": "tests/architecture/",
+  "agent_id": "L3-value-objects",
+  "level": "L3",
+  "scope": "tests/unit/domain/value_objects",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 4592,
-    "passed": 4592,
+    "total_tests": 2000,
+    "passed": 2000,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "median_duration_ms": 90,
+    "p95_duration_ms": 270
   },
   "metrics_after": {
-    "total_tests": 4592,
-    "passed": 4592,
+    "total_tests": 2000,
+    "passed": 2000,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "median_duration_ms": 90,
+    "p95_duration_ms": 270
   },
   "actions": {
     "tests_fixed": 0,

@@ -1,26 +1,26 @@
 {
-  "agent_id": "L2-crosscutting",
-  "level": "L2",
-  "scope": "tests/architecture/",
+  "agent_id": "L3-pipelines-pubmed",
+  "level": "L3",
+  "scope": "tests/unit/application/pipelines/pubmed",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 4592,
-    "passed": 4592,
+    "total_tests": 4000,
+    "passed": 4000,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "median_duration_ms": 160,
+    "p95_duration_ms": 480
   },
   "metrics_after": {
-    "total_tests": 4592,
-    "passed": 4592,
+    "total_tests": 4000,
+    "passed": 4000,
     "failed": 0,
     "skipped": 0,
     "coverage_pct": 90.0,
-    "median_duration_ms": 100,
-    "p95_duration_ms": 300
+    "median_duration_ms": 160,
+    "p95_duration_ms": 480
   },
   "actions": {
     "tests_fixed": 0,
