@@ -115,3 +115,43 @@ def test_cli_writes_deterministic_audit_and_fails_for_fixable_finding(
         == 1
     )
     assert output.read_text(encoding="utf-8") == expected
+
+
+@pytest.mark.parametrize(
+    ("payload", "message"),
+    [
+        ({"Results": {}}, "Trivy JSON Results must be a list"),
+        (
+            {"Results": [{"Vulnerabilities": {}}]},
+            "Trivy JSON Vulnerabilities must be a list",
+        ),
+        (
+            {
+                "Results": [
+                    {
+                        "Vulnerabilities": [
+                            {
+                                "VulnerabilityID": "CVE-2026-0005",
+                                "PkgName": "package",
+                            }
+                        ]
+                    }
+                ]
+            },
+            "Trivy vulnerability is missing identity fields",
+        ),
+    ],
+)
+def test_audit_preserves_trivy_validation_errors(
+    payload: dict[str, object],
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        build_fixability_audit(payload)
+
+
+def test_audit_ignores_null_vulnerabilities() -> None:
+    assert (
+        build_fixability_audit({"Results": [{"Vulnerabilities": None}]})["all_findings"]
+        == []
+    )
