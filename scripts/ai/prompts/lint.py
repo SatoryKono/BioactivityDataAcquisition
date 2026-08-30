@@ -112,7 +112,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 def _validate_with_jsonschema(data: dict[str, Any], schema: dict[str, Any]) -> list[str]:
     """Validate via jsonschema if available; return error messages."""
     try:
-        import jsonschema  # noqa: F401  # type: ignore[import-untyped]
+        import jsonschema  # type: ignore[import-untyped]
     except ImportError:
         return []  # fallback handled by caller
 
