@@ -283,7 +283,7 @@ Live GitHub enforcement state:
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains **disabled** and is not part of the active gate set.
+remains **active** and is not part of the active gate set.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with

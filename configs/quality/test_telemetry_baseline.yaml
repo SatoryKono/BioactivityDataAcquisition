@@ -101,6 +101,10 @@ duration_telemetry:
     source: junit.integration.xml
     test: tests.integration.config.test_chembl_contract_registry_coverage::test_chembl_registry_fixture_and_contract_surfaces_stay_in_dynamic_parity
   top_slowest_zones:
+  - zone: tests.unit.scripts.docs.passports.test_passport_projector
+    test_count: 4
+    total_duration_s: 47.748
+    max_duration_s: 21.002
   - zone: tests.unit.scripts.qa.test_report_debt_governance_gates
     test_count: 4
     total_duration_s: 40.486
