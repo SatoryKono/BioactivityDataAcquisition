@@ -1,0 +1,29 @@
+domain: tests
+id: prompt.audit.cycle.tests
+OBJECT: Test system lanes, gates, markers, and regression-detection coverage
+SCOPE:
+  - tests/
+  - configs/quality/
+  - pyproject.toml
+SSOT:
+  - docs/00-project/RULES.md
+  - configs/quality/test_matrix.yaml
+  - docs/00-project/TEST_LANE_MENTAL_MODEL.md
+AUDIT_CONTOURS:
+  - pytest and CI lane inventory, markers, quarantine, and isolation
+  - critical-path to positive/negative/contract test mapping
+  - flaky and disabled test evidence with rerun outcomes and owner linkage
+  - required-check to lane mapping and debt/skip budget trends
+MANDATORY_EVIDENCE:
+  - test-inventory.csv and lane-gate-map.csv
+  - critical-path-matrix.csv mapping critical paths to tests
+  - flaky-reruns.json with N rerun outcomes for claimed flaky tests
+VALIDATION:
+  - same LANE/SCOPE rerun and delta resolved/regressed/new
+  - required CI validation on pushed changes
+DOMAIN_STOP:
+  - unbounded full suite run without explicit budget
+  - secret material committed in fixtures
+OUTPUT_EXTRAS:
+  - test-inventory.csv
+  - lane-gate-map.csv

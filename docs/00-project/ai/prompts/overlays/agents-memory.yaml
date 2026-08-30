@@ -1,0 +1,34 @@
+domain: agents-memory
+id: prompt.audit.cycle.agents-memory
+OBJECT: AI runtime, agent scripts, instruction scope graph, and durable memory governance
+SCOPE:
+  - AGENTS.md
+  - .codex/
+  - .junie/
+  - .devin/
+  - docs/00-project/ai/
+  - scripts/ai/
+  - src/memory/
+  - scripts/memory/
+SSOT:
+  - AGENTS.md
+  - docs/00-project/ai/agents/guides/MEMORY_USAGE.md
+  - docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md
+AUDIT_CONTOURS:
+  - instruction scope graph root-profile-skill-scripts-CI and conflict detection
+  - script idempotency, dry-run, fail-closed exit, quoting, and secret-on-stdout guard
+  - catalog-schema parity and promote-only knowledge with provenance
+  - mirror parity and durable memory transcript/secret checks
+MANDATORY_EVIDENCE:
+  - instruction-graph.md and instruction-conflicts.csv
+  - tool-permissions.csv
+  - memory-schema-delta.json and memory smoke evidence
+VALIDATION:
+  - mirror parity check after runtime changes
+  - memory smoke and schema validation on touched families
+DOMAIN_STOP:
+  - destructive or secret-leaking script without guard
+  - secret or full transcript persisted in memory
+OUTPUT_EXTRAS:
+  - instruction-graph.md
+  - memory-schema-delta.json

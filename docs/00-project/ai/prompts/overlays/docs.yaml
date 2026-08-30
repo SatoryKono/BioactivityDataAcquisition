@@ -1,0 +1,31 @@
+domain: docs
+id: prompt.audit.cycle.docs
+OBJECT: Documentation content and pipeline generate-validate-artifact-publish
+SCOPE:
+  - README.md
+  - docs/
+  - mkdocs.yml
+  - scripts/docs/
+SSOT:
+  - docs/00-project/RULES.md
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/00-project/00-map.md
+  - docs/00-project/NORMATIVE_SOURCES.md
+AUDIT_CONTOURS:
+  - content freshness and audience/owner accuracy
+  - relative link resolution and command verification
+  - pipeline source-generator-validation-artifact chain
+  - mirror vs runtime ownership separation
+MANDATORY_EVIDENCE:
+  - docs-inventory.csv with README/docs/runbooks/ADR coverage
+  - command-matrix.csv proving commands and links re-checked
+  - broken-links.csv and content-vs-pipeline delta
+VALIDATION:
+  - rerun changed claims and link checks
+  - docs build gate via canonical python -m scripts.docs
+DOMAIN_STOP:
+  - secret leaked in docs or generated output
+  - invented SLA/coverage/commands without SSOT
+OUTPUT_EXTRAS:
+  - docs-inventory.csv
+  - content-vs-pipeline-delta.md
