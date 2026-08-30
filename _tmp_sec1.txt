@@ -1,0 +1,25 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 1 item
+
+tests\architecture\test_secret_shape_and_operator_guide_contracts.py F   [100%]
+
+================================== FAILURES ===================================
+_________ test_security_md_incorrect_example_is_not_credential_shaped _________
+
+    def test_security_md_incorrect_example_is_not_credential_shaped() -> None:
+        text = _read(".github/SECURITY.md")
+>       assert "sk-1234567890" in text
+E       AssertionError: assert 'sk-1234567890' in '# Security Policy\n\n## Threat Model\n\n### Data Sources\n\nBioETL integrates with the following public APIs:\n\n- **...default\n```\n\n______________________________________________________________________\n\n*Last updated: 2026-08-24*\n'
+
+tests\architecture\test_secret_shape_and_operator_guide_contracts.py:26: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_secret_shape_and_operator_guide_contracts.py::test_security_md_incorrect_example_is_not_credential_shaped
+============================== 1 failed in 1.79s ==============================

@@ -1,0 +1,50 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 8 items
+
+tests\architecture\test_test_telemetry_governance.py ....F...            [100%]
+
+================================== FAILURES ===================================
+___ test_branch_consumable_test_telemetry_reports_match_committed_baseline ____
+
+    def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> None:
+        payload = _load_baseline()
+        slowest = json.loads(
+            Path("reports/test-telemetry/slowest-tests.json").read_text(encoding="utf-8")
+        )
+        coverage = json.loads(
+            Path("reports/test-telemetry/coverage-summary.json").read_text(encoding="utf-8")
+        )
+        slowest_md = Path("reports/test-telemetry/slowest-tests.md").read_text(
+            encoding="utf-8"
+        )
+    
+        assert slowest["source_commit"] == payload["source_commit"]
+        assert slowest["source_run_id"] == payload["source_run_id"]
+        assert slowest["source_tree_sha256"] == payload["source_tree_sha256"]
+        assert slowest["total_cases"] == payload["duration_telemetry"]["total_cases"]
+        assert slowest["top_slowest"] == payload["duration_telemetry"]["top_slowest"]
+        assert (
+            slowest["execution_context"]
+            == payload["duration_telemetry"]["execution_context"]
+        )
+>       assert (
+            slowest["top_slowest_zones"]
+            == payload["duration_telemetry"]["top_slowest_zones"]
+        )
+E       AssertionError: assert [{'zone': 'te...: 9.196}, ...] == [{'zone': 'te...: 9.196}, ...]
+E         
+E         At index 9 diff: {'zone': 'tests.unit.composition.factories.pipeline.test_registry_consistency.TestFactoryValidity', 'test_count': 1, 'total_duration_s': 6.688, 'max_duration_s': 6.688} != {'zone': 'tests.unit.scripts.ops.test_recover_renderer', 'test_count': 1, 'total_duration_s': 6.004, 'max_duration_s': 6.004}
+E         Use -v to get more diff
+
+tests\architecture\test_test_telemetry_governance.py:194: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_test_telemetry_governance.py::test_branch_consumable_test_telemetry_reports_match_committed_baseline
+========================= 1 failed, 7 passed in 3.13s =========================

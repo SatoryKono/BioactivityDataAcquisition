@@ -1,0 +1,55 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 1 item
+
+tests\architecture\test_source_module_governance_inventory.py F          [100%]
+
+================================== FAILURES ===================================
+______ test_oversized_source_module_inventory_tracks_current_top_modules ______
+
+    @pytest.mark.architecture
+    def test_oversized_source_module_inventory_tracks_current_top_modules() -> None:
+        """Largest source modules must be tracked and split-on-touch guarded."""
+        payload = _load_yaml(CONFIG_PATH)
+        inventory = cast(YamlMap, payload["oversized_source_module_inventory"])
+        entries = cast(list[YamlMap], inventory["top_modules"])
+        max_lines = int(inventory["max_tracked_lines"])
+    
+        assert inventory["split_on_touch"] is True
+        assert inventory["linked_issue"] == "#4679"
+        for entry in entries:
+            path = ROOT / cast(str, entry["path"])
+            assert path.exists()
+            actual_lines = len(path.read_text(encoding="utf-8").splitlines())
+            assert actual_lines == int(entry["lines"])
+            assert actual_lines <= max_lines
+            assert cast(str, entry["owner"]).strip()
+            assert cast(str, entry["target_split"]).strip()
+    
+        for split in cast(list[YamlMap], inventory.get("completed_splits", [])):
+            source = ROOT / cast(str, split["source"])
+            extracted = ROOT / cast(str, split["extracted_surface"])
+            assert source.exists()
+            assert extracted.exists()
+>           assert len(source.read_text(encoding="utf-8").splitlines()) == int(
+                split["source_lines_after_split"]
+            )
+E           assert 218 == 219
+E            +  where 218 = len(['"""Lazy compatibility facade for dependency-inversion port protocols."""', '', 'from __future__ import annotations', '', 'from importlib import import_module', '', ...])
+E            +    where ['"""Lazy compatibility facade for dependency-inversion port protocols."""', '', 'from __future__ import annotations', '', 'from importlib import import_module', '', ...] = <built-in method splitlines of str object at 0x000001F7403B4220>()
+E            +      where <built-in method splitlines of str object at 0x000001F7403B4220> = '"""Lazy compatibility facade for dependency-inversion port protocols."""\n\nfrom __future__ import annotations\n\nfro...)[name] = value\n    return value\n\n\ndef __dir__() -> list[str]:\n    return sorted(set(globals()) | set(__all__))\n'.splitlines
+E            +        where '"""Lazy compatibility facade for dependency-inversion port protocols."""\n\nfrom __future__ import annotations\n\nfro...)[name] = value\n    return value\n\n\ndef __dir__() -> list[str]:\n    return sorted(set(globals()) | set(__all__))\n' = read_text(encoding='utf-8')
+E            +          where read_text = WindowsPath('E:/github/BioactivityDataAcquisition/src/bioetl/domain/ports/__init__.py').read_text
+E            +  and   219 = int(219)
+
+tests\architecture\test_source_module_governance_inventory.py:58: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_source_module_governance_inventory.py::test_oversized_source_module_inventory_tracks_current_top_modules
+============================== 1 failed in 1.87s ==============================

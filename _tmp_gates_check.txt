@@ -1,0 +1,2 @@
+Debt governance gates have 1 failing gate(s): generated_artifact_drift
+  - generated_artifact_drift: current={'count': 1, 'artifacts': ['remote_main_baseline']}; Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline
