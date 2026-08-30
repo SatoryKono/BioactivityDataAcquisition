@@ -263,10 +263,17 @@ jobs:
 
       - name: Check for diagram file changes
         id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            base="origin/${{ github.base_ref }}"
-            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            if [[ "${BASE_REF}" != "main" ]]; then
+              echo "unexpected pull-request base ref" >&2
+              exit 1
+            fi
+            base="origin/${BASE_REF}"
+            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
           else
             base="HEAD~1"
           fi
@@ -492,10 +499,16 @@ jobs:
           persist-credentials: false
 
       - name: Check for source-vs-rendered drift
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
-          base_ref="origin/${{ github.base_ref }}"
-          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          if [[ "${BASE_REF}" != "main" ]]; then
+            echo "unexpected pull-request base ref" >&2
+            exit 1
+          fi
+          base_ref="origin/${BASE_REF}"
+          git fetch --no-tags --depth=1 origin "${BASE_REF}"
 
           changed_diagrams=$(
             git diff --name-only "${base_ref}"...HEAD -- \
