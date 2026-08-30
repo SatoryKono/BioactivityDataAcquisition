@@ -1,2 +1,0 @@
-{"action":"dedupe","number":9646,"title":"[tech-debt][REQ-GOV-012][P2] Re-pin total tech-debt audit registry to origin/main d9ac42612b","finding_id":"TECH-DEBT-001","requirement_id":"REQ-GOV-012","priority":"P2","note":"Same root cause; SHA moved to cdff5b63e6. No new issue."}
-{"action":"dedupe","number":9647,"title":"[tech-debt][REQ-GOV-012][P1] Refresh stale quality artifacts so debt-governance gates pass","finding_id":"TECH-DEBT-002","requirement_id":"REQ-GOV-012","priority":"P1","note":"Same cluster; residual is remote_main_baseline only. No new issue."}

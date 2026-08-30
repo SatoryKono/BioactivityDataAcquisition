@@ -163,40 +163,46 @@ def export_trivy_baseline_csv(
 
 
 def _vulnerability_rows(payload: Mapping[str, Any]) -> Iterable[dict[str, str]]:
-    """Вернуть нормализованные строки уязвимостей из полного Trivy JSON evidence."""
-    results = payload.get("Results", [])
-    if not isinstance(results, list):
-        raise ValueError("Trivy JSON Results must be a list")
+    """Return normalized vulnerability rows from full Trivy JSON evidence."""
+    for result in _mapping_list(payload.get("Results", []), label="Results"):
 
-    for result in results:
-        if not isinstance(result, Mapping):
-            continue
         target = _text(result.get("Target"))
-        vulnerabilities = result.get("Vulnerabilities", [])
-        if vulnerabilities is None:
-            continue
-        if not isinstance(vulnerabilities, list):
-            raise ValueError("Trivy JSON Vulnerabilities must be a list")
-        for vulnerability in vulnerabilities:
-            if not isinstance(vulnerability, Mapping):
-                continue
-            vulnerability_id = _text(vulnerability.get("VulnerabilityID"))
-            package = _text(vulnerability.get("PkgName"))
-            installed = _text(vulnerability.get("InstalledVersion"))
-            if not vulnerability_id or not package or not installed:
-                raise ValueError("Trivy vulnerability is missing identity fields")
-            severity = _text(vulnerability.get("Severity")).upper() or "UNKNOWN"
-            status = _text(vulnerability.get("Status")).lower() or "affected"
-            fixed = _text(vulnerability.get("FixedVersion"))
-            yield {
-                "vulnerability_id": vulnerability_id,
-                "package": package,
-                "installed_version": installed,
-                "fixed_version": fixed,
-                "severity": severity,
-                "status": status,
-                "target": target,
-            }
+        yield from _result_vulnerability_rows(result, target=target)
+
+
+def _result_vulnerability_rows(
+    result: Mapping[str, Any],
+    *,
+    target: str,
+) -> Iterable[dict[str, str]]:
+    """Return normalized vulnerability rows for one Trivy result."""
+    vulnerabilities = result.get("Vulnerabilities", [])
+    if vulnerabilities is None:
+        return
+    for vulnerability in _mapping_list(vulnerabilities, label="Vulnerabilities"):
+        yield _fixability_row(vulnerability, target=target)
+
+
+def _fixability_row(
+    vulnerability: Mapping[str, Any],
+    *,
+    target: str,
+) -> dict[str, str]:
+    """Normalize one vulnerability into the fixability audit schema."""
+    vulnerability_id = _text(vulnerability.get("VulnerabilityID"))
+    package = _text(vulnerability.get("PkgName"))
+    installed = _text(vulnerability.get("InstalledVersion"))
+    if not vulnerability_id or not package or not installed:
+        raise ValueError("Trivy vulnerability is missing identity fields")
+    return {
+        "vulnerability_id": vulnerability_id,
+        "package": package,
+        "installed_version": installed,
+        "fixed_version": _text(vulnerability.get("FixedVersion")),
+        "severity": _text(vulnerability.get("Severity")).upper() or "UNKNOWN",
+        "status": _text(vulnerability.get("Status")).lower() or "affected",
+        "target": target,
+    }
 
 
 def is_fixable_blocking_finding(row: Mapping[str, str]) -> bool:
