@@ -24,15 +24,14 @@ COPY src/ ./src/
 
 # Binary-only uv bootstrap + frozen lockfile sync (Sonar docker:S8541/S8544).
 # Third-party deps: --no-build. Local project: wheel build + pinned binary install.
-RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
+RUN python -c "import subprocess,sys; subprocess.check_call([sys.executable,'-m','pip','install','--only-binary=:all:','--no-cache-dir','uv==0.11.26'])" && \
     UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --no-install-project \
         --directory /app && \
     uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
     BIOETL_VERSION="$(python -c "import tomllib; \
 print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" && \
-    uv pip install --python /app/.venv/bin/python --no-deps \
-        --only-binary :all: --no-index \
-        --find-links=/tmp/bioetl-wheels "bioetl==${BIOETL_VERSION}" && \
+    export BIOETL_VERSION && \
+    python -c "import os,subprocess; subprocess.check_call(['uv','pip','install','--python','/app/.venv/bin/python','--no-deps','--only-binary',':all:','--no-index','--find-links=/tmp/bioetl-wheels','bioetl=='+os.environ['BIOETL_VERSION']])" && \
     rm -rf /tmp/bioetl-wheels
 
 # ============ Production Stage ============
@@ -70,15 +69,14 @@ COPY package.json package-lock.json /app/
 COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
 # Binary-only uv bootstrap + frozen lockfile sync for dev extras (S8541/S8544).
-RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
+RUN python -c "import subprocess,sys; subprocess.check_call([sys.executable,'-m','pip','install','--only-binary=:all:','--no-cache-dir','uv==0.11.26'])" && \
     UV_NO_BUILD=1 uv sync --frozen --no-build --no-install-project \
         --extra dev --extra docs --directory /app && \
     uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
     BIOETL_VERSION="$(python -c "import tomllib; \
 print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" && \
-    uv pip install --python /app/.venv/bin/python --no-deps \
-        --only-binary :all: --no-index \
-        --find-links=/tmp/bioetl-wheels "bioetl[dev,docs]==${BIOETL_VERSION}" && \
+    export BIOETL_VERSION && \
+    python -c "import os,subprocess; subprocess.check_call(['uv','pip','install','--python','/app/.venv/bin/python','--no-deps','--only-binary',':all:','--no-index','--find-links=/tmp/bioetl-wheels','bioetl[dev,docs]=='+os.environ['BIOETL_VERSION']])" && \
     rm -rf /tmp/bioetl-wheels && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app
