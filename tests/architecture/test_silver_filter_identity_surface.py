@@ -166,7 +166,7 @@ def _git_list_files(*args: str) -> tuple[str, ...] | None:
 
 def _git_grep_token(token: str, *pathspecs: str) -> tuple[Path, ...] | None:
     result = subprocess.run(
-        ["git", "grep", "-l", "-F", "--", token, *pathspecs],
+        ["git", "grep", "--no-color", "-l", "-F", "--", token, *pathspecs],
         cwd=ROOT,
         capture_output=True,
         text=True,
