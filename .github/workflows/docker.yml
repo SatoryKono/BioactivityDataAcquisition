@@ -163,7 +163,6 @@ jobs:
           set -euo pipefail
           {
             echo "source_sha=${GITHUB_SHA}"
-            echo "base_image=python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579"
             echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
             echo "runtime_python=python-3.13=3.13.15-r2"
             echo "builder_uv=uv=0.11.26-r0"
@@ -256,7 +255,7 @@ jobs:
         run: |
           python3 -c "from pathlib import Path; from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import export_trivy_baseline_csv; count = export_trivy_baseline_csv(trivy_json=Path('reports/security/trivy-results.json'), github_alerts_json=Path('reports/security/github-trivy-alerts.json'), output=Path('reports/security/trivy-alerts.csv')); print(f'rows={count}')"
 
-      - name: Run Trivy on pinned Debian bookworm base image
+      - name: Run Trivy on pinned Wolfi runtime base image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: "chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"

@@ -1052,7 +1052,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv=0.11.26-r0" in dockerfile
     assert (
         dockerfile.count(
-            "python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579"
+            "chainguard/wolfi-base@sha256:"
+            "19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
         )
         == 2
     )
@@ -1378,7 +1379,14 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_all_medium_plus
     strict = built["Enforce full Trivy Critical High Medium zero policy"]
     assert str(strict["with"].get("exit-code")) == "1"
     assert strict["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
-    assert all(step["with"].get("ignore-unfixed") is False for step in built.values())
+    assert {
+        name: step["with"].get("ignore-unfixed") for name, step in built.items()
+    } == {
+        "Run full Trivy JSON evidence scan": False,
+        "Run full Trivy SARIF evidence scan": False,
+        "Enforce Trivy Critical High Medium policy": True,
+        "Enforce full Trivy Critical High Medium zero policy": False,
+    }
     assert all(step["with"].get("version") == "v0.70.0" for step in built.values())
 
 
