@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **46** live GitHub Actions
+This page is the canonical published inventory of the **47** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -77,6 +77,7 @@ Use it when you need to answer:
 | `contract-tests.yml` | `Monthly Contract Tests` | `schedule`, `workflow_dispatch` | Scheduled full contract-test lane |
 | `diagram-nightly.yml` | `Diagram Nightly Regression` | `schedule`, `workflow_dispatch` | Diagram regression/nightly canary |
 | `docs-kpi-weekly.yml` | `Docs KPI Weekly` | `schedule`, `workflow_dispatch` | Weekly docs KPI plus calendar runtime-mirror/freshness drift |
+| `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_dispatch` | Read-only quarterly GitHub settings review |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
 | `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |
