@@ -949,14 +949,7 @@
     }
   },
   "assertless_total_candidates": 87,
-  "budget_violations": [
-    {
-      "actual": 5,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1130,14 +1123,8 @@
     ]
   },
   "intentional_no_exception_contract": 86,
-  "markerless_examples": [
-    "tests/architecture/test_github_governance_review.py:84",
-    "tests/architecture/test_github_governance_review.py:95",
-    "tests/architecture/test_github_governance_review.py:106",
-    "tests/architecture/test_github_governance_review.py:125",
-    "tests/architecture/test_github_governance_review.py:141"
-  ],
-  "markerless_test_functions": 5,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2000,14 +1987,8 @@
         ".yml"
       ]
     },
-    "markerless_examples": [
-      "tests/architecture/test_github_governance_review.py:84",
-      "tests/architecture/test_github_governance_review.py:95",
-      "tests/architecture/test_github_governance_review.py:106",
-      "tests/architecture/test_github_governance_review.py:125",
-      "tests/architecture/test_github_governance_review.py:141"
-    ],
-    "markerless_test_functions": 5,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2073,7 +2054,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "352897eb8df8b100119df97c0eff77232e51b3555521d0588daeb32e4007c2d2",
+  "source_tree_sha256": "5ac69f2f6b1fc55ac28076d4b45853962d828cfe098e3cd2c6d346a79cb3677d",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2082,14 +2063,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
-    "markerless_examples": [
-      "tests/architecture/test_github_governance_review.py:84",
-      "tests/architecture/test_github_governance_review.py:95",
-      "tests/architecture/test_github_governance_review.py:106",
-      "tests/architecture/test_github_governance_review.py:125",
-      "tests/architecture/test_github_governance_review.py:141"
-    ],
-    "markerless_test_functions": 5,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
