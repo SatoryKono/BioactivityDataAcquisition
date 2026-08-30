@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Residual OSV exception (#9853):** mermaid-cli/puppeteer pins, Grafana plugin
+  GHSA, and `PYSEC-2026-3721` / `CVE-2026-3219` pip-audit ignores are timeboxed
+  to **2026-11-30**. OpenSSF Scorecard Vulnerabilities (#1294) is not dismissed.
+
 - **Supply-chain pins (#9801):** CI jobs install Python tools from `uv.lock`
   instead of unhashed `pip install`; jscpd uses a locked `npm ci` prefix.
   Dependabot now covers npm lockfiles (root, Mermaid, jscpd, Grafana plugins).

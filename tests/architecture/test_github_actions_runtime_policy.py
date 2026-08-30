@@ -458,6 +458,9 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert "--format=json" in str(osv_step["with"]["scan-args"])
     assert "--osv-json osv-results.json" in osv_gate
     assert "PYSEC-2026-3721" in pip_audit_run
+    assert "CVE-2026-3219" in pip_audit_run
+    assert "2026-11-30" in pip_audit_run
+    assert "#9853" in pip_audit_run or "9853" in pip_audit_run
     assert not (ROOT / "osv-scanner.toml").exists()
 
 
