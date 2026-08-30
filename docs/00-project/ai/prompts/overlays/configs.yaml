@@ -1,0 +1,34 @@
+domain: configs
+id: prompt.audit.cycle.configs
+OBJECT: Project config hierarchy, JSON schemas, compatibility registry, and secrets/env handling
+SCOPE:
+  - configs/
+  - pyproject.toml
+  - mkdocs.yml
+  - .importlinter
+  - package.json
+  - docker-compose.yml
+  - Dockerfile.bioetl
+  - .coderabbit.yaml
+SSOT:
+  - configs/_schema/
+  - docs/00-project/RULES.md
+  - docs/01-requirements/REQUIREMENTS.md
+AUDIT_CONTOURS:
+  - config-to-schema-to-generator-to-test mapping and hierarchy integrity
+  - schema and retired alias compatibility with negative-case rejection
+  - secret literal and interpolation checks against tracked provider YAML
+  - budget/threshold/exemption non-growth verification
+MANDATORY_EVIDENCE:
+  - config-map.csv covering configs, schemas, generators, and tests
+  - negative-cases.json proving rejected retired aliases
+  - budget-delta.json and effective-config-delta.json
+VALIDATION:
+  - focused config/schema tests and effective-config delta
+  - debt effect check for threshold/exemption changes
+DOMAIN_STOP:
+  - schema weakening to accept invalid data
+  - budget or exemption increase without approval
+OUTPUT_EXTRAS:
+  - config-map.csv
+  - budget-delta.json

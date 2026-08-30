@@ -1,0 +1,28 @@
+domain: tech-debt
+id: prompt.audit.cycle.tech-debt
+OBJECT: Technical debt register, blast-radius ordering, paydown, and residual re-check
+SCOPE:
+  - src/bioetl/
+  - configs/quality/
+SSOT:
+  - configs/quality/debt_scorecard.yaml
+  - configs/quality/debt-governance-gates.json
+  - docs/00-project/RULES.md
+AUDIT_CONTOURS:
+  - TODO/FIXME/HACK, suppression, shim, and disabled-gate inventory
+  - blast-radius ordering with owner, protecting tests, and paydown step
+  - residual trend analysis flat/down with architecture gate coupling
+  - rejected budget-raise ideas without debt-limit growth
+MANDATORY_EVIDENCE:
+  - debt-register.json collecting all debt signals with path and evidence
+  - blast-radius-table.csv sorted by blast radius
+  - residual-delta.json and rejected-policy.json
+VALIDATION:
+  - debt and residual architecture gates rerun
+  - before/after comparison on touched families
+DOMAIN_STOP:
+  - any budget or exemption raise
+  - residual pin removal without canonical regeneration
+OUTPUT_EXTRAS:
+  - debt-register.json
+  - blast-radius-table.csv
