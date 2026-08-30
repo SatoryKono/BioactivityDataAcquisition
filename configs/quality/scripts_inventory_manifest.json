@@ -1,22 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-30T17:46:54.468534+00:00",
+  "generated_at": "2026-08-30T17:57:03.069021+00:00",
   "summary": {
-    "total_scripts": 608,
+    "total_scripts": 609,
     "status_counts": {
-      "active": 341,
-      "supporting": 266,
-      "unknown": 1
+      "active": 342,
+      "supporting": 267
     },
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
-      "ci": 82,
-      "docs": 253,
+      "ci": 83,
+      "docs": 254,
       "other": 74,
       "scripts": 505,
       "skills": 12,
-      "tests": 415
+      "tests": 416
     }
   },
   "scripts": [
@@ -5119,7 +5118,7 @@
     {
       "path": "scripts/ai/prompts/diff.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 5,
       "references": [
@@ -5153,7 +5152,11 @@
           "source_group": "docs",
           "text": "scripts/ai/prompts/compile.py lint.py verify.py diff.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the prompt library diff helper used by compatibility workflows behind the canonical `python -m scripts.ai prompts` surface; do not promote this file as an additional standalone command."
     },
     {
       "path": "scripts/ai/prompts/lint.py",
@@ -5326,7 +5329,7 @@
       "references": [
         {
           "path": "tests/prompts/test_finding_fingerprint.py",
-          "line": 12,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ai.prompts.verify import finding_fingerprint"
         }
@@ -17772,6 +17775,45 @@
           "line": 19,
           "source_group": "tests",
           "text": "from scripts.engineering.repo import generate_scripts_wrapper_caller_matrix as module"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/repo/github_settings_review.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": ".github/workflows/github-settings-quarterly-review.yml",
+          "line": 31,
+          "source_group": "ci",
+          "text": "python scripts/engineering/repo/github_settings_review.py"
+        },
+        {
+          "path": "docs/05-operations/runbooks/github-settings-quarterly-review.md",
+          "line": 50,
+          "source_group": "docs",
+          "text": "python scripts/engineering/repo/github_settings_review.py --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md"
+        },
+        {
+          "path": "tests/architecture/test_github_governance_review.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "TOOL_PATH = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"github_settings_review.py\""
+        },
+        {
+          "path": "tests/architecture/test_github_governance_review.py",
+          "line": 144,
+          "source_group": "tests",
+          "text": "assert \"scripts/engineering/repo/github_settings_review.py\" in workflow"
+        },
+        {
+          "path": "tests/architecture/test_github_governance_review.py",
+          "line": 145,
+          "source_group": "tests",
+          "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
       ]
     },
