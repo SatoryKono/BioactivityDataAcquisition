@@ -18,8 +18,28 @@ runs:
     - name: Resolve architecture cache key
       id: arch-cache-key
       shell: bash
+      env:
+        CACHE_PATH_INPUT: ${{ inputs.cache-path }}
+        SOURCE_TREE_FALLBACK: ${{ hashFiles('src/bioetl/**/*.py', 'tests/architecture/**/*.py', 'pyproject.toml') }}
+        WORKSPACE: ${{ github.workspace }}
       run: |
         set -euo pipefail
+        cache_path="$(python3 - <<'PY'
+        import os
+        from pathlib import Path, PurePosixPath
+
+        raw = os.environ["CACHE_PATH_INPUT"]
+        if not raw or "\\" in raw or "\r" in raw or "\n" in raw:
+            raise SystemExit("cache-path must be a non-empty POSIX relative path")
+        relative = PurePosixPath(raw)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise SystemExit("cache-path must stay within github.workspace")
+        workspace = Path(os.environ["WORKSPACE"]).resolve()
+        candidate = (workspace / Path(*relative.parts)).resolve()
+        candidate.relative_to(workspace)
+        print(relative.as_posix())
+        PY
+        )"
         inventory="reports/quality/module-coverage-inventory.json"
         if [ -f "$inventory" ]; then
           source_hash="$(python3 - <<'PY'
@@ -30,16 +50,21 @@ runs:
         PY
         )"
         else
-          source_hash="${{ hashFiles('src/bioetl/**/*.py', 'tests/architecture/**/*.py', 'pyproject.toml') }}"
+          source_hash="${SOURCE_TREE_FALLBACK}"
         fi
-        echo "source_tree_sha256=${source_hash}" >> "$GITHUB_OUTPUT"
-        echo "cache_dir=${{ github.workspace }}/${{ inputs.cache-path }}" >> "$GITHUB_OUTPUT"
+        if [[ ! "${source_hash}" =~ ^[0-9a-f]{64}$ ]]; then
+          echo "invalid source_tree_sha256" >&2
+          exit 1
+        fi
+        printf 'source_tree_sha256=%s\n' "${source_hash}" >> "$GITHUB_OUTPUT"
+        printf 'cache_path=%s\n' "${cache_path}" >> "$GITHUB_OUTPUT"
+        printf 'cache_dir=%s/%s\n' "${WORKSPACE}" "${cache_path}" >> "$GITHUB_OUTPUT"
 
     - name: Restore architecture governance scan cache
       if: inputs.operation == 'restore'
       uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        path: ${{ inputs.cache-path }}
+        path: ${{ steps.arch-cache-key.outputs.cache_path }}
         key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}
         restore-keys: |
           arch-gov-cache-${{ runner.os }}-
@@ -48,10 +73,12 @@ runs:
       if: inputs.operation == 'save'
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        path: ${{ inputs.cache-path }}
+        path: ${{ steps.arch-cache-key.outputs.cache_path }}
         key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}
 
     - name: Export architecture cache directory
       shell: bash
+      env:
+        CACHE_DIR: ${{ steps.arch-cache-key.outputs.cache_dir }}
       run: |
-        echo "BIOETL_ARCHITECTURE_CACHE_DIR=${{ github.workspace }}/${{ inputs.cache-path }}" >> "$GITHUB_ENV"
+        printf 'BIOETL_ARCHITECTURE_CACHE_DIR=%s\n' "${CACHE_DIR}" >> "$GITHUB_ENV"

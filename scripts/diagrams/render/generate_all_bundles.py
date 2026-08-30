@@ -12,10 +12,13 @@ Produces class-diagrams-quality descriptions by parsing mermaid metadata:
 from __future__ import annotations
 
 import argparse
+import html
 import os
 import re
 import sys
+import unicodedata
 from datetime import datetime
+from html.parser import HTMLParser
 from pathlib import Path
 
 try:
@@ -28,6 +31,47 @@ except ImportError:  # pragma: no cover - direct script execution
 
 
 MMD_BASE = DIAGRAM_ROOT
+
+
+class _MermaidLabelTextExtractor(HTMLParser):
+    """Extract visible text from trusted Mermaid label markup."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        del attrs
+        if tag.casefold() == "br":
+            self.parts.append(" ")
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.handle_starttag(tag, attrs)
+
+
+def _mermaid_label_text(label: str) -> str:
+    """Return label text without treating a regex as an HTML sanitizer."""
+    parser = _MermaidLabelTextExtractor()
+    parser.feed(label)
+    parser.close()
+    visible: list[str] = []
+    pending_space = False
+    for character in "".join(parser.parts):
+        if character.isspace() or unicodedata.category(character).startswith("C"):
+            pending_space = bool(visible)
+            continue
+        if pending_space:
+            visible.append(" ")
+            pending_space = False
+        visible.append(character)
+    text = html.escape("".join(visible), quote=False)
+    for marker in ("\\", "`", "[", "]", "!"):
+        text = text.replace(marker, f"\\{marker}")
+    return text
+
 
 # Collection definitions: (dir_name, file_ext, output_name, collection_title)
 COLLECTIONS = [
@@ -210,8 +254,7 @@ def _collect_flow_node_names(lines: list[str]) -> list[str]:
         if not match:
             continue
         label = match.group(2) or match.group(4) or match.group(6) or ""
-        label = re.sub(r"<br\s*/?>", " ", label)
-        label = re.sub(r"<[^>]+>", "", label).strip()
+        label = _mermaid_label_text(label)
         if label and len(label) < 80:
             node_names.append(label)
     return node_names
