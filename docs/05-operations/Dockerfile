@@ -2,6 +2,9 @@
 # docker:S8431 — pin by digest only (no tag+digest).
 FROM python@sha256:baf89808ec37adeaab83cec287adb4a2afa4a11c1d51e961c7ec737877e61af6 AS base
 
+# uv 0.11.26: copy verified binaries from the immutable multi-platform image.
+COPY --from=ghcr.io/astral-sh/uv@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5 /uv /uvx /bin/
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -22,10 +25,9 @@ FROM base AS builder
 COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src/
 
-# Binary-only uv bootstrap + frozen lockfile sync (Sonar docker:S8541/S8544).
+# Frozen lockfile sync (Sonar docker:S8541/S8544).
 # Third-party deps: --no-build. Local project: wheel build + pinned binary install.
-RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --no-install-project \
+RUN UV_NO_BUILD=1 uv sync --frozen --no-build --no-dev --no-install-project \
         --directory /app && \
     uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
     BIOETL_VERSION="$(python -c "import tomllib; \
@@ -69,9 +71,8 @@ COPY grafana/ /app/grafana/
 COPY package.json package-lock.json /app/
 COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
-# Binary-only uv bootstrap + frozen lockfile sync for dev extras (S8541/S8544).
-RUN pip install --only-binary=:all: --no-cache-dir uv==0.11.26 && \
-    UV_NO_BUILD=1 uv sync --frozen --no-build --no-install-project \
+# Frozen lockfile sync for dev extras (S8541/S8544).
+RUN UV_NO_BUILD=1 uv sync --frozen --no-build --no-install-project \
         --extra dev --extra docs --directory /app && \
     uv build --wheel --out-dir /tmp/bioetl-wheels --directory /app && \
     BIOETL_VERSION="$(python -c "import tomllib; \
