@@ -431,7 +431,9 @@ ______________________________________________________________________
 
 ### Workflow: `release.yml`
 
-Triggered by GitHub Release publication or manual dispatch.
+Triggered by GitHub Release publication or manual dispatch (`workflow_dispatch` with `dry_run` default `true`).
+
+Environments: `testpypi` (`if: release || (workflow_dispatch && dry_run == 'false')`) and `pypi` (`if: release` only, `needs: publish-testpypi` chain). Both use OIDC trusted publishing (`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch policy (tags/releases only for `pypi`) and a reviewer/wait-timer in GitHub Settings → Environments; repository docs do not replace the live protection rule.
 
 ```
 1. Build         → wheel + sdist + twine verify
