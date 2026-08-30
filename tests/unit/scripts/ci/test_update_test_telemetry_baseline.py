@@ -207,6 +207,8 @@ def test_build_baseline_payload_captures_artifact_metrics(tmp_path: Path) -> Non
         source_branch="main",
         source_commit="abc123",
         source_run_id="run-42",
+        source_event="pull_request",
+        source_run_url="https://github.example/actions/runs/run-42",
         coverage_threshold=85.0,
     )
 
@@ -215,6 +217,8 @@ def test_build_baseline_payload_captures_artifact_metrics(tmp_path: Path) -> Non
     assert payload["coverage"]["threshold_satisfied"] is True
     assert payload["freshness_guard"]["timestamp_field"] == "refreshed_at_utc"
     assert payload["freshness_guard"]["max_age_days"] == 45
+    assert payload["source_event"] == "pull_request"
+    assert payload["source_run_url"] == "https://github.example/actions/runs/run-42"
     assert payload["duration_telemetry"]["total_cases"] == 321
     assert payload["duration_telemetry"]["top_slowest"][0]["test"] == (
         "tests.example::test_case"
@@ -269,6 +273,8 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
         "refresh_status": "captured",
         "source_commit": "abc123",
         "source_run_id": "run-42",
+        "source_event": "push",
+        "source_run_url": "https://github.example/actions/runs/run-42",
         "freshness_guard": {
             "timestamp_field": "refreshed_at_utc",
             "max_age_days": 45,
@@ -309,6 +315,7 @@ def test_render_and_write_baseline_outputs(tmp_path: Path) -> None:
     assert "Top Slow Zones" in markdown
     assert "`coverage-verify`" in markdown
     assert "historical `test-health` rollups remain non-blocking" in markdown
+    assert "Source event: `push`" in markdown
 
     output_yaml = tmp_path / "baseline.yaml"
     output_md = tmp_path / "baseline.md"
@@ -410,6 +417,8 @@ def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
         "source_branch": "main",
         "source_commit": "abc123",
         "source_run_id": "run-42",
+        "source_event": "push",
+        "source_run_url": "https://github.example/actions/runs/run-42",
         "refreshed_at_utc": "2026-04-29T12:00:00+00:00",
         "refresh_status": "captured",
         "freshness_guard": {
@@ -447,6 +456,8 @@ def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
     slowest_summary = json.loads(reports["slowest-tests.json"])
     assert coverage_summary["coverage"]["actual_percent"] == pytest.approx(91.23)
     assert coverage_summary["coverage_percent"] == pytest.approx(91.23)
+    assert coverage_summary["source_event"] == "push"
+    assert slowest_summary["source_run_url"].endswith("/run-42")
     assert slowest_summary["total_cases"] == 321
     assert slowest_summary["top_slowest"][0]["test"] == "tests.example::test_case"
     assert slowest_summary["top_slowest_tests"] == slowest_summary["top_slowest"]

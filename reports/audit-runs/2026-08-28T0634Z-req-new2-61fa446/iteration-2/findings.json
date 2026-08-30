@@ -1,0 +1,26 @@
+[
+  {
+    "id": "REQ-TRACE-004",
+    "requirement_id": "REQ-GOV-001",
+    "priority": "P2",
+    "severity": "Medium",
+    "confidence": "high",
+    "status": "PROVEN",
+    "category": "traceability_bindings",
+    "evidence": [
+      {
+        "path": "tests/architecture/test_req_traceability_bindings_wave2.py",
+        "observation": "26 concrete REQ bound to file surfaces, 66/172 covered"
+      }
+    ],
+    "expected": "26 concrete untraced bound to tests",
+    "actual": "Wave2 existence guard covers 26 REQ (REQ-DATA-007/008 etc)",
+    "impact": "Untraced 132->106, orphan 136->116",
+    "remediation": "Merge wave2 test",
+    "effort": "S",
+    "validation": [
+      "pytest -q"
+    ],
+    "automated_fix_possible": false
+  }
+]

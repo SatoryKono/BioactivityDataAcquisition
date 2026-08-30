@@ -161,3 +161,11 @@ def test_coercion_vocab_cross_ordering_golden_fixture() -> None:
         "coercion_vocab_cross_ordering",
         _project_outcomes(record, config),
     )
+
+
+def test_dq_rule_outcome_rejects_invalid_replacement_type() -> None:
+    """Внутренняя DQ-проверка отклоняет значения вне контракта результата."""
+    from bioetl.domain.behavior.dq_rule_evaluator import _require_dq_rule_outcome
+
+    with pytest.raises(TypeError, match="did not preserve DQRuleOutcome"):
+        _require_dq_rule_outcome(object())

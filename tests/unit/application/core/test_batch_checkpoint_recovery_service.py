@@ -256,3 +256,119 @@ async def test_save_checkpoint_now_leaves_checkpoint_saved_at_gauge_to_manager(
 
     checkpoint_manager.save_checkpoint.assert_awaited_once_with(1)
     metrics.set_gauge.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_save_checkpoint_failure_emits_failed_telemetry_and_span(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+    metrics: MagicMock,
+    tracer: MagicMock,
+) -> None:
+    checkpoint_manager.save_checkpoint.side_effect = RuntimeError("disk full")
+
+    with pytest.raises(RuntimeError, match="disk full"):
+        await service.save_checkpoint_now(records_fetched=2, resume_offset=3)
+
+    metrics.increment_counter.assert_called_once_with(
+        "bioetl_checkpoint_save_events_total",
+        1,
+        {
+            "pipeline": "chembl_activity",
+            "operation": "manual",
+            "status": "failed",
+        },
+    )
+    metrics.observe_histogram.assert_called_once()
+    span = tracer.get_tracer.return_value.start_as_current_span.return_value
+    span.set_attribute.assert_any_call("bioetl.checkpoint.status", "failed")
+    span.set_attribute.assert_any_call("error", True)
+    span.record_exception.assert_called_once()
+    span.__exit__.assert_called_once_with(None, None, None)
+
+
+@pytest.mark.asyncio
+async def test_exception_checkpoint_failure_is_contained_and_logged(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+) -> None:
+    checkpoint_manager.save_checkpoint.side_effect = RuntimeError("disk full")
+
+    await service.save_checkpoint_on_exception(
+        records_fetched=4,
+        resume_offset=6,
+        error=ValueError("bad row"),
+    )
+
+    logger.warning.assert_called_once()
+    assert logger.warning.call_args.kwargs == {
+        "records_processed": 10,
+        "error_type": "RuntimeError",
+        "reason": "checkpoint_save_failed_on_pipeline_exception",
+    }
+
+
+@pytest.mark.asyncio
+async def test_shutdown_checkpoint_failure_is_contained_and_logged(
+    service: BatchCheckpointRecoveryService,
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+) -> None:
+    checkpoint_manager.save_checkpoint.side_effect = RuntimeError("disk full")
+
+    await service.save_checkpoint_on_shutdown(records_fetched=5, resume_offset=7)
+
+    logger.warning.assert_called_once()
+    assert logger.warning.call_args.kwargs == {
+        "records_processed": 12,
+        "error_type": "RuntimeError",
+        "reason": "checkpoint_save_failed_on_shutdown",
+    }
+
+
+@pytest.mark.asyncio
+async def test_checkpoint_without_optional_observability_still_persists(
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+) -> None:
+    service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        pipeline_name="chembl_activity",
+    )
+
+    await service.save_checkpoint_now(records_fetched=1, resume_offset=2)
+
+    checkpoint_manager.save_checkpoint.assert_awaited_once_with(3)
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_shutdown_checkpoint_failure_is_recorded(
+    checkpoint_manager: AsyncMock,
+    logger: MagicMock,
+    metrics: MagicMock,
+    tracer: MagicMock,
+) -> None:
+    """Ошибка shutdown checkpoint локализуется и наблюдаема."""
+    checkpoint_manager._operation_errors = (OSError,)
+    checkpoint_manager.save_checkpoint.side_effect = OSError("disk unavailable")
+    recovery_service = BatchCheckpointRecoveryService(
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        metrics=metrics,
+        tracer=tracer,
+        pipeline_name="chembl_activity",
+    )
+
+    await recovery_service.save_checkpoint_on_shutdown(
+        records_fetched=4,
+        resume_offset=6,
+    )
+
+    logger.warning.assert_called_once()
+    assert logger.warning.call_args.kwargs["records_processed"] == 10
+    assert logger.warning.call_args.kwargs["error_type"] == "OSError"
+    metrics.increment_counter.assert_called_once()
+    metrics.observe_histogram.assert_called_once()
