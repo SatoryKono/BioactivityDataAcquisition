@@ -511,14 +511,29 @@ permissions:
 
 `docker-push` publishes GHCR images only from `main` pushes, through Environment
 `ghcr-publish`, with tags `:${{ github.sha }}` and `:${{ github.ref_name }}`.
-It does not publish `:latest`. Recommended live settings for `ghcr-publish`:
-deployment branch policy = protected branches (effectively `main` only), plus
-at least one protection rule (required reviewers or wait timer — e.g. 5 min).
+It does not publish `:latest`. The live `ghcr-publish` environment requires
+review by `@SatoryKono` and accepts only the `main` branch.
 Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
 | `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
 
-Publishing environments inventory (write-capable): `ghcr-publish` (docker.yml → `ghcr.io/SatoryKono/bioetl`), `testpypi`/`pypi` (release.yml → TestPyPI/PyPI via OIDC trusted publishing), `observability-render-host` (dashboard-render-host.yml, self-hosted). `copilot`/`staging`/`observability-render-host` must have deployment branch policy + protection rule if they guard secrets/deployments; otherwise document risk acceptance. `testpypi` allows `workflow_dispatch` with `dry_run == 'false'`; `pypi` is `release`-only and chains via `testpypi` (`needs: publish-testpypi`). Environment secrets must be scoped/rotated and never echoed in logs.
+Live publishing/deployment environment controls (API-verified 2026-08-30):
+
+| Environment | Owner / reviewer | Allowed refs | Purpose |
+| --- | --- | --- | --- |
+| `ghcr-publish` | `@SatoryKono` | branch `main` | `docker.yml` → immutable SHA/ref-name GHCR tags |
+| `observability-render-host` | `@SatoryKono` | branch `main` | reviewed manual execution on the self-hosted render runner |
+| `testpypi` | `@SatoryKono` | branch `main`; tags `v*` | reviewed manual dry-run override or release OIDC publish |
+| `pypi` | `@SatoryKono` | tags `v*` | release-only OIDC publish after `testpypi` |
+
+Each listed environment has a required-reviewer rule and a custom deployment
+branch/tag policy. Self-review remains allowed because the repository currently
+has one maintainer; this prevents deployment lockout while retaining an explicit
+approval gate. The environment-secret inventory was empty at verification time;
+PyPI uses OIDC trusted publishing. `copilot` and `staging` are not referenced by
+tracked workflows and have no environment secrets, so they are not classified
+as write-capable deployment surfaces. Environment secrets, if later added, must
+be scoped/rotated and never echoed in logs.
 
 `contract-tests.yml` keeps `contents: read` as the workflow baseline and grants
 `issues: write` only to the live contract-test job that creates a failure issue.
