@@ -27,6 +27,7 @@ import argparse
 import hashlib
 import logging
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -394,7 +395,7 @@ def compile_one(
         result["written"] = True
         return result
 
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         result["error"] = str(exc)
         LOGGER.exception("compile failed for %s/%s", domain, profile)
         return result
@@ -449,9 +450,11 @@ def main(argv: list[str] | None = None) -> int:
         profiles = discover_profiles()
         if not domains:
             LOGGER.error("no overlays found in %s", OVERLAYS_DIR)
+            print(f"no overlays found in {OVERLAYS_DIR}", file=sys.stderr)
             return 1
         if not profiles:
             LOGGER.error("no profiles found in %s", PROFILES_DIR)
+            print(f"no profiles found in {PROFILES_DIR}", file=sys.stderr)
             return 1
         results = compile_many(domains, profiles, check=args.check)
     else:
@@ -475,6 +478,8 @@ def main(argv: list[str] | None = None) -> int:
             LOGGER.error("%s", msg)
         else:
             LOGGER.info("%s", msg)
+        print(msg, file=sys.stderr)
+
 
     if args.check and (errors or drifts):
         return 1

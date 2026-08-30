@@ -385,6 +385,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     report = lint_all(strict=args.strict)
+
     text = format_report(report)
     try:
         sys.stdout.write(text)

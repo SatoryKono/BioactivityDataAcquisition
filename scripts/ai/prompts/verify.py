@@ -340,6 +340,7 @@ def check_golden(report: VerifyReport) -> None:
     if not GOLDEN_ROOT.is_dir():
         report.add_warning("golden_missing", f"golden dir not found: {GOLDEN_ROOT} (skip)")
         return
+
     goldens = sorted(GOLDEN_ROOT.rglob("*.md"))
     if not goldens:
         report.add_warning("golden_empty", f"no golden files under {GOLDEN_ROOT}")
