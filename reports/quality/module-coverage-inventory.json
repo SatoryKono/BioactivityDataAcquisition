@@ -49334,6 +49334,7 @@
   "schema_version": 1,
   "snapshot_date": "2026-08-28",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "source_tree_sha256": "d08c2557abe402eed24309c33e9c2d4c91cb9e50ae327e570868e4bc2d6728e1",
 ||||||| 09ab9ac286
   "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
@@ -49342,6 +49343,11 @@
 =======
   "source_tree_sha256": "456d6bdb4933548557ac1b869673cb02bff683dd4d74da87422d214a10dd58ee",
 >>>>>>> fix/stream-c-quality-9803-9791
+||||||| 47070d9e46
+  "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6",
+=======
+  "source_tree_sha256": "875aff773cf8a2234360936b50bec819c6ddfdc80e7c71200a247e5c37e97059",
+>>>>>>> pr-9815
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
