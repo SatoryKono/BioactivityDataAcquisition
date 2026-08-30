@@ -34,21 +34,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.13"
-
-      - name: Install Python tooling
-        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3 pylint==3.3.4"
+          uv-extras: "dev"
 
       - name: Prepare report directory
         run: mkdir -p reports
 
       - name: Generate Radon complexity reports
         run: |
-          radon cc src tests -a -s > reports/radon_cc.txt
-          radon cc src tests -a -s -j > reports/radon_cc.json
+          uv run --frozen --no-build radon cc src tests -a -s > reports/radon_cc.txt
+          uv run --frozen --no-build radon cc src tests -a -s -j > reports/radon_cc.json
 
       - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
         run: |
@@ -58,13 +56,13 @@ jobs:
           # DQ analyzers, composite orchestration, CLI formatters, runtime builders,
           # silver storage, control-plane artifacts, quarantine, observability,
           # quality governance, input adapters, extractor modules, memory.
-          xenon --max-absolute B --max-modules B --max-average A \
+          uv run --frozen --no-build xenon --max-absolute B --max-modules B --max-average A \
             --exclude "tests/*,src/memory/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/composition/runtime_builders/*,src/bioetl/composition/factories/services/*,src/bioetl/infrastructure/storage/silver/*,src/bioetl/infrastructure/control_plane/*,src/bioetl/infrastructure/quarantine/*,src/bioetl/infrastructure/observability/*,src/bioetl/infrastructure/quality/*" src
 
       - name: Strict complexity check for domain layer (CC ≤ 5)
         run: |
           echo "Checking domain layer complexity (max CC = 5, grade A)..."
-          xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain || {
+          uv run --frozen --no-build xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain || {
             echo "⚠️  Domain layer has functions with CC > 5"
             echo "Consider refactoring to keep domain logic simple"
             exit 1
@@ -73,17 +71,17 @@ jobs:
       - name: Generate detailed complexity report
         run: |
           echo "=== Functions with CC > 5 ===" > reports/high_complexity.txt
-          radon cc src -a -s --min C >> reports/high_complexity.txt || true
+          uv run --frozen --no-build radon cc src -a -s --min C >> reports/high_complexity.txt || true
           echo "" >> reports/high_complexity.txt
           echo "=== Maintainability Index ===" >> reports/high_complexity.txt
-          radon mi src -s >> reports/high_complexity.txt
+          uv run --frozen --no-build radon mi src -s >> reports/high_complexity.txt
 
       - name: Validate duplication/complexity exemption registry
-        run: python -m scripts.engineering.qa check-duplication-complexity-exemptions
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-duplication-complexity-exemptions
 
       - name: Check for critical complexity violations
         run: |
-          python - <<'PY'
+          uv run --frozen --no-build python - <<'PY'
           import json
           import sys
           from pathlib import Path
@@ -151,18 +149,15 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: .github/tooling/jscpd/package-lock.json
 
       - name: Run jscpd for duplication detection
         run: |
           set -euo pipefail
           mkdir -p reports/jscpd
-          TOOL_DIR="${RUNNER_TEMP}/jscpd-cli"
-          mkdir -p "${TOOL_DIR}"
-          cd "${TOOL_DIR}"
-          npm init -y >/dev/null
-          # Pin + local install (no npx on-demand install; Sonar S6505/S8543).
-          npm install --ignore-scripts --no-fund --no-audit jscpd@4.0.8
-          "${TOOL_DIR}/node_modules/.bin/jscpd" \
+          npm ci --ignore-scripts --no-fund --no-audit --prefix "${GITHUB_WORKSPACE}/.github/tooling/jscpd"
+          "${GITHUB_WORKSPACE}/.github/tooling/jscpd/node_modules/.bin/jscpd" \
             "${GITHUB_WORKSPACE}/src" "${GITHUB_WORKSPACE}/tests" \
             --config "${GITHUB_WORKSPACE}/.jscpd.json" \
             --threshold 5 --format python \
@@ -171,7 +166,7 @@ jobs:
 
       - name: Enforce BioETL hotspot duplication zero ratchet
         run: |
-          python -m scripts.engineering.qa report-duplication-baseline \
+          uv run --frozen --no-build python -m scripts.engineering.qa report-duplication-baseline \
             --targets src/bioetl/application/core src/bioetl/composition/bootstrap/runtime src/bioetl/composition/factories/pipeline src/bioetl/application/services/control_plane src/bioetl/composition/runtime_builders \
             --json-out reports/quality/hotspot-duplication-baseline.json \
             --md-out reports/quality/hotspot-duplication-baseline.md \
@@ -196,40 +191,36 @@ jobs:
   constructor-args-check:
     name: Constructor Arguments Check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.13"
-
-      - name: Install required dependencies
-        run: "pip install --only-binary=:all: pyyaml==6.0.3"
+          uv-extras: "dev"
 
       - name: Check constructor argument counts
-        run: python -m scripts.engineering.qa check-constructor-args
+        run: uv run --frozen --no-build python -m scripts.engineering.qa check-constructor-args
 
   executor-complexity:
     name: Executor Complexity Check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.13"
-
-      - name: Install tooling
-        run: "python -m pip install --only-binary=:all: radon==6.0.1 xenon==0.9.3"
+          uv-extras: "dev"
 
       - name: Check batch_executor.py complexity (max CC = 10)
         run: |
           echo "Checking batch_executor.py complexity..."
-          xenon --max-absolute B --max-modules B --max-average A \
+          uv run --frozen --no-build xenon --max-absolute B --max-modules B --max-average A \
             src/bioetl/application/core/batch_executor.py
