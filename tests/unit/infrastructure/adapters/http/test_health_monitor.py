@@ -290,6 +290,19 @@ class TestProviderHealthMonitorMetrics:
             labels={"provider": "chembl"},
         )
 
+    def test_restore_provider_health_status_ignores_unknown_metric(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """#9793: unknown CURRENT gauge values must not emit."""
+        from bioetl.infrastructure.adapters.http._health_monitor_observability import (
+            restore_provider_health_status,
+        )
+
+        restore_provider_health_status(
+            metrics=mock_metrics, provider="chembl", status=99
+        )
+        mock_metrics.set_gauge.assert_not_called()
+
     def test_metric_values_match_rules_md(
         self, monitor: ProviderHealthMonitor, mock_metrics: MagicMock
     ) -> None:

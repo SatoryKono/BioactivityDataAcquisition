@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Requirements catalog Wave 1 (#9803):** 20 invented `REQ-*` IDs from
+  RULES/ADR-033/`src/` now have canonical rows; catalog 172→192.
+
 - **Game Day DR drill runbook (#9761):** `docs/05-operations/runbooks/game-day.md`
   annual restore rehearsal with RPO 24h / RTO 4h, linked from the runbook index.
 
@@ -30,6 +33,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `cycle/` or `new/`.
 
 ### Changed
+
+- **Architecture scorecard ceiling (#9791):** diagnostic saturation
+  (`families_at_budget`, lazy-import util, composition util) now scores;
+  category floors raised to 10.0; `schema_version` 1→2. Program-gate caps
+  remain shrink-only.
+
+- **Requirements test markers (#9805):** 26 concrete untraced REQ IDs bound
+  to existing tests.
+
+- **Coverage regressions (#9793):** restore missing branches for SHA-bound
+  module coverage (formerly 100% modules, lazy composition wrappers, and
+  validator/error-handler/artifact-lifecycle edges). Unreachable inner
+  time-travel guard in `retention_time_travel.py` replaced with assert.
+
+- **Crosswalk executable surfaces (#9806):** first 20 MUST generic surfaces
+  replaced with concrete test paths.
 
 - **VCR/e2e skip policy (#9729):** CI `unit-fast` and the test-matrix
   `integration` (VCR replay) shard run serial (`-p no:xdist`). The reviewed

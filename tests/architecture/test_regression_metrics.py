@@ -14,6 +14,7 @@ Each test function enforces a specific quality metric with a ratchet budget.
 When the codebase improves, lower the budget to prevent regression.
 
 Implements §5 of the quality scorecard plan.
+REQ-GOV-001 REQ-PYTHON-001: mypy/ruff regression metrics stay gated.
 """
 
 from __future__ import annotations

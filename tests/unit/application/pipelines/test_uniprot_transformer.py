@@ -149,6 +149,24 @@ class TestUniProtProteinTransformer:
         mock_context.logger.warning.assert_called()
 
     @pytest.mark.asyncio
+    async def test_transform_pre_silver_missing_accession_returns_none(
+        self, transformer, mock_context
+    ):
+        """#9793: transform_pre_silver must skip records that fail validation."""
+        from bioetl.application.core.base_transformer.errors import FilteredOutError
+
+        def _filtered_out(record: object, field: str, allow_empty: bool = False) -> str:
+            raise FilteredOutError("filtered by silver policy")
+
+        transformer._get_required_field = _filtered_out  # type: ignore[method-assign]
+        result = await transformer.transform_pre_silver(
+            mock_context, {"primaryAccession": "P12345"}, index=0
+        )
+
+        assert result is None
+        mock_context.logger.warning.assert_called()
+
+    @pytest.mark.asyncio
     async def test_transform_missing_entry_name(self, transformer, mock_context):
         """Test transformation returns None when uniProtkbId is missing."""
         record = {

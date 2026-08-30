@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from typing import Protocol, cast
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.common.response_shapes import extract_response_items
 from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
     trusted_idmapping_url,
 )
@@ -21,6 +22,22 @@ class IDMappingParserDependencies(Protocol):
 
 class IDMappingParserMixin:
     """Pure parsing and selection logic for ID mapping payloads."""
+
+    def _append_mapping_results(
+        self,
+        data: object,
+        entries_by_id: dict[str, list[JsonDict]],
+    ) -> bool:
+        """Append valid mapping entries and report whether the payload is usable."""
+        if not isinstance(data, dict):
+            return False
+        for mapping in extract_response_items(data, "results"):
+            if not isinstance(mapping, dict):
+                continue
+            from_id, entry_data = self._parse_mapping_entry(mapping)
+            if from_id in entries_by_id and entry_data:
+                entries_by_id[from_id].append(entry_data)
+        return True
 
     @staticmethod
     def _select_primary_entry(
