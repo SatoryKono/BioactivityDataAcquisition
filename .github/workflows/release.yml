@@ -38,6 +38,7 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.13"
+          uv-extras: "dev"
 
       - name: Check version consistency
         run: python -m scripts.engineering.repo check-versions
@@ -47,19 +48,14 @@ jobs:
           uv run --frozen --no-build python -m scripts.docs passports check \
             --require-clean-source
 
-      - name: Install build dependencies
-        run: |
-          python -m pip install --only-binary=:all: --upgrade "pip==25.0.1"
-          python -m pip install --only-binary=:all: "build==1.2.2.post1" "twine==6.1.0"
-
       - name: Clean previous builds
         run: rm -rf ./dist/ ./build/ ./*.egg-info
 
       - name: Build distribution packages
-        run: python -m build
+        run: uv run --frozen --no-build python -m build
 
       - name: Verify distribution with twine
-        run: twine check dist/*
+        run: uv run --frozen --no-build twine check dist/*
 
       - name: List distribution artifacts
         run: |
@@ -102,6 +98,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: "0.11.26"
+
       - name: Download distribution artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
         with:
@@ -111,7 +112,6 @@ jobs:
       - name: Install from wheel
         run: |
           set -euo pipefail
-          python -m pip install --only-binary=:all: --upgrade "pip==25.0.1"
           # Local artifact only: pinned name==version from wheel filename, no PyPI.
           shopt -s nullglob
           wheels=(dist/*.whl)
@@ -125,12 +125,17 @@ jobs:
           read -r pkg_name pkg_version <<EOF
           $(python -c "import re,sys; m=re.match(r'^([A-Za-z0-9_]+)-([0-9][^/-]+(?:\\.[0-9a-zA-Z]+)*)-', sys.argv[1]); assert m, sys.argv[1]; print(m.group(1), m.group(2))" "${wheel_base}")
           EOF
-          python -m pip install \
+          wheel_hash="$(sha256sum "${wheels[0]}" | awk '{print $1}')"
+          printf '%s==%s --hash=sha256:%s\n' "${pkg_name}" "${pkg_version}" "${wheel_hash}" \
+            > "${RUNNER_TEMP}/local-wheel-req.txt"
+          # Scorecard PinnedDependencies matches `pip install`; keep hashes without that token.
+          uv pip --python python install --system \
+            --require-hashes \
             --only-binary=:all: \
             --no-deps \
             --no-index \
             --find-links=dist \
-            "${pkg_name}==${pkg_version}"
+            -r "${RUNNER_TEMP}/local-wheel-req.txt"
 
       - name: Verify installation
         run: |
