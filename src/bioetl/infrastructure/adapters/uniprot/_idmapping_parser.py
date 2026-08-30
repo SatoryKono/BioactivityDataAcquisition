@@ -5,8 +5,18 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping
+from typing import Protocol, cast
 
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    trusted_idmapping_url,
+)
+
+
+class IDMappingParserDependencies(Protocol):
+    """Host attributes required by ID-mapping response parsing."""
+
+    base_url: str
 
 
 class IDMappingParserMixin:
@@ -38,8 +48,7 @@ class IDMappingParserMixin:
         primary["all_mappings"] = json.dumps(all_accessions)
         return primary
 
-    @staticmethod
-    def _get_next_page_url(headers: Mapping[str, str]) -> str | None:
+    def _get_next_page_url(self, headers: Mapping[str, str]) -> str | None:
         """Extract next page URL from Link header.
 
         Returns:
@@ -50,7 +59,10 @@ class IDMappingParserMixin:
             return None
 
         match = re.search(r'<([^>]+)>;\s*rel="next"', str(link_header))
-        return match.group(1) if match else None
+        if not match:
+            return None
+        base_url = cast("IDMappingParserDependencies", self).base_url
+        return trusted_idmapping_url(base_url, match.group(1))
 
     @staticmethod
     def _extract_organism_info(

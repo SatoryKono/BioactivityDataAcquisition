@@ -20,6 +20,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 from unittest.mock import MagicMock
 
 import pytest
@@ -252,5 +253,7 @@ class TestChemblAdapterUnit:
         """API base URL should be correct."""
         from bioetl.infrastructure.adapters.chembl.entity_mapper import CHEMBL_API_BASE
 
-        assert "ebi.ac.uk" in CHEMBL_API_BASE
-        assert "chembl" in CHEMBL_API_BASE
+        parsed = urlsplit(CHEMBL_API_BASE)
+        assert parsed.scheme == "https"
+        assert parsed.hostname == "www.ebi.ac.uk"
+        assert parsed.path == "/chembl/api/data"
