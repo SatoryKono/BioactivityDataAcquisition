@@ -1,0 +1,29 @@
+domain: control-plane
+id: prompt.audit.project.new2.control-plane
+OBJECT: Control plane, RunManifest, RunLedger, replay, resume, fencing, and operator inspection
+SCOPE:
+  - src/bioetl/application/services/control_plane/
+  - src/bioetl/composition/control_plane_runtime.py
+SSOT:
+  - docs/02-architecture/decisions/ADR-044.md
+  - docs/02-architecture/decisions/ADR-046.md
+  - docs/02-architecture/decisions/ADR-047.md
+  - docs/03-guides/workflows.md
+AUDIT_CONTOURS:
+  - manifest, ledger, inspection, replay/resume, and force/repair verb surfaces
+  - checkpoint vs ledger contract, fencing/lock invariants, and persistence guarantees
+  - docs/runbooks/CLI claims vs code and store drift
+  - failure and restart scenario coverage
+MANDATORY_EVIDENCE:
+  - control-plane-surface-map.csv mapping all control surfaces
+  - resume-contract-matrix.csv and failure-scenarios.json
+  - store-delta.json proving persistence not silently skipped
+VALIDATION:
+  - focused control-plane tests including failure/restart/resume paths
+  - fencing evidence check for repair/force operations
+DOMAIN_STOP:
+  - resume ignoring ledger or checkpoint contract
+  - admin force without fencing evidence
+OUTPUT_EXTRAS:
+  - control-plane-surface-map.csv
+  - resume-contract-matrix.csv

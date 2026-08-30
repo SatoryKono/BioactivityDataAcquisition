@@ -1,0 +1,28 @@
+domain: normalization
+id: prompt.audit.project.new2.normalization
+OBJECT: Normalization policies and identifier families DOI, ChEMBL, UniProt, PubChem CID, SMILES, InChI
+SCOPE:
+  - src/bioetl/domain/normalization/
+  - docs/04-reference/normalization/
+SSOT:
+  - docs/04-reference/normalization/reference-identifiers.md
+  - src/bioetl/domain/ports/data_normalization.py
+  - docs/01-requirements/REQUIREMENTS.md
+AUDIT_CONTOURS:
+  - documented identifier families to normalizer modules and profile mapping
+  - regex, trim, case, and NA policy enforcement with undocumented heuristic detection
+  - docs-without-code and code-without-policy drift across providers
+  - deterministic hash input canonicalization and locale/decimal handling
+MANDATORY_EVIDENCE:
+  - identifier-family-matrix.csv mapping families to modules
+  - normalization-cases.json with before/after examples
+  - policy-code-drift.csv and hash-impact.md
+VALIDATION:
+  - normalization unit and property tests
+  - before/after example verification and hash stability checks
+DOMAIN_STOP:
+  - undocumented identifier mutation in normalizer
+  - non-deterministic locale or time-dependent behavior
+OUTPUT_EXTRAS:
+  - identifier-family-matrix.csv
+  - normalization-cases.json

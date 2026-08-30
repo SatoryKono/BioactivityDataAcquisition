@@ -1,0 +1,28 @@
+domain: dashboards
+id: prompt.audit.cycle.dashboards
+OBJECT: Grafana presentation-plane render, density, fill, fit, reflow, and shipped dashboard quality
+SCOPE:
+  - grafana/dashboards/
+SSOT:
+  - grafana/DASHBOARD_REQUIREMENTS.md
+  - grafana/design-system.md
+  - grafana/verdict-ontology.md
+  - grafana/layout-budgets.yaml
+AUDIT_CONTOURS:
+  - render and density area/scalar with viewport 1366x768 and theme variants
+  - fill, fit, reflow, visual, layout, data, copy, and safety contours
+  - shipped JSON as sole panel ID source with query/HTTP evidence for data status
+  - pipeline verification for dashboard JSON generation
+MANDATORY_EVIDENCE:
+  - panel-matrix.csv with uid, panel_id, y, band, type, datasource
+  - checks.json and density-results.csv
+  - render-evidence directory and per-panel status artifacts
+VALIDATION:
+  - static gates and affected panel renders rerun
+  - required CI checks and dark/light with 100/200 percent zoom
+DOMAIN_STOP:
+  - invented panel or DASH identifier
+  - data failure claimed only from screenshot without query evidence
+OUTPUT_EXTRAS:
+  - panel-matrix.csv
+  - density-results.csv
