@@ -417,14 +417,14 @@
     {
       "current": {
         "artifacts": [
-          "architecture_quality_scorecard"
+          "remote_main_baseline"
         ],
         "count": 1
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: architecture_quality_scorecard",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline",
       "source_artifact": "reports/quality/*.json",
       "status": "fail"
     }
@@ -460,20 +460,19 @@
     "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 43,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.14,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
+    "fail_count": 1,
     "failing_gates": [
-      "module_coverage_scorecard_coherence",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 43,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

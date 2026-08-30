@@ -5,7 +5,7 @@
   "source_tree_sha256": "19b2f9ff131af2e33f76b54032e7d1b00e65f8811194233ba68d62bbc42f87d9",
   "refreshed_at_utc": "2026-08-28T13:46:26.926300+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.58,
+  "coverage_percent": 96.54,
   "coverage": {
     "threshold_percent": 85.0,
     "actual_percent": 96.54,
