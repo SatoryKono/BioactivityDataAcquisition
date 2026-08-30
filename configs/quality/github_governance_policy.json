@@ -1,0 +1,233 @@
+{
+  "schema_version": "1.0",
+  "owner": "@SatoryKono",
+  "cadence": "quarterly and after repository-setting migrations",
+  "migration": {
+    "started_on": "2026-08-30",
+    "delete_not_before": "2026-11-30",
+    "rule": "Do not delete legacy labels during the migration window. Remove a label only after local automation, open issues and pull requests, saved-search owners, and known external integrations have been reviewed."
+  },
+  "wiki": {
+    "expected_enabled": false,
+    "owner": "BioETL Team",
+    "decision": "GitHub Wiki is disabled. Repository documentation is the only normative documentation surface; docs/00-project/NORMATIVE_SOURCES.md defines precedence."
+  },
+  "issue_intake": {
+    "format": "github-issue-forms",
+    "primary_forms": [
+      "bug_report.yml",
+      "feature_request.yml"
+    ],
+    "specialized_forms": [
+      "retention_sensitive_cleanup.yml"
+    ],
+    "chooser_config": "config.yml",
+    "legacy_inactive_templates": [
+      "bug_report.md",
+      "feature_request.md"
+    ]
+  },
+  "labels": {
+    "canonical": [
+      "priority:critical",
+      "priority:high",
+      "priority:medium",
+      "priority:low",
+      "bug",
+      "enhancement",
+      "documentation",
+      "ci/cd",
+      "config",
+      "testing",
+      "technical-debt",
+      "governance",
+      "security",
+      "dependencies",
+      "cleanup",
+      "guardrails",
+      "refactor",
+      "breaking-change",
+      "contract-failure",
+      "api-change",
+      "automated",
+      "stale",
+      "layer:domain",
+      "layer:application",
+      "layer:infrastructure",
+      "layer:composition",
+      "layer:interfaces",
+      "provider:chembl",
+      "provider:pubmed",
+      "provider:pubchem",
+      "provider:uniprot",
+      "provider:crossref",
+      "provider:openalex",
+      "provider:semantic-scholar"
+    ],
+    "aliases": {
+      "P0": "priority:critical",
+      "priority:P0": "priority:critical",
+      "critical": "priority:critical",
+      "P1": "priority:high",
+      "priority:P1": "priority:high",
+      "priority/P1": "priority:high",
+      "high-priority": "priority:high",
+      "P2": "priority:medium",
+      "priority:P2": "priority:medium",
+      "priority/P2": "priority:medium",
+      "medium-priority": "priority:medium",
+      "P3": "priority:low",
+      "priority:P3": "priority:low",
+      "priority/P3": "priority:low",
+      "priority/P4": "priority:low",
+      "priority/P5": "priority:low",
+      "priority/P6": "priority:low",
+      "priority/P7": "priority:low",
+      "priority/P8": "priority:low",
+      "docs": "documentation",
+      "ci": "ci/cd",
+      "ci-cd": "ci/cd",
+      "workflow": "ci/cd",
+      "workflows": "ci/cd",
+      "configs": "config",
+      "configuration": "config",
+      "test": "testing",
+      "tests": "testing",
+      "tech debt": "technical-debt",
+      "tech-debt": "technical-debt",
+      "technical debt": "technical-debt",
+      "breaking-changes": "breaking-change",
+      "refactoring": "refactor",
+      "application": "layer:application",
+      "application-layer": "layer:application",
+      "domain-layer": "layer:domain",
+      "infrastructure-layer": "layer:infrastructure"
+    },
+    "deprecated_without_replacement": [
+      "__probe__",
+      "BRC CNLD",
+      "Dashbord",
+      "Debit",
+      "Higiene",
+      "completed",
+      "done",
+      "final"
+    ],
+    "automation_required": [
+      "dependencies",
+      "ci/cd",
+      "documentation",
+      "config",
+      "contract-failure",
+      "api-change",
+      "automated",
+      "stale"
+    ]
+  },
+  "protected_environments": [
+    "ghcr-publish",
+    "observability-render-host",
+    "staging"
+  ],
+  "controls": [
+    {
+      "id": "GH-RULESET-001",
+      "title": "At least one active ruleset protects the discovered default branch",
+      "check": "active_ruleset",
+      "owner": "Repository administrators",
+      "risk": "high",
+      "known_issue": 9800,
+      "due_days": 30
+    },
+    {
+      "id": "GH-ACTIONS-001",
+      "title": "GitHub Actions requires full-SHA pinning",
+      "check": "sha_pinning_required",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": 9784,
+      "due_days": 14
+    },
+    {
+      "id": "GH-ENV-001",
+      "title": "Publishing and deployment environments have protection rules",
+      "check": "protected_environments",
+      "owner": "Release engineering",
+      "risk": "high",
+      "known_issue": 9785,
+      "due_days": 30
+    },
+    {
+      "id": "GH-DEPENDABOT-001",
+      "title": "Dependabot alerts and security updates are enabled",
+      "check": "dependabot_security_updates",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": 9783,
+      "due_days": 14
+    },
+    {
+      "id": "GH-CODEQL-001",
+      "title": "Advanced CodeQL workflow is present",
+      "check": "advanced_codeql",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": 9786,
+      "due_days": 14
+    },
+    {
+      "id": "GH-SECRET-001",
+      "title": "Secret scanning is enabled",
+      "check": "secret_scanning",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": 9796,
+      "due_days": 14
+    },
+    {
+      "id": "GH-CODEOWNERS-001",
+      "title": "CODEOWNERS exists on the reviewed default branch",
+      "check": "codeowners",
+      "owner": "BioETL Team",
+      "risk": "medium",
+      "known_issue": null,
+      "due_days": 30
+    },
+    {
+      "id": "GH-MERGE-001",
+      "title": "Squash is the only enabled merge method",
+      "check": "squash_only",
+      "owner": "Repository administrators",
+      "risk": "medium",
+      "known_issue": null,
+      "due_days": 30
+    },
+    {
+      "id": "GH-WIKI-001",
+      "title": "GitHub Wiki is disabled in favor of normative repository docs",
+      "check": "wiki_disabled",
+      "owner": "BioETL Team",
+      "risk": "low",
+      "known_issue": 9787,
+      "due_days": 30
+    },
+    {
+      "id": "GH-INTAKE-001",
+      "title": "Issue intake uses the governed GitHub Issue Forms set",
+      "check": "issue_forms",
+      "owner": "BioETL Team",
+      "risk": "medium",
+      "known_issue": 9787,
+      "due_days": 30
+    },
+    {
+      "id": "GH-LABELS-001",
+      "title": "Every automation-required canonical label exists",
+      "check": "automation_labels",
+      "owner": "BioETL Team",
+      "risk": "medium",
+      "known_issue": 9787,
+      "due_days": 30
+    }
+  ]
+}

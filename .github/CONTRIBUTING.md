@@ -31,6 +31,7 @@ Before contributing, read these documents:
 || [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
 || [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
 || [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
+|| [GitHub Label Taxonomy](../docs/00-project/governance/github-label-taxonomy.md) | Labels, issue intake, Wiki ownership |
 
 ## Workflow
 
@@ -173,9 +174,14 @@ Download and review `reports/ci/dependency-preflight.log` from its artifact and 
 
 ## Getting Help
 
-- **Questions**: Open an issue
-- **Bugs**: Include reproduction steps
-- **Features**: Discuss in issue first
+- **Bugs**: Use the canonical bug_report.yml Issue Form and include reproduction steps.
+- **Features and questions**: Use the canonical feature_request.yml Issue Form.
+- **Retention-sensitive cleanup**: Use the specialized cleanup form and linked runbook.
+- **Security vulnerabilities**: Use the private Security Advisory contact in the issue chooser; never file secrets or exploit details publicly.
+
+Blank public issues are disabled. Use canonical labels from the
+[GitHub label taxonomy](../docs/00-project/governance/github-label-taxonomy.md);
+legacy aliases are migration-only and MUST NOT be added to new work.
 
 ## RFC 2119 Keywords
 
