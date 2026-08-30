@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
@@ -79,6 +80,16 @@ def test_policy_documents_residual_osv_exception() -> None:
     assert "extract-zip" in text
     assert "grafana/plugins" in text
     assert "ADR-010" in text
+    assert "#9859" in text
+
+
+def test_residual_osv_exception_has_not_expired() -> None:
+    """Fail closed after 2026-11-30 so #9853 can close without losing the re-triage."""
+    deadline = date.fromisoformat(EXPIRY)
+    assert date.today() <= deadline, (
+        f"Residual OSV exception expired on {EXPIRY}. "
+        "Upgrade mermaid-cli/Grafana or renew §2.3.2 via #9859 with a new expiry."
+    )
 
 
 def test_security_md_and_pip_audit_ignore_are_timeboxed() -> None:

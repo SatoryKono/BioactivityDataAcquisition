@@ -51,7 +51,7 @@ jobs:
 
       - name: Run pip-audit
         run: |
-          # Residual OSV #9853 (expiry 2026-11-30): pip==26.1.2 in uv.lock.
+          # Residual OSV #9853 accepted; re-triage #9859 (expiry 2026-11-30).
           # CVE-2026-3219 / PYSEC-2026-3721 — pip archive-parsing (dev extra).
           # CI/dev only; not in the Wolfi/scratch runtime image.
           # Do not add osv-scanner.toml and do not dismiss Scorecard

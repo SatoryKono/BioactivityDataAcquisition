@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.2.4
+Version: 1.2.5
 Status: active
 Class: published
 Owner: BioETL Team
@@ -160,9 +160,12 @@ check, and do **not** dismiss #1294 as a false green.
 | PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.1.2` | `uv.lock` + `pip-audit --ignore-vuln` | Timeboxed ignore in `security.yml`; OSV CI gate stays HIGH/CRITICAL-only | CI/dev extra; not runtime image |
 | GHSA-2v37, 337j, wrjc, jjmj, 5c6j, qj8w, w5hq | Grafana npm (`react-router` 6.x, `uuid` 9.x, …) | `grafana/plugins/*` | No React Router 7 / uuid 11 force-bump (Grafana 13 host API) | Optional monitoring (ADR-010); not BioETL runtime |
 
-Expiry: **2026-11-30**. Owner: BioETL Team. Tracking issue: #9853.
-Re-triage by then: upgrade mermaid-cli (keeps diagram golden pins) and/or Grafana
-plugin majors, or renew the exception with a new dated issue.
+Expiry: **2026-11-30**. Owner: BioETL Team. Accepted on #9853 (closed).
+Re-triage: #9859. CI fail-closed gate:
+`tests/architecture/test_residual_osv_9853.py::test_residual_osv_exception_has_not_expired`.
+Upgrade mermaid-cli (keep diagram golden pins) and/or Grafana plugin majors, or
+renew the exception with a new dated issue. Scorecard Vulnerabilities **#1294**
+stays undismissed.
 
 `security.yml` OSV-Scanner still scans `uv.lock` only and fails on HIGH/CRITICAL.
 Medium `PYSEC-2026-3721` does not fail that gate; pip-audit `--strict` would,
@@ -679,3 +682,10 @@ ______________________________________________________________________
   puppeteer, Grafana plugins, and `PYSEC-2026-3721` / `CVE-2026-3219`.
 - Scorecard Vulnerabilities check #1294 stays undismissed; `osv-scanner.toml`
   remains forbidden.
+
+### Migration notes (1.2.5)
+
+- #9853 closeout: residual OSV exception is accepted. Re-triage moved to #9859.
+  CI fails closed after 2026-11-30
+  (`test_residual_osv_exception_has_not_expired`). Scorecard #1294 remains
+  undismissed.
