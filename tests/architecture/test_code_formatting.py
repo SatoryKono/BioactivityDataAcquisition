@@ -14,6 +14,7 @@ REQ-ARCH-001: Consistent code formatting across the codebase.
 REQ-ARCH-001: Consistent import ordering via ruff (isort rules).
 
 Note: ruff replaces black+isort as the unified formatter and linter.
+REQ-PYTHON-001 REQ-STACK-004: ruff format/lint stack.
 """
 
 from __future__ import annotations

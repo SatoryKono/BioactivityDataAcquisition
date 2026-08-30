@@ -2046,13 +2046,13 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2386,
-    "total_test_functions": 25134,
+    "total_test_files": 2382,
+    "total_test_functions": 25078,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "1b5ed100d12e3ba9bab99178d95bc5d10e775bc7f1839c9d6860d6713278b273",
+  "source_tree_sha256": "9151e98dbc8ee38d24bc885ff796e27ad2133c2714ef8d1e800cf856b93b7cde",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2112,8 +2112,8 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2386,
-  "total_test_functions": 25134,
+  "total_test_files": 2382,
+  "total_test_functions": 25078,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

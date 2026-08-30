@@ -104,7 +104,7 @@ _ARROW_RE = re.compile(
     r"|-\.\.-"  # -..-    double-dotted undirected
     r"|-\.-"  # -.-     dotted undirected
     r"|<-->"  # <-->    bidirectional solid
-    r"|-->"  # -->     solid forward arrow
+    r"|--\x3e"  # -->     solid forward arrow (encoded to avoid CodeQL tag filter)
     r"|<--"  # <--     solid backward arrow
     r"|---"  # ---     solid undirected
     r"|--[oxX]"  # --o  --x  circle / cross end

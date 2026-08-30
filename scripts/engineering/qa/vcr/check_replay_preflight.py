@@ -226,6 +226,50 @@ def _public_count(value: object) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) else None
 
 
+def _public_pointer_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = report.get("unresolved_lfs_pointers")
+    if not isinstance(rows, list):
+        return []
+    public_rows: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        path = _public_repo_path(row.get("path"))
+        if path is not None:
+            public_rows.append(
+                {
+                    "path": path,
+                    "strict_replay_blocked": row.get("strict_replay_blocked") is True,
+                }
+            )
+    return public_rows
+
+
+def _public_blocker_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
+    blockers = report.get("blockers")
+    if not isinstance(blockers, list):
+        return []
+    public_rows: list[dict[str, Any]] = []
+    for blocker in blockers:
+        if not isinstance(blocker, dict):
+            continue
+        blocker_id = blocker.get("id")
+        if not isinstance(blocker_id, str) or blocker_id not in PUBLIC_BLOCKER_IDS:
+            continue
+        public_blocker: dict[str, Any] = {"id": blocker_id}
+        raw_paths = blocker.get("paths")
+        if isinstance(raw_paths, list):
+            paths = [
+                path
+                for raw_path in raw_paths
+                if (path := _public_repo_path(raw_path)) is not None
+            ]
+            if paths:
+                public_blocker["paths"] = paths
+        public_rows.append(public_blocker)
+    return public_rows
+
+
 def _public_vcr_replay_preflight(report: dict[str, Any]) -> dict[str, Any]:
     """Build the explicit CLI DTO without internal paths or diagnostic messages."""
     catalog = report.get("catalog")
@@ -235,49 +279,12 @@ def _public_vcr_replay_preflight(report: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(sanitizer, dict):
         sanitizer = {}
 
-    pointer_rows: list[dict[str, Any]] = []
-    raw_pointer_rows = report.get("unresolved_lfs_pointers")
-    if isinstance(raw_pointer_rows, list):
-        for row in raw_pointer_rows:
-            if not isinstance(row, dict):
-                continue
-            path = _public_repo_path(row.get("path"))
-            if path is not None:
-                pointer_rows.append(
-                    {
-                        "path": path,
-                        "strict_replay_blocked": row.get("strict_replay_blocked")
-                        is True,
-                    }
-                )
-
-    public_blockers: list[dict[str, Any]] = []
-    blockers = report.get("blockers")
-    if isinstance(blockers, list):
-        for blocker in blockers:
-            if not isinstance(blocker, dict):
-                continue
-            blocker_id = blocker.get("id")
-            if not isinstance(blocker_id, str) or blocker_id not in PUBLIC_BLOCKER_IDS:
-                continue
-            public_blocker: dict[str, Any] = {"id": blocker_id}
-            raw_paths = blocker.get("paths")
-            if isinstance(raw_paths, list):
-                paths = [
-                    path
-                    for raw_path in raw_paths
-                    if (path := _public_repo_path(raw_path)) is not None
-                ]
-                if paths:
-                    public_blocker["paths"] = paths
-            public_blockers.append(public_blocker)
-
     return {
         "schema_version": "vcr-replay-preflight-public-v2",
         "vcr_root": _public_repo_path(report.get("vcr_root")),
         "cassette_count": _public_count(report.get("cassette_count")),
         "metadata_sidecar_count": _public_count(report.get("metadata_sidecar_count")),
-        "unresolved_lfs_pointers": pointer_rows,
+        "unresolved_lfs_pointers": _public_pointer_rows(report),
         "strict_unresolved_lfs_pointer_count": _public_count(
             report.get("strict_unresolved_lfs_pointer_count")
         ),
@@ -301,7 +308,7 @@ def _public_vcr_replay_preflight(report: dict[str, Any]) -> dict[str, Any]:
             "has_response_filter": sanitizer.get("has_response_filter") is True,
         },
         "remediation": "Run `git lfs pull` before replaying unresolved VCR cassettes.",
-        "blockers": public_blockers,
+        "blockers": _public_blocker_rows(report),
     }
 
 
