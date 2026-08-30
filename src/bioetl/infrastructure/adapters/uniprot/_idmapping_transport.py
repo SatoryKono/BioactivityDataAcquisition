@@ -12,6 +12,9 @@ from bioetl.infrastructure.adapters.common.response_shapes import (
     extract_response_text,
 )
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
+from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    trusted_idmapping_url,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -123,11 +126,22 @@ class IDMappingTransportMixin:
     ) -> None:
         """Paginate through ID mapping results, populating entries_by_id in place."""
         deps = self._transport_deps()
-        url: str | None = start_url
+        url: str | None = trusted_idmapping_url(deps.base_url, start_url)
+        redirect_count = 0
 
         while url:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
-                response = await deps.http_client.get(url)
+                response = await deps.http_client.get(url, follow_redirects=False)
+
+            if response.status_code in {301, 302, 303, 307, 308}:
+                redirect_count += 1
+                if redirect_count > 3:
+                    raise ValueError("UniProt ID mapping redirect limit exceeded")
+                location = response.headers.get("location")
+                if not location:
+                    raise ValueError("UniProt ID mapping redirect omitted Location")
+                url = trusted_idmapping_url(deps.base_url, location)
+                continue
 
             if response.status_code != 200:
                 deps.logger.warning(
@@ -136,6 +150,8 @@ class IDMappingTransportMixin:
                     status_code=response.status_code,
                 )
                 break
+
+            redirect_count = 0
 
             data = response.json()
             if not isinstance(data, dict):
@@ -147,7 +163,12 @@ class IDMappingTransportMixin:
                 if from_id in entries_by_id and entry_data:
                     entries_by_id[from_id].append(entry_data)
 
-            url = deps._get_next_page_url(response.headers)
+            next_url = deps._get_next_page_url(response.headers)
+            url = (
+                trusted_idmapping_url(deps.base_url, next_url)
+                if next_url is not None
+                else None
+            )
 
     def _resolve_entries(
         self,

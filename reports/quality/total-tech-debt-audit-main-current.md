@@ -6,19 +6,19 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/sonar-postmerge-ci-closeout-20260828
+Audited branch: fix/redos-inline-secret-20260828
 
-Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
+Audited commit SHA: `c7754a0a73cab6f38866af26da4c69790b70044e`
 
-Evidence surface SHA-256: `ec449cf76023afcd5bfcbfd39b81944faf9108d55a4d836126c0cfd5e6a44381`
+Evidence surface SHA-256: `06b3ee4e1c2440e24f5be27c144a48b8cb34cbeaf4972c959b3c08407ce1efc8`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
-  "evidence_surface_sha256": "ec449cf76023afcd5bfcbfd39b81944faf9108d55a4d836126c0cfd5e6a44381",
+  "audited_commit_sha": "c7754a0a73cab6f38866af26da4c69790b70044e",
+  "evidence_surface_sha256": "06b3ee4e1c2440e24f5be27c144a48b8cb34cbeaf4972c959b3c08407ce1efc8",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",

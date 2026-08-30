@@ -62,7 +62,7 @@
       "source": "reports/quality/hotspot-family-baseline.json"
     },
     "dq_rule_evaluator_coverage_percent": {
-      "current": 100.0,
+      "current": 98.51,
       "opening": 98.39,
       "source": "reports/quality/module-coverage-inventory.json"
     },
