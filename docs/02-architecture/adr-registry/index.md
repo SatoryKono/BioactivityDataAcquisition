@@ -7,19 +7,19 @@ Canonical live ADR index: `docs/02-architecture/decisions/README.md`.
 This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
-**Total ADRs**: 59
-**Last Updated**: 2026-08-25
+**Total ADRs**: 60
+**Last Updated**: 2026-08-30
 
 ## 📊 Status Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| `accepted` | 57 | 96.6% |
-| `superseded` | 2 | 3.4% |
+| `accepted` | 58 | 96.7% |
+| `superseded` | 2 | 3.3% |
 
 ## 🟢 Accepted ADRs
 
-### 57 decisions
+### 58 decisions
 
 ### ADR-001: Delta Lake vs Parquet
 
@@ -704,6 +704,20 @@ Pu...
 stay un...
 
 [📄 View Full ADR](../decisions/ADR-059-package-cohesion-budgets.md)
+
+---
+
+### ADR-060: Prompt Kernel and Overlay Architecture
+
+**Status**: `accepted` | **Category**: `Architecture` | **Owner**: `BioETL Team`
+
+**Relationships**: Related: ADR-041, ADR-043, ADR-044, ADR-046
+
+**Context**: The audit prompt library contains 24 full operator-paste prompts materialized at
+`docs/00-project/ai/prompts/library/audit/project/materialized-v3/`:
+...
+
+[📄 View Full ADR](../decisions/ADR-060-prompt-kernel-and-overlay-architecture.md)
 
 ---
 
