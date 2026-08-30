@@ -88,6 +88,8 @@ def test_client_rejects_mutating_gh_surfaces() -> None:
         )
     with pytest.raises(TOOL.GitHubReviewError):
         TOOL.ReadOnlyGitHubClient.assert_read_only(["issue", "create"])
+    with pytest.raises(TOOL.GitHubReviewError):
+        TOOL._git_head(ROOT, "--output=unexpected")
 
 
 def test_unknown_labels_are_retained_by_default() -> None:
