@@ -10,7 +10,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-TOOL_PATH = ROOT / ".github" / "tooling" / "github_settings_review.py"
+TOOL_PATH = ROOT / "scripts" / "engineering" / "repo" / "github_settings_review.py"
 POLICY_PATH = ROOT / "configs" / "quality" / "github_governance_policy.json"
 
 
@@ -141,6 +141,8 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     job_header = workflow.split("    steps:", 1)[0]
     assert "runner.temp" not in job_header
     assert "$RUNNER_TEMP/github-settings-review.json" in workflow
+    assert "scripts/engineering/repo/github_settings_review.py" in workflow
+    assert ".github/tooling/github_settings_review.py" not in workflow
 
 
 def test_issue_forms_and_automation_use_canonical_labels() -> None:
