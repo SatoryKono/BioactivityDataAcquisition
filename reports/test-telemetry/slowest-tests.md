@@ -40,14 +40,14 @@ Freshness guard: `<=45 days`
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 40.486 | 14.738 |
-| 2 | `tests.unit.scripts.docs.passports.test_passport_projector` | 3 | 36.646 | 17.374 |
-| 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 13.64 | 7.482 |
-| 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.034 | 4.039 |
-| 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.761 | 10.761 |
-| 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.196 | 9.196 |
-| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.418 | 7.418 |
-| 8 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 6.894 | 6.894 |
-| 9 | `tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI` | 1 | 6.891 | 6.891 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 4 | 47.748 | 21.002 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 40.486 | 14.738 |
+| 3 | `tests.unit.scripts.docs.passports.test_passport_projector` | 3 | 36.646 | 17.374 |
+| 4 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 13.64 | 7.482 |
+| 5 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.034 | 4.039 |
+| 6 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.761 | 10.761 |
+| 7 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.196 | 9.196 |
+| 8 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.418 | 7.418 |
+| 9 | `tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv` | 1 | 6.894 | 6.894 |
+| 10 | `tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI` | 1 | 6.891 | 6.891 |
 
