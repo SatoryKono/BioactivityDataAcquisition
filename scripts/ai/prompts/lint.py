@@ -45,7 +45,7 @@ LOGGER = logging.getLogger(__name__)
 # false-positives on allowed field name ``VALIDATION:`` or OBJECT text
 # like ``generate->validate->artifact``.
 CONTROLLER_RE = re.compile(
-    r"(Scope freeze|Iteration\s+i|Issue-sync|Post-audit|Normalize|Plan\s*[\|:])",
+    r"(Scope freeze|Iteration\s+i|Issue-sync|Post-audit|\bNormalize\b.*\bplan\b|\bPlan\s*[\|:])",
     re.I,
 )
 
