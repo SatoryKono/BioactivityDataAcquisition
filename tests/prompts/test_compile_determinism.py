@@ -49,8 +49,12 @@ def test_different_profile_changes_sha() -> None:
     b = compile_one("docs", "full-write")
     assert a["error"] is None
     assert b["error"] is None
-    assert a["prompt_sha8"] != b["prompt_sha8"]
+    # prompt_sha8 is hash of body (kernel+overlay) only — may be equal across
+    # profiles when body has no {{ALLOW_*}} tokens; whole-file bytes must differ
+    # because provenance header + params embed profile/precedence.
     assert a["rendered_text"] != b["rendered_text"]
+    assert sha8(a["rendered_text"].encode("utf-8")) != sha8(b["rendered_text"].encode("utf-8"))
+    assert a["params"]["MODE"] != b["params"]["MODE"]  # type: ignore[index]
 
 
 def test_provenance_header_present() -> None:
