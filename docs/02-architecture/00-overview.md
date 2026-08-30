@@ -23,7 +23,7 @@ treated as the same number:
 | Instrument | Typical use | Example (2026-08-05) |
 | --- | --- | ---: |
 | **Human maintainability audit** (ARCH-REF / review report) | Density, residual structure, cognitive load, package ownership | **7.82** / 10 |
-| **Machine quality scorecard** (`reports/quality/architecture-quality-scorecard.json`) | Layer violations, coverage floors, hotspot budgets, gate pass rates | **9.41** |
+| **Machine quality scorecard** (`reports/quality/architecture-quality-scorecard.json`) | Layer violations, coverage floors, hotspot budgets, gate pass rates | **9.14** |
 
 Scorecard green means **gates hold**; it does **not** mean residual package
 sprawl or mixin graphs are finished. Prefer human audit for prioritization of

@@ -20,7 +20,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
   "evidence_surface_sha256": "08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76",
   "metrics": {
-    "architecture_integral_score": 9.41,
+    "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
@@ -50,7 +50,7 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 
 1. Debt-governance gates: **44 pass / 1 fail** (45 debt-governance gates).
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
-1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
+1. Architecture quality integral score: **9.14** (`good_targeted_improvements`). Integral score `9.14`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2465**
    - fully_covered: **1568**

@@ -36,6 +36,8 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
             "public_entrypoint_growth_count",
             "public_export_facade_growth_count",
             "public_export_facade_conflict_count",
+            "composition_util",
+            "lazy_util",
         ),
     },
     {
@@ -46,6 +48,8 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
             "hotspot_family_count",
             "hotspot_budget_warning_count",
             "total_duplicate_clusters",
+            "families_at_budget_count",
+            "lazy_util",
         ),
     },
     {
@@ -101,6 +105,7 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
             "repo_wide_untriaged_zero_import_candidate_count",
             "hotspot_budget_warning_count",
             "total_duplicate_clusters",
+            "composition_util",
         ),
     },
 )
@@ -112,7 +117,21 @@ def _metric_value(metrics: dict[str, object], key: str) -> object:
 
 def _metric_int(metrics: dict[str, object], key: str) -> int:
     value = metrics.get(key, 0)
-    return int(value) if isinstance(value, (int, float)) else 0
+    return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0
+
+
+def _metric_float(metrics: dict[str, object], key: str) -> float:
+    value = metrics.get(key, 0)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return 0.0
+    return float(value)
+
+
+def _over_cap_penalty(
+    metrics: dict[str, object], key: str, threshold: float, penalty: float
+) -> float:
+    """Return ``penalty`` when a 0..1 utilisation ratio exceeds ``threshold``."""
+    return penalty if _metric_float(metrics, key) > threshold else 0.0
 
 
 def _composition_module_cap(package_cohesion_budget: dict[str, object]) -> int:
@@ -139,10 +158,11 @@ def _build_diagnostic_payload(
     composition_module_count: int,
     package_cohesion_budget: dict[str, object],
 ) -> dict[str, object]:
-    """Build decision-support evidence without changing program-gate scoring."""
+    """Build decision-support evidence; program-gate budgets stay shrink-only."""
     lazy_import_cap = lazy_import_ratchet.get("max_count")
     if not isinstance(lazy_import_cap, int):
         raise TypeError("lazy_import_ratchet.max_count must be an integer")
+    composition_cap = _composition_module_cap(package_cohesion_budget)
     return {
         "grade_kind": "diagnostic_proxy",
         "program_gate_policy": "external_unchanged",
@@ -153,15 +173,18 @@ def _build_diagnostic_payload(
             ),
             "module_boundaries_coupling": (
                 "hotspot budget warnings and duplicate clusters proxy; "
-                "at-budget families remain visible but non-blocking"
+                "at-budget families and cap saturation penalize the diagnostic "
+                "grade and remain shrink-only for program gates"
             ),
         },
         "families_at_budget_count": families_at_budget["count"],
         "families_at_budget": families_at_budget["names"],
         "lazy_import_observed_count": lazy_import_observed_count,
         "lazy_import_cap": lazy_import_cap,
+        "lazy_util": round(lazy_import_observed_count / lazy_import_cap, 4),
         "composition_module_count": composition_module_count,
-        "composition_module_cap": _composition_module_cap(package_cohesion_budget),
+        "composition_module_cap": composition_cap,
+        "composition_util": round(composition_module_count / composition_cap, 4),
     }
 
 
@@ -192,7 +215,7 @@ def _clamp_score(value: float) -> float:
 
 
 def _score_layer_compliance(metrics: dict[str, object]) -> float:
-    return _clamp_score(9.5 - 2.5 * _metric_int(metrics, "layer_violations"))
+    return _clamp_score(10.0 - 2.5 * _metric_int(metrics, "layer_violations"))
 
 
 def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
@@ -201,7 +224,7 @@ def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
         _metric_int(metrics, "sunset_compat_count"),
     )
     return _clamp_score(
-        9.2
+        10.0
         - 1.5 * _metric_int(metrics, "layer_violations")
         - 0.5 * active_compat_count
         - 1.0 * _metric_int(metrics, "expired_compat_count")
@@ -210,7 +233,7 @@ def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
 
 def _score_ddd_invariants(metrics: dict[str, object]) -> float:
     return _clamp_score(
-        9.0
+        10.0
         - 1.5 * _metric_int(metrics, "uncovered_module_count")
         - 0.75 * _metric_int(metrics, "unmeasured_module_count")
     )
@@ -218,11 +241,13 @@ def _score_ddd_invariants(metrics: dict[str, object]) -> float:
 
 def _score_composition_di(metrics: dict[str, object]) -> float:
     return _clamp_score(
-        9.0
+        10.0
         - 1.5 * _metric_int(metrics, "layer_violations")
         - 0.5 * _metric_int(metrics, "public_entrypoint_growth_count")
         - 0.75 * _metric_int(metrics, "public_export_facade_growth_count")
         - 1.0 * _metric_int(metrics, "public_export_facade_conflict_count")
+        - _over_cap_penalty(metrics, "composition_util", 0.95, 3.5)
+        - _over_cap_penalty(metrics, "lazy_util", 0.90, 0.5)
     )
 
 
@@ -230,30 +255,30 @@ def _score_module_boundaries_coupling(metrics: dict[str, object]) -> float:
     """Score module-boundary / coupling health.
 
     Tracking hotspot *families* is a governance surface, not residual debt.
-    Only budget warnings and residual full-app duplicate clusters reduce the
-    score. Clean posture (0 warnings, 0 clusters) scores 9.5 so the category
-    can clear the ≥9.0 program gate without dropping family tracking.
+    Budget warnings, duplicate clusters, at-budget families, and lazy-import
+    saturation reduce the diagnostic grade. Clean posture scores 10.0.
+    Program-gate caps remain shrink-only.
     """
     return _clamp_score(
-        9.5
+        10.0
         - 0.5 * _metric_int(metrics, "hotspot_budget_warning_count")
         - 0.05 * _metric_int(metrics, "total_duplicate_clusters")
+        - 0.80 * _metric_int(metrics, "families_at_budget_count")
+        - _over_cap_penalty(metrics, "lazy_util", 0.90, 0.4)
     )
 
 
 def _score_naming_package_consistency(metrics: dict[str, object]) -> float:
-    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     return _clamp_score(
-        9.9
+        10.0
         - 0.8 * _metric_int(metrics, "expired_compat_count")
         - 0.8 * _metric_int(metrics, "twin_pair_count")
     )
 
 
 def _score_test_strategy_testability(metrics: dict[str, object]) -> float:
-    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     return _clamp_score(
-        9.9
+        10.0
         - 1.5 * _metric_int(metrics, "unmeasured_module_count")
         - 1.0 * _metric_int(metrics, "uncovered_module_count")
         - 0.02 * _metric_int(metrics, "compatibility_test_file_count")
@@ -262,7 +287,7 @@ def _score_test_strategy_testability(metrics: dict[str, object]) -> float:
 
 def _score_config_contracts_entrypoints(metrics: dict[str, object]) -> float:
     return _clamp_score(
-        9.2
+        10.0
         - 2.0 * _metric_int(metrics, "contract_blocking_issue_count")
         - 2.0 * _metric_int(metrics, "dq_blocking_issue_count")
         - 1.5 * _metric_int(metrics, "adr_enforcement_blocking_gap_count")
@@ -271,7 +296,7 @@ def _score_config_contracts_entrypoints(metrics: dict[str, object]) -> float:
 
 def _score_determinism_replay_observability(metrics: dict[str, object]) -> float:
     return _clamp_score(
-        9.0
+        10.0
         - 1.5 * _metric_int(metrics, "dashboarded_without_emission_count")
         - 1.5 * _metric_int(metrics, "dashboarded_without_declaration_count")
         - 1.0 * _metric_int(metrics, "runtime_cardinality_review_required_count")
@@ -281,13 +306,12 @@ def _score_determinism_replay_observability(metrics: dict[str, object]) -> float
 
 
 def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
-    # Clean-posture floor recalibrated 2026-07-28 (#6793) after residual TD burn-down.
     active_compat_count = max(
         _metric_int(metrics, "transition_compat_count"),
         _metric_int(metrics, "sunset_compat_count"),
     )
     return _clamp_score(
-        9.9
+        10.0
         - 0.2 * active_compat_count
         - 0.5 * _metric_int(metrics, "expired_compat_count")
         - 0.2 * _metric_int(metrics, "public_entrypoint_growth_count")
@@ -296,6 +320,7 @@ def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
         - 0.5 * _metric_int(metrics, "repo_wide_untriaged_zero_import_candidate_count")
         - 0.08 * _metric_int(metrics, "hotspot_budget_warning_count")
         - 0.01 * _metric_int(metrics, "total_duplicate_clusters")
+        - _over_cap_penalty(metrics, "composition_util", 0.95, 3.0)
     )
 
 

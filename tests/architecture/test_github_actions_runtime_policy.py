@@ -8,7 +8,8 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture guardrails for GitHub Actions supply-chain policy."""
+"""Architecture guardrails for GitHub Actions supply-chain policy.REQ-DEP-002: GitHub Actions runtime/image policy.
+"""
 
 from __future__ import annotations
 
