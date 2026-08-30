@@ -45,20 +45,15 @@
     {
       "duration_s": 10.019,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact"
     },
     {
-      "duration_s": 9.509,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
-    },
-    {
-      "duration_s": 8.287,
+      "duration_s": 7.482,
       "source": "junit.integration.xml",
       "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
     },
     {
-      "duration_s": 7.271,
+      "duration_s": 7.418,
       "source": "junit.unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness"
     },
@@ -172,20 +167,15 @@
     {
       "duration_s": 10.019,
       "source": "junit-unit-scripts-tooling.xml",
-      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact"
     },
     {
-      "duration_s": 9.509,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
-    },
-    {
-      "duration_s": 8.287,
+      "duration_s": 7.482,
       "source": "junit.integration.xml",
       "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
     },
     {
-      "duration_s": 7.271,
+      "duration_s": 7.418,
       "source": "junit.unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness"
     },
@@ -310,7 +300,7 @@
       "max_duration_s": 7.205
     },
     {
-      "zone": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures",
+      "zone": "tests.unit.composition.test_registry_protocol.TestPipelineRegistryUnifiedAPI",
       "test_count": 1,
       "total_duration_s": 6.906,
       "max_duration_s": 6.906

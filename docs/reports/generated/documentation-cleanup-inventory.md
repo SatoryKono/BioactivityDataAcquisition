@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3597 |
-| Tracked doc-like files | 3597 |
-| Ignored local docs/reports files | 0 |
+| Doc-like files | 3535 |
+| Tracked doc-like files | 3530 |
+| Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
@@ -18,7 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3597 |
+| ignored_local | 5 |
+| tracked | 3530 |
 
 ## Lifecycle Counts
 
@@ -26,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 62 |
+| active_quality_baseline | 61 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 10 |
@@ -42,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 938 |
+| working_report | 855 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -62,8 +63,8 @@
 | Archived | 170 |
 | Canonical | 72 |
 | Deprecated | 8 |
-| Generated | 1177 |
-| Working | 1423 |
+| Generated | 1178 |
+| Working | 1360 |
 
 ## Surface Families
 
@@ -73,17 +74,17 @@
 | archive | 170 |
 | canonical | 72 |
 | duplicate | 8 |
-| generated | 1177 |
-| working | 1423 |
+| generated | 1178 |
+| working | 1360 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 929 |
-| generate-automatically | 1177 |
-| keep | 1139 |
+| archive-after-migration | 867 |
+| generate-automatically | 1178 |
+| keep | 1138 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 8 |
 
@@ -144,23 +145,6 @@
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-code-drift.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-pipeline.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-001.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-002.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-003.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-004.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-bundle.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-verification.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
@@ -171,6 +155,23 @@
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/blocked-evidence.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/preflight.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/final-summary.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
