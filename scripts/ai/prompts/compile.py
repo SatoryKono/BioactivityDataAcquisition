@@ -37,14 +37,17 @@ import yaml
 # Paths — mirrors registry.py
 # ---------------------------------------------------------------------------
 try:
-    from scripts.ai.prompts.registry import PROMPTS_ROOT as _REG_PROMPTS_ROOT
-    from scripts.ai.prompts.registry import REPO_ROOT as _REG_REPO_ROOT
+    from scripts.ai.prompts.registry import PROMPTS_ROOT as _RP
+    from scripts.ai.prompts.registry import REPO_ROOT as _RR
 
-    PROMPTS_ROOT: Path = _REG_PROMPTS_ROOT
-    REPO_ROOT: Path = _REG_REPO_ROOT
-except Exception:  # graceful fallback for importable tests without repo layout
-    REPO_ROOT = Path(__file__).resolve().parents[3]
-    PROMPTS_ROOT = REPO_ROOT / "docs" / "00-project" / "ai" / "prompts"
+    _PROMPTS_ROOT: Path = _RP
+    _REPO_ROOT: Path = _RR
+except ImportError:  # graceful fallback for importable tests without repo layout
+    _REPO_ROOT = Path(__file__).resolve().parents[3]
+    _PROMPTS_ROOT = _REPO_ROOT / "docs" / "00-project" / "ai" / "prompts"
+
+PROMPTS_ROOT: Path = _PROMPTS_ROOT
+REPO_ROOT: Path = _REPO_ROOT
 
 KERNEL_PATH: Path = PROMPTS_ROOT / "fragments" / "cyclic-kernel-v3.md"
 OVERLAYS_DIR: Path = PROMPTS_ROOT / "overlays"
@@ -281,7 +284,7 @@ def render_overlay_sections(overlay: dict[str, Any]) -> str:
 
 
 def render_compiled(
-    domain: str,
+    _domain: str,
     profile: str,
     kernel_sha8: str,
     overlay_sha8: str,
@@ -470,8 +473,13 @@ def main(argv: list[str] | None = None) -> int:
             status = "DRIFT"
         elif r.get("written"):
             status = "WROTE"
-        # Use stderr for CLI feedback; logging for structured logs
-        print(f"{status} {r['domain']}/{r['profile']}: {r.get('error') or r.get('output_path', '')}", file=sys.stderr)
+        msg = f"{status} {r['domain']}/{r['profile']}: {r.get('error') or r.get('output_path', '')}"
+        if r.get("error") or r.get("drift"):
+            LOGGER.error("%s", msg)
+        else:
+            LOGGER.info("%s", msg)
+        print(msg, file=sys.stderr)
+
 
     if args.check and (errors or drifts):
         return 1
