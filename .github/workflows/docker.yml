@@ -80,6 +80,8 @@ jobs:
 
   docker-lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
     strategy:
       matrix:
@@ -98,6 +100,8 @@ jobs:
 
   docker-compose-validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -279,6 +283,7 @@ jobs:
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
+            reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
             reports/security/trivy-version.json
@@ -301,6 +306,7 @@ jobs:
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
+            reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
             reports/security/trivy-version.json
