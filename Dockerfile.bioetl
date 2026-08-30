@@ -3,6 +3,8 @@
 # docker:S8431 - pin by digest only (no tag+digest).
 FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS builder
 
+# Builder package installation requires root; the final scratch stage is non-root.
+# hadolint ignore=DL3002
 USER 0
 WORKDIR /app
 
@@ -47,9 +49,8 @@ RUN printf '# BioETL\n' > README.md \
 # manager and shell surfaces from the final scratch stage.
 FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS runtime-root
 
-USER 0
-RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
-
+# Runtime-root assembles files only; the final scratch stage runs as 999:999.
+# hadolint ignore=DL3002
 USER 0
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
