@@ -10,7 +10,9 @@ import yaml
 
 pytestmark = pytest.mark.unit
 
-PROMPTS_ROOT = Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+PROMPTS_ROOT = (
+    Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+)
 OVERLAYS_DIR = PROMPTS_ROOT / "overlays"
 SCHEMA_PATH = PROMPTS_ROOT / "_schema" / "domain-overlay.schema.json"
 
@@ -21,12 +23,14 @@ def _load_schema() -> dict:
 
 def _validate(data: dict) -> list[str]:
     try:
-        import jsonschema  # type: ignore[import-untyped]
-        from jsonschema import Draft202012Validator  # type: ignore[attr-defined]
+        from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
     except ImportError:
         pytest.skip("jsonschema not available")
     validator = Draft202012Validator(_load_schema())
-    return [e.message for e in sorted(validator.iter_errors(data), key=lambda e: list(e.path))]
+    return [
+        e.message
+        for e in sorted(validator.iter_errors(data), key=lambda e: list(e.path))
+    ]
 
 
 def test_all_24_overlays_validate() -> None:
@@ -46,7 +50,9 @@ def test_overlay_with_allow_issue_write_must_fail_schema() -> None:
     bad["ALLOW_ISSUE_WRITE"] = True
     errs = _validate(bad)
     assert errs, "ALLOW_ISSUE_WRITE overlay must fail schema/lint"
-    assert any("ALLOW" in e or "not" in e.lower() or "additional" in e.lower() for e in errs)
+    assert any(
+        "ALLOW" in e or "not" in e.lower() or "additional" in e.lower() for e in errs
+    )
 
 
 def test_missing_required_field_must_fail() -> None:

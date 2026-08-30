@@ -7,20 +7,24 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
-
 from scripts.ai.prompts.verify import finding_fingerprint
 
 pytestmark = pytest.mark.unit
 
-PROMPTS_ROOT = Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+PROMPTS_ROOT = (
+    Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+)
 
 
 def test_fingerprint_stable_under_rephrased_claim() -> None:
     # fingerprint depends on domain|requirement_id|root_cause|paths, NOT claim
     # rephrasing claim (or any text outside those 4 fields) must not change it.
-    fp1 = finding_fingerprint("docs", "REQ-001", "broken SSOT link", ["README.md", "docs/guide.md"])
-    fp2 = finding_fingerprint("docs", "REQ-001", "broken SSOT link", ["README.md", "docs/guide.md"])
+    fp1 = finding_fingerprint(
+        "docs", "REQ-001", "broken SSOT link", ["README.md", "docs/guide.md"]
+    )
+    fp2 = finding_fingerprint(
+        "docs", "REQ-001", "broken SSOT link", ["README.md", "docs/guide.md"]
+    )
     assert fp1 == fp2
     assert len(fp1) == 64
 
@@ -42,8 +46,7 @@ def test_finding_schema_validates() -> None:
     assert schema_path.is_file()
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     try:
-        import jsonschema  # type: ignore[import-untyped]
-        from jsonschema import Draft202012Validator  # type: ignore[attr-defined]
+        from jsonschema import Draft202012Validator  # type: ignore[import-untyped]
     except ImportError:
         pytest.skip("jsonschema not available")
     fp = finding_fingerprint("docs", "REQ-001", "cause", ["README.md"])

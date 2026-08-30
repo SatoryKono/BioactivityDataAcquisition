@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
-from scripts.ai.prompts.lint import LintReport, check_overlay
-
 import pytest
+import yaml
+from scripts.ai.prompts.lint import LintReport, check_overlay
 
 pytestmark = pytest.mark.unit
 
@@ -50,5 +48,9 @@ def test_valid_overlay_clean() -> None:
     data["SSOT"] = ["docs/00-project/RULES.md"]
     data["AUDIT_CONTOURS"] = ["check freshness of SSOT links"]
     report = _lint(data)
-    guard = [e for e in report.errors if e.code in ("guard_non_weakening", "no_controller_duplication")]
+    guard = [
+        e
+        for e in report.errors
+        if e.code in ("guard_non_weakening", "no_controller_duplication")
+    ]
     assert guard == [], f"valid overlay must not trigger guards: {guard}"

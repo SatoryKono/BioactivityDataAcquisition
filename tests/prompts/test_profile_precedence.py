@@ -4,19 +4,23 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
 import pytest
-
+import yaml
 from scripts.ai.prompts.compile import compile_one
 
 pytestmark = pytest.mark.unit
 
-PROMPTS_ROOT = Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+PROMPTS_ROOT = (
+    Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
+)
 PROFILES_DIR = PROMPTS_ROOT / "profiles"
 
 
 def _load_profile(name: str) -> dict:
-    return yaml.safe_load((PROFILES_DIR / f"{name}.yaml").read_text(encoding="utf-8")) or {}
+    return (
+        yaml.safe_load((PROFILES_DIR / f"{name}.yaml").read_text(encoding="utf-8"))
+        or {}
+    )
 
 
 def test_audit_readonly_profile_fail_closed() -> None:
