@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/ledger-event.schema.json",
+  "title": "BioETL Audit Ledger Event (append-only)",
+  "description": "Append-only ledger event for reports/audit-runs/<run_id>/ledger.jsonl and master-ledger.jsonl. Events are written AFTER the state change they describe; resume reuses run_id and never replays completed side effects. File is append-only; rewriting history is a corruption.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "run_id",
+    "timestamp",
+    "stage"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9TZ:\\-\\.]+-[a-z0-9\\-]+-[a-f0-9]+-[a-f0-9]{8}$|^[0-9TZ:\\-\\.]+-[a-z0-9\\-]+-[a-f0-9]+$",
+      "description": "run_id = <UTC>-<domain>-<shortsha>-<prompt_sha8> (or master variant)"
+    },
+    "stage_no": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Numeric stage index (1..N for kernel iterations, 1..24 for master orchestrator)"
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stage identity: kernel A..I / scope-freeze..post-audit or master 01..24 / POST_AUDIT / event name"
+    },
+    "prompt_id": {
+      "type": "string",
+      "pattern": "^prompt\\.[a-z0-9\\.\\-_]+$",
+      "description": "Prompt/overlay ID"
+    },
+    "event": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "RUNNING",
+        "SUCCESS",
+        "FAILED",
+        "BLOCKED"
+      ]
+    },
+    "rendered_prompt_sha8": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$|^[a-f0-9]{8}$|^[a-f0-9]{8}-[a-f0-9]+$",
+      "description": "Deterministic render hash: 64-hex sha256 or 8-hex short (prompt_sha8). 64-hex is canonical; 8-hex accepted for compatibility."
+    },
+    "baseline_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issue_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pr_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "validation_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Finding fingerprint when event relates to a finding"
+    }
+  }
+}
