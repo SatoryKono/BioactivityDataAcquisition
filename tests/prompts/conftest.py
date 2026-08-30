@@ -6,6 +6,6 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def _bioetl_test_silver_validator(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch):  # noqa: ARG001
+def _bioetl_test_silver_validator() -> None:
     """Shadow root autouse fixture to keep prompts tests lightweight (no polars import)."""
     yield

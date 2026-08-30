@@ -6,7 +6,6 @@ import hashlib
 import re
 
 import pytest
-
 from scripts.ai.prompts.compile import compile_one, sha8
 
 pytestmark = pytest.mark.unit
@@ -53,7 +52,9 @@ def test_different_profile_changes_sha() -> None:
     # profiles when body has no {{ALLOW_*}} tokens; whole-file bytes must differ
     # because provenance header + params embed profile/precedence.
     assert a["rendered_text"] != b["rendered_text"]
-    assert sha8(a["rendered_text"].encode("utf-8")) != sha8(b["rendered_text"].encode("utf-8"))
+    assert sha8(a["rendered_text"].encode("utf-8")) != sha8(
+        b["rendered_text"].encode("utf-8")
+    )
     assert a["params"]["MODE"] != b["params"]["MODE"]  # type: ignore[index]
 
 
