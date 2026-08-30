@@ -136,6 +136,9 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     assert "workflow_dispatch:" in workflow
     assert "1 1,4,7,10" in workflow
     assert "--fail-on-drift" not in workflow
+    job_header = workflow.split("    steps:", 1)[0]
+    assert "runner.temp" not in job_header
+    assert "$RUNNER_TEMP/github-settings-review.json" in workflow
 
 
 def test_issue_forms_and_automation_use_canonical_labels() -> None:
