@@ -34,10 +34,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.domain.behavior._dq_rule_evaluators import _field_rule_violated
 from bioetl.domain.behavior._dq_rule_evaluators import (
     _conditional_matches,
     _cross_rule_violated,
+    _custom_cross_rule_violated,
+    _custom_rule_violated,
+    _field_rule_violated,
 )
 from bioetl.domain.behavior._dq_condition_matchers import _condition_options
 from bioetl.domain.behavior._dq_condition_matchers import _in_condition_matches
@@ -48,18 +50,106 @@ from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
     _coerce_string_list_like,
     _coerce_target_json_list,
     _is_invalid_xref_item,
+    _publication_taxonomy_strategy,
     _publication_taxonomy_rule_violated,
     _publication_taxonomy_vocabulary,
     _resolve_custom_validation_strategy,
+    _target_json_vocabulary_strategy,
     _target_json_vocabulary_rule_violated,
+    _target_xref_json_vocabulary_strategy,
     _target_xref_json_vocabulary_rule_violated,
+    validate_target_organism_rule_violated,
 )
+from bioetl.domain.behavior.dq_rule_evaluator import _require_dq_rule_outcome
+from bioetl.domain.behavior.dq_rule_evaluator import _apply_invalid_record_policy
+from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.config.validation import CrossFieldValidation
 from bioetl.domain.config.validation import FieldValidation
 from bioetl.domain.exceptions import ValidationError
+from bioetl.domain.types.dq_contracts import DQDisposition, DQRuleOutcome
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_custom_evaluator_fail_closed_branches_are_explicit() -> None:
+    with pytest.raises(ValidationError, match="Unknown custom validator: None"):
+        _custom_rule_violated({}, "value", None)
+
+    with pytest.raises(
+        ValidationError,
+        match="Unknown custom cross-field validator: None",
+    ):
+        _custom_cross_rule_violated({}, None)
+
+    alias_rule = CrossFieldValidation(
+        name="alias",
+        fields=("doi", "publication_doi"),
+        condition="custom",
+        validator="validate_alias_equality",
+    )
+    assert _custom_cross_rule_violated(
+        {"doi": "10.1/a", "publication_doi": "10.1/b"},
+        alias_rule,
+    )
+
+
+def test_vocabulary_strategy_guards_reject_unresolved_names() -> None:
+    assert _target_json_vocabulary_strategy([], None)
+    assert _target_xref_json_vocabulary_strategy([], None)
+    assert _publication_taxonomy_strategy("article", None)
+
+
+@pytest.mark.parametrize("value", [object(), "   "])
+def test_target_organism_rejects_non_string_or_empty_values(value: object) -> None:
+    assert validate_target_organism_rule_violated({}, value)
+
+
+def test_dq_outcome_type_guard_rejects_replacement_regression() -> None:
+    with pytest.raises(
+        TypeError,
+        match="dataclass replacement did not preserve DQRuleOutcome",
+    ):
+        _require_dq_rule_outcome(object())
+
+
+def test_cross_rule_requires_complete_conditional_configuration() -> None:
+    rule = CrossFieldValidation(
+        name="conditional",
+        fields=("trigger", "required"),
+        condition="conditional_required",
+    )
+
+    with pytest.raises(
+        ValidationError,
+        match="requires trigger_field and required_field",
+    ):
+        _cross_rule_violated({"trigger": True}, rule)
+
+
+def test_xref_vocabulary_rejects_non_list_payload() -> None:
+    assert _target_xref_json_vocabulary_rule_violated(
+        object(),
+        allowed_values=frozenset({"UniProt"}),
+    )
+
+
+def test_invalid_record_policy_preserves_already_blocking_outcome() -> None:
+    outcome = DQRuleOutcome(
+        rule_id="already-failed",
+        violation_kind="business_rule_violation",
+        severity="error",
+        disposition=DQDisposition.FAIL,
+    )
+
+    assert (
+        _apply_invalid_record_policy(
+            outcome,
+            dq_config=DQConfig(invalid_record_policy="quarantine"),
+            severity="error",
+        )
+        is outcome
+    )
 
 
 def test_target_component_types_json_vocab_custom_rule_accepts_canonical_json() -> None:

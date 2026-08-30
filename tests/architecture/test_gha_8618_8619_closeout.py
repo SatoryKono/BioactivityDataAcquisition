@@ -31,8 +31,8 @@ def test_github_policy_documents_active_root_hygiene_ruleset() -> None:
     """GHA-003: policy SSOT must document active always-on ruleset on main."""
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "root-hygiene-required-check" in text
-    assert "Enforcement: `disabled`." in text
+    assert "Enforcement: `active`." in text
     assert "`checks-complete`" in text
     assert "`root-hygiene`" in text
-    assert "Direct merge allowed; no active required-check ruleset" in text
+    assert "Direct updates to main are blocked by the active rule." in text
     assert "no bypass actors" in text

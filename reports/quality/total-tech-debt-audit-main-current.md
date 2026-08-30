@@ -6,19 +6,19 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: main
+Audited branch: fix/sonar-postmerge-ci-closeout-20260828
 
-Audited commit SHA: `72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4`
+Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`
 
-Evidence surface SHA-256: `1927dac9ece0d7143c05ec4adec635c731c83355f64d482d0e29550283662783`
+Evidence surface SHA-256: `1e083b4081837afbe1e485a8fbe5caa9149adb03046886218e43255692b95327`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4",
-  "evidence_surface_sha256": "1927dac9ece0d7143c05ec4adec635c731c83355f64d482d0e29550283662783",
+  "audited_commit_sha": "0687fbc75e442a93c5239de24e3d9055072d7cb8",
+  "evidence_surface_sha256": "1e083b4081837afbe1e485a8fbe5caa9149adb03046886218e43255692b95327",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1570,
+    "fully_covered_module_count": 1569,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 891,
+    "partially_covered_module_count": 892,
     "source_module_count": 2465,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pinned to a reachable current-main commit after canonical regeneration on the merged worktree. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical regeneration on origin/main e862d6dbf6. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
@@ -53,8 +53,8 @@ Refresh reason: Re-pinned to a reachable current-main commit after canonical reg
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2465**
-   - fully_covered: **1570**
-   - partially_covered: **891**
+   - fully_covered: **1569**
+   - partially_covered: **892**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**

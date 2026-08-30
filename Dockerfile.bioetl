@@ -1,7 +1,9 @@
 # Multi-stage build for bioetl: dependencies → shell-less runtime
 # All stages derive from one immutable Wolfi base image digest.
 # docker:S8431 — pin by digest only (no tag+digest).
-FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS builder
+# Upstream: python:3.12-slim-bookworm (Python 3.12.14), retrieved 2026-08-28.
+# pandas==2.2.3 has no cp314 wheel; a 3.14 digest breaks uv sync --no-build.
+FROM python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579 AS builder
 
 USER 0
 WORKDIR /app
@@ -40,13 +42,14 @@ print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")" \
     && rm -rf /tmp/bioetl-wheels \
     && mkdir -p /app/logs
 
-# End every stage as non-root; the runtime copy preserves explicit ownership.
-USER 65532:65532
+# Stage 2: Runtime (minimal image)
+# docker:S8431 — pin by digest only (no tag+digest).
+FROM python@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579
 
 # Prepare the supported Python 3.13 runtime filesystem. Keep the apk database so
 # Trivy can audit every installed OS package, while removing executable package
 # manager and shell surfaces before the final scratch stage.
-FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS runtime-root
+FROM chainguard/wolfi-base@sha256:03c6561658909fc4eadd0b2dc717375df40a22cc05455b8f82f1f1974e7e4427 AS runtime-root
 
 USER 0
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
@@ -70,7 +73,23 @@ COPY --from=runtime-root /usr /usr
 COPY --from=runtime-root /runtime-fs/ /
 WORKDIR /app
 
-COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv
+# Install runtime dependencies and create non-root user for security.
+# Debian security packages track moving distro revisions (no stable =version pins).
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && python -m pip install --no-cache-dir --upgrade pip==26.1.2 \
+    && groupadd -r -g 999 bioetl \
+    && useradd -r -u 999 -g bioetl bioetl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Runtime executes the wheel installed into the builder venv. Copy configs as
+# root-owned data; do not copy src/ or set PYTHONPATH to /app/src (that would
+# shadow the wheel).
 COPY --chown=root:root configs/ ./configs/
 COPY --from=builder --chown=65532:65532 /app/logs /app/logs
 

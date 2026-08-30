@@ -1,1 +1,0 @@
-{"run_id":"20260827-120500-cp-new2-a1f21f98","iteration":1,"waves":[],"max_waves_per_iteration":3,"debt_effect":"unchanged","acceptance":["No manifest/ledger split regression","Checkpoint anchors fail-closed","MemoryLock per workflow name","No silent skip without repair/force"],"rollback":"Revert branch fix/control-plane-cycle-new2-a1f21f98"}

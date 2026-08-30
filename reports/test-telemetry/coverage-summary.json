@@ -1,14 +1,16 @@
 {
-  "source_branch": "main",
-  "source_commit": "b3b326d75200eca40bcb91803ebe2528678777e6",
-  "source_run_id": "33224655453",
-  "source_tree_sha256": "19ad0ea0e4968bcf98efb222f4c7224767278c3ba556384154d033f20117996e",
-  "refreshed_at_utc": "2026-08-29T01:22:27.025840+00:00",
+  "source_branch": "fix/container-vulnerabilities-20260828",
+  "source_commit": "2460c8c04e2c86adddc2a609c30957a4b63c146c",
+  "source_run_id": "33169139447",
+  "source_event": "pull_request",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33169139447",
+  "source_tree_sha256": "dedfa7247e6967060f3c2645ba75d1e7a35ec9fdef6b7265263cddf1acf5b02e",
+  "refreshed_at_utc": "2026-08-28T12:08:33.049094+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.57,
+  "coverage_percent": 96.58,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.57,
+    "actual_percent": 96.58,
     "threshold_satisfied": true
   }
 }
