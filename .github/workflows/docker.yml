@@ -270,6 +270,12 @@ jobs:
           ignore-unfixed: false
           version: "v0.70.0"
 
+      - name: Generate Trivy fixability audit
+        run: |
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+            --trivy-json reports/security/trivy-results.json \
+            --output reports/security/trivy-fixability-audit.json
+
       - name: Validate complete security baseline
         id: validate-baseline
         if: always() && !cancelled()
@@ -333,6 +339,13 @@ jobs:
           exit-code: "1"
           ignore-unfixed: false
           version: "v0.70.0"
+
+      - name: Enforce fixable Trivy Critical High Medium policy
+        run: |
+          python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
+            --trivy-json reports/security/trivy-results.json \
+            --output reports/security/trivy-fixability-audit.json \
+            --fail-on-fixable
 
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
