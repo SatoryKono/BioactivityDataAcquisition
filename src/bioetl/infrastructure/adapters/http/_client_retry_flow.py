@@ -108,6 +108,7 @@ async def handle_response_attempt(
     can_retry: _CanRetryCheck,
     handle_retry_delay: _RetryDelayHandler,
     log_retry: _RetryLogger,
+    allow_redirect_response: bool = False,
 ) -> httpx.Response | _RequestAttemptOutcome:
     """Process a completed HTTP response without changing retry semantics."""
     if should_retry_response(
@@ -127,7 +128,8 @@ async def handle_response_attempt(
         )
         return _RequestAttemptOutcome(True, status_code, 1, status_error)
 
-    response.raise_for_status()
+    if not (allow_redirect_response and 300 <= response.status_code < 400):
+        response.raise_for_status()
     span.set_attribute("http.status_code", response.status_code)
     return response
 

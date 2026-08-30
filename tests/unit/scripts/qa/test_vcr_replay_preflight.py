@@ -89,8 +89,8 @@ def test_collect_vcr_replay_preflight_accepts_clean_catalog_and_secret_filter(
 
     assert report["blockers"] == []
     assert report["catalog"]["totals_match"] is True
-    assert report["secret_filter"]["replay_only"] is True
-    assert report["secret_filter"]["has_request_sanitizer"] is True
+    assert report["sanitizer_status"]["replay_only"] is True
+    assert report["sanitizer_status"]["has_request_sanitizer"] is True
 
 
 def test_main_strict_returns_nonzero_for_replay_blockers(tmp_path: Path) -> None:
@@ -102,3 +102,59 @@ def test_main_strict_returns_nonzero_for_replay_blockers(tmp_path: Path) -> None
     )
 
     assert preflight.main(["--root", str(tmp_path), "--strict"]) == 1
+
+
+def test_main_prints_only_allowlisted_public_fields(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sentinel = "DO-NOT-PRINT-SECRET"
+    absolute_path = f"C:/Users/private/{sentinel}"
+    internal_report = {
+        "schema_version": "vcr-replay-preflight-v1",
+        "root": absolute_path,
+        "vcr_root": "tests/fixtures/vcr",
+        "cassette_count": 1,
+        "metadata_sidecar_count": 0,
+        "unresolved_lfs_pointers": [
+            {
+                "path": absolute_path,
+                "strict_replay_blocked": True,
+                "headers": {"authorization": sentinel},
+                "query": sentinel,
+                "payload": sentinel,
+                "callback": sentinel,
+            }
+        ],
+        "strict_unresolved_lfs_pointer_count": 1,
+        "catalog": {"path": "reports/quality/vcr-metadata-catalog.json"},
+        "sanitizer_status": {
+            "record_mode": "none",
+            "replay_only": True,
+            "has_request_sanitizer": True,
+            "has_response_filter": True,
+            "unknown": sentinel,
+        },
+        "blockers": [
+            {
+                "id": "unresolved_vcr_lfs_pointers",
+                "message": sentinel,
+                "paths": [absolute_path],
+            },
+            {"id": sentinel, "message": sentinel},
+        ],
+        "unknown": {"nested": sentinel},
+    }
+    monkeypatch.setattr(
+        preflight,
+        "collect_vcr_replay_preflight",
+        lambda *args, **kwargs: internal_report,
+    )
+
+    assert preflight.main([]) == 0
+
+    stdout = capsys.readouterr().out
+    payload = json.loads(stdout)
+    assert sentinel not in stdout
+    assert "root" not in payload
+    assert payload["schema_version"] == "vcr-replay-preflight-public-v2"
+    assert payload["blockers"] == [{"id": "unresolved_vcr_lfs_pointers"}]
