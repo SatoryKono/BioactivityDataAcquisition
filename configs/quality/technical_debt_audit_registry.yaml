@@ -4,8 +4,13 @@ audits:
   - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
+<<<<<<< HEAD
     audited_commit_sha: 09ab9ac286bacb7eee3324e950603539a5c62ee6
     evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
+=======
+    audited_commit_sha: c7754a0a73cab6f38866af26da4c69790b70044e
+    evidence_surface_sha256: 06b3ee4e1c2440e24f5be27c144a48b8cb34cbeaf4972c959b3c08407ce1efc8
+>>>>>>> origin/main
 
     evidence_paths:
       - configs/quality/constructor_waivers.yaml
@@ -19,7 +24,11 @@ audits:
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-27.md
     audited_commit_sha: feab571a144d06137ca968ff1d6c49e9b77d3fab
+<<<<<<< HEAD
     evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
+=======
+    evidence_surface_sha256: 1270e19f35bad9c664cba6c88aa9c85e3f63c2470fdd1bc42e92f6f5ce334d22
+>>>>>>> origin/main
     evidence_paths:
       - configs/quality/compatibility_facade_inventory.yaml
       - configs/quality/debt_scorecard.yaml
@@ -37,7 +46,11 @@ audits:
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-23.md
     audited_commit_sha: 0b45de173fb869e1295abdffe9688c5c46ec544f
+<<<<<<< HEAD
     evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
+=======
+    evidence_surface_sha256: 228b26556f68767272dc9b8555990d2f4ce0d8fb3cd624d9b33f236eda5eda48
+>>>>>>> origin/main
     evidence_paths:
       - configs/quality/compatibility_facade_inventory.yaml
       - configs/quality/debt_scorecard.yaml
@@ -55,7 +68,11 @@ audits:
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-19.md
     audited_commit_sha: 2d46c3a69e75bf9a79094c071ec84a758f9e0289
+<<<<<<< HEAD
     evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
+=======
+    evidence_surface_sha256: 1b8be924d349c21dd9e6f45dcbadc34ed140a65e1e836f6cffefc787e658fef6
+>>>>>>> origin/main
     superseded_by: total-tech-debt-main-2026-07-23
     superseded_on: "2026-07-23"
     linked_issue: "#6355"

@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 from bioetl.domain.registry.publication_data import (
     get_publication_entity_type_validation_error,
 )
+
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(

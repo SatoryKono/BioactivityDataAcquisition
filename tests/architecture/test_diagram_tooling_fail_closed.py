@@ -46,6 +46,30 @@ def test_prune_orphan_nodes_normalizes_sequence_diagram() -> None:
     assert module.detect_diagram_type(["graph LR"]) == "flowchart"
 
 
+@pytest.mark.parametrize(
+    "arrow",
+    ["-->", "<--", "==>", "-.->", "--o", "--x", "~~~"],
+)
+def test_prune_orphan_nodes_preserves_supported_arrow_matrix(arrow: str) -> None:
+    module = _load(
+        "prune_orphan_nodes_arrow_matrix_9799",
+        "scripts/diagrams/fix/prune_orphan_nodes.py",
+    )
+
+    assert module._ARROW_RE.search(f"A {arrow} B") is not None
+    assert module._ids_from_edge_line(f"A {arrow} B") == {"A", "B"}
+
+
+def test_prune_orphan_nodes_rejects_malformed_html_like_arrow() -> None:
+    module = _load(
+        "prune_orphan_nodes_invalid_arrow_9799",
+        "scripts/diagrams/fix/prune_orphan_nodes.py",
+    )
+
+    assert module._ARROW_RE.search("A --!> B") is None
+    assert module._NODE_SHAPE_RE.match("Warning>label]") is not None
+
+
 def test_harmonize_link_styles_does_not_treat_er_substring_as_er() -> None:
     import xml.etree.ElementTree as ET
 

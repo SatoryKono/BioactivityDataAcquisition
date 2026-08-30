@@ -421,13 +421,18 @@ def test_ensure_backend_failure_message_includes_exit_code_and_log_tail(
         log_path.unlink(missing_ok=True)
 
 
+@pytest.mark.timeout(5)
 def test_backend_startup_log_tail_is_bounded_and_redacted(tmp_path: Path) -> None:
     log_path = tmp_path / "backend.log"
+    # Keep the complete marker/value inside the caller's 4,800-byte read window.
+    # This is still far beyond the size that made the former regex backtrack.
+    adversarial_secret = r"\!" * 2_000
     log_path.write_text(
         ("old log line\n" * 20_000)
         + "API_KEY=super-secret-value\n"
         + "DATABASE_URL=postgresql://user:password@localhost/db?token=secret\n"
-        + "Authorization: Bearer abc.def.ghi\n",
+        + "Authorization: Bearer abc.def.ghi\n"
+        + f'password="{adversarial_secret}\n',
         encoding="utf-8",
     )
 
@@ -438,6 +443,7 @@ def test_backend_startup_log_tail_is_bounded_and_redacted(tmp_path: Path) -> Non
     assert "super-secret-value" not in excerpt
     assert "user:password" not in excerpt
     assert "abc.def.ghi" not in excerpt
+    assert adversarial_secret not in excerpt
     assert "[REDACTED]" in excerpt
 
 

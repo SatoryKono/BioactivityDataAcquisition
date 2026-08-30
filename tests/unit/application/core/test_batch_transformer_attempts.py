@@ -41,13 +41,17 @@ from bioetl.application.core.batch_transformer_attempts import (
 )
 from bioetl.application.core.batch_transformer_attempt_success import (
     _apply_runtime_dq_outcomes,
+    _finalize_transformed_record,
     _resolve_gold_filter_details as _resolve_success_gold_filter_details,
+    build_transform_success_outcome,
+    resolve_transform_result,
 )
+from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.domain.behavior import dq_rule_evaluator
 from bioetl.domain.exceptions import DataQualityError
 from bioetl.domain.filtering import FilterOperator, GoldColumnFilter, GoldFilterConfig
 from bioetl.domain.types import ErrorType
-from bioetl.domain.types.dq_contracts import DQDisposition
+from bioetl.domain.types.dq_contracts import DQDisposition, DQRuleOutcome
 
 
 class _GoldFilterOwner:
@@ -79,6 +83,162 @@ class _UnstructuredGoldFilterEvaluator:
 
     def should_write_gold(self, _context, _record: dict[str, object]) -> bool:
         return False
+
+
+class _LegacyGoldFilterOwner:
+    def __init__(self, filters: object) -> None:
+        self._gold_filters = filters
+
+    def should_write_gold(self, _context, _record: dict[str, object]) -> bool:
+        return False
+
+
+@pytest.mark.unit
+def test_gold_filter_details_without_bound_owner_are_unavailable() -> None:
+    assert _resolve_gold_filter_details(lambda _ctx, _record: False, {}) is None
+
+
+@pytest.mark.unit
+def test_gold_filter_details_without_callable_evaluator_are_unavailable() -> None:
+    owner = _LegacyGoldFilterOwner(object())
+
+    assert _resolve_gold_filter_details(owner.should_write_gold, {}) is None
+
+
+@pytest.mark.unit
+def test_finalize_transformed_record_handles_all_normalization_modes() -> None:
+    context = _attempt_context()
+    processor = MagicMock()
+    processor.finalize_pre_silver.return_value = {"stage": "silver"}
+    processor.normalize_record.return_value = {"stage": "normalized"}
+    staged = PreSilverRecord(
+        entity_id="1",
+        business_data={"value": 1},
+        build_silver_record=MagicMock(),
+    )
+
+    assert (
+        _finalize_transformed_record(
+            transformed=None,
+            normalization_processor=processor,
+            context=context,
+            index=0,
+        )
+        is None
+    )
+    assert _finalize_transformed_record(
+        transformed=staged,
+        normalization_processor=processor,
+        context=context,
+        index=1,
+    ) == {"stage": "silver"}
+    assert _finalize_transformed_record(
+        transformed={"value": 1},
+        normalization_processor=processor,
+        context=context,
+        index=2,
+    ) == {"stage": "normalized"}
+
+
+@pytest.mark.unit
+def test_pre_silver_record_requires_normalization_processor() -> None:
+    staged = PreSilverRecord(
+        entity_id="1",
+        business_data={"value": 1},
+        build_silver_record=MagicMock(),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="PreSilverRecord requires RecordNormalizationProcessor",
+    ):
+        _finalize_transformed_record(
+            transformed=staged,
+            normalization_processor=None,
+            context=_attempt_context(),
+            index=0,
+        )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_resolve_transform_result_awaits_async_value() -> None:
+    async def transformed() -> dict[str, object]:
+        return {"value": 1}
+
+    assert await resolve_transform_result(transformed()) == {"value": 1}
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_build_transform_success_outcome_records_contract_exclusion() -> None:
+    debug_export = MagicMock()
+
+    outcome = await build_transform_success_outcome(
+        context=_attempt_context(),
+        transform=lambda _ctx, record, _index: {"entity_id": record["id"]},
+        raw_record={"id": "1"},
+        index=3,
+        normalization_processor=None,
+        gold_filter=lambda _ctx, _record: False,
+        gold_transform=lambda _ctx, record: record,
+        dq_config=None,
+        debug_export_service=debug_export,
+    )
+
+    assert outcome.silver_record == {"entity_id": "1"}
+    assert outcome.gold_record is None
+    assert outcome.gold_excluded_by_contract is True
+    debug_export.record_transform_success.assert_called_once_with(
+        raw_record={"id": "1"},
+        record_index=3,
+        silver_record={"entity_id": "1"},
+        gold_record=None,
+        gold_excluded_by_contract=True,
+        gold_filter_details=None,
+    )
+
+
+@pytest.mark.unit
+def test_runtime_dq_outcomes_project_warning_flags(monkeypatch) -> None:
+    outcome = DQRuleOutcome(
+        rule_id="warn-rule",
+        violation_kind="business_rule_violation",
+        severity="error",
+        disposition=DQDisposition.WARN,
+    )
+    monkeypatch.setattr(
+        "bioetl.domain.behavior.dq_rule_evaluator.evaluate_dq_rules_for_record",
+        lambda _record, _config: [outcome],
+    )
+
+    assert _apply_runtime_dq_outcomes(
+        silver_record={"entity_id": "1"},
+        dq_config=MagicMock(),
+    ) == {"entity_id": "1", "_dq_warn": True, "_dq_error": True}
+
+
+@pytest.mark.unit
+def test_runtime_dq_outcomes_raise_for_blocking_disposition(monkeypatch) -> None:
+    outcome = DQRuleOutcome(
+        rule_id="fail-rule",
+        violation_kind="business_rule_violation",
+        severity="error",
+        disposition=DQDisposition.FAIL,
+    )
+    monkeypatch.setattr(
+        "bioetl.domain.behavior.dq_rule_evaluator.evaluate_dq_rules_for_record",
+        lambda _record, _config: [outcome],
+    )
+
+    with pytest.raises(
+        DataQualityError,
+        match=r"disposition=fail; rules=\[fail-rule\]",
+    ):
+        _apply_runtime_dq_outcomes(
+            silver_record={"entity_id": "1"},
+            dq_config=MagicMock(),
+        )
 
 
 @pytest.mark.unit

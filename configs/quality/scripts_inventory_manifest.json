@@ -1,6 +1,10 @@
 {
   "schema_version": "1.0",
+<<<<<<< HEAD
   "generated_at": "2026-08-28T09:46:11.031765+00:00",
+=======
+  "generated_at": "2026-08-29T02:13:05.926390+00:00",
+>>>>>>> origin/main
   "summary": {
     "total_scripts": 604,
     "status_counts": {
@@ -15,7 +19,7 @@
       "other": 74,
       "scripts": 504,
       "skills": 12,
-      "tests": 411
+      "tests": 412
     }
   },
   "scripts": [
@@ -2591,7 +2595,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 280,
+          "line": 278,
           "source_group": "docs",
           "text": ".\\.venv-win\\Scripts\\python.exe scripts\\ai\\generate_project_domain_audit_workflow.py"
         }
@@ -2652,7 +2656,7 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 258,
+          "line": 256,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\grok\\install_skills.ps1"
         }
@@ -4977,7 +4981,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 46,
+      "reference_count": 45,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4993,37 +4997,37 @@
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 165,
+          "line": 163,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 206,
+          "line": 204,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts list"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 207,
+          "line": 205,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 208,
+          "line": 206,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 210,
+          "line": 208,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
           "path": "docs/00-project/ai/prompts/README.md",
-          "line": 211,
+          "line": 209,
           "source_group": "docs",
           "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
@@ -13570,13 +13574,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py",
           "line": 42,
           "source_group": "tests",
           "text": "from scripts.engineering.qa.docker_stability_campaign import trivy_baseline"
+        },
+        {
+          "path": "tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py",
+          "line": 8,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -16285,13 +16295,13 @@
       "references": [
         {
           "path": ".github/workflows/docker.yml",
-          "line": 16,
+          "line": 17,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
         {
           "path": ".github/workflows/docker.yml",
-          "line": 35,
+          "line": 36,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
@@ -16953,7 +16963,7 @@
         },
         {
           "path": ".github/workflows/branch-hygiene.yml",
-          "line": 49,
+          "line": 50,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
@@ -17233,7 +17243,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 362,
+          "line": 359,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -18486,7 +18496,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -18505,6 +18515,18 @@
           "line": 165,
           "source_group": "docs",
           "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
+        },
+        {
+          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+          "line": 20,
+          "source_group": "docs",
+          "text": "REQ-DELTA-002,MUST,2. Поток Данных и Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,Проверить наличие scheduled job для V"
+        },
+        {
+          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+          "line": 21,
+          "source_group": "docs",
+          "text": "REQ-DELTA-003,MUST,2. Поток Данных и Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,Проверить значение forensic-retention"
         },
         {
           "path": "scripts/ops/data/__main__.py",
@@ -19119,7 +19141,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 293,
+          "line": 290,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -19866,7 +19888,7 @@
         },
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 248,
+          "line": 246,
           "source_group": "tests",
           "text": "recover_ps1 = Path(\"scripts/ops/observability/grafana/recover_renderer.ps1\")"
         }
@@ -19934,7 +19956,7 @@
       "references": [
         {
           "path": "tests/integration/test_grafana_datasource_provisioning.py",
-          "line": 249,
+          "line": 247,
           "source_group": "tests",
           "text": "recover_sh = Path(\"scripts/ops/observability/grafana/recover_renderer.sh\")"
         }
@@ -20789,7 +20811,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1192,
+          "line": 1206,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -21890,7 +21912,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -22931,7 +22953,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -22999,7 +23021,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1129,
+          "line": 1143,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
