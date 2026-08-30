@@ -49,7 +49,7 @@ docker run --rm \
   -lc 'set -euo pipefail
 cd /tmp
 npm init -y >/dev/null 2>&1
-npm i playwright@1.49.1 --no-fund --no-audit
+npm --no-fund --no-audit install playwright@1.49.1
 # Prefer image browsers when present; otherwise let Playwright use defaults.
 if [[ ! -d "${PLAYWRIGHT_BROWSERS_PATH:-/ms-playwright}" ]]; then
   unset PLAYWRIGHT_BROWSERS_PATH PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD
