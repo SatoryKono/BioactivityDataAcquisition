@@ -537,8 +537,11 @@ class TestResourceBootstrapLazyImports:
     def test_bootstrap_quarantine_runtime_service_delegates(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        from bioetl.composition.bootstrap.cli import checkpoint as checkpoint_bootstrap
+
         monkeypatch.setattr(
-            "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_quarantine_runtime_service",
+            checkpoint_bootstrap,
+            "bootstrap_quarantine_runtime_service",
             lambda pipeline: ("quarantine", pipeline),
         )
         from bioetl.composition._resource_management import (
@@ -553,8 +556,11 @@ class TestResourceBootstrapLazyImports:
     def test_bootstrap_checkpoint_runtime_service_delegates(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        from bioetl.composition.bootstrap.cli import checkpoint as checkpoint_bootstrap
+
         monkeypatch.setattr(
-            "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_checkpoint_runtime_service",
+            checkpoint_bootstrap,
+            "bootstrap_checkpoint_runtime_service",
             lambda pipeline: ("checkpoint", pipeline),
         )
         from bioetl.composition._resource_management import (
@@ -569,12 +575,16 @@ class TestResourceBootstrapLazyImports:
     def test_bootstrap_lifecycle_and_cleanup_delegate(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
+        from bioetl.composition.bootstrap.cli import storage as storage_bootstrap
+
         monkeypatch.setattr(
-            "bioetl.composition.bootstrap.cli.storage.bootstrap_lifecycle_service",
+            storage_bootstrap,
+            "bootstrap_lifecycle_service",
             lambda: "lifecycle",
         )
         monkeypatch.setattr(
-            "bioetl.composition.bootstrap.cli.storage.bootstrap_cleanup_service",
+            storage_bootstrap,
+            "bootstrap_cleanup_service",
             lambda: "cleanup",
         )
         from bioetl.composition._resource_management import (
