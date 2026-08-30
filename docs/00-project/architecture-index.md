@@ -77,11 +77,8 @@ not an independent proof that every architecture program gate is satisfied.
 The `ddd_invariants` category uses module coverage status as a proxy; it does
 not count aggregates or prove invariant completeness. The
 `module_boundaries_coupling` category uses hotspot budget warnings and duplicate
-clusters as proxies; families exactly at budget remain non-blocking but are
-reported in `diagnostics`.
-
-The diagnostic payload also records the live lazy-import observation against
-`configs/quality/lazy_import_ratchet.yaml` and the composition module count
-against the shrink-only ADR-059 cap in
-`configs/quality/package_cohesion_budget.yaml`. Program-gate thresholds remain
-owned by their executable checks and are not changed by scorecard regeneration.
+clusters as proxies; families exactly at budget and cap saturation (lazy-import
+utilisation, composition module count) **do** reduce the diagnostic grade.
+Program-gate `max_count` / `max_modules` remain shrink-only and are not raised
+by scorecard regeneration. Clean posture scores 10.0; live integral is sensitive
+to those diagnostics (`schema_version` 2).

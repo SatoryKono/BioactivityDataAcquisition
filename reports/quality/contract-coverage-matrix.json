@@ -640,6 +640,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -1588,6 +1589,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -1809,6 +1811,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -1947,6 +1950,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -2164,6 +2168,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -2302,6 +2307,7 @@
         "tests/unit/domain/normalization/test_publication_structured_field_policy_specs.py",
         "tests/unit/domain/normalization/test_publication_structured_fields.py",
         "tests/unit/domain/ports/test_logger_and_publication_strategy_modules.py",
+        "tests/unit/domain/registry/test_publication_data.py",
         "tests/unit/domain/registry/test_publication_data_branches.py",
         "tests/unit/domain/registry/test_publication_registry.py",
         "tests/unit/domain/schemas/chembl/test_chembl_publication_validation.py",
@@ -2570,5 +2576,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-08-19"
+  "snapshot_date": "2026-08-28"
 }

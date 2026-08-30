@@ -78,6 +78,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-057](ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | Configuration | 2026-08-10 |
 | [ADR-058](ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | Architecture | 2026-08-25 |
 | [ADR-059](ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | Architecture | 2026-08-25 |
+| [ADR-060](ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt Kernel and Overlay Architecture | Accepted | Architecture | 2026-08-28 |
 
 ## ADRs by Category
 
@@ -98,6 +99,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-052](ADR-052-infrastructure-config-package-root-public-api.md): Infrastructure Config Package Root as Permanent Public API
 - [ADR-058](ADR-058-layered-port-registries.md): Layered Port Registries
 - [ADR-059](ADR-059-package-cohesion-budgets.md): Package Cohesion Budgets
+- [ADR-060](ADR-060-prompt-kernel-and-overlay-architecture.md): Prompt Kernel and Overlay Architecture (Kernel/Overlay/Profile, fail-closed)
 
 ### Storage
 

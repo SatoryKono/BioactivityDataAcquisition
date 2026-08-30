@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.1
+Version: 1.2.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-27'
+  Last verified: '2026-08-30'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-27*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-08-30*
 
 ______________________________________________________________________
 
@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined: `checks-complete` + `root-hygiene`; not GitHub-enforced). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined, not GitHub-enforced). See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -121,6 +121,26 @@ from checks that run only for matching paths.
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
 | **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact; the exact scanned image is promoted without rebuild to GHCR on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
 
+### 2.3.1 CodeQL ownership and alert triage
+
+BioETL uses **advanced CodeQL setup** owned by `.github/workflows/codeql.yml`.
+GitHub code-scanning **default setup MUST remain `not-configured`**. Do not
+enable default setup in parallel: that would duplicate Python scans and split
+alert ownership.
+
+| Item | Contract |
+| --- | --- |
+| Configuration owner | Advanced workflow `.github/workflows/codeql.yml` |
+| Languages | Python only (`build-mode: none`) |
+| Token permissions | Workflow `contents: read`; job `security-events: write` for SARIF upload |
+| Cadence | Push/PR (docs-ignored paths excluded) plus weekly Monday `17 4 * * 1` UTC |
+| Alert triage owner | BioETL Team (security lane); CODEOWNERS fallback `@SatoryKono` |
+| Alert triage cadence | Weekly on Monday, together with OpenSSF Scorecard |
+| Duplicate scans | Forbidden. Default setup stays off. |
+
+Actionable CodeQL alerts get a follow-up issue the same triage week. Alerts are
+closed only with SARIF/workflow proof, not by silent dismiss.
+
 ### 2.4 Code Hygiene
 
 | Workflow                     | File                           | Key Jobs                                                                                           | What It Checks                                                                                                                                     |
@@ -144,9 +164,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` are blocked by live required-check ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
-push and merge to `main` are blocked when `checks-complete` or `root-hygiene` fail. The following checks are the
-enforced quality gate for pull requests and for the `main` ref.
+Updates to `main` are **not** blocked by repository ruleset `root-hygiene-required-check` (enforcement **disabled** for `refs/heads/main`). Direct
+push and merge to `main` are currently allowed by GitHub rulesets. Workflows `checks-complete` and `root-hygiene` still run on pull requests; they are not required status checks while the ruleset is disabled. The following checks remain the
+policy-intended quality gate for pull requests and for the `main` ref.
 
 ### Final always-on required-check set
 
@@ -160,7 +180,7 @@ The final activation set for repository ruleset
 
 Both checks materialize on every PR targeting `main`. The repository ruleset
 `root-hygiene-required-check` remains defined with exactly this always-on set,
-and enforcement is **active**. Direct push/merge to `main` is blocked when required checks fail. Further ruleset mutations remain external operations that require
+and enforcement is **disabled**. Direct push/merge to `main` is not blocked by this ruleset. Further ruleset mutations remain external operations that require
 explicit maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks
@@ -194,7 +214,7 @@ use `paths-ignore` (#9738, #9723).
 | Surface | Name | Markers / command | GitHub required? |
 | --- | --- | --- | --- |
 | Pre-commit hook (manual) | `architecture-full` | `pytest tests/architecture/ -m "not slow and not benchmark and not memory"` | No (local `stages: [manual]`) |
-| CI job | `arch-tests` in `import-linter.yml` | same markers | Only as part of `checks-complete` **if** ruleset enforcement is enabled (currently disabled, #9723) |
+| CI job | `arch-tests` in `import-linter.yml` | same markers | Yes, as part of `checks-complete` in the active ruleset |
 | `test_matrix` lane | `architecture` | same `marker_expression` | No |
 | IDE daily | `pytest-architecture` | `architecture and not slow and not benchmark and not memory` | No |
 | IDE / local slow | `pytest-architecture-slow-governance` | `architecture and not benchmark and not memory` (includes slow) | No |
@@ -232,10 +252,10 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: the gate is a required quality signal for PRs, but GitHub does not
-  currently block merge or direct push. Failures MUST still be fixed or
-  explicitly risk-accepted in the PR discussion. The defined always-on set
-  remains `checks-complete` and `root-hygiene`.
+- **FAIL**: failures in `checks-complete` and `root-hygiene` still fail those
+  workflows. They do **not** currently block merge or direct push while
+  ruleset enforcement is `disabled`. Failures in other policy gates MUST still
+  be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
@@ -249,7 +269,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 | `schema-governance.yml` | `gate.schema-contracts` via `schema-governance-status` | `.github/workflows/schema-governance.yml` + this policy section |
 | `security.yml` | `gate.security-secrets` via `detect-secrets` | `.github/workflows/security.yml` + this policy section |
 | `commit-lint.yml` | `gate.commit-policy` via `commit-lint` | `.github/workflows/commit-lint.yml` + this policy section |
-| `root-hygiene.yml` | `gate.repo-hygiene` via `root-hygiene` | `.github/workflows/root-hygiene.yml` + disabled GitHub ruleset state |
+| `root-hygiene.yml` | `gate.repo-hygiene` via `root-hygiene` | `.github/workflows/root-hygiene.yml` + live GitHub ruleset state |
 | `docs.yml` | `gate.docs-governance` via `docs-governance` | `.github/workflows/docs.yml` + docs governance policy surfaces |
 | `port-contracts.yml` | Supporting gate: `contracts-status` | `.github/workflows/port-contracts.yml` |
 | `compiled-artifacts-block.yml` | Supporting gate: `no-pyc-check` | `.github/workflows/compiled-artifacts-block.yml` |
@@ -257,28 +277,25 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges and direct pushes to `main` are not blocked by required status
-checks. Repo-side evidence is the live repository ruleset state plus the
-workflows that still materialize the recommended checks on pull requests.
+PR merges and direct pushes to `main` are **not** blocked by repository
+rulesets while enforcement is disabled. Repo-side evidence is the live
+repository ruleset state plus the workflows that still materialize the
+policy-intended checks on pull requests.
 
-Activated and re-verified on `2026-08-19` with repository admin credentials via
-the GitHub REST API (closeout for #8619 / parent #8607; after the 2026-08-11
-activation the live state drifted to `enforcement=disabled`, and later the same
-day the operator explicitly allowed direct push to `main`, so enforcement was
-set back to `disabled`).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation).
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
 - Enforcement: `disabled`.
-- Direct merge allowed; no active required-check ruleset.
-- Defined (inactive) required status checks: exactly `checks-complete` and `root-hygiene`
+- Direct updates to main are not blocked by this ruleset.
+- Defined status checks (not enforced): exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
 - The ruleset has no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rules on `main`: none (`[]`).
+- Applied rule on `main`: none while enforcement is `disabled`.
 - Tracking references: `#3380`, `#8619`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
@@ -286,7 +303,7 @@ Live GitHub enforcement state:
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains **disabled** and is not part of the active gate set.
+is also **disabled** and is not part of the gate set.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -342,10 +359,21 @@ ______________________________________________________________________
 
 File: `.github/dependabot.yml`
 
-| Ecosystem      | Schedule | PR Limit | Labels         |
-| -------------- | -------- | -------- | -------------- |
-| pip (Python)   | Weekly   | 10       | `dependencies` |
-| github-actions | Weekly   | 5        | `ci`           |
+| Ecosystem      | Schedule | PR Limit | Labels            | Grouping                |
+| -------------- | -------- | -------- | ----------------- | ----------------------- |
+| pip (Python)   | Weekly   | 10       | `dependencies`    | `pip-minor-patch` (minor+patch) |
+| github-actions | Weekly   | 5        | `ci`              | `github-actions` (all)  |
+| docker         | Weekly   | 5        | `dependencies,ci` | `docker` (all)          |
+| npm (`/`) | Weekly | 5 | `dependencies` | `npm-root` |
+| npm (`/.github/actions/setup-mermaid`) | Weekly | 5 | `dependencies,ci` | `npm-mermaid` |
+| npm (`/.github/tooling/jscpd`) | Weekly | 5 | `dependencies,ci` | `npm-jscpd` |
+| npm (`/grafana/plugins/bioetl-scenes-app`) | Weekly | 5 | `dependencies` | `npm-grafana-scenes` |
+| npm (`/grafana/plugins/bioetl-selectorshell-panel`) | Weekly | 5 | `dependencies` | `npm-grafana-selectorshell` |
+
+Minor/patch grouping keeps weekly PR volume manageable; security-relevant major bumps stay as individual PRs for review.
+
+Triage owner: `@SatoryKono` (CODEOWNERS fallback), weekly cadence. Critical CVE ≤ 24h, High ≤ 72h — see SLA table below and `.github/SECURITY.md`.
+Dependabot creates update PRs; repository-level **Dependabot alerts + security updates** must be enabled separately in GitHub Settings → Code security (not just `dependabot.yml`). Security PRs must pass all project checks; auto-merge is forbidden.
 
 ### Dependency Update Policy
 
@@ -358,10 +386,11 @@ File: `.github/dependabot.yml`
 
 ### Supply Chain Security
 
-- All GitHub Actions **MUST** be SHA-pinned (e.g., `actions/checkout@<sha>`)
+- All GitHub Actions **MUST** be full-SHA-pinned (`owner/action@<40-hex>` with ` # vX.Y.Z` comment) — tag references are rejected by the enforcer and by the repository Actions setting `sha_pinning_required` when enabled. Local `./` actions are exempt.
 - `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the
-  pinned-action allowlist across `.github/workflows/**` and composite actions
-  under `.github/actions/**`.
+  pinned-action allowlist (`ALLOWED_USES`) across `.github/workflows/**` and composite actions
+  under `.github/actions/**`, plus `configs/quality/github_actions_remote_artifacts.yaml` for remote `curl|wget … | sh` patterns.
+- Updating a pinned Action: bump the workflow SHA **and** add the new SHA to `ALLOWED_USES` (keep the ` # vX.Y.Z` comment), then run `python -m scripts.engineering.repo check-actions-runtime-policy` and `pytest tests/architecture/test_github_actions_runtime_policy.py`. zizmor (`zizmor.yml`) runs as high-confidence gate on workflow/action changes.
 - Trivy records CRITICAL, HIGH, MEDIUM, and UNKNOWN findings and blocks the
   Docker image on CRITICAL, HIGH, or MEDIUM vulnerabilities
 - `pip-audit --strict` checks all Python dependencies
@@ -427,7 +456,9 @@ ______________________________________________________________________
 
 ### Workflow: `release.yml`
 
-Triggered by GitHub Release publication or manual dispatch.
+Triggered by GitHub Release publication or manual dispatch (`workflow_dispatch` with `dry_run` default `true`).
+
+Environments: `testpypi` (`if: release || (workflow_dispatch && dry_run == 'false')`) and `pypi` (`if: release` only, `needs: publish-testpypi` chain). Both use OIDC trusted publishing (`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch policy (tags/releases only for `pypi`) and a reviewer/wait-timer in GitHub Settings → Environments; repository docs do not replace the live protection rule.
 
 ```
 1. Build         → wheel + sdist + twine verify
@@ -480,10 +511,14 @@ permissions:
 
 `docker-push` publishes GHCR images only from `main` pushes, through Environment
 `ghcr-publish`, with tags `:${{ github.sha }}` and `:${{ github.ref_name }}`.
-It does not publish `:latest`. Environment protection (required reviewers or a
-wait timer) can be added on `ghcr-publish` without changing the workflow.
-| `id-token: write`        | release.yml (trusted publishing)                  |
+It does not publish `:latest`. Recommended live settings for `ghcr-publish`:
+deployment branch policy = protected branches (effectively `main` only), plus
+at least one protection rule (required reviewers or wait timer — e.g. 5 min).
+Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
+| `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
+
+Publishing environments inventory (write-capable): `ghcr-publish` (docker.yml → `ghcr.io/SatoryKono/bioetl`), `testpypi`/`pypi` (release.yml → TestPyPI/PyPI via OIDC trusted publishing), `observability-render-host` (dashboard-render-host.yml, self-hosted). `copilot`/`staging`/`observability-render-host` must have deployment branch policy + protection rule if they guard secrets/deployments; otherwise document risk acceptance. `testpypi` allows `workflow_dispatch` with `dry_run == 'false'`; `pypi` is `release`-only and chains via `testpypi` (`needs: publish-testpypi`). Environment secrets must be scoped/rotated and never echoed in logs.
 
 `contract-tests.yml` keeps `contents: read` as the workflow baseline and grants
 `issues: write` only to the live contract-test job that creates a failure issue.
@@ -532,3 +567,41 @@ ______________________________________________________________________
 ______________________________________________________________________
 
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
+
+
+### Evidence (2026-08-28)
+
+```json
+{
+  "name": "root-hygiene-required-check",
+  "enforcement": "active"
+}
+```
+
+### Evidence (2026-08-30)
+
+```json
+{
+  "name": "root-hygiene-required-check",
+  "enforcement": "disabled"
+}
+```
+
+`Re-enable: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=active`
+
+### Migration notes (1.2.2)
+
+- Changed `root-hygiene-required-check` from defined-only, disabled enforcement
+  to active GitHub enforcement on `refs/heads/main`.
+- Preserved the required contexts `checks-complete` and `root-hygiene` and
+  disabled the legacy `main` ruleset.
+- Related decision context: [ADR-047: Workflow Control Plane for Declarative
+  Workflows](../../02-architecture/decisions/ADR-047-workflow-control-plane.md).
+
+### Migration notes (1.2.3)
+
+- Re-verified live API state on `2026-08-30`: both `root-hygiene-required-check`
+  (15730586) and legacy `main` (13643213) have `enforcement: disabled`.
+- Policy SSOT now matches that live state. Workflows still emit
+  `checks-complete` and `root-hygiene`; they are not GitHub-required while the
+  ruleset is disabled.

@@ -1,7 +1,7 @@
 """Canonical ChEMBL pipeline marker class definitions.
 
 All ChEMBL entity pipelines inherit 100% of their logic from BasePipeline.
-Transformers are injected via DI from GenericPipelineFactory (REQ-ARCH-DI-007).
+Transformers are injected via DI from GenericPipelineFactory (REQ-ARCH-001).
 Individual classes exist for type identity and IDE discoverability.
 """
 

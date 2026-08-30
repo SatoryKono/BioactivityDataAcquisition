@@ -369,6 +369,15 @@ def build_architecture_quality_scorecard(
         composition_module_count=sum(1 for _ in composition_root.rglob("*.py")),
         package_cohesion_budget=package_cohesion_budget,
     )
+    for key in (
+        "lazy_import_observed_count",
+        "lazy_import_cap",
+        "lazy_util",
+        "composition_module_count",
+        "composition_module_cap",
+        "composition_util",
+    ):
+        metrics[key] = diagnostics[key]
     categories = _build_categories(metrics)
     integral_score = round(
         sum(
@@ -396,7 +405,7 @@ def build_architecture_quality_scorecard(
     )
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
         "source_artifacts": source_artifacts,
         "weights_sum": weights_sum,

@@ -153,8 +153,35 @@ entries:
     path: fragments/generic-nine-contract.md
     status: active
     class: fragment
-    tags: [guardrail, audit, generic-nine]
+    tags: [fragment, scope, generic-nine]
     summary: Shared contract for the nine-domain generic audit kit
+
+  - id: prompt.fragment.cyclic-kernel-v3
+    path: fragments/cyclic-kernel-v3.md
+    status: active
+    class: fragment
+    tags: [fragment, kernel, cycle, fail-closed]
+    summary: BioETL Cyclic Audit Kernel v3.0 fail-closed — full cycle baseline->close
+    version: 3.0.0
+    owner: BioETL Team
+
+  - id: prompt.fragment.evidence-contract-v3
+    path: fragments/evidence-contract-v3.md
+    status: active
+    class: fragment
+    tags: [fragment, evidence, fingerprint, gate]
+    summary: Evidence contract v3 — fingerprint, PROVEN gate, evidence binding
+    version: 3.0.0
+    owner: BioETL Team
+
+  - id: prompt.fragment.issue-state-machine-v3
+    path: fragments/issue-state-machine-v3.md
+    status: active
+    class: fragment
+    tags: [fragment, issue-fsm, dedupe, close-gate]
+    summary: Issue FSM v3 — create|reuse|defer|blocked|no_issue + close gate
+    version: 3.0.0
+    owner: BioETL Team
 
   # --- active operator-paste cards ---
   - id: prompt.session.grok-bootstrap

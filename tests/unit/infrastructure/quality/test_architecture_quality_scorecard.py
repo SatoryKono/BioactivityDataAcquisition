@@ -119,11 +119,11 @@ def test_architecture_quality_scorecard_has_stable_weighted_shape(
 ) -> None:
     payload = architecture_quality_scorecard_payload
 
-    assert payload["schema_version"] == 1
+    assert payload["schema_version"] == 2
     assert payload["weights_sum"] == 1.0
     assert len(payload["categories"]) == 10
     # Governed floor: integral score must stay at or above 8.0 without
-    # lowering the threshold (issue #8455). Current live score is ~9.4.
+    # lowering the threshold (issue #8455). Live score is ~9.1 after #9791.
     assert payload["integral_score"] >= 8.0
     assert payload["interpretation"] in {
         "satisfactory_system_refactoring_required",  # [5.0, 8.5)
@@ -188,6 +188,8 @@ def test_architecture_quality_scorecard_separates_diagnostics_from_program_gate(
         list(composition_root.rglob("*.py"))
     )
     assert diagnostics["composition_module_cap"] == composition_budget["max_modules"]
+    assert diagnostics["lazy_util"] == metrics["lazy_util"]
+    assert diagnostics["composition_util"] == metrics["composition_util"]
     assert (
         "not a count of DDD aggregates" in diagnostics["proxy_notes"]["ddd_invariants"]
     )
@@ -359,3 +361,52 @@ def test_architecture_quality_scorecard_does_not_double_count_sunset_subset() ->
     }
 
     assert overlapping_scores == baseline_scores
+
+
+def test_architecture_quality_scorecard_penalizes_at_budget_saturation() -> None:
+    clean_metrics = {
+        "layer_violations": 0,
+        "source_module_count": 2180,
+        "unmeasured_module_count": 0,
+        "uncovered_module_count": 0,
+        "hotspot_family_count": 5,
+        "hotspot_budget_warning_count": 0,
+        "families_at_budget_count": 0,
+        "total_duplicate_clusters": 0,
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
+        "twin_pair_count": 0,
+        "compatibility_test_file_count": 0,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "contract_blocking_issue_count": 0,
+        "dq_blocking_issue_count": 0,
+        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_declaration_count": 0,
+        "runtime_cardinality_review_required_count": 0,
+        "runtime_cardinality_threshold_violation_count": 0,
+        "adr_enforcement_blocking_gap_count": 0,
+        "lazy_util": 0.0,
+        "composition_util": 0.0,
+    }
+    saturated_metrics = {
+        **clean_metrics,
+        "families_at_budget_count": 2,
+        "lazy_util": 1.0,
+        "composition_util": 0.9833,
+    }
+
+    def _integral(metrics: dict[str, object]) -> float:
+        return round(
+            sum(float(category["weighted_score"]) for category in _build_categories(metrics)),
+            2,
+        )
+
+    clean_integral = _integral(clean_metrics)
+    saturated_integral = _integral(saturated_metrics)
+    assert clean_integral == 10.0
+    assert 9.0 <= saturated_integral <= 9.25
+    assert saturated_integral < clean_integral

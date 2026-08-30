@@ -23,6 +23,7 @@ Usage:
 
     To update snapshots (ONLY do this if you intentionally changed config structure):
     UPDATE_SNAPSHOTS=1 pytest tests/architecture/test_config_golden_master.py
+REQ-GOV-002: config golden master drift gate.
 """
 
 from __future__ import annotations

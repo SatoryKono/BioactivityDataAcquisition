@@ -15,6 +15,7 @@ REQ-ARCH-001: Factory classes MUST be in composition layer only.
 REQ-ARCH-001: Dependencies MUST be injected through constructors.
 
 See CLAUDE.md Â§2.2 and Â§11 Anti-Patterns.
+REQ-STACK-001: composition-root DI wiring.
 """
 
 from __future__ import annotations
