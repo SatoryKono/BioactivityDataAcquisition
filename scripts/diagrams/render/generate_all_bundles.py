@@ -264,11 +264,12 @@ def _count_edges(lines: list[str], is_class_diagram: bool) -> int:
     """Count Mermaid relationships for class and flow diagrams."""
     if is_class_diagram:
         class_edge_pattern = re.compile(
-            r"<\|--|--\*|--o|-->|<--|\.\.>|\.\.\|>|\*--(?!>)|o--(?!>)"
+            r"<\|--|--\*|--o|--\x3e|<--|\.\.\x3e|\.\.\|\x3e"
+            r"|\*--(?!\x3e)|o--(?!\x3e)"
         )
         return sum(len(class_edge_pattern.findall(line)) for line in lines)
 
-    edge_pattern = re.compile(r"(?:==>|-.->|--[>o]|<--|~~~)")
+    edge_pattern = re.compile(r"(?:==\x3e|-\.-\x3e|--[\x3eoxX]|<--|~~~)")
     return sum(len(edge_pattern.findall(line)) for line in lines)
 
 
