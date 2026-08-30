@@ -8,25 +8,25 @@ Audited repository: SatoryKono/BioactivityDataAcquisition
 
 Audited branch: fix/redos-inline-secret-20260828
 
-Audited commit SHA: `c7754a0a73cab6f38866af26da4c69790b70044e`
+Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `06b3ee4e1c2440e24f5be27c144a48b8cb34cbeaf4972c959b3c08407ce1efc8`
+Evidence surface SHA-256: `08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
 <!-- technical-debt-audit-summary-v1
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
-  "audited_commit_sha": "c7754a0a73cab6f38866af26da4c69790b70044e",
-  "evidence_surface_sha256": "06b3ee4e1c2440e24f5be27c144a48b8cb34cbeaf4972c959b3c08407ce1efc8",
+  "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
+  "evidence_surface_sha256": "08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76",
   "metrics": {
     "architecture_integral_score": 9.41,
     "architecture_interpretation": "good_targeted_improvements",
     "constructor_waiver_count": 1,
     "contract_coverage_schema": "contract-coverage-matrix-v3",
     "debt_gate_count": 45,
-    "debt_gate_fail_count": 0,
-    "debt_gate_pass_count": 45,
+    "debt_gate_fail_count": 1,
+    "debt_gate_pass_count": 44,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
     "fully_covered_module_count": 1569,
@@ -48,7 +48,7 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 
 ## Executive summary
 
-1. Debt-governance gates: **45 pass / 0 fail** (45 debt-governance gates).
+1. Debt-governance gates: **44 pass / 1 fail** (45 debt-governance gates).
 1. Release status: **debt-governance gates passing**; no blocking gaps remain.
 1. Architecture quality integral score: **9.41** (`good_targeted_improvements`). Integral score `9.41`.
 1. Module inventory (from module-coverage-inventory.json only):
