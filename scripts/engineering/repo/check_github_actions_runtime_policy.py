@@ -34,7 +34,10 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "actions/download-artifact": {"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"},  # v8.0.1
     "actions/github-script": {"f28e40c7f34bde8b3046d885e986cb6290c5673b"},  # v7
-    "actions/labeler": {"8558fd74291d67161a8a78ce36a881fa63b766a9"},  # v5
+    "actions/labeler": {
+        "8558fd74291d67161a8a78ce36a881fa63b766a9",  # v5
+        "bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13",  # v7.0.0
+    },
     "actions/stale": {"5bef64f19d7facfb25b37b414482c7164d639639"},  # v9
     "actions/dependency-review-action": {
         "a1d282b36b6f3519aa1f3fc636f609c47dddb294",  # v5.0.0
@@ -61,13 +64,16 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
     "github/codeql-action/init": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+        "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
     },
     "github/codeql-action/analyze": {
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+        "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
     },
     "github/codeql-action/upload-sarif": {
         "8dca8a82e2fa1a2c8908956f711300f9c4a4f4f6",  # v2 (docker.yml Trivy)
         "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28",  # v4.37.8
+        "cdf488f595d80d6e07e03d4674febd5ab45fa938",  # v4.37.9
     },
     "google/osv-scanner-action/osv-scanner-action": {
         "6e4298ebc4db23e847df9b2e2de2939d6f066c67",  # v2.5.1
