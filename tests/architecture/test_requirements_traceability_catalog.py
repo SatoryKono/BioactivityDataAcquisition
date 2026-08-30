@@ -114,7 +114,11 @@ def test_requirement_ids_in_rules_adr_and_src_are_in_crosswalk_csv() -> None:
     adr_root = _ROOT / "docs" / "02-architecture" / "decisions"
     src_root = _ROOT / "src" / "bioetl"
     found: dict[str, list[str]] = {}
-    for path in [rules, *sorted(adr_root.glob("ADR-*.md")), *sorted(src_root.rglob("*.py"))]:
+    for path in [
+        rules,
+        *sorted(adr_root.glob("ADR-*.md")),
+        *sorted(src_root.rglob("*.py")),
+    ]:
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8")

@@ -8,8 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture quality-gate tests for debt scorecard governance.REQ-GOV-012: quality debt scorecard is a change-set gate.
-"""
+"""Architecture quality-gate tests for debt scorecard governance.REQ-GOV-012: quality debt scorecard is a change-set gate."""
 
 from __future__ import annotations
 

@@ -1082,7 +1082,10 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         in operations_dockerfile
     )
     assert "RUN pip install" not in operations_dockerfile
-    assert "pip install --only-binary=:all: --no-cache-dir uv==" not in operations_dockerfile
+    assert (
+        "pip install --only-binary=:all: --no-cache-dir uv=="
+        not in operations_dockerfile
+    )
     setup_uv = (ROOT / ".github/actions/setup-python-uv/action.yml").read_text(
         encoding="utf-8"
     )

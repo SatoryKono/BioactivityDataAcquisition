@@ -197,7 +197,7 @@ def check_kernel_schema(report: LintReport) -> None:
 
 def _has_jsonschema() -> bool:
     try:
-        import jsonschema  # noqa: F401  # type: ignore[import-untyped]
+        import jsonschema  # type: ignore[import-untyped]
 
         return True
     except ImportError:
@@ -295,7 +295,7 @@ def check_profiles(report: LintReport) -> None:
         try:
             raw = path.read_text(encoding="utf-8")
             data = yaml.safe_load(raw) or {}
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             report.add_error("profile_parse", str(exc), path.as_posix())
             continue
 
@@ -330,7 +330,7 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
             try:
                 raw = path.read_text(encoding="utf-8")
                 data = yaml.safe_load(raw) or {}
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 report.add_error("overlay_parse", str(exc), path.as_posix())
                 continue
             if not isinstance(data, dict):

@@ -8,8 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture guardrails for GitHub Actions supply-chain policy.REQ-DEP-002: GitHub Actions runtime/image policy.
-"""
+"""Architecture guardrails for GitHub Actions supply-chain policy.REQ-DEP-002: GitHub Actions runtime/image policy."""
 
 from __future__ import annotations
 
@@ -483,12 +482,8 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     }
     assert init_step["with"]["languages"] == "python"
     assert "matrix" not in jobs["analyze"]
-    assert any(
-        f"github/codeql-action/init@{sha}" in uses for sha in allowed_init
-    )
-    assert any(
-        f"github/codeql-action/analyze@{sha}" in uses for sha in allowed_analyze
-    )
+    assert any(f"github/codeql-action/init@{sha}" in uses for sha in allowed_init)
+    assert any(f"github/codeql-action/analyze@{sha}" in uses for sha in allowed_analyze)
 
 
 def test_codeql_ownership_and_triage_are_documented() -> None:
@@ -532,9 +527,9 @@ def test_workflows_do_not_use_unhashed_pip_or_npm_install() -> None:
                     f"npm install; use npm ci with a committed lockfile"
                 )
 
-    duplication = (ROOT / ".github" / "workflows" / "duplication-complexity.yml").read_text(
-        encoding="utf-8"
-    )
+    duplication = (
+        ROOT / ".github" / "workflows" / "duplication-complexity.yml"
+    ).read_text(encoding="utf-8")
     assert "npm ci --ignore-scripts" in duplication
     assert ".github/tooling/jscpd" in duplication
 

@@ -1,5 +1,4 @@
-"""Security regressions for structured logging secret filters.REQ-GOV-010: structured logs redact secrets.
-"""
+"""Security regressions for structured logging secret filters.REQ-GOV-010: structured logs redact secrets."""
 
 from __future__ import annotations
 

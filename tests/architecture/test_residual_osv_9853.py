@@ -24,7 +24,9 @@ MERMAID_ACTION = ROOT / ".github" / "actions" / "setup-mermaid" / "action.yml"
 EXTRACT_ZIP = ROOT / ".github" / "actions" / "setup-mermaid" / "vendor" / "extract-zip"
 SCENES_PKG = ROOT / "grafana" / "plugins" / "bioetl-scenes-app" / "package.json"
 SCENES_LOCK = ROOT / "grafana" / "plugins" / "bioetl-scenes-app" / "package-lock.json"
-SELECTOR_PKG = ROOT / "grafana" / "plugins" / "bioetl-selectorshell-panel" / "package.json"
+SELECTOR_PKG = (
+    ROOT / "grafana" / "plugins" / "bioetl-selectorshell-panel" / "package.json"
+)
 SELECTOR_LOCK = (
     ROOT / "grafana" / "plugins" / "bioetl-selectorshell-panel" / "package-lock.json"
 )

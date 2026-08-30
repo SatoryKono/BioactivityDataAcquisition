@@ -29,6 +29,15 @@ def _text(value: object) -> str:
     return str(value or "").strip()
 
 
+def _mapping_list(value: object, *, label: str) -> Iterable[Mapping[str, Any]]:
+    """Yield mapping rows from a Trivy JSON list field."""
+    if not isinstance(value, list):
+        raise ValueError(f"Trivy JSON {label} must be a list")
+    for item in value:
+        if isinstance(item, Mapping):
+            yield item
+
+
 def _github_trivy_alert_index(payload: object) -> dict[tuple[str, str, str], str]:
     """Index GitHub Trivy alerts by the fields also present in Trivy JSON."""
     pages = payload if isinstance(payload, list) else []
@@ -165,7 +174,6 @@ def export_trivy_baseline_csv(
 def _vulnerability_rows(payload: Mapping[str, Any]) -> Iterable[dict[str, str]]:
     """Return normalized vulnerability rows from full Trivy JSON evidence."""
     for result in _mapping_list(payload.get("Results", []), label="Results"):
-
         target = _text(result.get("Target"))
         yield from _result_vulnerability_rows(result, target=target)
 

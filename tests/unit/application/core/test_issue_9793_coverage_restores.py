@@ -116,7 +116,9 @@ def test_config_helpers_reject_non_mapping_model_dump() -> None:
             return ["not-a-mapping"]
 
     with pytest.raises(TypeError, match="must return a mapping"):
-        get_pipeline_yaml_for_dq("chembl_activity", pipeline_config_loader=lambda _: _BadDump())
+        get_pipeline_yaml_for_dq(
+            "chembl_activity", pipeline_config_loader=lambda _: _BadDump()
+        )
 
 
 def test_default_registry_method_requires_objtype_on_class_access() -> None:
@@ -165,7 +167,9 @@ def test_exact_replay_mismatch_when_checkpoint_was_not_replay() -> None:
     assert any("exact replay" in item.lower() for item in messages)
 
 
-def test_default_pii_hasher_uses_configured_salt(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_default_pii_hasher_uses_configured_salt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition.factories.pipeline import transformer_dependencies as mod
 
     monkeypatch.setattr(
@@ -183,7 +187,9 @@ def test_default_pii_hasher_uses_configured_salt(monkeypatch: pytest.MonkeyPatch
     assert mod._default_pii_hasher() == "hasher:unit-test-salt"
 
 
-def test_create_metrics_rejects_non_port_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_create_metrics_rejects_non_port_adapter(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     from bioetl.composition.factories.services import port_factories as mod
 
     monkeypatch.setattr(mod, "resolve_metrics_port", lambda **_kwargs: object())
@@ -332,7 +338,9 @@ def test_legacy_increment_kwargs_and_error_handler_fallback() -> None:
 
     assert _legacy_increment_kwargs(list.append, 1, {"k": "v"}) == {}
 
-    def _increment(name: str, value: float, _tags: dict[str, str] | None = None) -> None:
+    def _increment(
+        name: str, value: float, _tags: dict[str, str] | None = None
+    ) -> None:
         captured.append((name, value, _tags))
 
     captured: list[tuple[str, float, dict[str, str] | None]] = []
@@ -370,7 +378,9 @@ def test_structural_policy_coercion_fallbacks() -> None:
 
 
 def test_require_dependency_context_rejects_wrong_type() -> None:
-    from bioetl.application.core.base_transformer.base import _require_dependency_context
+    from bioetl.application.core.base_transformer.base import (
+        _require_dependency_context,
+    )
 
     with pytest.raises(TypeError, match="TransformerDependencyContext"):
         _require_dependency_context("not-context")
@@ -576,8 +586,7 @@ async def test_publication_term_offset_skips_then_limits() -> None:
                 yield item
 
     records = [
-        item
-        async for item in _Harness()._fetch_target_records(limit=1, offset=1)
+        item async for item in _Harness()._fetch_target_records(limit=1, offset=1)
     ]
     assert records == [{"id": "b"}]
 
@@ -631,4 +640,3 @@ def test_bronze_io_mixin_rejects_divergent_existing_payload(
     host._build_stream_compressor = lambda: (_ for _ in ()).throw(RuntimeError("oom"))
     with pytest.raises(RuntimeError, match="oom"):
         host._write_atomic_stream(iter([b"abc", b"def"]), tmp_path / "out.zst")
-

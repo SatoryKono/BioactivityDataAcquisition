@@ -8,8 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture tests for the tracked integration and VCR execution policy.REQ-GOV-004 REQ-TEST-003: VCR cassette policy for integration tests.
-"""
+"""Architecture tests for the tracked integration and VCR execution policy.REQ-GOV-004 REQ-TEST-003: VCR cassette policy for integration tests."""
 
 from __future__ import annotations
 

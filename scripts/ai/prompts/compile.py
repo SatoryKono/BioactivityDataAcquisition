@@ -395,7 +395,7 @@ def compile_one(
         result["written"] = True
         return result
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         result["error"] = str(exc)
         LOGGER.exception("compile failed for %s/%s", domain, profile)
         return result

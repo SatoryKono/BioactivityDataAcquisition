@@ -8,8 +8,7 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Campaign idempotency gate for tracked fixture replay.REQ-GOV-003: reproducibility/idempotency gate.
-"""
+"""Campaign idempotency gate for tracked fixture replay.REQ-GOV-003: reproducibility/idempotency gate."""
 
 from __future__ import annotations
 
