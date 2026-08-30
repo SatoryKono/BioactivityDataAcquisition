@@ -1,734 +1,1040 @@
-# BioETL Prompt Library registry
-# Epic: #8513 | Schema: _schema/prompt.schema.json
-# Operator paste templates only — not runtime SSOT.
-
 version: 1.0.0
 root: docs/00-project/ai/prompts
 schema: _schema/prompt.schema.json
-
 entries:
-  # --- fragments ---
-  - id: prompt.fragment.read-order
-    path: fragments/read-order.md
-    status: active
-    class: fragment
-    tags: [guardrail, read-order]
-    summary: Mandatory read order before planning or editing
-
-  - id: prompt.fragment.git-safety
-    path: fragments/git-safety.md
-    status: active
-    class: fragment
-    tags: [guardrail, git]
-    summary: Git and worktree safety for operator sessions
-
-  - id: prompt.fragment.debt-budget-ban
-    path: fragments/debt-budget-ban.md
-    status: active
-    class: fragment
-    tags: [guardrail, debt]
-    summary: Technical-debt budgets must not increase
-
-  - id: prompt.fragment.env-guardrail
-    path: fragments/env-guardrail.md
-    status: active
-    class: fragment
-    tags: [guardrail, env]
-    summary: Secret-bearing .env surface guardrail
-
-  - id: prompt.fragment.evidence-contract
-    path: fragments/evidence-contract.md
-    status: active
-    class: fragment
-    tags: [guardrail, evidence]
-    summary: Minimum evidence format for findings and closeout
-
-  - id: prompt.fragment.language-ru
-    path: fragments/language-ru.md
-    status: active
-    class: fragment
-    tags: [guardrail, language]
-    summary: Default operator response language
-
-  - id: prompt.fragment.audit-scale
-    path: fragments/audit-scale.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, scale]
-    summary: Unified surface quality score 0-3 and priority P0-P3
-
-  - id: prompt.fragment.finding-schema
-    path: fragments/finding-schema.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, evidence]
-    summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
-
-  - id: prompt.fragment.unknown-params
-    path: fragments/unknown-params.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit]
-    summary: Do not invent repo parameters; prefer known BioETL SSOT
-
-  - id: prompt.fragment.reports-output
-    path: fragments/reports-output.md
-    status: active
-    class: fragment
-    tags: [guardrail, reports, root]
-    summary: Audit artifacts must land under reports/, not repo root
-
-  - id: prompt.fragment.shell-portability
-    path: fragments/shell-portability.md
-    status: active
-    class: fragment
-    tags: [guardrail, shell, windows]
-    summary: Portable shell notes for BioETL Windows-first operators
-
-  - id: prompt.fragment.orchestrator-guards
-    path: fragments/orchestrator-guards.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, orchestrator]
-    summary: Fail-closed guards for multi-iteration audit/implement orchestrator
-
-  - id: prompt.fragment.dual-agent-handoff
-    path: fragments/dual-agent-handoff.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, dual-agent, handoff]
-    summary: Handoff and task-pack contracts for dual-agent audit cycles
-
-  - id: prompt.fragment.coderabbit-dual-pass
-    path: fragments/coderabbit-dual-pass.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, coderabbit, review]
-    summary: CodeRabbit then agent order for audit and PR review passes
-
-  - id: prompt.fragment.peer-review-gate
-    path: fragments/peer-review-gate.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, dual-agent, review]
-    summary: Peer agent review gate before issue close
-
-  - id: prompt.fragment.bi-check-schema
-    path: fragments/bi-check-schema.md
-    status: active
-    class: fragment
-    tags: [guardrail, observability, bi, dashboard]
-    summary: BI dashboard check result schema and priority mapping
-
-  - id: prompt.fragment.grafana-six-contract
-    path: fragments/grafana-six-contract.md
-    status: deprecated
-    class: fragment
-    tags: [guardrail, observability, grafana, audit]
-    summary: Deprecated shared contract for the superseded six-prompt Grafana audit kit
-    successor: prompt.fragment.grafana-audit-contract
-
-  - id: prompt.fragment.grafana-audit-contract
-    path: fragments/grafana-audit-contract.md
-    status: active
-    class: fragment
-    tags: [guardrail, observability, grafana, dashboard, audit]
-    summary: Shared evidence, severity, and release-gate contract for Grafana audits
-
-  - id: prompt.fragment.dashboard-requirements-audit
-    path: fragments/dashboard-requirements-audit.md
-    status: active
-    class: fragment
-    tags: [guardrail, observability, grafana, dashboard, audit, requirements]
-    summary: Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates, ontology
-
-  - id: prompt.fragment.project-requirements-audit
-    path: fragments/project-requirements-audit.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, requirements, cycle]
-    summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue titles
-
-  - id: prompt.fragment.generic-nine-contract
-    path: fragments/generic-nine-contract.md
-    status: active
-    class: fragment
-    tags: [guardrail, audit, generic-nine]
-    summary: Shared contract for the nine-domain generic audit kit
-
-  # --- active operator-paste cards ---
-  - id: prompt.session.grok-bootstrap
-    path: library/session/grok-bootstrap.md
-    status: active
-    class: operator-paste
-    tags: [session, grok, bootstrap, operator]
-    summary: Short daily-work bootstrap for Grok sessions on BioETL
-
-  - id: prompt.closeout.grok
-    path: library/closeout/grok-closeout.md
-    status: active
-    class: operator-paste
-    tags: [closeout, grok, operator]
-    summary: Issue/PR closeout paste with verdicts, evidence, ship-profile note
-
-  - id: prompt.audit.grok-cycle
-    path: library/audit/grok-audit-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, grok, operator]
-    summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
-
-  - id: prompt.audit.orchestrator
-    path: library/audit/orchestrator.md
-    status: active
-    class: operator-paste
-    tags: [audit, orchestrator, github, operator]
-    summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
-
-  - id: prompt.audit.dual-agent-cycle
-    path: library/audit/dual-agent-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, cycle, coderabbit, github, operator]
-    summary: Dual-agent cyclic audit—plan—fix—check with external audit prompt and role swap
-
-  - id: prompt.audit.coderabbit-project-cycle
-    path: library/audit/coderabbit-project-cycle.md
-    status: active
-    class: operator-paste
-    tags:
-      [audit, cycle, coderabbit, project, exhaustive, plan, implement, operator]
-    summary: Exhaustive cyclic project audit with CodeRabbit dual-pass — matrix, plan, fix, re-CR
-
-  - id: prompt.audit.role-auditor
-    path: library/audit/role-auditor.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, role, auditor, operator]
-    summary: Dual-agent Auditor role — CR+agent audit, plan review, implement stream, peer review
-
-  - id: prompt.audit.role-planner
-    path: library/audit/role-planner.md
-    status: active
-    class: operator-paste
-    tags: [audit, dual-agent, role, planner, operator]
-    summary: Dual-agent Planner role — fact-check, task pack, plan gate, issues, implement stream
-
-  - id: prompt.tests.speed-optimization
-    path: library/tests/speed-optimization-loop.md
-    status: active
-    class: operator-paste
-    tags: [tests, performance, operator]
-    summary: Accelerate test runs without weakening coverage
-
-  - id: prompt.tests.fix-retest
-    path: library/tests/fix-retest-loop.md
-    status: active
-    class: operator-paste
-    tags: [tests, debug, operator]
-    summary: Run → fix → retest until green or blocked
-
-  - id: prompt.tests.cycle
-    path: library/tests/test-cycle.md
-    status: active
-    class: operator-paste
-    tags: [tests, cycle, pytest, quality, operator]
-    summary: Cyclic testing — baseline run, triage, fix, retest, delta per cycle
-
-  - id: prompt.docs.ai-audit-planning
-    path: library/docs/ai-audit-planning.md
-    status: active
-    class: operator-paste
-    tags: [docs, audit, planning, operator]
-    summary: Plan an audit of docs/00-project/ai surfaces
-
-  - id: prompt.architecture.review
-    path: library/architecture/review-assessment.md
-    status: active
-    class: operator-paste
-    tags: [architecture, review, operator, audit]
-    summary: Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs
-
-  - id: prompt.architecture.cycle
-    path: library/architecture/architecture-cycle.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        architecture,
-        audit,
-        cycle,
-        scorecard,
-        hexagonal,
-        plan,
-        implement,
-        operator,
-      ]
-    summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement waves
-
-  - id: prompt.observability.dashboard-panel-audit
-    path: library/observability/dashboard-panel-audit.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, audit, operator]
-    summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.3)
-
-  - id: prompt.observability.bi-dashboard-acceptance
-    path: library/observability/bi-dashboard-acceptance.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, bi, accessibility, acceptance, operator]
-    summary: BI dashboard acceptance — visual, layout, data contours with measurable checks
-
-  - id: prompt.observability.dashboard-audit-cycle
-    path: library/observability/dashboard-audit-cycle.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        dashboard,
-        grafana,
-        audit,
-        cycle,
-        density,
-        typography,
-        color,
-        layout,
-        render,
-        operator,
-      ]
-    summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours, gates, theme/zoom (Tier-1 100% / Tier-2 200%)
-
-  - id: prompt.observability.dashboard-full-cycle
-    path: library/observability/dashboard-full-cycle.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        dashboard,
-        grafana,
-        audit,
-        cycle,
-        issues,
-        closeout,
-        render,
-        operator,
-      ]
-    summary: Unified N=10 dashboard cycle — full audit (render, design, fill, panels, theme, zoom) then GH issues then fix-to-close; stop when no new issues and no open cycle issues
-
-  - id: prompt.observability.sequential-run
-    path: library/observability/sequential-run.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, audit, sequential, operator]
-    summary: Sequential observability folder run — unique cards, issue/close gates, DASH-AUTO appendix
-
-  - id: prompt.observability.dashboard-operator-playbook
-    path: library/observability/dashboard-operator-playbook.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        dashboard,
-        grafana,
-        operator,
-        playbook,
-        scenario,
-        verification,
-      ]
-    summary: Systematic per-panel operator playbook — question, dashboard link, analysis order, 5-10 scenarios with value-dependent choices
-
-  - id: prompt.observability.dashboard-data-duplication
-    path: library/observability/dashboard-data-duplication.md
-    status: active
-    class: operator-paste
-    tags:
-      [observability, dashboard, grafana, duplication, panels, audit, operator]
-    summary: Sequential per-dashboard panel data audit — intra-dashboard duplicates and exclusion plan without breaking FIT
-
-  - id: prompt.observability.dashboard-manual-validation
-    path: library/observability/dashboard-manual-validation.md
-    status: active
-    class: operator-paste
-    tags:
-      [observability, dashboard, grafana, audit, manual, validation, operator]
-    summary: Manual validation of DASH-* rules that static pytest cannot prove — reflow, computed type, live FIT, render states; theme and zoom Dark/Light 100%/200%
-
-  - id: prompt.observability.dashboard-v5.pack
-    path: library/observability/dashboard-v5/pack.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, v5, pack, operator]
-    summary: Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover
-
-  - id: prompt.observability.dashboard-v5.implement
-    path: library/observability/dashboard-v5/implement.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, v5, implement, operator]
-    summary: Implement leftover V5 residuals — babysit #8987, optional R-D validator
-
-  - id: prompt.observability.dashboard-v5.closeout
-    path: library/observability/dashboard-v5/closeout.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, v5, closeout, operator]
-    summary: Close V5 residual issues/PRs with origin/main evidence only
-
-  - id: prompt.observability.dashboard-v5.audit-rf
-    path: library/observability/dashboard-v5/audit-rf.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, v5, audit, rf, visual, operator]
-    summary: V5 R-F visual cycle — THEME dark+light, ZOOM 200, VIEWPORT 1920, leftover NV; not a selector refactor
-
-  - id: prompt.observability.grafana-audit.master
-    path: library/observability/grafana-audit/master.md
-    status: active
-    class: operator-paste
-    tags: [observability, grafana, dashboard, audit, master, evidence, operator]
-    summary: Complete read-only Grafana audit across visual, layout, and data contours
-
-  - id: prompt.observability.grafana-audit.visual
-    path: library/observability/grafana-audit/visual.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        grafana,
-        dashboard,
-        audit,
-        accessibility,
-        wcag,
-        visual,
-        operator,
-      ]
-    summary: Grafana visual audit for palette, contrast, typography, and status encoding
-
-  - id: prompt.observability.grafana-audit.layout
-    path: library/observability/grafana-audit/layout.md
-    status: active
-    class: operator-paste
-    tags:
-      [observability, grafana, dashboard, audit, layout, navigation, operator]
-    summary: Grafana layout audit for hierarchy, first viewport, variables, and drill-down
-
-  - id: prompt.observability.grafana-audit.data-integrity
-    path: library/observability/grafana-audit/data-integrity.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        grafana,
-        dashboard,
-        audit,
-        data,
-        lineage,
-        integrity,
-        operator,
-      ]
-    summary: Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation
-
-  - id: prompt.observability.grafana-audit.regression
-    path: library/observability/grafana-audit/regression.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        grafana,
-        dashboard,
-        audit,
-        regression,
-        acceptance,
-        release,
-        operator,
-      ]
-    summary: Grafana baseline-to-candidate regression acceptance and release gate
-
-  - id: prompt.observability.dashboard-first-window-noscroll
-    path: library/observability/dashboard-first-window-noscroll.md
-    status: active
-    class: operator-paste
-    tags:
-      [
-        observability,
-        dashboard,
-        grafana,
-        first-window,
-        scroll,
-        containment,
-        implement,
-        operator,
-      ]
-    summary: Ultimate DASH-FIT-004 — no internal scroll on every first-window panel; mandatory pytest on code/tests/docs; N>=10 runs per UID and CONSECUTIVE_PASS>=5; theme and zoom recorded
-
-  # --- generic nine-prompt audit kit (2026-08-11 07:12 BST) ---
-  - id: prompt.audit.generic-nine.pack
-    path: library/audit/generic-nine/pack.md
-    status: active
-    class: operator-paste
-    tags: [audit, pack, generic-nine, operator]
-    summary: Pack routing for the nine-domain generic code/project audit kit
-
-  # --- deprecated grafana six-prompt read-only audit kit (2026-08-11) ---
-  - id: prompt.observability.grafana-six.pack
-    path: library/observability/grafana-six/pack.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, pack, read-only, operator]
-    summary: Deprecated six-prompt routing; use prompt.observability.grafana-audit.master
-    successor: prompt.observability.grafana-audit.master
-
-  - id: prompt.observability.grafana-six.evidence
-    path: library/observability/grafana-six/evidence.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, evidence, read-only, operator]
-    summary: Deprecated evidence stage; use the master Grafana audit
-    successor: prompt.observability.grafana-audit.master
-
-  - id: prompt.observability.grafana-six.visual
-    path: library/observability/grafana-six/visual.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, visual, a11y, read-only, operator]
-    summary: Deprecated visual audit; use prompt.observability.grafana-audit.visual
-    successor: prompt.observability.grafana-audit.visual
-
-  - id: prompt.observability.grafana-six.layout
-    path: library/observability/grafana-six/layout.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, layout, ia, read-only, operator]
-    summary: Deprecated layout audit; use prompt.observability.grafana-audit.layout
-    successor: prompt.observability.grafana-audit.layout
-
-  - id: prompt.observability.grafana-six.data
-    path: library/observability/grafana-six/data.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, data, promql, read-only, operator]
-    summary: Deprecated data audit; use prompt.observability.grafana-audit.data-integrity
-    successor: prompt.observability.grafana-audit.data-integrity
-
-  - id: prompt.observability.grafana-six.consolidate
-    path: library/observability/grafana-six/consolidate.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, consolidate, read-only, operator]
-    summary: Deprecated consolidation stage; use the master Grafana audit
-    successor: prompt.observability.grafana-audit.master
-
-  - id: prompt.observability.grafana-six.reverify
-    path: library/observability/grafana-six/reverify.md
-    status: deprecated
-    class: operator-paste
-    tags: [observability, grafana, audit, reverify, read-only, operator]
-    summary: Deprecated reverify audit; use prompt.observability.grafana-audit.regression
-    successor: prompt.observability.grafana-audit.regression
-
-  # --- domain audit cards (generic nine-kit intake 2026-08) ---
-  - id: prompt.audit.docs-content
-    path: library/audit/docs-content.md
-    status: active
-    class: operator-paste
-    tags: [audit, docs, content, operator]
-    summary: Evidence-based audit of project documentation content and drift
-
-  - id: prompt.audit.tests-system
-    path: library/audit/tests-system.md
-    status: active
-    class: operator-paste
-    tags: [audit, tests, quality, operator]
-    summary: Audit test system as regression detection, not coverage vanity
-
-  - id: prompt.audit.tech-debt
-    path: library/audit/tech-debt.md
-    status: active
-    class: operator-paste
-    tags: [audit, debt, quality, operator]
-    summary: Evidence-based technical debt register with risk-ordered paydown
-
-  - id: prompt.audit.tests-cycle
-    path: library/audit/tests-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, tests, cycle, quality, operator]
-    summary: Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify
-
-  - id: prompt.audit.docs-cycle
-    path: library/audit/docs-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, docs, cycle, content, operator]
-    summary: Cyclic documentation audit — content drift, commands, links, fix, re-verify
-
-  - id: prompt.audit.tech-debt-cycle
-    path: library/audit/tech-debt-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, debt, cycle, quality, operator]
-    summary: Cyclic technical-debt audit — register, trend, paydown, residual re-check
-
-  - id: prompt.audit.cyclic-pack
-    path: library/audit/cyclic-pack.md
-    status: active
-    class: operator-paste
-    tags: [audit, cycle, pack, operator]
-    summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
-
-  - id: prompt.audit.project.pack
-    path: library/audit/project/pack.md
-    status: active
-    class: operator-paste
-    tags: [audit, project, pack, tech-debt, tests, docs, diagrams, operator]
-    summary: Full project-audit paste pack — tech-debt, tests, docs, diagrams, and the 10-domain cycle
-
-  - id: prompt.audit.sequential-run
-    path: library/audit/sequential-run.md
-    status: active
-    class: operator-paste
-    tags: [audit, sequential, cycle, github, operator]
-    summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close gates
-
-  - id: prompt.audit.repo-tree
-    path: library/audit/repo-tree.md
-    status: active
-    class: operator-paste
-    tags: [audit, repo, hygiene, root, operator]
-    summary: Repository tree and root hygiene audit against allowlist
-
-  - id: prompt.audit.repo-tree-cycle
-    path: library/audit/repo-tree-cycle.md
-    status: active
-    class: operator-paste
-    tags: [audit, repo, hygiene, root, cycle, operator]
-    summary: Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix, re-verify
-
-  - id: prompt.audit.github-actions
-    path: library/audit/github-actions.md
-    status: active
-    class: operator-paste
-    tags: [audit, ci, github-actions, security, operator]
-    summary: GitHub Actions supply-chain and correctness audit
-
-  - id: prompt.audit.agents-runtime
-    path: library/audit/agents-runtime.md
-    status: active
-    class: operator-paste
-    tags: [audit, agents, runtime, scripts, operator]
-    summary: Audit AI agent instructions, skills, and agent-related scripts
-
-  - id: prompt.audit.diagrams
-    path: library/audit/diagrams.md
-    status: active
-    class: operator-paste
-    tags: [audit, diagrams, mermaid, architecture, operator]
-    summary: Audit version-controlled diagrams and render scripts
-
-  - id: prompt.audit.docs-pipeline
-    path: library/audit/docs-pipeline.md
-    status: active
-    class: operator-paste
-    tags: [audit, docs, pipeline, scripts, operator]
-    summary: Audit docs generate/validate/publish scripts and pipelines
-
-  # --- ten-domain cyclic pack (library/audit/cycle/) ---
-  - id: prompt.audit.cycle.docs
-    path: library/audit/cycle/docs.md
-    status: active
-    class: operator-paste
-    tags: [audit, docs, cycle, content, pipeline, scripts, operator]
-    summary: Cyclic audit of documentation content and docs helper scripts
-
-  - id: prompt.audit.cycle.diagrams
-    path: library/audit/cycle/diagrams.md
-    status: active
-    class: operator-paste
-    tags: [audit, diagrams, mermaid, cycle, scripts, operator]
-    summary: Cyclic audit of version-controlled diagrams and render scripts
-
-  - id: prompt.audit.cycle.agents-memory
-    path: library/audit/cycle/agents-memory.md
-    status: active
-    class: operator-paste
-    tags: [audit, agents, memory, runtime, scripts, cycle, operator]
-    summary: Cyclic audit of AI runtime, agent scripts, and agent memory
-
-  - id: prompt.audit.cycle.configs
-    path: library/audit/cycle/configs.md
-    status: active
-    class: operator-paste
-    tags: [audit, configs, schema, cycle, operator]
-    summary: Cyclic audit of project config files, schemas, and compatibility
-
-  - id: prompt.audit.cycle.tests
-    path: library/audit/cycle/tests.md
-    status: active
-    class: operator-paste
-    tags: [audit, tests, cycle, quality, operator]
-    summary: Cyclic audit of the test system -- lanes, gates, flaky, fix, re-verify
-
-  - id: prompt.audit.cycle.tech-debt
-    path: library/audit/cycle/tech-debt.md
-    status: active
-    class: operator-paste
-    tags: [audit, debt, cycle, quality, operator]
-    summary: Cyclic technical-debt audit -- register, trend, paydown, residual re-check
-
-  - id: prompt.audit.cycle.architecture
-    path: library/audit/cycle/architecture.md
-    status: active
-    class: operator-paste
-    tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
-    summary: Cyclic architecture audit -- 10-category scorecard, plan, implement waves
-
-  - id: prompt.audit.cycle.telemetry
-    path: library/audit/cycle/telemetry.md
-    status: active
-    class: operator-paste
-    tags:
-      [audit, observability, telemetry, metrics, prometheus, cycle, operator]
-    summary: Cyclic audit of observability instrumentation and dashboard data feed
-
-  - id: prompt.audit.cycle.dashboards
-    path: library/audit/cycle/dashboards.md
-    status: active
-    class: operator-paste
-    tags: [observability, dashboard, grafana, render, design, cycle, operator]
-    summary: Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates
-
-  - id: prompt.audit.cycle.coderabbit
-    path: library/audit/cycle/coderabbit.md
-    status: active
-    class: operator-paste
-    tags: [audit, cycle, coderabbit, project, exhaustive, operator]
-    summary: Exhaustive cyclic project audit with CodeRabbit dual-pass
-
-  # --- archived campaigns (discoverability; not default paste) ---
-  - id: prompt.campaign.generic-nine-audit-kit
-    path: archive/campaigns/generic-nine-audit-kit-2026-08.md
-    status: archived
-    class: campaign
-    tags: [audit, campaign, archive, generic-kit]
-    summary: Cleaned generic nine-domain audit kit (2026-08); prefer prompt.audit.generic-nine.pack
-
-  - id: prompt.campaign.project-audit-orchestrator-kit
-    path: archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md
-    status: archived
-    class: campaign
-    tags: [audit, campaign, archive, orchestrator, generic-kit]
-    summary: Nine audits + N-iteration orchestrator (2026-08-11); prefer prompt.audit.orchestrator
-
-  - id: prompt.campaign.bi-dashboard-audit-kit
-    path: archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md
-    status: archived
-    class: campaign
-    tags: [observability, dashboard, bi, campaign, archive]
-    summary: BI dashboard acceptance kit (visual/layout/data); prefer bi-dashboard-acceptance card
+- id: prompt.fragment.read-order
+  path: fragments/read-order.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - read-order
+  summary: Mandatory read order before planning or editing
+- id: prompt.fragment.git-safety
+  path: fragments/git-safety.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - git
+  summary: Git and worktree safety for operator sessions
+- id: prompt.fragment.debt-budget-ban
+  path: fragments/debt-budget-ban.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - debt
+  summary: Technical-debt budgets must not increase
+- id: prompt.fragment.env-guardrail
+  path: fragments/env-guardrail.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - env
+  summary: Secret-bearing .env surface guardrail
+- id: prompt.fragment.evidence-contract
+  path: fragments/evidence-contract.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - evidence
+  summary: Minimum evidence format for findings and closeout
+- id: prompt.fragment.language-ru
+  path: fragments/language-ru.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - language
+  summary: Default operator response language
+- id: prompt.fragment.audit-scale
+  path: fragments/audit-scale.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - scale
+  summary: Unified surface quality score 0-3 and priority P0-P3
+- id: prompt.fragment.finding-schema
+  path: fragments/finding-schema.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - evidence
+  summary: Finding fields + findings.json contract including requirement_id (REQ-*/DASH-*)
+- id: prompt.fragment.unknown-params
+  path: fragments/unknown-params.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  summary: Do not invent repo parameters; prefer known BioETL SSOT
+- id: prompt.fragment.reports-output
+  path: fragments/reports-output.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - reports
+  - root
+  summary: Audit artifacts must land under reports/, not repo root
+- id: prompt.fragment.shell-portability
+  path: fragments/shell-portability.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - shell
+  - windows
+  summary: Portable shell notes for BioETL Windows-first operators
+- id: prompt.fragment.orchestrator-guards
+  path: fragments/orchestrator-guards.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - orchestrator
+  summary: Fail-closed guards for multi-iteration audit/implement orchestrator
+- id: prompt.fragment.dual-agent-handoff
+  path: fragments/dual-agent-handoff.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - dual-agent
+  - handoff
+  summary: Handoff and task-pack contracts for dual-agent audit cycles
+- id: prompt.fragment.coderabbit-dual-pass
+  path: fragments/coderabbit-dual-pass.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - coderabbit
+  - review
+  summary: CodeRabbit then agent order for audit and PR review passes
+- id: prompt.fragment.peer-review-gate
+  path: fragments/peer-review-gate.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - dual-agent
+  - review
+  summary: Peer agent review gate before issue close
+- id: prompt.fragment.bi-check-schema
+  path: fragments/bi-check-schema.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - observability
+  - bi
+  - dashboard
+  summary: BI dashboard check result schema and priority mapping
+- id: prompt.fragment.grafana-six-contract
+  path: fragments/grafana-six-contract.md
+  status: deprecated
+  class: fragment
+  tags:
+  - guardrail
+  - observability
+  - grafana
+  - audit
+  summary: Deprecated shared contract for the superseded six-prompt Grafana audit
+    kit
+  successor: prompt.fragment.grafana-audit-contract
+- id: prompt.fragment.grafana-audit-contract
+  path: fragments/grafana-audit-contract.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  summary: Shared evidence, severity, and release-gate contract for Grafana audits
+- id: prompt.fragment.dashboard-requirements-audit
+  path: fragments/dashboard-requirements-audit.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - requirements
+  summary: Bind dashboard audits to DASHBOARD_REQUIREMENTS.md — IDs, bands, gates,
+    ontology
+- id: prompt.fragment.project-requirements-audit
+  path: fragments/project-requirements-audit.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - requirements
+  - cycle
+  summary: Bind project-domain audits to REQUIREMENTS.md — REQ-* IDs, gates, issue
+    titles
+- id: prompt.fragment.generic-nine-contract
+  path: fragments/generic-nine-contract.md
+  status: active
+  class: fragment
+  tags:
+  - guardrail
+  - audit
+  - generic-nine
+  summary: Shared contract for the nine-domain generic audit kit
+- id: prompt.session.grok-bootstrap
+  path: library/session/grok-bootstrap.md
+  status: active
+  class: operator-paste
+  tags:
+  - session
+  - grok
+  - bootstrap
+  - operator
+  summary: Short daily-work bootstrap for Grok sessions on BioETL
+- id: prompt.closeout.grok
+  path: library/closeout/grok-closeout.md
+  status: active
+  class: operator-paste
+  tags:
+  - closeout
+  - grok
+  - operator
+  summary: Issue/PR closeout paste with verdicts, evidence, ship-profile note
+- id: prompt.audit.grok-cycle
+  path: library/audit/grok-audit-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - grok
+  - operator
+  summary: One-cycle audit paste with severity, stop conditions, Windows/memory gates
+- id: prompt.audit.orchestrator
+  path: library/audit/orchestrator.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - orchestrator
+  - github
+  - operator
+  summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
+- id: prompt.audit.dual-agent-cycle
+  path: library/audit/dual-agent-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - dual-agent
+  - cycle
+  - coderabbit
+  - github
+  - operator
+  summary: Dual-agent cyclic audit—plan—fix—check with external audit prompt and role
+    swap
+- id: prompt.audit.coderabbit-project-cycle
+  path: library/audit/coderabbit-project-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - cycle
+  - coderabbit
+  - project
+  - exhaustive
+  - plan
+  - implement
+  - operator
+  summary: Exhaustive cyclic project audit with CodeRabbit dual-pass — matrix, plan,
+    fix, re-CR
+- id: prompt.audit.role-auditor
+  path: library/audit/role-auditor.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - dual-agent
+  - role
+  - auditor
+  - operator
+  summary: Dual-agent Auditor role — CR+agent audit, plan review, implement stream,
+    peer review
+- id: prompt.audit.role-planner
+  path: library/audit/role-planner.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - dual-agent
+  - role
+  - planner
+  - operator
+  summary: Dual-agent Planner role — fact-check, task pack, plan gate, issues, implement
+    stream
+- id: prompt.tests.speed-optimization
+  path: library/tests/speed-optimization-loop.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - performance
+  - operator
+  summary: Accelerate test runs without weakening coverage
+- id: prompt.tests.fix-retest
+  path: library/tests/fix-retest-loop.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - debug
+  - operator
+  summary: Run → fix → retest until green or blocked
+- id: prompt.tests.cycle
+  path: library/tests/test-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - tests
+  - cycle
+  - pytest
+  - quality
+  - operator
+  summary: Cyclic testing — baseline run, triage, fix, retest, delta per cycle
+- id: prompt.docs.ai-audit-planning
+  path: library/docs/ai-audit-planning.md
+  status: active
+  class: operator-paste
+  tags:
+  - docs
+  - audit
+  - planning
+  - operator
+  summary: Plan an audit of docs/00-project/ai surfaces
+- id: prompt.architecture.review
+  path: library/architecture/review-assessment.md
+  status: active
+  class: operator-paste
+  tags:
+  - architecture
+  - review
+  - operator
+  - audit
+  summary: Architecture review v2.4 (hexagonal/C4/arc42) with findings.json outputs
+- id: prompt.architecture.cycle
+  path: library/architecture/architecture-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - architecture
+  - audit
+  - cycle
+  - scorecard
+  - hexagonal
+  - plan
+  - implement
+  - operator
+  summary: Cyclic architecture audit — 10-category scorecard, improvement plan, implement
+    waves
+- id: prompt.observability.dashboard-panel-audit
+  path: library/observability/dashboard-panel-audit.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - operator
+  summary: Five-phase Grafana panel audit — render, GH issues, fix, closeout (v1.3)
+- id: prompt.observability.bi-dashboard-acceptance
+  path: library/observability/bi-dashboard-acceptance.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - bi
+  - accessibility
+  - acceptance
+  - operator
+  summary: BI dashboard acceptance — visual, layout, data contours with measurable
+    checks
+- id: prompt.observability.dashboard-audit-cycle
+  path: library/observability/dashboard-audit-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - cycle
+  - density
+  - typography
+  - color
+  - layout
+  - render
+  - operator
+  summary: Cyclic Grafana audit (v2.1) bound to DASHBOARD_REQUIREMENTS.md — contours,
+    gates, theme/zoom (Tier-1 100% / Tier-2 200%)
+- id: prompt.observability.dashboard-full-cycle
+  path: library/observability/dashboard-full-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - cycle
+  - issues
+  - closeout
+  - render
+  - operator
+  summary: Unified N=10 dashboard cycle — full audit (render, design, fill, panels,
+    theme, zoom) then GH issues then fix-to-close; stop when no new issues and no
+    open cycle issues
+- id: prompt.observability.sequential-run
+  path: library/observability/sequential-run.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - sequential
+  - operator
+  summary: Sequential observability folder run — unique cards, issue/close gates,
+    DASH-AUTO appendix
+- id: prompt.observability.dashboard-operator-playbook
+  path: library/observability/dashboard-operator-playbook.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - operator
+  - playbook
+  - scenario
+  - verification
+  summary: Systematic per-panel operator playbook — question, dashboard link, analysis
+    order, 5-10 scenarios with value-dependent choices
+- id: prompt.observability.dashboard-data-duplication
+  path: library/observability/dashboard-data-duplication.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - duplication
+  - panels
+  - audit
+  - operator
+  summary: Sequential per-dashboard panel data audit — intra-dashboard duplicates
+    and exclusion plan without breaking FIT
+- id: prompt.observability.dashboard-manual-validation
+  path: library/observability/dashboard-manual-validation.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - audit
+  - manual
+  - validation
+  - operator
+  summary: Manual validation of DASH-* rules that static pytest cannot prove — reflow,
+    computed type, live FIT, render states; theme and zoom Dark/Light 100%/200%
+- id: prompt.observability.dashboard-v5.pack
+  path: library/observability/dashboard-v5/pack.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - v5
+  - pack
+  - operator
+  summary: Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover
+- id: prompt.observability.dashboard-v5.implement
+  path: library/observability/dashboard-v5/implement.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - v5
+  - implement
+  - operator
+  summary: Implement leftover V5 residuals — babysit
+- id: prompt.observability.dashboard-v5.closeout
+  path: library/observability/dashboard-v5/closeout.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - v5
+  - closeout
+  - operator
+  summary: Close V5 residual issues/PRs with origin/main evidence only
+- id: prompt.observability.dashboard-v5.audit-rf
+  path: library/observability/dashboard-v5/audit-rf.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - v5
+  - audit
+  - rf
+  - visual
+  - operator
+  summary: V5 R-F visual cycle — THEME dark+light, ZOOM 200, VIEWPORT 1920, leftover
+    NV; not a selector refactor
+- id: prompt.observability.grafana-audit.master
+  path: library/observability/grafana-audit/master.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - master
+  - evidence
+  - operator
+  summary: Complete read-only Grafana audit across visual, layout, and data contours
+- id: prompt.observability.grafana-audit.visual
+  path: library/observability/grafana-audit/visual.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - accessibility
+  - wcag
+  - visual
+  - operator
+  summary: Grafana visual audit for palette, contrast, typography, and status encoding
+- id: prompt.observability.grafana-audit.layout
+  path: library/observability/grafana-audit/layout.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - layout
+  - navigation
+  - operator
+  summary: Grafana layout audit for hierarchy, first viewport, variables, and drill-down
+- id: prompt.observability.grafana-audit.data-integrity
+  path: library/observability/grafana-audit/data-integrity.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - data
+  - lineage
+  - integrity
+  - operator
+  summary: Forensic Grafana audit for lineage, exact queries, invariants, and reconciliation
+- id: prompt.observability.grafana-audit.regression
+  path: library/observability/grafana-audit/regression.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - dashboard
+  - audit
+  - regression
+  - acceptance
+  - release
+  - operator
+  summary: Grafana baseline-to-candidate regression acceptance and release gate
+- id: prompt.observability.dashboard-first-window-noscroll
+  path: library/observability/dashboard-first-window-noscroll.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - first-window
+  - scroll
+  - containment
+  - implement
+  - operator
+  summary: Ultimate DASH-FIT-004 — no internal scroll on every first-window panel;
+    mandatory pytest on code/tests/docs; N>=10 runs per UID and CONSECUTIVE_PASS>=5;
+    theme and zoom recorded
+- id: prompt.audit.generic-nine.pack
+  path: library/audit/generic-nine/pack.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - pack
+  - generic-nine
+  - operator
+  summary: Pack routing for the nine-domain generic code/project audit kit
+- id: prompt.observability.grafana-six.pack
+  path: library/observability/grafana-six/pack.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - pack
+  - read-only
+  - operator
+  summary: Deprecated six-prompt routing; use prompt.observability.grafana-audit.master
+  successor: prompt.observability.grafana-audit.master
+- id: prompt.observability.grafana-six.evidence
+  path: library/observability/grafana-six/evidence.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - evidence
+  - read-only
+  - operator
+  summary: Deprecated evidence stage; use the master Grafana audit
+  successor: prompt.observability.grafana-audit.master
+- id: prompt.observability.grafana-six.visual
+  path: library/observability/grafana-six/visual.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - visual
+  - a11y
+  - read-only
+  - operator
+  summary: Deprecated visual audit; use prompt.observability.grafana-audit.visual
+  successor: prompt.observability.grafana-audit.visual
+- id: prompt.observability.grafana-six.layout
+  path: library/observability/grafana-six/layout.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - layout
+  - ia
+  - read-only
+  - operator
+  summary: Deprecated layout audit; use prompt.observability.grafana-audit.layout
+  successor: prompt.observability.grafana-audit.layout
+- id: prompt.observability.grafana-six.data
+  path: library/observability/grafana-six/data.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - data
+  - promql
+  - read-only
+  - operator
+  summary: Deprecated data audit; use prompt.observability.grafana-audit.data-integrity
+  successor: prompt.observability.grafana-audit.data-integrity
+- id: prompt.observability.grafana-six.consolidate
+  path: library/observability/grafana-six/consolidate.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - consolidate
+  - read-only
+  - operator
+  summary: Deprecated consolidation stage; use the master Grafana audit
+  successor: prompt.observability.grafana-audit.master
+- id: prompt.observability.grafana-six.reverify
+  path: library/observability/grafana-six/reverify.md
+  status: deprecated
+  class: operator-paste
+  tags:
+  - observability
+  - grafana
+  - audit
+  - reverify
+  - read-only
+  - operator
+  summary: Deprecated reverify audit; use prompt.observability.grafana-audit.regression
+  successor: prompt.observability.grafana-audit.regression
+- id: prompt.audit.docs-content
+  path: library/audit/docs-content.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - content
+  - operator
+  summary: Evidence-based audit of project documentation content and drift
+- id: prompt.audit.tests-system
+  path: library/audit/tests-system.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - tests
+  - quality
+  - operator
+  summary: Audit test system as regression detection, not coverage vanity
+- id: prompt.audit.tech-debt
+  path: library/audit/tech-debt.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - debt
+  - quality
+  - operator
+  summary: Evidence-based technical debt register with risk-ordered paydown
+- id: prompt.audit.tests-cycle
+  path: library/audit/tests-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - tests
+  - cycle
+  - quality
+  - operator
+  summary: Cyclic audit of the test system — inventory, gates, flaky, fix, re-verify
+- id: prompt.audit.docs-cycle
+  path: library/audit/docs-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - cycle
+  - content
+  - operator
+  summary: Cyclic documentation audit — content drift, commands, links, fix, re-verify
+- id: prompt.audit.tech-debt-cycle
+  path: library/audit/tech-debt-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - debt
+  - cycle
+  - quality
+  - operator
+  summary: Cyclic technical-debt audit — register, trend, paydown, residual re-check
+- id: prompt.audit.cyclic-pack
+  path: library/audit/cyclic-pack.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - cycle
+  - pack
+  - operator
+  summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
+- id: prompt.audit.project.pack
+  path: library/audit/project/pack.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - project
+  - pack
+  - tech-debt
+  - tests
+  - docs
+  - diagrams
+  - operator
+  summary: Full project-audit paste pack — tech-debt, tests, docs, diagrams, and the
+    10-domain cycle
+- id: prompt.audit.sequential-run
+  path: library/audit/sequential-run.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - sequential
+  - cycle
+  - github
+  - operator
+  summary: Sequential library/audit run — 10 cycle cards, REQ-* binding, issue/fix/close
+    gates
+- id: prompt.audit.repo-tree
+  path: library/audit/repo-tree.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - repo
+  - hygiene
+  - root
+  - operator
+  summary: Repository tree and root hygiene audit against allowlist
+- id: prompt.audit.repo-tree-cycle
+  path: library/audit/repo-tree-cycle.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - repo
+  - hygiene
+  - root
+  - cycle
+  - operator
+  summary: Cyclic repository hygiene audit — root allowlist, clutter, ignore, fix,
+    re-verify
+- id: prompt.audit.github-actions
+  path: library/audit/github-actions.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - ci
+  - github-actions
+  - security
+  - operator
+  summary: GitHub Actions supply-chain and correctness audit
+- id: prompt.audit.agents-runtime
+  path: library/audit/agents-runtime.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - agents
+  - runtime
+  - scripts
+  - operator
+  summary: Audit AI agent instructions, skills, and agent-related scripts
+- id: prompt.audit.diagrams
+  path: library/audit/diagrams.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - diagrams
+  - mermaid
+  - architecture
+  - operator
+  summary: Audit version-controlled diagrams and render scripts
+- id: prompt.audit.docs-pipeline
+  path: library/audit/docs-pipeline.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - pipeline
+  - scripts
+  - operator
+  summary: Audit docs generate/validate/publish scripts and pipelines
+- id: prompt.audit.cycle.docs
+  path: library/audit/cycle/docs.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - docs
+  - cycle
+  - content
+  - pipeline
+  - scripts
+  - operator
+  summary: Cyclic audit of documentation content and docs helper scripts
+- id: prompt.audit.cycle.diagrams
+  path: library/audit/cycle/diagrams.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - diagrams
+  - mermaid
+  - cycle
+  - scripts
+  - operator
+  summary: Cyclic audit of version-controlled diagrams and render scripts
+- id: prompt.audit.cycle.agents-memory
+  path: library/audit/cycle/agents-memory.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - agents
+  - memory
+  - runtime
+  - scripts
+  - cycle
+  - operator
+  summary: Cyclic audit of AI runtime, agent scripts, and agent memory
+- id: prompt.audit.cycle.configs
+  path: library/audit/cycle/configs.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - configs
+  - schema
+  - cycle
+  - operator
+  summary: Cyclic audit of project config files, schemas, and compatibility
+- id: prompt.audit.cycle.tests
+  path: library/audit/cycle/tests.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - tests
+  - cycle
+  - quality
+  - operator
+  summary: Cyclic audit of the test system -- lanes, gates, flaky, fix, re-verify
+- id: prompt.audit.cycle.tech-debt
+  path: library/audit/cycle/tech-debt.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - debt
+  - cycle
+  - quality
+  - operator
+  summary: Cyclic technical-debt audit -- register, trend, paydown, residual re-check
+- id: prompt.audit.cycle.architecture
+  path: library/audit/cycle/architecture.md
+  status: active
+  class: operator-paste
+  tags:
+  - architecture
+  - audit
+  - cycle
+  - scorecard
+  - hexagonal
+  - operator
+  summary: Cyclic architecture audit -- 10-category scorecard, plan, implement waves
+- id: prompt.audit.cycle.telemetry
+  path: library/audit/cycle/telemetry.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - observability
+  - telemetry
+  - metrics
+  - prometheus
+  - cycle
+  - operator
+  summary: Cyclic audit of observability instrumentation and dashboard data feed
+- id: prompt.audit.cycle.dashboards
+  path: library/audit/cycle/dashboards.md
+  status: active
+  class: operator-paste
+  tags:
+  - observability
+  - dashboard
+  - grafana
+  - render
+  - design
+  - cycle
+  - operator
+  summary: Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM,
+    bands, DASH-* gates
+- id: prompt.audit.cycle.coderabbit
+  path: library/audit/cycle/coderabbit.md
+  status: active
+  class: operator-paste
+  tags:
+  - audit
+  - cycle
+  - coderabbit
+  - project
+  - exhaustive
+  - operator
+  summary: Exhaustive cyclic project audit with CodeRabbit dual-pass
+- id: prompt.campaign.generic-nine-audit-kit
+  path: archive/campaigns/generic-nine-audit-kit-2026-08.md
+  status: archived
+  class: campaign
+  tags:
+  - audit
+  - campaign
+  - archive
+  - generic-kit
+  summary: Cleaned generic nine-domain audit kit (2026-08); prefer prompt.audit.generic-nine.pack
+- id: prompt.campaign.project-audit-orchestrator-kit
+  path: archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md
+  status: archived
+  class: campaign
+  tags:
+  - audit
+  - campaign
+  - archive
+  - orchestrator
+  - generic-kit
+  summary: Nine audits + N-iteration orchestrator (2026-08-11); prefer prompt.audit.orchestrator
+- id: prompt.campaign.bi-dashboard-audit-kit
+  path: archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md
+  status: archived
+  class: campaign
+  tags:
+  - observability
+  - dashboard
+  - bi
+  - campaign
+  - archive
+  summary: BI dashboard acceptance kit (visual/layout/data); prefer bi-dashboard-acceptance
+    card
+- id: prompt.audit.project.gh-actions-cyclic-1000
+  path: library/audit/project/gh-actions-cyclic-audit-1000.md
+  status: active
+  class: operator-paste
+  tags:
+  - gh-actions
+  - cyclic
+  - audit
+  summary: GH Actions cyclic audit 1000x test->fix->retest
