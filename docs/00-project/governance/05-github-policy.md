@@ -361,6 +361,7 @@ File: `.github/dependabot.yml`
   under `.github/actions/**`.
 - Trivy records CRITICAL, HIGH, MEDIUM, and UNKNOWN findings and blocks the
   Docker image on CRITICAL, HIGH, or MEDIUM vulnerabilities
+  - Residual OSV accepted per #9853 (expiry **2026-11-30**, re-triage #9859): GHSA `jMR9-qjv8-65gv` (extract-zip 2.0.2 via mermaid-cli 10.6.1 `overrides`), `5p4m-...` (js-yaml 4.3.2), `svgo 3.3.5`, `tar-fs 2.1.5`, `ws 8.21.3`, `PYSEC-2026-3721/CVE-2026-3219` `pip==26.1.2` (`--ignore-vuln` in `security.yml`), Grafana `react-router/uuid` — Scorecard Vulnerabilities #1294 stays **undismissed**; CI fail-closed `tests/architecture/test_residual_osv_9853.py::test_residual_osv_exception_has_not_expired`; do **not** add `osv-scanner.toml` and do **not** dismiss #1294.
 - `pip-audit --strict` checks all Python dependencies
 - `detect-secrets` prevents credential leaks in commits
 
@@ -530,6 +531,21 @@ ______________________________________________________________________
 
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
+
+### Upcoming ruleset for main (RF-008, not yet enforced — owner approval required)
+
+Target: `refs/heads/main` (upcoming `main` ruleset per #9800, not enforced — requires owner approval).
+Rules: require PR + 1 approving review + dismiss stale reviews + require conversation resolution + required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:false`) + restrict bypass: maintainers only + require linear history.
+Bypass: `current_user_can_bypass: never` (when enabled). Activation: dry-run evidence (`GET /repos/*/rulesets` + `GET /rules/branches/main`) → owner @SatoryKono approval → `PUT enforcement=active`. Rollback opt-in: `gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled` + record in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices), known_issue `9800` (`GH-RULESET-001`).
+
+### Quarterly Read-Only Review Runbook (read-only, no mutations)
+
+Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
+
+Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 active + legacy 13643213) → `GET /rules/branches/main` (expect 404 when disabled) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
+Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 
 ### Evidence (2026-08-28)
 
