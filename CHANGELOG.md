@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Root PYTHON_LOCATION:** move `github_settings_review.py` from
+  `.github/tooling/` to `scripts/engineering/repo/` so structure audit stays fail-closed.
+
 - **Residual OSV exception (#9853, re-triage #9859):** mermaid-cli/puppeteer pins, Grafana plugin
   GHSA, and `PYSEC-2026-3721` / `CVE-2026-3219` pip-audit ignores are timeboxed
   to **2026-11-30**. OpenSSF Scorecard Vulnerabilities (#1294) is not dismissed.

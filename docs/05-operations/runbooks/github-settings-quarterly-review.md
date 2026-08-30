@@ -47,7 +47,7 @@ state.
 
 1. Run the workflow with workflow_dispatch or execute locally:
 
-       python .github/tooling/github_settings_review.py --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md
+       python scripts/engineering/repo/github_settings_review.py --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md
 
 1. Confirm the report records the discovered repository/default branch and
    automation_mutated_github: false.
