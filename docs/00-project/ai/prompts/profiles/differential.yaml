@@ -1,0 +1,13 @@
+# P1 #9808 — differential execution profile
+# Differential audit variant — scoped change-set audit, fail-closed.
+name: differential
+description: Differential audit variant
+MODE: audit
+AUDIT_MODE: differential
+ALLOW_ISSUE_WRITE: false
+ALLOW_PUSH: false
+ALLOW_MERGE: false
+ALLOW_CLOSE: false
+ALLOW_NETWORK: false
+ALLOW_FULL_SUITE: false
+LANGUAGE: ru
