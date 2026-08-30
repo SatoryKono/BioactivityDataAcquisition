@@ -23,9 +23,9 @@ _SECRET_MARKERS = (
 _SECRET_HEADER = re.compile(
     r"(?im)\b(authorization|cookie|credential|private[_-]?key)\b\s*[:=]\s*[^\r\n]*"
 )
-_INLINE_SECRET = re.compile(
+_INLINE_SECRET_PREFIX = re.compile(
     r"(?i)\b(password|passwd|token|secret|api[_-]?key|credential|private[_-]?key)\b"
-    r'\s*[:=]\s*("(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'|[^\s,;&]+)'
+    r"\s*[:=]\s*"
 )
 # Character classes omit a-z under (?i) to avoid S5869 duplicate-range findings.
 _BEARER_SECRET = re.compile(r"(?i)\bBearer\s+[-A-Z0-9._~+/=]+")
@@ -35,6 +35,9 @@ _PREFIXED_SECRET = re.compile(
 )
 _EMBEDDED_URL = re.compile(r"[A-Za-z][-A-Za-z0-9+.]*://[^\s<>'\"]+")
 _CYCLE_SENTINEL = "[REDACTED CYCLE]"
+_UNQUOTED_VALUE_STOP = frozenset(",;&")
+_QUOTE_CHARS = frozenset("\"'")
+_ESCAPE_CHAR = "\\"
 
 
 def _redact_inline_secrets(value: str) -> str:
@@ -43,9 +46,48 @@ def _redact_inline_secrets(value: str) -> str:
         lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}",
         value,
     )
-    return _INLINE_SECRET.sub(
-        lambda match: f"{match.group(1)}={_REDACTED_PLACEHOLDER}", redacted
-    )
+    parts: list[str] = []
+    cursor = 0
+    while match := _INLINE_SECRET_PREFIX.search(redacted, cursor):
+        parts.append(redacted[cursor : match.start()])
+        parts.append(f"{match.group(1)}={_REDACTED_PLACEHOLDER}")
+        cursor = _inline_secret_value_end(redacted, match.end())
+    parts.append(redacted[cursor:])
+    return "".join(parts)
+
+
+def _scan_unquoted_value_end(value: str, start: int) -> int:
+    cursor = start
+    length = len(value)
+    while cursor < length:
+        char = value[cursor]
+        if char.isspace() or char in _UNQUOTED_VALUE_STOP:
+            break
+        cursor += 1
+    return cursor
+
+
+def _scan_quoted_value_end(value: str, start: int, quote: str) -> int:
+    cursor = start + 1
+    length = len(value)
+    while cursor < length:
+        char = value[cursor]
+        if char == _ESCAPE_CHAR:
+            cursor = min(cursor + 2, length)
+            continue
+        cursor += 1
+        if char == quote:
+            return cursor
+    return length
+
+
+def _inline_secret_value_end(value: str, start: int) -> int:
+    if start >= len(value):
+        return start
+    quote = value[start]
+    if quote in _QUOTE_CHARS:
+        return _scan_quoted_value_end(value, start, quote)
+    return _scan_unquoted_value_end(value, start)
 
 
 def _redact_url_hostname(parsed: SplitResult) -> str:

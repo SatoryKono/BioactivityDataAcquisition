@@ -1,11 +1,9 @@
 {
-  "source_branch": "fix/container-vulnerabilities-20260828",
-  "source_commit": "2460c8c04e2c86adddc2a609c30957a4b63c146c",
-  "source_run_id": "33169139447",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33169139447",
-  "source_tree_sha256": "dedfa7247e6967060f3c2645ba75d1e7a35ec9fdef6b7265263cddf1acf5b02e",
-  "refreshed_at_utc": "2026-08-28T12:08:33.049094+00:00",
+  "source_branch": "fix/redos-inline-secret-20260828",
+  "source_commit": "c7754a0a73cab6f38866af26da4c69790b70044e",
+  "source_run_id": "33192008237",
+  "source_tree_sha256": "8846fdc0a086a158b584fb0e8f8aac36298269eaaa79a859759e236120b9e8a5",
+  "refreshed_at_utc": "2026-08-28T17:27:44.817166+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.58,
   "coverage": {
