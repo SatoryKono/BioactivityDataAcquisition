@@ -1076,7 +1076,13 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
         not in dockerfile
     )
-    assert "uv==0.11.26" in operations_dockerfile
+    assert (
+        "ghcr.io/astral-sh/uv@sha256:"
+        "3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5"
+        in operations_dockerfile
+    )
+    assert "RUN pip install" not in operations_dockerfile
+    assert "pip install --only-binary=:all: --no-cache-dir uv==" not in operations_dockerfile
     setup_uv = (ROOT / ".github/actions/setup-python-uv/action.yml").read_text(
         encoding="utf-8"
     )
