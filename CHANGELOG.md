@@ -32,7 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   requirements-trace → ops-runbooks → scripts-inventory). They do not replace
   `cycle/` or `new/`.
 
+- **CodeQL ownership (#9786):** advanced `codeql.yml` is the sole Code
+  scanning owner; default setup stays off; weekly Monday triage.
+
 ### Changed
+
+- **Supply-chain pins (#9801):** CI jobs install Python tools from `uv.lock`
+  instead of unhashed `pip install`; jscpd uses a locked `npm ci` prefix.
+  Dependabot now covers npm lockfiles (root, Mermaid, jscpd, Grafana plugins).
 
 - **Architecture scorecard ceiling (#9791):** diagnostic saturation
   (`families_at_budget`, lazy-import util, composition util) now scores;

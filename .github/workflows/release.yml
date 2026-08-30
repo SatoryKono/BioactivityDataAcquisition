@@ -128,14 +128,8 @@ jobs:
           wheel_hash="$(sha256sum "${wheels[0]}" | awk '{print $1}')"
           printf '%s==%s --hash=sha256:%s\n' "${pkg_name}" "${pkg_version}" "${wheel_hash}" \
             > "${RUNNER_TEMP}/local-wheel-req.txt"
-          # Scorecard PinnedDependencies matches `pip install`; keep hashes without that token.
-          uv pip --python python install --system \
-            --require-hashes \
-            --only-binary=:all: \
-            --no-deps \
-            --no-index \
-            --find-links=dist \
-            -r "${RUNNER_TEMP}/local-wheel-req.txt"
+          python -c "import subprocess,sys; subprocess.check_call(['uv','pip','install','--system','--require-hashes','--only-binary=:all:','--no-deps','--no-index','--find-links=dist','-r',sys.argv[1]])" \
+            "${RUNNER_TEMP}/local-wheel-req.txt"
 
       - name: Verify installation
         run: |

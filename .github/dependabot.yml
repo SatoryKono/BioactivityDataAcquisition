@@ -35,3 +35,60 @@ updates:
     groups:
       docker:
         patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      npm-root:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/.github/actions/setup-mermaid"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      npm-mermaid:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/.github/tooling/jscpd"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      npm-jscpd:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/grafana/plugins/bioetl-scenes-app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      npm-grafana-scenes:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
+    directory: "/grafana/plugins/bioetl-selectorshell-panel"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      npm-grafana-selectorshell:
+        patterns: ["*"]

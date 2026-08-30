@@ -30,7 +30,7 @@ the human index.
 | `branch-hygiene.yml` | Branch Hygiene | PR branch-name policy and periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | ChemblBaseline Smoke | ChEMBL baseline smoke lane |
 | `coderabbit.yml` | CodeRabbit | Automated review integration |
-| `codeql.yml` | CodeQL | Python CodeQL SAST to GitHub code scanning |
+| `codeql.yml` | CodeQL | Advanced Python CodeQL SAST to GitHub code scanning; default setup stays off |
 | `commit-lint.yml` | Commit Lint | Conventional commit message lint |
 | `compiled-artifacts-block.yml` | Block Compiled Python Artifacts | Fail on committed bytecode/build junk |
 | `consolidation-gates.yml` | consolidation-gates | Consolidation / cleanup governance gates |

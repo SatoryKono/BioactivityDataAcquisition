@@ -1,0 +1,8 @@
+{
+  "name": "bioetl-jscpd-cli",
+  "private": true,
+  "description": "Pinned jscpd CLI for duplication-complexity.yml (Scorecard PinnedDependencies, Sonar S8543).",
+  "dependencies": {
+    "jscpd": "4.0.8"
+  }
+}
