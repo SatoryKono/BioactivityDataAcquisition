@@ -528,3 +528,70 @@ class TestListCheckpoints:
             result = await list_checkpoints("any_pipeline")
 
         assert result == []
+
+
+@pytest.mark.unit
+class TestResourceBootstrapLazyImports:
+    """#9793: exercise lazy import wrappers instead of patching them away."""
+
+    def test_bootstrap_quarantine_runtime_service_delegates(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_quarantine_runtime_service",
+            lambda pipeline: ("quarantine", pipeline),
+        )
+        from bioetl.composition._resource_management import (
+            bootstrap_quarantine_runtime_service,
+        )
+
+        assert bootstrap_quarantine_runtime_service("chembl_activity") == (
+            "quarantine",
+            "chembl_activity",
+        )
+
+    def test_bootstrap_checkpoint_runtime_service_delegates(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "bioetl.composition.bootstrap.cli.checkpoint.bootstrap_checkpoint_runtime_service",
+            lambda pipeline: ("checkpoint", pipeline),
+        )
+        from bioetl.composition._resource_management import (
+            bootstrap_checkpoint_runtime_service,
+        )
+
+        assert bootstrap_checkpoint_runtime_service("chembl_activity") == (
+            "checkpoint",
+            "chembl_activity",
+        )
+
+    def test_bootstrap_lifecycle_and_cleanup_delegate(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "bioetl.composition.bootstrap.cli.storage.bootstrap_lifecycle_service",
+            lambda: "lifecycle",
+        )
+        monkeypatch.setattr(
+            "bioetl.composition.bootstrap.cli.storage.bootstrap_cleanup_service",
+            lambda: "cleanup",
+        )
+        from bioetl.composition._resource_management import (
+            bootstrap_cleanup_service,
+            bootstrap_lifecycle_service,
+        )
+
+        assert bootstrap_lifecycle_service() == "lifecycle"
+        assert bootstrap_cleanup_service() == "cleanup"
+
+    def test_load_pipeline_config_delegates(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.pipeline_config_api.load_pipeline_config",
+            lambda pipeline: {"name": pipeline},
+        )
+        from bioetl.composition._resource_management import load_pipeline_config
+
+        assert load_pipeline_config("chembl_activity") == {"name": "chembl_activity"}

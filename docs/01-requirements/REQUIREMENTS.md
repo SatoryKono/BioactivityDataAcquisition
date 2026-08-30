@@ -1,9 +1,9 @@
 # BioETL Requirements
 
-Version: 1.12.6
+Version: 1.12.7
 Status: active
 Aligned with: RULES.md v6.1.11 ([source](../00-project/RULES.md); architecture stamp re-check 2026-08-25)
-Last verified: 2026-08-27
+Last verified: 2026-08-28
 
 ## Purpose and authority
 
@@ -22,11 +22,11 @@ runtime or normative source.
 
 ## Machine-readable traceability
 
-The complete catalog contains **172 active requirements**:
+The complete catalog contains **192 active requirements**:
 
-- 151 `MUST`;
+- 167 `MUST`;
 - 16 `MUST NOT`;
-- 4 `SHOULD`;
+- 8 `SHOULD`;
 - 1 `MAY`.
 
 Every requirement has its modality, `RULES.md` section, ADR references,
@@ -49,11 +49,11 @@ row must also identify a verification method or executable surface.
 
 | Normative area | Requirements | Primary `RULES.md` sections | Representative decisions and evidence |
 | --- | ---: | --- | --- |
-| Architecture and layers | 7 | §1 | ADR-005, ADR-048; `tests/architecture/` |
-| Medallion, data, DQ, replay, composites | 51 | §2, §6.1 | ADR-002, ADR-014, ADR-018, ADR-026, ADR-045, ADR-050; `configs/entities/`, `configs/composites/`, `tests/contract/` |
-| Errors and observability | 43 | §3 | ADR-006, ADR-007, ADR-016, ADR-017, ADR-019, ADR-053; `src/bioetl/infrastructure/observability/`, `grafana/` |
+| Architecture and layers | 14 | §1 | ADR-005, ADR-048; `tests/architecture/` |
+| Medallion, data, DQ, replay, composites | 60 | §2, §6.1 | ADR-002, ADR-014, ADR-018, ADR-026, ADR-033, ADR-045, ADR-050; `configs/entities/`, `configs/composites/`, `tests/contract/` |
+| Errors and observability | 45 | §3 | ADR-006, ADR-007, ADR-016, ADR-017, ADR-019, ADR-053; `src/bioetl/infrastructure/observability/`, `grafana/` |
 | Code and testing | 25 | §4 | ADR-032, ADR-042, ADR-049; `pyproject.toml`, `tests/` |
-| Operations and control plane | 28 | §5, §6.1 | ADR-010, ADR-044, ADR-046, ADR-047; `src/bioetl/domain/control_plane/run_manifest.py`, `src/bioetl/domain/control_plane/run_ledger.py`, `configs/workflows/` |
+| Operations and control plane | 30 | §5, §6.1 | ADR-010, ADR-044, ADR-046, ADR-047; `src/bioetl/domain/control_plane/run_manifest.py`, `src/bioetl/domain/control_plane/run_ledger.py`, `configs/workflows/` |
 | Documentation | 2 | §6 | `scripts/docs/`, documentation CI checks |
 | Contracts and change management | 6 | §8 | ADR-037, ADR-038, ADR-039, ADR-048; `configs/base/contract_registry.yaml`, `reports/quality/contract-coverage-matrix.json` |
 | Developer experience | 5 | §9 | `Makefile`, `scripts/engineering/dev/` |
@@ -118,6 +118,10 @@ increased as a documentation remedy.
 
 ## Version history
 
+- v1.12.7 (2026-08-28): catalogued invented `REQ-ARCH-011/012/013/030/031/040/041`,
+  `REQ-AUDIT-001/002`, `REQ-CONF-001`, `REQ-ERR-015`, `REQ-OBS-010`, and
+  `REQ-VAL-001..008` already cited in RULES/ADR-033/`src/` (#9803); catalog
+  count 172→192.
 - v1.12.6 (2026-08-27): added `REQ-DASH-004` (`DASH-DENSITY-002` scalar
   information density) already published in `DASHBOARD_REQUIREMENTS.md` to the
   traceability CSV; catalog count 171→172.

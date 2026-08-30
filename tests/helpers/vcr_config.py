@@ -1,4 +1,5 @@
-"""Shared VCR replay configuration helpers for test suites."""
+"""Shared VCR replay configuration helpers for test suites.REQ-TEST-004: shared VCR helper config.
+"""
 
 from __future__ import annotations
 

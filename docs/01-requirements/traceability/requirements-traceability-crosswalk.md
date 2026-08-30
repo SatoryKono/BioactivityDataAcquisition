@@ -1,15 +1,18 @@
 # Requirements Traceability Crosswalk
 
-- snapshot_date: 2026-08-27
-- source: `docs/01-requirements/REQUIREMENTS.md` v1.12.6
+- snapshot_date: 2026-08-28
+- source: `docs/01-requirements/REQUIREMENTS.md` v1.12.7
 - canonical_rules_owner: `docs/00-project/RULES.md` v6.1.11
 - artifact: `docs/01-requirements/traceability/requirements-traceability-crosswalk.csv`
-- row_count: 172
-- modality_counts: `151 MUST`, `16 MUST NOT`, `4 SHOULD`, `1 MAY`
-- status_counts: `166 confirmed`, `6 updated`, `0 conflict`, `0 follow-up`
+- row_count: 192
+- modality_counts: `167 MUST`, `16 MUST NOT`, `8 SHOULD`, `1 MAY`
+- status_counts: `186 confirmed`, `6 updated`, `0 conflict`, `0 follow-up`
 
 ## New Rows
 
+- `REQ-ARCH-011/012/013/030/031/040/041`, `REQ-AUDIT-001/002`, `REQ-CONF-001`,
+  `REQ-ERR-015`, `REQ-OBS-010`, `REQ-VAL-001..008` — invented IDs from RULES,
+  ADR-033, and `src/bioetl/` now have canonical CSV rows (#9803).
 - `REQ-DASH-001..004` — density, typography, area-fill presentation, and
   scalar information density (`DASH-DENSITY-002`) delegated by `RULES.md`
   §3.2.3 to the scoped dashboard contract.
@@ -27,7 +30,8 @@
 
 ## Resolution Notes
 
-- The crosswalk now covers all 172 active requirements, including the four
+- The crosswalk now covers all 192 active requirements, including the 20
+  previously invented RULES/ADR-033/`src/` identifiers, the four
   dashboard presentation requirements and 12 cross-cutting governance
   requirements.
 - No active `CONTRIBUTING.md` conflict required remediation in current `main`.
