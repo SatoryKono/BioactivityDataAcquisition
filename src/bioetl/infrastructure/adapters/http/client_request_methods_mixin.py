@@ -57,7 +57,7 @@ class HTTPClientRequestMethodsMixin:
         Returns:
             httpx.Response from the server after applying retry policy.
         """
-        request_kwargs: dict[str, Any] = {"params": params, "headers": headers}
+        request_kwargs: dict[str, object] = {"params": params, "headers": headers}
         if follow_redirects is not None:
             request_kwargs["follow_redirects"] = follow_redirects
         return await self._request_with_retry("GET", url, **request_kwargs)
