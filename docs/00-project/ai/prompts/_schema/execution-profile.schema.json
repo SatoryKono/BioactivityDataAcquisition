@@ -25,6 +25,25 @@
         "full"
       ]
     },
+    "AUDIT_MODE": {
+      "type": "string",
+      "enum": [
+        "full",
+        "differential"
+      ]
+    },
+    "LANGUAGE": {
+      "type": "string",
+      "enum": [
+        "ru",
+        "en"
+      ]
+    },
+    "N": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
     "ALLOW_ISSUE_WRITE": {
       "type": "boolean",
       "default": false
