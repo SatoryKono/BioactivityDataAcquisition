@@ -1,1 +1,0 @@
-E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe: Error while finding module specification for 'scripts.ci.update_test_telemetry_baseline' (ModuleNotFoundError: No module named 'scripts.ci')
