@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3597 |
-| Tracked doc-like files | 3597 |
-| Ignored local docs/reports files | 0 |
+| Doc-like files | 3672 |
+| Tracked doc-like files | 3667 |
+| Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
@@ -18,7 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3597 |
+| ignored_local | 5 |
+| tracked | 3667 |
 
 ## Lifecycle Counts
 
@@ -26,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 62 |
+| active_quality_baseline | 61 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 10 |
@@ -42,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 938 |
+| working_report | 857 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -58,39 +59,63 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 747 |
+| Active | 749 |
 | Archived | 170 |
-| Canonical | 72 |
-| Deprecated | 8 |
-| Generated | 1177 |
-| Working | 1423 |
+| Canonical | 73 |
+| Deprecated | 32 |
+| Generated | 1286 |
+| Working | 1362 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 747 |
+| active | 749 |
 | archive | 170 |
-| canonical | 72 |
-| duplicate | 8 |
-| generated | 1177 |
-| working | 1423 |
+| canonical | 73 |
+| duplicate | 32 |
+| generated | 1286 |
+| working | 1362 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 929 |
-| generate-automatically | 1177 |
-| keep | 1139 |
+| archive-after-migration | 869 |
+| generate-automatically | 1286 |
+| keep | 1141 |
 | reconcile-with-github-state | 8 |
-| replace-with-link | 8 |
+| replace-with-link | 32 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.architecture.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.coderabbit.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.configs.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.dashboards.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.diagrams.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.docs.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tech-debt.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.telemetry.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tests.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.cli-compat.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.control-plane.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.dq-contracts.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.github-actions.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.http-clients.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.medallion.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.normalization.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.ops-runbooks.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.providers.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.qa-gates.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.requirements-trace.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.scripts-inventory.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.security-secrets.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.vcr-http.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/fragments/grafana-six-contract.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/consolidate.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/data.md` | Deprecated | 1 | replace-with-link |
@@ -144,50 +169,9 @@
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-code-drift.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi-after.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/docs-pipeline.csv` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-001.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-002.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-003.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/issue-DOCS-004.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-bundle.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/proof-verification.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/blocked-evidence.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/preflight.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/final-summary.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -242,6 +226,11 @@
 | `docs/00-project/ai/prompts/INVENTORY.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/domain-overlay.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/execution-profile.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/finding-v3.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/kernel.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/_schema/ledger-event.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/prompt.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -268,11 +257,6 @@
 | `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/dashboard-audit-full-cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/fragments/audit-scale.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/fragments/bi-check-schema.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/fragments/coderabbit-dual-pass.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

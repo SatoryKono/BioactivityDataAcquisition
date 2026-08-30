@@ -401,7 +401,10 @@ def test_architecture_quality_scorecard_penalizes_at_budget_saturation() -> None
 
     def _integral(metrics: dict[str, object]) -> float:
         return round(
-            sum(float(category["weighted_score"]) for category in _build_categories(metrics)),
+            sum(
+                float(category["weighted_score"])
+                for category in _build_categories(metrics)
+            ),
             2,
         )
 

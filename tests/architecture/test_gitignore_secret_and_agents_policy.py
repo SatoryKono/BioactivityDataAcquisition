@@ -1,5 +1,4 @@
-"""Gitignore last-match policy for secrets and tracked agent skills (#9698).REQ-ENV-003: secrets stay out of git and agent surfaces.
-"""
+"""Gitignore last-match policy for secrets and tracked agent skills (#9698).REQ-ENV-003: secrets stay out of git and agent surfaces."""
 
 from __future__ import annotations
 

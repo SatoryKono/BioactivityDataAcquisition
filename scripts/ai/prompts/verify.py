@@ -194,7 +194,7 @@ def check_generated_catalog(report: VerifyReport) -> list[Path]:
     for p in domain_files:
         try:
             text = p.read_text(encoding="utf-8").replace("\r\n", "\n")
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             report.add_error("generated_read", str(exc), p.as_posix())
             continue
         prov = _parse_provenance_header(text)

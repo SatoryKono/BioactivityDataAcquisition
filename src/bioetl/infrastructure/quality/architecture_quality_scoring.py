@@ -117,7 +117,11 @@ def _metric_value(metrics: dict[str, object], key: str) -> object:
 
 def _metric_int(metrics: dict[str, object], key: str) -> int:
     value = metrics.get(key, 0)
-    return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else 0
+    return (
+        int(value)
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+        else 0
+    )
 
 
 def _metric_float(metrics: dict[str, object], key: str) -> float:
