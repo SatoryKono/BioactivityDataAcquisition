@@ -170,6 +170,7 @@ nav:
           - "File Policy": 00-project/governance/03-file-policy.md
           - "Extending BioETL": 00-project/governance/04-extending-bioetl.md
           - "GitHub Policy": 00-project/governance/05-github-policy.md
+          - "GitHub Labels, Intake, and Wiki": 00-project/governance/github-label-taxonomy.md
           - "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
           - "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
           - "Debt Ownership Playbook": 00-project/governance/08-debt-ownership-playbook.md
@@ -534,6 +535,7 @@ nav:
           - "Stale Lock": 05-operations/runbooks/stale-lock.md
           - "Quarantine Management": 05-operations/runbooks/quarantine-management.md
           - "Retention-Sensitive Cleanup": 05-operations/runbooks/retention-sensitive-cleanup.md
+          - "Quarterly GitHub Settings Review": 05-operations/runbooks/github-settings-quarterly-review.md
           - "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
           - "Observability Checklist": 05-operations/runbooks/observability-checklist.md
           - "Run Manifest Inspection": 05-operations/runbooks/run-manifest-inspection.md
