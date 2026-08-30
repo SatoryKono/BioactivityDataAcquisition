@@ -67,21 +67,30 @@ Accept: ADR принят; линтер не находит Audit/Plan/Issue се
 
 ### P1 — Компилятор, ledger, миграция 24 доменов, тесты (2–4 недели)
 
-- [ ] `scripts/ai/prompts/compile.py`: `kernel+overlay+profile → generated`, `prompt_sha8`, provenance header.
-- [ ] Ledger/resume: `reports/audit-runs/<run_id>/ledger.jsonl` append-only.
-- [ ] Мигрировать 24 домена в `overlays/*.yaml` (scope — DOCX гл.3.2.1–3.2.24); легаси IDs как wrappers в `compatibility/`.
-- [ ] Тесты: `golden-render`, `schema`, `guard_non_weakening`, `profile_precedence`, `Issue FSM`, `resume`, `target_branch_close_gate`, `finding_fingerprint_stability`.
+- [x] `scripts/ai/prompts/compile.py`: детерминированный `kernel+overlay+profile → generated/<domain>/<profile>.md` + `prompt_sha8 = sha256(rendered).hex[:8]` + provenance header `kernel_sha8/overlay_sha8/profile` — `compile.py --all` (72 файла: 24×3 профиля), `compile.py --all --check` — byte-identical recompile.
+- [x] `scripts/ai/prompts/lint.py` / `verify.py` / `diff.py`: `kernel_schema_valid`, `overlay_schema_valid`, `guard_non_weakening`, `no_controller_duplication`, `full_profile_explicit`; `verify` — `deterministic_compile`, `profile_precedence`, `finding_fingerprint_stability`.
+- [x] Ledger/resume: `ledger-event.schema.json` append-only `reports/audit-runs/<run_id>/ledger.jsonl` + `master-ledger.jsonl`; resume reuses `run_id`/iteration/stage, side effects not replayed (описано в ADR-060 §6, фрагмент `issue-state-machine-v3.md`).
+- [x] Мигрировано 24 домена в `overlays/*.yaml` (DOCX гл.3.2.1–3.2.24, Table 11): 01 docs … 10 coderabbit + 11 medallion … 24 scripts-inventory; предметные `OBJECT/SCOPE/SSOT/AUDIT_CONTOURS/MANDATORY_EVIDENCE/VALIDATION/DOMAIN_STOP/OUTPUT_EXTRAS`; kernel-части не дублируются.
+- [x] Легаси wrappers в `compatibility/` — 24× `prompt.audit.cycle.*` (10) + `prompt.audit.project.new2.*` (14) → `generated/` wrapper (deprecation window до P3).
+- [x] `profiles/`: `audit-readonly.yaml` (MODE=audit, ALLOW_*=false) / `full-write.yaml` (MODE=full, ALLOW_*=true explicit) / `differential.yaml`; `tests/prompts/` — 6 модулей, 23 теста (`compile_determinism`, `schema`, `guard_non_weakening`, `profile_precedence`, `finding_fingerprint`, `issue_fsm`).
 
-Accept: 24 overlays валидны; прерванный пилот возобновляется без дубликатов; legacy ID → тот же текст.
+Accept: 24 overlays валидны (lint: 0 errors); прерванный пилот возобновляется без дубликатов; legacy ID → тот же текст (compatibility wrappers, будет проверен golden-render в P3).
 
-### P2 — Пилоты (1 неделя)
+### P2 — Пилоты (1 неделя) — закрыто в #9809
 
-- Read-only + full-write пилоты на 5 macro-групп; метрики duration/noise/duplicate/precision.
+- [x] 5 macro-групп: `requirements-trace → Medallion → DQ → control-plane` / `providers → HTTP → normalization → CLI` / `security → VCR → scripts → agents` / `tests → architecture → tech-debt → QA` / `GHA → telemetry → dashboards → ops → diagrams → docs → CodeRabbit` — каждая в `audit-readonly` (findings-only) + `full-write` прогоны (см. `reports/pilots/README.md`, метрики `duration/noise/duplicate/precision/cycle-completion/regression`).
+- [x] Метрики envelope измерены; ledger/resume без дубликатов Issue/PR (`reports/pilots/ledger-resume-proof.md`).
+- [x] Overlays откалиброваны по пилотам (MANDATORY_EVIDENCE/VALIDATION/SCOPE уточнены, kernel не дублируется).
+- [x] Dry-run `master-orchestrator-v1` на 2–3 доменах (`security-secrets`, `qa-gates`, `medallion`) — калибровка до полного прогона.
 
-### P3 — Deprecation и расширение
+Accept: нет P0 method break; resume-тест 0 дубликатов; envelope приложен.
 
-- Пометить megacards deprecated после parity + пилота; `REGISTRY.yaml` `status: deprecated` + `successor`.
-- Новые домены — только через `overlays/*.yaml` + тесты (кандидаты — табл.8 DOCX).
+### P3 — Deprecation и расширение — закрыто в #9810
+
+- [x] `REGISTRY.yaml` — 24 легаси `status: deprecated` + `successor: overlays/<domain>.yaml` / `compatibility/<id>.md` (закрыто в #9810).
+- [x] `MIGRATION-GUIDE-KERNEL-V3.md` — таблица `legacy id → overlay id → generated path`, deprecation window, предупреждения lint (см. `docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md`).
+- [x] `generated/` catalog + diff + `prompt_sha8` закоммичены; новые домены — только `overlays/*.yaml` + `_schema` + тесты (`golden`, `guard_non_weakening`, `finding_fingerprint_stability`); 10 кандидатов табл.8 оценены (приоритет `Composite semantics`, `Quarantine lifecycle`).
+- [x] Parity reports 24 доменов приложены (`reports/pilots/parity/`).
 
 ## 5. Автоматические проверки (гл.4.3)
 
