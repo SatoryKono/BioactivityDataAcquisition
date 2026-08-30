@@ -36,13 +36,13 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `9.41` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `9.14` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2467` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2465` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json`, `reports/quality/debt-governance-gates.json` |
-| Coverage inventory status counts | `1570` fully covered, `891` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1568` fully covered, `893` partially covered, `4` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Families at fan-in budget | `1` (`application_services_control_plane` 2/2) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
+| Families at fan-in budget | `2` (`application_services_control_plane`, `composition_runtime_builders`) | `reports/quality/hotspot-family-baseline.json`, scorecard metrics |
 | Debt-governance gates | `45` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `0` actionable / `44` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and zero uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `892` modules
+a blanket line/branch coverage guarantee: `893` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
@@ -306,7 +306,7 @@ by storage technology. Current owner boundaries:
 ## Open Questions
 
 - Module coverage currently has zero unmeasured and zero uncovered source modules
-  in `reports/quality/module-coverage-inventory.json`, while `892` modules remain
+  in `reports/quality/module-coverage-inventory.json`, while `893` modules remain
   partially covered. The inventory is current release evidence for module
   measurement status; do not describe it as complete line/branch coverage.
 - Hotspot family `application_services_control_plane` sits **at**
