@@ -1,0 +1,40 @@
+{
+  "iteration": 1,
+  "waves": [
+    {
+      "id": "wave1",
+      "title": "Fix invented-REQ drift (RULES/src -> CSV)",
+      "files": [
+        "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+        "docs/01-requirements/traceability/requirements-traceability-crosswalk.md",
+        "docs/01-requirements/REQUIREMENTS.md"
+      ],
+      "acceptance": "csv rows 172->184 or markers removed; zero invented in docs/src",
+      "rollback": "git checkout -- docs/01-requirements/"
+    },
+    {
+      "id": "wave2",
+      "title": "Concrete-untraced binding (tag existing tests)",
+      "files": [
+        "tests/architecture/",
+        "tests/contract/",
+        "tests/integration/"
+      ],
+      "acceptance": "26 concrete untraced gain REQ marker in tests; 132->106",
+      "rollback": "git checkout -- tests/"
+    },
+    {
+      "id": "wave3",
+      "title": "Generic orphan hardening (crosswalk executable_surface)",
+      "files": [
+        "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv"
+      ],
+      "acceptance": "Top 20 generic (REQ-DX-*, CHECKPOINT-*, etc) get concrete paths; 137->117",
+      "rollback": "git checkout -- docs/01-requirements/"
+    }
+  ],
+  "max_waves_per_iteration": 5,
+  "debt_effect": "flat",
+  "acceptance": "Zero invented in docs/src; 132 untraced trending down",
+  "rollback": "Revert waves in reverse order"
+}

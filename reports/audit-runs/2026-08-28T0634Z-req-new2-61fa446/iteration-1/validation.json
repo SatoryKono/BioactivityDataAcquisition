@@ -1,0 +1,22 @@
+{
+  "iteration": 1,
+  "after_csv_bulk_fix": true,
+  "csv_rows": 192,
+  "csv_uniq": 192,
+  "tests_covered": 68,
+  "src_covered": 29,
+  "union_covered": 86,
+  "untraced_in_tests": 124,
+  "orphan_generic": 120,
+  "invented": {
+    "src": 0,
+    "docs": 0,
+    "tests": 0
+  },
+  "closed_issue": 9803,
+  "open_issues_remaining": [
+    9805,
+    9806
+  ],
+  "status": "P1 drift CLOSED on origin/main; P2 waves 2+3 pending"
+}

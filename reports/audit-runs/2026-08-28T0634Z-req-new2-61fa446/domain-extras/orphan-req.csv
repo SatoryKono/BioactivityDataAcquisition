@@ -1,0 +1,138 @@
+requirement_id,modality,status,executable_surface,verification_method
+REQ-ARCH-003,MUST,confirmed,domain/; domain/schemas; domain/contracts,"Статический анализ импортов в `domain/` — отсутствие httpx, requests, sqlite3, psycopg2, boto3 и т.д.; отдельная архитектурная проверка, что Pandera/Pandas находятся только в `domain/schemas` и `domain/contracts`."
+REQ-ARCH-004,SHOULD,confirmed,Проверить наличие декоратора на Protocol классах для критичных адаптеров,Проверить наличие декоратора на Protocol классах для критичных адаптеров
+REQ-ARCH-006,MUST,confirmed,Проверить что health check не загружает большие данные,Проверить что health check не загружает большие данные
+REQ-ARCH-007,MUST NOT,confirmed,Тест — исключение в health check возвращает UNHEALTHY,Тест — исключение в health check возвращает UNHEALTHY
+REQ-DATA-001,MUST,confirmed,Проверить расширения файлов в Bronze директории (.jsonl.zst),Проверить расширения файлов в Bronze директории (.jsonl.zst)
+REQ-DATA-002,MUST,confirmed,Regex валидация путей Bronze файлов,Regex валидация путей Bronze файлов
+REQ-DATA-003,MUST,confirmed,Отсутствие операций UPDATE/DELETE на Bronze данных,Отсутствие операций UPDATE/DELETE на Bronze данных
+REQ-DATA-004,MUST,confirmed,Для breaking-изменений определён отдельный путь/версия хранения и план миграции,Для breaking-изменений определён отдельный путь/версия хранения и план миграции
+REQ-DATA-005,MUST,confirmed,Проверить local archive policy policy на Bronze бакете,Проверить local archive policy policy на Bronze бакете
+REQ-DATA-009,MUST,confirmed,Конфиг пайплайна содержит strict=True для Gold,Конфиг пайплайна содержит strict=True для Gold
+REQ-DATA-010,MUST,confirmed,Наличие полей версионирования или date партиций в Gold,Наличие полей версионирования или date партиций в Gold
+REQ-DELTA-002,MUST,confirmed,Проверить наличие scheduled job для VACUUM,Проверить наличие scheduled job для VACUUM
+REQ-DELTA-003,MUST,confirmed,Проверить значение forensic-retention в конфигах пайплайнов,Проверить значение forensic-retention в конфигах пайплайнов
+REQ-SCHEMA-001,MUST,confirmed,Unit-тест — удаление обязательного поля или смена типа вызывает исключение и остановку,Unit-тест — удаление обязательного поля или смена типа вызывает исключение и остановку
+REQ-SCHEMA-002,MUST,confirmed,Проверить логирование при добавлении нового поля,Проверить логирование при добавлении нового поля
+REQ-SCHEMA-003,MUST,confirmed,Проверить наличие механизма назначения owner и отслеживания SLA для Critical drift,Проверить наличие механизма назначения owner и отслеживания SLA для Critical drift
+REQ-SCHEMA-004,MUST,confirmed,Проверить наличие механизма отслеживания Critical drift и блокировки релиза,Проверить наличие механизма отслеживания Critical drift и блокировки релиза
+REQ-LINEAGE-001,MUST,confirmed,Проверить наличие lineage anchor в sidecar metadata / lineage publication contract,Проверить наличие lineage anchor в sidecar metadata / lineage publication contract
+REQ-LINEAGE-002,MUST,confirmed,Проверить наличие и схему metadata sidecar/моделей lineage,Проверить наличие и схему metadata sidecar/моделей lineage
+REQ-LINEAGE-003,MUST NOT,confirmed,Отсутствие внешних путей хранения; используются локальные пути,Отсутствие внешних путей хранения; используются локальные пути
+REQ-BACKFILL-001,MUST,confirmed,"Проверить наличие runtime provenance anchors в run manifest, run ledger, sidecar metadata или audit contract","Проверить наличие runtime provenance anchors в run manifest, run ledger, sidecar metadata или audit contract"
+REQ-BACKFILL-002,MUST,confirmed,_run_type; backfill; rebuild,"Unit-тесты подтверждают, что `_run_type` не участвует в physical Delta merge predicate, а governance/lock tests подтверждают exclusive execution для `backfill`/`rebuild`"
+REQ-BACKFILL-003,MUST NOT,confirmed,Тест concurrent запуска — второй процесс получает ошибку блокировки,Тест concurrent запуска — второй процесс получает ошибку блокировки
+REQ-BACKFILL-004,MUST,confirmed,Проверить формат lock key в MemoryLock при backfill/rebuild,Проверить формат lock key в MemoryLock при backfill/rebuild
+REQ-BACKFILL-005,MUST,confirmed,Проверить значение по умолчанию в конфигурации,Проверить значение по умолчанию в конфигурации
+REQ-CLEAR-002,MUST,confirmed,Integration тест — gold очищается при rebuild,Integration тест — gold очищается при rebuild
+REQ-PARTITION-001,MUST,confirmed,Проверить структуру директорий Bronze,Проверить структуру директорий Bronze
+REQ-PARTITION-002,MUST,confirmed,"Мониторинг метрик партиционирования, алерты","Мониторинг метрик партиционирования, алерты"
+REQ-PARTITION-003,MUST,confirmed,Тест — превышение лимита вызывает ошибку пайплайна,Тест — превышение лимита вызывает ошибку пайплайна
+REQ-PARTITION-004,MUST NOT,confirmed,Статический анализ конфигов — partition-by не содержит запрещенных типов,Статический анализ конфигов — partition-by не содержит запрещенных типов
+REQ-NULL-001,MUST,confirmed,Unit-тест — отсутствующее поле преобразуется в NULL,Unit-тест — отсутствующее поле преобразуется в NULL
+REQ-NULL-002,MUST NOT,confirmed,Статический анализ кода на использование sentinel values,Статический анализ кода на использование sentinel values
+REQ-NULL-004,MUST,confirmed,Integration тест — невалидная запись попадает в quarantine,Integration тест — невалидная запись попадает в quarantine
+REQ-QUARANTINE-001,MUST,confirmed,Проверить существование таблицы и её схему,Проверить существование таблицы и её схему
+REQ-QUARANTINE-002,MUST,confirmed,Тест — большой payload обрезается,Тест — большой payload обрезается
+REQ-QUARANTINE-003,MUST,confirmed,Проверить local archive policy или retention policy,Проверить local archive policy или retention policy
+REQ-QUARANTINE-004,MUST,confirmed,Проверить наличие обязательного поля в схеме quarantine,Проверить наличие обязательного поля в схеме quarantine
+REQ-ID-001,MUST,confirmed,Unit-тест генерации ID — результат соответствует алгоритму,Unit-тест генерации ID — результат соответствует алгоритму
+REQ-ID-002,MUST,confirmed,Unit-тест — JSON формат соответствует спецификации,Unit-тест — JSON формат соответствует спецификации
+REQ-ID-003,MUST,confirmed,Unit-тест — float округление в ID генерации,Unit-тест — float округление в ID генерации
+REQ-ID-004,MUST,confirmed,Unit-тест — NaN/Inf нормализация,Unit-тест — NaN/Inf нормализация
+REQ-ID-005,MUST,confirmed,Unit-тест — нормализация дат,Unit-тест — нормализация дат
+REQ-ID-006,MUST,confirmed,Unit-тест — пробелы удаляются,Unit-тест — пробелы удаляются
+REQ-ID-007,MUST,confirmed,Unit-тест — мета-поля не влияют на хэш,Unit-тест — мета-поля не влияют на хэш
+REQ-ID-008,MUST,confirmed,Тест детекции коллизий,Тест детекции коллизий
+REQ-ERR-001,MUST,confirmed,Тест — 401 ошибка останавливает пайплайн,Тест — 401 ошибка останавливает пайплайн
+REQ-ERR-002,MUST,confirmed,Тест — 429 вызывает retry с exponential backoff,Тест — 429 вызывает retry с exponential backoff
+REQ-ERR-003,MUST,confirmed,Тест — невалидный SMILES не останавливает обработку,Тест — невалидный SMILES не останавливает обработку
+REQ-THRESHOLD-001,MUST,confirmed,Тест — 6% ошибок генерирует warning,Тест — 6% ошибок генерирует warning
+REQ-THRESHOLD-002,MUST,confirmed,Тест — 21% ошибок останавливает батч,Тест — 21% ошибок останавливает батч
+REQ-RETRY-001,MUST,confirmed,Тест — после 3 неудач операция прекращается,Тест — после 3 неудач операция прекращается
+REQ-RETRY-002,MUST,confirmed,Тест — интервалы между retry соответствуют multiplier,Тест — интервалы между retry соответствуют multiplier
+REQ-RETRY-003,SHOULD,confirmed,Проверить наличие jitter в retry логике,Проверить наличие jitter в retry логике
+REQ-CB-001,MUST,confirmed,Тест — после 5 ошибок circuit открывается,Тест — после 5 ошибок circuit открывается
+REQ-CB-002,MUST,confirmed,Тест — circuit остается открытым 5 минут,Тест — circuit остается открытым 5 минут
+REQ-CB-003,MUST,confirmed,Тест — после recovery-timeout делается пробный запрос,Тест — после recovery-timeout делается пробный запрос
+REQ-CB-004,MUST,updated,Проверить экспорт метрики в правильном формате,Проверить экспорт метрики в правильном формате
+REQ-CB-005,MUST,confirmed,Проверить наличие алерта в мониторинге,Проверить наличие алерта в мониторинге
+REQ-OBS-001,MUST,updated,run_id; run_id,Статический анализ и observability/architecture tests подтверждают наличие `run_id` в лог-схеме и запрет high-cardinality `run_id` labels.
+REQ-OBS-002,MUST,confirmed,Проверить retention policy логов,Проверить retention policy логов
+REQ-OBS-003,MUST,confirmed,Проверить retention policy метрик,Проверить retention policy метрик
+REQ-OBS-004,MUST,confirmed,Проверить формат логов — валидный JSON,Проверить формат логов — валидный JSON
+REQ-OBS-005,MUST,confirmed,Валидация схемы логов,Валидация схемы логов
+REQ-OBS-006,SHOULD,confirmed,Проверить наличие дополнительных полей в логах,Проверить наличие дополнительных полей в логах
+REQ-LOCK-001,MUST,confirmed,Проверить реализацию LockPort в коде блокировок,Проверить реализацию LockPort в коде блокировок
+REQ-LOCK-002,MUST,confirmed,Проверить значение TTL при создании блокировки,Проверить значение TTL при создании блокировки
+REQ-LOCK-003,MUST,confirmed,Тест — heartbeat обновляет TTL,Тест — heartbeat обновляет TTL
+REQ-LOCK-004,MUST NOT,confirmed,Статический анализ — один бэкенд для блокировок,Статический анализ — один бэкенд для блокировок
+REQ-LOCK-005,MUST,confirmed,Проверить наличие owner-id в данных блокировки,Проверить наличие owner-id в данных блокировки
+REQ-LOCK-006,MUST,confirmed,Тест — блокировка снимается после 4 часов,Тест — блокировка снимается после 4 часов
+REQ-LOCK-007,MUST,confirmed,Тест — при потере heartbeat воркер завершается до коммита,Тест — при потере heartbeat воркер завершается до коммита
+REQ-LOCK-008,MUST,confirmed,Тест — проверка owner-id перед commit,Тест — проверка owner-id перед commit
+REQ-DQ-001,MUST,updated,Проверить endpoint /metrics возвращает Prometheus формат,Проверить endpoint /metrics возвращает Prometheus формат
+REQ-DQ-002,MUST,updated,Проверить наличие метрики с правильными лейблами,Проверить наличие метрики с правильными лейблами
+REQ-DQ-003,MUST,updated,Проверить наличие метрики freshness,Проверить наличие метрики freshness
+REQ-ANOMALY-001,MUST,confirmed,Проверить расчет baseline,Проверить расчет baseline
+REQ-ANOMALY-002,MUST,confirmed,Тест — 2.5x baseline генерирует warning,Тест — 2.5x baseline генерирует warning
+REQ-ANOMALY-003,MUST,confirmed,Тест — 6x baseline генерирует critical,Тест — 6x baseline генерирует critical
+REQ-ANOMALY-004,MUST,confirmed,Тест — 60% baseline генерирует warning,Тест — 60% baseline генерирует warning
+REQ-ANOMALY-005,MUST,confirmed,Тест — 40% baseline генерирует critical,Тест — 40% baseline генерирует critical
+REQ-ANOMALY-006,MUST,confirmed,Тест — корректное поведение на разных этапах cold start,Тест — корректное поведение на разных этапах cold start
+REQ-HEALTH-001,MUST,confirmed,Тест — параметры корректируются при degraded,Тест — параметры корректируются при degraded
+REQ-HEALTH-002,MUST,confirmed,Тест — пайплайн ставится на паузу,Тест — пайплайн ставится на паузу
+REQ-HEALTH-003,MUST,updated,Проверить экспорт метрики,Проверить экспорт метрики
+REQ-STACK-002,MUST,confirmed,"Проверить обёртки для pubchempy, biopython","Проверить обёртки для pubchempy, biopython"
+REQ-TEST-001,MUST,confirmed,Проверить отсутствие моков внешних библиотек в unit тестах,Проверить отсутствие моков внешних библиотек в unit тестах
+REQ-TEST-002,MUST NOT,confirmed,Статический анализ тестов на использование mock,Статический анализ тестов на использование mock
+REQ-TEST-004,MUST,confirmed,before-record,Проверить хук `before-record` в конфиге VCR
+REQ-TEST-005,MUST,confirmed,Проверить pytest команду в CI,Проверить pytest команду в CI
+REQ-TEST-006,MUST,confirmed,Проверить наличие scheduled workflow для contract tests,Проверить наличие scheduled workflow для contract tests
+REQ-GOV-003,MUST,confirmed,idempotency test; merge predicate,Idempotency test repeats the same batch; review merge predicate
+REQ-GOV-004,MUST,confirmed,regression tests; fixtures; VCR,Regression-test diff review; deterministic time/random/network checks
+REQ-GOV-005,MUST,confirmed,config validators; Qodo schema,Config/schema validators; deterministic YAML serialization; Qodo schema review
+REQ-GOV-006,MUST,confirmed,docs; migration; changelog; tests,"Diff review for docs, migration notes, changelog/version and regression tests"
+REQ-GOV-007,MUST,confirmed,test_module_coverage_inventory_source_tree_hash_is_current,`pytest tests/architecture/test_module_coverage_inventory_freshness.py::test_module_coverage_inventory_source_tree_hash_is_current`
+REQ-GOV-010,MUST NOT,confirmed,secret scanner; logs; artifacts,Secret scanner and logging/serialization review
+REQ-GOV-012,MUST NOT,confirmed,check-exemptions; scorecard; regression metrics,"Compare debt/quality configs; run exemption, scorecard and regression metrics gates"
+REQ-RATE-001,MUST,confirmed,Проверить наличие rate limiter в каждом адаптере,Проверить наличие rate limiter в каждом адаптере
+REQ-RATE-002,MUST,confirmed,Тест — при заполненной очереди скорость чтения снижается,Тест — при заполненной очереди скорость чтения снижается
+REQ-SECRET-001,MUST,confirmed,Проверить источник секретов в коде,Проверить источник секретов в коде
+REQ-SECRET-002,MUST,confirmed,Проверить имена переменных окружения,Проверить имена переменных окружения
+REQ-SECRET-003,MUST NOT,confirmed,"Статический анализ на хардкод секретов (API keys, passwords)","Статический анализ на хардкод секретов (API keys, passwords)"
+REQ-SHUTDOWN-001,MUST,confirmed,Тест — SIGTERM останавливает извлечение,Тест — SIGTERM останавливает извлечение
+REQ-SHUTDOWN-002,MUST,confirmed,Тест — текущий батч дописывается до конца,Тест — текущий батч дописывается до конца
+REQ-SHUTDOWN-003,MUST,confirmed,Тест — чекпоинт сохраняется атомарно,Тест — чекпоинт сохраняется атомарно
+REQ-SHUTDOWN-004,MUST,confirmed,Тест — exit code = 0,Тест — exit code = 0
+REQ-CHECKPOINT-001,MUST,confirmed,Тест — при старте проверяется локальное хранилище,Тест — при старте проверяется локальное хранилище
+REQ-CHECKPOINT-002,MUST,confirmed,Тест — resume начинает с правильной позиции,Тест — resume начинает с правильной позиции
+REQ-CHECKPOINT-003,MUST,confirmed,Тест — генерируется warning о stale checkpoint,Тест — генерируется warning о stale checkpoint
+REQ-CHECKPOINT-004,MUST,confirmed,Тест — чекпоинт удаляется при успехе,Тест — чекпоинт удаляется при успехе
+REQ-CLEANUP-002,MUST,confirmed,aclose(),Тест — повторный вызов `aclose()` не вызывает ошибку
+REQ-CLEANUP-003,MUST NOT,confirmed,Тест — исключения внутри aclose перехватываются,Тест — исключения внутри aclose перехватываются
+REQ-CLEANUP-004,MUST,confirmed,async with services:,Проверить использование `async with services:` в runner
+REQ-SEC-001,MUST,confirmed,"Проверить, что секреты берутся не из репозитория, а из environment/secret injection; review локальных permission/profile настроек","Проверить, что секреты берутся не из репозитория, а из environment/secret injection; review локальных permission/profile настроек"
+REQ-SEC-002,MUST,confirmed,Проверить хэширование PII в Silver трансформациях,Проверить хэширование PII в Silver трансформациях
+REQ-SEC-003,MUST,confirmed,Тест — хэширование без соли вызывает ошибку,Тест — хэширование без соли вызывает ошибку
+REQ-SEC-004,MUST,confirmed,Проверить отсутствие PII полей в Gold схемах,Проверить отсутствие PII полей в Gold схемах
+REQ-DR-001,MUST,confirmed,Проверить backup schedule обеспечивает RPO,Проверить backup schedule обеспечивает RPO
+REQ-DR-002,MUST,confirmed,Провести DR drill и замерить время восстановления,Провести DR drill и замерить время восстановления
+REQ-DR-003,SHOULD,confirmed,Проверить наличие зафиксированного restore drill или rehearsal по runbook,Проверить наличие зафиксированного restore drill или rehearsal по runbook
+REQ-ENV-001,MUST,confirmed,Проверить конфигурации локальных путей и profile overrides,Проверить конфигурации локальных путей и profile overrides
+REQ-ENV-002,MUST,confirmed,Проверить изоляцию локальных данных между окружениями,Проверить изоляцию локальных данных между окружениями
+REQ-DOC-001,MUST,confirmed,uv run python -m scripts.docs check-links --links --specs --configs; docs/99-archive/,"Прогнать `uv run python -m scripts.docs check-links --links --specs --configs` и убедиться, что generated-doc проверки (например dependency-map / schema export checks) проходят в CI, а active entry points не ссылаются на `docs/99-archive/` как на источник текущих требований"
+REQ-DOC-002,MUST,confirmed,Проверить соответствие структур папок,Проверить соответствие структур папок
+REQ-CONTRACT-001,MUST,confirmed,Проверить наличие JSON Schema файлов,Проверить наличие JSON Schema файлов
+REQ-CONTRACT-002,MUST,confirmed,Проверить формат версий в схемах,Проверить формат версий в схемах
+REQ-CONTRACT-003,MUST,confirmed,Проверить diff PR: обновлены JSON exports/contract parity и есть impact note в PR/changelog/ADR-контексте,Проверить diff PR: обновлены JSON exports/contract parity и есть impact note в PR/changelog/ADR-контексте
+REQ-CONTRACT-004,MUST,confirmed,Проверить наличие deprecated маркеров в схемах,Проверить наличие deprecated маркеров в схемах
+REQ-ROLLBACK-001,MUST,confirmed,"Проверить наличие manual rollback procedure и placeholder/guard, запрещающий несуществующий runtime rollback command","Проверить наличие manual rollback procedure и placeholder/guard, запрещающий несуществующий runtime rollback command"
+REQ-ROLLBACK-002,MUST NOT,confirmed,Тест — DQ ошибки не вызывают rollback,Тест — DQ ошибки не вызывают rollback
+REQ-DX-001,MUST,confirmed,Команда выполняется без ошибок,Команда выполняется без ошибок
+REQ-DX-002,MUST,confirmed,Команда выполняется и запускает рекомендуемый локальный pre-commit прогон,Команда выполняется и запускает рекомендуемый локальный pre-commit прогон
+REQ-DX-003,MUST,confirmed,Команда выполняется и запускает линтеры,Команда выполняется и запускает линтеры
+REQ-DX-005,MUST,confirmed,Файл существует и содержит все необходимые переменные,Файл существует и содержит все необходимые переменные
+REQ-PROVIDER-001,MUST,confirmed,Проверить реализацию health check для ChEMBL,Проверить реализацию health check для ChEMBL
+REQ-PROVIDER-002,MUST,confirmed,Проверить реализацию health check для PubChem,Проверить реализацию health check для PubChem
+REQ-PROVIDER-003,MUST,confirmed,Проверить fallback health check с timeout,Проверить fallback health check с timeout
