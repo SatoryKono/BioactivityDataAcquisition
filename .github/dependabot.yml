@@ -19,7 +19,7 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     labels:
-      - "ci"
+      - "ci/cd"
     groups:
       github-actions:
         patterns: ["*"]
@@ -31,7 +31,7 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "ci"
+      - "ci/cd"
     groups:
       docker:
         patterns: ["*"]
@@ -54,7 +54,7 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "ci"
+      - "ci/cd"
     groups:
       npm-mermaid:
         patterns: ["*"]
@@ -66,7 +66,7 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "ci"
+      - "ci/cd"
     groups:
       npm-jscpd:
         patterns: ["*"]

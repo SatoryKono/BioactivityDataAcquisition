@@ -362,11 +362,11 @@ File: `.github/dependabot.yml`
 | Ecosystem      | Schedule | PR Limit | Labels            | Grouping                |
 | -------------- | -------- | -------- | ----------------- | ----------------------- |
 | pip (Python)   | Weekly   | 10       | `dependencies`    | `pip-minor-patch` (minor+patch) |
-| github-actions | Weekly   | 5        | `ci`              | `github-actions` (all)  |
-| docker         | Weekly   | 5        | `dependencies,ci` | `docker` (all)          |
+| github-actions | Weekly   | 5        | `ci/cd`           | `github-actions` (all)  |
+| docker         | Weekly   | 5        | `dependencies,ci/cd` | `docker` (all)        |
 | npm (`/`) | Weekly | 5 | `dependencies` | `npm-root` |
-| npm (`/.github/actions/setup-mermaid`) | Weekly | 5 | `dependencies,ci` | `npm-mermaid` |
-| npm (`/.github/tooling/jscpd`) | Weekly | 5 | `dependencies,ci` | `npm-jscpd` |
+| npm (`/.github/actions/setup-mermaid`) | Weekly | 5 | `dependencies,ci/cd` | `npm-mermaid` |
+| npm (`/.github/tooling/jscpd`) | Weekly | 5 | `dependencies,ci/cd` | `npm-jscpd` |
 | npm (`/grafana/plugins/bioetl-scenes-app`) | Weekly | 5 | `dependencies` | `npm-grafana-scenes` |
 | npm (`/grafana/plugins/bioetl-selectorshell-panel`) | Weekly | 5 | `dependencies` | `npm-grafana-selectorshell` |
 
@@ -402,16 +402,41 @@ ______________________________________________________________________
 
 ### Issue Templates
 
-Located in `.github/ISSUE-TEMPLATE/`:
+Located in `.github/ISSUE_TEMPLATE/`. GitHub Issue Forms are the sole active
+intake format:
 
-| Template        | File                 | Labels        |
-| --------------- | -------------------- | ------------- |
-| Bug Report      | `bug-report.md`      | `bug`         |
-| Feature Request | `feature-request.md` | `enhancement` |
+| Form | File | Labels | Role |
+| --- | --- | --- | --- |
+| Bug Report | `bug_report.yml` | `bug` | Primary |
+| Feature Request | `feature_request.yml` | `enhancement` | Primary |
+| Retention-Sensitive Cleanup | `retention_sensitive_cleanup.yml` | `cleanup,guardrails` | Specialized |
+
+`config.yml` disables blank issues and routes vulnerability reports to
+private Security Advisories. The two `*.md` files are inactive migration
+references without YAML front matter and are retained until the label/template
+migration review completes.
+
+### Labels and Wiki
+
+The canonical classifications, migration window, automation consumers, Issue
+Forms ownership, and the decision to disable GitHub Wiki are defined in
+[GitHub label taxonomy, intake, and Wiki ownership](github-label-taxonomy.md)
+and `configs/quality/github_governance_policy.json`. Unknown labels default to
+`retained`; label deletion requires the documented human review and MUST NOT
+occur before 2026-11-30.
+
+### Quarterly settings review
+
+`.github/workflows/github-settings-quarterly-review.yml` performs a read-only
+review on the first day of each quarter and on manual dispatch. It discovers
+the repository/default branch dynamically, writes evidence, and does not edit
+settings, secrets, branches, labels, environments, or issues. Follow
+[Quarterly read-only GitHub settings review](../../05-operations/runbooks/github-settings-quarterly-review.md)
+for escalation and evidence requirements.
 
 ### Pull Request Template
 
-File: `.github/pull-request-template.md`
+File: `.github/pull_request_template.md`
 
 Every PR auto-populates with:
 

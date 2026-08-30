@@ -87,6 +87,12 @@ ______________________________________________________________________
 | [Merge Campaign](merge-campaign.md)                                      | Consolidation/merge order and reproducibility gate playbook                                      | P2       |
 | [Generated Artifact Drift Workflow](generated-artifact-drift-workflow.md) | Governed regeneration and closeout workflow for generated artifact drift                         | P2       |
 
+### Repository Governance
+
+| Runbook | Description | Priority |
+| --- | --- | --- |
+| [Quarterly read-only GitHub settings review](github-settings-quarterly-review.md) | Evidence-only review of rulesets, merge/Actions/security settings, environments, CODEOWNERS, labels, Issue Forms, Wiki, and workflow health | P2 |
+
 ### Control-Plane / Traceability Routing
 
 - Use [Run Manifest and Run Ledger Contract](../../04-reference/contracts/run-manifest-ledger.md)
