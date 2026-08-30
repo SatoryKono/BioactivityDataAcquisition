@@ -112,7 +112,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 def _validate_with_jsonschema(data: dict[str, Any], schema: dict[str, Any]) -> list[str]:
     """Validate via jsonschema if available; return error messages."""
     try:
-        import jsonschema  # type: ignore[import-untyped]
+        import jsonschema  # noqa: F401  # type: ignore[import-untyped]
     except ImportError:
         return []  # fallback handled by caller
 
@@ -183,6 +183,7 @@ def check_kernel_schema(report: LintReport) -> None:
     if schema is None:
         report.add_warning("kernel_schema_missing", f"schema not found: {SCHEMA_DIR / 'kernel.schema.json'}")
         return
+    # Kernel schema describes params object; we validate a sample defaults payload.
     sample: dict[str, Any] = {"SCOPE": "src/bioetl/domain", "MODE": "audit"}
     if _has_jsonschema():
         errs = _validate_with_jsonschema(sample, schema)
@@ -222,6 +223,8 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
                 report.add_error("overlay_schema_valid", msg, path.as_posix())
 
     # -- guard_non_weakening: overlay must not contain ALLOW_*=true or weakening keys
+    # Schema already bans ALLOW_*; this guard gives a clearer fail-closed message
+    # and the raw-text scan below covers nested ALLOW_*: true literals.
     for key, _val in data.items():
         if key.startswith("ALLOW_"):
             report.add_error(
@@ -385,7 +388,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     report = lint_all(strict=args.strict)
-
+    # Write to stdout using utf-8 aware path (avoid print for logging parity)
     text = format_report(report)
     try:
         sys.stdout.write(text)
