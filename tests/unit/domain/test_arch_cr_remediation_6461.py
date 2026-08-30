@@ -67,6 +67,33 @@ def test_redaction_covers_basic_auth_and_cookie() -> None:
     assert "[REDACTED]" in redacted
 
 
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ('token="escaped\\"quote"', "token=[REDACTED]"),
+        ("password='escaped\\'quote'", "password=[REDACTED]"),
+    ],
+)
+def test_redaction_handles_escaped_quotes(text: str, expected: str) -> None:
+    assert _redact_string(text) == expected
+
+
+def test_redaction_preserves_escaped_quotes_without_exposing_secret() -> None:
+    secret = r"alpha\" beta"
+
+    redacted = _redact_string(f'password="{secret}" safe-tail')
+
+    assert secret not in redacted
+    assert redacted == "password=[REDACTED] safe-tail"
+
+
+def test_redaction_handles_long_unterminated_escaped_secret() -> None:
+    text = 'token="' + ("\\" * 30_000) + "&"
+
+    # Linear scan consumes an unterminated quoted value through end-of-string.
+    assert _redact_string(text) == "token=[REDACTED]"
+
+
 def test_redaction_handles_cyclic_context() -> None:
     payload: dict[str, object] = {"token": "secret-value"}
     payload["self"] = payload

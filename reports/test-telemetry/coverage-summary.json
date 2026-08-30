@@ -1,14 +1,14 @@
 {
-  "source_branch": "main",
-  "source_commit": "5b19ac248cf6f8ab4a3554cf62eaf2547a23ff11",
-  "source_run_id": "32935853676",
-  "source_tree_sha256": "eef3f57084eaccadd034ee9a5da285e8f23b59f15fd6d490f078a080f5e47c46",
-  "refreshed_at_utc": "2026-08-28T05:51:38.598505+00:00",
+  "source_branch": "fix/redos-inline-secret-20260828",
+  "source_commit": "c7754a0a73cab6f38866af26da4c69790b70044e",
+  "source_run_id": "33192008237",
+  "source_tree_sha256": "8846fdc0a086a158b584fb0e8f8aac36298269eaaa79a859759e236120b9e8a5",
+  "refreshed_at_utc": "2026-08-28T17:27:44.817166+00:00",
   "refresh_status": "captured",
-  "coverage_percent": 96.44,
+  "coverage_percent": 96.58,
   "coverage": {
     "threshold_percent": 85.0,
-    "actual_percent": 96.44,
+    "actual_percent": 96.58,
     "threshold_satisfied": true
   }
 }

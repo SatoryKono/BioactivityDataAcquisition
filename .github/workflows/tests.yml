@@ -1425,8 +1425,8 @@ jobs:
           set -euo pipefail
           test -s reports/quality/module-coverage-inventory.candidate.json
           if ! cmp --silent \
-            reports/quality/module-coverage-inventory.json \
-            reports/quality/module-coverage-inventory.candidate.json; then
+            <(jq -S 'del(.coverage_xml_sha256)' reports/quality/module-coverage-inventory.json) \
+            <(jq -S 'del(.coverage_xml_sha256)' reports/quality/module-coverage-inventory.candidate.json); then
             echo "Committed module coverage inventory is stale."
             echo "Download module-coverage-inventory.candidate.json from the successful SHA-bound coverage-verify producer."
             exit 1

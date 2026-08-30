@@ -4,8 +4,7 @@ This module provides a hierarchical exception system for consistent error handli
 across the BioETL project. All domain-specific exceptions should inherit from these
 base classes to ensure proper error classification and handling.
 
-REQ-ARCH-011: Domain layer should use structured exception hierarchy
-REQ-ARCH-012: Exceptions should be immutable and include context
+Architecture: Domain layer structured exception hierarchy (see RULES 1 / REQ-ARCH-001..003) + immutable context
 """
 
 from __future__ import annotations
