@@ -1,4 +1,0 @@
-{"ts":"2026-08-27T08:15:00Z","cmd":"python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update","result":"ok"}
-{"ts":"2026-08-27T08:15:20Z","cmd":"python -m scripts.engineering.qa report-adr-enforcement-matrix --update","result":"ok"}
-{"ts":"2026-08-27T08:15:40Z","cmd":"python -m scripts.engineering.qa report-debt-governance-gates --check --changed-from-ref origin/main","result":"exit 0 fail_count=0"}
-{"ts":"2026-08-27T08:16:20Z","cmd":"pytest closeout 5956/5564/6159/5839/5790/5866/7461 + scorecard","result":"0 fail, 2 skip"}

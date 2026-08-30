@@ -4,7 +4,7 @@ This service provides consistent error handling across the application,
 including logging, metrics, and error transformation. It acts as a single
 point of control for all error handling policies.
 
-REQ-ARCH-013: Application layer should handle errors consistently
+Architecture (see RULES 1 / REQ-ERR-001..003): Application error handling
 REQ-OBS-001: Errors should be logged with full context
 """
 

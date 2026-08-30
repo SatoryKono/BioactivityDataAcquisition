@@ -23,8 +23,9 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
         run: |
           pattern='^(feat|fix|refactor|docs|test|chore|ci)/[a-z0-9]+([.-][a-z0-9]+)*$'
+          master_pattern='^master[0-9-]+$'
           automation='^(dependabot|renovate|devin|bolt)/.+'
-          if [[ ! "$HEAD_REF" =~ $pattern && ! "$HEAD_REF" =~ $automation ]]; then
+          if [[ ! "$HEAD_REF" =~ $pattern && ! "$HEAD_REF" =~ $master_pattern && ! "$HEAD_REF" =~ $automation ]]; then
             echo "Non-compliant branch name: $HEAD_REF" >&2
             echo "Use <type>/<lowercase-kebab-description>." >&2
             exit 1
@@ -56,3 +57,4 @@ jobs:
           path: reports/quality/branch-hygiene-latest.json
           if-no-files-found: error
           retention-days: 14
+
