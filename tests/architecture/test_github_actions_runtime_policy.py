@@ -488,6 +488,54 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     )
 
 
+def test_codeql_ownership_and_triage_are_documented() -> None:
+    policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
+    security_md = (ROOT / ".github" / "SECURITY.md").read_text(encoding="utf-8")
+    dependabot = (ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+
+    assert "### 2.3.1 CodeQL ownership and alert triage" in policy_doc
+    assert "advanced CodeQL setup" in policy_doc
+    assert "not-configured" in policy_doc
+    assert "default setup MUST remain" in policy_doc
+    assert "Alert triage owner" in policy_doc
+    assert "Weekly on Monday" in policy_doc
+    assert "advanced setup only" in security_md
+    assert 'directory: "/.github/tooling/jscpd"' in dependabot
+    assert 'package-ecosystem: "npm"' in dependabot
+
+
+PIP_INSTALL_RE = re.compile(r"(?i)pip(?:3)?\s+install")
+NPM_INSTALL_RE = re.compile(r"(?i)npm\s+install\b")
+
+
+def test_workflows_do_not_use_unhashed_pip_or_npm_install() -> None:
+    jscpd_lock = ROOT / ".github" / "tooling" / "jscpd" / "package-lock.json"
+    assert jscpd_lock.is_file()
+
+    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        for line_no, raw in enumerate(text.splitlines(), 1):
+            line = raw.split("#", 1)[0]
+            match = PIP_INSTALL_RE.search(line)
+            if match is not None:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT).as_posix()}:{line_no} uses "
+                    f"unpinned pip install ({match.group(0)!r})"
+                )
+            npm_match = NPM_INSTALL_RE.search(line)
+            if npm_match is not None:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT).as_posix()}:{line_no} uses "
+                    f"npm install; use npm ci with a committed lockfile"
+                )
+
+    duplication = (ROOT / ".github" / "workflows" / "duplication-complexity.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "npm ci --ignore-scripts" in duplication
+    assert ".github/tooling/jscpd" in duplication
+
+
 def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/scorecard.yml")
     triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
