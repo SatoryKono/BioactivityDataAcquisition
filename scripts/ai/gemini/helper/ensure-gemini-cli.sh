@@ -100,8 +100,8 @@ if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
         echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
     fi
 
-    npm install --global --prefix "${GEMINI_NPM_PREFIX}" --silent node@22 @google/gemini-cli@latest \
-        2>/dev/null || npm install --global --prefix "${GEMINI_NPM_PREFIX}" node@22 @google/gemini-cli@latest >&2
+    npm --global --prefix "${GEMINI_NPM_PREFIX}" --silent install node@22.18.0 @google/gemini-cli@0.57.0 \
+        2>/dev/null || npm --global --prefix "${GEMINI_NPM_PREFIX}" install node@22.18.0 @google/gemini-cli@0.57.0 >&2
 fi
 
 if [[ ! -x "${GEMINI_BIN}" ]]; then
