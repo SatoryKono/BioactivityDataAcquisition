@@ -8,6 +8,7 @@ import pytest
 from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import (
     build_fixability_audit,
     main,
+    trivy_baseline_rows,
 )
 
 pytestmark = pytest.mark.unit
@@ -115,3 +116,68 @@ def test_cli_writes_deterministic_audit_and_fails_for_fixable_finding(
         == 1
     )
     assert output.read_text(encoding="utf-8") == expected
+
+
+def test_baseline_rows_preserve_alert_mapping_and_layer_fallback() -> None:
+    rows = trivy_baseline_rows(
+        {
+            "Results": [
+                {
+                    "Target": "bioetl:test",
+                    "Vulnerabilities": [
+                        {
+                            "VulnerabilityID": "CVE-2026-0002",
+                            "PkgName": "unlayered-package",
+                            "InstalledVersion": "2.0.0",
+                            "FixedVersion": "",
+                            "Status": "affected",
+                        },
+                        {
+                            "VulnerabilityID": "CVE-2026-0001",
+                            "PkgName": "layered-package",
+                            "InstalledVersion": "1.0.0",
+                            "FixedVersion": "1.0.1",
+                            "Status": "affected",
+                            "Layer": {"DiffID": "sha256:layer"},
+                        },
+                    ],
+                }
+            ]
+        },
+        github_alerts=[
+            {
+                "number": 42,
+                "rule": {"id": "CVE-2026-0001"},
+                "most_recent_instance": {
+                    "message": {
+                        "text": (
+                            "Vulnerability: CVE-2026-0001\n"
+                            "Package: layered-package\n"
+                            "Installed Version: 1.0.0"
+                        )
+                    }
+                },
+            }
+        ],
+    )
+
+    assert rows == [
+        {
+            "alert_number": "42",
+            "CVE": "CVE-2026-0001",
+            "package": "layered-package",
+            "installed": "1.0.0",
+            "fixed": "1.0.1",
+            "layer": "sha256:layer",
+            "status": "affected",
+        },
+        {
+            "alert_number": "",
+            "CVE": "CVE-2026-0002",
+            "package": "unlayered-package",
+            "installed": "2.0.0",
+            "fixed": "",
+            "layer": "bioetl:test",
+            "status": "affected",
+        },
+    ]
