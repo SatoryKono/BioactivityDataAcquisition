@@ -7,6 +7,11 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
+    groups:
+      pip-minor-patch:
+        patterns: ["*"]
+        update-types:
+          ["version-update:semver-minor", "version-update:semver-patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -15,11 +20,18 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "ci"
+    groups:
+      github-actions:
+        patterns: ["*"]
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "ci"
+    groups:
+      docker:
+        patterns: ["*"]
