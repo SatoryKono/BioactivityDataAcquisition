@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-30T17:46:54.468534+00:00",
+  "generated_at": "2026-08-30T17:51:34.513478+00:00",
   "summary": {
     "total_scripts": 608,
     "status_counts": {
       "active": 341,
-      "supporting": 266,
-      "unknown": 1
+      "supporting": 267
     },
     "reference_group_coverage": {
       "agents": 7,
@@ -5119,7 +5118,7 @@
     {
       "path": "scripts/ai/prompts/diff.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 5,
       "references": [
@@ -5153,7 +5152,11 @@
           "source_group": "docs",
           "text": "scripts/ai/prompts/compile.py lint.py verify.py diff.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the prompt library diff helper used by compatibility workflows behind the canonical `python -m scripts.ai prompts` surface; do not promote this file as an additional standalone command."
     },
     {
       "path": "scripts/ai/prompts/lint.py",
@@ -5326,7 +5329,7 @@
       "references": [
         {
           "path": "tests/prompts/test_finding_fingerprint.py",
-          "line": 12,
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ai.prompts.verify import finding_fingerprint"
         }
