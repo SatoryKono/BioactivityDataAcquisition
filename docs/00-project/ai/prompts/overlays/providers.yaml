@@ -1,0 +1,29 @@
+domain: providers
+id: prompt.audit.project.new2.providers
+OBJECT: Providers, entity catalog, adapter packages, and pipeline registration
+SCOPE:
+  - configs/providers/
+  - configs/entities/
+  - src/bioetl/infrastructure/adapters/
+SSOT:
+  - docs/00-project/RULES.md
+  - docs/03-guides/extending-bioetl.md
+  - configs/_schema/
+AUDIT_CONTOURS:
+  - YAML providers vs adapters vs entity files vs registry parity
+  - orphan YAML and missing adapter detection with composite dependencies
+  - env indirection only and no interpolation in tracked provider YAML
+  - provider_entity pipeline id convention and registration coverage
+MANDATORY_EVIDENCE:
+  - provider-matrix.csv mapping YAML, adapter, entity, and registry
+  - orphan-surfaces.json listing orphan configs and adapters
+  - registration-delta.csv and provider-validation.json
+VALIDATION:
+  - config, adapter, and registration tests for touched providers
+  - unified HTTP client reuse check deferred to HTTP card
+DOMAIN_STOP:
+  - config without implementation adapter
+  - secret literal or interpolation in tracked YAML
+OUTPUT_EXTRAS:
+  - provider-matrix.csv
+  - orphan-surfaces.json

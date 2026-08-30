@@ -1,0 +1,34 @@
+domain: telemetry
+id: prompt.audit.cycle.telemetry
+OBJECT: Observability instrumentation from scrape/export through recording rules to queryable series
+SCOPE:
+  - src/bioetl/infrastructure/observability/
+  - src/bioetl/observability/
+  - grafana/prometheus-rules/
+  - grafana/prometheus.yml
+  - grafana/provisioning/
+  - docs/04-reference/observability/
+  - reports/observability/
+SSOT:
+  - docs/02-architecture/decisions/ADR-017.md
+  - docs/02-architecture/decisions/ADR-019.md
+  - docs/02-architecture/decisions/ADR-022.md
+  - docs/04-reference/observability/metrics-catalog.md
+AUDIT_CONTOURS:
+  - metric name registry vs catalog/rules/dashboard queries
+  - coverage matrix panel/query/metric/rule/labels/ready/blocker
+  - instrumentation semantics ports/adapters/NoOp tracing and cardinality
+  - recording rule tests via promtool and expected empty vs missing handling
+MANDATORY_EVIDENCE:
+  - metric-inventory.json and coverage-matrix.csv
+  - cardinality-delta.json and rule-test-results.json
+  - readiness evidence for first-screen panels
+VALIDATION:
+  - inventory and rule test rerun with evidence
+  - cardinality evidence attached and run_id label absence verified
+DOMAIN_STOP:
+  - invented metric series without catalog or rule
+  - secret or token leaked into labels or rules
+OUTPUT_EXTRAS:
+  - coverage-matrix.csv
+  - cardinality-delta.json

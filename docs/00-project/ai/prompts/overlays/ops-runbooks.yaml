@@ -1,0 +1,29 @@
+domain: ops-runbooks
+id: prompt.audit.project.new2.ops-runbooks
+OBJECT: Operations runbooks covering DR, rollback, shutdown, triage, resume/repair, and Game Day
+SCOPE:
+  - docs/05-operations/
+  - docs/03-guides/workflows.md
+SSOT:
+  - docs/05-operations/runbooks/index.md
+  - docs/03-guides/workflows.md
+  - docs/00-project/RULES.md
+  - docs/02-architecture/decisions/ADR-010.md
+AUDIT_CONTOURS:
+  - runbook inventory DR, rollback, shutdown, Game Day, and control-plane triage
+  - procedure step vs CLI/script/help existence with preconditions and rollback
+  - local-only default preservation and hidden Docker/Redis/external orchestration detection
+  - monitoring-gated actions and no live production mutation guard
+MANDATORY_EVIDENCE:
+  - runbook-command-matrix.csv mapping steps to actual CLI/script/help
+  - tabletop-results.md and rollback-gaps.json
+  - precondition-map.csv with decision points and safety checks
+VALIDATION:
+  - command parse and help output verification plus link checks
+  - tabletop scenario walkthrough with evidence
+DOMAIN_STOP:
+  - live production mutation during audit
+  - dangerous nonexistent command in runbook
+OUTPUT_EXTRAS:
+  - runbook-command-matrix.csv
+  - tabletop-results.md

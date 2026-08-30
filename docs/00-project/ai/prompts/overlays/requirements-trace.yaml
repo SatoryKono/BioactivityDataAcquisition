@@ -1,0 +1,29 @@
+domain: requirements-trace
+id: prompt.audit.project.new2.requirements-trace
+OBJECT: REQ traceability from catalog through crosswalk to implementation, tests, and evidence
+SCOPE:
+  - docs/01-requirements/
+  - tests/
+  - src/bioetl/
+SSOT:
+  - docs/01-requirements/REQUIREMENTS.md
+  - docs/01-requirements/traceability.csv
+  - docs/00-project/RULES.md
+AUDIT_CONTOURS:
+  - REQ ID catalog vs CSV inventory with duplicate/missing/status drift
+  - bidirectional requirement to code/test/evidence mapping
+  - invented or retired ID citation detection in tests and docs
+  - orphan REQ and untraced test classification
+MANDATORY_EVIDENCE:
+  - requirement-graph.json with bidirectional edges
+  - orphan-req.csv and untraced-tests.csv
+  - crosswalk-delta.csv and schema check results
+VALIDATION:
+  - re-read of catalog and CSV with schema checks
+  - sampled executable path and test evidence verification
+DOMAIN_STOP:
+  - invented REQ identifier used as coverage claim
+  - covered status based only on file count without executable evidence
+OUTPUT_EXTRAS:
+  - requirement-graph.json
+  - orphan-req.csv

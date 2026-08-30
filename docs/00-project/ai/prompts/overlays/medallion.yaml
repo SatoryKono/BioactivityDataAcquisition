@@ -1,0 +1,29 @@
+domain: medallion
+id: prompt.audit.project.new2.medallion
+OBJECT: Medallion Bronze/Silver/Gold write-path, quarantine, atomicity, and replay clocks
+SCOPE:
+  - src/bioetl/domain/medallion.py
+  - src/bioetl/infrastructure/storage/
+SSOT:
+  - docs/02-architecture/decisions/ADR-002.md
+  - docs/02-architecture/decisions/ADR-014.md
+  - docs/02-architecture/decisions/ADR-018.md
+  - src/bioetl/domain/medallion.py
+AUDIT_CONTOURS:
+  - write mode vs policy mapping and silent overwrite detection
+  - Bronze/Silver/Gold writer layers, quarantine, and Delta time-travel claims
+  - atomicity via temp then os.replace and deterministic write order
+  - replay clocks, PK/business uniqueness, and wall-clock default checks
+MANDATORY_EVIDENCE:
+  - write-path-matrix.csv mapping modes to policy and ADR
+  - atomicity-evidence.json proving temp-replace usage
+  - replay-clock-audit.csv and layer-delta.json
+VALIDATION:
+  - focused storage and architecture tests on touched writers
+  - replay determinism check and overwrite fail-closed verification
+DOMAIN_STOP:
+  - non-atomic critical write path
+  - Gold validation weakened or wall-clock replay default
+OUTPUT_EXTRAS:
+  - write-path-matrix.csv
+  - replay-clock-audit.csv
