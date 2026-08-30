@@ -90,7 +90,6 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-<<<<<<< HEAD
       "coverage_actual_percent": 96.54,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
@@ -99,21 +98,6 @@
       "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
       "source_run_id": "33149935203",
       "top_slow_zone": {"zone":"tests.unit.scripts.docs.passports.test_passport_projector","test_count":4,"total_duration_s":47.748,"max_duration_s":21.002}
-=======
-      "coverage_actual_percent": 96.58,
-      "coverage_percent_fallback_used": false,
-      "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-28T12:08:33.049094+00:00",
-      "slowest_total_cases": 49266,
-      "source_commit": "2460c8c04e2c86adddc2a609c30957a4b63c146c",
-      "source_run_id": "33169139447",
-      "top_slow_zone": {
-        "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
-        "test_count": 4,
-        "total_duration_s": 40.486,
-        "max_duration_s": 14.738
-      }
->>>>>>> origin/main
     },
     "5702": {
       "helper_owner_contains_timeout_contracts": true,

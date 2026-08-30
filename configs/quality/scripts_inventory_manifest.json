@@ -1,10 +1,6 @@
 {
   "schema_version": "1.0",
-<<<<<<< HEAD
   "generated_at": "2026-08-28T09:46:11.031765+00:00",
-=======
-  "generated_at": "2026-08-29T02:13:05.926390+00:00",
->>>>>>> origin/main
   "summary": {
     "total_scripts": 604,
     "status_counts": {
