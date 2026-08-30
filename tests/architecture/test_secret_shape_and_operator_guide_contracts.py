@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,19 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def _read(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8")
+
+
+def _docker_identity(raw: str) -> tuple[int, int]:
+    parts = raw.split(":")
+    assert len(parts) == 2
+
+    def _component(value: str) -> int:
+        if value == "root":
+            return 0
+        assert re.fullmatch(r"(?:0|[1-9][0-9]*)", value), value
+        return int(value)
+
+    return _component(parts[0]), _component(parts[1])
 
 
 def test_readme_mcp_env_example_has_no_neo4j_password_literal() -> None:
@@ -48,7 +62,18 @@ def test_runtime_dockerfile_does_not_shadow_installed_wheel() -> None:
     text = _read("Dockerfile.bioetl")
     assert "PYTHONPATH=/app/src" not in text
     assert "COPY --chown=root:root src/ ./src/" not in text
-    assert "COPY --chown=root:root configs/ ./configs/" in text
+    configs_copies = [
+        line
+        for line in text.splitlines()
+        if line.startswith("COPY ") and " configs/ ./configs/" in line
+    ]
+    assert len(configs_copies) == 1
+    configs_copy = configs_copies[0]
+    owner = re.search(r"--chown=([^\s]+)", configs_copy)
+    assert owner is not None
+    assert _docker_identity(owner.group(1)) == (0, 0)
+    with pytest.raises(AssertionError):
+        _docker_identity("00:0")
     assert 'ENTRYPOINT ["bioetl"]' in text
 
 
