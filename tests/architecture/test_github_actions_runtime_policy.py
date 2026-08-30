@@ -464,8 +464,9 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
 def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/codeql.yml")
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
-    init_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/init"]))
-    analyze_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/analyze"]))
+    uses = _step_uses(workflow, "analyze")
+    allowed_init = policy.ALLOWED_USES["github/codeql-action/init"]
+    allowed_analyze = policy.ALLOWED_USES["github/codeql-action/analyze"]
     init_step = next(
         step
         for step in jobs["analyze"]["steps"]
@@ -479,9 +480,11 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     }
     assert init_step["with"]["languages"] == "python"
     assert "matrix" not in jobs["analyze"]
-    assert f"github/codeql-action/init@{init_sha}" in _step_uses(workflow, "analyze")
-    assert f"github/codeql-action/analyze@{analyze_sha}" in _step_uses(
-        workflow, "analyze"
+    assert any(
+        f"github/codeql-action/init@{sha}" in uses for sha in allowed_init
+    )
+    assert any(
+        f"github/codeql-action/analyze@{sha}" in uses for sha in allowed_analyze
     )
 
 
