@@ -74,22 +74,22 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 9,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "pass"
+      "status": "fail"
     },
     {
-      "current": 0,
+      "current": 303,
       "limit": 0,
       "metric": "uncovered_module_count",
       "name": "module_coverage_uncovered_modules",
       "remediation": "Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -455,7 +455,7 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "remote_main_baseline": true
   },
   "status_counts": {
     "fail": 1,
