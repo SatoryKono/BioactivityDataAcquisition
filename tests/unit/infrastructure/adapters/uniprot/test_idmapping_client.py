@@ -29,7 +29,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
@@ -262,6 +262,21 @@ class TestUniProtIDMappingClient:
         assert "No jobId" in str(exc_info.value)
 
     @pytest.mark.asyncio
+    async def test_map_ids_rejects_malformed_submission_payload(
+        self, idmapping_client, mock_http_client
+    ):
+        """Reject a successful submission response whose JSON is not an object."""
+        submit_response = MagicMock()
+        submit_response.status_code = 200
+        submit_response.json.return_value = []
+        mock_http_client.post = AsyncMock(return_value=submit_response)
+
+        with pytest.raises(IDMappingJobError, match="malformed response") as exc_info:
+            await idmapping_client.map_ids("ChEMBL", "UniProtKB", ["CHEMBL204"])
+
+        assert exc_info.value.job_id == "unknown"
+
+    @pytest.mark.asyncio
     async def test_map_ids_direct_string_mapping(
         self, idmapping_client, mock_http_client
     ):
@@ -326,11 +341,191 @@ class TestUniProtIDMappingClient:
 
     def test_get_next_page_url_with_link_header(self, idmapping_client):
         """Test extraction of next page URL from Link header."""
-        headers = {"Link": '<https://rest.uniprot.org/next>; rel="next"'}
+        headers = {
+            "Link": '<https://rest.uniprot.org/idmapping/results/job-1?cursor=2>; rel="next"'
+        }
 
         url = idmapping_client._get_next_page_url(headers)
 
-        assert url == "https://rest.uniprot.org/next"
+        assert url == "https://rest.uniprot.org/idmapping/results/job-1?cursor=2"
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://rest.uniprot.org.evil/idmapping/results/job-1",
+            "https://rest.uniprot.org@evil.example/idmapping/results/job-1",
+            "http://rest.uniprot.org/idmapping/results/job-1",
+            "https://rest.uniprot.org:444/idmapping/results/job-1",
+            "https://rest.uniprot.org/idmapping/../admin",
+            "https://rest.uniprot.org/uniprotkb/search",
+        ],
+    )
+    def test_get_next_page_url_rejects_untrusted_links(
+        self, idmapping_client: UniProtIDMappingClient, url: str
+    ) -> None:
+        with pytest.raises(ValueError, match="UniProt ID mapping"):
+            idmapping_client._get_next_page_url({"Link": f'<{url}>; rel="next"'})
+
+    @pytest.mark.asyncio
+    async def test_results_redirect_is_validated_before_next_request(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        response = MagicMock()
+        response.status_code = 302
+        response.headers = {"location": "https://evil.example/idmapping/results/job-1"}
+        mock_http_client.get = AsyncMock(return_value=response)
+
+        with pytest.raises(ValueError, match="UniProt ID mapping"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
+
+        mock_http_client.get.assert_awaited_once_with(
+            "https://rest.uniprot.org/idmapping/results/job-1",
+            follow_redirects=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_results_same_origin_redirect_is_followed(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        redirect = MagicMock(
+            status_code=302,
+            headers={"location": "/idmapping/results/job-1?cursor=2"},
+        )
+        page = MagicMock(status_code=200, headers={})
+        page.json.return_value = {"results": []}
+        mock_http_client.get = AsyncMock(side_effect=[redirect, page])
+
+        await idmapping_client._fetch_results_pages(
+            "job-1",
+            {"CHEMBL1": []},
+            "https://rest.uniprot.org/idmapping/results/job-1",
+        )
+
+        assert mock_http_client.get.await_args_list == [
+            call(
+                "https://rest.uniprot.org/idmapping/results/job-1",
+                follow_redirects=False,
+            ),
+            call(
+                "https://rest.uniprot.org/idmapping/results/job-1?cursor=2",
+                follow_redirects=False,
+            ),
+        ]
+
+    @pytest.mark.asyncio
+    async def test_results_redirect_requires_location(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        mock_http_client.get = AsyncMock(
+            return_value=MagicMock(status_code=302, headers={})
+        )
+
+        with pytest.raises(ValueError, match="redirect omitted Location"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
+
+    @pytest.mark.asyncio
+    async def test_results_redirect_chain_is_bounded(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        redirect = MagicMock(
+            status_code=302,
+            headers={"location": "/idmapping/results/job-1"},
+        )
+        mock_http_client.get = AsyncMock(return_value=redirect)
+
+        with pytest.raises(ValueError, match="redirect limit exceeded"):
+            await idmapping_client._fetch_results_pages(
+                "job-1",
+                {"CHEMBL1": []},
+                "https://rest.uniprot.org/idmapping/results/job-1",
+            )
+
+        assert mock_http_client.get.await_count == 4
+
+    @pytest.mark.asyncio
+    async def test_results_non_success_is_logged_and_stops(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        mock_http_client.get = AsyncMock(
+            return_value=MagicMock(status_code=503, headers={})
+        )
+
+        await idmapping_client._fetch_results_pages(
+            "job-1",
+            {"CHEMBL1": []},
+            "https://rest.uniprot.org/idmapping/results/job-1",
+        )
+
+        mock_logger.warning.assert_called_once_with(
+            "idmapping_results_error",
+            job_id="job-1",
+            status_code=503,
+        )
+
+    @pytest.mark.asyncio
+    async def test_results_malformed_page_stops(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        response = MagicMock(status_code=200, headers={})
+        response.json.return_value = []
+        mock_http_client.get = AsyncMock(return_value=response)
+
+        await idmapping_client._fetch_results_pages(
+            "job-1",
+            {"CHEMBL1": []},
+            "https://rest.uniprot.org/idmapping/results/job-1",
+        )
+
+        mock_http_client.get.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_results_invalid_entry_does_not_block_next_page(
+        self,
+        idmapping_client: UniProtIDMappingClient,
+        mock_http_client: MagicMock,
+    ) -> None:
+        first_page = MagicMock(
+            status_code=200,
+            headers={
+                "Link": '<https://rest.uniprot.org/idmapping/results/job-1?cursor=2>; rel="next"'
+            },
+        )
+        first_page.json.return_value = {"results": ["invalid"]}
+        last_page = MagicMock(status_code=200, headers={})
+        last_page.json.return_value = {"results": []}
+        mock_http_client.get = AsyncMock(side_effect=[first_page, last_page])
+
+        await idmapping_client._fetch_results_pages(
+            "job-1",
+            {"CHEMBL1": []},
+            "https://rest.uniprot.org/idmapping/results/job-1",
+        )
+
+        assert mock_http_client.get.await_args_list[-1] == call(
+            "https://rest.uniprot.org/idmapping/results/job-1?cursor=2",
+            follow_redirects=False,
+        )
 
     def test_get_next_page_url_no_link_header(self, idmapping_client):
         """Test handling of missing Link header."""
@@ -498,8 +693,7 @@ class TestUniProtIDMappingClient:
         """Test string representation."""
         repr_str = repr(idmapping_client)
 
-        assert "UniProtIDMappingClient" in repr_str
-        assert "rest.uniprot.org" in repr_str
+        assert repr_str == "UniProtIDMappingClient(base_url='https://rest.uniprot.org')"
 
     def test_i_d_mapping_client__provider_name__543e9538(self, idmapping_client):
         """Test provider name attribute."""

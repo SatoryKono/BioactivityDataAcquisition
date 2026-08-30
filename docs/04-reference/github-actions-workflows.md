@@ -57,7 +57,7 @@ Use it when you need to answer:
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `push`, `pull_request`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `push`, `pull_request` | Generated artifacts, schema parity, schema drift |
-| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Python CodeQL SAST to GitHub code scanning |
+| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Advanced Python CodeQL SAST; default setup off |
 | `dependency-review.yml` | `Dependency review` | `pull_request` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
 | `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `push`, `pull_request` | High-confidence GitHub Actions YAML audit |
@@ -93,7 +93,7 @@ Use it when you need to answer:
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `workflow_dispatch`, `push`, `pull_request` | Optional helper-image and compose validation |
+| `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
 | `release.yml` | _(unnamed in YAML)_ | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
 

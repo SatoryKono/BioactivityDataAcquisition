@@ -1,5 +1,11 @@
 # Materialized v3 — 24 циклических промпта + Master Orchestrator
 
+> Current checkout note (2026-08-28): legacy `project/full/`, `project/new/`,
+> and `project/new2/` source trees are retired. The `Source path` column below
+> records provenance at the dated baseline; it is not a live navigation target.
+> Maintained source cards remain in `../../cycle/`; all files in this directory
+> are frozen evidence.
+
 Источник: `C:/Users/Fedor/Desktop/bioetl_prompt_system_kernel_v3_full_portfolio_formatted_v2.1.docx`
 Дата генерации: 28.08.2026 | ID документа: BIOETL-PROMPT-ARCH-KERNEL-V3-003
 Repository baseline: `main @ 3aba8559a58038cd9ff9a90621f19ea39b930a2f`
@@ -46,6 +52,8 @@ Repository baseline: `main @ 3aba8559a58038cd9ff9a90621f19ea39b930a2f`
 
 ## Примечание
 
-- Файлы — материализации на 28.08.2026. Source of truth — карточки в `library/audit/cycle/` и `library/audit/project/new2/`. Не редактируй materialized-файлы вручную; они — снапшот.
+- Файлы — материализации на 28.08.2026. Поддерживаемый source-card набор живёт
+  в `library/audit/cycle/`; упоминания retired `project/new2/` описывают только
+  provenance baseline. Не редактируй materialized-файлы вручную; они — снапшот.
 - Профиль `MODE=full, ALLOW_*=true` — explicit operator override, не library default (kernel остаётся fail-closed).
 - Артефакты циклов: `reports/audit-runs/<run_id>/` — см. каждый промпт раздел Outputs.

@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/finding-v3.schema.json",
+  "title": "BioETL Finding v3",
+  "description": "Evidence-contract finding: stable fingerprint = sha256(domain|requirement_id|root_cause|canonical_paths). NOT_PROVEN must not create Issue or allow mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fingerprint",
+    "status",
+    "requirement_id",
+    "domain",
+    "root_cause"
+  ],
+  "properties": {
+    "finding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Stable sha256 hex (64 chars) over domain|requirement_id|root_cause|canonical_paths"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PROVEN",
+        "NOT_PROVEN"
+      ]
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "FACT",
+        "INFERENCE",
+        "GAP",
+        "CONTRADICTION"
+      ],
+      "description": "FACT|INFERENCE|GAP|CONTRADICTION"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "requirement_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "REQ-* from SSOT or GAP"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "broken_invariant": {
+      "type": "string",
+      "minLength": 1
+    },
+    "root_cause": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affected_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "path+symbol/line OR command+scope+timestamp+exit+relevant output",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "output": {
+          "type": "string"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "command"
+          ]
+        }
+      ]
+    },
+    "acceptance": {
+      "type": "string"
+    },
+    "validation_commands": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "rollback": {
+      "type": "string"
+    },
+    "owner_surface": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Owning surface/layer for the fix (domain|application|infrastructure|composition)"
+    }
+  }
+}

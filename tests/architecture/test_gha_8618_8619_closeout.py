@@ -27,12 +27,12 @@ def test_gha_002_docs_workflow_is_present_and_not_ignored() -> None:
     assert "docs-governance:" in DOCS_WORKFLOW.read_text(encoding="utf-8")
 
 
-def test_github_policy_documents_active_root_hygiene_ruleset() -> None:
-    """GHA-003: policy SSOT must document active always-on ruleset on main."""
+def test_github_policy_documents_live_root_hygiene_ruleset() -> None:
+    """GHA-003: policy SSOT must document the live ruleset enforcement state."""
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "root-hygiene-required-check" in text
     assert "Enforcement: `disabled`." in text
     assert "`checks-complete`" in text
     assert "`root-hygiene`" in text
-    assert "Direct merge allowed; no active required-check ruleset" in text
+    assert "Direct updates to main are not blocked by this ruleset." in text
     assert "no bypass actors" in text

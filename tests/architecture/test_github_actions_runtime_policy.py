@@ -8,7 +8,8 @@
 # pyright: reportOperatorIssue=false
 # pyright: reportAbstractUsage=false
 # PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
-"""Architecture guardrails for GitHub Actions supply-chain policy."""
+"""Architecture guardrails for GitHub Actions supply-chain policy.REQ-DEP-002: GitHub Actions runtime/image policy.
+"""
 
 from __future__ import annotations
 
@@ -463,8 +464,9 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
 def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/codeql.yml")
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
-    init_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/init"]))
-    analyze_sha = next(iter(policy.ALLOWED_USES["github/codeql-action/analyze"]))
+    uses = _step_uses(workflow, "analyze")
+    allowed_init = policy.ALLOWED_USES["github/codeql-action/init"]
+    allowed_analyze = policy.ALLOWED_USES["github/codeql-action/analyze"]
     init_step = next(
         step
         for step in jobs["analyze"]["steps"]
@@ -478,10 +480,60 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
     }
     assert init_step["with"]["languages"] == "python"
     assert "matrix" not in jobs["analyze"]
-    assert f"github/codeql-action/init@{init_sha}" in _step_uses(workflow, "analyze")
-    assert f"github/codeql-action/analyze@{analyze_sha}" in _step_uses(
-        workflow, "analyze"
+    assert any(
+        f"github/codeql-action/init@{sha}" in uses for sha in allowed_init
     )
+    assert any(
+        f"github/codeql-action/analyze@{sha}" in uses for sha in allowed_analyze
+    )
+
+
+def test_codeql_ownership_and_triage_are_documented() -> None:
+    policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
+    security_md = (ROOT / ".github" / "SECURITY.md").read_text(encoding="utf-8")
+    dependabot = (ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
+
+    assert "### 2.3.1 CodeQL ownership and alert triage" in policy_doc
+    assert "advanced CodeQL setup" in policy_doc
+    assert "not-configured" in policy_doc
+    assert "default setup MUST remain" in policy_doc
+    assert "Alert triage owner" in policy_doc
+    assert "Weekly on Monday" in policy_doc
+    assert "advanced setup only" in security_md
+    assert 'directory: "/.github/tooling/jscpd"' in dependabot
+    assert 'package-ecosystem: "npm"' in dependabot
+
+
+PIP_INSTALL_RE = re.compile(r"(?i)pip(?:3)?\s+install")
+NPM_INSTALL_RE = re.compile(r"(?i)npm\s+install\b")
+
+
+def test_workflows_do_not_use_unhashed_pip_or_npm_install() -> None:
+    jscpd_lock = ROOT / ".github" / "tooling" / "jscpd" / "package-lock.json"
+    assert jscpd_lock.is_file()
+
+    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        for line_no, raw in enumerate(text.splitlines(), 1):
+            line = raw.split("#", 1)[0]
+            match = PIP_INSTALL_RE.search(line)
+            if match is not None:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT).as_posix()}:{line_no} uses "
+                    f"unpinned pip install ({match.group(0)!r})"
+                )
+            npm_match = NPM_INSTALL_RE.search(line)
+            if npm_match is not None:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT).as_posix()}:{line_no} uses "
+                    f"npm install; use npm ci with a committed lockfile"
+                )
+
+    duplication = (ROOT / ".github" / "workflows" / "duplication-complexity.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "npm ci --ignore-scripts" in duplication
+    assert ".github/tooling/jscpd" in duplication
 
 
 def test_scorecard_workflow_is_non_blocking_weekly_baseline() -> None:

@@ -132,6 +132,56 @@ def test_bundle_generator_falls_back_to_png_when_svg_missing(tmp_path: Path) -> 
     assert "png/01-sample.png" in markdown
 
 
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("Bronze<br/>Delta", "Bronze Delta"),
+        ("<strong>Gold</strong> output", "Gold output"),
+        ("Visible<!-- internal note --> tail", "Visible tail"),
+        ("literal --!> marker", "literal --\\!&gt; marker"),
+        (
+            "&lt;script&gt;alert(1)&lt;/script&gt;",
+            "&lt;script&gt;alert(1)&lt;/script&gt;",
+        ),
+        ("&lt;img src=x onerror=alert(1)&gt;", "&lt;img src=x onerror=alert(1)&gt;"),
+        (
+            "![tracking](https://evil.example/pixel)",
+            r"\!\[tracking\](https://evil.example/pixel)",
+        ),
+        ("[click](javascript:alert(1))", r"\[click\](javascript:alert(1))"),
+        ("`raw code`", r"\`raw code\`"),
+        ("&lt;https://evil.example&gt;", "&lt;https://evil.example&gt;"),
+        ("safe&#10;# injected", "safe # injected"),
+        ("safe&#10;---", "safe ---"),
+        ("safe&#13;tail", "safe tail"),
+        ("safe\u2028tail", "safe tail"),
+        ("safe\x00tail", "safe tail"),
+    ],
+)
+def test_mermaid_label_text_uses_structural_html_parsing(
+    label: str, expected: str
+) -> None:
+    module = _load_generate_all_bundles()
+
+    assert module._mermaid_label_text(label) == expected
+
+
+@pytest.mark.parametrize(
+    "arrow",
+    ["-->", "<--", "==>", "-.->", "--o", "--x", "~~~"],
+)
+def test_bundle_generator_counts_supported_flow_edges(arrow: str) -> None:
+    module = _load_generate_all_bundles()
+
+    assert module._count_edges([f"A {arrow} B"], is_class_diagram=False) == 1
+
+
+def test_bundle_generator_rejects_malformed_html_like_arrow() -> None:
+    module = _load_generate_all_bundles()
+
+    assert module._count_edges(["A --!> B"], is_class_diagram=False) == 0
+
+
 def test_tracked_bundle_image_links_resolve_to_rendered_artifacts() -> None:
     bundle_dir = Path("docs/02-architecture/diagrams/bundles")
     image_link_re = re.compile(r"!\[[^\]]*]\(([^)]+)\)")

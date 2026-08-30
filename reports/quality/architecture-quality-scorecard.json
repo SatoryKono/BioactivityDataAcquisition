@@ -1,241 +1,33 @@
 {
-  "categories": [
-    {
-      "evidence_metrics": {
-        "layer_violations": 0
-      },
-      "id": "layer_compliance",
-      "name": "Layer compliance",
-      "score": 9.5,
-      "weight": 0.13,
-      "weighted_score": 1.235
-    },
-    {
-      "evidence_metrics": {
-        "expired_compat_count": 0,
-        "layer_violations": 0,
-        "sunset_compat_count": 0,
-        "transition_compat_count": 0
-      },
-      "id": "hexagonal_ports_adapters",
-      "name": "Hexagonal / Ports & Adapters",
-      "score": 9.2,
-      "weight": 0.11,
-      "weighted_score": 1.012
-    },
-    {
-      "evidence_metrics": {
-        "source_module_count": 2465,
-        "uncovered_module_count": 0
-      },
-      "id": "ddd_invariants",
-      "name": "DDD / aggregates / invariants",
-      "score": 9.0,
-      "weight": 0.09,
-      "weighted_score": 0.81
-    },
-    {
-      "evidence_metrics": {
-        "layer_violations": 0,
-        "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 0,
-        "public_export_facade_growth_count": 0
-      },
-      "id": "composition_di",
-      "name": "Composition root / DI",
-      "score": 9.0,
-      "weight": 0.1,
-      "weighted_score": 0.9
-    },
-    {
-      "evidence_metrics": {
-        "hotspot_budget_warning_count": 0,
-        "hotspot_family_count": 5,
-        "total_duplicate_clusters": 0
-      },
-      "id": "module_boundaries_coupling",
-      "name": "Module boundaries / coupling",
-      "score": 9.5,
-      "weight": 0.14,
-      "weighted_score": 1.33
-    },
-    {
-      "evidence_metrics": {
-        "expired_compat_count": 0,
-        "twin_pair_count": 0
-      },
-      "id": "naming_package_consistency",
-      "name": "Naming / package consistency",
-      "score": 9.9,
-      "weight": 0.08,
-      "weighted_score": 0.792
-    },
-    {
-      "evidence_metrics": {
-        "compatibility_test_file_count": 0,
-        "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
-      },
-      "id": "test_strategy_testability",
-      "name": "Test strategy / testability",
-      "score": 9.9,
-      "weight": 0.12,
-      "weighted_score": 1.188
-    },
-    {
-      "evidence_metrics": {
-        "adr_enforcement_blocking_gap_count": 0,
-        "contract_blocking_issue_count": 0,
-        "dq_blocking_issue_count": 0
-      },
-      "id": "config_contracts_entrypoints",
-      "name": "Config / contracts / entrypoints",
-      "score": 9.2,
-      "weight": 0.09,
-      "weighted_score": 0.828
-    },
-    {
-      "evidence_metrics": {
-        "contract_blocking_issue_count": 0,
-        "dashboarded_without_declaration_count": 0,
-        "dashboarded_without_emission_count": 0,
-        "layer_violations": 0,
-        "runtime_cardinality_review_required_count": 0,
-        "runtime_cardinality_threshold_violation_count": 0
-      },
-      "id": "determinism_replay_observability",
-      "name": "Determinism / replay / observability",
-      "score": 9.0,
-      "weight": 0.08,
-      "weighted_score": 0.72
-    },
-    {
-      "evidence_metrics": {
-        "expired_compat_count": 0,
-        "hotspot_budget_warning_count": 0,
-        "public_entrypoint_growth_count": 0,
-        "public_export_facade_conflict_count": 0,
-        "public_export_facade_growth_count": 0,
-        "repo_wide_untriaged_zero_import_candidate_count": 0,
-        "sunset_compat_count": 0,
-        "total_duplicate_clusters": 0,
-        "transition_compat_count": 0
-      },
-      "id": "debt_burden_evolution_friction",
-      "name": "Debt burden / evolution friction",
-      "score": 9.9,
-      "weight": 0.06,
-      "weighted_score": 0.594
-    }
-  ],
-  "debt_budget_policy": {
-    "budget_growth_allowed": false,
-    "compatibility_debt_metrics_source": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
-    "current_compatibility_debt_metrics": {
-      "expired_compat_count": {
-        "current_count": 0,
-        "linked_issue": "3354",
-        "max_count": 0,
-        "owner": "@bioetl-architecture",
-        "ratchet_policy": "Zero-budget fail-fast metric.",
-        "rationale": "Expired compatibility items are not allowed to persist after their sunset date."
-      },
-      "sunset_compat_count": {
-        "current_count": 0,
-        "linked_issue": "4700",
-        "max_count": 0,
-        "owner": "@bioetl-architecture",
-        "ratchet_policy": "May only decrease before the sunset; must reach zero after 2026-09-30.",
-        "rationale": "Control-plane run_manifest_diagnostics_* compatibility shims were removed in Stream C; transition_debt inventory is empty.",
-        "sunset_date": "2026-09-30",
-        "target_count": 0
-      },
-      "transition_compat_count": {
-        "current_count": 0,
-        "linked_issue": "4700",
-        "max_count": 0,
-        "owner": "@bioetl-architecture",
-        "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed.",
-        "rationale": "Stream C post-sunset shim removal cleared all control-plane manifest diagnostics transition_debt entries; callers use manifest.diagnostics.* owners. Sanctioned public entrypoints are tracked separately as stable public API.",
-        "target_count": 0
-      }
-    }
-  },
-  "diagnostics": {
-    "composition_module_cap": 300,
-    "composition_module_count": 295,
-    "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
-    ],
-    "families_at_budget_count": 2,
-    "grade_kind": "diagnostic_proxy",
-    "lazy_import_cap": 97,
-    "lazy_import_observed_count": 97,
-    "program_gate_policy": "external_unchanged",
-    "proxy_notes": {
-      "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
-      "module_boundaries_coupling": "hotspot budget warnings and duplicate clusters proxy; at-budget families remain visible but non-blocking"
-    }
-  },
+  "schema_version": 2,
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.41,
-  "interpretation": "good_targeted_improvements",
-  "metrics": {
-    "accepted_adr_count": 57,
-    "adr_enforcement_blocking_gap_count": 0,
-    "adr_enforcement_manual_exception_count": 0,
-    "compatibility_test_file_count": 0,
-    "contract_blocking_issue_count": 0,
-    "dashboarded_without_declaration_count": 0,
-    "dashboarded_without_emission_count": 0,
-    "dq_blocking_issue_count": 0,
-    "expired_compat_count": 0,
-    "families_at_budget": [
-      "application_services_control_plane",
-      "composition_runtime_builders"
-    ],
-    "families_at_budget_count": 2,
-    "hotspot_budget_warning_count": 0,
-    "hotspot_family_count": 5,
-    "layer_violations": 0,
-    "public_entrypoint_growth_count": 0,
-    "public_export_facade_conflict_count": 0,
-    "public_export_facade_growth_count": 0,
-    "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "retained_entrypoint_count": 12,
-    "retained_public_export_facade_count": 4,
-    "runtime_cardinality_review_required_count": 0,
-    "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2465,
-    "sunset_compat_count": 0,
-    "total_duplicate_clusters": 0,
-    "transition_compat_count": 0,
-    "twin_pair_count": 0,
-    "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
-  },
-  "schema_version": 1,
   "source_artifacts": {
-    "adr_enforcement_matrix": {
-      "accepted_adr_count": 57,
-      "blocking_gap_count": 0,
-      "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
-      "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
+    "dependency_map": {
+      "path": "docs/02-architecture/generated/module-dependency-map.json",
+      "source_fingerprint": "666bc7cc6d667dc838b11eb87ca8ecb720fcc89967ec4430b38f2ac7bdb9ed93"
+    },
+    "module_coverage_inventory": {
+      "path": "reports/quality/module-coverage-inventory.json",
+      "source_tree_sha256": "456d6bdb4933548557ac1b869673cb02bff683dd4d74da87422d214a10dd58ee",
+      "coverage_xml_sha256": "28aaa980500b1f81bf10a934b0e6d562ac023ffe50e49c58649802c0da47ba17"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
       "snapshot_date": "2026-08-26"
+    },
+    "dead_code_inventory": {
+      "path": "reports/quality/dead-code-inventory.json",
+      "snapshot_date": "2026-08-01"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
       "valid": true
     },
     "contract_registry_dq_diagnostics": {
-      "blocking_issue_count": 0,
       "path": "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
       "source_check": "python -m scripts.engineering.ci validate-dq-consistency",
-      "valid": true
+      "valid": true,
+      "blocking_issue_count": 0
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
@@ -243,7 +35,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "666bc7cc6d667dc838b11eb87ca8ecb720fcc89967ec4430b38f2ac7bdb9ed93"
+      "source_fingerprint": "71560ce80f41726c46807fef6d76e26a360e8a18a4b0b3de2d3df422fefb560d"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -255,14 +47,14 @@
       "total_duplicate_clusters": 0
     },
     "hotspot_family_baseline": {
-      "budget_warnings": 0,
       "path": "reports/quality/hotspot-family-baseline.json",
-      "snapshot_date": "2026-07-27"
+      "snapshot_date": "2026-07-27",
+      "budget_warnings": 0
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "5f652c862e2355e56f19d86cfe41130258d678a7d2a8361ce8479dbffe2cea03",
+      "coverage_xml_sha256": "a98ebaf45164ea224015cd2221922fd388c3585312809594800e16d46021c793",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6"
+      "source_tree_sha256": "456d6bdb4933548557ac1b869673cb02bff683dd4d74da87422d214a10dd58ee"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
@@ -270,9 +62,247 @@
       "path": "reports/observability/runtime_cardinality_inventory.json"
     },
     "test_governance_report": {
-      "compatibility_test_files": 0,
-      "path": "reports/quality/test-governance-current.json"
+      "path": "reports/quality/test-governance-current.json",
+      "compatibility_test_files": 0
+    },
+    "adr_enforcement_matrix": {
+      "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload",
+      "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
+      "accepted_adr_count": 57,
+      "blocking_gap_count": 0
+    },
+    "diagnostic_policy": {
+      "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
+      "package_cohesion_budget": "configs/quality/package_cohesion_budget.yaml"
     }
   },
-  "weights_sum": 1.0
+  "weights_sum": 1.0,
+  "integral_score": 9.14,
+  "interpretation": "good_targeted_improvements",
+  "diagnostics": {
+    "grade_kind": "diagnostic_proxy",
+    "program_gate_policy": "external_unchanged",
+    "proxy_notes": {
+      "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
+      "module_boundaries_coupling": "hotspot budget warnings and duplicate clusters proxy; at-budget families and cap saturation penalize the diagnostic grade and remain shrink-only for program gates"
+    },
+    "families_at_budget_count": 2,
+    "families_at_budget": [
+      "application_services_control_plane",
+      "composition_runtime_builders"
+    ],
+    "lazy_import_observed_count": 97,
+    "lazy_import_cap": 97,
+    "lazy_util": 1.0,
+    "composition_module_count": 295,
+    "composition_module_cap": 300,
+    "composition_util": 0.9833
+  },
+  "categories": [
+    {
+      "id": "layer_compliance",
+      "name": "Layer compliance",
+      "weight": 0.13,
+      "score": 10.0,
+      "weighted_score": 1.3,
+      "evidence_metrics": {
+        "layer_violations": 0
+      }
+    },
+    {
+      "id": "hexagonal_ports_adapters",
+      "name": "Hexagonal / Ports & Adapters",
+      "weight": 0.11,
+      "score": 10.0,
+      "weighted_score": 1.1,
+      "evidence_metrics": {
+        "layer_violations": 0,
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0
+      }
+    },
+    {
+      "id": "ddd_invariants",
+      "name": "DDD / aggregates / invariants",
+      "weight": 0.09,
+      "score": 10.0,
+      "weighted_score": 0.9,
+      "evidence_metrics": {
+        "source_module_count": 2465,
+        "uncovered_module_count": 0
+      }
+    },
+    {
+      "id": "composition_di",
+      "name": "Composition root / DI",
+      "weight": 0.1,
+      "score": 6.0,
+      "weighted_score": 0.6,
+      "evidence_metrics": {
+        "layer_violations": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
+        "composition_util": 0.9833,
+        "lazy_util": 1.0
+      }
+    },
+    {
+      "id": "module_boundaries_coupling",
+      "name": "Module boundaries / coupling",
+      "weight": 0.14,
+      "score": 8.0,
+      "weighted_score": 1.12,
+      "evidence_metrics": {
+        "hotspot_family_count": 5,
+        "hotspot_budget_warning_count": 0,
+        "total_duplicate_clusters": 0,
+        "families_at_budget_count": 2,
+        "lazy_util": 1.0
+      }
+    },
+    {
+      "id": "naming_package_consistency",
+      "name": "Naming / package consistency",
+      "weight": 0.08,
+      "score": 10.0,
+      "weighted_score": 0.8,
+      "evidence_metrics": {
+        "expired_compat_count": 0,
+        "twin_pair_count": 0
+      }
+    },
+    {
+      "id": "test_strategy_testability",
+      "name": "Test strategy / testability",
+      "weight": 0.12,
+      "score": 10.0,
+      "weighted_score": 1.2,
+      "evidence_metrics": {
+        "unmeasured_module_count": 0,
+        "uncovered_module_count": 0,
+        "compatibility_test_file_count": 0
+      }
+    },
+    {
+      "id": "config_contracts_entrypoints",
+      "name": "Config / contracts / entrypoints",
+      "weight": 0.09,
+      "score": 10.0,
+      "weighted_score": 0.9,
+      "evidence_metrics": {
+        "contract_blocking_issue_count": 0,
+        "dq_blocking_issue_count": 0,
+        "adr_enforcement_blocking_gap_count": 0
+      }
+    },
+    {
+      "id": "determinism_replay_observability",
+      "name": "Determinism / replay / observability",
+      "weight": 0.08,
+      "score": 10.0,
+      "weighted_score": 0.8,
+      "evidence_metrics": {
+        "layer_violations": 0,
+        "contract_blocking_issue_count": 0,
+        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_declaration_count": 0,
+        "runtime_cardinality_review_required_count": 0,
+        "runtime_cardinality_threshold_violation_count": 0
+      }
+    },
+    {
+      "id": "debt_burden_evolution_friction",
+      "name": "Debt burden / evolution friction",
+      "weight": 0.06,
+      "score": 7.0,
+      "weighted_score": 0.42,
+      "evidence_metrics": {
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "hotspot_budget_warning_count": 0,
+        "total_duplicate_clusters": 0,
+        "composition_util": 0.9833
+      }
+    }
+  ],
+  "metrics": {
+    "layer_violations": 0,
+    "source_module_count": 2465,
+    "unmeasured_module_count": 0,
+    "uncovered_module_count": 0,
+    "hotspot_family_count": 5,
+    "hotspot_budget_warning_count": 0,
+    "families_at_budget_count": 2,
+    "families_at_budget": [
+      "application_services_control_plane",
+      "composition_runtime_builders"
+    ],
+    "total_duplicate_clusters": 0,
+    "retained_entrypoint_count": 12,
+    "retained_public_export_facade_count": 4,
+    "transition_compat_count": 0,
+    "sunset_compat_count": 0,
+    "expired_compat_count": 0,
+    "public_entrypoint_growth_count": 0,
+    "public_export_facade_growth_count": 0,
+    "public_export_facade_conflict_count": 0,
+    "twin_pair_count": 0,
+    "compatibility_test_file_count": 0,
+    "repo_wide_untriaged_zero_import_candidate_count": 0,
+    "contract_blocking_issue_count": 0,
+    "dq_blocking_issue_count": 0,
+    "dashboarded_without_emission_count": 0,
+    "dashboarded_without_declaration_count": 0,
+    "runtime_cardinality_review_required_count": 0,
+    "runtime_cardinality_threshold_violation_count": 0,
+    "accepted_adr_count": 57,
+    "adr_enforcement_blocking_gap_count": 0,
+    "adr_enforcement_manual_exception_count": 0,
+    "lazy_import_observed_count": 97,
+    "lazy_import_cap": 97,
+    "lazy_util": 1.0,
+    "composition_module_count": 295,
+    "composition_module_cap": 300,
+    "composition_util": 0.9833
+  },
+  "debt_budget_policy": {
+    "budget_growth_allowed": false,
+    "compatibility_debt_metrics_source": "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics",
+    "current_compatibility_debt_metrics": {
+      "transition_compat_count": {
+        "current_count": 0,
+        "max_count": 0,
+        "target_count": 0,
+        "owner": "@bioetl-architecture",
+        "linked_issue": "4700",
+        "rationale": "Stream C post-sunset shim removal cleared all control-plane manifest diagnostics transition_debt entries; callers use manifest.diagnostics.* owners. Sanctioned public entrypoints are tracked separately as stable public API.",
+        "ratchet_policy": "Fail on growth; ratchet current/max_count toward target_count zero as transition-only compatibility shims are removed."
+      },
+      "sunset_compat_count": {
+        "current_count": 0,
+        "max_count": 0,
+        "target_count": 0,
+        "owner": "@bioetl-architecture",
+        "linked_issue": "4700",
+        "sunset_date": "2026-09-30",
+        "rationale": "Control-plane run_manifest_diagnostics_* compatibility shims were removed in Stream C; transition_debt inventory is empty.",
+        "ratchet_policy": "May only decrease before the sunset; must reach zero after 2026-09-30."
+      },
+      "expired_compat_count": {
+        "current_count": 0,
+        "max_count": 0,
+        "owner": "@bioetl-architecture",
+        "linked_issue": "3354",
+        "rationale": "Expired compatibility items are not allowed to persist after their sunset date.",
+        "ratchet_policy": "Zero-budget fail-fast metric."
+      }
+    }
+  }
 }

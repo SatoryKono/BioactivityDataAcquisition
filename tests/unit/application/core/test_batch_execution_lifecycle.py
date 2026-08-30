@@ -181,6 +181,50 @@ async def test_run_service_finalizes_on_cancelled_error(
 
 
 @pytest.mark.asyncio
+async def test_run_service_finalizes_when_cancel_interrupts_shield(
+    lifecycle_deps: tuple[MagicMock, MagicMock, MagicMock],
+) -> None:
+    """#9793: a second cancel during shielded finalize must still await persist."""
+    progress, tracing, checkpoint = lifecycle_deps
+    lifecycle_service = BatchExecutionLifecycleService(
+        progress_service=progress,
+        tracing_manager=tracing,
+        checkpoint_recovery_service=checkpoint,
+    )
+    run_service = BatchExecutionRunService(
+        execution_lifecycle_service=lifecycle_service
+    )
+    execution_context = prepare_execution_context(limit=1, query=None, offset=0)
+    started = asyncio.Event()
+    original_finalize = run_service._finalize
+
+    async def _slow_finalize(*args: Any, **kwargs: Any) -> None:
+        started.set()
+        await asyncio.sleep(0.05)
+        await original_finalize(*args, **kwargs)
+
+    run_service._finalize = _slow_finalize  # type: ignore[method-assign]
+
+    async def _cancel_loop(execution_context: BatchExecutionContext) -> None:
+        _ = execution_context
+        raise asyncio.CancelledError()
+
+    task = asyncio.create_task(
+        run_service.execute(
+            execution_context=execution_context,
+            run_loop=_cancel_loop,
+            execution_state=_Counters(),
+            memory_state=_Memory(),
+        )
+    )
+    await started.wait()
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    checkpoint.save_checkpoint_on_shutdown.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_run_service_finalizes_on_pipeline_shutdown(
     lifecycle_deps: tuple[MagicMock, MagicMock, MagicMock],
 ) -> None:

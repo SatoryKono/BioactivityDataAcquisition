@@ -6,12 +6,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 
+import httpx
+
 from bioetl.domain.types import JsonDict
-from bioetl.infrastructure.adapters.common.response_shapes import (
-    extract_response_items,
-    extract_response_text,
-)
+from bioetl.infrastructure.adapters.common.response_shapes import extract_response_text
 from bioetl.infrastructure.adapters.uniprot._idmapping_errors import IDMappingJobError
+from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    trusted_idmapping_url,
+)
+
+_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
+_MAX_RESULT_REDIRECTS = 3
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -33,6 +38,12 @@ class IDMappingTransportDependencies(Protocol):
         self,
         mapping: JsonDict,  # Any: untyped API JSON
     ) -> tuple[str | None, JsonDict | None]: ...
+
+    def _append_mapping_results(
+        self,
+        data: object,
+        entries_by_id: dict[str, list[JsonDict]],
+    ) -> bool: ...
 
     def _get_next_page_url(self, headers: Mapping[str, str]) -> str | None: ...
 
@@ -123,11 +134,21 @@ class IDMappingTransportMixin:
     ) -> None:
         """Paginate through ID mapping results, populating entries_by_id in place."""
         deps = self._transport_deps()
-        url: str | None = start_url
+        url: str | None = trusted_idmapping_url(deps.base_url, start_url)
+        redirect_count = 0
 
         while url:
             with deps._adapter_metrics.measure_request("/idmapping/results"):
-                response = await deps.http_client.get(url)
+                response = await deps.http_client.get(url, follow_redirects=False)
+
+            redirect = self._results_redirect(
+                deps,
+                response,
+                redirect_count=redirect_count,
+            )
+            if redirect is not None:
+                url, redirect_count = redirect
+                continue
 
             if response.status_code != 200:
                 deps.logger.warning(
@@ -137,17 +158,31 @@ class IDMappingTransportMixin:
                 )
                 break
 
-            data = response.json()
-            if not isinstance(data, dict):
-                break
-            for mapping in extract_response_items(data, "results"):
-                if not isinstance(mapping, dict):
-                    continue
-                from_id, entry_data = deps._parse_mapping_entry(mapping)
-                if from_id in entries_by_id and entry_data:
-                    entries_by_id[from_id].append(entry_data)
+            redirect_count = 0
 
-            url = deps._get_next_page_url(response.headers)
+            if not deps._append_mapping_results(response.json(), entries_by_id):
+                break
+
+            next_url = deps._get_next_page_url(response.headers)
+            url = trusted_idmapping_url(deps.base_url, next_url) if next_url else None
+
+    @staticmethod
+    def _results_redirect(
+        deps: IDMappingTransportDependencies,
+        response: httpx.Response,
+        *,
+        redirect_count: int,
+    ) -> tuple[str, int] | None:
+        """Return one validated redirect target and its bounded hop count."""
+        if response.status_code not in _REDIRECT_STATUS_CODES:
+            return None
+        next_count = redirect_count + 1
+        if next_count > _MAX_RESULT_REDIRECTS:
+            raise ValueError("UniProt ID mapping redirect limit exceeded")
+        location = response.headers.get("location")
+        if not location:
+            raise ValueError("UniProt ID mapping redirect omitted Location")
+        return trusted_idmapping_url(deps.base_url, location), next_count
 
     def _resolve_entries(
         self,

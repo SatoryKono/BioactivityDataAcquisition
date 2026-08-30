@@ -77,19 +77,24 @@ ______________________________________________________________________
 
 ### 1. Start the proxy (Windows)
 
-Run once before working with Codex:
+Determine the Windows address of the WSL virtual adapter and the matching WSL
+client subnet, then pass both explicitly:
 
 ```cmd
-scripts\ops\start-wsl-proxy.bat
+scripts\ops\runtime\wsl\start-wsl-proxy.bat 172.30.32.1 172.30.32.0/20
 ```
 
 Or manually:
 
 ```cmd
-python scripts\ops\wsl_proxy.py
+python scripts\ops\runtime\wsl\wsl_proxy.py --bind-host 172.30.32.1 --allow-cidr 172.30.32.0/20
 ```
 
-The proxy listens on `0.0.0.0:3128`. Verify:
+The no-argument Python default is loopback-only. A wildcard bind is rejected
+unless both `--allow-wildcard` and at least one `--allow-cidr` are supplied.
+Prefer the exact WSL adapter address shown above. Independently configure and
+verify Windows Firewall so TCP 3128 accepts only the same WSL subnet; the Python
+process cannot enforce the host firewall policy. Verify:
 
 ```cmd
 netstat -an | findstr 3128
@@ -295,7 +300,8 @@ bash "$BIOETL_DIR/scripts/ai/codex/helper/setup-wsl.sh"
 
 **Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)
 
-Minimal HTTP CONNECT proxy running on Windows, listening on `0.0.0.0:3128`.
+Minimal HTTP CONNECT proxy running on Windows, bound to the explicitly selected
+WSL adapter address with a client CIDR allowlist.
 WSL2 routes all HTTP/HTTPS traffic through it via `http_proxy` / `https_proxy`
 environment variables (set by `scripts/engineering/dev/bash/.wsl_proxy_env.sh`).
 
@@ -350,7 +356,8 @@ ______________________________________________________________________
    netstat -an | findstr 3128
    ```
 
-   If not listening, run `scripts\ops\start-wsl-proxy.bat`.
+   If not listening, rerun the explicit launcher command from Quick Start and
+   verify the matching Windows Firewall scope.
 
 1. **Check proxy env** (WSL):
 

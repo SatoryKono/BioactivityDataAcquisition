@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/kernel.schema.json",
+  "title": "BioETL Cyclic Audit Kernel v3 Params",
+  "description": "Fail-closed kernel parameters for BioETL Cyclic Audit Kernel v3.0. SCOPE and MODE are required. All ALLOW_* default to false. Never increase caps/budgets via prompt.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "SCOPE",
+    "MODE"
+  ],
+  "properties": {
+    "N": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "description": "Iterations i=1..N"
+    },
+    "MODE": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "audit+issues",
+        "full"
+      ],
+      "description": "Execution mode: audit | audit+issues | full"
+    },
+    "AUDIT_MODE": {
+      "type": "string",
+      "enum": [
+        "full",
+        "differential"
+      ],
+      "default": "full",
+      "description": "Scope audit mode"
+    },
+    "SCOPE": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Required audit scope path/glob; empty SCOPE must STOP"
+    },
+    "BASE_BRANCH": {
+      "type": "string",
+      "minLength": 1,
+      "default": "main",
+      "description": "Baseline branch"
+    },
+    "WORK_BRANCH": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Work branch, e.g. fix/<domain>-cycle-<shortsha>",
+      "default": "fix/audit-cycle"
+    },
+    "ALLOW_ISSUE_WRITE": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow creating/updating Issues (requires PROVEN)"
+    },
+    "ALLOW_PUSH": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_MERGE": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_CLOSE": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_NETWORK": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_FULL_SUITE": {
+      "type": "boolean",
+      "default": false
+    },
+    "MONITORING": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable optional monitoring/Docker/Redis when explicitly needed"
+    },
+    "MAX_FILES_PER_SCOPE": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 300
+    },
+    "MAX_ISSUES_PER_ITERATION": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 5
+    },
+    "MAX_WAVES_PER_ITERATION": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3
+    },
+    "MAX_COMMAND_SECONDS": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 900
+    },
+    "LANGUAGE": {
+      "type": "string",
+      "enum": [
+        "ru",
+        "en"
+      ],
+      "default": "ru"
+    }
+  }
+}

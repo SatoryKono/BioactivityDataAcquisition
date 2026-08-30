@@ -115,7 +115,10 @@ def test_docs_workflow_runs_doc_integrity_guardrails() -> None:
 def test_docs_workflow_diagram_drift_uses_pr_base_ref() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
-    assert 'base_ref="origin/${{ github.base_ref }}"' in workflow
+    assert "BASE_REF: ${{ github.base_ref }}" in workflow
+    assert 'base_ref="origin/${BASE_REF}"' in workflow
+    assert '[[ "${BASE_REF}" != "main" ]]' in workflow
+    assert "origin/${{ github.base_ref }}" not in workflow
     assert 'git diff --name-only "${base_ref}"...HEAD' in workflow
     drift_block = workflow.split("check-diagram-drift:", maxsplit=1)[1]
     assert "origin/main...HEAD" not in drift_block

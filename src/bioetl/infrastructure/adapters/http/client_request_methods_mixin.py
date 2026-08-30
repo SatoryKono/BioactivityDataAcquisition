@@ -44,6 +44,8 @@ class HTTPClientRequestMethodsMixin:
         url: str,
         params: JsonDict | None = None,
         headers: dict[str, str] | None = None,
+        *,
+        follow_redirects: bool | None = None,
     ) -> httpx.Response:
         """Send GET request with retry policy.
 
@@ -55,9 +57,10 @@ class HTTPClientRequestMethodsMixin:
         Returns:
             httpx.Response from the server after applying retry policy.
         """
-        return await self._request_with_retry(
-            "GET", url, params=params, headers=headers
-        )
+        request_kwargs: dict[str, object] = {"params": params, "headers": headers}
+        if follow_redirects is not None:
+            request_kwargs["follow_redirects"] = follow_redirects
+        return await self._request_with_retry("GET", url, **request_kwargs)
 
     async def post(
         self,
