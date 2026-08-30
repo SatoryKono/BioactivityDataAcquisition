@@ -1,7 +1,0 @@
-step,entrypoint,input,output,environment,failure_semantics,local_ci,status
-links,python -m scripts.docs check-links,docs+mkdocs+configs,JSON report,Python,rc1-on-violation,local+CI,fail-not-in-nav-growth
-drift,python -m scripts.docs check-drift,runtime+docs,stdout-json,Python,rc1-on-drift,local+CI,pass
-kpi,python -m scripts.docs check-kpi,docs+mkdocs,KPI JSON+Markdown,docs-extra-not-required,rc1-on-breach,weekly-CI,router-rc2
-cleanup,python -m scripts.docs generate-cleanup-inventory,tracked-doc-surfaces,tracked JSON+Markdown,Python,rc1-on-drift,local+CI,drift
-verify,python -m scripts.docs verify,all-doc-gates+mkdocs,temporary-site,docs-extra,first-nonzero,local+CI,blocked-by-router-and-gates
-publish,GitHub-Pages-docs-workflow,validated-site,site-artifact,docs-extra,workflow-failure,CI,not-executed
