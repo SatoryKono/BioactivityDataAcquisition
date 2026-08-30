@@ -51,6 +51,11 @@ jobs:
 
       - name: Run pip-audit
         run: |
+          # Residual OSV #9853 (expiry 2026-11-30): pip==26.1.2 in uv.lock.
+          # CVE-2026-3219 / PYSEC-2026-3721 — pip archive-parsing (dev extra).
+          # CI/dev only; not in the Wolfi/scratch runtime image.
+          # Do not add osv-scanner.toml and do not dismiss Scorecard
+          # Vulnerabilities (OpenSSF check #1294).
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
           UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict \
             --ignore-vuln CVE-2026-3219 \

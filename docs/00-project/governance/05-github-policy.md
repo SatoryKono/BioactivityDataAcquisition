@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.2.3
+Version: 1.2.4
 Status: active
 Class: published
 Owner: BioETL Team
@@ -140,6 +140,33 @@ alert ownership.
 
 Actionable CodeQL alerts get a follow-up issue the same triage week. Alerts are
 closed only with SARIF/workflow proof, not by silent dismiss.
+
+### 2.3.2 Residual OSV after RF-009 (#9853)
+
+After supply-chain pin closeout (#9801) the BioETL **runtime image** (Wolfi/scratch)
+stays Trivy-clean. OpenSSF Scorecard **Vulnerabilities** (check **#1294**) still
+reports residual OSV/GHSA on **non-runtime** surfaces. That Scorecard check
+**MUST remain open** until the packages are upgraded or this exception expires.
+Do **not** add `osv-scanner.toml`, do **not** disable the Scorecard Vulnerabilities
+check, and do **not** dismiss #1294 as a false green.
+
+| ID | Package | Surface | Status until 2026-11-30 | Exposure |
+| --- | --- | --- | --- | --- |
+| GHSA-jmr9-qjv8-65gv | `extract-zip` | `.github/actions/setup-mermaid` via mermaid-cli 10.6.1 / puppeteer | Vendored 2.0.2 symlink-target patch (`vendor/extract-zip`); no upstream 2.x release | CI diagram render only |
+| GHSA-5p4m-2wfm-xmqj | `js-yaml` | mermaid-cli lockfile | Pinned **4.3.2** (patched; `< 4.3.1` was affected) | CI diagrams |
+| GHSA-2p49 / GHSA-xpqw | `svgo` | mermaid lockfile | Override **3.3.5** | CI diagrams |
+| GHSA-8cj5 / pq67 / vj76 | `tar-fs` | mermaid puppeteer | Override **2.1.5** | CI diagrams |
+| GHSA-3h5v / 58qx / 96hv | `ws` | mermaid puppeteer | Override **8.21.3** | CI diagrams |
+| PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.1.2` | `uv.lock` + `pip-audit --ignore-vuln` | Timeboxed ignore in `security.yml`; OSV CI gate stays HIGH/CRITICAL-only | CI/dev extra; not runtime image |
+| GHSA-2v37, 337j, wrjc, jjmj, 5c6j, qj8w, w5hq | Grafana npm (`react-router` 6.x, `uuid` 9.x, …) | `grafana/plugins/*` | No React Router 7 / uuid 11 force-bump (Grafana 13 host API) | Optional monitoring (ADR-010); not BioETL runtime |
+
+Expiry: **2026-11-30**. Owner: BioETL Team. Tracking issue: #9853.
+Re-triage by then: upgrade mermaid-cli (keeps diagram golden pins) and/or Grafana
+plugin majors, or renew the exception with a new dated issue.
+
+`security.yml` OSV-Scanner still scans `uv.lock` only and fails on HIGH/CRITICAL.
+Medium `PYSEC-2026-3721` does not fail that gate; pip-audit `--strict` would,
+hence the timeboxed ignore.
 
 ### 2.4 Code Hygiene
 
@@ -645,3 +672,10 @@ ______________________________________________________________________
 - Policy SSOT now matches that live state. Workflows still emit
   `checks-complete` and `root-hygiene`; they are not GitHub-required while the
   ruleset is disabled.
+
+### Migration notes (1.2.4)
+
+- Documented residual OSV exception #9853 (expiry 2026-11-30) for mermaid-cli
+  puppeteer, Grafana plugins, and `PYSEC-2026-3721` / `CVE-2026-3219`.
+- Scorecard Vulnerabilities check #1294 stays undismissed; `osv-scanner.toml`
+  remains forbidden.
