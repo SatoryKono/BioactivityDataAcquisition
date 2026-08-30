@@ -57,7 +57,7 @@ Use it when you need to answer:
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `push`, `pull_request`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `push`, `pull_request` | Generated artifacts, schema parity, schema drift |
-| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Python CodeQL SAST to GitHub code scanning |
+| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule` | Advanced Python CodeQL SAST; default setup off |
 | `dependency-review.yml` | `Dependency review` | `pull_request` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
 | `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `push`, `pull_request` | High-confidence GitHub Actions YAML audit |
