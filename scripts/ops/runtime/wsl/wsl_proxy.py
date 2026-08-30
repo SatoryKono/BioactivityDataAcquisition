@@ -220,11 +220,28 @@ def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bind-host", "--listen-host", dest="bind_host", default=LISTEN_HOST)
-    parser.add_argument("--port", "--listen-port", dest="port", type=int, default=LISTEN_PORT)
+    parser.add_argument(
+        "--bind-host", "--listen-host", dest="bind_host", default=LISTEN_HOST
+    )
+    parser.add_argument(
+        "--port", "--listen-port", dest="port", type=int, default=LISTEN_PORT
+    )
     parser.add_argument("--allow-wildcard", action="store_true")
     parser.add_argument("--allow-cidr", action="append", default=[])
     return parser.parse_args(argv)
+
+
+def _parse_listen_settings(argv: list[str] | None = None) -> tuple[str, int]:
+    """Parse listener host/port and reject wildcard or non-IPv4 addresses."""
+    args = parse_args(argv)
+    parser = argparse.ArgumentParser(description="Run the local WSL HTTP proxy.")
+    try:
+        listen_address = ipaddress.IPv4Address(args.bind_host)
+    except ipaddress.AddressValueError:
+        parser.error("listener address must be a concrete IPv4 address")
+    if listen_address.is_unspecified:
+        parser.error("wildcard listener addresses are not permitted")
+    return str(listen_address), args.port
 
 
 def main(argv: list[str] | None = None) -> None:
