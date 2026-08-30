@@ -109,7 +109,9 @@ make security-check
 
 ### Automated Monitoring
 
-- **Dependabot alerts**: Enabled via `.github/dependabot.yml` (pip + GitHub Actions)
+- **Dependabot version updates**: `.github/dependabot.yml` (pip + github-actions + docker; weekly, grouped minor/patch for pip, grouped per ecosystem otherwise)
+- **Dependabot alerts + security updates**: must be enabled in GitHub Settings → Code security and analysis → Dependency graph / Dependabot alerts / Dependabot security updates (separate from `dependabot.yml` version-update PRs)
+- **Dependabot triage**: owner `@SatoryKono` (CODEOWNERS), weekly; SLA Critical ≤ 24h, High ≤ 72h (see `05-github-policy.md §5`). PRs must pass all checks; auto-merge forbidden.
 - **Dependency review**: PR-time fail-closed scan of lockfile/manifest diffs (`.github/workflows/dependency-review.yml`, `fail-on-severity: high`)
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
 - **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
@@ -121,7 +123,7 @@ make security-check
 - **Syft SBOM**: SPDX artifact on GitHub Release (`release.yml`) and GHCR push (`docker.yml`)
 - **zizmor**: High-confidence GitHub Actions YAML audit on workflow/action changes (`.github/workflows/zizmor.yml`)
 - **Trivy**: Container image scanning in `.github/workflows/docker.yml` (SHA-pinned)
-- **Update policy**: Security patches applied within 72 hours
+- **Update policy**: Critical ≤ 24h, High ≤ 72h, Medium next sprint (see `05-github-policy.md §5`)
 
 ### Dependency Versioning Policy
 
