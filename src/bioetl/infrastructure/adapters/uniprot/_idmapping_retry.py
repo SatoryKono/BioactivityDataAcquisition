@@ -10,6 +10,9 @@ from bioetl.infrastructure.adapters.uniprot._idmapping_errors import (
     IDMappingJobError,
     IDMappingTimeoutError,
 )
+from bioetl.infrastructure.adapters.uniprot._idmapping_url_policy import (
+    trusted_idmapping_url,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -45,11 +48,17 @@ class IDMappingRetryMixin:
         return cast("IDMappingRetryDependencies", self)  # pyright: ignore[reportInvalidCast]
 
     @staticmethod
-    def _check_redirect_to_results(response: object) -> str | None:
+    def _check_redirect_to_results(response: object, *, base_url: str) -> str | None:
         """Return results URL if response redirected to a results endpoint."""
-        response_url = str(response.url) if hasattr(response, "url") else ""  # pyright: ignore[reportAttributeAccessIssue]
+        response_url = ""
+        if getattr(response, "status_code", 0) in {301, 302, 303, 307, 308}:
+            headers = getattr(response, "headers", {})
+            if hasattr(headers, "get"):
+                response_url = str(headers.get("location", ""))
+        elif hasattr(response, "url"):
+            response_url = str(response.url)  # pyright: ignore[reportAttributeAccessIssue]
         if "/results/" in response_url or "/uniprotkb/results/" in response_url:
-            return response_url
+            return trusted_idmapping_url(base_url, response_url)
         return None
 
     @staticmethod
@@ -82,7 +91,12 @@ class IDMappingRetryMixin:
             response_url = (
                 str(response.url) if hasattr(response, "url") else ""  # pyright: ignore[reportAttributeAccessIssue]
             )
-            return True, response_url or None
+            return (
+                True,
+                trusted_idmapping_url(deps.base_url, response_url)
+                if response_url
+                else None,
+            )
         if status == "FINISHED":
             deps.logger.debug(
                 "idmapping_job_finished",
@@ -112,9 +126,11 @@ class IDMappingRetryMixin:
 
         for attempt in range(deps.MAX_POLL_ATTEMPTS):
             with deps._adapter_metrics.measure_request("/idmapping/status"):
-                response = await deps.http_client.get(url)
+                response = await deps.http_client.get(url, follow_redirects=False)
 
-            redirect_url = self._check_redirect_to_results(response)
+            redirect_url = self._check_redirect_to_results(
+                response, base_url=deps.base_url
+            )
             if redirect_url is not None:
                 deps.logger.debug(
                     "idmapping_job_finished",

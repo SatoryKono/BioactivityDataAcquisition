@@ -154,8 +154,8 @@ def test_issue_6100_vcr_replay_preflight_is_registered_and_catalog_safe() -> Non
     assert report["schema_version"] == "vcr-replay-preflight-v1"
     assert report["catalog"]["exists"] is True
     assert report["catalog"]["totals_match"] is True
-    assert report["secret_filter"]["replay_only"] is True
-    assert report["secret_filter"]["has_request_sanitizer"] is True
+    assert report["sanitizer_status"]["replay_only"] is True
+    assert report["sanitizer_status"]["has_request_sanitizer"] is True
 
     totals = catalog["totals"]
     assert totals["cassette_count"] == report["cassette_count"]

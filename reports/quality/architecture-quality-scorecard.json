@@ -25,7 +25,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2465,
+        "source_module_count": 2466,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -207,7 +207,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2465,
+    "source_module_count": 2466,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
@@ -243,7 +243,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "403bd6d0a9fa1aaaef412d5355a973b5c9c6d3514bc260798ef1e9f3c99c6045"
+      "source_fingerprint": "6e65c7997e5e272181c3962391e605aa1a49ae092686d6cc54a9364dbe8f0608"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -260,9 +260,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "cac637ef848299b837beb30394c1a450e06d8b75961764cc74124939207f4802",
+      "coverage_xml_sha256": "5f652c862e2355e56f19d86cfe41130258d678a7d2a8361ce8479dbffe2cea03",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "addf3909b257eea4ca26fe6aed28de8133807ddb6301c7e4462c279b93b5cb08"
+      "source_tree_sha256": "56148c1a5a9b907c757acfaf5c1d909dfa24409c6487b7fb34869ef90be83eda"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

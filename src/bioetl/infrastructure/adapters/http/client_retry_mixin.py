@@ -246,6 +246,7 @@ class HTTPClientRetryMixin:
                 attempt=attempt,
                 retries_used=retries_used,
                 span=span,
+                allow_redirect_response=kwargs.get("follow_redirects") is False,
             )
         except CircuitBreakerOpenError as exc:
             handle_circuit_breaker_trip(
@@ -289,6 +290,7 @@ class HTTPClientRetryMixin:
         attempt: int,
         retries_used: int,
         span: SpanLike,
+        allow_redirect_response: bool = False,
     ) -> httpx.Response | _RequestAttemptOutcome:
         """Process a completed HTTP response without changing retry semantics."""
         return await handle_response_attempt(
@@ -302,6 +304,7 @@ class HTTPClientRetryMixin:
             can_retry=self._can_retry,
             handle_retry_delay=self._handle_retry_delay,
             log_retry=self._log_retry,
+            allow_redirect_response=allow_redirect_response,
         )
 
     async def _handle_request_exception(
