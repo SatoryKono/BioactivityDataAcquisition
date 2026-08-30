@@ -113,7 +113,6 @@ def _validate_with_jsonschema(data: dict[str, Any], schema: dict[str, Any]) -> l
     """Validate via jsonschema if available; return error messages."""
     try:
         import jsonschema  # type: ignore[import-untyped]
-        from jsonschema import ValidationError  # type: ignore[attr-defined]
     except ImportError:
         return []  # fallback handled by caller
 
@@ -184,8 +183,6 @@ def check_kernel_schema(report: LintReport) -> None:
     if schema is None:
         report.add_warning("kernel_schema_missing", f"schema not found: {SCHEMA_DIR / 'kernel.schema.json'}")
         return
-    # Kernel schema describes params object; we validate a sample defaults payload
-    # The check here is that the schema itself is valid and defaults would pass.
     sample: dict[str, Any] = {"SCOPE": "src/bioetl/domain", "MODE": "audit"}
     if _has_jsonschema():
         errs = _validate_with_jsonschema(sample, schema)
@@ -225,25 +222,16 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
                 report.add_error("overlay_schema_valid", msg, path.as_posix())
 
     # -- guard_non_weakening: overlay must not contain ALLOW_*=true or weakening keys
-    # Schema already bans ALLOW_*, but explicit guard check gives clearer message
-    # and covers literal "true" in YAML plus any guard keyword stripping.
-    for key, val in data.items():
+    for key, _val in data.items():
         if key.startswith("ALLOW_"):
             report.add_error(
                 "guard_non_weakening",
                 f"overlay must not declare {key} (fail-closed); move ALLOW_* to profile",
                 path.as_posix(),
             )
-        elif key.startswith("ALLOW_") and isinstance(val, bool) and val is True:
-            report.add_error(
-                "guard_non_weakening",
-                f"overlay must not set {key}=true",
-                path.as_posix(),
-            )
-    # Scan raw text for ALLOW_*=true literal — covers cases where YAML key is nested
+    # Scan raw text for ALLOW_*=true literal — covers nested cases
     for m in re.finditer(r"ALLOW_[A-Z_]+\s*:\s*true", raw_text):
         snippet = m.group(0).strip()
-        # Deduplicate if already reported per-key above
         already = any(snippet.split(":")[0].strip() in e.message for e in report.errors if e.path == path.as_posix())
         if not already:
             report.add_error(
@@ -252,9 +240,7 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
                 path.as_posix(),
             )
 
-    # Check for controller-weakening keywords (Iteration / Issue-sync etc.) in free-form values
-    # This is the guard clause for keywords like Iteration, Issue-sync, etc. even outside
-    # the structured section-title scan below.
+    # Check for controller-weakening keywords in free-form values
     guard_keywords_re = re.compile(r"\b(Iteration|Issue-sync|ALLOW_NETWORK|ALLOW_FULL_SUITE)\b", re.I)
     for key, val in data.items():
         if isinstance(val, list):
@@ -264,8 +250,6 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
         else:
             continue
         if guard_keywords_re.search(joined) and key not in {"domain", "id", "successor"}:
-            # Allow these keywords only if they appear in a clearly domain-scoped way;
-            # otherwise flag. For now flag if Iteration / Issue-sync appears at all.
             if re.search(r"\bIteration\b", joined, re.I) or re.search(r"Issue-sync", joined, re.I):
                 report.add_error(
                     "guard_non_weakening",
@@ -316,7 +300,6 @@ def check_profiles(report: LintReport) -> None:
             report.add_error("profile_parse", "profile must be a mapping", path.as_posix())
             continue
 
-        # Schema valid check
         if schema is not None and has_js:
             errs = _validate_with_jsonschema(data, schema)
             for msg in errs:
@@ -402,7 +385,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     report = lint_all(strict=args.strict)
-    # Write to stdout using utf-8 aware path (avoid print for logging parity)
+
     text = format_report(report)
     try:
         sys.stdout.write(text)

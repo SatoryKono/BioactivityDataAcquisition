@@ -206,11 +206,7 @@ def check_generated_catalog(report: VerifyReport) -> list[Path]:
             )
             continue
         # Verify prompt_sha8 matches body hash (header excluded)
-        # Body = everything after the second --> (header is 2 lines)
-        # Easier: prompt_sha8 = sha8(body_bytes) where body = text after header lines
-        # Header is 3 lines: GENERATED + provenance + params
         lines = text.splitlines()
-        # provenance header is lines 0..2 — body starts after line 2
         body_start = 0
         for idx, line in enumerate(lines):
             if line.startswith("<!-- params:"):
@@ -278,11 +274,7 @@ def check_deterministic_recompile(report: VerifyReport) -> None:
 
 
 def check_profile_precedence(report: VerifyReport) -> None:
-    """Ensure generated params respect profile precedence.
-
-    Specifically: for audit-readonly ALLOW_* must be false; for full-write
-    ALLOW_* true. Also MODE must match profile's declared MODE.
-    """
+    """Ensure generated params respect profile precedence."""
     try:
         import yaml
     except ImportError:
@@ -311,11 +303,9 @@ def check_profile_precedence(report: VerifyReport) -> None:
                 k, v = part.split("=", 1)
                 parsed[k] = v
 
-        # Infer profile from path (generated/<domain>/<profile>.md)
         profile = p.stem
         domain = p.parent.name
 
-        # Check that profile file's MODE / ALLOW_* match params line
         profile_path = PROFILES_DIR / f"{profile}.yaml"
         if profile_path.is_file():
             try:
@@ -339,7 +329,6 @@ def check_profile_precedence(report: VerifyReport) -> None:
                             p.as_posix(),
                         )
         else:
-            # No profile file — warn but not fail
             report.add_warning(
                 "profile_precedence",
                 f"profile yaml not found for generated {domain}/{profile}",
@@ -351,7 +340,7 @@ def check_golden(report: VerifyReport) -> None:
     if not GOLDEN_ROOT.is_dir():
         report.add_warning("golden_missing", f"golden dir not found: {GOLDEN_ROOT} (skip)")
         return
-    # Golden layout: golden/<domain>/<profile>.md
+
     goldens = sorted(GOLDEN_ROOT.rglob("*.md"))
     if not goldens:
         report.add_warning("golden_empty", f"no golden files under {GOLDEN_ROOT}")
