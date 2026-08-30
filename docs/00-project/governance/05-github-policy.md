@@ -339,10 +339,16 @@ ______________________________________________________________________
 
 File: `.github/dependabot.yml`
 
-| Ecosystem      | Schedule | PR Limit | Labels         |
-| -------------- | -------- | -------- | -------------- |
-| pip (Python)   | Weekly   | 10       | `dependencies` |
-| github-actions | Weekly   | 5        | `ci`           |
+| Ecosystem      | Schedule | PR Limit | Labels            | Grouping                |
+| -------------- | -------- | -------- | ----------------- | ----------------------- |
+| pip (Python)   | Weekly   | 10       | `dependencies`    | `pip-minor-patch` (minor+patch) |
+| github-actions | Weekly   | 5        | `ci`              | `github-actions` (all)  |
+| docker         | Weekly   | 5        | `dependencies,ci` | `docker` (all)          |
+
+Minor/patch grouping keeps weekly PR volume manageable; security-relevant major bumps stay as individual PRs for review.
+
+Triage owner: `@SatoryKono` (CODEOWNERS fallback), weekly cadence. Critical CVE ≤ 24h, High ≤ 72h — see SLA table below and `.github/SECURITY.md`.
+Dependabot creates update PRs; repository-level **Dependabot alerts + security updates** must be enabled separately in GitHub Settings → Code security (not just `dependabot.yml`). Security PRs must pass all project checks; auto-merge is forbidden.
 
 ### Dependency Update Policy
 
@@ -355,10 +361,11 @@ File: `.github/dependabot.yml`
 
 ### Supply Chain Security
 
-- All GitHub Actions **MUST** be SHA-pinned (e.g., `actions/checkout@<sha>`)
+- All GitHub Actions **MUST** be full-SHA-pinned (`owner/action@<40-hex>` with ` # vX.Y.Z` comment) — tag references are rejected by the enforcer and by the repository Actions setting `sha_pinning_required` when enabled. Local `./` actions are exempt.
 - `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the
-  pinned-action allowlist across `.github/workflows/**` and composite actions
-  under `.github/actions/**`.
+  pinned-action allowlist (`ALLOWED_USES`) across `.github/workflows/**` and composite actions
+  under `.github/actions/**`, plus `configs/quality/github_actions_remote_artifacts.yaml` for remote `curl|wget … | sh` patterns.
+- Updating a pinned Action: bump the workflow SHA **and** add the new SHA to `ALLOWED_USES` (keep the ` # vX.Y.Z` comment), then run `python -m scripts.engineering.repo check-actions-runtime-policy` and `pytest tests/architecture/test_github_actions_runtime_policy.py`. zizmor (`zizmor.yml`) runs as high-confidence gate on workflow/action changes.
 - Trivy records CRITICAL, HIGH, MEDIUM, and UNKNOWN findings and blocks the
   Docker image on CRITICAL, HIGH, or MEDIUM vulnerabilities
 - `pip-audit --strict` checks all Python dependencies
@@ -477,10 +484,14 @@ permissions:
 
 `docker-push` publishes GHCR images only from `main` pushes, through Environment
 `ghcr-publish`, with tags `:${{ github.sha }}` and `:${{ github.ref_name }}`.
-It does not publish `:latest`. Environment protection (required reviewers or a
-wait timer) can be added on `ghcr-publish` without changing the workflow.
-| `id-token: write`        | release.yml (trusted publishing)                  |
+It does not publish `:latest`. Recommended live settings for `ghcr-publish`:
+deployment branch policy = protected branches (effectively `main` only), plus
+at least one protection rule (required reviewers or wait timer — e.g. 5 min).
+Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
+| `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
+
+Publishing environments inventory (write-capable): `ghcr-publish` (docker.yml → `ghcr.io/SatoryKono/bioetl`), `testpypi`/`pypi` (release.yml → TestPyPI/PyPI via OIDC trusted publishing), `observability-render-host` (dashboard-render-host.yml, self-hosted). `copilot`/`staging`/`observability-render-host` must have deployment branch policy + protection rule if they guard secrets/deployments; otherwise document risk acceptance. `testpypi` allows `workflow_dispatch` with `dry_run == 'false'`; `pypi` is `release`-only and chains via `testpypi` (`needs: publish-testpypi`). Environment secrets must be scoped/rotated and never echoed in logs.
 
 `contract-tests.yml` keeps `contents: read` as the workflow baseline and grants
 `issues: write` only to the live contract-test job that creates a failure issue.
