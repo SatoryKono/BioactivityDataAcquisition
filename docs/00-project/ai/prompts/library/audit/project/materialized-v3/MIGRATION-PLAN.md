@@ -58,12 +58,12 @@ tests/prompts/unit/ contract/ golden/ integration/
 
 ### P0 — Норматив и ядро (1–2 недели, один PR)
 
-- [ ] ADR Prompt Kernel and Overlay Architecture: owners, precedence, versioning, migration window.
-- [ ] Вынести `fragments/cyclic-kernel-v3.md` (+ evidence/issue FSM) — контент из `_kernel-v3.md`.
-- [ ] Создать `_schema/*.json` (D7): запретить `unknown guard overrides`, требовать обязательные поля.
-- [ ] Зафиксировать: `materialized-v3/` — снапшот, не SSOT; SSOT — будущие `overlays/*.yaml` + `fragments/`.
+- [x] ADR Prompt Kernel and Overlay Architecture: [`ADR-060`](../../../../02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) — owners, precedence (runtime → AGENTS.md → NORMATIVE_SOURCES.md → RULES.md → registry → kernel/overlay/profile), versioning (kernel SemVer / overlay per-domain / profile), migration window (закрыто в #9807).
+- [x] Вынесено `fragments/cyclic-kernel-v3.md` (+ `evidence-contract-v3.md` + `issue-state-machine-v3.md`) — контент из `_kernel-v3.md` (Kernel v3.0 fail-closed, §3.1 DOCX).
+- [x] Создано `_schema/*.json` (D7): `kernel.schema.json` / `domain-overlay.schema.json` (reject `ALLOW_*` — `patternProperties: ^ALLOW_.*` + `not anyOf`) / `execution-profile.schema.json` / `finding-v3.schema.json` (fingerprint `^[a-f0-9]{64}$`) / `ledger-event.schema.json` — запрещает `unknown guard overrides`, требует обязательные поля.
+- [x] Зафиксировано: `materialized-v3/` — frozen snapshot 28.08.2026 `3aba8559` (не SSOT, не редактировать); SSOT — `fragments/` + `overlays/*.yaml` + `profiles/` + `_schema/` + `scripts/ai/prompts/` + `generated/`.
 
-Accept: ADR принят; линтер не находит Audit/Plan/Issue секций в `overlays/`.
+Accept: ADR принят; линтер не находит Audit/Plan/Issue секций в `overlays/` — см. `lint.py: no_controller_duplication`.
 
 ### P1 — Компилятор, ledger, миграция 24 доменов, тесты (2–4 недели)
 
