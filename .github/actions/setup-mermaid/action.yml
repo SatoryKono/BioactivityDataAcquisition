@@ -35,6 +35,10 @@ runs:
         TOOL_DIR="${RUNNER_TEMP}/mermaid-cli"
         mkdir -p "${TOOL_DIR}"
         cp "${ACTION_DIR}/package.json" "${ACTION_DIR}/package-lock.json" "${TOOL_DIR}/"
+        # Vendored extract-zip (CVE-2026-56876) is a file: override; copy it
+        # next to package.json so npm ci in RUNNER_TEMP can resolve it.
+        mkdir -p "${TOOL_DIR}/vendor"
+        cp -R "${ACTION_DIR}/vendor/." "${TOOL_DIR}/vendor/"
         cd "${TOOL_DIR}"
         if [ "${MERMAID_VERSION}" != "10.6.1" ]; then
           echo "setup-mermaid currently pins @mermaid-js/mermaid-cli@10.6.1 via package-lock.json" >&2
