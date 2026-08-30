@@ -55,7 +55,8 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         tzdata=2026c-r0 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \
-    && chown 65532:65532 /runtime-fs/tmp \n    && chmod 0700 /runtime-fs/tmp \
+    && chown 65532:65532 /runtime-fs/tmp \
+    && chmod 0700 /runtime-fs/tmp \
     && rm -f /bin/sh /bin/busybox /sbin/apk /usr/bin/apk
 USER 65532:65532
 
@@ -70,7 +71,7 @@ COPY --from=runtime-root /runtime-fs/ /
 WORKDIR /app
 
 COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv
-COPY --chown=0:0 configs/ ./configs/
+COPY --chown=root:root configs/ ./configs/
 COPY --from=builder --chown=65532:65532 /app/logs /app/logs
 
 ENV PATH="/app/.venv/bin:$PATH"

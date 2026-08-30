@@ -1,0 +1,93 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 8 items
+
+tests\architecture\test_test_telemetry_governance.py F.F.F...            [100%]
+
+================================== FAILURES ===================================
+_____________ test_committed_test_telemetry_baseline_is_populated _____________
+
+    def test_committed_test_telemetry_baseline_is_populated() -> None:
+        payload = _load_baseline()
+    
+        assert payload["refresh_status"] == "captured"
+        assert payload["source_commit"], "Committed baseline must pin a source commit"
+        assert payload["source_run_id"], "Committed baseline must pin a source run id"
+        live_tree = compute_test_telemetry_source_tree_sha256()
+>       assert payload["source_tree_sha256"] == live_tree, (
+            "Committed telemetry source_tree_sha256 drifted from the audited test tree. "
+            f"{REFRESH_HINT}"
+        )
+E       AssertionError: Committed telemetry source_tree_sha256 drifted from the audited test tree. Refresh with: python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> (see docs/05-engineering/test-telemetry-baseline.md)
+E       assert '830c38225b41...2ba87fb8d6f2f' == 'dedfa7247e69...cddf1acf5b02e'
+E         
+E         - dedfa7247e6967060f3c2645ba75d1e7a35ec9fdef6b7265263cddf1acf5b02e
+E         + 830c38225b41569c6bc500a35ee22ff1f5dee10e8fa0e3f61792ba87fb8d6f2f
+
+tests\architecture\test_test_telemetry_governance.py:83: AssertionError
+________ test_committed_test_telemetry_branch_accurate_source_identity ________
+
+    def test_committed_test_telemetry_branch_accurate_source_identity() -> None:
+        """Fail closed when branch-accurate telemetry provenance drifts (#5729)."""
+        payload = _load_baseline()
+        guard = payload.get("branch_accurate_guard") or {}
+        assert guard.get("enforced") is True, (
+            "branch_accurate_guard.enforced must remain true for committed telemetry"
+        )
+        assert guard.get("require_source_tree_match") is True
+    
+        head = _git_head()
+        source_commit = str(payload["source_commit"])
+        assert len(source_commit) == 40, "source_commit must be a full 40-char SHA"
+        assert _is_ancestor(source_commit, head) or source_commit == head, (
+            f"source_commit {source_commit} is not reachable from HEAD {head}. "
+            f"{REFRESH_HINT}"
+        )
+    
+        live_tree = compute_test_telemetry_source_tree_sha256()
+>       assert payload["source_tree_sha256"] == live_tree, (
+            "Branch-accurate telemetry requires source_tree_sha256 to match the audited "
+            f"HEAD test tree. {REFRESH_HINT}"
+        )
+E       AssertionError: Branch-accurate telemetry requires source_tree_sha256 to match the audited HEAD test tree. Refresh with: python -m scripts.engineering.ci.update_test_telemetry_baseline --source-commit <sha> --source-run-id <run-id> (see docs/05-engineering/test-telemetry-baseline.md)
+E       assert '830c38225b41...2ba87fb8d6f2f' == 'dedfa7247e69...cddf1acf5b02e'
+E         
+E         - dedfa7247e6967060f3c2645ba75d1e7a35ec9fdef6b7265263cddf1acf5b02e
+E         + 830c38225b41569c6bc500a35ee22ff1f5dee10e8fa0e3f61792ba87fb8d6f2f
+
+tests\architecture\test_test_telemetry_governance.py:140: AssertionError
+___ test_branch_consumable_test_telemetry_reports_match_committed_baseline ____
+
+    def test_branch_consumable_test_telemetry_reports_match_committed_baseline() -> None:
+        payload = _load_baseline()
+        slowest = json.loads(
+            Path("reports/test-telemetry/slowest-tests.json").read_text(encoding="utf-8")
+        )
+        coverage = json.loads(
+            Path("reports/test-telemetry/coverage-summary.json").read_text(encoding="utf-8")
+        )
+        slowest_md = Path("reports/test-telemetry/slowest-tests.md").read_text(
+            encoding="utf-8"
+        )
+    
+        assert slowest["source_commit"] == payload["source_commit"]
+        assert slowest["source_run_id"] == payload["source_run_id"]
+>       assert slowest["source_tree_sha256"] == payload["source_tree_sha256"]
+E       AssertionError: assert 'a66aa6a0cad1...ae4ac36e41fdb' == '830c38225b41...2ba87fb8d6f2f'
+E         
+E         - 830c38225b41569c6bc500a35ee22ff1f5dee10e8fa0e3f61792ba87fb8d6f2f
+E         + a66aa6a0cad1b5e154578471f2298b4573fd9fa6d92ebf5d694ae4ac36e41fdb
+
+tests\architecture\test_test_telemetry_governance.py:187: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_test_telemetry_governance.py::test_committed_test_telemetry_baseline_is_populated
+FAILED tests/architecture/test_test_telemetry_governance.py::test_committed_test_telemetry_branch_accurate_source_identity
+FAILED tests/architecture/test_test_telemetry_governance.py::test_branch_consumable_test_telemetry_reports_match_committed_baseline
+========================= 3 failed, 5 passed in 2.99s =========================

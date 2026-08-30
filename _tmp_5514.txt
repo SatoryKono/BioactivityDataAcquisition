@@ -1,0 +1,34 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 1 item
+
+tests\architecture\test_tech_debt_issues_5514_5515_governance.py F       [100%]
+
+================================== FAILURES ===================================
+_____ test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs _____
+
+    def test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs() -> None:
+        review = _load_json(FLAKY_REVIEW)
+        test_governance = _load_json(TEST_GOVERNANCE)
+    
+>       assert review == build_payload(ROOT)
+E       AssertionError: assert {'decision': ... '#5514', ...} == {'schema_vers...'#6351'], ...}
+E         
+E         Omitting 11 identical items, use -vv to show
+E         Differing items:
+E         {'summary': {'by_alert_level': {'critical': 0, 'warning': 0}, 'by_category': {'Contract': 0, 'Data': 0, 'Import': 0, '...cation': 0, 'composition': 0, 'domain': 0, 'infrastructure': 0, ...}, 'by_severity': {'P1': 0, 'P2': 0, 'P3': 0}, ...}} != {'summary': {'total_tests_analyzed': 25096, 'total_test_files': 2380, 'test_governance_budget_violation_count': 0, 'test_governance_source_tree_sha256': 'df3d2397a33d94bae03c50b593a3a41349f43dcfc43db02aa675994b42626571', ...}}
+E         {'source_fingerprints': {'curated_inventory_sh...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+tests\architecture\test_tech_debt_issues_5514_5515_governance.py:47: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_tech_debt_issues_5514_5515_governance.py::test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs
+============================== 1 failed in 1.79s ==============================

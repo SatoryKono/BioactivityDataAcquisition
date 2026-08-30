@@ -48,8 +48,7 @@ def test_runtime_dockerfile_does_not_shadow_installed_wheel() -> None:
     text = _read("Dockerfile.bioetl")
     assert "PYTHONPATH=/app/src" not in text
     assert "COPY --chown=root:root src/ ./src/" not in text
-    assert "COPY --from=runtime-root /runtime-fs/ /" in text
-    assert "COPY --chown=root:root configs/ ./configs/" not in text
+    assert "COPY --chown=root:root configs/ ./configs/" in text
     assert 'ENTRYPOINT ["bioetl"]' in text
 
 

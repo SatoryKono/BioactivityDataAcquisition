@@ -1,0 +1,2 @@
+Debt governance gate JSON artifact is stale: E:\github\BioactivityDataAcquisition\reports\quality\debt-governance-gates.json
+Debt governance gate Markdown artifact is stale: E:\github\BioactivityDataAcquisition\reports\quality\debt-governance-gates.md

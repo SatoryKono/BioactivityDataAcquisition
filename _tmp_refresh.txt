@@ -1,0 +1,28 @@
+wrote E:\github\BioactivityDataAcquisition\reports\quality\source-tree-manifest.json source_tree_sha256=7a3909a13bd8c3ba45c6c7b8155b4c2f9bde1f7358bee13db2bded6ceb4666b6
+[module-coverage-inventory] modules=2465; json=E:\github\BioactivityDataAcquisition\reports\quality\module-coverage-inventory.json
+[updated] wrote architecture dependency docs:
+  - docs\02-architecture\generated\module-dependency-map.md
+  - docs\02-architecture\generated\module-dependency-map.json
+[updated] wrote hotspot-family baseline artifacts:
+  - reports/quality/hotspot-family-baseline.json
+  - reports/quality/hotspot-family-baseline.md
+[dead-code-inventory] triaged_entries=18; repo_wide_zero_import_candidates=3; json=E:\github\BioactivityDataAcquisition\reports\quality\dead-code-inventory.json; markdown=E:\github\BioactivityDataAcquisition\reports\quality\dead-code-inventory.md
+Wrote architecture quality scorecard: E:\github\BioactivityDataAcquisition\reports\quality\architecture-quality-scorecard.json
+Backlog saved to reports\quality\config-surface-backlog.json
+entity_effective partial=0 actionable=0 composite=0
+[updated] wrote live residual snapshot: E:\github\BioactivityDataAcquisition\reports\quality\live-residual-snapshot.json families=5 clusters=6
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_source_tree_manifest
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.generate_architecture_dependency_map --update
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_hotspot_family_baseline --update
+SYNC scorecard hotspot metrics: already aligned
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_dead_code_inventory
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_architecture_quality_scorecard
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_config_surface_backlog
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa.report_live_residual_snapshot
++ E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m scripts.engineering.qa report-debt-governance-gates --update
+REFRESH complete. Recommended verification:
+  python -m scripts.engineering.qa.refresh_governance_artifacts --check
+  python -m scripts.engineering.qa report-debt-governance-gates --check
+  pytest tests/architecture/test_quality_debt_scorecard.py tests/architecture/test_hotspot_growth_family_ratchets.py -q --tb=line

@@ -1,0 +1,60 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0 -- E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'fast' -> max_examples=5
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collecting ... collected 1 item
+
+tests/architecture/test_tech_debt_issues_5752_5755_closeout.py::test_issue_5752_narrative_reports_match_live_governance_artifacts FAILED [100%]
+
+================================== FAILURES ===================================
+______ test_issue_5752_narrative_reports_match_live_governance_artifacts ______
+
+    def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
+        compatibility = _load_json(COMPATIBILITY_CENSUS)
+        test_governance = _load_json(TEST_GOVERNANCE)
+        scorecard = _load_json(SCORECARD)
+        gates = _load_json(DEBT_GATES)
+        debt_report = DEBT_REPORT.read_text(encoding="utf-8")
+        current_state = CURRENT_STATE.read_text(encoding="utf-8")
+    
+        validation_errors = validate_technical_debt_audit_registry(ROOT)
+>       assert validation_errors == []
+E       AssertionError: assert ['current audit evidence_surface_sha256 is stale', 'current audit is missing metadata marker: Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`', 'current audit is missing metadata marker: Evidence surface SHA-256: `4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1`', 'current audit semantic summary is stale'] == []
+E         
+E         Left contains 4 more items, first extra item: 'current audit evidence_surface_sha256 is stale'
+E         
+E         Full diff:
+E         - []
+E         + [
+E         +     'current audit evidence_surface_sha256 is stale',
+E         +     'current audit is missing metadata marker: Audited commit SHA: '
+E         +     '`0687fbc75e442a93c5239de24e3d9055072d7cb8`',
+E         +     'current audit is missing metadata marker: Evidence surface SHA-256: '
+E         +     '`4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1`',
+E         +     'current audit semantic summary is stale',
+E         + ]
+
+tests\architecture\test_tech_debt_issues_5752_5755_closeout.py:117: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_tech_debt_issues_5752_5755_closeout.py::test_issue_5752_narrative_reports_match_live_governance_artifacts - AssertionError: assert ['current audit evidence_surface_sha256 is stale', 'current audit is missing metadata marker: Audited commit SHA: `0687fbc75e442a93c5239de24e3d9055072d7cb8`', 'current audit is missing metadata marker: Evidence surface SHA-256: `4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1`', 'current audit semantic summary is stale'] == []
+  
+  Left contains 4 more items, first extra item: 'current audit evidence_surface_sha256 is stale'
+  
+  Full diff:
+  - []
+  + [
+  +     'current audit evidence_surface_sha256 is stale',
+  +     'current audit is missing metadata marker: Audited commit SHA: '
+  +     '`0687fbc75e442a93c5239de24e3d9055072d7cb8`',
+  +     'current audit is missing metadata marker: Evidence surface SHA-256: '
+  +     '`4089362bb889e66da69536d9584421ee8e1ecb2624c94f87bec6990619e587d1`',
+  +     'current audit semantic summary is stale',
+  + ]
+============================== 1 failed in 1.79s ==============================

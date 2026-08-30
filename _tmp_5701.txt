@@ -1,0 +1,38 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 1 item
+
+tests\architecture\test_tech_debt_issues_5700_5706_closeout.py F         [100%]
+
+================================== FAILURES ===================================
+_______ test_issue_5701_telemetry_surfaces_share_current_head_metadata ________
+
+    def test_issue_5701_telemetry_surfaces_share_current_head_metadata() -> None:
+        payload = _load_json(CLOSEOUT)["outcomes"]["5701"]
+        baseline = _load_yaml(TELEMETRY_BASELINE)
+        coverage = _load_json(TELEMETRY_COVERAGE)
+        slowest = _load_json(TELEMETRY_SLOWEST)
+    
+        expected_commit = payload["source_commit"]
+        expected_run_id = payload["source_run_id"]
+        expected_refreshed_at = payload["refreshed_at_utc"]
+    
+        assert payload["coverage_xml_present"] is True
+        assert payload["coverage_percent_fallback_used"] is False
+>       assert baseline["source_commit"] == expected_commit
+E       AssertionError: assert '2460c8c04e2c...957a4b63c146c' == '72b4efe10b8b...eb5b56b7ca2f4'
+E         
+E         - 72b4efe10b8b6c95937ee5fbb13eb5b56b7ca2f4
+E         + 2460c8c04e2c86adddc2a609c30957a4b63c146c
+
+tests\architecture\test_tech_debt_issues_5700_5706_closeout.py:104: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_tech_debt_issues_5700_5706_closeout.py::test_issue_5701_telemetry_surfaces_share_current_head_metadata
+============================== 1 failed in 1.77s ==============================

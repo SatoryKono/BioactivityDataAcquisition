@@ -1,0 +1,19 @@
+usage: report_flaky_test_burndown_review.py [-h] [--repo-root REPO_ROOT]
+                                            [--inventory INVENTORY]
+                                            [--test-governance TEST_GOVERNANCE]
+                                            [--json-out JSON_OUT]
+                                            [--empirical-run-dir EMPIRICAL_RUN_DIR]
+                                            [--empirical-json-out EMPIRICAL_JSON_OUT]
+                                            [--check]
+
+Generate the deterministic tracked flaky-test burndown review.
+
+options:
+  -h, --help            show this help message and exit
+  --repo-root REPO_ROOT
+  --inventory INVENTORY
+  --test-governance TEST_GOVERNANCE
+  --json-out JSON_OUT
+  --empirical-run-dir EMPIRICAL_RUN_DIR
+  --empirical-json-out EMPIRICAL_JSON_OUT
+  --check
