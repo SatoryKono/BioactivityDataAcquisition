@@ -22,8 +22,6 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      REVIEW_JSON: ${{ runner.temp }}/github-settings-review.json
-      REVIEW_MARKDOWN: ${{ runner.temp }}/github-settings-review.md
     steps:
       - name: Check out the discovered review source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
@@ -31,15 +29,15 @@ jobs:
       - name: Collect read-only settings evidence
         run: >-
           python .github/tooling/github_settings_review.py
-          --json-out "$REVIEW_JSON"
-          --markdown-out "$REVIEW_MARKDOWN"
+          --json-out "$RUNNER_TEMP/github-settings-review.json"
+          --markdown-out "$RUNNER_TEMP/github-settings-review.md"
 
       - name: Publish review summary
         if: always()
         shell: bash
         run: |
-          if [[ -f "$REVIEW_MARKDOWN" ]]; then
-            cat "$REVIEW_MARKDOWN" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f "$RUNNER_TEMP/github-settings-review.md" ]]; then
+            cat "$RUNNER_TEMP/github-settings-review.md" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "GitHub settings review did not produce Markdown evidence." >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -50,7 +48,7 @@ jobs:
         with:
           name: github-settings-review-${{ github.run_id }}
           path: |
-            ${{ env.REVIEW_JSON }}
-            ${{ env.REVIEW_MARKDOWN }}
+            ${{ runner.temp }}/github-settings-review.json
+            ${{ runner.temp }}/github-settings-review.md
           if-no-files-found: warn
           retention-days: 30
