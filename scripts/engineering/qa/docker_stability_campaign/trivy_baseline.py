@@ -1,4 +1,4 @@
-"""Deterministic Trivy JSON to RF-001 baseline CSV normalization."""
+"""Детерминированная нормализация Trivy evidence и контроль исправимых уязвимостей."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ FIXABILITY_AUDIT_SCHEMA_VERSION = "trivy-fixability-audit-v1"
 
 
 def _text(value: object) -> str:
-    """Normalize an arbitrary scalar for the fixability audit."""
+    """Нормализовать произвольное скалярное значение для audit-отчёта."""
     return str(value or "").strip()
 
 
@@ -61,35 +61,48 @@ def _github_trivy_alert_index(payload: object) -> dict[tuple[str, str, str], str
     return index
 
 
-def _mapping_list(value: object, *, label: str) -> list[Mapping[str, Any]]:
-    """Return mapping items from a Trivy list or reject an invalid shape."""
-    if not isinstance(value, list):
-        raise ValueError(f"Trivy JSON {label} must be a list")
-    return [item for item in value if isinstance(item, Mapping)]
+def _iter_trivy_vulnerabilities(
+    payload: Mapping[str, Any],
+) -> Iterable[tuple[str, Mapping[str, Any]]]:
+    """Итерировать валидные vulnerability rows полного Trivy JSON evidence."""
+    results = payload.get("Results", [])
+    if not isinstance(results, list):
+        raise ValueError("Trivy JSON Results must be a list")
+
+    for result in results:
+        if not isinstance(result, Mapping):
+            continue
+        target = _text(result.get("Target"))
+        vulnerabilities = result.get("Vulnerabilities") or []
+        if not isinstance(vulnerabilities, list):
+            raise ValueError("Trivy JSON Vulnerabilities must be a list")
+        for vulnerability in vulnerabilities:
+            if isinstance(vulnerability, Mapping):
+                yield target, vulnerability
 
 
 def _trivy_baseline_row(
-    vulnerability: Mapping[str, Any],
     *,
     target: str,
+    vulnerability: Mapping[str, Any],
     alert_index: Mapping[tuple[str, str, str], str],
 ) -> dict[str, str]:
-    """Normalize one Trivy vulnerability into the baseline CSV schema."""
-    cve = str(vulnerability.get("VulnerabilityID") or "")
-    package = str(vulnerability.get("PkgName") or "")
-    installed = str(vulnerability.get("InstalledVersion") or "")
+    """Нормализовать одно finding в детерминированную строку baseline CSV."""
+    cve = _text(vulnerability.get("VulnerabilityID"))
+    package = _text(vulnerability.get("PkgName"))
+    installed = _text(vulnerability.get("InstalledVersion"))
     if not cve or not package or not installed:
         raise ValueError("Trivy vulnerability is missing identity fields")
     layer = vulnerability.get("Layer")
-    layer_id = str(layer.get("DiffID") or "") if isinstance(layer, Mapping) else ""
+    layer_id = _text(layer.get("DiffID")) if isinstance(layer, Mapping) else ""
     return {
         "alert_number": alert_index.get((cve, package, installed), ""),
         "CVE": cve,
         "package": package,
         "installed": installed,
-        "fixed": str(vulnerability.get("FixedVersion") or ""),
+        "fixed": _text(vulnerability.get("FixedVersion")),
         "layer": layer_id or target,
-        "status": str(vulnerability.get("Status") or "affected"),
+        "status": _text(vulnerability.get("Status")) or "affected",
     }
 
 
@@ -98,23 +111,16 @@ def trivy_baseline_rows(
     *,
     github_alerts: object | None = None,
 ) -> list[dict[str, str]]:
-    """Normalize Trivy image JSON into the RF-001 baseline CSV schema."""
+    """Нормализовать Trivy image JSON в схему baseline CSV RF-001."""
     alert_index = _github_trivy_alert_index(github_alerts)
-    rows: list[dict[str, str]] = []
-    for result in _mapping_list(payload.get("Results", []), label="Results"):
-        target = str(result.get("Target") or "")
-        vulnerabilities = _mapping_list(
-            result.get("Vulnerabilities") or [],
-            label="Vulnerabilities",
+    rows = [
+        _trivy_baseline_row(
+            target=target,
+            vulnerability=vulnerability,
+            alert_index=alert_index,
         )
-        for vulnerability in vulnerabilities:
-            rows.append(
-                _trivy_baseline_row(
-                    vulnerability,
-                    target=target,
-                    alert_index=alert_index,
-                )
-            )
+        for target, vulnerability in _iter_trivy_vulnerabilities(payload)
+    ]
     return sorted(
         rows,
         key=lambda row: (
@@ -157,7 +163,7 @@ def export_trivy_baseline_csv(
 
 
 def _vulnerability_rows(payload: Mapping[str, Any]) -> Iterable[dict[str, str]]:
-    """Return normalized vulnerability rows from full Trivy JSON evidence."""
+    """Вернуть нормализованные строки уязвимостей из полного Trivy JSON evidence."""
     results = payload.get("Results", [])
     if not isinstance(results, list):
         raise ValueError("Trivy JSON Results must be a list")
@@ -194,7 +200,7 @@ def _vulnerability_rows(payload: Mapping[str, Any]) -> Iterable[dict[str, str]]:
 
 
 def is_fixable_blocking_finding(row: Mapping[str, str]) -> bool:
-    """Return whether a finding must block merge without suppressing the CVE."""
+    """Определить, должен ли finding блокировать merge без suppression уязвимости."""
     return (
         row["severity"] in BLOCKING_SEVERITIES
         and bool(row["fixed_version"])
@@ -203,7 +209,7 @@ def is_fixable_blocking_finding(row: Mapping[str, str]) -> bool:
 
 
 def build_fixability_audit(payload: Mapping[str, Any]) -> dict[str, object]:
-    """Build a stable audit with all findings and a separate merge gate."""
+    """Собрать stable audit с полным перечнем findings и отдельным merge gate."""
     all_findings = sorted(
         _vulnerability_rows(payload),
         key=lambda row: (
@@ -245,7 +251,7 @@ def build_fixability_audit(payload: Mapping[str, Any]) -> dict[str, object]:
 
 
 def write_fixability_audit(*, trivy_json: Path, output: Path) -> dict[str, object]:
-    """Write the audit report to a repository-bounded path and return it."""
+    """Записать audit-отчёт в repository-bounded путь и вернуть его payload."""
     safe_trivy = resolve_output_path(trivy_json)
     payload = json.loads(safe_trivy.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -261,20 +267,20 @@ def write_fixability_audit(*, trivy_json: Path, output: Path) -> dict[str, objec
 
 
 def parse_fixability_gate_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    """Parse CLI arguments for the Trivy fixability-aware merge gate."""
+    """Разобрать аргументы CLI fixability-aware merge gate."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trivy-json", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--fail-on-fixable",
         action="store_true",
-        help="Return a non-zero exit code when fixable Critical/High/Medium findings exist.",
+        help="Вернуть ненулевой exit code при исправимых Critical/High/Medium findings.",
     )
     return parser.parse_args(argv)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Build the audit and apply the merge-gate policy without SARIF suppression."""
+    """Сформировать audit и применить merge-gate policy без suppression SARIF."""
     args = parse_fixability_gate_args(argv)
     audit = write_fixability_audit(
         trivy_json=resolve_output_path(args.trivy_json),
