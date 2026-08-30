@@ -158,6 +158,8 @@ dev = [
     # Code duplication detection
     "pylint>=3.0",
     "detect-secrets>=1.4",
+    "build==1.2.2.post1",
+    "twine==6.1.0",
     # Dead code detection
     "vulture>=2.11",
     # Mutation testing

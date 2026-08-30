@@ -121,6 +121,26 @@ from checks that run only for matching paths.
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
 | **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact; the exact scanned image is promoted without rebuild to GHCR on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
 
+### 2.3.1 CodeQL ownership and alert triage
+
+BioETL uses **advanced CodeQL setup** owned by `.github/workflows/codeql.yml`.
+GitHub code-scanning **default setup MUST remain `not-configured`**. Do not
+enable default setup in parallel: that would duplicate Python scans and split
+alert ownership.
+
+| Item | Contract |
+| --- | --- |
+| Configuration owner | Advanced workflow `.github/workflows/codeql.yml` |
+| Languages | Python only (`build-mode: none`) |
+| Token permissions | Workflow `contents: read`; job `security-events: write` for SARIF upload |
+| Cadence | Push/PR (docs-ignored paths excluded) plus weekly Monday `17 4 * * 1` UTC |
+| Alert triage owner | BioETL Team (security lane); CODEOWNERS fallback `@SatoryKono` |
+| Alert triage cadence | Weekly on Monday, together with OpenSSF Scorecard |
+| Duplicate scans | Forbidden. Default setup stays off. |
+
+Actionable CodeQL alerts get a follow-up issue the same triage week. Alerts are
+closed only with SARIF/workflow proof, not by silent dismiss.
+
 ### 2.4 Code Hygiene
 
 | Workflow                     | File                           | Key Jobs                                                                                           | What It Checks                                                                                                                                     |
@@ -344,6 +364,11 @@ File: `.github/dependabot.yml`
 | pip (Python)   | Weekly   | 10       | `dependencies`    | `pip-minor-patch` (minor+patch) |
 | github-actions | Weekly   | 5        | `ci`              | `github-actions` (all)  |
 | docker         | Weekly   | 5        | `dependencies,ci` | `docker` (all)          |
+| npm (`/`) | Weekly | 5 | `dependencies` | `npm-root` |
+| npm (`/.github/actions/setup-mermaid`) | Weekly | 5 | `dependencies,ci` | `npm-mermaid` |
+| npm (`/.github/tooling/jscpd`) | Weekly | 5 | `dependencies,ci` | `npm-jscpd` |
+| npm (`/grafana/plugins/bioetl-scenes-app`) | Weekly | 5 | `dependencies` | `npm-grafana-scenes` |
+| npm (`/grafana/plugins/bioetl-selectorshell-panel`) | Weekly | 5 | `dependencies` | `npm-grafana-selectorshell` |
 
 Minor/patch grouping keeps weekly PR volume manageable; security-relevant major bumps stay as individual PRs for review.
 

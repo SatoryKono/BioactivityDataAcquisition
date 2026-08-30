@@ -118,7 +118,7 @@ make security-check
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning
 - **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; job fails on HIGH/CRITICAL (and unknown severity), not Medium/Low
 - **Bandit**: Python anti-pattern scan in `.github/workflows/security.yml`
-- **CodeQL**: Python SAST uploaded to GitHub code scanning (`.github/workflows/codeql.yml`)
+- **CodeQL**: advanced setup only (`.github/workflows/codeql.yml`). GitHub default setup stays `not-configured`; do not enable both. Python SAST uploads to Code scanning. Alert triage: BioETL Team, weekly Monday with Scorecard.
 - **OpenSSF Scorecard**: Weekly non-blocking baseline (`.github/workflows/scorecard.yml`)
 - **Syft SBOM**: SPDX artifact on GitHub Release (`release.yml`) and GHCR push (`docker.yml`)
 - **zizmor**: High-confidence GitHub Actions YAML audit on workflow/action changes (`.github/workflows/zizmor.yml`)
