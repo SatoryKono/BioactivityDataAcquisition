@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -187,9 +188,14 @@ class ReadOnlyGitHubClient:
         return collected
 
 
-def _git_head(repo_root: Path) -> str:
+def _git_head(repo_root: Path, source_ref: str = "HEAD") -> str:
+    if (
+        source_ref.startswith("-")
+        or re.fullmatch(r"[A-Za-z0-9_./^~:-]+", source_ref) is None
+    ):
+        raise GitHubReviewError("invalid source git ref")
     completed = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+        ["git", "rev-parse", "--verify", source_ref + "^{commit}"],
         cwd=repo_root,
         text=True,
         capture_output=True,
@@ -247,6 +253,7 @@ def collect_snapshot(
     policy: dict[str, Any],
     *,
     now: datetime | None = None,
+    source_git_ref: str = "HEAD",
 ) -> dict[str, Any]:
     generated_at = (now or datetime.now(UTC)).astimezone(UTC)
     identity = client.json(["repo", "view", "--json", "nameWithOwner,defaultBranchRef"])
@@ -307,7 +314,8 @@ def collect_snapshot(
         "schema_version": "1.0",
         "generated_at": generated_at.isoformat(),
         "source": {
-            "git_head": _git_head(repo_root),
+            "git_head": _git_head(repo_root, source_git_ref),
+            "git_ref": source_git_ref,
             "policy_sha256": _sha256(
                 repo_root / "configs" / "quality" / "github_governance_policy.json"
             ),
@@ -637,6 +645,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--json-out", type=Path, required=True)
     parser.add_argument("--markdown-out", type=Path, required=True)
+    parser.add_argument(
+        "--source-git-ref",
+        default="HEAD",
+        help="Read-only git ref recorded as the reviewed source (default: HEAD).",
+    )
     parser.add_argument("--fail-on-drift", action="store_true")
     return parser.parse_args(argv)
 
@@ -649,7 +662,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         policy_path = repo_root / policy_path
     policy = _load_policy(policy_path)
     client = ReadOnlyGitHubClient(repo_root)
-    snapshot = collect_snapshot(client, repo_root, policy)
+    snapshot = collect_snapshot(
+        client,
+        repo_root,
+        policy,
+        source_git_ref=args.source_git_ref,
+    )
     report = build_report(snapshot, policy)
 
     for output_path, content in (
