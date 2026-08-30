@@ -166,6 +166,22 @@ def test_mermaid_label_text_uses_structural_html_parsing(
     assert module._mermaid_label_text(label) == expected
 
 
+@pytest.mark.parametrize(
+    "arrow",
+    ["-->", "<--", "==>", "-.->", "--o", "--x", "~~~"],
+)
+def test_bundle_generator_counts_supported_flow_edges(arrow: str) -> None:
+    module = _load_generate_all_bundles()
+
+    assert module._count_edges([f"A {arrow} B"], is_class_diagram=False) == 1
+
+
+def test_bundle_generator_rejects_malformed_html_like_arrow() -> None:
+    module = _load_generate_all_bundles()
+
+    assert module._count_edges(["A --!> B"], is_class_diagram=False) == 0
+
+
 def test_tracked_bundle_image_links_resolve_to_rendered_artifacts() -> None:
     bundle_dir = Path("docs/02-architecture/diagrams/bundles")
     image_link_re = re.compile(r"!\[[^\]]*]\(([^)]+)\)")
