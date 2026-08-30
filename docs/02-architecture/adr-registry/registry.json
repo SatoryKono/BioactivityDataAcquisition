@@ -1,6 +1,6 @@
 {
-  "generated": "2026-08-25T14:49:07.712611",
-  "total_adrs": 59,
+  "generated": "2026-08-30T21:01:29.940484",
+  "total_adrs": 60,
   "adrs": [
     {
       "adr_number": "001",
@@ -1146,16 +1146,39 @@
         "ADR-049"
       ],
       "tags": []
+    },
+    {
+      "adr_number": "060",
+      "title": "Prompt Kernel and Overlay Architecture",
+      "file_path": "ADR-060-prompt-kernel-and-overlay-architecture.md",
+      "status": "accepted",
+      "source_status": "Accepted",
+      "category": "Architecture",
+      "owner": "BioETL Team",
+      "decision_date": "2026-08-28",
+      "last_reviewed": "2026-08-28",
+      "context": "The audit prompt library contains 24 full operator-paste prompts materialized at\n`docs/00-project/ai/prompts/library/audit/project/materialized-v3/`:\n- 10 `cycle/` cards (`01-docs` … `10-coderabbit...",
+      "decision": "### 1. Kernel v3.0 — fail-closed extraction\nExtract the shared cyclic controller from the 24 cards into a single versioned kernel:\n```\ndocs/00-project/ai/prompts/\n  fragments/\n    cyclic-kernel-v3....",
+      "consequences": "### Positive\n- Single kernel eliminates 24× controller duplication → no drift between domains (Table 9: 24→1).\n- Fail-closed defaults remove unsafe `ALLOW_*=true` library defaults (Table 9: unsafe ...",
+      "supersedes": [],
+      "superseded_by": [],
+      "related": [
+        "ADR-041",
+        "ADR-043",
+        "ADR-044",
+        "ADR-046"
+      ],
+      "tags": []
     }
   ],
   "stats": {
     "by_status": {
-      "accepted": 57,
+      "accepted": 58,
       "superseded": 2
     },
     "by_category": {
       "Storage": 3,
-      "Architecture": 14,
+      "Architecture": 15,
       "Locking": 1,
       "Data Modeling": 3,
       "Observability": 6,
