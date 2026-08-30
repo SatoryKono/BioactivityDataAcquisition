@@ -388,7 +388,7 @@
         ]
       }
     ],
-    "generated_at": "2026-08-30T15:48:09.855398+00:00",
+    "generated_at": "2026-08-30T15:53:38.157131+00:00",
     "issue_intake": {
       "config_exists": true,
       "files": [
@@ -1916,79 +1916,80 @@
       "secret_scanning_push_protection": "enabled"
     },
     "source": {
-      "git_head": "b1f207999f36d753c4ebdd7ba942fedbe9af9c42",
+      "git_head": "4f817cdd916544823cc58e6c03b01150e7bebedf",
+      "git_ref": "HEAD",
       "policy_sha256": "3a54af9cf365d26be5e44df8926fc2eb4689ab288bcbe69878a0ca165751248b",
-      "tool_sha256": "08887bee4693b90cf273779a697d2f81623efa223285d31fb978753cce010e89"
+      "tool_sha256": "9c89d437f564e301071ad9433157e744487674ccfa55a5b8adea3ea7c9d7114b"
     },
     "workflow_health": {
       "conclusions": {
-        "cancelled": 49,
+        "cancelled": 51,
         "failure": 4,
-        "in_progress": 11,
+        "in_progress": 15,
         "pending": 2,
-        "queued": 23,
-        "success": 11
+        "queued": 13,
+        "success": 15
       },
       "recent_non_successful": [
         {
           "conclusion": "cancelled",
-          "name": "Root Hygiene",
-          "started_at": "2026-08-30T15:45:29Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320535443"
-        },
-        {
-          "conclusion": "cancelled",
           "name": "OpenSSF Scorecard",
-          "started_at": "2026-08-30T15:45:29Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320535442"
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742487"
         },
         {
           "conclusion": "cancelled",
-          "name": "Dashboard first-window no-scroll",
-          "started_at": "2026-08-30T15:45:29Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320535435"
+          "name": "Type Checking (Strict)",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742458"
         },
         {
           "conclusion": "cancelled",
           "name": "Root Hygiene",
-          "started_at": "2026-08-30T15:44:35Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320493201"
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742444"
         },
         {
           "conclusion": "cancelled",
           "name": "Dashboard first-window no-scroll",
-          "started_at": "2026-08-30T15:44:35Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320493187"
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742443"
         },
         {
           "conclusion": "cancelled",
-          "name": "OpenSSF Scorecard",
-          "started_at": "2026-08-30T15:44:35Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320493176"
+          "name": "Duplication and Complexity Checks",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742438"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Security Scans",
+          "started_at": "2026-08-30T15:49:58Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320742429"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "Security Scans",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615988"
         },
         {
           "conclusion": "cancelled",
           "name": "Root Hygiene",
-          "started_at": "2026-08-30T15:43:21Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320439625"
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615959"
+        },
+        {
+          "conclusion": "cancelled",
+          "name": "OpenSSF Scorecard",
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615938"
         },
         {
           "conclusion": "cancelled",
           "name": "Dashboard first-window no-scroll",
-          "started_at": "2026-08-30T15:43:21Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320439614"
-        },
-        {
-          "conclusion": "cancelled",
-          "name": "OpenSSF Scorecard",
-          "started_at": "2026-08-30T15:43:21Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320439605"
-        },
-        {
-          "conclusion": "cancelled",
-          "name": "OpenSSF Scorecard",
-          "started_at": "2026-08-30T15:42:51Z",
-          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320415151"
+          "started_at": "2026-08-30T15:47:14Z",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33320615937"
         }
       ],
       "sample_size": 100
