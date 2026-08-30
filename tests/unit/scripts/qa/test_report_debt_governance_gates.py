@@ -562,6 +562,11 @@ def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
         "_hotspot_family_baseline_artifact_matches_builder",
         lambda *, repo_root: True,
     )
+    _patch_both(
+        monkeypatch,
+        "_config_surface_backlog_matches_builder",
+        lambda *, repo_root: True,
+    )
     monkeypatch.setattr(
         gates.report_architecture_debt_remote_main_baseline,
         "build_payload",

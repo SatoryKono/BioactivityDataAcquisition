@@ -25,6 +25,8 @@ def _load_tool():
 
 TOOL = _load_tool()
 
+pytestmark = pytest.mark.architecture
+
 
 def _policy() -> dict:
     return json.loads(POLICY_PATH.read_text(encoding="utf-8"))

@@ -4,11 +4,13 @@
   "description": "Pinned Mermaid CLI tooling for the setup-mermaid composite action (Sonar githubactions:S8543).",
   "dependencies": {
     "@mermaid-js/mermaid-cli": "10.6.1",
-    "svgo": "3.3.5"
+    "svgo": "3.3.5",
+    "extract-zip": "file:vendor/extract-zip"
   },
   "overrides": {
     "svgo": "3.3.5",
     "tar-fs": "2.1.5",
-    "ws": "8.21.3"
+    "ws": "8.21.3",
+    "extract-zip": "$extract-zip"
   }
 }
