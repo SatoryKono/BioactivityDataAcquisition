@@ -50,12 +50,12 @@
   ],
   "outcomes": {
     "5729": {
-      "coverage_actual_percent": 96.56,
+      "coverage_actual_percent": 96.58,
       "coverage_percent": 96.56,
-      "refreshed_at_utc": "2026-08-28T19:46:37.462404+00:00",
-      "source_commit": "8e4223b98b5491184c7f65424804cd3e159bda46",
-      "source_run_id": "33204402376",
-      "source_tree_sha256": "1a97a5ab22f2d2f283440b517ff1ded0dedbf84202a292ec3c7a40354356f3c9"
+      "refreshed_at_utc": "2026-08-28T12:08:33.049094+00:00",
+      "source_commit": "2460c8c04e2c86adddc2a609c30957a4b63c146c",
+      "source_run_id": "33169139447",
+      "source_tree_sha256": "62f5638402eef2c7e7f78b56d4e195b41baf36e30eb81b66f39e3f2de8bb2695"
     },
     "5730": {
       "minimum_coverage_percent": 54.0,
@@ -105,5 +105,5 @@
     }
   },
   "schema_version": "tech-debt-issues-5729-5733-closeout-v1",
-  "updated_at_utc": "2026-08-28T19:46:37.462404+00:00"
+  "updated_at_utc": "2026-08-06T16:35:04.328332+00:00"
 }

@@ -1,17 +1,21 @@
 """Minimal HTTP CONNECT proxy for WSL2 -> Windows VPN tunnel.
 
-Defaults to loopback. Non-loopback listeners require an explicit client CIDR;
-wildcard binding additionally requires an explicit opt-in flag.
+Defaults to loopback. To expose the proxy to the WSL virtual network,
+explicitly supply the Windows host address for that interface; non-loopback
+listeners require an explicit client CIDR, and wildcard binding additionally
+requires an explicit opt-in flag.
 Supports both HTTP CONNECT (for HTTPS) and plain HTTP forwarding.
 
 Usage:
-    python scripts/ops/runtime/wsl/wsl_proxy.py          # foreground
-    pythonw scripts/ops/runtime/wsl/wsl_proxy.py         # background (no console)
-    start /B python scripts/ops/runtime/wsl/wsl_proxy.py # background via cmd
+    python scripts/ops/runtime/wsl/wsl_proxy.py
+    python scripts/ops/runtime/wsl/wsl_proxy.py --listen-host <wsl-host-ip>
+    pythonw scripts/ops/runtime/wsl/wsl_proxy.py
 """
 
 from __future__ import annotations
 
+import argparse
+import ipaddress
 import logging
 import argparse
 import ipaddress
@@ -218,8 +222,8 @@ def handle_client(client: socket.socket, addr: tuple[str, int]) -> None:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bind-host", default=LISTEN_HOST)
-    parser.add_argument("--port", type=int, default=LISTEN_PORT)
+    parser.add_argument("--bind-host", "--listen-host", dest="bind_host", default=LISTEN_HOST)
+    parser.add_argument("--port", "--listen-port", dest="port", type=int, default=LISTEN_PORT)
     parser.add_argument("--allow-wildcard", action="store_true")
     parser.add_argument("--allow-cidr", action="append", default=[])
     return parser.parse_args(argv)

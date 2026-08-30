@@ -1,3 +1,3 @@
 # Failure Frequency Summary
 
-No failures detected.
+No failures were processed since the main command `pytest tests/` timed out.

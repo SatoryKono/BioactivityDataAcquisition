@@ -5,10 +5,6 @@
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-Refresh note (2026-08-28): PR #9821 source-tree reconcile after the UniProt
-transport refactor; `source_tree_sha256` and `source_module_count` match
-`reports/quality/module-coverage-inventory.json`.
-
 Refresh note (2026-08-20): TYP-RF RF-007 hash-only reconcile on origin/main after SNR-RF RF-002 (#9143); `source_tree_sha256` now matches `reports/quality/module-coverage-inventory.json`.
 
 Refresh note (2026-08-19): TYP-RF RF-007 hash-only reconcile after the mypy zero-error typing track; `source_tree_sha256` and `source_module_count` now match `reports/quality/module-coverage-inventory.json`.
@@ -28,8 +24,8 @@ tracked coverage measurements.
 Current-baseline note (2026-08-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current source baseline is
-`source_module_count=2466` with
-`source_tree_sha256=344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6`.
+`source_module_count=2465` with
+`source_tree_sha256=dcf4c865e564cc429c76b1d30de7c1c99100466c47eb3d9155bf1a1e7efb0a92`.
 Raw files dated before `2026-07-19` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence. Refresh (2026-08-05) followed the #4343 composite facade narrowing
@@ -37,7 +33,7 @@ and related module-coverage inventory hash-only reconcile.
 
 Refresh note (2026-08-25): ARCH-VG hash-only reconcile after composition/domain
 facade closeout. Source baseline is
-`source_module_count=2466` with the updated `source_tree_sha256` above; the
+`source_module_count=2465` with the updated `source_tree_sha256` above; the
 module-coverage inventory was reconciled with its canonical source-tree-only
 refresh path (coverage measurements were preserved).
 
@@ -96,6 +92,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `344db333531ff412f92892115a28fe4e26e8c6582185091e7cb181423b01b9e6`
+- source_tree_sha256: `dcf4c865e564cc429c76b1d30de7c1c99100466c47eb3d9155bf1a1e7efb0a92`
 
-`source_module_count=2466`
+`source_module_count=2465`

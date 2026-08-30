@@ -68,6 +68,30 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.cycle.telemetry` | `library/audit/cycle/telemetry.md` | Cyclic audit of observability instrumentation and dashboard data feed |
 | `prompt.audit.cycle.dashboards` | `library/audit/cycle/dashboards.md` | Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates |
 | `prompt.audit.cycle.coderabbit` | `library/audit/cycle/coderabbit.md` | Exhaustive cyclic project audit with CodeRabbit dual-pass |
+| `prompt.audit.project.new.architecture` | `library/audit/project/new/01-architecture.md` | Improved cyclic architecture audit — 10-category scorecard, plan waves, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.configs` | `library/audit/project/new/02-configs.md` | Improved cyclic config audit — schema hierarchy, compatibility, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.tests` | `library/audit/project/new/03-tests.md` | Improved cyclic test-system audit plus bounded LANE retest, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.tech-debt` | `library/audit/project/new/04-tech-debt.md` | Improved cyclic tech-debt audit — register, blast-radius paydown, residual re-check, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.docs` | `library/audit/project/new/05-docs.md` | Improved cyclic docs audit — content plus scripts/docs pipeline, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.agents-memory` | `library/audit/project/new/06-agents-memory.md` | Improved cyclic agents/memory audit — runtime parity check, memory workflow, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.telemetry` | `library/audit/project/new/07-telemetry.md` | Improved cyclic telemetry audit — instrumentation to recording rules, MONITORING fail-closed, early-stop |
+| `prompt.audit.project.new.dashboards` | `library/audit/project/new/08-dashboards.md` | Improved cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM contours, ALLOW_* true, stop when no new issues and no open cycle issues |
+| `prompt.audit.project.new.diagrams` | `library/audit/project/new/09-diagrams.md` | Improved cyclic diagrams audit — ADR-040 Mermaid skill, pinned render, ALLOW_* true, early-stop |
+| `prompt.audit.project.new.coderabbit` | `library/audit/project/new/10-coderabbit.md` | Improved cyclic project+CodeRabbit audit — dual-pass, peer gate, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.medallion` | `library/audit/project/new2/01-medallion.md` | Cyclic Medallion write-path audit — Bronze/Silver/Gold, quarantine, determinism, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.dq-contracts` | `library/audit/project/new2/02-dq-contracts.md` | Cyclic DQ/Pandera contract audit — schemas, column_order, QC sidecars, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.control-plane` | `library/audit/project/new2/03-control-plane.md` | Cyclic control-plane audit — RunManifest/Ledger, resume/repair, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.providers` | `library/audit/project/new2/04-providers.md` | Cyclic provider catalog audit — YAML vs adapters vs entities, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.http-clients` | `library/audit/project/new2/05-http-clients.md` | Cyclic HTTP-client audit — timeout, retry, QPS, pagination, circuit breaker, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.normalization` | `library/audit/project/new2/06-normalization.md` | Cyclic identifier/normalization audit — DOI, ChEMBL, UniProt, SMILES policies vs code, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.cli-compat` | `library/audit/project/new2/07-cli-compat.md` | Cyclic public CLI/HTTP/entrypoint compatibility audit — freeze, shims, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.security-secrets` | `library/audit/project/new2/08-security-secrets.md` | Cyclic secrets/security audit — .env policy, leak scan, GHA overlap, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.vcr-http` | `library/audit/project/new2/09-vcr-http.md` | Cyclic VCR cassette audit — placement, determinism, secret-safety, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.qa-gates` | `library/audit/project/new2/10-qa-gates.md` | Cyclic QA-gates audit — quality scripts, scorecard freshness, no budget growth, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.github-actions` | `library/audit/project/new2/11-github-actions.md` | Cyclic GitHub Actions supply-chain audit — pins, permissions, trust model, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.requirements-trace` | `library/audit/project/new2/12-requirements-trace.md` | Cyclic REQ-* traceability audit — requirements vs tests/code, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.ops-runbooks` | `library/audit/project/new2/13-ops-runbooks.md` | Cyclic ops/runbook audit — DR, rollback, Game Day, ADR-010, ALLOW_* true, early-stop |
+| `prompt.audit.project.new2.scripts-inventory` | `library/audit/project/new2/14-scripts-inventory.md` | Cyclic scripts inventory audit — catalog, lifecycle, no-growth cap, ALLOW_* true, early-stop |
 
 ## Active fragments
 
@@ -184,6 +208,30 @@ Operator paste templates and fragments. Not runtime SSOT.
 | `prompt.audit.cycle.telemetry` | operator-paste | active | `library/audit/cycle/telemetry.md` |
 | `prompt.audit.cycle.dashboards` | operator-paste | active | `library/audit/cycle/dashboards.md` |
 | `prompt.audit.cycle.coderabbit` | operator-paste | active | `library/audit/cycle/coderabbit.md` |
+| `prompt.audit.project.new.architecture` | operator-paste | active | `library/audit/project/new/01-architecture.md` |
+| `prompt.audit.project.new.configs` | operator-paste | active | `library/audit/project/new/02-configs.md` |
+| `prompt.audit.project.new.tests` | operator-paste | active | `library/audit/project/new/03-tests.md` |
+| `prompt.audit.project.new.tech-debt` | operator-paste | active | `library/audit/project/new/04-tech-debt.md` |
+| `prompt.audit.project.new.docs` | operator-paste | active | `library/audit/project/new/05-docs.md` |
+| `prompt.audit.project.new.agents-memory` | operator-paste | active | `library/audit/project/new/06-agents-memory.md` |
+| `prompt.audit.project.new.telemetry` | operator-paste | active | `library/audit/project/new/07-telemetry.md` |
+| `prompt.audit.project.new.dashboards` | operator-paste | active | `library/audit/project/new/08-dashboards.md` |
+| `prompt.audit.project.new.diagrams` | operator-paste | active | `library/audit/project/new/09-diagrams.md` |
+| `prompt.audit.project.new.coderabbit` | operator-paste | active | `library/audit/project/new/10-coderabbit.md` |
+| `prompt.audit.project.new2.medallion` | operator-paste | active | `library/audit/project/new2/01-medallion.md` |
+| `prompt.audit.project.new2.dq-contracts` | operator-paste | active | `library/audit/project/new2/02-dq-contracts.md` |
+| `prompt.audit.project.new2.control-plane` | operator-paste | active | `library/audit/project/new2/03-control-plane.md` |
+| `prompt.audit.project.new2.providers` | operator-paste | active | `library/audit/project/new2/04-providers.md` |
+| `prompt.audit.project.new2.http-clients` | operator-paste | active | `library/audit/project/new2/05-http-clients.md` |
+| `prompt.audit.project.new2.normalization` | operator-paste | active | `library/audit/project/new2/06-normalization.md` |
+| `prompt.audit.project.new2.cli-compat` | operator-paste | active | `library/audit/project/new2/07-cli-compat.md` |
+| `prompt.audit.project.new2.security-secrets` | operator-paste | active | `library/audit/project/new2/08-security-secrets.md` |
+| `prompt.audit.project.new2.vcr-http` | operator-paste | active | `library/audit/project/new2/09-vcr-http.md` |
+| `prompt.audit.project.new2.qa-gates` | operator-paste | active | `library/audit/project/new2/10-qa-gates.md` |
+| `prompt.audit.project.new2.github-actions` | operator-paste | active | `library/audit/project/new2/11-github-actions.md` |
+| `prompt.audit.project.new2.requirements-trace` | operator-paste | active | `library/audit/project/new2/12-requirements-trace.md` |
+| `prompt.audit.project.new2.ops-runbooks` | operator-paste | active | `library/audit/project/new2/13-ops-runbooks.md` |
+| `prompt.audit.project.new2.scripts-inventory` | operator-paste | active | `library/audit/project/new2/14-scripts-inventory.md` |
 | `prompt.campaign.generic-nine-audit-kit` | campaign | archived | `archive/campaigns/generic-nine-audit-kit-2026-08.md` |
 | `prompt.campaign.project-audit-orchestrator-kit` | campaign | archived | `archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` |
 | `prompt.campaign.bi-dashboard-audit-kit` | campaign | archived | `archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md` |

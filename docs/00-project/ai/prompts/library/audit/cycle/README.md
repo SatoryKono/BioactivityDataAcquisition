@@ -36,7 +36,8 @@ Render:
 
 Порядок прогона: 1→10. `#8` перед `#9`. `#10` замыкает dual-pass.
 
-Полные inlined-тексты (фрагменты уже вшиты): [../project/full/](../project/full/) и router `prompt.audit.project.pack`.
+Снимок полных inlined-текстов: [materialized-v3](../project/materialized-v3/README.md).
+Редактируемые source cards остаются в этой папке; router — `prompt.audit.project.pack`.
 
 Исчерпывающий прогон всей папки с ISSUE/FIX/CLOSE после каждой карточки:
 `prompt.audit.sequential-run` ([../sequential-run.md](../sequential-run.md)).
