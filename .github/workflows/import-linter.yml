@@ -174,6 +174,23 @@ jobs:
                     # Full history required for telemetry/audit ancestor and commit-existence gates.
                     fetch-depth: 0
 
+            -   name: Fetch Git LFS objects for architecture governance
+                run: |
+                    set -euo pipefail
+                    # Test-governance source identity includes VCR fixture payloads.
+                    # Fail closed instead of hashing unresolved LFS pointer files.
+                    if ! git lfs pull; then
+                      echo "::error::Git LFS pull failed for arch-tests. Required governance fixtures are unavailable. Increase the GitHub LFS data pack and re-run."
+                      exit 1
+                    fi
+                    if git lfs ls-files -n | head -n 1 | grep -q .; then
+                      sample="$(git lfs ls-files -n | head -n 1)"
+                      if [ -f "$sample" ] && head -n 1 "$sample" | grep -q 'git-lfs.github.com/spec/v1'; then
+                        echo "::error::Git LFS objects remain pointer files for arch-tests. Materialize LFS objects and re-run."
+                        exit 1
+                      fi
+                    fi
+
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
 
