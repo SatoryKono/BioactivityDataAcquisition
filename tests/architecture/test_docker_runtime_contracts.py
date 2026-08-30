@@ -42,6 +42,21 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _docker_identity(raw: str) -> tuple[int, int]:
+    """Parse a canonical Docker user/group identity without notation bypasses."""
+
+    parts = raw.split(":")
+    assert len(parts) == 2
+
+    def _component(value: str) -> int:
+        if value == "root":
+            return 0
+        assert re.fullmatch(r"(?:0|[1-9][0-9]*)", value), value
+        return int(value)
+
+    return _component(parts[0]), _component(parts[1])
+
+
 def _load_preflight() -> ModuleType:
     spec = importlib.util.spec_from_file_location(
         "docker_runtime_preflight", PREFLIGHT_PATH
@@ -1049,12 +1064,13 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "COPY --from=runtime-root /lib64 /lib64" in dockerfile
     assert "COPY --from=runtime-root /usr /usr" in dockerfile
     assert "mkdir -p /runtime-fs/tmp" in dockerfile
-    assert "chown 65532:65532 /runtime-fs/tmp" in dockerfile
-    assert "chmod 0700 /runtime-fs/tmp" in dockerfile
-    assert "chmod 1777" not in dockerfile
+    assert "chmod 1777 /runtime-fs/tmp" in dockerfile
+    assert "bioetl:x:999:999:BioETL runtime:/app:/sbin/nologin" in dockerfile
+    assert "bioetl:x:999:" in dockerfile
     assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
     assert "COPY --from=runtime-root / /" not in dockerfile
-    assert "COPY --chown=root:root configs/ ./configs/" in dockerfile
+    assert "setuptools==83.0.0" in dockerfile
+    assert "--build-constraint /tmp/build-constraints.txt" in dockerfile
     assert (
         "4fad23465a06cc5149a541fbec6f87e234a64dc0550f6bfdd2d290d8f03240df"
         not in dockerfile
@@ -1078,10 +1094,23 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     )
     assert dockerfile.count('SHELL ["/bin/bash", "-o", "pipefail", "-c"]') == 1
     assert "python -m pip install" not in dockerfile
-    assert "USER 65532:65532" in dockerfile
     assert "apt-get" not in dockerfile
-    assert "rm -f /bin/sh /bin/busybox /sbin/apk /usr/bin/apk" in dockerfile
-    assert "COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv" in dockerfile
+    assert "rm -f" in dockerfile
+    for forbidden in (
+        "/bin/sh",
+        "/bin/ash",
+        "/bin/bash",
+        "/sbin/apk",
+        "/usr/bin/apk",
+    ):
+        assert forbidden in dockerfile
+    final_stage = dockerfile.rsplit("FROM scratch", maxsplit=1)[1]
+    runtime_users = re.findall(r"(?m)^USER\s+(\S+)\s*$", final_stage)
+    assert runtime_users
+    assert _docker_identity(runtime_users[-1]) == (999, 999)
+    with pytest.raises(AssertionError):
+        _docker_identity("0999:999")
+    assert "COPY --from=builder --chown=999:999 /app/.venv /app/.venv" in dockerfile
     assert "USER bioetl" not in dockerfile
     assert (
         'CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('
@@ -1324,7 +1353,9 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-build" in ancestors
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_medium_plus() -> None:
+def test_docker_built_image_trivy_emits_full_evidence_and_blocks_all_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     built = {
@@ -1376,6 +1407,9 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
         "Upload reproducible security baseline"
     )
     assert step_names.index("Enforce Trivy Critical High Medium policy") < (
+        step_names.index("Export exact scanned image for publication")
+    )
+    assert step_names.index("Enforce full Trivy Critical High Medium zero policy") < (
         step_names.index("Export exact scanned image for publication")
     )
 
