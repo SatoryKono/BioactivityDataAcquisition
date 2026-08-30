@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bioetl.local/schemas/execution-profile.schema.json",
+  "title": "BioETL Execution Profile",
+  "description": "Execution profile that overrides kernel params for a run. Only profiles/full-write.yaml may have ALLOW_*=true; this restriction is enforced by lint.py, not by this schema. Schema allows ALLOW_* so lint can report the violation with context.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Profile name / file identity, e.g. read-only, full-write"
+    },
+    "description": {
+      "type": "string"
+    },
+    "MODE": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "audit+issues",
+        "full"
+      ]
+    },
+    "ALLOW_ISSUE_WRITE": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_PUSH": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_MERGE": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_CLOSE": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_NETWORK": {
+      "type": "boolean",
+      "default": false
+    },
+    "ALLOW_FULL_SUITE": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
