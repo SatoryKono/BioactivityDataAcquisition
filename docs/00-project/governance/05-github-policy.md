@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.2
+Version: 1.2.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-28'
+  Last verified: '2026-08-30'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-28*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-08-30*
 
 ______________________________________________________________________
 
@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active** and GitHub-enforced (required: `checks-complete` + `root-hygiene`). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined, not GitHub-enforced). See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -144,9 +144,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` are blocked by live required-check ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
-push and merge to `main` are blocked when `checks-complete` or `root-hygiene` fail. The following checks are the
-enforced quality gate for pull requests and for the `main` ref.
+Updates to `main` are **not** blocked by repository ruleset `root-hygiene-required-check` (enforcement **disabled** for `refs/heads/main`). Direct
+push and merge to `main` are currently allowed by GitHub rulesets. Workflows `checks-complete` and `root-hygiene` still run on pull requests; they are not required status checks while the ruleset is disabled. The following checks remain the
+policy-intended quality gate for pull requests and for the `main` ref.
 
 ### Final always-on required-check set
 
@@ -160,7 +160,7 @@ The final activation set for repository ruleset
 
 Both checks materialize on every PR targeting `main`. The repository ruleset
 `root-hygiene-required-check` remains defined with exactly this always-on set,
-and enforcement is **active**. Direct push/merge to `main` is blocked when required checks fail. Further ruleset mutations remain external operations that require
+and enforcement is **disabled**. Direct push/merge to `main` is not blocked by this ruleset. Further ruleset mutations remain external operations that require
 explicit maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks
@@ -232,10 +232,10 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: failures in the GitHub-enforced always-on set block merge and direct
-  push. The required set remains `checks-complete` and `root-hygiene`; failures
-  in other policy gates MUST still be fixed or explicitly risk-accepted in the
-  PR discussion.
+- **FAIL**: failures in `checks-complete` and `root-hygiene` still fail those
+  workflows. They do **not** currently block merge or direct push while
+  ruleset enforcement is `disabled`. Failures in other policy gates MUST still
+  be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
 
@@ -249,7 +249,7 @@ To remove drift between workflow-specific job names and governance language, Bio
 | `schema-governance.yml` | `gate.schema-contracts` via `schema-governance-status` | `.github/workflows/schema-governance.yml` + this policy section |
 | `security.yml` | `gate.security-secrets` via `detect-secrets` | `.github/workflows/security.yml` + this policy section |
 | `commit-lint.yml` | `gate.commit-policy` via `commit-lint` | `.github/workflows/commit-lint.yml` + this policy section |
-| `root-hygiene.yml` | `gate.repo-hygiene` via `root-hygiene` | `.github/workflows/root-hygiene.yml` + active GitHub ruleset state |
+| `root-hygiene.yml` | `gate.repo-hygiene` via `root-hygiene` | `.github/workflows/root-hygiene.yml` + live GitHub ruleset state |
 | `docs.yml` | `gate.docs-governance` via `docs-governance` | `.github/workflows/docs.yml` + docs governance policy surfaces |
 | `port-contracts.yml` | Supporting gate: `contracts-status` | `.github/workflows/port-contracts.yml` |
 | `compiled-artifacts-block.yml` | Supporting gate: `no-pyc-check` | `.github/workflows/compiled-artifacts-block.yml` |
@@ -257,25 +257,25 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges and direct pushes to `main` are blocked when the required status
-checks fail. Repo-side evidence is the live repository ruleset state plus the
-workflows that materialize the required checks on pull requests.
+PR merges and direct pushes to `main` are **not** blocked by repository
+rulesets while enforcement is disabled. Repo-side evidence is the live
+repository ruleset state plus the workflows that still materialize the
+policy-intended checks on pull requests.
 
-Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation).
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: `active`.
-- Direct updates to main are blocked by the active rule.
-- Required status checks: exactly `checks-complete` and `root-hygiene`
+- Enforcement: `disabled`.
+- Direct updates to main are not blocked by this ruleset.
+- Defined status checks (not enforced): exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
 - The ruleset has no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rule on `main`: required status checks for `checks-complete` and
-  `root-hygiene`.
+- Applied rule on `main`: none while enforcement is `disabled`.
 - Tracking references: `#3380`, `#8619`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
@@ -283,7 +283,7 @@ Live GitHub enforcement state:
 
 The legacy repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-remains **active** and is not part of the active gate set.
+is also **disabled** and is not part of the gate set.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -540,7 +540,16 @@ ______________________________________________________________________
 }
 ```
 
-`Rollback: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled`
+### Evidence (2026-08-30)
+
+```json
+{
+  "name": "root-hygiene-required-check",
+  "enforcement": "disabled"
+}
+```
+
+`Re-enable: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=active`
 
 ### Migration notes (1.2.2)
 
@@ -550,3 +559,11 @@ ______________________________________________________________________
   disabled the legacy `main` ruleset.
 - Related decision context: [ADR-047: Workflow Control Plane for Declarative
   Workflows](../../02-architecture/decisions/ADR-047-workflow-control-plane.md).
+
+### Migration notes (1.2.3)
+
+- Re-verified live API state on `2026-08-30`: both `root-hygiene-required-check`
+  (15730586) and legacy `main` (13643213) have `enforcement: disabled`.
+- Policy SSOT now matches that live state. Workflows still emit
+  `checks-complete` and `root-hygiene`; they are not GitHub-required while the
+  ruleset is disabled.

@@ -115,9 +115,10 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
 
     assert "Branch Protection Verification" in policy
     assert "Activated and re-verified on `2026-08-28`" in policy
+    assert "Re-verified disabled on `2026-08-30`" in policy
     assert "#3380" in policy
     assert "root-hygiene-required-check" in policy
     assert "/rules/15730586" in policy
-    assert "Enforcement: `active`" in policy
+    assert "Enforcement: `disabled`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
-    assert "Direct updates to main are blocked by the active rule." in policy
+    assert "Direct updates to main are not blocked by this ruleset." in policy
