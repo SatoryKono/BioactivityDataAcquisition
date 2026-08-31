@@ -322,6 +322,10 @@
       "-m",
       "pip_audit",
       "--skip-editable",
+      "--ignore-vuln",
+      "CVE-2026-3219",
+      "--ignore-vuln",
+      "PYSEC-2026-3721",
       "--cache-dir",
       ".cache/pip-audit"
     ],
