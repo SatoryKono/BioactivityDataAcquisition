@@ -2117,7 +2117,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2399,
-  "total_test_functions": 25248,
+    "total_test_functions": 25248,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
