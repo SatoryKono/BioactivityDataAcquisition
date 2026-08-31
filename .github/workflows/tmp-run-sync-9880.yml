@@ -26,7 +26,10 @@ jobs:
       - name: Refresh and verify debt gates after artifact commit
         shell: bash
         run: |
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
           uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --update
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
           uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check
       - name: Commit second-pass gates
         shell: bash
@@ -34,7 +37,7 @@ jobs:
           changed="$(git diff --name-only)"
           for path in ${changed}; do
             case "${path}" in
-              reports/quality/debt-governance-gates.json|reports/quality/debt-governance-gates.md) ;;
+              reports/quality/architecture-debt-remote-main-baseline.json|reports/quality/architecture-debt-remote-main-baseline.md|reports/quality/debt-governance-gates.json|reports/quality/debt-governance-gates.md) ;;
               *) echo "Unexpected generated path: ${path}" >&2; exit 1 ;;
             esac
           done
