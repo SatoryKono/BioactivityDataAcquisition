@@ -1065,7 +1065,8 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "COPY --from=runtime-root /lib64 /lib64" in dockerfile
     assert "COPY --from=runtime-root /usr /usr" in dockerfile
     assert "mkdir -p /runtime-fs/tmp" in dockerfile
-    assert "chmod 1777 /runtime-fs/tmp" in dockerfile
+    assert "chown 999:999 /runtime-fs/tmp" in dockerfile
+    assert "chmod 0700 /runtime-fs/tmp" in dockerfile
     assert "bioetl:x:999:999:BioETL runtime:/app:/sbin/nologin" in dockerfile
     assert "bioetl:x:999:" in dockerfile
     assert "COPY --from=runtime-root /runtime-fs/ /" in dockerfile
@@ -1401,6 +1402,8 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_all_medium_plus
 
 def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    assert workflow["permissions"] == {}
+    assert all("permissions" in job for job in workflow["jobs"].values())
     steps = workflow["jobs"]["docker-build"]["steps"]
     provenance = next(
         step
@@ -1415,7 +1418,8 @@ def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
         'pwd.getpwuid(999).pw_shell == "/sbin/nologin"',
         'grp.getgrgid(999).gr_name == "bioetl"',
         'find_spec("pip") is None',
-        'stat.S_IMODE(os.stat("/tmp").st_mode) == 0o1777',
+        'stat.S_IMODE(os.stat("/tmp").st_mode) == 0o700',
+        '(os.stat("/tmp").st_uid, os.stat("/tmp").st_gid) == (999, 999)',
         'not os.access("/app/configs", os.W_OK)',
         "forbidden_paths = (",
         "os.path.lexists(path)",
