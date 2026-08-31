@@ -1,0 +1,3 @@
+[zed_xenon] running CI-aligned complexity gate
+[zed_xenon] exclude=tests\*,src\memory\*,src\bioetl\infrastructure\adapters\input\*,src\bioetl\application\services\dq\*,src\bioetl\application\composite\*,src\bioetl\application\pipelines\*\extractors\*,src\bioetl\interfaces\cli\*,src\bioetl\composition\runtime_builders\*,src\bioetl\composition\factories\services\*,src\bioetl\infrastructure\storage\silver\*,src\bioetl\infrastructure\control_plane\*,src\bioetl\infrastructure\quarantine\*,src\bioetl\infrastructure\observability\*,src\bioetl\infrastructure\quality\*
+[zed_xenon] OK (max-absolute B, max-modules B, max-average A)
