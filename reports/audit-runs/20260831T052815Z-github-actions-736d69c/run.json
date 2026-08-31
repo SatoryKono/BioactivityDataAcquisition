@@ -1,0 +1,38 @@
+{
+  "run_id": "20260831T052815Z-github-actions-736d69c",
+  "started_at": "2026-08-31T05:28:15Z",
+  "repo": "SatoryKono/BioactivityDataAcquisition",
+  "mode": "full",
+  "audit_mode": "full",
+  "language": "ru",
+  "n": 10,
+  "scope": [
+    ".github/workflows",
+    ".github/actions",
+    ".github/dependabot.yml"
+  ],
+  "baseline_sha": "736d69cf5d093c7ff97b2f6b60c470b033e9370d",
+  "base_branch": "main",
+  "work_branch": "fix/github-actions-cycle-736d69c",
+  "local_preflight": {
+    "status": "DEGRADED",
+    "git_status": "UNAVAILABLE",
+    "head": "UNAVAILABLE",
+    "remote": "UNAVAILABLE",
+    "tool_versions": "UNAVAILABLE",
+    "reason": "Codex unified exec failed before process start: batch file arguments are invalid; no local checkout mutation performed"
+  },
+  "remote_preflight": {
+    "auth_account": "SatoryKono",
+    "repo_permission": "admin",
+    "default_branch": "main",
+    "main_sha": "736d69cf5d093c7ff97b2f6b60c470b033e9370d",
+    "open_issues": 0,
+    "open_prs": 0,
+    "scope_files": 57,
+    "workflow_files": 47,
+    "tree_truncated": false
+  },
+  "debt_budget": "unchanged",
+  "env_files_touched": false
+}

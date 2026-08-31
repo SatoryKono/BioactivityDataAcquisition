@@ -242,6 +242,32 @@ def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
         )
 
 
+def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
+    """Every PR-facing workflow cancels superseded runs for the same PR."""
+    violations: list[str] = []
+    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = _load_yaml(path)
+        triggers = workflow.get("on")
+        if not isinstance(triggers, dict) or not {
+            "pull_request",
+            "pull_request_target",
+        }.intersection(triggers):
+            continue
+        concurrency = workflow.get("concurrency")
+        if not isinstance(concurrency, dict):
+            violations.append(f"{path.name}: missing workflow concurrency")
+            continue
+        group = str(concurrency.get("group", ""))
+        cancel = concurrency.get("cancel-in-progress")
+        if "${{ github.workflow }}" not in group:
+            violations.append(f"{path.name}: group must include github.workflow")
+        if cancel in {None, False, "false", ""}:
+            violations.append(
+                f"{path.name}: PR concurrency must cancel superseded runs"
+            )
+    assert violations == []
+
+
 def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
     violation = policy._validate_allowed_uses_ref(
         "docker://codiumai/pr-agent:latest",
