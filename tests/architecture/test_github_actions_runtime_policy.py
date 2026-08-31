@@ -650,7 +650,9 @@ def test_write_capable_jobs_do_not_checkout_pull_request_merge_refs() -> None:
                     continue
                 checkout_ref = str((step.get("with") or {}).get("ref", ""))
                 if "refs/pull/" in checkout_ref:
-                    violations.append(f"{workflow_path.name}:{job_name}:{checkout_ref}")
+                    violations.append(
+                        f"{workflow_path.name}:{job_name}:{checkout_ref}"
+                    )
     assert not violations, (
         "write-capable jobs must not execute pull-request merge refs:\n"
         + "\n".join(violations)
