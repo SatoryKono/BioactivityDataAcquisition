@@ -283,13 +283,6 @@
     },
     {
       "kind": "import:pandas",
-      "line": 10,
-      "path": "src/bioetl/domain/schemas/chembl/assay.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
       "line": 11,
       "path": "src/bioetl/domain/schemas/chembl/assay.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -298,6 +291,13 @@
     {
       "kind": "import:pandera",
       "line": 12,
+      "path": "src/bioetl/domain/schemas/chembl/assay.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 13,
       "path": "src/bioetl/domain/schemas/chembl/assay.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
@@ -395,13 +395,6 @@
     },
     {
       "kind": "import:pandas",
-      "line": 11,
-      "path": "src/bioetl/domain/schemas/chembl/publication.py",
-      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
-      "symbol": "<module>"
-    },
-    {
-      "kind": "import:pandera",
       "line": 12,
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
@@ -410,6 +403,13 @@
     {
       "kind": "import:pandera",
       "line": 13,
+      "path": "src/bioetl/domain/schemas/chembl/publication.py",
+      "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
+      "symbol": "<module>"
+    },
+    {
+      "kind": "import:pandera",
+      "line": 14,
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
       "reason": "Pandera/Pandas are allowed only inside machine-checkable Domain contract/schema boundary modules.",
       "symbol": "<module>"
