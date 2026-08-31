@@ -38,27 +38,8 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Print exact live coverage metrics
-        run: |
-          uv run --frozen --no-build python - <<'PY'
-          import json
-          from pathlib import Path
-          inventory = json.loads(Path("reports/quality/module-coverage-inventory.json").read_text())
-          application_core = inventory["summary"]["hotspot_family_coverage"]["application_core"]
-          below_85 = sum(
-              1
-              for row in inventory["modules"]
-              if isinstance(row.get("coverage_percent"), (int, float))
-              and float(row["coverage_percent"]) < 85.0
-          )
-          dq_row = next(row for row in inventory["modules"] if row["module"] == "bioetl.domain.behavior.dq_rule_evaluator")
-          print(json.dumps({
-              "application_core_covered_line_percent": application_core["covered_line_percent"],
-              "below_85_module_count": below_85,
-              "dq_rule_evaluator_coverage_percent": dq_row["coverage_percent"],
-          }, indent=2, sort_keys=True))
-          PY
-          exit 1
+      - name: Ruff check
+        run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
