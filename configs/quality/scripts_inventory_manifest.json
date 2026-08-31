@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T09:01:16.642856+00:00",
+  "generated_at": "2026-08-31T10:27:11.900016+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -3117,7 +3117,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 61,
+          "line": 63,
           "source_group": "tests",
           "text": "ADR_ANALYSIS_PS1 = MCP_DIR / \"mcp_adr_analysis_wrapper.ps1\""
         },
@@ -3222,7 +3222,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 64,
+          "line": 66,
           "source_group": "tests",
           "text": "AST_GREP_SH = MCP_DIR / \"mcp_ast_grep_wrapper.sh\""
         }
@@ -3397,7 +3397,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 57,
+          "line": 59,
           "source_group": "tests",
           "text": "CODE_INTERPRETER_PS1 = MCP_DIR / \"mcp_code_interpreter_wrapper.ps1\""
         }
@@ -3443,7 +3443,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 63,
+          "line": 65,
           "source_group": "tests",
           "text": "CONTEXT7_PS1 = MCP_DIR / \"mcp_context7_wrapper.ps1\""
         },
@@ -3486,7 +3486,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 62,
+          "line": 64,
           "source_group": "tests",
           "text": "CONTEXT7_SH = MCP_DIR / \"mcp_context7_wrapper.sh\""
         },
@@ -3666,7 +3666,7 @@
       "references": [
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 55,
+          "line": 57,
           "source_group": "tests",
           "text": "FETCH_PS1 = MCP_DIR / \"mcp_fetch_wrapper.ps1\""
         }
@@ -3703,7 +3703,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 54,
+          "line": 56,
           "source_group": "tests",
           "text": "FETCH_SH = MCP_DIR / \"mcp_fetch_wrapper.sh\""
         }
@@ -4066,7 +4066,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 60,
+          "line": 62,
           "source_group": "tests",
           "text": "MUTMUT_PS1 = MCP_DIR / \"mcp_mutmut_wrapper.ps1\""
         }
@@ -4103,7 +4103,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 59,
+          "line": 61,
           "source_group": "tests",
           "text": "MUTMUT_SH = MCP_DIR / \"mcp_mutmut_wrapper.sh\""
         }
@@ -4147,7 +4147,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1186,
+          "line": 1319,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -4190,7 +4190,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 58,
+          "line": 60,
           "source_group": "tests",
           "text": "NEO4J_CYPHER_SH = MCP_DIR / \"mcp_neo4j_cypher_wrapper.sh\""
         },
@@ -4825,7 +4825,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 53,
+          "line": 55,
           "source_group": "tests",
           "text": "UV_RESOLVER_PS1 = MCP_DIR / \"support\" / \"uv_resolver.ps1\""
         }
@@ -4880,7 +4880,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 52,
+          "line": 54,
           "source_group": "tests",
           "text": "UV_RESOLVER_SH = MCP_DIR / \"support\" / \"uv_resolver.sh\""
         },
