@@ -578,12 +578,31 @@ _WRITE_PERMISSION_KEYS = (
 )
 
 
-def _job_has_write_permission(job: dict[str, Any]) -> bool:
-    perms = job.get("permissions")
-    if not isinstance(perms, dict):
+def _effective_permissions(
+    workflow: dict[str, Any], job: dict[str, Any]
+) -> object:
+    return job["permissions"] if "permissions" in job else workflow.get("permissions")
+
+
+def _permissions_have_any_write(permissions: object) -> bool:
+    if permissions == "write-all":
+        return True
+    if not isinstance(permissions, dict):
+        return False
+    return any(str(value).lower() == "write" for value in permissions.values())
+
+
+def _job_has_write_permission(
+    workflow: dict[str, Any], job: dict[str, Any]
+) -> bool:
+    permissions = _effective_permissions(workflow, job)
+    if permissions == "write-all":
+        return True
+    if not isinstance(permissions, dict):
         return False
     return any(
-        str(perms.get(key, "")).lower() == "write" for key in _WRITE_PERMISSION_KEYS
+        str(permissions.get(key, "")).lower() == "write"
+        for key in _WRITE_PERMISSION_KEYS
     )
 
 
@@ -595,7 +614,9 @@ def test_write_capable_jobs_disable_checkout_credentials() -> None:
         if not isinstance(jobs, dict):
             continue
         for job_name, job in jobs.items():
-            if not isinstance(job, dict) or not _job_has_write_permission(job):
+            if not isinstance(job, dict):
+                continue
+            if not _job_has_write_permission(workflow, job):
                 continue
             for step in job.get("steps") or []:
                 if not isinstance(step, dict):
@@ -609,6 +630,36 @@ def test_write_capable_jobs_disable_checkout_credentials() -> None:
     assert not missing, (
         "write-capable jobs must set persist-credentials: false on checkout:\n"
         + "\n".join(missing)
+    )
+
+
+def test_write_capable_jobs_do_not_checkout_pull_request_merge_refs() -> None:
+    violations: list[str] = []
+    for workflow_path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = _load_yaml(workflow_path)
+        jobs = workflow.get("jobs")
+        if not isinstance(jobs, dict):
+            continue
+        for job_name, job in jobs.items():
+            if not isinstance(job, dict):
+                continue
+            permissions = _effective_permissions(workflow, job)
+            if not _permissions_have_any_write(permissions):
+                continue
+            for step in job.get("steps") or []:
+                if not isinstance(step, dict):
+                    continue
+                uses = str(step.get("uses", ""))
+                if not uses.startswith("actions/checkout@"):
+                    continue
+                checkout_ref = str((step.get("with") or {}).get("ref", ""))
+                if "refs/pull/" in checkout_ref:
+                    violations.append(
+                        f"{workflow_path.name}:{job_name}:{checkout_ref}"
+                    )
+    assert not violations, (
+        "write-capable jobs must not execute pull-request merge refs:\n"
+        + "\n".join(violations)
     )
 
 
