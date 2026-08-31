@@ -578,7 +578,9 @@ _WRITE_PERMISSION_KEYS = (
 )
 
 
-def _effective_permissions(workflow: dict[str, Any], job: dict[str, Any]) -> object:
+def _effective_permissions(
+    workflow: dict[str, Any], job: dict[str, Any]
+) -> object:
     return job["permissions"] if "permissions" in job else workflow.get("permissions")
 
 
@@ -590,7 +592,9 @@ def _permissions_have_any_write(permissions: object) -> bool:
     return any(str(value).lower() == "write" for value in permissions.values())
 
 
-def _job_has_write_permission(workflow: dict[str, Any], job: dict[str, Any]) -> bool:
+def _job_has_write_permission(
+    workflow: dict[str, Any], job: dict[str, Any]
+) -> bool:
     permissions = _effective_permissions(workflow, job)
     if permissions == "write-all":
         return True
