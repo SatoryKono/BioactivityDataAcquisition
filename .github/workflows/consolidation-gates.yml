@@ -38,23 +38,37 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Generate arch-test drift diagnostics
+      - name: Print live and closeout coverage metrics
         run: |
-          set -euxo pipefail
-          uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --update
-          uv run --frozen --no-build python scripts/data_quality/inventory_silver_filters_migration.py
-          uv run --frozen --no-build python -m scripts.engineering.ci.update_test_telemetry_baseline \
-            --source-commit 509605cf5d6c33e655e357d55c9cf4071f254d81 \
-            --source-run-id 33400035056 \
-            --source-event pull_request \
-            --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33400035056
-          git diff -- docs/reports/generated/documentation-cleanup-inventory.json docs/reports/generated/documentation-cleanup-inventory.md
-          git diff -- docs/filters/inventory-baseline.csv docs/filters/inventory-baseline.json docs/filters/inventory-baseline.md
-          git diff -- configs/quality/test_telemetry_baseline.yaml docs/05-engineering/test-telemetry-baseline.md reports/test-telemetry
-          echo "TECH_DEBT_EVIDENCE_HASH"
-          uv run --frozen --no-build python -m scripts.engineering.qa.technical_debt_audit_registry --print-evidence-hash
-          echo "TECH_DEBT_SEMANTIC_SUMMARY"
-          uv run --frozen --no-build python -m scripts.engineering.qa.technical_debt_audit_registry --print-semantic-summary
+          uv run --frozen --no-build python - <<'PY'
+          import json
+          from pathlib import Path
+          from tests.architecture.test_issue_5272_application_core_coverage_closeout import _application_core_summary, _below_default_floor_count
+          root = Path(".")
+          inventory = json.loads((root / "reports/quality/module-coverage-inventory.json").read_text())
+          closeout_5272 = json.loads((root / "reports/quality/issue-5272-application-core-coverage-closeout.json").read_text())
+          closeout_5376 = json.loads((root / "reports/quality/issue-5376-coverage-tail-closeout.json").read_text())
+          closeout_5387 = json.loads((root / "reports/quality/tech-debt-issues-5387-5394-closeout.json").read_text())
+          closeout_5861 = json.loads((root / "reports/quality/tech-debt-issues-5861-5864-closeout.json").read_text())
+          application_core = _application_core_summary(inventory)
+          below_85 = _below_default_floor_count(inventory)
+          dq_row = next(row for row in inventory["modules"] if row["module"] == "bioetl.domain.behavior.dq_rule_evaluator")
+          issue_5392 = next(row for row in closeout_5387["issues"] if row["issue"]["number"] == 5392)
+          print(json.dumps({
+              "live": {
+                  "application_core_covered_line_percent": application_core["covered_line_percent"],
+                  "below_85_module_count": below_85,
+                  "dq_rule_evaluator_coverage_percent": dq_row["coverage_percent"],
+              },
+              "closeout": {
+                  "issue_5272": closeout_5272["current_metrics"],
+                  "issue_5272_parent": closeout_5272["parent_epic_status"],
+                  "issue_5376": closeout_5376["current_live_metrics"],
+                  "issue_5392": issue_5392["current_live_coverage"],
+                  "issue_5861": closeout_5861["metrics"]["dq_rule_evaluator_coverage_percent"],
+              },
+          }, indent=2, sort_keys=True))
+          PY
           exit 1
 
       - name: Ruff format check
