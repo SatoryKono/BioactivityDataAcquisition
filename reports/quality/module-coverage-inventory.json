@@ -49353,7 +49353,13 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-08-28",
+<<<<<<< HEAD
   "source_tree_sha256": "bbca11d26a63935351ed54fc428673f8f5b4d144b4f2a7216e7bf914c61aa52b",
+||||||| 3114fb87be
+  "source_tree_sha256": "6a2a253c9e347c4a85834d890b5029b414c50472977318b2130c1ae4295adb53",
+=======
+  "source_tree_sha256": "3fd4aa01034c20aa69afe66af6ff359ca1410473497bd48765799b5e3057e676",
+>>>>>>> origin/codex/fix-remaining-ci-blockers-20260831
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
