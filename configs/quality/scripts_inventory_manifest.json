@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T15:45:24.895+00:00",
+  "generated_at": "2026-08-31T15:49:36.626+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -11771,13 +11771,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 358,
+          "line": 355,
           "source_group": "tests",
           "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 415,
+          "line": 412,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
