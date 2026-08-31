@@ -325,16 +325,13 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
         "-m",
         "pip_audit",
         "--skip-editable",
-        "--ignore-vuln",
-        "CVE-2026-3219",
-        "--ignore-vuln",
-        "PYSEC-2026-3721",
         "--cache-dir",
         ".cache/pip-audit",
     ]
     security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
         encoding="utf-8"
     )
+    assert "Do not restore --ignore-vuln for that advisory." in security_workflow
     assert "--ignore-vuln CVE-2026-3219" not in security_workflow
     assert "--ignore-vuln PYSEC-2026-3721" not in security_workflow
 
@@ -490,7 +487,17 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
     for lane_key in ("coverage-local", "coverage"):
         coverage_args = lane_module["LANES"][lane_key]
         assert "--ignore=tests/unit/scripts" in coverage_args
+        assert "--ignore=tests/unit/memory" in coverage_args
+        assert "--ignore=tests/integration/memory" in coverage_args
+        assert "--ignore=tests/unit/repo_backed" in coverage_args
         assert "--cov-fail-under=85" in coverage_args
+        assert "--cov-report=term:skip-covered" in coverage_args
+        assert "--cov-report=term-missing" not in coverage_args
+        assert not any(
+            arg == "--cov-report=html:reports/coverage/htmlcov"
+            or arg.startswith("--cov-report=html")
+            for arg in coverage_args
+        )
 
     scripts_lane = matrix_lanes["unit-scripts-tooling"]
     assert scripts_lane["paths"] == ["tests/unit/scripts/"]
