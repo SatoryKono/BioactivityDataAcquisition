@@ -447,9 +447,10 @@ def _configure_windows_local_basetemp(config: pytest.Config) -> None:
     root = _windows_local_temp_root()
     if root is None:
         return
-    basetemp = root / f"basetemp-{os.getpid()}"
-    basetemp.mkdir(parents=True, exist_ok=True)
-    config.option.basetemp = basetemp
+    # Pytest rm_rf's an existing --basetemp before recreating it. Creating the
+    # leaf here races that cleanup on Windows (WinError 5 on os.scandir).
+    # Point at a unique path that does not exist yet; pytest creates it.
+    config.option.basetemp = root / f"basetemp-{os.getpid()}-{os.urandom(4).hex()}"
 
 
 def _configure_isolated_run_report_root(config: pytest.Config) -> None:

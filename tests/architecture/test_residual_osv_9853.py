@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, cast
 
@@ -90,7 +90,8 @@ def test_residual_osv_exception_has_not_expired() -> None:
     deadline = date.fromisoformat(EXPIRY)
     assert deadline == date(2026, 11, 30)
     assert EXPIRY == "2026-11-30"
-    assert datetime.now(tz=timezone.utc).date() <= deadline, (
+    # UTC clock keeps test-governance date_today_call_sites_max at 0.
+    assert datetime.now(UTC).date() <= deadline, (
         f"residual OSV exception expired on {EXPIRY}; upgrade mermaid/Grafana "
         "or renew the exception with a new dated issue"
     )
@@ -99,14 +100,21 @@ def test_residual_osv_exception_has_not_expired() -> None:
 def test_security_md_and_pip_audit_ignore_are_timeboxed() -> None:
     security_md = SECURITY_MD.read_text(encoding="utf-8")
     workflow = SECURITY_WORKFLOW.read_text(encoding="utf-8")
+    pip_block = next(
+        block
+        for block in (ROOT / "uv.lock").read_text(encoding="utf-8").split("[[package]]")
+        if 'name = "pip"' in block
+    )
     assert "PYSEC-2026-3721" in security_md
     assert EXPIRY in security_md
     assert "#1294" in security_md
     assert "osv-scanner.toml" in security_md
-    assert "--ignore-vuln PYSEC-2026-3721" in workflow
-    assert "--ignore-vuln CVE-2026-3219" in workflow
+    assert "26.2.1" in security_md
+    assert "--ignore-vuln CVE-2026-3219" not in workflow
+    assert "--ignore-vuln PYSEC-2026-3721" not in workflow
     assert EXPIRY in workflow
     assert "#9853" in workflow
+    assert 'version = "26.2.1"' in pip_block
 
 
 def test_mermaid_lockfile_keeps_patched_overrides() -> None:
