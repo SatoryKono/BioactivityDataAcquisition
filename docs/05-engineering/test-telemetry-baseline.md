@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-28'
+  Last verified: '2026-08-31'
 
 ______________________________________________________________________
 
@@ -30,9 +30,11 @@ trend evidence only.
 - Source branch: `main`
 - Source commit: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 - Source run id: `33149935203`
-- Source tree sha256: `6a20b0eb1ec210bfc2622924a312120ee61ebd0058c8ee8ab66a2d542e40b251`
+- Source event: `push`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33149935203`
+- Source tree sha256: `7860ea64e35ac9a0a2a624c911183bdb308355143fa64d1a384e7ddd94a10976`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-28T13:46:26.926300+00:00`
+- Refreshed at (UTC): `2026-08-31T17:07:41.774840+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -70,9 +72,9 @@ trend evidence only.
 | 3 | `11.988` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_subprocess_environment_invariant` | `junit-unit-scripts-tooling.xml` |
 | 4 | `10.945` | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation` | `junit-repo-backed-unit.xml` |
 | 5 | `10.759` | `tests.unit.scripts.docs.passports.test_passport_projector::test_generation_is_byte_deterministic` | `junit-unit-scripts-tooling.xml` |
-| 6 | `10.126` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.xml` |
-| 7 | `10.102` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_tolerates_unavailable_remote_main_baseline_builder` | `junit-unit-scripts-tooling.xml` |
-| 8 | `10.019` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.xml` |
+| 6 | `10.06` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact` | `junit-unit-scripts-tooling.xml` |
+| 7 | `10.046` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_tolerates_unavailable_remote_main_baseline_builder` | `junit-unit-scripts-tooling.xml` |
+| 8 | `9.943` | `tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale` | `junit-unit-scripts-tooling.xml` |
 | 9 | `9.509` | `tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]` | `junit-contract-confidence.xml` |
 | 10 | `8.287` | `tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts` | `junit.integration.xml` |
 
@@ -81,15 +83,15 @@ trend evidence only.
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
 | 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 4 | 47.748 | 21.002 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 47.569 | 17.322 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 47.371 | 17.322 |
 | 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 13.864 | 8.287 |
 | 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.392 | 4.138 |
 | 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.945 | 10.945 |
 | 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.509 | 9.509 |
-| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.271 | 7.271 |
-| 8 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction` | 1 | 7.205 | 7.205 |
-| 9 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 6.906 | 6.906 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.216 | 7.216 |
+| 8 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 7.008 | 7.008 |
+| 9 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 10 | `tests.contract.test_gold_pk_consistency.TestGoldPkConsistency` | 1 | 4.844 | 4.844 |
 
 ## Refresh Procedure
 

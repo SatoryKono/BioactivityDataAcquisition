@@ -39,14 +39,14 @@ Freshness guard: `<=45 days`
 
 | Rank | Zone | Tests | Total Duration (s) | Max Duration (s) |
 |---:|---|---:|---:|---:|
-| 1 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 47.748 | 21.002 |
-| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 47.569 | 17.322 |
+| 1 | `tests.unit.scripts.docs.passports.test_passport_projector` | 4 | 47.748 | 21.002 |
+| 2 | `tests.unit.scripts.qa.test_report_debt_governance_gates` | 4 | 47.371 | 17.322 |
 | 3 | `tests.integration.ci.test_track_d_fixture_control_plane_linkage` | 2 | 13.864 | 8.287 |
 | 4 | `tests.contract.test_normalization_cross_layer_contracts` | 3 | 12.392 | 4.138 |
 | 5 | `tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery` | 1 | 10.945 | 10.945 |
 | 6 | `tests.contract.test_provider_contract_drift_replay` | 1 | 9.509 | 9.509 |
-| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.271 | 7.271 |
-| 8 | `tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction` | 1 | 7.205 | 7.205 |
-| 9 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 6.906 | 6.906 |
-| 10 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 7 | `tests.unit.composition.factories.pipeline.test_registry` | 1 | 7.216 | 7.216 |
+| 8 | `tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures` | 1 | 7.008 | 7.008 |
+| 9 | `tests.unit.scripts.ops.test_recover_renderer` | 1 | 6.004 | 6.004 |
+| 10 | `tests.contract.test_gold_pk_consistency.TestGoldPkConsistency` | 1 | 4.844 | 4.844 |
 

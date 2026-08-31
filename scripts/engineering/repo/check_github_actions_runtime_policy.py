@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -14,6 +15,19 @@ ROOT = Path(__file__).resolve().parents[3]
 WORKFLOWS_DIR = ROOT / ".github/workflows"
 COMPOSITE_ACTIONS_DIR = ROOT / ".github/actions"
 REMOTE_ARTIFACTS_FILE = ROOT / "configs/quality/github_actions_remote_artifacts.yaml"
+# Local composite-action checkouts may vendor node_modules; rglob of those
+# trees times out architecture-fast on Windows.
+_COMPOSITE_ACTION_SKIP_DIRS = frozenset(
+    {
+        ".git",
+        ".venv",
+        ".venv-win",
+        "__pycache__",
+        "dist",
+        "node_modules",
+        "vendor",
+    }
+)
 
 ALLOWED_USES: dict[str, set[str]] = {
     "actions/checkout": {
@@ -114,12 +128,27 @@ REMOTE_SCRIPT_URL_PATTERN = re.compile(
 )
 
 
+def _iter_composite_action_manifests() -> list[Path]:
+    if not COMPOSITE_ACTIONS_DIR.is_dir():
+        return []
+    found: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(
+        COMPOSITE_ACTIONS_DIR, followlinks=False
+    ):
+        dirnames[:] = sorted(
+            name for name in dirnames if name not in _COMPOSITE_ACTION_SKIP_DIRS
+        )
+        for filename in filenames:
+            if filename in {"action.yml", "action.yaml"}:
+                found.append(Path(dirpath, filename))
+    return sorted(found)
+
+
 def iter_yaml_files() -> list[Path]:
     return [
         *sorted(WORKFLOWS_DIR.glob("*.yml")),
         *sorted(WORKFLOWS_DIR.glob("*.yaml")),
-        *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yml")),
-        *sorted(COMPOSITE_ACTIONS_DIR.rglob("action.yaml")),
+        *_iter_composite_action_manifests(),
     ]
 
 
