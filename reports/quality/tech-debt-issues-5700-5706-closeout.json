@@ -95,7 +95,7 @@
       "coverage_xml_present": true,
       "refreshed_at_utc": "2026-08-31T18:16:47.214981+00:00",
       "slowest_total_cases": 49516,
-      "source_commit": "a13dc554f0b9a1f0e2c5df7eb06209177010ede0",
+      "source_commit": "2321a7ffbd59cf4d3e1e112ba2d4b5c692eb3c16",
       "source_run_id": "33423158461",
       "top_slow_zone": {
         "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
