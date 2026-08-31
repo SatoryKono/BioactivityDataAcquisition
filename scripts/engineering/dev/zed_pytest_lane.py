@@ -36,6 +36,7 @@ from scripts.engineering.dev.zed_env_doctor import ensure_ready
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"
 _TESTS_ROOT = "tests/"
+_IGNORE_UNIT_SCRIPTS = "--ignore=tests/unit/scripts"
 _IGNORE_UNIT_REPO_BACKED = "--ignore=tests/unit/repo_backed"
 _VCR_RECORD_NONE = "--vcr-record=none"
 _COMMON = (
@@ -78,7 +79,7 @@ LANES: dict[str, tuple[str, ...]] = {
     ),
     "unit-fast": (
         "tests/unit/",
-        "--ignore=tests/unit/scripts",
+        _IGNORE_UNIT_SCRIPTS,
         _IGNORE_UNIT_REPO_BACKED,
         "-q",
         "-m",
@@ -155,7 +156,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/architecture",
         # Script/tooling tests have a dedicated serial CI lane and can exceed the
         # Windows per-test timeout when instrumented inside this product estimate.
-        "--ignore=tests/unit/scripts",
+        _IGNORE_UNIT_SCRIPTS,
         # Memory proof tests spawn git ls-files; under coverage they exceed the
         # pytest-timeout and do not cover src/bioetl.
         "--ignore=tests/unit/memory",
@@ -180,7 +181,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/e2e",
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
-        "--ignore=tests/unit/scripts",
+        _IGNORE_UNIT_SCRIPTS,
         "--ignore=tests/unit/memory",
         "--ignore=tests/integration/memory",
         _IGNORE_UNIT_REPO_BACKED,
