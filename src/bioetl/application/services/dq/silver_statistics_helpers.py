@@ -6,6 +6,9 @@ from typing import cast
 
 import polars as pl
 
+from bioetl.application.services.dq.silver_statistics_uniqueness import (
+    check_uniqueness_stats as check_uniqueness_stats,
+)
 from bioetl.domain.behavior.dq_serializer import to_dict
 from bioetl.domain.types import JsonDict
 from bioetl.domain.value_objects.dq_report import (
@@ -18,7 +21,6 @@ from bioetl.domain.value_objects.dq_report import (
     NumericDistribution,
     SchemaDriftResult,
     TypeConformanceResult,
-    UniquenessResult,
     ValueDistributionResult,
 )
 
@@ -68,99 +70,6 @@ def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], floa
     overall_null_rate = total_nulls / total_cells if total_cells > 0 else 0.0
     return results, round(overall_null_rate, 4)
 
-
-def check_uniqueness_stats(
-    df: pl.DataFrame,
-    primary_keys: list[str],
-    profile_errors: tuple[type[BaseException], ...],
-) -> UniquenessResult:
-    """Calculate uniqueness and per-column cardinality statistics.
-
-    Args:
-        df: Input Polars DataFrame to compute uniqueness on.
-        primary_keys: List of column names forming the entity primary key.
-        profile_errors: Exception types to catch during per-column cardinality
-            profiling (e.g. Polars errors for unsupported dtypes).
-
-    Returns:
-        UniquenessResult with duplicate count, rate, and per-column cardinality.
-        Returns WARN status if any primary key columns are missing.
-    """
-    if not primary_keys:
-        return UniquenessResult(
-            primary_key="",
-            unique_count=len(df),
-            total_count=len(df),
-            duplicate_rate=0.0,
-            status=DQCheckStatus.PASS,
-        )
-
-    existing_keys = [k for k in primary_keys if k in df.columns]
-    if not existing_keys:
-        return UniquenessResult(
-            primary_key=",".join(primary_keys),
-            unique_count=len(df),
-            total_count=len(df),
-            duplicate_rate=0.0,
-            status=DQCheckStatus.WARN,
-            column_stats={"_note": {"message": "Primary key columns not found"}},
-        )
-
-    total_count = len(df)
-    unique_count = df.select(existing_keys).unique(maintain_order=False).height
-    duplicate_count = total_count - unique_count
-    duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
-
-    column_stats = _profile_column_uniqueness(
-        df,
-        columns=df.columns[:10],
-        total_count=total_count,
-        profile_errors=profile_errors,
-    )
-
-    status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
-    return UniquenessResult(
-        primary_key=",".join(existing_keys),
-        unique_count=unique_count,
-        total_count=total_count,
-        duplicate_rate=round(duplicate_rate, 4),
-        column_stats=column_stats,
-        status=status,
-    )
-
-
-def _profile_column_uniqueness(
-    df: pl.DataFrame,
-    *,
-    columns: list[str],
-    total_count: int,
-    profile_errors: tuple[type[BaseException], ...],
-) -> JsonDict:
-    """Build per-column cardinality evidence with a dtype-safe fallback."""
-    if not columns:
-        return {}
-
-    try:
-        unique_counts = df.select(
-            [pl.col(column).n_unique() for column in columns]
-        ).row(0, named=True)
-    except profile_errors:
-        unique_counts = {}
-        for column in columns:
-            try:
-                unique_counts[column] = df[column].n_unique()
-            except profile_errors:
-                continue
-
-    return {
-        column: {
-            "cardinality": cardinality,
-            "uniqueness_ratio": (
-                round(cardinality / total_count, 4) if total_count else 0.0
-            ),
-        }
-        for column, cardinality in unique_counts.items()
-    }
 
 
 def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:

@@ -7,8 +7,8 @@ Refresh note (2026-08-31): hash-only reconcile after restoring coverage measurem
 from the last valid inventory and adding
 `src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
 Current source baseline is
-`source_module_count=2466` with
-`source_tree_sha256=3fd4aa01034c20aa69afe66af6ff359ca1410473497bd48765799b5e3057e676`.
+`source_module_count=2467` with
+`source_tree_sha256=bbca11d26a63935351ed54fc428673f8f5b4d144b4f2a7216e7bf914c61aa52b`.
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
