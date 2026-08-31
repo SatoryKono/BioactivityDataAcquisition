@@ -10,7 +10,7 @@ Audited branch: fix/redos-inline-secret-20260828
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `facf673e7c847417a52ef51e311d6a38d5fcde497d5e48efeac11f0009d1d8db`
+Evidence surface SHA-256: `0ae567ba8819abeb7de1db97c554c8d26da06b32b59c73eb5a6dd49d4e127f2f`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "facf673e7c847417a52ef51e311d6a38d5fcde497d5e48efeac11f0009d1d8db",
+  "evidence_surface_sha256": "0ae567ba8819abeb7de1db97c554c8d26da06b32b59c73eb5a6dd49d4e127f2f",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
