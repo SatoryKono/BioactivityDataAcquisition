@@ -2314,6 +2314,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
         "docs/00-project/ai/prompts/compatibility/README.md",
         "docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md",
         "docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.architecture.md",
