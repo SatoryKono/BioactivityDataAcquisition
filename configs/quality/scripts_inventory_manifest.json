@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T21:33:03.237397+00:00",
+  "generated_at": "2026-08-31T22:42:13.481625+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -4147,7 +4147,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1354,
+          "line": 1355,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
