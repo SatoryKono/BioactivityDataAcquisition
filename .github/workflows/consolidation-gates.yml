@@ -39,7 +39,15 @@ jobs:
           uv-sync-args: "--frozen --dev"
 
       - name: Ruff check
-        run: uv run --frozen --no-build ruff check .
+        run: |
+          set +e
+          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
+          refresh_status=$?
+          echo "REFRESH_STATUS=${refresh_status}"
+          echo "CHANGED_FILES_BEGIN"
+          git diff --name-only
+          echo "CHANGED_FILES_END"
+          exit 1
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
