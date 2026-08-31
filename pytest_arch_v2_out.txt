@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 4659 items
+
+tests\architecture\domain\test_aggregate_fsm_transitions.py ............ [  0%]
+...........................................................              [  1%]
+tests\architecture\test_actions_artifact_storage_policy.py ....          [  1%]
+tests\architecture\test_adapter_contracts.py ..................          [  1%]
+tests\architecture\test_adapter_http_client_enforcement.py ..            [  2%]
+tests\architecture\test_adapter_port_conformance.py .........            [  2%]
+tests\architecture\test_add_svg_text_fallback.py .......                 [  2%]
+tests\architecture\test_adr_enforcement_matrix.py ....                   [  2%]
+tests\architecture\test_adr_registry_governance_sync.py ...              [  2%]
+tests\architecture\test_aggregate_boundaries.py .........                [  2%]
+tests\architecture\test_ai_memory_program_contracts.py ....              [  2%]
+tests\architecture\test_ai_runtime_governance_links.py .                 [  2%]
+tests\architecture\test_ai_session_memory_placement.py .                 [  2%]
+tests\architecture\test_ai_vibe_surface_contract.py ....                 [  2%]
+tests\architecture\test_antipatterns.py .
