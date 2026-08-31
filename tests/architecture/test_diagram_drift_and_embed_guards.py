@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import re
+import stat
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -37,6 +38,23 @@ _DECL_LINE_RE = re.compile(
     flags=re.IGNORECASE,
 )
 _PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
+# Match documentation_sync active-doc exclusions, plus diagram companion dumps
+# that F014 does not author. Scanning those trees on Windows cloud checkouts
+# can block in read_text() until pytest-timeout (90s) fires.
+_SKIPPED_DIR_NAMES = frozenset(
+    {"99-archive", "archive", "reports", "site", "exports", "generated"}
+)
+_DIAGRAM_COMPANION_DIR_NAMES = frozenset({"descriptions", "bundles"})
+_MERMAID_FENCE_MARKERS = (b"```mermaid", b"``` mermaid")
+# Authored docs in this tree stay well under 400 KiB; refuse multi-MB slurps.
+_MAX_ACTIVE_DOC_BYTES = 1_048_576
+# Windows cloud placeholders (OneDrive/Google Drive). Reading them hydrates
+# remotely and can hang the 90s architecture-fast budget.
+_FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x00040000
+_FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
+_CLOUD_PLACEHOLDER_ATTRIBUTES = (
+    _FILE_ATTRIBUTE_RECALL_ON_OPEN | _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS
+)
 
 
 def _load_apply_elk_layout() -> ModuleType:
@@ -68,11 +86,53 @@ def _rendered_stems(source_dir: Path, rendered_dir_name: str, suffix: str) -> se
     return {p.stem for p in rendered_dir.glob(f"*{suffix}") if p.is_file()}
 
 
+def _prune_walk_dirnames(root: Path, dirpath: str, dirnames: list[str]) -> None:
+    """Drop archive/generated/companion trees before os.walk descends."""
+    base = Path(dirpath)
+    try:
+        rel_parts = base.relative_to(root).parts
+    except ValueError:
+        dirnames[:] = []
+        return
+    skip = set(_SKIPPED_DIR_NAMES)
+    if rel_parts[:2] == ("02-architecture", "diagrams"):
+        skip |= _DIAGRAM_COMPANION_DIR_NAMES
+    dirnames[:] = [item for item in dirnames if item not in skip]
+
+
+def _is_cloud_placeholder(st: os.stat_result) -> bool:
+    attrs = int(getattr(st, "st_file_attributes", 0) or 0)
+    return bool(attrs & _CLOUD_PLACEHOLDER_ATTRIBUTES)
+
+
+def _read_active_markdown_lines(path: Path) -> list[str] | None:
+    """Return lines only for regular local files that contain a mermaid fence."""
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    if not stat.S_ISREG(st.st_mode) or _is_cloud_placeholder(st):
+        return None
+    if st.st_size > _MAX_ACTIVE_DOC_BYTES:
+        raise AssertionError(
+            f"{path} is {st.st_size} bytes; F014 refuses to slurp files larger "
+            f"than {_MAX_ACTIVE_DOC_BYTES} bytes"
+        )
+    if st.st_size == 0:
+        return None
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    if not any(marker in raw for marker in _MERMAID_FENCE_MARKERS):
+        return None
+    return raw.decode("utf-8").splitlines()
+
+
 def _active_markdown_paths(root: Path) -> list[Path]:
-    skipped_dirs = {"99-archive", "reports", "site"}
     paths: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [item for item in dirnames if item not in skipped_dirs]
+        _prune_walk_dirnames(root, dirpath, dirnames)
         base = Path(dirpath)
         for filename in filenames:
             if not filename.endswith(".md"):
@@ -161,6 +221,26 @@ def test_apply_elk_default_dir_is_canonical() -> None:
     )
 
 
+def test_active_markdown_paths_skip_generated_companion_trees() -> None:
+    """F014 walks authored docs, not generated diagram dumps or export trees."""
+    relative = [
+        path.relative_to(DOCS_ROOT).as_posix()
+        for path in _active_markdown_paths(DOCS_ROOT)
+    ]
+    assert relative
+    assert all(not item.startswith("99-archive/") for item in relative)
+    assert all(not item.startswith("exports/") for item in relative)
+    assert all("/generated/" not in f"/{item}/" for item in relative)
+    assert all(
+        not item.startswith("02-architecture/diagrams/descriptions/")
+        for item in relative
+    )
+    assert all(
+        not item.startswith("02-architecture/diagrams/bundles/") for item in relative
+    )
+    assert "02-architecture/system-context.md" in relative
+
+
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
 
@@ -201,9 +281,8 @@ def test_embedded_mermaid_in_active_docs_valid() -> None:
 
     issues: list[str] = []
     for md_path in md_paths:
-        try:
-            lines = md_path.read_text(encoding="utf-8").splitlines()
-        except OSError:
+        lines = _read_active_markdown_lines(md_path)
+        if lines is None:
             continue
         blocks = iter_fenced_mermaid_blocks(lines)
         for block_lines, start_ln in blocks:
