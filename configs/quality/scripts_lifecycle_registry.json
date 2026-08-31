@@ -409,21 +409,9 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/ai/prompts/compile.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic compiler implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
     "scripts/ai/prompts/diff.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the prompt library diff helper used by compatibility workflows behind the canonical `python -m scripts.ai prompts` surface; do not promote this file as an additional standalone command.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ai/prompts/lint.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the prompt-policy lint implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
@@ -442,12 +430,6 @@
     "scripts/ai/prompts/render.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prompt Library rendering helper behind the canonical python -m scripts.ai.prompts command surface; do not promote this implementation module into a duplicate active CLI.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ai/prompts/verify.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the prompt-contract verification implementation imported by the prompt test suite; keep it supporting while the prompt package remains the governed entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
@@ -889,6 +871,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
     },
+    "scripts/engineering/qa/docker_stability_campaign/trivy_baseline.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/qa/docker_stability_campaign/promotion.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable.",
@@ -912,12 +900,6 @@
       "next_step": "Retain as the shared stage-state, baseline, and restoration helper behind the opt-in Docker stability campaign; keep resumability evidence atomic and fail-closed.",
       "owner": "@bioetl-platform",
       "review_by": "2026-10-15"
-    },
-    "scripts/engineering/qa/docker_stability_campaign/trivy_baseline.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic RF-001 Trivy JSON and GitHub alert normalization helper used by docker.yml and its owning unit tests; do not expose another active script entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     },
     "scripts/engineering/qa/extract_uniprot_semantic_payload_vocab.py": {
       "decision": "shared_helper_module",
@@ -1195,12 +1177,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/engineering/repo/github_settings_review.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the read-only GitHub settings review implementation covered by governance contract tests; keep it supporting while workflow execution is owned by the repository-local action.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
     "scripts/engineering/repo/publish_tdx_audit_issues.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget.",
@@ -1248,18 +1224,6 @@
       "next_step": "Retain as the context-aware Neo4j audit connection helper while deployment and live-audit runbooks reference scripts/ops/data/neo4j_audit.py; fold it into a broader canonical ops helper surface only if the audit workflow is consolidated.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
-    },
-    "scripts/ops/launchers/codex/verify-setup.bat": {
-      "decision": "windows_compatibility_wrapper",
-      "next_step": "Retain as the cmd.exe compatibility facade over verify-setup.ps1; keep setup verification behavior in the canonical run-codex.ps1 check path and remove this wrapper only after batch callers are retired.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ops/launchers/codex/verify-setup.ps1": {
-      "decision": "windows_compatibility_wrapper",
-      "next_step": "Retain as the legacy PowerShell setup-verification facade over scripts/ai/codex/run-codex.ps1 check; keep the canonical launcher as the behavior owner and remove this facade after documented compatibility callers migrate.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     },
     "scripts/ops/maintenance/github/remove_required_status_check.sh": {
       "decision": "legacy_manual_utility",
@@ -1333,18 +1297,6 @@
       "owner": "@bioetl-observability",
       "review_by": "2026-09-30"
     },
-    "scripts/ops/observability/grafana/dashboard_context_links.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
-    },
     "scripts/ops/observability/grafana/ensure_quarantine_explorer.py": {
       "decision": "compatibility_wrapper",
       "next_step": "Retain only as the fail-closed compatibility stub for the removed Quarantine Explorer command; keep it supporting while documented legacy invocations must receive the explicit exit-2 retirement message.",
@@ -1392,6 +1344,12 @@
       "next_step": "Retain as a Windows compatibility helper while screenshot orchestration remains primarily Linux/WSL-driven; promote to active utility only if a Windows-native observability flow is formally governed. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ops/observability/grafana/dashboard_context_links.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
     },
     "scripts/ops/observability/grafana/render_nav_bus.py": {
       "decision": "legacy_manual_utility",
@@ -1470,6 +1428,18 @@
       "next_step": "Retain as a bounded manual CodeRabbit review launcher; keep it supporting unless promoted to a governed CI-only review workflow.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/launchers/codex/verify-setup.bat": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as the cmd.exe compatibility facade over verify-setup.ps1; keep setup verification behavior in the canonical run-codex.ps1 check path and remove this wrapper only after batch callers are retired.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ops/launchers/codex/verify-setup.ps1": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as the legacy PowerShell setup-verification facade over scripts/ai/codex/run-codex.ps1 check; keep the canonical launcher as the behavior owner and remove this facade after documented compatibility callers migrate.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     },
     "scripts/ops/runtime/docker/_rf017_finalize_observation.py": {
       "decision": "shared_helper_module",
@@ -1626,6 +1596,36 @@
       "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
+    },
+    "scripts/ops/observability/grafana/dashboard_state_fixture_v2.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-17"
+    },
+    "scripts/ai/prompts/compile.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic compiler implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ai/prompts/lint.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the prompt-policy lint implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ai/prompts/verify.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the prompt-contract verification implementation imported by the prompt test suite; keep it supporting while the prompt package remains the governed entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/engineering/repo/github_settings_review.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the read-only GitHub settings review implementation covered by governance contract tests; keep it supporting while workflow execution is owned by the repository-local action.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"
