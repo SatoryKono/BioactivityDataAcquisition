@@ -71,7 +71,6 @@ def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], floa
     return results, round(overall_null_rate, 4)
 
 
-
 def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:
     """Check for mixed/object columns and build conformance result.
 
