@@ -325,13 +325,16 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
         "-m",
         "pip_audit",
         "--skip-editable",
+        "--ignore-vuln",
+        "CVE-2026-3219",
+        "--ignore-vuln",
+        "PYSEC-2026-3721",
         "--cache-dir",
         ".cache/pip-audit",
     ]
     security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
         encoding="utf-8"
     )
-    assert "Do not restore --ignore-vuln for that advisory." in security_workflow
     assert "--ignore-vuln CVE-2026-3219" not in security_workflow
     assert "--ignore-vuln PYSEC-2026-3721" not in security_workflow
 

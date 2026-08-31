@@ -56,7 +56,7 @@ drift is currently clear (`stale_artifacts` are all false in
 release-gate failures rather than hidden warning-only coverage drift. Module
 coverage currently reports `0` unmeasured and `0` uncovered source modules
 from the committed coverage inventory (debt-governance gates). That is a module-inventory fact, not
-a blanket line/branch coverage guarantee: `858` modules
+a blanket line/branch coverage guarantee: `893` modules
 remain partially covered and line/branch coverage must be read from the
 `coverage-verify` artifacts. Read-only
 audit evidence should use
