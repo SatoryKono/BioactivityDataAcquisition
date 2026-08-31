@@ -578,9 +578,7 @@ _WRITE_PERMISSION_KEYS = (
 )
 
 
-def _effective_permissions(
-    workflow: dict[str, Any], job: dict[str, Any]
-) -> object:
+def _effective_permissions(workflow: dict[str, Any], job: dict[str, Any]) -> object:
     return job["permissions"] if "permissions" in job else workflow.get("permissions")
 
 
@@ -614,9 +612,9 @@ def test_write_capable_jobs_disable_checkout_credentials() -> None:
         if not isinstance(jobs, dict):
             continue
         for job_name, job in jobs.items():
-            if not isinstance(job, dict) or not _job_has_write_permission(
-                workflow, job
-            ):
+            if not isinstance(job, dict):
+                continue
+            if not _job_has_write_permission(workflow, job):
                 continue
             for step in job.get("steps") or []:
                 if not isinstance(step, dict):
