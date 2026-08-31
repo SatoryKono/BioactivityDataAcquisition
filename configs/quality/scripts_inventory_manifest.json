@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T06:32:58.390274+00:00",
+  "generated_at": "2026-08-31T07:10:18.414406+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -10,8 +10,8 @@
     "reference_group_coverage": {
       "agents": 7,
       "build": 17,
-      "ci": 83,
-      "docs": 255,
+      "ci": 82,
+      "docs": 254,
       "other": 74,
       "scripts": 505,
       "skills": 12,
@@ -10465,7 +10465,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 258,
+      "reference_count": 259,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -17807,20 +17807,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".github/workflows/github-settings-quarterly-review.yml",
-          "line": 31,
-          "source_group": "ci",
-          "text": "python scripts/engineering/repo/github_settings_review.py"
-        },
-        {
-          "path": "docs/05-operations/runbooks/github-settings-quarterly-review.md",
-          "line": 50,
-          "source_group": "docs",
-          "text": "python scripts/engineering/repo/github_settings_review.py --json-out reports/quality/github-settings-review.json --markdown-out reports/quality/github-settings-review.md"
-        },
         {
           "path": "tests/architecture/test_github_governance_review.py",
           "line": 13,
@@ -17829,13 +17817,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 144,
+          "line": 159,
           "source_group": "tests",
-          "text": "assert \"scripts/engineering/repo/github_settings_review.py\" in workflow"
+          "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 145,
+          "line": 160,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
@@ -21042,7 +21030,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1245,
+          "line": 1246,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -23184,7 +23172,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1182,
+          "line": 1183,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -23252,7 +23240,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1182,
+          "line": 1183,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
