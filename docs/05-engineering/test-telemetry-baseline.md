@@ -28,11 +28,11 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `fix/pr-9882-live-review-config`
-- Source commit: `a13dc554f0b9a1f0e2c5df7eb06209177010ede0`
+- Source commit: `2321a7ffbd59cf4d3e1e112ba2d4b5c692eb3c16`
 - Source run id: `33423158461`
 - Source event: `pull_request`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33423158461`
-- Source tree sha256: `b77e8f4292d8606e470c6003d9aad4ef02834845561491af48a89d1819dece6e`
+- Source tree sha256: `6002eed9bacc24844f43351f2cc6c2858a4ff590456fb671a804f5db84a06997`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-08-31T18:16:47.214981+00:00`
 

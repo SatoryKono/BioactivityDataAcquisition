@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T16:14:27.496470+00:00",
+  "generated_at": "2026-08-31T20:08:22.041815+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -6613,7 +6613,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_drift_and_embed_guards.py",
-          "line": 43,
+          "line": 63,
           "source_group": "tests",
           "text": "module_path = REPO_ROOT / \"scripts\" / \"diagrams\" / \"fix\" / \"apply_elk_layout.py\""
         }
