@@ -156,7 +156,11 @@ def write_debug_xlsx(
     *,
     max_rows_per_sheet: int,
 ) -> None:
-    from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
+    # Keep the mypy ignore on the `from openpyxl import (` line. Ruff wrapping
+    # onto `Workbook` does not suppress [import-untyped] ("stubs not installed").
+    from openpyxl import (  # type: ignore[import-untyped]
+        Workbook,  # pyright: ignore[reportMissingModuleSource]
+    )
 
     workbook = Workbook()
     deterministic_timestamp = datetime(1980, 1, 1)

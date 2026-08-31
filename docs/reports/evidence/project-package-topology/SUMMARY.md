@@ -3,6 +3,13 @@
 Дата: 2026-08-17
 Статус: refreshed
 
+Refresh note (2026-08-31): hash-only reconcile after restoring coverage measurements
+from the last valid inventory and adding
+`src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
+Current source baseline is
+`source_module_count=2466` with
+`source_tree_sha256=c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb`.
+
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
 Refresh note (2026-08-20): TYP-RF RF-007 hash-only reconcile on origin/main after SNR-RF RF-002 (#9143); `source_tree_sha256` now matches `reports/quality/module-coverage-inventory.json`.

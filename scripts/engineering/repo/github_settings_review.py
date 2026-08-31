@@ -627,7 +627,23 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+_ALLOWED_POLICY_RELPATH = __import__("re").compile(r"^[A-Za-z0-9._/-]+$")
+
+
+def _safe_policy_path(path: Path, repo_root: Path | None = None) -> Path:
+    # S8707 path-injection guard — policy path must stay inside repo and not escape via traversal/symlink.
+    root = (repo_root or Path(__file__).resolve().parents[3]).resolve()
+    rel = path.as_posix() if path.is_absolute() else path.as_posix()
+    if not _ALLOWED_POLICY_RELPATH.match(rel) or ".." in rel.split("/"):
+        raise ValueError(f"invalid policy path: {path}")
+    resolved = (root / path).resolve() if not path.is_absolute() else path.resolve()
+    if resolved != root and not str(resolved).startswith(str(root) + __import__("os").sep):
+        raise ValueError(f"policy path escapes repo root: {path}")
+    return resolved
+
+
 def _load_policy(path: Path) -> dict[str, Any]:
+    path = _safe_policy_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("schema_version") != "1.0":
         raise GitHubReviewError("unsupported GitHub governance policy schema")

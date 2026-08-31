@@ -34,7 +34,7 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
-      "line": "1128",
+      "line": "1127",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -650,7 +650,7 @@
     "weak_no_value": 0
   },
   "assertless_examples": [
-    "tests/architecture/test_quality_debt_scorecard.py:1128",
+    "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
     "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -949,14 +949,7 @@
     }
   },
   "assertless_total_candidates": 87,
-  "budget_violations": [
-    {
-      "actual": 1,
-      "budget": "date_today_call_sites_max",
-      "expected_max": 0,
-      "metric": "date_today_call_sites"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1100,7 +1093,7 @@
       "test_count": 41
     }
   },
-  "date_today_call_sites": 1,
+  "date_today_call_sites": 0,
   "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
     "cross_file_groups": 0,
@@ -1179,7 +1172,7 @@
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
-        "line": "1128",
+        "line": "1127",
         "path": "tests/architecture/test_quality_debt_scorecard.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -1795,7 +1788,7 @@
       "weak_no_value": 0
     },
     "assertless_examples": [
-      "tests/architecture/test_quality_debt_scorecard.py:1128",
+      "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
       "tests/unit/application/core/test_batch_metrics_accounting.py:48",
@@ -1965,7 +1958,7 @@
         "test_count": 41
       }
     },
-    "date_today_call_sites": 1,
+    "date_today_call_sites": 0,
     "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
       "cross_file_groups": 0,
@@ -2013,8 +2006,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2397,
-      "test_python_file_count": 2628,
+      "test_glob_file_count": 2398,
+      "test_python_file_count": 2629,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2055,18 +2048,18 @@
       "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2397,
-    "total_test_functions": 25225,
+    "total_test_files": 2398,
+    "total_test_functions": 25238,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b72b7e5b377215ce088087d5358e681261f5bd1fb322756d0b6b49b431d75419",
+  "source_tree_sha256": "6e095027918473a9991982bde88dfed2bab58cbb912d7438c55a52be8de7b721",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
     "compatibility_test_files": 0,
-    "date_today_call_sites": 1,
+    "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
@@ -2081,8 +2074,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2397,
-    "test_python_file_count": 2628,
+    "test_glob_file_count": 2398,
+    "test_python_file_count": 2629,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2123,8 +2116,8 @@
     "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2397,
-  "total_test_functions": 25225,
+  "total_test_files": 2398,
+  "total_test_functions": 25238,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

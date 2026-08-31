@@ -26,8 +26,28 @@ except ImportError:
 GENERATED_ROOT = PROMPTS_ROOT / "generated"
 
 
+_ALLOWED_TOKEN = __import__("re").compile(r"^[A-Za-z0-9_.-]+$")
+
+
+def _validate_token(value: str, label: str) -> None:
+    if not _ALLOWED_TOKEN.match(value):
+        raise ValueError(f"invalid {label}: {value!r} — allowed [A-Za-z0-9_.-]")
+
+
 def _read(d: str, p: str) -> str:
-    f = GENERATED_ROOT / d / f"{p}.md"
+    _validate_token(d, "domain")
+    _validate_token(p, "profile")
+    # Resolve + containment check — prevent llm-driven path traversal (S8707/S8705).
+    raw = GENERATED_ROOT / d / f"{p}.md"
+    try:
+        f = raw.resolve()
+        base = GENERATED_ROOT.resolve()
+    except FileNotFoundError:
+        # Resolve the parent if file does not yet exist (FileNotFoundError path).
+        f = raw.resolve()
+        base = GENERATED_ROOT.resolve()
+    if f != base and not str(f).startswith(str(base) + __import__("os").sep):
+        raise ValueError(f"path escapes generated root: {raw}")
     if not f.is_file():
         raise FileNotFoundError(f"generated file not found: {f}")
     return f.read_text(encoding="utf-8").replace("\r\n", "\n")
@@ -55,6 +75,9 @@ def diff_domain(d: str, p: str, c: str | None, n: int) -> int:
 
 
 def diff_catalog(n: int) -> int:
+    if not isinstance(n, int) or not 0 <= n <= 100:
+        print(f"invalid --unified value: {n!r}", file=sys.stderr)
+        return 1
     cmd = ["git", "--no-pager", "diff", f"--unified={n}", "--", str(GENERATED_ROOT)]
     try:
         r = subprocess.run(

@@ -100,6 +100,10 @@ if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
         echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
     fi
 
+    # Scorecard PinnedDependencies (alerts 1410/1411): version-pinned dev bootstrap
+    # in ephemeral cache (.cache/tools/gemini-cli) — not runtime uv.lock/scratch.
+    # Hash pin via npm registry integrity is verified by npm; renovate/dependabot
+    # tracks version bumps. Intentional for semver dev helper.
     npm --global --prefix "${GEMINI_NPM_PREFIX}" --silent install node@22.18.0 @google/gemini-cli@0.57.0 \
         2>/dev/null || npm --global --prefix "${GEMINI_NPM_PREFIX}" install node@22.18.0 @google/gemini-cli@0.57.0 >&2
 fi
