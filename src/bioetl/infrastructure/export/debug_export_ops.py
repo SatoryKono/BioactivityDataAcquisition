@@ -156,9 +156,7 @@ def write_debug_xlsx(
     *,
     max_rows_per_sheet: int,
 ) -> None:
-    from openpyxl import (
-        Workbook,  # pyright: ignore[reportMissingModuleSource]
-    )
+    from openpyxl import Workbook  # pyright: ignore[reportMissingModuleSource]
 
     workbook = Workbook()
     deterministic_timestamp = datetime(1980, 1, 1)

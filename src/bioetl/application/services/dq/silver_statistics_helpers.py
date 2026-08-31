@@ -119,36 +119,12 @@ def check_uniqueness_stats(
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
 
-    column_stats: JsonDict = {}
-    cols_to_check = df.columns[:10]
-    if cols_to_check:
-        try:
-            # Vectorize cardinality check to avoid massive FFI overhead in python loop
-            unique_counts = df.select(
-                [pl.col(c).n_unique() for c in cols_to_check]
-            ).row(0, named=True)
-            for col, cardinality in unique_counts.items():
-                column_stats[col] = {
-                    "cardinality": cardinality,
-                    "uniqueness_ratio": (
-                        round(cardinality / total_count, 4) if total_count > 0 else 0.0
-                    ),
-                }
-        except profile_errors:
-            # Fallback to loop if vectorized n_unique fails on specific dtypes
-            for col in cols_to_check:
-                try:
-                    cardinality = df[col].n_unique()
-                    column_stats[col] = {
-                        "cardinality": cardinality,
-                        "uniqueness_ratio": (
-                            round(cardinality / total_count, 4)
-                            if total_count > 0
-                            else 0.0
-                        ),
-                    }
-                except profile_errors:
-                    continue
+    column_stats = _profile_column_uniqueness(
+        df,
+        columns=df.columns[:10],
+        total_count=total_count,
+        profile_errors=profile_errors,
+    )
 
     status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
     return UniquenessResult(
@@ -159,6 +135,40 @@ def check_uniqueness_stats(
         column_stats=column_stats,
         status=status,
     )
+
+
+def _profile_column_uniqueness(
+    df: pl.DataFrame,
+    *,
+    columns: list[str],
+    total_count: int,
+    profile_errors: tuple[type[BaseException], ...],
+) -> JsonDict:
+    """Build per-column cardinality evidence with a dtype-safe fallback."""
+    if not columns:
+        return {}
+
+    try:
+        unique_counts = df.select(
+            [pl.col(column).n_unique() for column in columns]
+        ).row(0, named=True)
+    except profile_errors:
+        unique_counts = {}
+        for column in columns:
+            try:
+                unique_counts[column] = df[column].n_unique()
+            except profile_errors:
+                continue
+
+    return {
+        column: {
+            "cardinality": cardinality,
+            "uniqueness_ratio": (
+                round(cardinality / total_count, 4) if total_count > 0 else 0.0
+            ),
+        }
+        for column, cardinality in unique_counts.items()
+    }
 
 
 def check_type_conformance_stats(df: pl.DataFrame) -> TypeConformanceResult:

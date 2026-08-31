@@ -409,9 +409,21 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/ai/prompts/compile.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the deterministic compiler implementation behind `python -m scripts.ai.prompts compile`; keep contributor and CI invocation routed through the package entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/ai/prompts/diff.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the prompt library diff helper used by compatibility workflows behind the canonical `python -m scripts.ai prompts` surface; do not promote this file as an additional standalone command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ai/prompts/lint.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the prompt lint implementation behind `python -m scripts.ai.prompts lint`; keep contributor and CI invocation routed through the package entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
@@ -430,6 +442,12 @@
     "scripts/ai/prompts/render.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the Prompt Library rendering helper behind the canonical python -m scripts.ai.prompts command surface; do not promote this implementation module into a duplicate active CLI.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
+    "scripts/ai/prompts/verify.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the prompt verification implementation behind `python -m scripts.ai.prompts verify`; keep contributor and CI invocation routed through the package entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
@@ -1177,6 +1195,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/repo/github_settings_review.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the read-only GitHub governance review implementation behind `python -m scripts.engineering.repo github-settings-review`; keep workflow and runbook invocation routed through the package entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-30"
+    },
     "scripts/engineering/repo/publish_tdx_audit_issues.py": {
       "decision": "legacy_manual_utility",
       "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget.",
@@ -1602,30 +1626,6 @@
       "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
-    },
-    "scripts/ai/prompts/compile.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the deterministic compiler implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ai/prompts/lint.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the prompt-policy lint implementation inside the governed prompt package; keep lifecycle accounting on the package entrypoint and promote only if this module becomes a separately governed public surface.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/ai/prompts/verify.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the prompt-contract verification implementation imported by the prompt test suite; keep it supporting while the prompt package remains the governed entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
-    },
-    "scripts/engineering/repo/github_settings_review.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the read-only GitHub settings review implementation covered by governance contract tests; keep it supporting while workflow execution is owned by the repository-local action.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"

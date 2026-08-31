@@ -33,7 +33,10 @@ import polars as pl
 import pytest
 
 from bioetl.application.services.dq.silver_statistics_helpers import (
+    _categorical_row_value_count,
+    _profile_column_uniqueness,
     check_content_hash_integrity_stats,
+    check_deduplication_stats,
     check_null_rates_stats,
     check_schema_drift_stats,
     check_uniqueness_stats,
@@ -206,3 +209,42 @@ class TestSilverStatisticsHelpers:
         assert (
             result["categorical_columns"]["category"]["top_values"][0]["value"] == "a"
         )
+
+@pytest.mark.unit
+def test_helper_edge_paths_cover_safe_fallbacks() -> None:
+    """Fallback helpers keep empty and unsupported inputs fail-closed."""
+    df = pl.DataFrame({"entity_id": ["e1", "e2"]})
+
+    no_key = check_uniqueness_stats(df, [], (RuntimeError,))
+    assert no_key.status == DQCheckStatus.PASS
+    assert no_key.unique_count == 2
+
+    dedupe = check_deduplication_stats(2, 3, None)
+    assert dedupe.duplicates_by_content_hash == 0
+    assert dedupe.duplicates_by_business_key == 1
+
+    no_collision = check_content_hash_integrity_stats(2, 0)
+    assert no_collision.status == DQCheckStatus.PASS
+
+    fallback = _profile_column_uniqueness(
+        df,
+        columns=["missing", "entity_id"],
+        total_count=2,
+        profile_errors=(pl.exceptions.ColumnNotFoundError,),
+    )
+    assert fallback["entity_id"]["cardinality"] == 2
+    assert "missing" not in fallback
+
+    assert _categorical_row_value_count(
+        {"value": "x", "counts": 3}, "category"
+    ) == ("x", 3)
+    assert _categorical_row_value_count(
+        {"category": "x", "count": "invalid"}, "category"
+    ) == ("x", 0)
+    assert profile_numeric_column(
+        df, "missing", (pl.exceptions.ColumnNotFoundError,)
+    ) is None
+    assert profile_categorical_column(
+        df, "missing", (pl.exceptions.ColumnNotFoundError,)
+    ) is None
+
