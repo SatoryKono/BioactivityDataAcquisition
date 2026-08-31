@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Zed xenon gate:** `Audit: complexity` invokes the `xenon` console script
+  (CI-aligned) instead of `python -m xenon`, which has no `__main__` module, and
+  fails closed through the environment doctor when extra `dev` is missing.
+
 - **Root hygiene:** untrack `.jules/` (Bolt note from #9863). File policy already
   requires `.jules/` to stay gitignored, not a tracked root directory.
   Sync RULES.md appendix through ADR-060; refresh architecture dependency map

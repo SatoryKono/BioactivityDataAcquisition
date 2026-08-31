@@ -46,8 +46,8 @@
       "status": "pass"
     },
     {
-      "current": "d4089dd05cd1b175dccf487be73c05a8e0ae78cf2e64f99401d7e8748031c424",
-      "limit": "d4089dd05cd1b175dccf487be73c05a8e0ae78cf2e64f99401d7e8748031c424",
+      "current": "c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb",
+      "limit": "c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -57,15 +57,15 @@
     {
       "current": {
         "source_module_count": 2466,
-        "source_tree_sha256": "d4089dd05cd1b175dccf487be73c05a8e0ae78cf2e64f99401d7e8748031c424",
-        "uncovered_module_count": 303,
-        "unmeasured_module_count": 9
+        "source_tree_sha256": "c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2466,
-        "source_tree_sha256": "d4089dd05cd1b175dccf487be73c05a8e0ae78cf2e64f99401d7e8748031c424",
-        "uncovered_module_count": 303,
-        "unmeasured_module_count": 9
+        "source_tree_sha256": "c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,22 +74,22 @@
       "status": "pass"
     },
     {
-      "current": 9,
+      "current": 0,
       "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
-      "current": 303,
+      "current": 0,
       "limit": 0,
       "metric": "uncovered_module_count",
       "name": "module_coverage_uncovered_modules",
       "remediation": "Keep reviewed uncovered-module residual at or below the committed no-growth ratchet.",
       "source_artifact": "configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -253,13 +253,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -406,27 +406,25 @@
       "status": "pass"
     },
     {
-      "current": "bd58c22076fbbd2d923cf2964d5cdcc3bcd5de1e058101f51f9991fcaa65e5f2",
+      "current": "db481facc9c4e5393c41a1d2cc0585f8c207fe7238e4aa6701ffbba07aebc2c0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
-        "artifacts": [
-          "remote_main_baseline"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: remote_main_baseline",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -457,25 +455,22 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 4,
-    "pass": 41,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.04,
-    "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
-    "fail_count": 4,
+    "architecture_quality_scorecard_integral_score": 9.14,
+    "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
+    "fail_count": 1,
     "failing_gates": [
-      "module_coverage_unmeasured_modules",
-      "module_coverage_uncovered_modules",
-      "test_governance_budget_violations",
-      "generated_artifact_drift"
+      "remote_main_architecture_debt_baseline"
     ],
     "gate_count": 45,
-    "pass_count": 41,
+    "pass_count": 44,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

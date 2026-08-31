@@ -1,4 +1,4 @@
-# mypy: disable-error-code="misc"
+# mypy: disable-error-code="misc,untyped-decorator"
 """Common/shared ChEMBL Pydantic models used across endpoint-specific modules."""
 
 from __future__ import annotations
