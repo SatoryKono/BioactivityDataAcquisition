@@ -27,6 +27,16 @@ jobs:
           uv-extras: dev
           enable-pytest-cache: "false"
 
+      - name: Generate and validate canonical governance payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
+          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts --check
+          git diff --check
+          git diff --exit-code --             .             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.json'             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.md'             ':(exclude)reports/quality/debt-governance-gates.json'             ':(exclude)reports/quality/debt-governance-gates.md'             ':(exclude)reports/quality/test-governance-current.json'
+
       - name: Download SHA-bound coverage candidate
         shell: bash
         env:
@@ -39,14 +49,6 @@ jobs:
           candidate="$(find "$destination" -type f -name 'module-coverage-inventory.candidate.json' -print -quit)"
           test -n "$candidate"
           cp "$candidate" reports/quality/module-coverage-inventory.json
-
-      - name: Generate and validate canonical governance payloads
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
-          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts --check
           git diff --check
           git diff --exit-code --             .             ':(exclude)reports/quality/module-coverage-inventory.json'             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.json'             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.md'             ':(exclude)reports/quality/debt-governance-gates.json'             ':(exclude)reports/quality/debt-governance-gates.md'             ':(exclude)reports/quality/test-governance-current.json'
 
