@@ -90,6 +90,10 @@ def test_residual_osv_exception_has_not_expired() -> None:
     deadline = date.fromisoformat(EXPIRY)
     assert deadline == date(2026, 11, 30)
     assert EXPIRY == "2026-11-30"
+    assert date.today() <= deadline, (
+        f"residual OSV exception expired on {EXPIRY}; upgrade mermaid/Grafana "
+        "or renew the exception with a new dated issue"
+    )
 
 
 def test_security_md_and_pip_audit_ignore_are_timeboxed() -> None:

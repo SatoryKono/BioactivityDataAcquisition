@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T11:07:50.105427+00:00",
+  "generated_at": "2026-08-31T12:30:27.861059+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 508,
       "skills": 12,
-      "tests": 416
+      "tests": 417
     }
   },
   "scripts": [
@@ -11771,13 +11771,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 351,
+          "line": 358,
           "source_group": "tests",
           "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 408,
+          "line": 415,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
@@ -11928,7 +11928,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 317,
+          "line": 324,
           "source_group": "tests",
           "text": "\"scripts/engineering/dev/zed_run.py\","
         }
@@ -11965,13 +11965,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 365,
+          "line": 372,
           "source_group": "tests",
           "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 410,
+          "line": 417,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -12020,13 +12020,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 358,
+          "line": 365,
           "source_group": "tests",
           "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 409,
+          "line": 416,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
@@ -12324,7 +12324,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 404,
+      "reference_count": 399,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -17437,7 +17437,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
@@ -17456,6 +17456,12 @@
           "line": 53,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
+        },
+        {
+          "path": "tests/architecture/test_github_actions_runtime_policy.py",
+          "line": 24,
+          "source_group": "tests",
+          "text": "from scripts.engineering.repo import check_github_actions_runtime_policy as policy"
         }
       ]
     },
