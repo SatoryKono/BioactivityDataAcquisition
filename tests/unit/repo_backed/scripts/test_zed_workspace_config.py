@@ -489,6 +489,8 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
         assert "--ignore=tests/unit/scripts" in coverage_args
         assert "--ignore=tests/unit/memory" in coverage_args
         assert "--ignore=tests/integration/memory" in coverage_args
+        assert "--ignore=tests/integration" in coverage_args
+        assert "--ignore=tests/security" in coverage_args
         assert "--ignore=tests/unit/repo_backed" in coverage_args
         assert "--cov-fail-under=85" in coverage_args
         assert "--cov-report=term:skip-covered" in coverage_args
@@ -501,6 +503,19 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
 
     scripts_lane = matrix_lanes["unit-scripts-tooling"]
     assert scripts_lane["paths"] == ["tests/unit/scripts/"]
+
+
+def test_zed_pytest_lane_rejects_overlapping_runs(tmp_path: Path) -> None:
+    """The runner must serialize pytest lanes beyond Zed's task-local guard."""
+    lane_module = _load_lane_module()
+    exclusive_lane_lock = lane_module["_exclusive_lane_lock"]
+    busy_error = lane_module["ZedLaneBusyError"]
+    lock_path = tmp_path / "zed-pytest-lane.lock"
+
+    with exclusive_lane_lock(lock_path):
+        with pytest.raises(busy_error, match="already running"):
+            with exclusive_lane_lock(lock_path):
+                pytest.fail("overlapping lane unexpectedly acquired the lock")
 
 
 def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
