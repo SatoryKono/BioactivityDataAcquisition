@@ -9,4 +9,6 @@ timeout method: thread
 timeout func_only: False
 collected 18 items
 
-tests\architecture\test_module_coverage_inventory.py ..........
+tests\architecture\test_module_coverage_inventory.py ..................  [100%]
+
+============================= 18 passed in 25.02s =============================
