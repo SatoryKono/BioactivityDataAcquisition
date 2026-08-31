@@ -1,0 +1,14 @@
+{
+  "iteration": 2,
+  "revision": "PENDING_COMMIT",
+  "static": {
+    "workflow_count": 47,
+    "trust_rows": 47,
+    "trust_parse_incomplete": 0,
+    "pr_concurrency_missing": 0,
+    "labeler_uses_pr_number": true,
+    "generated_line_anchor_strategy": "restore original offsets by moving new blocks/tests to EOF"
+  },
+  "live_ci": "PENDING",
+  "result": "PENDING"
+}
