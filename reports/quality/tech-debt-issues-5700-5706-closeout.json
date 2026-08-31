@@ -90,14 +90,14 @@
       "workflow_contains_strict_preflight": true
     },
     "5701": {
-      "coverage_actual_percent": 96.54,
+      "coverage_actual_percent": 96.7,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-28T13:46:26.926300+00:00",
-      "slowest_total_cases": 49226,
-      "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-      "source_run_id": "33149935203",
-      "top_slow_zone": {"zone":"tests.unit.scripts.qa.test_report_debt_governance_gates","test_count":4,"total_duration_s":47.748,"max_duration_s":21.002}
+      "refreshed_at_utc": "2026-08-31T14:53:02.462614+00:00",
+      "slowest_total_cases": 49511,
+      "source_commit": "ca49252a010746df2544351070f617096ab54805",
+      "source_run_id": "33393923747",
+      "top_slow_zone": {"zone":"tests.unit.scripts.docs.passports.test_passport_projector","test_count":4,"total_duration_s":47.057,"max_duration_s":20.623}
     },
     "5702": {
       "helper_owner_contains_timeout_contracts": true,
