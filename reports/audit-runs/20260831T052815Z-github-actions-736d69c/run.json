@@ -1,11 +1,14 @@
 {
   "run_id": "20260831T052815Z-github-actions-736d69c",
   "started_at": "2026-08-31T05:28:15Z",
+  "finished_at": "2026-08-31T06:25:56.566Z",
   "repo": "SatoryKono/BioactivityDataAcquisition",
   "mode": "full",
   "audit_mode": "full",
   "language": "ru",
   "n": 10,
+  "stopped_after_iteration": 3,
+  "early_stop_reason": "two consecutive iterations without new PROVEN P0/P1 and without scoped regression after remediation",
   "scope": [
     ".github/workflows",
     ".github/actions",
@@ -14,13 +17,14 @@
   "baseline_sha": "736d69cf5d093c7ff97b2f6b60c470b033e9370d",
   "base_branch": "main",
   "work_branch": "fix/github-actions-cycle-736d69c",
+  "pr": 9869,
   "local_preflight": {
     "status": "DEGRADED",
     "git_status": "UNAVAILABLE",
     "head": "UNAVAILABLE",
     "remote": "UNAVAILABLE",
     "tool_versions": "UNAVAILABLE",
-    "reason": "Codex unified exec failed before process start: batch file arguments are invalid; no local checkout mutation performed"
+    "reason": "Codex unified exec failed before process start; no local checkout mutation performed"
   },
   "remote_preflight": {
     "auth_account": "SatoryKono",
@@ -33,6 +37,21 @@
     "workflow_files": 47,
     "tree_truncated": false
   },
+  "closeout": {
+    "main_sha": "ce3b633d2d5724dec55556a9ec66d5c5a7bbe1c9",
+    "main_protected": false,
+    "ruleset_15730586": "disabled",
+    "open_cycle_issues": [
+      9800,
+      9865
+    ],
+    "source_validation_sha": "3849a9ae92696e4b61b92f420a1536c077e96336",
+    "final_gate": "BLOCK",
+    "code_merge_commit": "ce3b633d2d5724dec55556a9ec66d5c5a7bbe1c9",
+    "merge_performed_by_auditor": false,
+    "external_merge_on_red_ci": true
+  },
   "debt_budget": "unchanged",
-  "env_files_touched": false
+  "env_files_touched": false,
+  "merged": "external_on_red_ci"
 }

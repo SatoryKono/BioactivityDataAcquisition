@@ -1,0 +1,62 @@
+{
+  "iteration": 3,
+  "source_sha": "3849a9ae92696e4b61b92f420a1536c077e96336",
+  "static": {
+    "scope_exists": true,
+    "workflow_count": 47,
+    "catalog_claim": 47,
+    "external_uses": 231,
+    "unpinned_external_uses": 0,
+    "upload_artifacts": 71,
+    "artifact_violations": 0,
+    "pr_workflows_missing_concurrency": [],
+    "trust_rows": 47,
+    "trust_parse_incomplete": 0,
+    "privileged_untrusted_checkout": 0
+  },
+  "live": {
+    "workflow_runs": {
+      "branch": 33363281110,
+      "zizmor": 33363281236,
+      "dashboard": 33363281113,
+      "root": 33363280970,
+      "commit_lint": 33363281204,
+      "type": 33363280971,
+      "security": 33363281077,
+      "duplication": 33363281131,
+      "codeql": 33363281078,
+      "consolidation": 33363281075,
+      "tests": 33363281222,
+      "lint_arch": 33363281026
+    },
+    "success": 9,
+    "failure": 3,
+    "zizmor": "success",
+    "root_hygiene": "success",
+    "branch_hygiene": "success",
+    "type_checking": "success",
+    "security": "success",
+    "codeql": "success",
+    "architecture": {
+      "summary": "43 failed, 4541 passed, 4 skipped, 70 deselected",
+      "concurrency_guard": "PASS; absent from failure list after memory-retention fix",
+      "previous_summary": "44 failed, 4540 passed, 4 skipped, 70 deselected"
+    },
+    "global_blockers": [
+      "Ruff format: src/bioetl/application/services/dq/silver_statistics_helpers.py",
+      "scripts inventory: scripts/ai/prompts/compile.py,diff.py,lint.py reference_count drift",
+      "architecture scorecard integral_score 7.04 below existing 8.0 floor",
+      "pre-existing generated governance, coverage, telemetry, script-count, and documentation drift"
+    ]
+  },
+  "main_closeout": {
+    "sha": "ce3b633d2d5724dec55556a9ec66d5c5a7bbe1c9",
+    "protected": false,
+    "required_contexts": [],
+    "ruleset_15730586": "disabled",
+    "bypass_actors": [],
+    "code_from_pr_9869": true,
+    "external_merge_on_red_ci": true
+  },
+  "result": "BLOCK"
+}

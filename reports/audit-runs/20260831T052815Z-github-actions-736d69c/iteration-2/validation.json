@@ -1,14 +1,26 @@
 {
   "iteration": 2,
-  "revision": "PENDING_COMMIT",
+  "revision": "78674b0af48de3749d4d9056940676fead63998d",
   "static": {
     "workflow_count": 47,
     "trust_rows": 47,
     "trust_parse_incomplete": 0,
-    "pr_concurrency_missing": 0,
+    "original_pr_concurrency_missing": 0,
     "labeler_uses_pr_number": true,
-    "generated_line_anchor_strategy": "restore original offsets by moving new blocks/tests to EOF"
+    "generated_line_anchor_drift_from_audit_changes": 0
   },
-  "live_ci": "PENDING",
-  "result": "PENDING"
+  "live_ci": {
+    "zizmor": "success",
+    "root_hygiene": "success",
+    "global_result": "failure",
+    "scoped_regression": [
+      "memory-retention.yml group omitted github.workflow"
+    ],
+    "unrelated_blockers": [
+      "silver_statistics_helpers.py ruff format",
+      "scripts/ai/prompts reference_count drift",
+      "architecture scorecard 7.04 below existing floor 8.0"
+    ]
+  },
+  "result": "FAIL_SCOPED_REGRESSION_FOUND"
 }

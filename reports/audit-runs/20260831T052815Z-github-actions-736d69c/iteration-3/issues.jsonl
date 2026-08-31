@@ -1,0 +1,2 @@
+{"issue":9865,"state":"open","requirement_id":"REQ-DEP-002","reason":"code was externally merged as ce3b633 on red CI; required CI acceptance remains unmet"}
+{"issue":9800,"state":"open","requirement_id":"GH-RULESET-001","reason":"main remains unprotected and ruleset 15730586 disabled"}
