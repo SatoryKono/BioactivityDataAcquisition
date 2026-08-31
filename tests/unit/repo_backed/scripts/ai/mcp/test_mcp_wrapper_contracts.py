@@ -595,9 +595,11 @@ exit [int]$env:BIOETL_TEST_EXIT_CODE
         encoding="utf-8",
         newline="",
     )
-    with path.open("rb") as handle:
-        os.fsync(handle.fileno())
-    # Linux pwsh only discovers PATH scripts when the executable bit is set.
+    try:
+        with path.open("rb") as handle:
+            os.fsync(handle.fileno())
+    except OSError:
+        pass
     try:
         path.chmod(path.stat().st_mode | 0o755)
     except OSError:
