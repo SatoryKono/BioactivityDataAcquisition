@@ -16,7 +16,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.support._atomic_replace import (
     AtomicWriteError,
     _confined_replace_pair,
-    _replace_prevalidated_with_retry,
+    _replace_prevalidated_with_retry as _replace_with_retry,
 )
 
 
@@ -58,7 +58,7 @@ class AtomicWriteGroup:
         try:
             for target, temp_path, _ in self._pending:
                 failed_target = target
-                _replace_prevalidated_with_retry(
+                _replace_with_retry(
                     temp_path,
                     target,
                     retry_policy=self._retry_policy,
