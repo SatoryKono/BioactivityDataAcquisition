@@ -77,6 +77,60 @@ def check_null_rates_stats(df: pl.DataFrame) -> tuple[list[NullRateResult], floa
     return results, round(overall_null_rate, 4)
 
 
+def _uniqueness_ratio(cardinality: int, total_count: int) -> float:
+    if total_count <= 0:
+        return 0.0
+    return round(cardinality / total_count, 4)
+
+
+def _column_cardinality_entry(cardinality: int, total_count: int) -> JsonDict:
+    return {
+        "cardinality": cardinality,
+        "uniqueness_ratio": _uniqueness_ratio(cardinality, total_count),
+    }
+
+
+def _profile_column_cardinality_fallback(
+    df: pl.DataFrame,
+    cols_to_check: list[str],
+    total_count: int,
+    profile_errors: tuple[type[BaseException], ...],
+) -> JsonDict:
+    """Per-column n_unique fallback when vectorized profiling fails."""
+    column_stats: JsonDict = {}
+    for col in cols_to_check:
+        try:
+            cardinality = df[col].n_unique()
+        except profile_errors:
+            continue
+        column_stats[col] = _column_cardinality_entry(cardinality, total_count)
+    return column_stats
+
+
+def _profile_column_cardinality(
+    df: pl.DataFrame,
+    cols_to_check: list[str],
+    total_count: int,
+    profile_errors: tuple[type[BaseException], ...],
+) -> JsonDict:
+    """Profile uniqueness cardinality for a bounded column set."""
+    if not cols_to_check:
+        return {}
+    try:
+        # Vectorize cardinality check to avoid massive FFI overhead in python loop
+        unique_counts = df.select([pl.col(c).n_unique() for c in cols_to_check]).row(
+            0, named=True
+        )
+    except profile_errors:
+        return _profile_column_cardinality_fallback(
+            df, cols_to_check, total_count, profile_errors
+        )
+    return {
+        col: _column_cardinality_entry(cardinality, total_count)
+        for col, cardinality in unique_counts.items()
+    }
+
+
 def check_uniqueness_stats(
     df: pl.DataFrame,
     primary_keys: list[str],
@@ -118,38 +172,12 @@ def check_uniqueness_stats(
     unique_count = df.select(existing_keys).unique(maintain_order=False).height
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
-
-    column_stats: JsonDict = {}
-    cols_to_check = df.columns[:10]
-    if cols_to_check:
-        try:
-            # Vectorize cardinality check to avoid massive FFI overhead in python loop
-            unique_counts = df.select(
-                [pl.col(c).n_unique() for c in cols_to_check]
-            ).row(0, named=True)
-            for col, cardinality in unique_counts.items():
-                column_stats[col] = {
-                    "cardinality": cardinality,
-                    "uniqueness_ratio": (
-                        round(cardinality / total_count, 4) if total_count > 0 else 0.0
-                    ),
-                }
-        except profile_errors:
-            # Fallback to loop if vectorized n_unique fails on specific dtypes
-            for col in cols_to_check:
-                try:
-                    cardinality = df[col].n_unique()
-                    column_stats[col] = {
-                        "cardinality": cardinality,
-                        "uniqueness_ratio": (
-                            round(cardinality / total_count, 4)
-                            if total_count > 0
-                            else 0.0
-                        ),
-                    }
-                except profile_errors:
-                    continue
-
+    column_stats = _profile_column_cardinality(
+        df,
+        list(df.columns[:10]),
+        total_count,
+        profile_errors,
+    )
     status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
     return UniquenessResult(
         primary_key=",".join(existing_keys),
