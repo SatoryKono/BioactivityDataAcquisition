@@ -40,9 +40,7 @@ jobs:
 
       - name: Ruff check
         run: |
-          uv run --frozen --no-build ruff format src/bioetl/application/services/dq/silver_statistics_helpers.py
-          git diff -- src/bioetl/application/services/dq/silver_statistics_helpers.py
-          uv run --frozen --no-build python -m scripts.engineering.qa --help
+          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts --help
           exit 1
 
       - name: Ruff format check
