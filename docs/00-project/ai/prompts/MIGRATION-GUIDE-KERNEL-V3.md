@@ -12,12 +12,12 @@
 
 ```bash
 # один домен
-python -m scripts.ai.prompts.compile --domain docs --profile audit-readonly
-python -m scripts.ai.prompts.compile --domain docs --profile full-write
+python -m scripts.ai.prompts compile --domain docs --profile audit-readonly
+python -m scripts.ai.prompts compile --domain docs --profile full-write
 # весь каталог + проверка дрейфа (CI gate)
-python -m scripts.ai.prompts.compile --all --check
-python -m scripts.ai.prompts.lint
-python -m scripts.ai.prompts.verify
+python -m scripts.ai.prompts compile --all --check
+python -m scripts.ai.prompts lint
+python -m scripts.ai.prompts verify
 ```
 
 ---
@@ -137,7 +137,7 @@ provenance: materialized-v3 @ main@3aba8559 — BIOETL-PROMPT-ARCH-KERNEL-V3-003
 `REGISTRY.yaml` `prompt.*` резолвит legacy ID в wrapper; wrapper рендерит скомпилированный текст. Прямой путь без registry:
 
 ```bash
-python -m scripts.ai.prompts.compile --domain <domain> --profile audit-readonly  # или full-write / differential
+python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly  # или full-write / differential
 python -m scripts.ai.prompts.diff --domain <domain>  # diff rendered vs golden
 ```
 
@@ -148,9 +148,9 @@ Precedence (ADR-060 §4): `runtime profiles (.codex/.junie/.devin/.gemini) > AGE
 Запуск:
 
 ```bash
-python -m scripts.ai.prompts.lint              # schema + guard + controller checks
-python -m scripts.ai.prompts.verify            # deterministic_compile, fingerprint, FSM
-python -m scripts.ai.prompts.compile --all --check  # byte-identical recompile gate
+python -m scripts.ai.prompts lint              # schema + guard + controller checks
+python -m scripts.ai.prompts verify            # deterministic_compile, fingerprint, FSM
+python -m scripts.ai.prompts compile --all --check  # byte-identical recompile gate
 ```
 
 | Gate (CI-blocking, ADR-060 §6) | Что ловит | Сообщение / действие |
@@ -194,8 +194,8 @@ python -m scripts.ai.prompts.compile --all --check  # byte-identical recompile g
 ```bash
 time (cp docs/00-project/ai/prompts/overlays/docs.yaml docs/00-project/ai/prompts/overlays/<new>.yaml \
   && $EDITOR docs/00-project/ai/prompts/overlays/<new>.yaml \
-  && python -m scripts.ai.prompts.compile --domain <new> --profile audit-readonly \
-  && python -m scripts.ai.prompts.lint && python -m scripts.ai.prompts.verify)
+  && python -m scripts.ai.prompts compile --domain <new> --profile audit-readonly \
+  && python -m scripts.ai.prompts lint && python -m scripts.ai.prompts verify)
 # ожидаемо <60 мин до green CI, без правки fragments/
 ```
 
