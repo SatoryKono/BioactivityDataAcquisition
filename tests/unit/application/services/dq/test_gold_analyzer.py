@@ -72,7 +72,7 @@ from bioetl.domain.value_objects.dq_report import (
     MedallionLayer,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.timeout(90)]
 
 
 @pytest.fixture

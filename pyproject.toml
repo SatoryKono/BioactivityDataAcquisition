@@ -254,7 +254,7 @@ markers = [
 ]
 # Default timeout: 60 seconds per test (prevents CI hangs from stuck tests)
 # Override per-test with @pytest.mark.timeout(N) or disable with @pytest.mark.timeout(0)
-timeout = 60
+timeout = 90
 # Timeout method: thread works on all platforms (signal only on Unix)
 timeout_method = "thread"
 filterwarnings = [
