@@ -14,6 +14,8 @@ __all__ = [
     "ATOMIC_WRITE_EXCEPTIONS",
     "AtomicWriteError",
     "ReplaceRetryHook",
+    "_confined_replace_pair",
+    "_replace_prevalidated_with_retry",
     "_replace_with_retry",
 ]
 
@@ -77,6 +79,22 @@ def _replace_with_retry(
 ) -> None:
     """Replace target path with bounded retry for transient file-lock errors."""
     target_resolved, temp_resolved = _confined_replace_pair(temp_path, target)
+    _replace_prevalidated_with_retry(
+        temp_resolved,
+        target_resolved,
+        retry_policy=retry_policy,
+        on_retry=on_retry,
+    )
+
+
+def _replace_prevalidated_with_retry(
+    temp_resolved: Path,
+    target_resolved: Path,
+    *,
+    retry_policy: AdaptiveRetryPolicy,
+    on_retry: ReplaceRetryHook | None = None,
+) -> None:
+    """Replace a pair already confined by ``_confined_replace_pair``."""
     retry_count = 0
     while True:
         try:

@@ -108,7 +108,7 @@ def test_atomic_write_group_cleans_uncommitted_temp_files_on_commit_error(
         raise OSError("replace failed")
 
     monkeypatch.setattr(
-        "bioetl.infrastructure.storage.support.atomic_group._replace_with_retry",
+        "bioetl.infrastructure.storage.support.atomic_group._replace_prevalidated_with_retry",
         fail_second_replace,
     )
 
