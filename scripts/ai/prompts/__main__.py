@@ -7,6 +7,9 @@ Usage:
   python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=src/bioetl/domain
   python -m scripts.ai.prompts check-registry
   python -m scripts.ai.prompts check
+  python -m scripts.ai.prompts compile --all --check
+  python -m scripts.ai.prompts lint --strict
+  python -m scripts.ai.prompts verify --golden
   python -m scripts.ai.prompts project-full-links --check
   python -m scripts.ai.prompts catalog
   python -m scripts.ai.prompts new --id prompt.example.demo --class operator-paste
@@ -426,8 +429,22 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     _configure_stdio()
+    args_list = argv if argv is not None else sys.argv[1:]
+    if args_list:
+        command, rest = args_list[0], args_list[1:]
+        if command == "compile":
+            from scripts.ai.prompts import compile as routed_command
+        elif command == "lint":
+            from scripts.ai.prompts import lint as routed_command
+        elif command == "verify":
+            from scripts.ai.prompts import verify as routed_command
+        else:
+            routed_command = None
+        if routed_command is not None:
+            return int(routed_command.main(rest))
+
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(args_list)
     return int(args.func(args))
 
 

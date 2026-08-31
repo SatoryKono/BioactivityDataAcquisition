@@ -7,6 +7,7 @@ Usage:
 
 Commands:
     check-inventory    Check scripts inventory drift
+    github-settings-review  Collect read-only GitHub governance evidence
     sync-inventory     Refresh scripts inventory manifest
     sync-wrapper-caller-matrix  Refresh scripts wrapper caller matrix
     check-catalog      Validate catalog governance policy
@@ -44,6 +45,7 @@ from scripts.engineering.common.cli_dispatch import (
 
 COMMANDS = {
     "check-inventory": "check_scripts_inventory.py",
+    "github-settings-review": "github_settings_review.py",
     "sync-inventory": "sync_scripts_inventory.py",
     "sync-wrapper-caller-matrix": "generate_scripts_wrapper_caller_matrix.py",
     "check-catalog": "check_scripts_catalog.py",

@@ -28,7 +28,7 @@ jobs:
 
       - name: Collect read-only settings evidence
         run: >-
-          python -m scripts.engineering.repo.github_settings_review
+          python -m scripts.engineering.repo github-settings-review
           --json-out "$RUNNER_TEMP/github-settings-review.json"
           --markdown-out "$RUNNER_TEMP/github-settings-review.md"
 
