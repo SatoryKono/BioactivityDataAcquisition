@@ -80,5 +80,28 @@
     }
   ],
   "overall": "BLOCK",
-  "iteration": 2
+  "iteration": 2,
+  "post_audit": {
+    "pull_request": 9874,
+    "validated_sha": "e9f88e6777176691c3329d4f8432122c3baff421",
+    "status": "BLOCK",
+    "completed_success": [
+      "Branch Hygiene",
+      "Dashboard first-window no-scroll",
+      "Commit Lint"
+    ],
+    "completed_failure": [
+      "Root Hygiene",
+      "consolidation-gates",
+      "Type Checking (Strict)"
+    ],
+    "still_running_at_stop": [
+      "Tests",
+      "Lint and Architecture Gates",
+      "Security Scans",
+      "CodeQL",
+      "Duplication and Complexity Checks"
+    ],
+    "reason": "failure terminal condition reached; merge and close guards engaged"
+  }
 }

@@ -9,8 +9,10 @@
 - Pins: **231/231** external action references are immutable 40-hex SHAs.
 - Correctness: **29/29** PR workflows use concurrency; **71/71** artifact uploads have bounded retention; catalog is synchronized at 47 workflows.
 - Required checks: docs/config map `checks-complete` and `root-hygiene`, but ruleset 15730586 is disabled and live branch protection exposes no required contexts.
-- CI: **red** on baseline SHA — Root Hygiene run 33365034000 fails on tracked `arch_hash.txt`; Type Checking run 33365034014 fails on `debug_export_ops.py:161 [unused-ignore]`. These blockers are outside SCOPE and were not mutated.
+- CI: **red** on baseline SHA — main Root Hygiene rerun 33365472089 fails on tracked `arch_hash.txt` and `arch_run_tmp.txt`; Type Checking run 33365034014 fails on `debug_export_ops.py:161 [unused-ignore]`. These blockers are outside SCOPE and were not mutated.
 - Local validation: **DEGRADED** because the PowerShell unified executor failed before command start; no local mutation was performed.
+
+- Post-audit PR: draft #9874 at `e9f88e6777176691c3329d4f8432122c3baff421`; Root Hygiene 33365870287, consolidation-gates 33365870239, and Type Checking 33365870242 failed. No merge or issue close was attempted.
 
 ## Final gate
 

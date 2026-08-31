@@ -66,5 +66,35 @@
   },
   "budgets_changed": false,
   "env_changed": false,
-  "secrets_printed": false
+  "secrets_printed": false,
+  "completed_at": "2026-08-31T06:56:08.569Z",
+  "post_audit": {
+    "pull_request": 9874,
+    "validated_sha": "e9f88e6777176691c3329d4f8432122c3baff421",
+    "draft": true,
+    "merge_performed": false,
+    "issues_closed": [],
+    "ruleset_mutated": false,
+    "ci_gate": "BLOCK",
+    "failed_runs": [
+      {
+        "id": 33365870287,
+        "name": "Root Hygiene",
+        "evidence": [
+          "arch_hash.txt",
+          "arch_run_tmp.txt"
+        ]
+      },
+      {
+        "id": 33365870239,
+        "name": "consolidation-gates",
+        "evidence": "RUF034 scripts/engineering/repo/github_settings_review.py:636"
+      },
+      {
+        "id": 33365870242,
+        "name": "Type Checking (Strict)",
+        "evidence": "debug_export_ops.py:161 unused-ignore"
+      }
+    ]
+  }
 }
