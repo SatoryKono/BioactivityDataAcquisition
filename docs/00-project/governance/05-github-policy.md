@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** (defined, not GitHub-enforced). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active** (`checks-complete`, `root-hygiene`). See §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -194,9 +194,9 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` are **not** blocked by repository ruleset `root-hygiene-required-check` (enforcement **disabled** for `refs/heads/main`). Direct
-push and merge to `main` are currently allowed by GitHub rulesets. Workflows `checks-complete` and `root-hygiene` still run on pull requests; they are not required status checks while the ruleset is disabled. The following checks remain the
-policy-intended quality gate for pull requests and for the `main` ref.
+Updates to `main` **are** blocked by repository ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
+push and merge to `main` require the always-on contexts `checks-complete` and `root-hygiene`. There are no bypass actors (`current_user_can_bypass: never`). The following checks are the
+GitHub-required quality gate for pull requests and for the `main` ref.
 
 ### Final always-on required-check set
 
@@ -209,8 +209,9 @@ The final activation set for repository ruleset
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
 Both checks materialize on every PR targeting `main`. The repository ruleset
-`root-hygiene-required-check` remains defined with exactly this always-on set,
-and enforcement is **disabled**. Direct push/merge to `main` is not blocked by this ruleset. Further ruleset mutations remain external operations that require
+`root-hygiene-required-check` is defined with exactly this always-on set,
+and enforcement is **active**. Direct push/merge to `main` is blocked when these
+contexts are missing or failing. Further ruleset mutations remain external operations that require
 explicit maintainer confirmation and API re-verification.
 
 ### Path-scoped core checks
@@ -282,9 +283,9 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Escalation policy for fail/warn
 
-- **FAIL**: failures in `checks-complete` and `root-hygiene` still fail those
-  workflows. They do **not** currently block merge or direct push while
-  ruleset enforcement is `disabled`. Failures in other policy gates MUST still
+- **FAIL**: failures in `checks-complete` and `root-hygiene` fail those
+  workflows and **block** merge or direct push while ruleset enforcement is
+  `active`. Failures in other policy gates MUST still
   be fixed or explicitly risk-accepted in the PR discussion.
 - **WARN**: merge MAY proceed only with documented justification and a follow-up issue with owner and due date.
 - **WARN→FAIL**: repeated warning in 2 consecutive runs for the same surface, or warning on governance-contract surfaces (`RULES.md`, ADR-linked checks, schema parity, secrets) escalates to FAIL.
@@ -307,26 +308,26 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges and direct pushes to `main` are **not** blocked by repository
-rulesets while enforcement is disabled. Repo-side evidence is the live
-repository ruleset state plus the workflows that still materialize the
-policy-intended checks on pull requests.
+PR merges and direct pushes to `main` **are** blocked by repository
+ruleset `root-hygiene-required-check` while enforcement is active. Repo-side evidence is the live
+repository ruleset state plus the workflows that materialize
+`checks-complete` and `root-hygiene` on pull requests.
 
-Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set).
 
 Live GitHub enforcement state:
 
 - Repository ruleset `root-hygiene-required-check` targets
   `refs/heads/main`.
-- Enforcement: `disabled`.
-- Direct updates to main are not blocked by this ruleset.
-- Defined status checks (not enforced): exactly `checks-complete` and `root-hygiene`
+- Enforcement: `active`.
+- Direct updates to main are blocked by this ruleset when required checks are missing or failing.
+- Defined status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: false`).
 - The ruleset has no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rule on `main`: none while enforcement is `disabled`.
-- Tracking references: `#3380`, `#8619`.
+- Applied rule on `main`: required status checks from ruleset `15730586`.
+- Tracking references: `#3380`, `#8619`, `#9800`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
@@ -640,18 +641,17 @@ ______________________________________________________________________
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
 
-### Upcoming ruleset for main (RF-008, not yet enforced — owner approval required)
+### Main ruleset (RF-008 / GH-RULESET-001 — required checks active)
 
-Target: `refs/heads/main` (upcoming `main` ruleset per #9800, not enforced — requires owner approval).
-Rules: require PR + 1 approving review + dismiss stale reviews + require conversation resolution + required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:false`) + restrict bypass: maintainers only + require linear history.
-Bypass: `current_user_can_bypass: never` (when enabled). Activation: dry-run evidence (`GET /repos/*/rulesets` + `GET /rules/branches/main`) → owner @SatoryKono approval → `PUT enforcement=active`. Rollback opt-in: `gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=disabled` + record in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices), known_issue `9800` (`GH-RULESET-001`).
+Target: `refs/heads/main` (ruleset `15730586` `root-hygiene-required-check`).
+Rules currently enforced: required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:false`). No bypass actors (`current_user_can_bypass: never`). Additional review/linear-history rules remain out of this ruleset. Rollback: `gh api --method PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586` with `enforcement=disabled` + record in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
 
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 active + legacy 13643213) → `GET /rules/branches/main` (expect 404 when disabled) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 active + legacy 13643213) → `GET /rules/branches/main` (required status checks when 15730586 is active) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 
@@ -673,7 +673,21 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
 }
 ```
 
-`Re-enable: gh api -X PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586 -f enforcement=active`
+`Re-enable: gh api --method PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586` with `enforcement=active`
+
+### Evidence (2026-08-31)
+
+```json
+{
+  "name": "root-hygiene-required-check",
+  "enforcement": "active",
+  "bypass_actors": [],
+  "current_user_can_bypass": "never",
+  "required_status_checks": ["checks-complete", "root-hygiene"]
+}
+```
+
+Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/merge` returned HTTP 405 `Required status check "checks-complete" is expected.` while ruleset 15730586 was `active`.
 
 ### Migration notes (1.2.2)
 
@@ -712,3 +726,9 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
   `pip-audit --strict` no longer uses `--ignore-vuln`. Mermaid-cli 10.6.1
   vendored `extract-zip` 2.0.2 and Grafana plugin residuals remain until
   2026-11-30. Scorecard #1294 stays undismissed.
+
+### Migration notes (1.2.7)
+
+- #9800 closeout: ruleset `15730586` `root-hygiene-required-check` is `active`
+  on `refs/heads/main` with required contexts `checks-complete` and
+  `root-hygiene`, no bypass actors. Rollback remains `enforcement=disabled`.
