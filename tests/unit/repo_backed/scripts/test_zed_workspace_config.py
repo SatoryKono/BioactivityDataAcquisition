@@ -106,6 +106,7 @@ def test_zed_xenon_adapts_ci_excludes_to_windows_paths() -> None:
     [
         "settings.json",
         "tasks.json",
+        "keymap.json",
         "mcp.json",
         "snippets/python.json",
         "snippets/yaml.json",
@@ -114,6 +115,12 @@ def test_zed_xenon_adapts_ci_excludes_to_windows_paths() -> None:
 def test_tracked_zed_json_is_valid(relative_path: str) -> None:
     """Every tracked Zed JSON surface should be parseable."""
     assert _load_json(relative_path) is not None
+
+
+def test_zed_task_picker_shortcut_spawns_tasks() -> None:
+    """The documented task shortcut should open the task picker."""
+    keymap = _load_json("keymap.json")
+    assert keymap["bindings"]["ctrl-shift-t"] == "task::Spawn"
 
 
 def test_zed_language_settings_delegate_to_project_sources_of_truth() -> None:
