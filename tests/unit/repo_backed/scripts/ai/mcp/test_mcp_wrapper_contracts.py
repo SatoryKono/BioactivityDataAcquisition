@@ -359,7 +359,14 @@ def _powershell_cwd_prefix() -> str:
     """Pin Windows PowerShell cwd to the repo even when launched from WSL."""
     if POWERSHELL is None or not str(POWERSHELL).lower().endswith(".exe"):
         return ""
-    return f"Set-Location -LiteralPath {_ps_quote(_powershell_path(ROOT))}; "
+    location = f"Set-Location -LiteralPath {_ps_quote(_powershell_path(ROOT))}"
+    # Windows PowerShell 5.1 discovers ``npx.ps1`` as ExternalScript, but WSL
+    # interop and a missing ``.PS1`` PATHEXT entry can still hide the fake.
+    pathext = (
+        "if ($env:PATHEXT -notmatch '(?i)(^|;)\\.PS1(;|$)') { "
+        "$env:PATHEXT = '.PS1;' + $env:PATHEXT }"
+    )
+    return f"{location}; {pathext}; "
 
 
 def _run_powershell_command(
@@ -925,6 +932,13 @@ def test_powershell_uv_resolver_candidate_paths(
 
     assert result.returncode == 0, result.stderr
     assert expected in result.stdout.strip()
+
+
+def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:
+    source = UV_RESOLVER_PS1.read_text(encoding="utf-8")
+    compact = re.sub(r"\s+", "", source)
+    assert "function Get-BioetlPathEntries" in source
+    assert "[char[]]@($pathSeparator,';',':')" not in compact
 
 
 @POWERSHELL_MARK
