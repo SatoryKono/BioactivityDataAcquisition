@@ -38,16 +38,8 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Remote-main baseline diff diagnostic
-        run: |
-          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline \
-            --update \
-            --json-out "${RUNNER_TEMP}/architecture-debt-remote-main-baseline.json" \
-            --md-out "${RUNNER_TEMP}/architecture-debt-remote-main-baseline.md"
-          diff -u reports/quality/architecture-debt-remote-main-baseline.json "${RUNNER_TEMP}/architecture-debt-remote-main-baseline.json" || true
-          diff -u reports/quality/architecture-debt-remote-main-baseline.md "${RUNNER_TEMP}/architecture-debt-remote-main-baseline.md" || true
-          exit 1
+      - name: Ruff check
+        run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
