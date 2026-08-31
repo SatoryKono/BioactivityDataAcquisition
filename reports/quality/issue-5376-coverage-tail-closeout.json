@@ -29,17 +29,17 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 68,
+    "below_85_module_count": 62,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
-    "tracked_module_coverage_percent": 100.0,
+    "tracked_module_coverage_percent": 100,
     "tracked_module_status": "fully_covered"
   },
   "closeout": {
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 68,
+    "residual_below_85_module_count": 62,
     "rationale": "The bounded shard reduction remains reflected in the current canonical coverage inventory; residual below-floor modules stay tracked under the parent epic."
   }
 }
