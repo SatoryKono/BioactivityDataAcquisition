@@ -264,6 +264,39 @@ raise SystemExit(subprocess.call(sys.argv[1:]))
     }
 }
 
+function Get-BioetlPathEntries {
+    <#
+    .SYNOPSIS
+      Split PATH without turning ``E:\tools`` into ``E`` + ``\tools``.
+    #>
+    if ([string]::IsNullOrWhiteSpace($env:PATH)) {
+        return , @()
+    }
+
+    $raw = $env:PATH
+    # Windows PATH uses ';' and drive-letter prefixes. Splitting those values
+    # on ':' is correct for POSIX pwsh, but it corrupts ``E:\github\...``.
+    $windowsStyle = $raw.Contains(';') -or ($raw -match '^[A-Za-z]:[\\/]')
+    if ($windowsStyle) {
+        $parts = $raw.Split([char[]]@(';'), [StringSplitOptions]::RemoveEmptyEntries)
+    }
+    else {
+        $parts = $raw.Split(
+            [char[]]@([IO.Path]::PathSeparator, ':'),
+            [StringSplitOptions]::RemoveEmptyEntries
+        )
+    }
+
+    $entries = [System.Collections.Generic.List[string]]::new()
+    foreach ($part in $parts) {
+        $item = $part.Trim()
+        if (-not [string]::IsNullOrWhiteSpace($item)) {
+            $entries.Add($item) | Out-Null
+        }
+    }
+    return , @($entries)
+}
+
 function Resolve-BioetlUvxBin {
     <#
     .SYNOPSIS
@@ -273,14 +306,7 @@ function Resolve-BioetlUvxBin {
 
     # Prefer explicit PATH probes first so test fakes (uvx.ps1) and non-Windows
     # pwsh path separators are honored before host-wide installs.
-    $pathSeparator = [IO.Path]::PathSeparator
-    $pathEntries = @()
-    if (-not [string]::IsNullOrWhiteSpace($env:PATH)) {
-        $pathEntries += $env:PATH.Split(
-            [char[]]@($pathSeparator, ';', ':'),
-            [StringSplitOptions]::RemoveEmptyEntries
-        )
-    }
+    $pathEntries = @(Get-BioetlPathEntries)
     foreach ($entry in $pathEntries) {
         foreach ($name in @("uvx.exe", "uvx.cmd", "uvx.ps1", "uvx")) {
             try {
