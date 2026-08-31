@@ -27,7 +27,9 @@ try:
 
     PROMPTS_ROOT: Path = _REG_PROMPTS_ROOT
 except Exception:
-    PROMPTS_ROOT = Path(__file__).resolve().parents[3] / "docs" / "00-project" / "ai" / "prompts"
+    PROMPTS_ROOT = (
+        Path(__file__).resolve().parents[3] / "docs" / "00-project" / "ai" / "prompts"
+    )
 
 GENERATED_ROOT = PROMPTS_ROOT / "generated"
 OVERLAYS_DIR = PROMPTS_ROOT / "overlays"
@@ -183,12 +185,19 @@ def check_generated_catalog(report: VerifyReport) -> list[Path]:
     domain_files = [p for p in files if p.name != "CATALOG.md"]
     catalog = GENERATED_ROOT / "CATALOG.md"
     if not GENERATED_ROOT.is_dir():
-        report.add_error("generated_exists", f"generated dir not found: {GENERATED_ROOT}")
+        report.add_error(
+            "generated_exists", f"generated dir not found: {GENERATED_ROOT}"
+        )
         return domain_files
     if not domain_files:
-        report.add_error("generated_exists", f"no generated domain/profile files under {GENERATED_ROOT}")
+        report.add_error(
+            "generated_exists",
+            f"no generated domain/profile files under {GENERATED_ROOT}",
+        )
     if not catalog.is_file():
-        report.add_warning("generated_catalog_missing", f"CATALOG.md not found: {catalog}")
+        report.add_warning(
+            "generated_catalog_missing", f"CATALOG.md not found: {catalog}"
+        )
 
     # Every generated file should have provenance header + prompt_sha8
     for p in domain_files:
@@ -228,7 +237,11 @@ def check_generated_catalog(report: VerifyReport) -> list[Path]:
 def check_deterministic_recompile(report: VerifyReport) -> None:
     """Recompile overlays×profiles and compare to files on disk."""
     try:
-        from scripts.ai.prompts.compile import compile_one, discover_overlays, discover_profiles
+        from scripts.ai.prompts.compile import (
+            compile_one,
+            discover_overlays,
+            discover_profiles,
+        )
     except ImportError as exc:
         report.add_warning("compile_import", f"could not import compile: {exc}")
         return
@@ -236,7 +249,9 @@ def check_deterministic_recompile(report: VerifyReport) -> None:
     overlays = discover_overlays()
     profiles = discover_profiles()
     if not overlays or not profiles:
-        report.add_warning("deterministic_compile", "no overlays or profiles to recompile")
+        report.add_warning(
+            "deterministic_compile", "no overlays or profiles to recompile"
+        )
         return
 
     for domain in sorted(overlays):
@@ -278,7 +293,9 @@ def check_profile_precedence(report: VerifyReport) -> None:
     try:
         import yaml
     except ImportError:
-        report.add_warning("profile_precedence", "yaml not available for precedence check")
+        report.add_warning(
+            "profile_precedence", "yaml not available for precedence check"
+        )
         return
 
     files = [p for p in sorted(GENERATED_ROOT.rglob("*.md")) if p.name != "CATALOG.md"]
@@ -313,7 +330,11 @@ def check_profile_precedence(report: VerifyReport) -> None:
             except Exception:
                 continue
             for k in ("MODE", "LANGUAGE", "AUDIT_MODE", "N"):
-                if k in prof and str(prof[k]).lower() != parsed.get(k, "").lower() and k in parsed:
+                if (
+                    k in prof
+                    and str(prof[k]).lower() != parsed.get(k, "").lower()
+                    and k in parsed
+                ):
                     report.add_error(
                         "profile_precedence",
                         f"{domain}/{profile}: param {k} header {parsed.get(k)!r} != profile {prof[k]!r}",
@@ -338,7 +359,9 @@ def check_profile_precedence(report: VerifyReport) -> None:
 
 def check_golden(report: VerifyReport) -> None:
     if not GOLDEN_ROOT.is_dir():
-        report.add_warning("golden_missing", f"golden dir not found: {GOLDEN_ROOT} (skip)")
+        report.add_warning(
+            "golden_missing", f"golden dir not found: {GOLDEN_ROOT} (skip)"
+        )
         return
 
     goldens = sorted(GOLDEN_ROOT.rglob("*.md"))
@@ -349,7 +372,11 @@ def check_golden(report: VerifyReport) -> None:
         rel = gold.relative_to(GOLDEN_ROOT)
         candidate = GENERATED_ROOT / rel
         if not candidate.is_file():
-            report.add_error("golden_missing_generated", f"golden {rel} has no generated counterpart", gold.as_posix())
+            report.add_error(
+                "golden_missing_generated",
+                f"golden {rel} has no generated counterpart",
+                gold.as_posix(),
+            )
             continue
         g_text = gold.read_text(encoding="utf-8").replace("\r\n", "\n")
         c_text = candidate.read_text(encoding="utf-8").replace("\r\n", "\n")
@@ -373,7 +400,9 @@ def verify_all(*, golden: bool = False) -> VerifyReport:
     report.stats = {
         "errors": len(report.errors),
         "warnings": len(report.warnings),
-        "generated_files": len([p for p in GENERATED_ROOT.rglob("*.md") if p.name != "CATALOG.md"])
+        "generated_files": len(
+            [p for p in GENERATED_ROOT.rglob("*.md") if p.name != "CATALOG.md"]
+        )
         if GENERATED_ROOT.is_dir()
         else 0,
     }

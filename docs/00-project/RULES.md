@@ -2159,9 +2159,12 @@ fields:
 | [ADR-057](../02-architecture/decisions/ADR-057-deterministic-runtime-config-authority-and-identity.md) | Deterministic Runtime Config Authority and Identity | Accepted | 2026-08-10 |
 | [ADR-058](../02-architecture/decisions/ADR-058-layered-port-registries.md) | Layered Port Registries | Accepted | 2026-08-25 |
 | [ADR-059](../02-architecture/decisions/ADR-059-package-cohesion-budgets.md) | Package Cohesion Budgets | Accepted | 2026-08-25 |
+| [ADR-060](../02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) | Prompt Kernel and Overlay Architecture | Accepted | 2026-08-28 |
 
 ## История Изменений (Changelog)
 
+- **6.1.12** (2026-08-31): синхронизирован индекс принятых решений с
+  ADR-060 (prompt kernel and overlay architecture).
 - **6.1.11** (2026-08-25): синхронизирован индекс принятых решений с
   ADR-058 (layered port registries) и ADR-059 (shrink-only package cohesion
   budgets).

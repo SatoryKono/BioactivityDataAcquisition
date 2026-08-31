@@ -37,6 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Root hygiene:** untrack `.jules/` (Bolt note from #9863). File policy already
+  requires `.jules/` to stay gitignored, not a tracked root directory.
+  Sync RULES.md appendix through ADR-060; refresh architecture dependency map
+  fingerprint; ruff-format prompt compile/lint/verify helpers.
+
 - **Root PYTHON_LOCATION:** move `github_settings_review.py` from
   `.github/tooling/` to `scripts/engineering/repo/` so structure audit stays fail-closed.
   Follow-on ruff blockers: restore `_mapping_list` in Trivy baseline, drop unused
