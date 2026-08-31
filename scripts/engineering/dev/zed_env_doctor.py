@@ -27,6 +27,7 @@ MIN_PYTHON = (3, 12)
 # Modules required by tracked `.zed/tasks.json` quality/test surfaces.
 DEFAULT_REQUIRED_MODULES: tuple[str, ...] = (
     "pytest",
+    "pytest_cov",
     "ruff",
     "mypy",
     "importlinter",
@@ -35,6 +36,7 @@ DEFAULT_REQUIRED_MODULES: tuple[str, ...] = (
     "pip_audit",
     "vulture",
     "xenon",
+    "jsonschema",
 )
 
 # Friendly names for recovery messages when import name differs from tool brand.

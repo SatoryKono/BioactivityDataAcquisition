@@ -53,15 +53,23 @@ def _platform_xenon_exclude(
     return exclude
 
 
-def main(argv: list[str] | None = None) -> int:
-    del argv
-    os.chdir(REPO_ROOT)
-    canonical_exclude = _xenon_exclude_from_workflow()
-    exclude = _platform_xenon_exclude(canonical_exclude)
-    cmd = [
-        sys.executable,
-        "-m",
-        "xenon",
+def _xenon_cli(*, executable: str | None = None, platform: str | None = None) -> Path:
+    """Return the console-script next to the active interpreter (CI uses ``xenon``)."""
+    bindir = Path(sys.executable if executable is None else executable).resolve().parent
+    name = "xenon.exe" if (platform or sys.platform) == "win32" else "xenon"
+    return bindir / name
+
+
+def _xenon_command(exclude: str) -> list[str]:
+    """Build the CI-aligned xenon argv. Xenon has no ``python -m xenon`` entry."""
+    cli = _xenon_cli()
+    if not cli.is_file():
+        raise SystemExit(
+            "[zed_xenon] xenon CLI is missing next to the interpreter: "
+            f"{cli}. Refresh with: .\\scripts\\engineering\\dev\\setup_env_windows.ps1"
+        )
+    return [
+        str(cli),
         "--max-absolute",
         "B",
         "--max-modules",
@@ -72,6 +80,15 @@ def main(argv: list[str] | None = None) -> int:
         exclude,
         "src",
     ]
+
+
+def main(argv: list[str] | None = None) -> int:
+    del argv
+    os.chdir(REPO_ROOT)
+    ensure_ready(modules=("xenon",))
+    canonical_exclude = _xenon_exclude_from_workflow()
+    exclude = _platform_xenon_exclude(canonical_exclude)
+    cmd = _xenon_command(exclude)
     print("[zed_xenon] running CI-aligned complexity gate", flush=True)
     print(f"[zed_xenon] exclude={exclude}", flush=True)
     completed = subprocess.run(cmd, cwd=REPO_ROOT, check=False)
