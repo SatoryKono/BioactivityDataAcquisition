@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Pipeline execution configuration settings."""
 
 from __future__ import annotations

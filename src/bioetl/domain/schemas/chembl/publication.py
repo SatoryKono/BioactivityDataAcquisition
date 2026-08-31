@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Pandera schema for ChEMBL Publication entity.
 
 Aligned with RULES.md v5.24, ChEMBL 34 schema, and Publication Schema Unification spec.

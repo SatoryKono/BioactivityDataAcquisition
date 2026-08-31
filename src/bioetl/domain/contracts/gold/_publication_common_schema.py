@@ -1,4 +1,4 @@
-# mypy: disable-error-code="misc"
+# mypy: disable-error-code="misc,untyped-decorator"
 """Shared Pandera field blocks for publication-oriented Gold contracts."""
 
 from __future__ import annotations

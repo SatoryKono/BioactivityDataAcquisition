@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Pydantic schema for source-profile extraction policy metadata."""
 
 from __future__ import annotations
