@@ -39,6 +39,7 @@ from scripts.engineering.dev.zed_env_doctor import ensure_ready
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"
 _TESTS_ROOT = "tests/"
+_IGNORE_UNIT_REPO_BACKED = "--ignore=tests/unit/repo_backed"
 _VCR_RECORD_NONE = "--vcr-record=none"
 _COMMON = (
     _TB_SHORT,
@@ -173,7 +174,7 @@ LANES: dict[str, tuple[str, ...]] = {
     "unit-fast": (
         "tests/unit/",
         "--ignore=tests/unit/scripts",
-        "--ignore=tests/unit/repo_backed",
+        _IGNORE_UNIT_REPO_BACKED,
         "-q",
         "-m",
         (
@@ -262,7 +263,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/security",
         # Repo-backed tests spawn PowerShell/WSL/docker children; under coverage
         # they stall the 98-99% Zed tail and do not cover src/bioetl.
-        "--ignore=tests/unit/repo_backed",
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
@@ -285,7 +286,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/integration/memory",
         "--ignore=tests/integration",
         "--ignore=tests/security",
-        "--ignore=tests/unit/repo_backed",
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
