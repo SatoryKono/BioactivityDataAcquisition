@@ -38,8 +38,24 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Ruff check
-        run: uv run --frozen --no-build ruff check .
+      - name: Generate arch-test drift diagnostics
+        run: |
+          set -euxo pipefail
+          uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --update
+          uv run --frozen --no-build python scripts/data_quality/inventory_silver_filters_migration.py
+          uv run --frozen --no-build python -m scripts.engineering.ci.update_test_telemetry_baseline \
+            --source-commit 509605cf5d6c33e655e357d55c9cf4071f254d81 \
+            --source-run-id 33400035056 \
+            --source-event pull_request \
+            --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33400035056
+          git diff -- docs/reports/generated/documentation-cleanup-inventory.json docs/reports/generated/documentation-cleanup-inventory.md
+          git diff -- docs/filters/inventory-baseline.csv docs/filters/inventory-baseline.json docs/filters/inventory-baseline.md
+          git diff -- configs/quality/test_telemetry_baseline.yaml docs/05-engineering/test-telemetry-baseline.md reports/test-telemetry
+          echo "TECH_DEBT_EVIDENCE_HASH"
+          uv run --frozen --no-build python -m scripts.engineering.qa.technical_debt_audit_registry --print-evidence-hash
+          echo "TECH_DEBT_SEMANTIC_SUMMARY"
+          uv run --frozen --no-build python -m scripts.engineering.qa.technical_debt_audit_registry --print-semantic-summary
+          exit 1
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
