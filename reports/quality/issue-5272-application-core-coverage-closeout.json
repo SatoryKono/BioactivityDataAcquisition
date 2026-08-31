@@ -34,5 +34,5 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Application core coverage improved significantly (49.09% -> 96.98%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules are zero. Parent epic #5244 stays open while 68 production modules remain below the default coverage floor."
+  "notes": "Application core coverage improved significantly (49.09% -> 97.59%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules are zero. Parent epic #5244 stays open while 62 production modules remain below the default coverage floor."
 }
