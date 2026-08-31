@@ -109,8 +109,8 @@
         "improved_module": "src/bioetl/domain/behavior/_dq_rule_evaluators.py"
       },
       "current_live_coverage": {
-        "below_85_module_count": 68,
-        "improved_module_current_coverage_percent": 97.0,
+        "below_85_module_count": 62,
+        "improved_module_current_coverage_percent": 97,
         "improved_module_current_status": "partially_covered",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
