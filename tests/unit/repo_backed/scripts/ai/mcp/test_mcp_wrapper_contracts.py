@@ -934,6 +934,7 @@ def test_powershell_uv_resolver_candidate_paths(
     helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
     command = (
         f". {helper}; {mock_functions}; "
+        "$env:PATH = 'C:\\Windows\\System32'; "
         "[Console]::Out.WriteLine((Resolve-BioetlUvxBin))"
     )
 
@@ -947,7 +948,29 @@ def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:
     source = UV_RESOLVER_PS1.read_text(encoding="utf-8")
     compact = re.sub(r"\s+", "", source)
     assert "function Get-BioetlPathEntries" in source
+    assert "function Add-BioetlFlattenedStrings" in source
     assert "[char[]]@($pathSeparator,';',':')" not in compact
+    assert "return,@($entries)" not in compact
+
+
+@POWERSHELL_MARK
+def test_powershell_get_bioetl_path_entries_preserves_program_files_entries() -> None:
+    helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
+    command = f"""
+. {helper}
+$env:PATH = 'C:\\Program Files\\PowerShell\\7;E:\\github\\repo;C:\\Program Files\\GitHub CLI'
+$entries = @(Get-BioetlPathEntries)
+[Console]::Out.WriteLine($entries.Count)
+[Console]::Out.WriteLine(($entries -join '|'))
+"""
+
+    result = _run_powershell_command(command)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [
+        "3",
+        r"C:\Program Files\PowerShell\7|E:\github\repo|C:\Program Files\GitHub CLI",
+    ]
 
 
 @POWERSHELL_MARK
@@ -961,14 +984,17 @@ def test_powershell_uv_resolver_keeps_drive_letter_path_entries(
     expected = os.path.normcase(_powershell_path(fake_uvx))
     command = f"""
 . {helper}
-$env:PATH = {fixture} + [IO.Path]::PathSeparator + 'C:\\Windows\\System32'
+function Get-Command {{ param($Name, $ErrorAction) $null }}
+$env:PATH = {fixture} + [IO.Path]::PathSeparator + 'C:\\Program Files\\GitHub CLI;C:\\Windows\\System32'
 [Console]::Out.WriteLine((Resolve-BioetlUvxBin))
 """
 
     result = _run_powershell_command(command)
 
     assert result.returncode == 0, result.stderr
-    assert os.path.normcase(result.stdout.strip()) == expected
+    resolved = result.stdout.strip()
+    assert os.path.normcase(resolved) == expected
+    assert "GitHub CLI" not in resolved
 
 
 @POWERSHELL_MARK
