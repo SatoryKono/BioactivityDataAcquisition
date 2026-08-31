@@ -82,6 +82,6 @@
     "ctrl-k ctrl-w": "editor::ToggleWordWrap",
     "ctrl-k ctrl-z": "editor::ToggleSoftWrap",
     "ctrl-shift-enter": "terminal::Spawn",
-    "ctrl-shift-t": "task::Configure"
+    "ctrl-shift-t": "task::Spawn"
   }
 }
