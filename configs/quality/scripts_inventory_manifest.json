@@ -12324,7 +12324,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 399,
+      "reference_count": 398,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
