@@ -1,0 +1,67 @@
+name: Temporary canonical artifact refresh
+
+on:
+  push:
+    branches:
+      - "fix/remaining-ci-blockers-20260831"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temporary-canonical-refresh-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python and uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.13"
+
+      - name: Run canonical generators
+        run: |
+          uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+          uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
+            --update \
+            --manifest configs/quality/scripts_inventory_manifest.json \
+            --check-lifecycle \
+            --forbid-evaluate-active \
+            --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+          uv run --frozen --no-build python -m scripts.engineering.qa report-module-coverage \
+            --allow-missing-coverage-xml
+
+      - name: Validate refreshed artifacts
+        run: |
+          uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+          uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \
+            --manifest configs/quality/scripts_inventory_manifest.json \
+            --check-lifecycle \
+            --forbid-evaluate-active \
+            --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+          git diff --check
+
+      - name: Commit canonical outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            configs/quality/scripts_inventory_manifest.json \
+            docs/02-architecture/generated/module-dependency-map.json \
+            docs/02-architecture/generated/module-dependency-map.md \
+            reports/quality/module-coverage-inventory.json
+          if git diff --cached --quiet; then
+            echo "Canonical artifacts are already current."
+            exit 0
+          fi
+          git commit -m "chore(governance): refresh canonical artifacts"
+          git push origin "HEAD:${{ github.ref_name }}"
