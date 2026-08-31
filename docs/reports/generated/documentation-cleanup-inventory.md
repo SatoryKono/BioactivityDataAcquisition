@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3672 |
-| Tracked doc-like files | 3667 |
+| Doc-like files | 3711 |
+| Tracked doc-like files | 3706 |
 | Ignored local docs/reports files | 5 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 5 |
-| tracked | 3667 |
+| tracked | 3706 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 278 |
-| active_quality_baseline | 61 |
+| active_quality_baseline | 64 |
 | closeout_evidence | 88 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 10 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
-| working_report | 857 |
+| working_report | 892 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -63,8 +63,8 @@
 | Archived | 170 |
 | Canonical | 73 |
 | Deprecated | 32 |
-| Generated | 1286 |
-| Working | 1362 |
+| Generated | 1287 |
+| Working | 1400 |
 
 ## Surface Families
 
@@ -74,17 +74,17 @@
 | archive | 170 |
 | canonical | 73 |
 | duplicate | 32 |
-| generated | 1286 |
-| working | 1362 |
+| generated | 1287 |
+| working | 1400 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 336 |
-| archive-after-migration | 869 |
-| generate-automatically | 1286 |
-| keep | 1141 |
+| archive-after-migration | 904 |
+| generate-automatically | 1287 |
+| keep | 1144 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 32 |
 
@@ -224,6 +224,7 @@
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/INVENTORY.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/domain-overlay.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -256,7 +257,6 @@
 | `docs/00-project/ai/prompts/archive/mirrors/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

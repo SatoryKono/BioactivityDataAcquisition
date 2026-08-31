@@ -8,7 +8,7 @@ from the last valid inventory and adding
 `src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
 Current source baseline is
 `source_module_count=2466` with
-`source_tree_sha256=6a2a253c9e347c4a85834d890b5029b414c50472977318b2130c1ae4295adb53`.
+`source_tree_sha256=3fd4aa01034c20aa69afe66af6ff359ca1410473497bd48765799b5e3057e676`.
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 

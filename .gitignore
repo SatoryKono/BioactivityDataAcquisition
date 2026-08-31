@@ -58,6 +58,9 @@ temp_*
 # Root-level local test-run captures are never repository artifacts.
 /pytest_*.txt
 /runner_*.txt
+/pip_audit_*.txt
+/check_doc.py
+/check_test.py
 /arch_hash.txt
 /arch_run_tmp.txt
 .coverage-sharded/
