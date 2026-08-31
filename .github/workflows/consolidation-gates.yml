@@ -38,13 +38,8 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Test governance hash diagnostic
-        run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
-            --check \
-            --json-out reports/quality/test-governance-current.json \
-            --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
-          exit 1
+      - name: Ruff check
+        run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
