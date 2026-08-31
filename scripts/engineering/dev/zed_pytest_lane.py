@@ -222,6 +222,8 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/unit/memory",
         "--ignore=tests/integration/memory",
         "--ignore=tests/integration",
+        # Full-tree os.walk secret scans time out on this Windows checkout.
+        "--ignore=tests/security",
         # Repo-backed tests spawn PowerShell/WSL/docker children; under coverage
         # they stall the 98-99% Zed tail and do not cover src/bioetl.
         "--ignore=tests/unit/repo_backed",
@@ -246,6 +248,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/unit/memory",
         "--ignore=tests/integration/memory",
         "--ignore=tests/integration",
+        "--ignore=tests/security",
         "--ignore=tests/unit/repo_backed",
         "-m",
         "not memory and not benchmark and not slow",

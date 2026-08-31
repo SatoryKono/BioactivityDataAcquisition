@@ -426,6 +426,7 @@ def test_zed_task_save_reveal_and_concurrency_policy() -> None:
         assert task.get("save") in VALID_SAVE, label
         assert task.get("reveal") in VALID_REVEAL, label
         assert task.get("hide") in VALID_HIDE, label
+        assert task["hide"] == "never", label
         assert task.get("allow_concurrent_runs") is False, label
 
         if label in {"Test: current file", "Test: nearest symbol"}:
@@ -438,14 +439,10 @@ def test_zed_task_save_reveal_and_concurrency_policy() -> None:
         if label.startswith(NON_CONCURRENT_LABEL_PREFIXES):
             assert task["allow_concurrent_runs"] is False
 
-        # Fast checks hide on success and avoid focus thrash when successful.
-        if label in {"Check: lint", "Check: MCP manifests", "Environment: verify"}:
-            assert task["hide"] == "on_success"
-
         # Mutating / long / security-sensitive tasks keep output visible.
         if label.startswith(("Generate:", "Audit:", "Coverage:", "Format:")):
             assert task["reveal"] == "always"
-            assert task["hide"] == "never" or label.startswith("Format:")
+            assert task["hide"] == "never"
 
 
 def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
@@ -493,6 +490,7 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
         assert "--ignore=tests/unit/memory" in coverage_args
         assert "--ignore=tests/integration/memory" in coverage_args
         assert "--ignore=tests/integration" in coverage_args
+        assert "--ignore=tests/security" in coverage_args
         assert "--ignore=tests/unit/repo_backed" in coverage_args
         assert "--cov-fail-under=85" in coverage_args
         assert "--cov-report=term:skip-covered" in coverage_args
