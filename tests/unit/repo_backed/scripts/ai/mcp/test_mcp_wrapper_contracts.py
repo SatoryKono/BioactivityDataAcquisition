@@ -96,6 +96,7 @@ EXAMPLE_CONTEXT7_KEY = "example-context7-key"
 
 POWERSHELL_WRAPPER_ENV_NAMES = (
     "PATH",
+    "PATHEXT",
     "USERPROFILE",
     "UV_CACHE_DIR",
     "UV_TOOL_DIR",
@@ -627,8 +628,14 @@ def _windows_wrapper_env(
         # Linux CI runs pwsh with POSIX PATH semantics; keep fakes discoverable.
         path_value = f"{windows_dir}:/usr/bin:/bin"
         join = "/"
+    host_pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD")
+    if ".PS1" not in host_pathext.upper():
+        pathext = ".PS1;" + host_pathext
+    else:
+        pathext = host_pathext
     env = _clean_env(
         PATH=path_value,
+        PATHEXT=pathext,
         USERPROFILE=windows_dir,
         UV_CACHE_DIR=f"{windows_dir}{join}uv-cache",
         UV_TOOL_DIR=f"{windows_dir}{join}uv-tools",
