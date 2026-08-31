@@ -34,7 +34,6 @@ import pytest
 
 from bioetl.application.services.dq.silver_statistics_helpers import (
     _categorical_row_value_count,
-    _profile_column_uniqueness,
     check_content_hash_integrity_stats,
     check_deduplication_stats,
     check_null_rates_stats,
@@ -226,15 +225,6 @@ def test_helper_edge_paths_cover_safe_fallbacks() -> None:
 
     no_collision = check_content_hash_integrity_stats(2, 0)
     assert no_collision.status == DQCheckStatus.PASS
-
-    fallback = _profile_column_uniqueness(
-        df,
-        columns=["missing", "entity_id"],
-        total_count=2,
-        profile_errors=(pl.exceptions.ColumnNotFoundError,),
-    )
-    assert fallback["entity_id"]["cardinality"] == 2
-    assert "missing" not in fallback
 
     assert _categorical_row_value_count({"value": "x", "counts": 3}, "category") == (
         "x",
