@@ -1,0 +1,8 @@
+check,workflow,policy_class,ruleset_state,live_required,requirement_id,evidence
+"checks-complete","import-linter.yml","always-on","configured-disabled","false","GH-RULESET-001","unfiltered pull_request"
+"root-hygiene","root-hygiene.yml","always-on","configured-disabled","false","GH-RULESET-001","unfiltered pull_request"
+"coverage-verify","tests.yml","path-scoped","not-configured","false","policy","must not be unconditional"
+"schema-governance-status","schema-governance.yml","path-scoped","not-configured","false","policy","must not be unconditional"
+"detect-secrets","security.yml","path-scoped","not-configured","false","policy","must not be unconditional"
+"commit-lint","commit-lint.yml","path-scoped","not-configured","false","policy","must not be unconditional"
+"type-check","type-checking.yml","path-scoped","not-configured","false","policy","must not be unconditional"
