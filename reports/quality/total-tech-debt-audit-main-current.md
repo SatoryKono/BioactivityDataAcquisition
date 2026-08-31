@@ -6,11 +6,11 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/redos-inline-secret-20260828
+Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `a8ccdd676c7bc25e389f349a0ab35ca0a10bcac9f9ab1c234a107232121b7c55`
+Evidence surface SHA-256: `32d9a45c36bf6b8869322ddf252fe0964cd0ef5a02f58bbc13722b6612ec9aa5`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "a8ccdd676c7bc25e389f349a0ab35ca0a10bcac9f9ab1c234a107232121b7c55",
+  "evidence_surface_sha256": "32d9a45c36bf6b8869322ddf252fe0964cd0ef5a02f58bbc13722b6612ec9aa5",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
@@ -29,10 +29,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1570,
+    "fully_covered_module_count": 1605,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 893,
+    "partially_covered_module_count": 858,
     "source_module_count": 2467,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical regeneration on origin/main e862d6dbf6. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
@@ -53,8 +53,8 @@ Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical 
 1. Architecture quality integral score: **9.14** (`good_targeted_improvements`). Integral score `9.14`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2467**
-   - fully_covered: **1570**
-   - partially_covered: **893**
+   - fully_covered: **1605**
+   - partially_covered: **858**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
