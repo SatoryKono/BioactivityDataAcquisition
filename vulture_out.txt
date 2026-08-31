@@ -1,0 +1,2 @@
+[zed_vulture] path=E:/github/BioactivityDataAcquisition/src/bioetl min_confidence=80 reportable=0
+[zed_vulture] no reportable dead-code findings
