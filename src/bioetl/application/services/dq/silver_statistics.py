@@ -161,7 +161,9 @@ class SilverStatisticsCalculator:
 
         import itertools
 
-        for col, dtype in itertools.islice(df.schema.items(), 20):  # Limit to first 20 columns
+        for col, dtype in itertools.islice(
+            df.schema.items(), 20
+        ):  # Limit to first 20 columns
             if dtype in (pl.Float64, pl.Float32, pl.Int64, pl.Int32, pl.Int16, pl.Int8):
                 numeric_dist = _profile_numeric_column(df, col, _SILVER_PROFILE_ERRORS)
                 if numeric_dist is not None:
