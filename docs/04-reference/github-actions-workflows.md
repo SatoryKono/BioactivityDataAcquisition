@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-21'
+  Last verified: '2026-08-31'
 
 ______________________________________________________________________
 
@@ -84,7 +84,7 @@ Use it when you need to answer:
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `schedule`, `workflow_dispatch` | Stale report-noise draft PR cleanup under repository hygiene policy |
-| `quality-debt-weekly.yml` | _(unnamed in YAML)_ | `schedule`, `workflow_dispatch` | Weekly quality-debt scorecard/report lane |
+| `quality-debt-weekly.yml` | `Quality Debt Weekly` | `schedule`, `workflow_dispatch` | Weekly quality-debt scorecard/report lane |
 | `scorecard.yml` | `OpenSSF Scorecard` | `schedule`, `workflow_dispatch`, `push` | Weekly non-blocking OpenSSF Scorecard baseline |
 | `stale.yml` | `Stale` | `schedule` | Issue/PR staleness automation |
 | `vacuum.yml` | `Weekly VACUUM` | `schedule`, `workflow_dispatch` | Scheduled Delta VACUUM maintenance |
@@ -96,7 +96,7 @@ Use it when you need to answer:
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
 | `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
-| `release.yml` | _(unnamed in YAML)_ | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
+| `release.yml` | `Release` | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
 
 ### Reusable / compatibility-only helpers
 
