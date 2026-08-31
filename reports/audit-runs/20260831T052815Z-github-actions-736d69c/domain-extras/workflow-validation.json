@@ -1,0 +1,29 @@
+{
+  "baseline_sha": "736d69cf5d093c7ff97b2f6b60c470b033e9370d",
+  "yaml_schema": "PENDING_LIVE_CI",
+  "catalog": {
+    "expected": 47,
+    "actual": 47,
+    "result": "PASS"
+  },
+  "pins": {
+    "total_uses": 310,
+    "unpinned": 0,
+    "result": "PASS"
+  },
+  "artifacts": {
+    "uploads": 71,
+    "violations": 0,
+    "result": "PASS"
+  },
+  "concurrency": {
+    "missing_before": [
+      ".github/workflows/branch-hygiene.yml",
+      ".github/workflows/contract-governance-fast-check.yml",
+      ".github/workflows/memory-freshness.yml",
+      ".github/workflows/provider-contract-drift.yml"
+    ],
+    "result": "FAIL"
+  },
+  "zizmor": "PENDING_LIVE_CI"
+}

@@ -1,0 +1,63 @@
+{
+  "iteration": 1,
+  "new_findings": 2,
+  "open_cycle_issues": 2,
+  "findings": [
+    {
+      "finding_id": "AUD-001",
+      "severity": "P1",
+      "status": "PROVEN",
+      "requirement_id": "GH-RULESET-001",
+      "title": "main ruleset disabled and tracker was closed before acceptance",
+      "evidence": [
+        {
+          "source": "GitHub API GET /branches/main",
+          "value": "protected=false; required contexts empty"
+        },
+        {
+          "source": "GitHub API GET /rulesets/15730586",
+          "value": "enforcement=disabled; contexts=checks-complete,root-hygiene; bypass_actors=[]"
+        },
+        {
+          "source": "GitHub issue #9800",
+          "value": "was closed/completed with unchecked acceptance criteria"
+        }
+      ],
+      "verification_methods": [
+        "live branch/ruleset API",
+        "tracker acceptance audit"
+      ],
+      "remediation": "Separate owner-approved repository-settings change; no admin bypass from code PR.",
+      "issue": 9800
+    },
+    {
+      "finding_id": "AUD-002",
+      "severity": "P2",
+      "status": "PROVEN",
+      "requirement_id": "REQ-DEP-002",
+      "title": "Four PR workflows lack concurrency cancellation",
+      "paths": [
+        ".github/workflows/branch-hygiene.yml",
+        ".github/workflows/contract-governance-fast-check.yml",
+        ".github/workflows/memory-freshness.yml",
+        ".github/workflows/provider-contract-drift.yml"
+      ],
+      "evidence": [
+        {
+          "source": "workflow static inventory",
+          "value": "pull_request trigger present and workflow concurrency absent in four paths"
+        },
+        {
+          "source": "docs/00-project/governance/05-github-policy.md",
+          "value": "SSOT states all PR-triggered workflows use concurrency"
+        }
+      ],
+      "verification_methods": [
+        "path scan",
+        "SSOT claim comparison"
+      ],
+      "remediation": "Add PR-number concurrency with run-id fallback and regression test.",
+      "issue": 9865
+    }
+  ]
+}

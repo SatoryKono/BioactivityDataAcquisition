@@ -1,0 +1,30 @@
+{
+  "iteration": 1,
+  "static": {
+    "scope_exists": true,
+    "workflow_count": 47,
+    "catalog_claim": 47,
+    "external_uses": 231,
+    "unpinned_external_uses": 0,
+    "upload_artifacts": 71,
+    "missing_or_unbounded_retention": 0,
+    "pull_request_target": [
+      {
+        "path": ".github/workflows/labeler.yml",
+        "checkout_untrusted": false
+      }
+    ],
+    "pr_workflows_missing_concurrency": [
+      ".github/workflows/branch-hygiene.yml",
+      ".github/workflows/contract-governance-fast-check.yml",
+      ".github/workflows/memory-freshness.yml",
+      ".github/workflows/provider-contract-drift.yml"
+    ]
+  },
+  "live": {
+    "baseline_main_ci": "FAILING/IN_PROGRESS",
+    "root_hygiene": "failure",
+    "note": "baseline failure predates audit branch"
+  },
+  "result": "FAIL"
+}
