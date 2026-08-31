@@ -327,6 +327,25 @@ def test_collect_link_scan_files_keeps_nav_docs_without_prechecking_existence(
     assert collected == [missing_nav_doc, nav_doc, tree_doc]
 
 
+def test_should_skip_frozen_materialized_v3_snapshot(
+    check_doc_links_module: ModuleType,
+) -> None:
+    module = check_doc_links_module
+    frozen_doc = (
+        module.DOCS_DIR
+        / "00-project"
+        / "ai"
+        / "prompts"
+        / "library"
+        / "audit"
+        / "project"
+        / "materialized-v3"
+        / "MIGRATION-PLAN.md"
+    )
+
+    assert module._should_skip(frozen_doc)
+
+
 def test_has_any_heading_accepts_cli_inspection_alias(
     check_doc_links_module: ModuleType,
 ) -> None:

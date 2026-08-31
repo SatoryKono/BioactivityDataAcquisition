@@ -122,6 +122,8 @@ SKIP_DIRS = frozenset(
         "reports",
         "site",
         "99-archive",
+        # Immutable prompt-system evidence snapshot; active sources live outside it.
+        "materialized-v3",
     }
 )
 
@@ -991,9 +993,7 @@ GITHUB_POLICY_DOC = DOCS_DIR / "00-project" / "governance" / "05-github-policy.m
 WORKFLOW_COUNT_CLAIM_RE = re.compile(
     r"BioETL uses \*\*(\d+) GitHub Actions workflows\*\*"
 )
-INVENTORY_COUNT_CLAIM_RE = re.compile(
-    r"\*\*(\d+)\*\* live GitHub Actions"
-)
+INVENTORY_COUNT_CLAIM_RE = re.compile(r"\*\*(\d+)\*\* live GitHub Actions")
 WORKFLOW_FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]+\.yml$")
 TRIGGER_TOKEN_RE = re.compile(r"`([a-z_]+)`")
 
@@ -1051,12 +1051,16 @@ def check_github_actions_workflow_claim_parity() -> list[str]:
     errors: list[str] = []
     live_files = sorted(GITHUB_WORKFLOWS_DIR.glob("*.yml"))
     live_count = len(live_files)
-    inventory_text = WORKFLOW_INVENTORY_DOC.read_text(encoding="utf-8", errors="replace")
+    inventory_text = WORKFLOW_INVENTORY_DOC.read_text(
+        encoding="utf-8", errors="replace"
+    )
     policy_text = GITHUB_POLICY_DOC.read_text(encoding="utf-8", errors="replace")
 
     policy_match = WORKFLOW_COUNT_CLAIM_RE.search(policy_text)
     if policy_match is None:
-        errors.append("docs/00-project/governance/05-github-policy.md missing workflow count claim")
+        errors.append(
+            "docs/00-project/governance/05-github-policy.md missing workflow count claim"
+        )
     elif int(policy_match.group(1)) != live_count:
         errors.append(
             "docs/00-project/governance/05-github-policy.md claims "
@@ -1065,7 +1069,9 @@ def check_github_actions_workflow_claim_parity() -> list[str]:
 
     inventory_match = INVENTORY_COUNT_CLAIM_RE.search(inventory_text)
     if inventory_match is None:
-        errors.append("docs/04-reference/github-actions-workflows.md missing live workflow count")
+        errors.append(
+            "docs/04-reference/github-actions-workflows.md missing live workflow count"
+        )
     elif int(inventory_match.group(1)) != live_count:
         errors.append(
             "docs/04-reference/github-actions-workflows.md claims "

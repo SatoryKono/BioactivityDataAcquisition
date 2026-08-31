@@ -264,6 +264,20 @@ raise SystemExit(subprocess.call(sys.argv[1:]))
     }
 }
 
+function Add-BioetlTrimmedString {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Collections.IList]$Target,
+
+        $Value
+    )
+
+    $item = "$Value".Trim()
+    if (-not [string]::IsNullOrWhiteSpace($item)) {
+        [void]$Target.Add($item)
+    }
+}
+
 function Add-BioetlFlattenedStrings {
     <#
     .SYNOPSIS
@@ -289,10 +303,7 @@ function Add-BioetlFlattenedStrings {
             continue
         }
         if ($current -is [string]) {
-            $item = $current.Trim()
-            if (-not [string]::IsNullOrWhiteSpace($item)) {
-                [void]$Target.Add($item)
-            }
+            Add-BioetlTrimmedString -Target $Target -Value $current
             continue
         }
         if ($current -is [System.Collections.IEnumerable]) {
@@ -301,10 +312,7 @@ function Add-BioetlFlattenedStrings {
             }
             continue
         }
-        $text = "$current".Trim()
-        if (-not [string]::IsNullOrWhiteSpace($text)) {
-            [void]$Target.Add($text)
-        }
+        Add-BioetlTrimmedString -Target $Target -Value $current
     }
 }
 
