@@ -16,7 +16,7 @@ jobs:
       - name: Checkout exact PR head read-only
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
-          ref: e3d37d4fa1081048be2f6441c27fb42de93bec24
+          ref: 10693061ec5fe1264683a61e83a3a4da45da1950
           fetch-depth: 1
           persist-credentials: false
 
