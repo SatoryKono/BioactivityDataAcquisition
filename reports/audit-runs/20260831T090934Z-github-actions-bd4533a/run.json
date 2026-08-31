@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20260831T090934Z-github-actions-bd4533a",
+  "domain": "github-actions",
+  "mode": "full",
+  "audit_mode": "full",
+  "language": "ru",
+  "max_iterations": 10,
+  "executed_iterations": 3,
+  "started_at": "2026-08-31T09:09:34.943Z",
+  "completed_at": "2026-08-31T09:27:19.785Z",
+  "early_stop": {
+    "triggered": true,
+    "reason": "iterations 2 and 3 had no new PROVEN P0/P1 and no new in-scope regression",
+    "gate": "BLOCK"
+  },
+  "repository": "SatoryKono/BioactivityDataAcquisition",
+  "base_branch": "main",
+  "work_branch": "fix/github-actions-cycle-bd4533a",
+  "baseline_sha": "bd4533a2c923d464dfd971ffacf96df6bc9b70be",
+  "baseline_tree": "6e6045bc8186a76340d3a7a1349d859832ed3b4c",
+  "final_observed_main_sha": "7add6987645a81e973a579aa4cc5b6db6d32f1b5",
+  "scope": [
+    ".github/workflows",
+    ".github/actions",
+    ".github/dependabot.yml"
+  ],
+  "scope_exists": true,
+  "preflight": {
+    "local": {
+      "status": "DEGRADED",
+      "mutation_allowed": false,
+      "error": "batch file arguments are invalid",
+      "git_status": "UNAVAILABLE",
+      "head": "UNAVAILABLE",
+      "remote": "UNAVAILABLE",
+      "tool_versions": {
+        "git": "UNAVAILABLE",
+        "gh": "UNAVAILABLE",
+        "python": "UNAVAILABLE"
+      },
+      "auth": "UNAVAILABLE; no token printed",
+      "memory_pre_task": "UNAVAILABLE"
+    },
+    "remote": {
+      "status": "PASS",
+      "actor": "SatoryKono; token not exposed",
+      "default_branch": "main",
+      "baseline_head": "bd4533a2c923d464dfd971ffacf96df6bc9b70be",
+      "branch_protected": false,
+      "required_contexts": [],
+      "rulesets": [
+        {
+          "id": 15730586,
+          "enforcement": "disabled",
+          "contexts": [
+            "checks-complete",
+            "root-hygiene"
+          ],
+          "bypass_actors": []
+        },
+        {
+          "id": 13643213,
+          "enforcement": "disabled"
+        }
+      ],
+      "open_cycle_issues": [
+        9800,
+        9865
+      ]
+    }
+  },
+  "baseline_hashes": {
+    "docs/00-project/governance/05-github-policy.md": "8b231b95a15953fed52718de864d5ee28017dcc1",
+    "docs/04-reference/github-actions-workflows.md": "8dbbae33396ed547b46fcbd392b9133054a7cafb",
+    "configs/quality/github_governance_policy.json": "153eec56e0c7030947d839305860e48d85c98c26",
+    "reports/quality/architecture-quality-scorecard.json": "805a9fe7a75d02f3d0fe27d5bc17f85a333b5a83",
+    "tests/architecture/test_github_actions_runtime_policy.py": "2b1b2341d65e5f2f8385367145815b0896ad76cb",
+    ".github/dependabot.yml": "55307c05c48fea9a9b8c453a9ac4909d91141175"
+  },
+  "issue_mutations": [
+    {
+      "action": "created",
+      "issue": 9881
+    },
+    {
+      "action": "commented",
+      "pull_request": 9880,
+      "comment_id": 5476177408
+    },
+    {
+      "action": "commented",
+      "issue": 9800,
+      "comment_id": 5476254212
+    },
+    {
+      "action": "updated",
+      "issue": 9881
+    }
+  ],
+  "fix_mutations": [
+    {
+      "pull_request": 9880,
+      "commits": [
+        "2361ec16b7d29c21aec2b7fa89fd1a4d333933a8",
+        "80037b10b0805198a33050bdfdb060307e04d4f5",
+        "594fe41040277d95215e2d02bc9a226a7bf86935",
+        "3421f7e8928e51da1e0bcb983d40a608634fcae1"
+      ],
+      "change": "effective-permission-aware refs/pull merge guard plus formatting follow-ups"
+    }
+  ],
+  "post_task": {
+    "status": "DEGRADED",
+    "reason": "local executor unavailable; remote post-audit used"
+  },
+  "mutations": {
+    "merge_performed": false,
+    "issues_closed": [],
+    "ruleset_mutated": false,
+    "env_changed": false,
+    "budgets_changed": false,
+    "secrets_printed": false
+  },
+  "final_gate": "BLOCK"
+}

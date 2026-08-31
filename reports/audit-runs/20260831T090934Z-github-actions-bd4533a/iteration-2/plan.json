@@ -1,0 +1,29 @@
+{
+  "iteration": 2,
+  "actions": [
+    {
+      "id": "remove-temp-workflow",
+      "status": "OPEN"
+    },
+    {
+      "id": "add-regression-guard",
+      "status": "IMPLEMENTED_NOT_ACCEPTED",
+      "pull_request": 9880,
+      "head": "2361ec16b7d29c21aec2b7fa89fd1a4d333933a8"
+    },
+    {
+      "id": "restore-catalog-parity",
+      "status": "FAIL"
+    },
+    {
+      "id": "activate-required-checks",
+      "status": "OPEN",
+      "issue": 9800
+    },
+    {
+      "id": "validate-and-merge",
+      "status": "BLOCKED_BY_CI",
+      "merge_performed": false
+    }
+  ]
+}

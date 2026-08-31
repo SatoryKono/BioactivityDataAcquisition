@@ -1,0 +1,29 @@
+{
+  "iteration": 3,
+  "actions": [
+    {
+      "id": "remove-temp-workflow",
+      "status": "PARTIAL_ACCEPTANCE"
+    },
+    {
+      "id": "add-regression-guard",
+      "status": "IMPLEMENTED_NOT_ACCEPTED",
+      "pull_request": 9880,
+      "head": "3421f7e8928e51da1e0bcb983d40a608634fcae1"
+    },
+    {
+      "id": "restore-catalog-parity",
+      "status": "PASS"
+    },
+    {
+      "id": "activate-required-checks",
+      "status": "OPEN",
+      "issue": 9800
+    },
+    {
+      "id": "validate-and-merge",
+      "status": "BLOCKED_BY_CI",
+      "merge_performed": false
+    }
+  ]
+}

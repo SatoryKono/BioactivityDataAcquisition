@@ -1,0 +1,36 @@
+{
+  "snapshot_at": "2026-08-31T09:10:09.149Z",
+  "iteration": 2,
+  "main_sha": "fb82a1f561218198f8fa8ed438ff95b0a5e22e7d",
+  "main_scope": {
+    "workflows": 48,
+    "privileged_temp_workflow": true,
+    "catalog_status": "FAIL",
+    "regression_guard_on_main": false
+  },
+  "remediation_pr": {
+    "number": 9880,
+    "state": "open",
+    "head": "2361ec16b7d29c21aec2b7fa89fd1a4d333933a8",
+    "workflow_removed": true,
+    "regression_guard_added": true,
+    "zizmor": "PASS",
+    "required_ci": "NOT_GREEN"
+  },
+  "required_check_enforcement": {
+    "main_protected": false,
+    "required_contexts": [],
+    "ruleset_15730586": "disabled"
+  },
+  "local_validation": "DEGRADED",
+  "open_cycle_issues": [
+    9800,
+    9865,
+    9881
+  ],
+  "new_issues": 0,
+  "new_proven_p0_p1": 0,
+  "new_regressions": 0,
+  "consecutive_no_new_p0_p1_no_regression": 1,
+  "overall": "BLOCK"
+}
