@@ -262,7 +262,9 @@ def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
         if "${{ github.workflow }}" not in group:
             violations.append(f"{path.name}: group must include github.workflow")
         if cancel in {None, False, "false", ""}:
-            violations.append(f"{path.name}: PR concurrency must cancel superseded runs")
+            violations.append(
+                f"{path.name}: PR concurrency must cancel superseded runs"
+            )
     assert violations == []
 
 
