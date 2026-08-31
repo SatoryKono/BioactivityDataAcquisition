@@ -81,7 +81,7 @@ jobs:
           )
           for path in "${paths[@]}"; do
             echo "__PAYLOAD_BEGIN__:${path}"
-            base64 -w0 "${path}"
+            base64 "${path}"
             echo
             echo "__PAYLOAD_END__:${path}"
           done
