@@ -41,6 +41,10 @@ on:
       - 'tests/architecture/test_pipeline_config_contract_ownership_map_*.py'
       - '.github/workflows/contract-governance-*.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   PYTHON_VERSION: "3.13"
 
