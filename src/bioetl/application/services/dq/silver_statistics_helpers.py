@@ -124,9 +124,9 @@ def check_uniqueness_stats(
     if cols_to_check:
         try:
             # Vectorize cardinality check to avoid massive FFI overhead in python loop
-            unique_counts = df.select([
-                pl.col(c).n_unique() for c in cols_to_check
-            ]).row(0, named=True)
+            unique_counts = df.select(
+                [pl.col(c).n_unique() for c in cols_to_check]
+            ).row(0, named=True)
             for col, cardinality in unique_counts.items():
                 column_stats[col] = {
                     "cardinality": cardinality,
@@ -142,7 +142,9 @@ def check_uniqueness_stats(
                     column_stats[col] = {
                         "cardinality": cardinality,
                         "uniqueness_ratio": (
-                            round(cardinality / total_count, 4) if total_count > 0 else 0.0
+                            round(cardinality / total_count, 4)
+                            if total_count > 0
+                            else 0.0
                         ),
                     }
                 except profile_errors:

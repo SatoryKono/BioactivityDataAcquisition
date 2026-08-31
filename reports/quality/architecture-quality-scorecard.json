@@ -26,13 +26,13 @@
     {
       "evidence_metrics": {
         "source_module_count": 2466,
-        "uncovered_module_count": 303
+        "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 0.0,
+      "score": 10.0,
       "weight": 0.09,
-      "weighted_score": 0.0
+      "weighted_score": 0.9
     },
     {
       "evidence_metrics": {
@@ -77,14 +77,14 @@
     {
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
-        "uncovered_module_count": 303,
-        "unmeasured_module_count": 9
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 0.0,
+      "score": 10.0,
       "weight": 0.12,
-      "weighted_score": 0.0
+      "weighted_score": 1.2
     },
     {
       "evidence_metrics": {
@@ -186,8 +186,8 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 7.04,
-  "interpretation": "satisfactory_system_refactoring_required",
+  "integral_score": 9.14,
+  "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
     "adr_enforcement_blocking_gap_count": 0,
@@ -225,8 +225,8 @@
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
-    "uncovered_module_count": 303,
-    "unmeasured_module_count": 9
+    "uncovered_module_count": 0,
+    "unmeasured_module_count": 0
   },
   "schema_version": 2,
   "source_artifacts": {
@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "9a3b2d18c3e05ad582a861c3db0fcead80bc4a12971aae121585569ec4c35991"
+      "source_fingerprint": "84367c89e0766d5d990dce26b969004b5cd080aa876cc9261373da97a3ac8b14"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -273,9 +273,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "fd842822558114d1d23269ac9f12447935f2a818fd0000d810aa0a22e74dbc0b",
+      "coverage_xml_sha256": "28aaa980500b1f81bf10a934b0e6d562ac023ffe50e49c58649802c0da47ba17",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "d4089dd05cd1b175dccf487be73c05a8e0ae78cf2e64f99401d7e8748031c424"
+      "source_tree_sha256": "c919708d1c96384d333fe923723d02a1c707061bed43feb76976092ff029becb"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

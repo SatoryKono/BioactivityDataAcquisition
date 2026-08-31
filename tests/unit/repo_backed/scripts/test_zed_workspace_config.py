@@ -85,6 +85,20 @@ def test_zed_xenon_adapts_ci_excludes_to_windows_paths() -> None:
         )
         == r"tests\*,src\memory\*"
     )
+    windows_cli = namespace["_xenon_cli"](
+        executable=r"C:\repo\.venv-win\Scripts\python.exe",
+        platform="win32",
+    )
+    posix_cli = namespace["_xenon_cli"](
+        executable="/repo/.venv/bin/python",
+        platform="linux",
+    )
+    assert windows_cli.name == "xenon.exe"
+    assert posix_cli.name == "xenon"
+    source = (ROOT / "scripts" / "engineering" / "dev" / "zed_xenon.py").read_text(
+        encoding="utf-8"
+    )
+    assert '"-m"' not in source
 
 
 @pytest.mark.parametrize(
