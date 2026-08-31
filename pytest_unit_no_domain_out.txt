@@ -91,4 +91,7 @@ tests\unit\application\composite\test_fsm_pipeline_scenarios.py ........ [  3%]
 tests\unit\application\composite\test_helper_module_coverage.py .....    [  3%]
 tests\unit\application\composite\test_join_key_resolution_property.py .. [  3%]
 ...                                                                      [  3%]
-tests\unit\application\composite\test_join_planner.py ......
+tests\unit\application\composite\test_join_planner.py .............      [  3%]
+tests\unit\application\composite\test_lifecycle_observer_service.py .... [  4%]
+...                                                                      [  4%]
+tests\unit\application\composite\test_merger.py .............
