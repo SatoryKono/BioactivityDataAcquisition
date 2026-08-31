@@ -147,6 +147,9 @@ LANES: dict[str, tuple[str, ...]] = {
         "no:benchmark",
     ),
     # Advisory local coverage estimate — NOT the canonical coverage-verify gate.
+    # Do not emit HTML here: writing htmlcov for the full src/bioetl tree on
+    # Windows routinely hangs after tests and yields a bare Zed exit code 1
+    # with a truncated/zero-byte htmlcov directory.
     "coverage-local": (
         _TESTS_ROOT,
         "--ignore=tests/e2e",
@@ -159,7 +162,6 @@ LANES: dict[str, tuple[str, ...]] = {
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
         "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,
@@ -175,7 +177,6 @@ LANES: dict[str, tuple[str, ...]] = {
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
         "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,
