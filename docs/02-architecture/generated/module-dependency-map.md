@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2464`
-- Internal import edges (raw): `7695`
+- Scanned modules: `2465`
+- Internal import edges (raw): `7698`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `327`
@@ -21,8 +21,8 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1552 OK| application
-    application -->|977 OK| domain
+    application -->|1553 OK| application
+    application -->|979 OK| domain
     composition -->|196 OK| application
     composition -->|681 OK| composition
     composition -->|283 OK| domain
@@ -40,8 +40,8 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1552 | allowed |
-| `application`    | `domain`         |     977 | allowed |
+| `application`    | `application`    |    1553 | allowed |
+| `application`    | `domain`         |     979 | allowed |
 | `composition`    | `application`    |     196 | allowed |
 | `composition`    | `composition`    |     681 | allowed |
 | `composition`    | `domain`         |     283 | allowed |
@@ -62,7 +62,7 @@ flowchart LR
 | `infrastructure.adapters`      | `domain.types`                             |     118 |
 | `application.composite`        | `domain.composite`                         |     104 |
 | `application.core`             | `domain.types`                             |      87 |
-| `application.services`         | `domain.types`                             |      80 |
+| `application.services`         | `domain.types`                             |      81 |
 | `infrastructure.storage`       | `domain.types`                             |      72 |
 | `infrastructure.storage`       | `domain.ports`                             |      61 |
 | `application.pipelines`        | `domain.types`                             |      57 |
@@ -83,7 +83,7 @@ flowchart LR
 | `composition.runtime_builders` | `domain.control_plane`                     |      26 |
 | `infrastructure.config`        | `domain.types`                             |      25 |
 | `infrastructure.control_plane` | `domain.control_plane`                     |      25 |
-| `application.services`         | `domain.value_objects`                     |      23 |
+| `application.services`         | `domain.value_objects`                     |      24 |
 | `infrastructure.adapters`      | `domain.ports`                             |      23 |
 | `application.pipelines`        | `domain.entities`                          |      22 |
 | `composition.factories`        | `domain.schemas`                           |      22 |
