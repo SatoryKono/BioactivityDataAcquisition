@@ -58,7 +58,8 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
         tzdata=2026c-r0 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \
-    && chmod 1777 /runtime-fs/tmp \ # S2612: intentional FHS sticky bit for 999:999 scratch /tmp; image has no shell/apk, only bioetl user
+    && chown 999:999 /runtime-fs/tmp \
+    && chmod 0700 /runtime-fs/tmp \
     && ! grep -Eq '^[^:]*:[^:]*:999:' /etc/passwd \
     && ! grep -Eq '^[^:]*:[^:]*:999:' /etc/group \
     && printf 'bioetl:x:999:999:BioETL runtime:/app:/sbin/nologin\n' >> /etc/passwd \

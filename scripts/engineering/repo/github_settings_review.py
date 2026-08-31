@@ -15,6 +15,15 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.engineering.common.repo_paths import (
+    resolve_cli_path,
+    resolve_output_path,
+)
+
 MUTATING_GH_ARGUMENTS = frozenset(
     {
         "-X",
@@ -627,23 +636,7 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-_ALLOWED_POLICY_RELPATH = __import__("re").compile(r"^[A-Za-z0-9._/-]+$")
-
-
-def _safe_policy_path(path: Path, repo_root: Path | None = None) -> Path:
-    # S8707 path-injection guard — policy path must stay inside repo and not escape via traversal/symlink.
-    root = (repo_root or Path(__file__).resolve().parents[3]).resolve()
-    rel = path.as_posix() if path.is_absolute() else path.as_posix()
-    if not _ALLOWED_POLICY_RELPATH.match(rel) or ".." in rel.split("/"):
-        raise ValueError(f"invalid policy path: {path}")
-    resolved = (root / path).resolve() if not path.is_absolute() else path.resolve()
-    if resolved != root and not str(resolved).startswith(str(root) + __import__("os").sep):
-        raise ValueError(f"policy path escapes repo root: {path}")
-    return resolved
-
-
 def _load_policy(path: Path) -> dict[str, Any]:
-    path = _safe_policy_path(path)
     payload = json.loads(path.read_text(encoding="utf-8"))
     if payload.get("schema_version") != "1.0":
         raise GitHubReviewError("unsupported GitHub governance policy schema")
@@ -652,8 +645,7 @@ def _load_policy(path: Path) -> dict[str, Any]:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    default_root = Path(__file__).resolve().parents[2]
-    parser.add_argument("--repo-root", type=Path, default=default_root)
+    parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument(
         "--policy",
         type=Path,
@@ -672,10 +664,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    repo_root = args.repo_root.resolve()
-    policy_path = args.policy
-    if not policy_path.is_absolute():
-        policy_path = repo_root / policy_path
+    repo_root = resolve_cli_path(args.repo_root)
+    policy_path = resolve_cli_path(args.policy, root=repo_root)
     policy = _load_policy(policy_path)
     client = ReadOnlyGitHubClient(repo_root)
     snapshot = collect_snapshot(
@@ -690,7 +680,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         (args.json_out, json.dumps(report, indent=2, sort_keys=True) + "\n"),
         (args.markdown_out, render_markdown(report)),
     ):
-        target = output_path if output_path.is_absolute() else repo_root / output_path
+        target = resolve_output_path(output_path, root=repo_root)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8", newline="\n")
 
@@ -707,6 +697,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         raise SystemExit(main())
-    except (GitHubReviewError, json.JSONDecodeError, OSError) as error:
+    except (GitHubReviewError, json.JSONDecodeError, OSError, ValueError) as error:
         sys.stderr.write(f"GitHub governance review failed: {error}\n")
         raise SystemExit(2) from error
