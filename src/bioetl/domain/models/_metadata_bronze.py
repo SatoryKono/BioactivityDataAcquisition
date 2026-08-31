@@ -1,4 +1,4 @@
-# mypy: disable-error-code="misc"
+# mypy: disable-error-code="misc,untyped-decorator"
 """Bronze layer metadata models.
 
 Contains API request tracking, source metadata, file output info,

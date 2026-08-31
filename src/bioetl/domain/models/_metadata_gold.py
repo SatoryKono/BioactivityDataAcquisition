@@ -1,4 +1,4 @@
-# mypy: disable-error-code="misc"
+# mypy: disable-error-code="misc,untyped-decorator"
 """Gold layer metadata models.
 
 Contains schema contract, SCD tracking, composite extensions,

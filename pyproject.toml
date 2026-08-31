@@ -382,6 +382,18 @@ module = [
 ]
 ignore_missing_imports = true
 
+# openpyxl has types-openpyxl, so ignore_missing_imports does not suppress
+# [import-untyped] ("Library stubs not installed"). Keep this override even
+# when the stub package is present: formatter can move inline ignores off
+# the import line, and Zed/CI type gates must stay green either way.
+[[tool.mypy.overrides]]
+module = [
+    "openpyxl",
+    "openpyxl.*",
+]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
 # Pandera @register_check_method decorator lacks type stubs
 [[tool.mypy.overrides]]
 module = [

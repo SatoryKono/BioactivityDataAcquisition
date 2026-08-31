@@ -42,4 +42,5 @@ def _format_yaml_string(value: str) -> str:
         _YAML_RESERVED_STRINGS
     ):
         return value
-    return orjson.dumps(value).decode("utf-8")
+    encoded = orjson.dumps(value).decode("utf-8")
+    return str(encoded)

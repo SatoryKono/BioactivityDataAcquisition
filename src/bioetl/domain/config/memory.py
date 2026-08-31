@@ -5,14 +5,14 @@ Defines the MemoryConfig value object for memory-aware batch processing.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 __all__ = [
     "MemoryConfig",
 ]
 
 
-class MemoryConfig(BaseModel, frozen=True, extra="forbid"):
+class MemoryConfig(BaseModel):
     """Configuration for memory-aware batch processing.
 
     Used by MemoryMonitor (infrastructure layer) to configure adaptive
@@ -36,6 +36,8 @@ class MemoryConfig(BaseModel, frozen=True, extra="forbid"):
         >>> config.max_batch_memory_mb
         512
     """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     max_batch_memory_mb: int = Field(default=512, gt=0)
     memory_pressure_threshold: float = Field(

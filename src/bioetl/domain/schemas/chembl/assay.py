@@ -1,3 +1,4 @@
+# mypy: disable-error-code="untyped-decorator"
 """Pandera schema for ChEMBL Assay entity.
 
 Aligned with RULES.md v5.24 and ChEMBL 34 schema.
