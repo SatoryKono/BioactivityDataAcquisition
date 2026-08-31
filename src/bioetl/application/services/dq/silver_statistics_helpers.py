@@ -28,15 +28,7 @@ OptionalNumeric = int | float | None
 def detect_type_changes(
     current: dict[str, str], previous: dict[str, str]
 ) -> list[dict[str, str]]:
-    """Find fields whose types differ between current and previous schema.
-
-    Args:
-        current: Mapping of column name to current type string.
-        previous: Mapping of column name to previous type string.
-
-    Returns:
-        List of dicts with 'field', 'from', and 'to' keys for each changed column.
-    """
+    """Return fields whose types changed between schema snapshots."""
     return [
         {"field": f, "from": previous[f], "to": current[f]}
         for f in current
@@ -164,7 +156,7 @@ def _profile_column_uniqueness(
         column: {
             "cardinality": cardinality,
             "uniqueness_ratio": (
-                round(cardinality / total_count, 4) if total_count > 0 else 0.0
+                round(cardinality / total_count, 4) if total_count else 0.0
             ),
         }
         for column, cardinality in unique_counts.items()
