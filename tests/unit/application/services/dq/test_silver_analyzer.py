@@ -61,7 +61,7 @@ from bioetl.domain.value_objects.dq_report import (
     SilverDQCheckType,
 )
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.timeout(90)]
 
 
 # ---------------------------------------------------------------------------
