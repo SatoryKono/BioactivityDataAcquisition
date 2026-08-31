@@ -38,13 +38,8 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
-      - name: Contract matrix diff diagnostic
-        run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa report-contract-coverage-matrix \
-            --json-out "${RUNNER_TEMP}/contract-coverage-matrix.json" \
-            --md-out "${RUNNER_TEMP}/contract-coverage-matrix.md"
-          diff -u reports/quality/contract-coverage-matrix.json "${RUNNER_TEMP}/contract-coverage-matrix.json" || true
-          exit 1
+      - name: Ruff check
+        run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
