@@ -19,7 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.common.repo_paths import (  # noqa: E402
+from scripts.engineering.common.repo_paths import (
     resolve_cli_path,
     resolve_output_path,
 )
