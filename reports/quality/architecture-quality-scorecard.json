@@ -6,7 +6,7 @@
       },
       "id": "layer_compliance",
       "name": "Layer compliance",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.13,
       "weighted_score": 1.3
     },
@@ -19,7 +19,7 @@
       },
       "id": "hexagonal_ports_adapters",
       "name": "Hexagonal / Ports & Adapters",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.11,
       "weighted_score": 1.1
     },
@@ -30,7 +30,7 @@
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.09,
       "weighted_score": 0.9
     },
@@ -38,14 +38,14 @@
       "evidence_metrics": {
         "composition_util": 0.9833,
         "layer_violations": 0,
-        "lazy_util": 1,
+        "lazy_util": 1.0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
       },
       "id": "composition_di",
       "name": "Composition root / DI",
-      "score": 6,
+      "score": 6.0,
       "weight": 0.1,
       "weighted_score": 0.6
     },
@@ -54,12 +54,12 @@
         "families_at_budget_count": 2,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "lazy_util": 1,
+        "lazy_util": 1.0,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
-      "score": 8,
+      "score": 8.0,
       "weight": 0.14,
       "weighted_score": 1.12
     },
@@ -70,7 +70,7 @@
       },
       "id": "naming_package_consistency",
       "name": "Naming / package consistency",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.08,
       "weighted_score": 0.8
     },
@@ -82,7 +82,7 @@
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.12,
       "weighted_score": 1.2
     },
@@ -94,7 +94,7 @@
       },
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.09,
       "weighted_score": 0.9
     },
@@ -109,7 +109,7 @@
       },
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
-      "score": 10,
+      "score": 10.0,
       "weight": 0.08,
       "weighted_score": 0.8
     },
@@ -128,7 +128,7 @@
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
-      "score": 7,
+      "score": 7.0,
       "weight": 0.06,
       "weighted_score": 0.42
     }
@@ -178,7 +178,7 @@
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 97,
     "lazy_import_observed_count": 97,
-    "lazy_util": 1,
+    "lazy_util": 1.0,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -211,7 +211,7 @@
     "layer_violations": 0,
     "lazy_import_cap": 97,
     "lazy_import_observed_count": 97,
-    "lazy_util": 1,
+    "lazy_util": 1.0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
@@ -287,5 +287,5 @@
       "path": "reports/quality/test-governance-current.json"
     }
   },
-  "weights_sum": 1
+  "weights_sum": 1.0
 }
