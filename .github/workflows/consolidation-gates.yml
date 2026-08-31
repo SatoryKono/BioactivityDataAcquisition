@@ -42,10 +42,7 @@ jobs:
         run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
-        run: |
-          uv run --frozen --no-build ruff format tests/unit/application/composite/test_merger_metrics_mixin.py tests/unit/application/services/dq/test_silver_statistics_helpers.py tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py
-          git diff -- tests/unit/application/composite/test_merger_metrics_mixin.py tests/unit/application/services/dq/test_silver_statistics_helpers.py tests/unit/infrastructure/quality/test_architecture_quality_scorecard.py
-          exit 1
+        run: uv run --frozen --no-build ruff format --check .
 
       - name: Mypy
         run: >-

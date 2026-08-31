@@ -279,4 +279,3 @@ def test_metrics_edge_branches_keep_noop_inputs_unchanged() -> None:
     mixin._config.field_mappings = {"a": "a", "missing": "target"}
     assert mixin._apply_field_mappings(df).equals(df)
     assert mixin._calculate_field_coverage(df.select("_private")) == {}
-

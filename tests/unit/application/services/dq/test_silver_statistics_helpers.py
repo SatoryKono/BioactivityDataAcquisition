@@ -236,16 +236,18 @@ def test_helper_edge_paths_cover_safe_fallbacks() -> None:
     assert fallback["entity_id"]["cardinality"] == 2
     assert "missing" not in fallback
 
-    assert _categorical_row_value_count(
-        {"value": "x", "counts": 3}, "category"
-    ) == ("x", 3)
+    assert _categorical_row_value_count({"value": "x", "counts": 3}, "category") == (
+        "x",
+        3,
+    )
     assert _categorical_row_value_count(
         {"category": "x", "count": "invalid"}, "category"
     ) == ("x", 0)
-    assert profile_numeric_column(
-        df, "missing", (pl.exceptions.ColumnNotFoundError,)
-    ) is None
-    assert profile_categorical_column(
-        df, "missing", (pl.exceptions.ColumnNotFoundError,)
-    ) is None
-
+    assert (
+        profile_numeric_column(df, "missing", (pl.exceptions.ColumnNotFoundError,))
+        is None
+    )
+    assert (
+        profile_categorical_column(df, "missing", (pl.exceptions.ColumnNotFoundError,))
+        is None
+    )

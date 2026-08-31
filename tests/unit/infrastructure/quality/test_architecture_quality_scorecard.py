@@ -421,12 +421,8 @@ def test_scoring_helper_edges_fail_closed_and_sort_evidence() -> None:
     assert scoring_module._metric_int({"value": "3"}, "value") == 0
     assert scoring_module._metric_float({"value": False}, "value") == 0.0
     assert scoring_module._metric_float({"value": 0.75}, "value") == 0.75
-    assert (
-        scoring_module._over_cap_penalty({"util": 0.9}, "util", 0.8, 1.5) == 1.5
-    )
-    assert (
-        scoring_module._over_cap_penalty({"util": 0.8}, "util", 0.8, 1.5) == 0.0
-    )
+    assert scoring_module._over_cap_penalty({"util": 0.9}, "util", 0.8, 1.5) == 1.5
+    assert scoring_module._over_cap_penalty({"util": 0.8}, "util", 0.8, 1.5) == 0.0
     assert scoring_module._count_hotspot_families_at_budget(
         {"families": "invalid"}
     ) == {"count": 0, "names": []}
@@ -444,4 +440,3 @@ def test_scoring_helper_edges_fail_closed_and_sort_evidence() -> None:
     assert saturated == {"count": 2, "names": ["alpha", "zeta"]}
     assert scoring_module._clamp_score(-1.0) == 0.0
     assert scoring_module._clamp_score(11.0) == 10.0
-
