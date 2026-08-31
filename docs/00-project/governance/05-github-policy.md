@@ -157,7 +157,7 @@ check, and do **not** dismiss #1294 as a false green.
 | GHSA-2p49 / GHSA-xpqw | `svgo` | mermaid lockfile | Override **3.3.5** | CI diagrams |
 | GHSA-8cj5 / pq67 / vj76 | `tar-fs` | mermaid puppeteer | Override **2.1.5** | CI diagrams |
 | GHSA-3h5v / 58qx / 96hv | `ws` | mermaid puppeteer | Override **8.21.3** | CI diagrams |
-| PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.1.2` | `uv.lock` + `pip-audit --ignore-vuln` | Timeboxed ignore in `security.yml`; OSV CI gate stays HIGH/CRITICAL-only | CI/dev extra; not runtime image |
+| PYSEC-2026-3721 / CVE-2026-3219 | `pip==26.2.1` | `uv.lock` | Remediated 2026-08-31; `pip-audit --strict` is clean without `--ignore-vuln` | CI/dev extra; not runtime image |
 | GHSA-2v37, 337j, wrjc, jjmj, 5c6j, qj8w, w5hq | Grafana npm (`react-router` 6.x, `uuid` 9.x, …) | `grafana/plugins/*` | No React Router 7 / uuid 11 force-bump (Grafana 13 host API) | Optional monitoring (ADR-010); not BioETL runtime |
 
 Expiry: **2026-11-30**. Owner: BioETL Team. Accepted on #9853 (closed).
@@ -168,8 +168,8 @@ renew the exception with a new dated issue. Scorecard Vulnerabilities **#1294**
 stays undismissed.
 
 `security.yml` OSV-Scanner still scans `uv.lock` only and fails on HIGH/CRITICAL.
-Medium `PYSEC-2026-3721` does not fail that gate; pip-audit `--strict` would,
-hence the timeboxed ignore.
+`pip-audit --strict` no longer ignores `PYSEC-2026-3721` / `CVE-2026-3219`
+because `uv.lock` pins `pip==26.2.1`.
 
 ### 2.4 Code Hygiene
 
@@ -423,7 +423,7 @@ Dependabot creates update PRs; repository-level **Dependabot alerts + security u
 - Updating a pinned Action: bump the workflow SHA **and** add the new SHA to `ALLOWED_USES` (keep the ` # vX.Y.Z` comment), then run `python -m scripts.engineering.repo check-actions-runtime-policy` and `pytest tests/architecture/test_github_actions_runtime_policy.py`. zizmor (`zizmor.yml`) runs as high-confidence gate on workflow/action changes.
 - Trivy records CRITICAL, HIGH, MEDIUM, and UNKNOWN findings and blocks the
   Docker image on CRITICAL, HIGH, or MEDIUM vulnerabilities
-  - Residual OSV accepted per #9853 (expiry **2026-11-30**, re-triage #9859): GHSA `jMR9-qjv8-65gv` (extract-zip 2.0.2 via mermaid-cli 10.6.1 `overrides`), `5p4m-...` (js-yaml 4.3.2), `svgo 3.3.5`, `tar-fs 2.1.5`, `ws 8.21.3`, `PYSEC-2026-3721/CVE-2026-3219` `pip==26.1.2` (`--ignore-vuln` in `security.yml`), Grafana `react-router/uuid` — Scorecard Vulnerabilities #1294 stays **undismissed**; CI fail-closed `tests/architecture/test_residual_osv_9853.py::test_residual_osv_exception_has_not_expired`; do **not** add `osv-scanner.toml` and do **not** dismiss #1294.
+  - Residual OSV accepted per #9853 (expiry **2026-11-30**, re-triage #9859): GHSA `jMR9-qjv8-65gv` (extract-zip 2.0.2 via mermaid-cli 10.6.1 `overrides`), `5p4m-...` (js-yaml 4.3.2), `svgo 3.3.5`, `tar-fs 2.1.5`, `ws 8.21.3`, Grafana `react-router/uuid`. `PYSEC-2026-3721` / `CVE-2026-3219` is remediated at `pip==26.2.1` (no `--ignore-vuln`). Scorecard Vulnerabilities #1294 stays **undismissed**; CI fail-closed `tests/architecture/test_residual_osv_9853.py::test_residual_osv_exception_has_not_expired`; do **not** add `osv-scanner.toml` and do **not** dismiss #1294.
 - `pip-audit --strict` checks all Python dependencies
 - `detect-secrets` prevents credential leaks in commits
 
@@ -705,3 +705,10 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
   CI fails closed after 2026-11-30
   (`test_residual_osv_exception_has_not_expired`). Scorecard #1294 remains
   undismissed.
+
+### Migration notes (1.2.6)
+
+- #9859 re-triage: `pip==26.2.1` remediates `PYSEC-2026-3721` / `CVE-2026-3219`;
+  `pip-audit --strict` no longer uses `--ignore-vuln`. Mermaid-cli 10.6.1
+  vendored `extract-zip` 2.0.2 and Grafana plugin residuals remain until
+  2026-11-30. Scorecard #1294 stays undismissed.

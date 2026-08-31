@@ -115,7 +115,7 @@ make security-check
 - **Dependency review**: PR-time fail-closed scan of lockfile/manifest diffs (`.github/workflows/dependency-review.yml`, `fail-on-severity: high`)
 - **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
 - **Gitleaks**: Runs in CI (`.github/workflows/security.yml`) with `.gitleaks.toml` (`--redact`; no secret values in job summaries/comments)
-- **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning. Timeboxed `--ignore-vuln` for `CVE-2026-3219` / `PYSEC-2026-3721` (`pip==26.1.2`, expiry **2026-11-30**, accepted on #9853, re-triage #9859). Not a Scorecard dismiss.
+- **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning. `PYSEC-2026-3721` / `CVE-2026-3219` is remediated at `pip==26.2.1`; do not restore `--ignore-vuln` for that advisory. Residual mermaid/Grafana GHSA remain timeboxed to **2026-11-30** (#9853/#9859). Not a Scorecard dismiss.
 - **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; job fails on HIGH/CRITICAL (and unknown severity), not Medium/Low. Do **not** add `osv-scanner.toml`. Residual mermaid-cli/Grafana GHSA: `05-github-policy.md` §2.3.2, re-triage #9859. Scorecard Vulnerabilities (**#1294**) stays open.
 - **Bandit**: Python anti-pattern scan in `.github/workflows/security.yml`
 - **CodeQL**: advanced setup only (`.github/workflows/codeql.yml`). GitHub default setup stays `not-configured`; do not enable both. Python SAST uploads to Code scanning. Alert triage: BioETL Team, weekly Monday with Scorecard.
