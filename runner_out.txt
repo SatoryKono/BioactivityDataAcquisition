@@ -1,0 +1,4 @@
+[INFO] Running: All Tests
+[INFO] Command: E:\github\BioactivityDataAcquisition\.venv-win\Scripts\python.exe -m pytest tests/ -x -q
+........................................................................ [  0%]
+...............................................
