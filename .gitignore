@@ -59,6 +59,8 @@ temp_*
 /pytest_*.txt
 /runner_*.txt
 /pip_audit_*.txt
+/bandit_*.txt
+/mypy_*.txt
 /check_doc.py
 /check_test.py
 /arch_hash.txt
