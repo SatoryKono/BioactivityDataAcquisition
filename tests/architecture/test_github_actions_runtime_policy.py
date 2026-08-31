@@ -663,6 +663,17 @@ def test_write_capable_jobs_do_not_checkout_pull_request_merge_refs() -> None:
     )
 
 
+def test_workflows_do_not_ship_temporary_files() -> None:
+    temporary = sorted(
+        path.name
+        for path in (ROOT / ".github" / "workflows").glob("tmp-*.yml")
+    )
+    assert temporary == [], (
+        "temporary GitHub Actions workflows must not remain on the default branch:\n"
+        + "\n".join(temporary)
+    )
+
+
 def test_named_workflows_declare_top_level_contents_read() -> None:
     for name in (
         "branch-hygiene.yml",
