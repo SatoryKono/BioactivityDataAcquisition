@@ -8,6 +8,7 @@
     },
     "pins": {
       "total_uses": 310,
+      "external_uses": 231,
       "unpinned": 0,
       "result": "PASS"
     },
@@ -24,36 +25,51 @@
         ".github/workflows/provider-contract-drift.yml"
       ],
       "result": "FAIL"
-    },
-    "zizmor": "PENDING_AT_BASELINE"
+    }
   },
   "post_fix": {
-    "sha": "PENDING_COMMIT",
+    "sha": "3849a9ae92696e4b61b92f420a1536c077e96336",
     "catalog": {
       "expected": 47,
       "actual": 47,
       "result": "PASS"
     },
     "pins": {
+      "external_uses": 231,
       "unpinned": 0,
       "result": "PASS"
     },
     "artifacts": {
+      "uploads": 71,
       "violations": 0,
       "result": "PASS"
     },
     "concurrency": {
       "missing": [],
       "stable_pr_identity_guard": true,
+      "namespaced_groups": true,
       "result": "PASS"
     },
     "trust_matrix": {
       "rows": 47,
       "incomplete": 0,
+      "privileged_untrusted_checkout": 0,
       "result": "PASS"
     },
-    "yaml_schema": "PENDING_LIVE_CI",
-    "zizmor": "PENDING_LIVE_CI",
-    "global_ci": "PENDING"
+    "yaml_schema": "PASS_GITHUB_SCHEDULED",
+    "zizmor": {
+      "result": "PASS",
+      "run_id": 33363281236
+    },
+    "architecture_guard": {
+      "result": "PASS",
+      "run_id": 33363281026,
+      "evidence": "not in failure list; aggregate improved from 4540 to 4541 passes"
+    },
+    "global_ci": {
+      "result": "FAIL",
+      "success_workflows": 9,
+      "failure_workflows": 3
+    }
   }
 }
