@@ -1,1 +1,16 @@
-import json; inv=json.load(open('reports/quality/module-coverage-inventory.json')); s=inv['summary']; st=s['status_counts']; doc=open('docs/02-architecture/current-state-inventory.md', encoding='utf-8').read(); print(repr(doc[doc.find('Coverage inventory status counts')-20:doc.find('Coverage inventory status counts')+200]))
+import json
+
+inv = json.load(open("reports/quality/module-coverage-inventory.json"))
+s = inv["summary"]
+st = s["status_counts"]
+doc = open("docs/02-architecture/current-state-inventory.md", encoding="utf-8").read()
+print(
+    repr(
+        doc[
+            doc.find("Coverage inventory status counts") - 20 : doc.find(
+                "Coverage inventory status counts"
+            )
+            + 200
+        ]
+    )
+)
