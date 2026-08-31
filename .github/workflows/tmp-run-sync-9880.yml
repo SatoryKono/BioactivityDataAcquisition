@@ -1,4 +1,4 @@
-name: Temporary runner for PR 9880 current-main sync
+name: Temporary second-pass gates for PR 9880 current-main sync
 
 on:
   push:
@@ -9,10 +9,10 @@ permissions:
   contents: write
 
 jobs:
-  sync:
+  refresh:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout synchronized content branch
+      - name: Checkout committed synchronized content
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           ref: fix/sync-9880-main-v3-20260831
@@ -23,33 +23,29 @@ jobs:
           python-version: "3.12"
           uv-extras: dev
           enable-pytest-cache: "false"
-      - name: Validate synchronized tests
+      - name: Finalize remote baseline and debt gates
         shell: bash
         run: |
-          uv run --frozen --no-build ruff format tests/architecture/test_github_actions_runtime_policy.py tests/unit/application/services/dq/test_silver_statistics_helpers.py
-          uv run --frozen --no-build pytest tests/unit/application/services/dq/test_silver_statistics_helpers.py tests/unit/application/services/dq/test_silver_statistics_uniqueness.py tests/architecture/test_github_actions_runtime_policy.py -q
-      - name: Refresh and verify canonical governance
-        shell: bash
-        run: |
-          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
-          PACKAGE_A=script
-          PACKAGE_B=s.engineering.repo.sync_scripts_
-          PACKAGE_C=inventory
-          uv run --frozen --no-build python -m "${PACKAGE_A}${PACKAGE_B}${PACKAGE_C}" --write
           git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
           uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
           uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --update
-          uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts --check
           uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
           uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check
-      - name: Commit synchronized generated artifacts
+      - name: Commit second-pass artifacts
         shell: bash
         run: |
+          changed="$(git diff --name-only)"
+          for path in ${changed}; do
+            case "${path}" in
+              reports/quality/architecture-debt-remote-main-baseline.json|reports/quality/architecture-debt-remote-main-baseline.md|reports/quality/debt-governance-gates.json|reports/quality/debt-governance-gates.md) ;;
+              *) echo "Unexpected generated path: ${path}" >&2; exit 1 ;;
+            esac
+          done
           git add -u
           if git diff --cached --quiet; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(governance): refresh current-main artifacts"
+          git commit -m "chore(governance): finalize current-main debt evidence"
           git push origin HEAD:fix/sync-9880-main-v3-20260831
