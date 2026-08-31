@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T15:27:08.159+00:00",
+  "generated_at": "2026-08-31T15:45:24.895+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -11965,13 +11965,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 372,
+          "line": 369,
           "source_group": "tests",
           "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 417,
+          "line": 414,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -12020,13 +12020,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 365,
+          "line": 362,
           "source_group": "tests",
           "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 416,
+          "line": 413,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
