@@ -185,7 +185,15 @@ def resolve_params(
             continue
         if key in params:
             params[key] = val
-        elif key.startswith("ALLOW_") or key in {"MODE", "AUDIT_MODE", "N", "LANGUAGE", "SCOPE", "BASE_BRANCH", "WORK_BRANCH"}:
+        elif key.startswith("ALLOW_") or key in {
+            "MODE",
+            "AUDIT_MODE",
+            "N",
+            "LANGUAGE",
+            "SCOPE",
+            "BASE_BRANCH",
+            "WORK_BRANCH",
+        }:
             params[key] = val
 
     # Overlay-derived SCOPE: SCOPE is array in overlay, string in kernel
@@ -354,7 +362,9 @@ def compile_one(
         try:
             k_body_rendered = substitute_params(k_body, params)
         except ValueError as exc:
-            raise ValueError(f"param substitution failed for {domain}/{profile}: {exc}") from exc
+            raise ValueError(
+                f"param substitution failed for {domain}/{profile}: {exc}"
+            ) from exc
 
         # If overlay text contains tokens, also substitute (rare but deterministic)
         overlay_sections = render_overlay_sections(overlay_data)
@@ -365,7 +375,9 @@ def compile_one(
             pass
 
         body = k_body_rendered.rstrip() + "\n\n" + overlay_sections.lstrip()
-        prompt_sha8, final = render_compiled(domain, profile, kernel_sha8, overlay_sha8, params, body)
+        prompt_sha8, final = render_compiled(
+            domain, profile, kernel_sha8, overlay_sha8, params, body
+        )
 
         result["kernel_sha8"] = kernel_sha8
         result["overlay_sha8"] = overlay_sha8
@@ -386,7 +398,9 @@ def compile_one(
                     result["drift"] = True
                     # compute diff sha for logging
                     existing_sha8 = sha8(existing.encode("utf-8"))
-                    result["error"] = f"drift: existing sha8 {existing_sha8} != expected {prompt_sha8}"
+                    result["error"] = (
+                        f"drift: existing sha8 {existing_sha8} != expected {prompt_sha8}"
+                    )
             return result
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -426,7 +440,9 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m scripts.ai.prompts.compile",
         description="Deterministic kernel+overlay+profile compiler (P1 #9808)",
     )
-    parser.add_argument("--domain", default=None, help="Overlay domain slug (without .yaml)")
+    parser.add_argument(
+        "--domain", default=None, help="Overlay domain slug (without .yaml)"
+    )
     parser.add_argument("--profile", default=None, help="Profile name (without .yaml)")
     parser.add_argument(
         "--all",
@@ -479,7 +495,6 @@ def main(argv: list[str] | None = None) -> int:
         else:
             LOGGER.info("%s", msg)
         print(msg, file=sys.stderr)
-
 
     if args.check and (errors or drifts):
         return 1

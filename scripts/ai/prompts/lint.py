@@ -31,7 +31,9 @@ try:
 
     PROMPTS_ROOT: Path = _REG_PROMPTS_ROOT
 except Exception:
-    PROMPTS_ROOT = Path(__file__).resolve().parents[3] / "docs" / "00-project" / "ai" / "prompts"
+    PROMPTS_ROOT = (
+        Path(__file__).resolve().parents[3] / "docs" / "00-project" / "ai" / "prompts"
+    )
 
 OVERLAYS_DIR = PROMPTS_ROOT / "overlays"
 PROFILES_DIR = PROMPTS_ROOT / "profiles"
@@ -109,7 +111,9 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _validate_with_jsonschema(data: dict[str, Any], schema: dict[str, Any]) -> list[str]:
+def _validate_with_jsonschema(
+    data: dict[str, Any], schema: dict[str, Any]
+) -> list[str]:
     """Validate via jsonschema if available; return error messages."""
     try:
         import jsonschema  # type: ignore[import-untyped]
@@ -181,14 +185,19 @@ def _minimal_kernel_checks(data: dict[str, Any]) -> list[str]:
 def check_kernel_schema(report: LintReport) -> None:
     schema = _load_json(SCHEMA_DIR / "kernel.schema.json")
     if schema is None:
-        report.add_warning("kernel_schema_missing", f"schema not found: {SCHEMA_DIR / 'kernel.schema.json'}")
+        report.add_warning(
+            "kernel_schema_missing",
+            f"schema not found: {SCHEMA_DIR / 'kernel.schema.json'}",
+        )
         return
     # Kernel schema describes params object; we validate a sample defaults payload.
     sample: dict[str, Any] = {"SCOPE": "src/bioetl/domain", "MODE": "audit"}
     if _has_jsonschema():
         errs = _validate_with_jsonschema(sample, schema)
         for msg in errs:
-            report.add_error("kernel_schema_valid", msg, str(SCHEMA_DIR / "kernel.schema.json"))
+            report.add_error(
+                "kernel_schema_valid", msg, str(SCHEMA_DIR / "kernel.schema.json")
+            )
     else:
         errs = _minimal_kernel_checks(sample)
         for msg in errs:
@@ -204,7 +213,9 @@ def _has_jsonschema() -> bool:
         return False
 
 
-def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text: str) -> None:
+def check_overlay(
+    report: LintReport, path: Path, data: dict[str, Any], raw_text: str
+) -> None:
     # -- overlay_schema_valid
     schema = _load_json(SCHEMA_DIR / "domain-overlay.schema.json")
     if schema is None:
@@ -235,7 +246,11 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
     # Scan raw text for ALLOW_*=true literal — covers nested cases
     for m in re.finditer(r"ALLOW_[A-Z_]+\s*:\s*true", raw_text):
         snippet = m.group(0).strip()
-        already = any(snippet.split(":")[0].strip() in e.message for e in report.errors if e.path == path.as_posix())
+        already = any(
+            snippet.split(":")[0].strip() in e.message
+            for e in report.errors
+            if e.path == path.as_posix()
+        )
         if not already:
             report.add_error(
                 "guard_non_weakening",
@@ -244,7 +259,9 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
             )
 
     # Check for controller-weakening keywords in free-form values
-    guard_keywords_re = re.compile(r"\b(Iteration|Issue-sync|ALLOW_NETWORK|ALLOW_FULL_SUITE)\b", re.I)
+    guard_keywords_re = re.compile(
+        r"\b(Iteration|Issue-sync|ALLOW_NETWORK|ALLOW_FULL_SUITE)\b", re.I
+    )
     for key, val in data.items():
         if isinstance(val, list):
             joined = " ".join(str(x) for x in val)
@@ -252,8 +269,14 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
             joined = val
         else:
             continue
-        if guard_keywords_re.search(joined) and key not in {"domain", "id", "successor"}:
-            if re.search(r"\bIteration\b", joined, re.I) or re.search(r"Issue-sync", joined, re.I):
+        if guard_keywords_re.search(joined) and key not in {
+            "domain",
+            "id",
+            "successor",
+        }:
+            if re.search(r"\bIteration\b", joined, re.I) or re.search(
+                r"Issue-sync", joined, re.I
+            ):
                 report.add_error(
                     "guard_non_weakening",
                     f"overlay field {key!r} contains controller keyword '{guard_keywords_re.search(joined).group(0)}'",
@@ -287,7 +310,9 @@ def check_overlay(report: LintReport, path: Path, data: dict[str, Any], raw_text
 
 def check_profiles(report: LintReport) -> None:
     if not PROFILES_DIR.is_dir():
-        report.add_warning("profiles_missing", f"profiles dir not found: {PROFILES_DIR}")
+        report.add_warning(
+            "profiles_missing", f"profiles dir not found: {PROFILES_DIR}"
+        )
         return
     schema = _load_json(SCHEMA_DIR / "execution-profile.schema.json")
     has_js = _has_jsonschema()
@@ -300,7 +325,9 @@ def check_profiles(report: LintReport) -> None:
             continue
 
         if not isinstance(data, dict):
-            report.add_error("profile_parse", "profile must be a mapping", path.as_posix())
+            report.add_error(
+                "profile_parse", "profile must be a mapping", path.as_posix()
+            )
             continue
 
         if schema is not None and has_js:
@@ -324,7 +351,9 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
     check_kernel_schema(report)
 
     if not OVERLAYS_DIR.is_dir():
-        report.add_warning("overlays_missing", f"overlays dir not found: {OVERLAYS_DIR}")
+        report.add_warning(
+            "overlays_missing", f"overlays dir not found: {OVERLAYS_DIR}"
+        )
     else:
         for path in sorted(OVERLAYS_DIR.glob("*.yaml")):
             try:
@@ -334,7 +363,9 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
                 report.add_error("overlay_parse", str(exc), path.as_posix())
                 continue
             if not isinstance(data, dict):
-                report.add_error("overlay_parse", "overlay must be a mapping", path.as_posix())
+                report.add_error(
+                    "overlay_parse", "overlay must be a mapping", path.as_posix()
+                )
                 continue
             check_overlay(report, path, data, raw)
 
@@ -343,8 +374,12 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
     report.stats = {
         "errors": len(report.errors),
         "warnings": len(report.warnings),
-        "overlays": len(list(OVERLAYS_DIR.glob("*.yaml"))) if OVERLAYS_DIR.is_dir() else 0,
-        "profiles": len(list(PROFILES_DIR.glob("*.yaml"))) if PROFILES_DIR.is_dir() else 0,
+        "overlays": len(list(OVERLAYS_DIR.glob("*.yaml")))
+        if OVERLAYS_DIR.is_dir()
+        else 0,
+        "profiles": len(list(PROFILES_DIR.glob("*.yaml")))
+        if PROFILES_DIR.is_dir()
+        else 0,
     }
     return report
 
