@@ -69,6 +69,7 @@ def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     assert "[ADR-057]" in rules_text
     assert "[ADR-058]" in rules_text
     assert "[ADR-059]" in rules_text
+    assert "[ADR-060]" in rules_text
     assert "ADR-050" in decisions_index_text
     assert "ADR-051" in decisions_index_text
     assert "ADR-052" in decisions_index_text
@@ -79,6 +80,7 @@ def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     assert "ADR-057" in decisions_index_text
     assert "ADR-058" in decisions_index_text
     assert "ADR-059" in decisions_index_text
+    assert "ADR-060" in decisions_index_text
 
 
 def test_filters_docs_keep_adr_050_as_canonical_boundary() -> None:
