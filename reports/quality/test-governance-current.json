@@ -2,7 +2,7 @@
   "assertion_branch_reachability": {
     "finding_count": 0,
     "findings": [],
-    "metric_percent": 100,
+    "metric_percent": 100.0,
     "scan_paths": [
       "tests/architecture/test_determinism_identity_policy.py",
       "tests/architecture/test_replay_time_seam_inventory.py",
@@ -30,7 +30,7 @@
     "scanned_test_count": 370,
     "unreviewed_count": 0
   },
-  "assertion_branch_reachability_percent": 100,
+  "assertion_branch_reachability_percent": 100.0,
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
@@ -1140,7 +1140,7 @@
     "assertion_branch_reachability": {
       "finding_count": 0,
       "findings": [],
-      "metric_percent": 100,
+      "metric_percent": 100.0,
       "scan_paths": [
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py",
@@ -1168,7 +1168,7 @@
       "scanned_test_count": 370,
       "unreviewed_count": 0
     },
-    "assertion_branch_reachability_percent": 100,
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
       {
         "category": "architecture_helper_guard",
@@ -2054,9 +2054,9 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "0cef31f5b032c47b93cd4873ff99d0ce9a2f9965e5d9b6cc91e281de079d775b",
+  "source_tree_sha256": "2e58ad081a549a827f8b0ad76428a1a6d344537c05c1d2758119febc826efeb5",
   "summary": {
-    "assertion_branch_reachability_percent": 100,
+    "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
