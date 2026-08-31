@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "actions": [
+    {
+      "finding_id": "GHA-20260831-001",
+      "decision": "DEFER_SETTINGS_MUTATION",
+      "reason": "owner approval required by policy; admin bypass forbidden",
+      "issue": 9800
+    },
+    {
+      "finding_id": "GHA-20260831-002",
+      "decision": "NO_NEW_CODE_FIX",
+      "reason": "29/29 PR workflows already comply on main; retain open until CI and evidence acceptance",
+      "issue": 9865
+    },
+    {
+      "decision": "MATERIALIZE_EVIDENCE_ONLY",
+      "branch": "fix/github-actions-cycle-52f3a66"
+    }
+  ],
+  "iteration": 1
+}
