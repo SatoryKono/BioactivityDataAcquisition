@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T08:43:31.728610+00:00",
+  "generated_at": "2026-08-31T08:23:18.331417+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -4977,7 +4977,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 44,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -4992,40 +4992,40 @@
           "text": "- `generated/CATALOG.md` from `REGISTRY.yaml` (`python -m scripts.ai.prompts catalog`)"
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 15,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 163,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts compile --domain docs --profile audit-readonly"
+          "text": "python -m scripts.ai.prompts render prompt.audit.dual-agent-cycle \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 16,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 204,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts compile --domain docs --profile full-write"
+          "text": "python -m scripts.ai.prompts list"
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 18,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 205,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts compile --all --check"
+          "text": "python -m scripts.ai.prompts show prompt.audit.grok-cycle"
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 19,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 206,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts lint"
+          "text": "python -m scripts.ai.prompts render prompt.session.grok-bootstrap \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 20,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 208,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts verify"
+          "text": "python -m scripts.ai.prompts render prompt.audit.grok-cycle --param SCOPE=\"src/bioetl/domain\""
         },
         {
-          "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
-          "line": 140,
+          "path": "docs/00-project/ai/prompts/README.md",
+          "line": 209,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly  # или full-write / differential"
+          "text": "python -m scripts.ai.prompts render prompt.closeout.grok --param SCOPE=\"issues: #NNNN\""
         }
       ],
       "owner": "@bioetl-platform",
