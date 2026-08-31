@@ -115,23 +115,38 @@ def check_uniqueness_stats(
         )
 
     total_count = len(df)
-    unique_count = df.select(existing_keys).unique().height
+    unique_count = df.select(existing_keys).unique(maintain_order=False).height
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
 
     column_stats: JsonDict = {}
-    for col in df.columns[:10]:
+    cols_to_check = df.columns[:10]
+    if cols_to_check:
         try:
-            cardinality = df[col].n_unique()
-            column_stats[col] = {
-                "cardinality": cardinality,
-                "uniqueness_ratio": (
-                    round(cardinality / total_count, 4) if total_count > 0 else 0.0
-                ),
-            }
+            # Vectorize cardinality check to avoid massive FFI overhead in python loop
+            unique_counts = df.select([
+                pl.col(c).n_unique() for c in cols_to_check
+            ]).row(0, named=True)
+            for col, cardinality in unique_counts.items():
+                column_stats[col] = {
+                    "cardinality": cardinality,
+                    "uniqueness_ratio": (
+                        round(cardinality / total_count, 4) if total_count > 0 else 0.0
+                    ),
+                }
         except profile_errors:
-            # Some Polars dtypes can fail n_unique() for profiling purposes.
-            continue
+            # Fallback to loop if vectorized n_unique fails on specific dtypes
+            for col in cols_to_check:
+                try:
+                    cardinality = df[col].n_unique()
+                    column_stats[col] = {
+                        "cardinality": cardinality,
+                        "uniqueness_ratio": (
+                            round(cardinality / total_count, 4) if total_count > 0 else 0.0
+                        ),
+                    }
+                except profile_errors:
+                    continue
 
     status = DQCheckStatus.PASS if duplicate_rate == 0 else DQCheckStatus.WARN
     return UniquenessResult(
