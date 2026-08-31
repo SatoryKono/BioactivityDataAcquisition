@@ -34,7 +34,6 @@ import pytest
 
 from bioetl.application.services.dq.silver_statistics_uniqueness import (
     _profile_column_cardinality,
-    check_uniqueness_stats,
 )
 from bioetl.application.services.dq.silver_statistics_helpers import (
     _categorical_row_value_count,
