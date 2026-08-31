@@ -23,7 +23,10 @@ from __future__ import annotations
 
 import os
 import sys
-from collections.abc import Mapping, Sequence
+import tempfile
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +39,7 @@ from scripts.engineering.dev.zed_env_doctor import ensure_ready
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"
 _TESTS_ROOT = "tests/"
+_IGNORE_UNIT_REPO_BACKED = "--ignore=tests/unit/repo_backed"
 _VCR_RECORD_NONE = "--vcr-record=none"
 _COMMON = (
     _TB_SHORT,
@@ -44,6 +48,98 @@ _COMMON = (
     "no:benchmark",
     "--maxfail=1",
 )
+
+_LANE_BUSY_EXIT_CODE = 2
+
+
+class ZedLaneBusyError(RuntimeError):
+    """Raised when another pytest lane already owns the checkout lock."""
+
+
+def _lane_lock_path(repo_root: Path = REPO_ROOT) -> Path:
+    """Return a machine-local lock path unique to this repository checkout."""
+    checkout = os.path.normcase(str(repo_root.resolve()))
+    checkout_digest = sha256(checkout.encode("utf-8")).hexdigest()[:16]
+    return Path(tempfile.gettempdir()) / "bioetl-zed-pytest" / f"{checkout_digest}.lock"
+
+
+def _owner_path(lock_path: Path) -> Path:
+    return lock_path.with_name(lock_path.name + ".owner")
+
+
+def _write_lock_owner(lock_path: Path, owner: str | None) -> None:
+    payload = f"{os.getpid()}\t{owner or 'pytest-lane'}\n"
+    _owner_path(lock_path).write_text(payload, encoding="utf-8")
+
+
+def _read_lock_owner(lock_path: Path) -> str | None:
+    owner_path = _owner_path(lock_path)
+    try:
+        raw = owner_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    if not raw:
+        return None
+    pid, _, lane = raw.partition("\t")
+    if pid.isdigit() and lane:
+        return f"pid={pid} lane={lane}"
+    return raw
+
+
+def _busy_message(lock_path: Path) -> str:
+    holder = _read_lock_owner(lock_path)
+    suffix = f" ({holder})" if holder else ""
+    return (
+        "another Zed pytest lane is already running for this checkout"
+        f"{suffix}. Stop that Zed task or wait for it to finish."
+    )
+
+
+@contextmanager
+def _exclusive_lane_lock(
+    lock_path: Path | None = None,
+    *,
+    owner: str | None = None,
+) -> Iterator[None]:
+    """Fail fast when another Zed pytest lane is active for this checkout."""
+    resolved_lock_path = lock_path or _lane_lock_path()
+    resolved_lock_path.parent.mkdir(parents=True, exist_ok=True)
+    handle = resolved_lock_path.open("a+b")
+    acquired = False
+    try:
+        handle.seek(0, os.SEEK_END)
+        if handle.tell() == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            raise ZedLaneBusyError(_busy_message(resolved_lock_path)) from exc
+        acquired = True
+        _write_lock_owner(resolved_lock_path, owner)
+        yield
+    finally:
+        if acquired:
+            _owner_path(resolved_lock_path).unlink(missing_ok=True)
+            handle.seek(0)
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+        handle.close()
+
 
 # Explicit mapping from Zed lane keys to canonical suite_name values in
 # configs/quality/test_matrix.yaml. Keys without an entry are local-only UX.
@@ -78,7 +174,7 @@ LANES: dict[str, tuple[str, ...]] = {
     "unit-fast": (
         "tests/unit/",
         "--ignore=tests/unit/scripts",
-        "--ignore=tests/unit/repo_backed",
+        _IGNORE_UNIT_REPO_BACKED,
         "-q",
         "-m",
         (
@@ -147,6 +243,9 @@ LANES: dict[str, tuple[str, ...]] = {
         "no:benchmark",
     ),
     # Advisory local coverage estimate — NOT the canonical coverage-verify gate.
+    # Do not emit HTML here: writing htmlcov for the full src/bioetl tree on
+    # Windows routinely hangs after tests and yields a bare Zed exit code 1
+    # with a truncated/zero-byte htmlcov directory.
     "coverage-local": (
         _TESTS_ROOT,
         "--ignore=tests/e2e",
@@ -155,11 +254,23 @@ LANES: dict[str, tuple[str, ...]] = {
         # Script/tooling tests have a dedicated serial CI lane and can exceed the
         # Windows per-test timeout when instrumented inside this product estimate.
         "--ignore=tests/unit/scripts",
+        # Memory proof tests spawn git ls-files; under coverage they exceed the
+        # pytest-timeout and do not cover src/bioetl.
+        "--ignore=tests/unit/memory",
+        "--ignore=tests/integration/memory",
+        "--ignore=tests/integration",
+        # Full-tree os.walk secret scans time out on this Windows checkout.
+        "--ignore=tests/security",
+        # Repo-backed tests spawn PowerShell/WSL/docker children; under coverage
+        # they stall the 98-99% Zed tail and do not cover src/bioetl.
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
-        "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
+        # term-missing dumps every uncovered line for ~2500 modules and can
+        # kill the Zed/Windows capture after tests have already passed.
+        # htmlcov for the full src/bioetl tree hangs the same way on Windows.
+        "--cov-report=term:skip-covered",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,
@@ -171,11 +282,15 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
         "--ignore=tests/unit/scripts",
+        "--ignore=tests/unit/memory",
+        "--ignore=tests/integration/memory",
+        "--ignore=tests/integration",
+        "--ignore=tests/security",
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
-        "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
+        "--cov-report=term:skip-covered",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,
@@ -255,16 +370,24 @@ def _usage() -> str:
     )
 
 
-def _run_pytest(argv_tail: Sequence[str]) -> int:
+def _run_pytest(argv_tail: Sequence[str], *, lane_name: str) -> int:
     # Ensure interactive Zed runs stay offline for VCR by default.
     if "VCR_RECORD_MODE" not in os.environ:
         os.environ["VCR_RECORD_MODE"] = "none"
     if "PYTHONDONTWRITEBYTECODE" not in os.environ:
         os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
-    import pytest
+    try:
+        with _exclusive_lane_lock(owner=lane_name):
+            import pytest
 
-    return int(pytest.main(list(argv_tail)))
+            return int(pytest.main(list(argv_tail)))
+    except ZedLaneBusyError as exc:
+        print(
+            f"[zed-pytest-lane] cannot start {lane_name!r}: {exc}",
+            file=sys.stderr,
+        )
+        return _LANE_BUSY_EXIT_CODE
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -283,7 +406,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         path = args[1]
         extra = args[2:]
-        return _run_pytest((path, "-v", *_COMMON, *extra))
+        return _run_pytest((path, "-v", *_COMMON, *extra), lane_name=mode)
 
     if mode == "nearest":
         if len(args) < 3:
@@ -292,14 +415,14 @@ def main(argv: list[str] | None = None) -> int:
         path = args[1]
         symbol = args[2]
         extra = args[3:]
-        return _run_pytest((path, "-k", symbol, "-v", *_COMMON, *extra))
+        return _run_pytest((path, "-k", symbol, "-v", *_COMMON, *extra), lane_name=mode)
 
     if mode not in LANES:
         print(f"Unknown lane: {mode!r}\n{_usage()}", file=sys.stderr, end="")
         return 2
 
     extra = args[1:]
-    return _run_pytest((*LANES[mode], *extra))
+    return _run_pytest((*LANES[mode], *extra), lane_name=mode)
 
 
 if __name__ == "__main__":

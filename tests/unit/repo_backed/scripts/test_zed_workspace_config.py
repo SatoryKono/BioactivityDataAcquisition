@@ -325,18 +325,15 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
         "-m",
         "pip_audit",
         "--skip-editable",
-        "--ignore-vuln",
-        "CVE-2026-3219",
-        "--ignore-vuln",
-        "PYSEC-2026-3721",
         "--cache-dir",
         ".cache/pip-audit",
     ]
     security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
         encoding="utf-8"
     )
-    assert "--ignore-vuln CVE-2026-3219" in security_workflow
-    assert "--ignore-vuln PYSEC-2026-3721" in security_workflow
+    assert "Do not restore --ignore-vuln for that advisory." in security_workflow
+    assert "--ignore-vuln CVE-2026-3219" not in security_workflow
+    assert "--ignore-vuln PYSEC-2026-3721" not in security_workflow
 
     architecture = next(
         task for task in tasks if task["label"] == "Test: architecture-fast"
@@ -426,6 +423,7 @@ def test_zed_task_save_reveal_and_concurrency_policy() -> None:
         assert task.get("save") in VALID_SAVE, label
         assert task.get("reveal") in VALID_REVEAL, label
         assert task.get("hide") in VALID_HIDE, label
+        assert task["hide"] == "never", label
         assert task.get("allow_concurrent_runs") is False, label
 
         if label in {"Test: current file", "Test: nearest symbol"}:
@@ -438,14 +436,10 @@ def test_zed_task_save_reveal_and_concurrency_policy() -> None:
         if label.startswith(NON_CONCURRENT_LABEL_PREFIXES):
             assert task["allow_concurrent_runs"] is False
 
-        # Fast checks hide on success and avoid focus thrash when successful.
-        if label in {"Check: lint", "Check: MCP manifests", "Environment: verify"}:
-            assert task["hide"] == "on_success"
-
         # Mutating / long / security-sensitive tasks keep output visible.
         if label.startswith(("Generate:", "Audit:", "Coverage:", "Format:")):
             assert task["reveal"] == "always"
-            assert task["hide"] == "never" or label.startswith("Format:")
+            assert task["hide"] == "never"
 
 
 def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
@@ -490,10 +484,35 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
     for lane_key in ("coverage-local", "coverage"):
         coverage_args = lane_module["LANES"][lane_key]
         assert "--ignore=tests/unit/scripts" in coverage_args
+        assert "--ignore=tests/unit/memory" in coverage_args
+        assert "--ignore=tests/integration/memory" in coverage_args
+        assert "--ignore=tests/integration" in coverage_args
+        assert "--ignore=tests/security" in coverage_args
+        assert "--ignore=tests/unit/repo_backed" in coverage_args
         assert "--cov-fail-under=85" in coverage_args
+        assert "--cov-report=term:skip-covered" in coverage_args
+        assert "--cov-report=term-missing" not in coverage_args
+        assert not any(
+            arg == "--cov-report=html:reports/coverage/htmlcov"
+            or arg.startswith("--cov-report=html")
+            for arg in coverage_args
+        )
 
     scripts_lane = matrix_lanes["unit-scripts-tooling"]
     assert scripts_lane["paths"] == ["tests/unit/scripts/"]
+
+
+def test_zed_pytest_lane_rejects_overlapping_runs(tmp_path: Path) -> None:
+    """The runner must serialize pytest lanes beyond Zed's task-local guard."""
+    lane_module = _load_lane_module()
+    exclusive_lane_lock = lane_module["_exclusive_lane_lock"]
+    busy_error = lane_module["ZedLaneBusyError"]
+    lock_path = tmp_path / "zed-pytest-lane.lock"
+
+    with exclusive_lane_lock(lock_path):
+        with pytest.raises(busy_error, match="already running"):
+            with exclusive_lane_lock(lock_path):
+                pytest.fail("overlapping lane unexpectedly acquired the lock")
 
 
 def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:

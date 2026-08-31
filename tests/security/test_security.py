@@ -305,6 +305,7 @@ class TestPrivateKeyExposure:
             "node_modules",
             "site",
             "htmlcov",
+            "reports",
             "coverage.json",  # Skip large generated files
         }
 

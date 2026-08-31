@@ -62,13 +62,13 @@
       "source": "reports/quality/hotspot-family-baseline.json"
     },
     "dq_rule_evaluator_coverage_percent": {
-      "current": 98.51,
+      "current": 100.0,
       "opening": 98.39,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "ledger_core_events_coverage_percent": {
-      "current": 100.0,
-      "opening": 100.0,
+      "current": 100,
+      "opening": 100,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "runtime_builders_files_ge_250_loc": {

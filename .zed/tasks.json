@@ -7,7 +7,7 @@
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "hide": "on_success",
+    "hide": "never",
     "save": "none",
     "allow_concurrent_runs": false
   },
@@ -23,7 +23,7 @@
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "always",
-    "hide": "on_success",
+    "hide": "never",
     "save": "all",
     "allow_concurrent_runs": false
   },
@@ -41,7 +41,7 @@
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "no_focus",
-    "hide": "on_success",
+    "hide": "never",
     "save": "all",
     "allow_concurrent_runs": false
   },
@@ -322,10 +322,6 @@
       "-m",
       "pip_audit",
       "--skip-editable",
-      "--ignore-vuln",
-      "CVE-2026-3219",
-      "--ignore-vuln",
-      "PYSEC-2026-3721",
       "--cache-dir",
       ".cache/pip-audit"
     ],
@@ -370,7 +366,7 @@
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
     "reveal": "no_focus",
-    "hide": "on_success",
+    "hide": "never",
     "save": "all",
     "allow_concurrent_runs": false
   },

@@ -464,6 +464,20 @@ def test_tests_workflow_keeps_local_cardinality_fallback_out_of_release_gate() -
 
 
 @pytest.mark.architecture
+def test_tests_workflow_runs_live_review_only_with_configured_prometheus() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text(
+        encoding="utf-8"
+    )
+
+    marker = "name: Review observability runtime cardinality evidence (live)"
+    assert marker in workflow
+    live_step = workflow.split(marker, 1)[1].split("      - name:", 1)[0]
+    assert "github.event_name != 'pull_request'" in live_step
+    assert "vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL != ''" in live_step
+    assert "--fail-on-degraded-live-review" in live_step
+
+
+@pytest.mark.architecture
 def test_tests_workflow_blocks_touched_metric_changes_on_stale_or_degraded_review() -> (
     None
 ):
