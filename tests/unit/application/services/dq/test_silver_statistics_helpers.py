@@ -32,14 +32,15 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
+from bioetl.application.services.dq.silver_statistics_uniqueness import (
+    _profile_column_cardinality,
+)
 from bioetl.application.services.dq.silver_statistics_helpers import (
     _categorical_row_value_count,
-    _profile_column_uniqueness,
     check_content_hash_integrity_stats,
     check_deduplication_stats,
     check_null_rates_stats,
     check_schema_drift_stats,
-    check_uniqueness_stats,
     detect_type_changes,
     profile_categorical_column,
     profile_numeric_column,
@@ -77,30 +78,6 @@ class TestSilverStatisticsHelpers:
         assert [item.column_name for item in results] == ["id", "name"]
         assert all(item.null_rate == pytest.approx(0.0) for item in results)
         assert all(item.status == DQCheckStatus.PASS for item in results)
-
-    def test_check_uniqueness_stats_warns_when_primary_keys_missing(self) -> None:
-        df = pl.DataFrame({"entity_id": ["e1", "e2"]})
-
-        result = check_uniqueness_stats(df, ["missing_id"], (RuntimeError,))
-
-        assert result.status == DQCheckStatus.WARN
-        assert result.primary_key == "missing_id"
-        assert (
-            result.column_stats["_note"]["message"] == "Primary key columns not found"
-        )
-
-    def test_check_uniqueness_stats_calculates_duplicate_rate_and_column_stats(
-        self,
-    ) -> None:
-        df = pl.DataFrame({"entity_id": ["e1", "e1", "e2"], "source": ["a", "a", "b"]})
-
-        result = check_uniqueness_stats(df, ["entity_id"], (RuntimeError,))
-
-        assert result.status == DQCheckStatus.WARN
-        assert result.unique_count == 2
-        assert result.total_count == 3
-        assert result.duplicate_rate == round(1 / 3, 4)
-        assert "entity_id" in result.column_stats
 
     def test_check_schema_drift_stats_handles_absent_previous_schema(self) -> None:
         df = pl.DataFrame({"entity_id": ["e1"], "score": [1.0]})
@@ -216,10 +193,6 @@ def test_helper_edge_paths_cover_safe_fallbacks() -> None:
     """Fallback helpers keep empty and unsupported inputs fail-closed."""
     df = pl.DataFrame({"entity_id": ["e1", "e2"]})
 
-    no_key = check_uniqueness_stats(df, [], (RuntimeError,))
-    assert no_key.status == DQCheckStatus.PASS
-    assert no_key.unique_count == 2
-
     dedupe = check_deduplication_stats(2, 3, None)
     assert dedupe.duplicates_by_content_hash == 0
     assert dedupe.duplicates_by_business_key == 1
@@ -227,9 +200,9 @@ def test_helper_edge_paths_cover_safe_fallbacks() -> None:
     no_collision = check_content_hash_integrity_stats(2, 0)
     assert no_collision.status == DQCheckStatus.PASS
 
-    fallback = _profile_column_uniqueness(
+    fallback = _profile_column_cardinality(
         df,
-        columns=["missing", "entity_id"],
+        cols_to_check=["missing", "entity_id"],
         total_count=2,
         profile_errors=(pl.exceptions.ColumnNotFoundError,),
     )

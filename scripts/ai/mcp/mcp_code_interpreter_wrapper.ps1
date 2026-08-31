@@ -23,11 +23,17 @@ Exit-McpValidateOnly -ServerName "mcp-code-interpreter"
 
 # 1) Local Python module if installed (no Deno required)
 $python = Get-Command python -ErrorAction SilentlyContinue
-if ($python) {
-    & python -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)" 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        & python -m mcp_server_code_interpreter
-        exit $LASTEXITCODE
+if ($python -and $python.Source) {
+    try {
+        $pythonExe = $python.Source
+        & $pythonExe -c "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('mcp_server_code_interpreter') else 1)" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            & $pythonExe -m mcp_server_code_interpreter
+            exit $LASTEXITCODE
+        }
+    }
+    catch {
+        # Probe is best-effort; uvx/Deno fallback remains available.
     }
 }
 
