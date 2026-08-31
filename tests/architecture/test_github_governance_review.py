@@ -94,6 +94,20 @@ def test_client_rejects_mutating_gh_surfaces() -> None:
         TOOL._git_head(ROOT, "--output=unexpected")
 
 
+def test_cli_paths_are_confined_but_explicit_runner_temp_is_supported(
+    tmp_path: Path,
+) -> None:
+    assert TOOL.REPO_ROOT == ROOT
+    with pytest.raises(ValueError):
+        TOOL.resolve_cli_path(ROOT.parent / "outside-policy.json", root=ROOT)
+
+    external_output = tmp_path / "github-settings-review.json"
+    assert (
+        TOOL.resolve_output_path(external_output, root=ROOT)
+        == external_output.resolve()
+    )
+
+
 def test_unknown_labels_are_retained_by_default() -> None:
     classification, replacement = TOOL._classification(
         "project-specific-label",
@@ -141,7 +155,8 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     job_header = workflow.split("    steps:", 1)[0]
     assert "runner.temp" not in job_header
     assert "$RUNNER_TEMP/github-settings-review.json" in workflow
-    assert "scripts/engineering/repo/github_settings_review.py" in workflow
+    assert "python -m scripts.engineering.repo.github_settings_review" in workflow
+    assert "python scripts/engineering/repo/github_settings_review.py" not in workflow
     assert ".github/tooling/github_settings_review.py" not in workflow
 
 
