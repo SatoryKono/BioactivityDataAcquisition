@@ -949,7 +949,14 @@
     }
   },
   "assertless_total_candidates": 87,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 1,
+      "budget": "date_today_call_sites_max",
+      "expected_max": 0,
+      "metric": "date_today_call_sites"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1093,7 +1100,7 @@
       "test_count": 41
     }
   },
-  "date_today_call_sites": 0,
+  "date_today_call_sites": 1,
   "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
     "cross_file_groups": 0,
@@ -1958,7 +1965,7 @@
         "test_count": 41
       }
     },
-    "date_today_call_sites": 0,
+    "date_today_call_sites": 1,
     "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
       "cross_file_groups": 0,
@@ -2054,12 +2061,12 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "9927bcd768dc7b2f05f5da0022c146d8e5b315ad9df2089814e3b96f6fb33122",
+  "source_tree_sha256": "db70c1f69344804e4d4a4bcef95cdb08a726e9d5b7e0f5beaab4172f3a0b8633",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
     "compatibility_test_files": 0,
-    "date_today_call_sites": 0,
+    "date_today_call_sites": 1,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
