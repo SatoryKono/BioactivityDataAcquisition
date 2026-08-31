@@ -16,6 +16,8 @@ from bioetl.infrastructure.storage.delta.resilience import (
 from bioetl.infrastructure.storage.support._atomic_replace import (
     AtomicWriteError,
     _confined_replace_pair,
+)
+from bioetl.infrastructure.storage.support._atomic_replace import (
     _replace_prevalidated_with_retry as _replace_with_retry,
 )
 
