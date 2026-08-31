@@ -7,16 +7,16 @@ on:
   workflow_call:
   push:
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
   pull_request:
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
+      - "docs/**"
+      - "*.md"
+      - ".ai/**"
+      - "LICENSE"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,15 +51,13 @@ jobs:
 
       - name: Run pip-audit
         run: |
-          # Residual OSV #9853 accepted; re-triage #9859 (expiry 2026-11-30).
-          # CVE-2026-3219 / PYSEC-2026-3721 — pip archive-parsing (dev extra).
-          # CI/dev only; not in the Wolfi/scratch runtime image.
+          # Residual OSV #9853/#9859 (expiry 2026-11-30): mermaid/Grafana only.
+          # pip PYSEC-2026-3721 / CVE-2026-3219 is remediated at pip==26.2.1.
+          # Do not restore --ignore-vuln for that advisory.
           # Do not add osv-scanner.toml and do not dismiss Scorecard
           # Vulnerabilities (OpenSSF check #1294).
           UV_CACHE_DIR=/tmp/.uv-cache uv export --no-hashes --no-emit-project --extra dev > /tmp/pip-audit-requirements.txt
           UV_CACHE_DIR=/tmp/.uv-cache uv run --frozen --no-build pip-audit --strict \
-            --ignore-vuln CVE-2026-3219 \
-            --ignore-vuln PYSEC-2026-3721 \
             -r /tmp/pip-audit-requirements.txt --cache-dir /tmp/.pip-audit-cache
 
   bandit:

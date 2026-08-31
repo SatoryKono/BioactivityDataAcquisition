@@ -101,14 +101,21 @@ def test_residual_osv_exception_has_not_expired() -> None:
 def test_security_md_and_pip_audit_ignore_are_timeboxed() -> None:
     security_md = SECURITY_MD.read_text(encoding="utf-8")
     workflow = SECURITY_WORKFLOW.read_text(encoding="utf-8")
+    pip_block = next(
+        block
+        for block in (ROOT / "uv.lock").read_text(encoding="utf-8").split("[[package]]")
+        if 'name = "pip"' in block
+    )
     assert "PYSEC-2026-3721" in security_md
     assert EXPIRY in security_md
     assert "#1294" in security_md
     assert "osv-scanner.toml" in security_md
-    assert "--ignore-vuln PYSEC-2026-3721" in workflow
-    assert "--ignore-vuln CVE-2026-3219" in workflow
+    assert "26.2.1" in security_md
+    assert "--ignore-vuln CVE-2026-3219" not in workflow
+    assert "--ignore-vuln PYSEC-2026-3721" not in workflow
     assert EXPIRY in workflow
     assert "#9853" in workflow
+    assert 'version = "26.2.1"' in pip_block
 
 
 def test_mermaid_lockfile_keeps_patched_overrides() -> None:
