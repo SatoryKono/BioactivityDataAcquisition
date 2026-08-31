@@ -62,8 +62,44 @@ def _lane_lock_path(repo_root: Path = REPO_ROOT) -> Path:
     return Path(tempfile.gettempdir()) / "bioetl-zed-pytest" / f"{checkout_digest}.lock"
 
 
+def _owner_path(lock_path: Path) -> Path:
+    return lock_path.with_name(lock_path.name + ".owner")
+
+
+def _write_lock_owner(lock_path: Path, owner: str | None) -> None:
+    payload = f"{os.getpid()}\t{owner or 'pytest-lane'}\n"
+    _owner_path(lock_path).write_text(payload, encoding="utf-8")
+
+
+def _read_lock_owner(lock_path: Path) -> str | None:
+    owner_path = _owner_path(lock_path)
+    try:
+        raw = owner_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    if not raw:
+        return None
+    pid, _, lane = raw.partition("\t")
+    if pid.isdigit() and lane:
+        return f"pid={pid} lane={lane}"
+    return raw
+
+
+def _busy_message(lock_path: Path) -> str:
+    holder = _read_lock_owner(lock_path)
+    suffix = f" ({holder})" if holder else ""
+    return (
+        "another Zed pytest lane is already running for this checkout"
+        f"{suffix}. Stop that Zed task or wait for it to finish."
+    )
+
+
 @contextmanager
-def _exclusive_lane_lock(lock_path: Path | None = None) -> Iterator[None]:
+def _exclusive_lane_lock(
+    lock_path: Path | None = None,
+    *,
+    owner: str | None = None,
+) -> Iterator[None]:
     """Fail fast when another Zed pytest lane is active for this checkout."""
     resolved_lock_path = lock_path or _lane_lock_path()
     resolved_lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -85,13 +121,13 @@ def _exclusive_lane_lock(lock_path: Path | None = None) -> Iterator[None]:
 
                 fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError as exc:
-            raise ZedLaneBusyError(
-                "another Zed pytest lane is already running for this checkout"
-            ) from exc
+            raise ZedLaneBusyError(_busy_message(resolved_lock_path)) from exc
         acquired = True
+        _write_lock_owner(resolved_lock_path, owner)
         yield
     finally:
         if acquired:
+            _owner_path(resolved_lock_path).unlink(missing_ok=True)
             handle.seek(0)
             if os.name == "nt":
                 import msvcrt
@@ -341,7 +377,7 @@ def _run_pytest(argv_tail: Sequence[str], *, lane_name: str) -> int:
         os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 
     try:
-        with _exclusive_lane_lock():
+        with _exclusive_lane_lock(owner=lane_name):
             import pytest
 
             return int(pytest.main(list(argv_tail)))

@@ -93,11 +93,16 @@
       "coverage_actual_percent": 96.54,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-28T13:46:26.926300+00:00",
+      "refreshed_at_utc": "2026-08-31T17:18:00.911707+00:00",
       "slowest_total_cases": 49226,
       "source_commit": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
       "source_run_id": "33149935203",
-      "top_slow_zone": {"zone":"tests.unit.scripts.qa.test_report_debt_governance_gates","test_count":4,"total_duration_s":47.748,"max_duration_s":21.002}
+      "top_slow_zone": {
+        "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
+        "test_count": 4,
+        "total_duration_s": 47.748,
+        "max_duration_s": 21.002
+      }
     },
     "5702": {
       "helper_owner_contains_timeout_contracts": true,
