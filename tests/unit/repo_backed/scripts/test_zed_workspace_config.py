@@ -491,6 +491,12 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
         coverage_args = lane_module["LANES"][lane_key]
         assert "--ignore=tests/unit/scripts" in coverage_args
         assert "--cov-fail-under=85" in coverage_args
+        assert "--cov-report=term-missing" in coverage_args
+        assert not any(
+            arg == "--cov-report=html:reports/coverage/htmlcov"
+            or arg.startswith("--cov-report=html")
+            for arg in coverage_args
+        )
 
     scripts_lane = matrix_lanes["unit-scripts-tooling"]
     assert scripts_lane["paths"] == ["tests/unit/scripts/"]
