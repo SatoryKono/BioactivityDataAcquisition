@@ -152,6 +152,9 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/e2e",
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
+        # Script/tooling tests have a dedicated serial CI lane and can exceed the
+        # Windows per-test timeout when instrumented inside this product estimate.
+        "--ignore=tests/unit/scripts",
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
@@ -167,6 +170,7 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/e2e",
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
+        "--ignore=tests/unit/scripts",
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
