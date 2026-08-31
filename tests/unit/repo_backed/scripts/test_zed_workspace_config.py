@@ -480,6 +480,13 @@ def test_zed_pytest_lanes_match_canonical_test_matrix() -> None:
     # Local coverage estimate must not claim coverage-verify authority.
     assert "coverage-local" not in lane_module["CANONICAL_SUITE_BY_LANE"]
     assert "coverage-verify" not in lane_module["CANONICAL_SUITE_BY_LANE"].values()
+    for lane_key in ("coverage-local", "coverage"):
+        coverage_args = lane_module["LANES"][lane_key]
+        assert "--ignore=tests/unit/scripts" in coverage_args
+        assert "--cov-fail-under=85" in coverage_args
+
+    scripts_lane = matrix_lanes["unit-scripts-tooling"]
+    assert scripts_lane["paths"] == ["tests/unit/scripts/"]
 
 
 def test_zed_terminal_prefers_windows_venv_and_offline_vcr() -> None:
