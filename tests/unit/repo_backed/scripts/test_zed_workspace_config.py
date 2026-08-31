@@ -335,8 +335,8 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
         encoding="utf-8"
     )
-    assert "--ignore-vuln CVE-2026-3219" in security_workflow
-    assert "--ignore-vuln PYSEC-2026-3721" in security_workflow
+    assert "--ignore-vuln CVE-2026-3219" not in security_workflow
+    assert "--ignore-vuln PYSEC-2026-3721" not in security_workflow
 
     architecture = next(
         task for task in tasks if task["label"] == "Test: architecture-fast"
