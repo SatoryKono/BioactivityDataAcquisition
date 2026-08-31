@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T12:53:59.159919+00:00",
+  "generated_at": "2026-08-31T15:27:08.159+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -1688,13 +1688,13 @@
         },
         {
           "path": ".zed/tasks.json",
-          "line": 366,
+          "line": 362,
           "source_group": "other",
           "text": "\"scripts/ai/codex/setup_mcp.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 381,
+          "line": 377,
           "source_group": "other",
           "text": "\"scripts/ai/codex/setup_mcp.py\","
         }
@@ -11947,7 +11947,7 @@
       "references": [
         {
           "path": ".zed/tasks.json",
-          "line": 342,
+          "line": 338,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_vulture.py\""
         },
@@ -11990,7 +11990,7 @@
       "references": [
         {
           "path": ".zed/tasks.json",
-          "line": 354,
+          "line": 350,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_xenon.py\""
         },
@@ -17441,7 +17441,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 420,
+          "line": 421,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19388,7 +19388,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 340,
+          "line": 341,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
