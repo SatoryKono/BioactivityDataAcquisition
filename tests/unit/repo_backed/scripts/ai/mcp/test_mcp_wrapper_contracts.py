@@ -38,7 +38,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Iterator
+from functools import lru_cache
 from pathlib import Path
 
 import pytest
@@ -330,10 +332,48 @@ def _powershell_python_path() -> str:
     return _powershell_path(windows_python)
 
 
+def _collapse_windows_env(env: dict[str, str]) -> dict[str, str]:
+    """Keep the last value when PATH/Path both exist.
+
+    Windows and WSL binfmt treat those names as one variable. A copied host
+    ``Path`` plus a test ``PATH`` can resurrect the host PATH.
+    """
+    windows_powershell = POWERSHELL is not None and str(POWERSHELL).lower().endswith(
+        ".exe"
+    )
+    if os.name != "nt" and not windows_powershell:
+        return env
+    collapsed: dict[str, str] = {}
+    last_name_by_key: dict[str, str] = {}
+    for name, value in env.items():
+        key = name.lower()
+        previous = last_name_by_key.get(key)
+        if previous is not None and previous != name:
+            collapsed.pop(previous, None)
+        last_name_by_key[key] = name
+        collapsed[name] = value
+    return collapsed
+
+
+def _powershell_cwd_prefix() -> str:
+    """Pin Windows PowerShell cwd to the repo even when launched from WSL."""
+    if POWERSHELL is None or not str(POWERSHELL).lower().endswith(".exe"):
+        return ""
+    location = f"Set-Location -LiteralPath {_ps_quote(_powershell_path(ROOT))}"
+    # Windows PowerShell 5.1 discovers ``npx.ps1`` as ExternalScript, but WSL
+    # interop and a missing ``.PS1`` PATHEXT entry can still hide the fake.
+    pathext = (
+        "if ($env:PATHEXT -notmatch '(?i)(^|;)\\.PS1(;|$)') { "
+        "$env:PATHEXT = '.PS1;' + $env:PATHEXT }"
+    )
+    return f"{location}; {pathext}; "
+
+
 def _run_powershell_command(
     command: str, *, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
     assert POWERSHELL is not None
+    run_env = _collapse_windows_env(env or _clean_env())
     try:
         result = subprocess.run(
             [
@@ -343,10 +383,10 @@ def _run_powershell_command(
                 "-ExecutionPolicy",
                 "Bypass",
                 "-Command",
-                command,
+                _powershell_cwd_prefix() + command,
             ],
             cwd=ROOT,
-            env=env or _clean_env(),
+            env=run_env,
             text=True,
             capture_output=True,
             check=False,
@@ -366,10 +406,11 @@ def _run_powershell_file(
     path: Path, *, env: dict[str, str]
 ) -> subprocess.CompletedProcess[str]:
     assert POWERSHELL is not None
+    run_env = _collapse_windows_env(env)
     setup = []
     for name in POWERSHELL_WRAPPER_ENV_NAMES:
-        if name in env:
-            setup.append(f"$env:{name}={_ps_quote(env[name])}")
+        if name in run_env:
+            setup.append(f"$env:{name}={_ps_quote(run_env[name])}")
         else:
             setup.append(f"Remove-Item 'Env:{name}' -ErrorAction SilentlyContinue")
     setup.append(f"& {_ps_quote(_powershell_path(path))}")
@@ -383,10 +424,10 @@ def _run_powershell_file(
                 "-ExecutionPolicy",
                 "Bypass",
                 "-Command",
-                "; ".join(setup),
+                _powershell_cwd_prefix() + "; ".join(setup),
             ],
             cwd=ROOT,
-            env=env,
+            env=run_env,
             text=True,
             capture_output=True,
             check=False,
@@ -404,13 +445,72 @@ def _run_powershell_file(
     return result
 
 
+@lru_cache(maxsize=1)
+def _windows_fixture_root() -> Path:
+    """Keep fake launchers off cloud-synced / DrvFs repo volumes."""
+    windows_powershell = POWERSHELL is not None and str(POWERSHELL).lower().endswith(
+        ".exe"
+    )
+    if not windows_powershell:
+        return ROOT / ".cache" / "mcp-contract-tests"
+    if os.name == "nt":
+        base = Path(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir())
+        return base / "bioetl-mcp-contract-tests"
+    try:
+        result = subprocess.run(
+            [
+                POWERSHELL,
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "[Console]::Out.WriteLine([IO.Path]::GetTempPath())",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ROOT / ".cache" / "mcp-contract-tests"
+    win_temp = result.stdout.strip().rstrip("\\/")
+    if result.returncode != 0 or not win_temp:
+        return ROOT / ".cache" / "mcp-contract-tests"
+    try:
+        converted = subprocess.run(
+            ["wslpath", "-u", win_temp],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ROOT / ".cache" / "mcp-contract-tests"
+    unix = converted.stdout.strip()
+    if converted.returncode != 0 or not unix:
+        return ROOT / ".cache" / "mcp-contract-tests"
+    return Path(unix) / "bioetl-mcp-contract-tests"
+
+
+def _read_capture_file(path: Path) -> str:
+    """Read a capture file, retrying Windows sharing / DrvFs delays."""
+    last_error: OSError | None = None
+    for _ in range(20):
+        try:
+            return path.read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            last_error = exc
+            time.sleep(0.05)
+    assert last_error is not None
+    raise last_error
+
+
 @pytest.fixture
 def windows_fixture_dir(request: pytest.FixtureRequest) -> Iterator[Path]:
     """Create a Windows-addressable ignored directory for fake launchers."""
     base_name = re.sub(r"[^A-Za-z0-9_.-]+", "-", request.node.originalname)
     node_hash = hashlib.sha256(request.node.nodeid.encode()).hexdigest()[:12]
     safe_name = f"{base_name}-{node_hash}"
-    path = ROOT / ".cache" / "mcp-contract-tests" / safe_name
+    path = _windows_fixture_root() / safe_name
     if path.exists():
         shutil.rmtree(path)
     path.mkdir(parents=True)
@@ -476,21 +576,26 @@ def _write_windows_launcher(path: Path) -> None:
         """if ($env:BIOETL_TEST_PYTHON_PROBE -eq '1' -and $args[0] -eq '-c') {
     exit 0
 }
-"executable=$PSCommandPath" | Set-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
+$lines = New-Object System.Collections.Generic.List[string]
+[void]$lines.Add("executable=$PSCommandPath")
 foreach ($argument in $args) {
-    "arg=$argument" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
+    [void]$lines.Add("arg=$argument")
 }
 $keyState = if ($env:CONTEXT7_API_KEY) { 'yes' } else { 'no' }
-"context7_key_present=$keyState" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
-"execution_mode=$env:EXECUTION_MODE" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
-"project_path=$env:PROJECT_PATH" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
-"adr_path=$env:ADR_PATH" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
-"ignore_scripts=$env:npm_config_ignore_scripts" | Add-Content -LiteralPath $env:BIOETL_TEST_CAPTURE
+[void]$lines.Add("context7_key_present=$keyState")
+[void]$lines.Add("execution_mode=$env:EXECUTION_MODE")
+[void]$lines.Add("project_path=$env:PROJECT_PATH")
+[void]$lines.Add("adr_path=$env:ADR_PATH")
+[void]$lines.Add("ignore_scripts=$env:npm_config_ignore_scripts")
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllLines($env:BIOETL_TEST_CAPTURE, $lines.ToArray(), $utf8)
 exit [int]$env:BIOETL_TEST_EXIT_CODE
 """,
         encoding="utf-8",
         newline="",
     )
+    with path.open("rb") as handle:
+        os.fsync(handle.fileno())
     # Linux pwsh only discovers PATH scripts when the executable bit is set.
     try:
         path.chmod(path.stat().st_mode | 0o755)
@@ -829,6 +934,34 @@ def test_powershell_uv_resolver_candidate_paths(
     assert expected in result.stdout.strip()
 
 
+def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:
+    source = UV_RESOLVER_PS1.read_text(encoding="utf-8")
+    compact = re.sub(r"\s+", "", source)
+    assert "function Get-BioetlPathEntries" in source
+    assert "[char[]]@($pathSeparator,';',':')" not in compact
+
+
+@POWERSHELL_MARK
+def test_powershell_uv_resolver_keeps_drive_letter_path_entries(
+    windows_fixture_dir: Path,
+) -> None:
+    fake_uvx = windows_fixture_dir / "uvx.ps1"
+    _write_windows_launcher(fake_uvx)
+    helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
+    fixture = _ps_quote(_powershell_path(windows_fixture_dir))
+    expected = os.path.normcase(_powershell_path(fake_uvx))
+    command = f"""
+. {helper}
+$env:PATH = {fixture} + [IO.Path]::PathSeparator + 'C:\\Windows\\System32'
+[Console]::Out.WriteLine((Resolve-BioetlUvxBin))
+"""
+
+    result = _run_powershell_command(command)
+
+    assert result.returncode == 0, result.stderr
+    assert os.path.normcase(result.stdout.strip()) == expected
+
+
 @POWERSHELL_MARK
 def test_powershell_uv_resolver_reports_unavailable() -> None:
     helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
@@ -971,7 +1104,7 @@ def test_bash_fetch_wrapper_executes_resolved_uvx(tmp_path: Path) -> None:
 
     assert result.returncode == 17
     assert result.stdout == ""
-    captured = capture_file.read_text(encoding="utf-8").splitlines()
+    captured = _read_capture_file(capture_file).splitlines()
     # WSL may report the launcher path in /mnt/<drive>/... form.
     assert captured[0] in {
         f"executable={fake_uvx}",
@@ -1005,7 +1138,7 @@ def test_powershell_fetch_wrapper_executes_resolved_uvx(
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
-    captured = capture_file.read_text(encoding="utf-8").splitlines()
+    captured = _read_capture_file(capture_file).splitlines()
     assert "arg=--python" in captured
     assert "arg=3.13" in captured
     assert "arg=--with" in captured
@@ -1052,7 +1185,7 @@ def test_code_interpreter_uses_local_python_without_deno(
     result = _run_powershell_file(CODE_INTERPRETER_PS1, env=env)
 
     assert result.returncode == 0, result.stderr
-    captured = capture_file.read_text(encoding="utf-8").splitlines()
+    captured = _read_capture_file(capture_file).splitlines()
     assert "arg=-m" in captured
     assert "arg=mcp_server_code_interpreter" in captured
     assert "Deno" not in result.stderr
@@ -1085,7 +1218,7 @@ def test_code_interpreter_executes_uvx_when_deno_is_available(
     result = _run_powershell_file(CODE_INTERPRETER_PS1, env=env)
 
     assert result.returncode == 0, result.stderr
-    captured = capture_file.read_text(encoding="utf-8").splitlines()
+    captured = _read_capture_file(capture_file).splitlines()
     assert "arg=--from" in captured
     assert "arg=mcp-run-python==0.0.22" in captured
     assert "arg=mcp-run-python" in captured
@@ -1173,7 +1306,7 @@ def test_neo4j_explicit_credentials_take_precedence(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    captured = capture_file.read_text(encoding="utf-8")
+    captured = _read_capture_file(capture_file)
     assert "neo4j_username=explicit-user" in captured
     assert "neo4j_password=explicit-password" in captured
     assert "packed-password" not in captured
@@ -1224,7 +1357,7 @@ def test_adr_analysis_wrapper_startup_contract(
     result = _run_powershell_file(ADR_ANALYSIS_PS1, env=env)
 
     assert result.returncode == 0, result.stderr
-    captured = capture_file.read_text(encoding="utf-8").splitlines()
+    captured = _read_capture_file(capture_file).splitlines()
     assert "arg=-y" in captured
     assert "arg=mcp-adr-analysis-server@2.6.14" in captured
     assert "arg=--stdio" not in captured
@@ -1266,7 +1399,7 @@ def test_bash_context7_uses_env_auth_without_argv(
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
-    captured = capture_file.read_text(encoding="utf-8")
+    captured = _read_capture_file(capture_file)
     assert f"arg={CONTEXT7_PACKAGE}" in captured
     assert "arg=--api-key" not in captured
     assert EXAMPLE_CONTEXT7_KEY not in captured
@@ -1296,7 +1429,7 @@ def test_powershell_context7_uses_env_auth_without_argv(
 
     assert result.returncode == 0, result.stderr
     assert result.stdout == ""
-    captured = capture_file.read_text(encoding="utf-8")
+    captured = _read_capture_file(capture_file)
     assert f"arg={CONTEXT7_PACKAGE}" in captured
     assert "arg=--api-key" not in captured
     assert EXAMPLE_CONTEXT7_KEY not in captured
@@ -1362,7 +1495,7 @@ def test_ast_grep_normal_launch_preserves_primary_and_fallback_dispatch(
     )
 
     assert result.returncode == 0, result.stderr
-    calls = capture_file.read_text(encoding="utf-8").splitlines()
+    calls = _read_capture_file(capture_file).splitlines()
     assert calls == [
         "-y @notprolands/ast-grep-mcp@1.1.1 --stdio --example",
         "-y @chousyn/ast-grep-mcp@0.1.1 --stdio --example",
