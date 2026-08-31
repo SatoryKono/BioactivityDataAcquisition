@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/sonar-prompts-verify-20260901`
-- Source commit: `2c5f4894d141470e8935c89e80a34f15b0776d54`
-- Source run id: `33441788760`
+- Source branch: `fix/pr-9882-live-review-config`
+- Source commit: `2321a7ffbd59cf4d3e1e112ba2d4b5c692eb3c16`
+- Source run id: `33423158461`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33441788760`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33423158461`
 - Source tree sha256: `8e72c98284baf91176a73329108c6071f22765508b8dab61116ca9ccd936ba5f`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-08-31T21:52:37.638931+00:00`
+- Refreshed at (UTC): `2026-08-31T18:16:47.214981+00:00`
 
 ## Branch-accurate provenance (#5729)
 
