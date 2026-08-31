@@ -1,4 +1,4 @@
-name: Temporary read-only prospective gates for PR 9880
+name: Temporary read-only final governance for PR 9880
 
 on:
   push:
@@ -24,22 +24,31 @@ jobs:
           python-version: "3.12"
           uv-extras: dev
           enable-pytest-cache: "false"
-      - name: Regenerate and emit prospective gate payloads
+      - name: Regenerate final prospective governance payloads
         shell: bash
         run: |
           uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --update
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --check
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check
           changed="$(git diff --name-only)"
           for path in ${changed}; do
             case "${path}" in
-              reports/quality/debt-governance-gates.json|reports/quality/debt-governance-gates.md) ;;
+              reports/quality/architecture-debt-remote-main-baseline.json|reports/quality/architecture-debt-remote-main-baseline.md|reports/quality/debt-governance-gates.json|reports/quality/debt-governance-gates.md) ;;
               *) echo "Unexpected prospective path: ${path}" >&2; exit 1 ;;
             esac
           done
-          echo "JSON_B64_BEGIN"
-          base64 -w0 reports/quality/debt-governance-gates.json
-          echo
-          echo "JSON_B64_END"
-          echo "MD_B64_BEGIN"
-          base64 -w0 reports/quality/debt-governance-gates.md
-          echo
-          echo "MD_B64_END"
+          for spec in \
+            "BASELINE_JSON:reports/quality/architecture-debt-remote-main-baseline.json" \
+            "BASELINE_MD:reports/quality/architecture-debt-remote-main-baseline.md" \
+            "GATES_JSON:reports/quality/debt-governance-gates.json" \
+            "GATES_MD:reports/quality/debt-governance-gates.md"; do
+            label="${spec%%:*}"
+            file="${spec#*:}"
+            echo "${label}_B64_BEGIN"
+            base64 -w0 "${file}"
+            echo
+            echo "${label}_B64_END"
+          done
