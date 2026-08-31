@@ -934,6 +934,7 @@ def test_powershell_uv_resolver_candidate_paths(
     helper = _ps_quote(_powershell_path(UV_RESOLVER_PS1))
     command = (
         f". {helper}; {mock_functions}; "
+        "$env:PATH = 'C:\\Windows\\System32'; "
         "[Console]::Out.WriteLine((Resolve-BioetlUvxBin))"
     )
 
