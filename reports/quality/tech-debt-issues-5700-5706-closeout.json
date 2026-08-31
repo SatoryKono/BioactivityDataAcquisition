@@ -138,37 +138,37 @@
     "5706": {
       "top_under_70_modules": [
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 18,
           "path": "src/bioetl/composition/bootstrap/runtime/_pipeline_bootstrap_lazy_dependencies.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 9,
           "path": "src/bioetl/domain/normalization/profiles/_chembl_policy_family_mapping.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 56,
           "path": "src/bioetl/domain/normalization/profiles/_normalization_helpers.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 31,
           "path": "src/bioetl/domain/normalization/profiles/_profile_validation.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 39,
           "path": "src/bioetl/infrastructure/schemas/workflow_config_fk.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 61,
           "path": "src/bioetl/interfaces/cli/commands/domains/health/_observability_backend_startup_types.py"
         },
         {
-          "coverage_percent": 0,
+          "coverage_percent": 0.0,
           "missing_lines": 15,
           "path": "src/bioetl/interfaces/cli/commands/domains/health/failure_handling.py"
         },

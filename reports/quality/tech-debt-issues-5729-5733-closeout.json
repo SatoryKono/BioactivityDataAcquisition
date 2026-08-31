@@ -58,7 +58,7 @@
       "source_tree_sha256": "ebddbd3c33c135a8498d76181e07e35db9a7426ed7aab148c25784e69bd9271a"
     },
     "5730": {
-      "minimum_coverage_percent": 54,
+      "minimum_coverage_percent": 54.0,
       "target_modules": [
         "bioetl.infrastructure.storage.support.checkpoint_writer",
         "bioetl.infrastructure.control_plane._file_lineage_index"
@@ -66,9 +66,9 @@
     },
     "5731": {
       "minimum_module_coverages": {
-        "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow": 77,
-        "bioetl.application.core.runner": 86,
-        "bioetl.application.observability.observer": 95
+        "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow": 77.0,
+        "bioetl.application.core.runner": 86.0,
+        "bioetl.application.observability.observer": 95.0
       }
     },
     "5732": {
