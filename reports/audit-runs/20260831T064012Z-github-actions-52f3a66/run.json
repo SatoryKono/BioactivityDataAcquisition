@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20260831T064012Z-github-actions-52f3a66",
+  "domain": "github-actions",
+  "mode": "full",
+  "audit_mode": "full",
+  "language": "ru",
+  "max_iterations": 10,
+  "executed_iterations": 2,
+  "early_stop": "two consecutive iterations without new PROVEN P0/P1 and without regression",
+  "started_at": "2026-08-31T06:40:12Z",
+  "materialized_at": "2026-08-31T06:49:22.711Z",
+  "repository": "SatoryKono/BioactivityDataAcquisition",
+  "base_branch": "main",
+  "work_branch": "fix/github-actions-cycle-52f3a66",
+  "baseline_sha": "52f3a664070ed15e028f0f03d67a889777580dd9",
+  "baseline_tree": "f72e8c975381ad16285e8a342274124fc14fdb06",
+  "scope": [
+    ".github/workflows",
+    ".github/actions",
+    ".github/dependabot.yml"
+  ],
+  "scope_exists": true,
+  "preflight": {
+    "local": {
+      "status": "DEGRADED",
+      "mutations_allowed": false,
+      "error": "Failed to create unified exec process: batch file arguments are invalid",
+      "git_status": "UNAVAILABLE",
+      "head": "UNAVAILABLE",
+      "remote": "UNAVAILABLE",
+      "tool_versions": {
+        "git": "UNAVAILABLE",
+        "gh": "UNAVAILABLE",
+        "python": "UNAVAILABLE"
+      },
+      "auth": "UNAVAILABLE; no token printed",
+      "memory_pre_task": "UNAVAILABLE"
+    },
+    "remote": {
+      "status": "PASS",
+      "default_branch": "main",
+      "head": "52f3a664070ed15e028f0f03d67a889777580dd9",
+      "tree": "f72e8c975381ad16285e8a342274124fc14fdb06",
+      "repository_visibility": "public",
+      "authenticated_actor": "SatoryKono/Fedor; token not exposed",
+      "branch_protected": false,
+      "required_contexts": [],
+      "open_cycle_issues": [
+        9800,
+        9865
+      ],
+      "open_prs": [
+        9871,
+        9872
+      ]
+    }
+  },
+  "baseline_hashes": {
+    "docs/00-project/governance/05-github-policy.md": "8b231b95a15953fed52718de864d5ee28017dcc1",
+    "docs/04-reference/github-actions-workflows.md": "8dbbae33396ed547b46fcbd392b9133054a7cafb",
+    "configs/quality/scripts_inventory_manifest.json": "baca0ef5feced78e55fd468c79eebb1a285f1916",
+    "configs/quality/debt_scorecard.yaml": "80353687b0fd3c041580afbe6a4e3a1999122fb2",
+    "reports/quality/architecture-quality-scorecard.json": "56a8d18a4b7b6b85d16be2986f00b0c02cd0b200",
+    ".github/dependabot.yml": "55307c05c48fea9a9b8c453a9ac4909d91141175"
+  },
+  "budgets_changed": false,
+  "env_changed": false,
+  "secrets_printed": false,
+  "completed_at": "2026-08-31T06:56:08.569Z",
+  "post_audit": {
+    "pull_request": 9874,
+    "validated_sha": "e9f88e6777176691c3329d4f8432122c3baff421",
+    "draft": true,
+    "merge_performed": false,
+    "issues_closed": [],
+    "ruleset_mutated": false,
+    "ci_gate": "BLOCK",
+    "failed_runs": [
+      {
+        "id": 33365870287,
+        "name": "Root Hygiene",
+        "evidence": [
+          "arch_hash.txt",
+          "arch_run_tmp.txt"
+        ]
+      },
+      {
+        "id": 33365870239,
+        "name": "consolidation-gates",
+        "evidence": "RUF034 scripts/engineering/repo/github_settings_review.py:636"
+      },
+      {
+        "id": 33365870242,
+        "name": "Type Checking (Strict)",
+        "evidence": "debug_export_ops.py:161 unused-ignore"
+      }
+    ]
+  }
+}

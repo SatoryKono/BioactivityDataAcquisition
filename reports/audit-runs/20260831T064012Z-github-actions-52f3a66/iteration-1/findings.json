@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "new_issues": 0,
+  "proven_findings": [
+    {
+      "finding_id": "GHA-20260831-001",
+      "requirement_id": "GH-RULESET-001",
+      "priority": "P1",
+      "proof": "PROVEN",
+      "state": "OPEN_EXISTING",
+      "issue": 9800,
+      "title": "main ruleset and required checks are not enforced",
+      "root_cause": "rulesets 15730586 and 13643213 are disabled; branches/main protected=false",
+      "path_evidence": [
+        "docs/00-project/governance/05-github-policy.md §3",
+        ".github/workflows/import-linter.yml",
+        ".github/workflows/root-hygiene.yml"
+      ],
+      "live_evidence": {
+        "branch_protected": false,
+        "required_contexts": [],
+        "ruleset_id": 15730586,
+        "enforcement": "disabled",
+        "configured_contexts": [
+          "checks-complete",
+          "root-hygiene"
+        ],
+        "bypass_actors": []
+      },
+      "acceptance": "owner approval plus active live ruleset and a PR proving failed required checks block merge"
+    },
+    {
+      "finding_id": "GHA-20260831-002",
+      "requirement_id": "REQ-DEP-002",
+      "priority": "P2",
+      "proof": "PROVEN",
+      "state": "OPEN_ACCEPTANCE",
+      "issue": 9865,
+      "title": "concurrency remediation is on main but final acceptance is not green",
+      "root_cause": "historical incomplete PR concurrency and evidence; code is remediated, but repository CI/final evidence acceptance remain open",
+      "path_evidence": [
+        "tests/architecture/test_github_actions_runtime_policy.py",
+        ".github/workflows/labeler.yml",
+        ".github/workflows/memory-retention.yml",
+        ".github/workflows/branch-hygiene.yml"
+      ],
+      "current_evidence": {
+        "pr_workflows": 29,
+        "with_concurrency": 29,
+        "pull_request_target_workflows": 1,
+        "isolated_pull_request_target": 1,
+        "code_merge": "ce3b633d2d5724dec55556a9ec66d5c5a7bbe1c9"
+      },
+      "acceptance": "required repository CI green and final evidence accepted on origin/main"
+    }
+  ],
+  "unproven_candidates": [],
+  "regressions": [],
+  "iteration": 1
+}
