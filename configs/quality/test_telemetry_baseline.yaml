@@ -2,13 +2,13 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/sonar-prompts-verify-20260901
-refreshed_at_utc: '2026-08-31T21:46:21.958835+00:00'
+refreshed_at_utc: '2026-08-31T21:52:37.638931+00:00'
 refresh_status: captured
-source_commit: 628949c2c2ef780856f9736497989a085d661556
+source_commit: 2c5f4894d141470e8935c89e80a34f15b0776d54
 source_run_id: '33441788760'
 source_event: pull_request
 source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33441788760
-source_tree_sha256: 0f748a110b9d7da51e833d17b5751919f21b51e75f84fb095f55b73a3e9ee17b
+source_tree_sha256: 8e72c98284baf91176a73329108c6071f22765508b8dab61116ca9ccd936ba5f
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
