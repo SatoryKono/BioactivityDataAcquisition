@@ -32,14 +32,16 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
+from bioetl.application.services.dq.silver_statistics_uniqueness import (
+    _profile_column_cardinality,
+    check_uniqueness_stats,
+)
 from bioetl.application.services.dq.silver_statistics_helpers import (
     _categorical_row_value_count,
-    _profile_column_uniqueness,
     check_content_hash_integrity_stats,
     check_deduplication_stats,
     check_null_rates_stats,
     check_schema_drift_stats,
-    check_uniqueness_stats,
     detect_type_changes,
     profile_categorical_column,
     profile_numeric_column,
@@ -227,9 +229,9 @@ def test_helper_edge_paths_cover_safe_fallbacks() -> None:
     no_collision = check_content_hash_integrity_stats(2, 0)
     assert no_collision.status == DQCheckStatus.PASS
 
-    fallback = _profile_column_uniqueness(
+    fallback = _profile_column_cardinality(
         df,
-        columns=["missing", "entity_id"],
+        cols_to_check=["missing", "entity_id"],
         total_count=2,
         profile_errors=(pl.exceptions.ColumnNotFoundError,),
     )
