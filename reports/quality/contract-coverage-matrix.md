@@ -1,7 +1,7 @@
 # Contract Coverage Matrix
 
 - schema_version: `contract-coverage-matrix-v3`
-- snapshot_date: 2026-08-28
+- snapshot_date: 2026-08-31
 - row_count: 27
 - gold_enabled_count: 27
 - gold_contract_available_count: 27
@@ -45,5 +45,5 @@
 | `pubchem_compound` | `gold` | `pubchem.compound` | True | True | `covered` | `covered` | True | 39 | 6 | 0 | `entity_id, molecule_id` | 7 | 2 | - | - |
 | `pubmed_publication` | `gold` | `pubmed.publication` | True | True | `covered` | `covered` | True | 66 | 9 | 0 | `entity_id, pmid` | 65 | 2 | - | - |
 | `semanticscholar_publication` | `gold` | `semanticscholar.publication` | True | True | `covered` | `covered` | True | 54 | 9 | 0 | `entity_id, paper_id` | 65 | 2 | - | - |
-| `uniprot_idmapping` | `gold` | `uniprot.idmapping` | True | True | `covered` | `covered` | True | 19 | 7 | 0 | `entity_id, target_id` | 12 | 2 | - | - |
+| `uniprot_idmapping` | `gold` | `uniprot.idmapping` | True | True | `covered` | `covered` | True | 19 | 7 | 0 | `entity_id, target_id` | 13 | 2 | - | - |
 | `uniprot_protein` | `gold` | `uniprot.protein` | True | True | `covered` | `covered` | True | 97 | 6 | 0 | `accession, entity_id` | 17 | 2 | - | - |
