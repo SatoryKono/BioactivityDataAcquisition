@@ -39,7 +39,11 @@ jobs:
           uv-sync-args: "--frozen --dev"
 
       - name: Ruff check
-        run: uv run --frozen --no-build ruff check .
+        run: |
+          uv run --frozen --no-build ruff format src/bioetl/application/services/dq/silver_statistics_helpers.py
+          git diff -- src/bioetl/application/services/dq/silver_statistics_helpers.py
+          uv run --frozen --no-build python -m scripts.engineering.qa --help
+          exit 1
 
       - name: Ruff format check
         run: uv run --frozen --no-build ruff format --check .
