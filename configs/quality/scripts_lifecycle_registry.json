@@ -43,17 +43,17 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
-    "scripts/ai/codex/helper/wsl_proxy_env.sh": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ai/codex/helper/wsl-support.ps1": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared Windows-side WSL path and invocation helper for Codex PowerShell launchers; promote to active only if the Windows launcher flow becomes a governed first-class runtime entrypoint. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ai/codex/helper/wsl_proxy_env.sh": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
     },
     "scripts/ai/codex/mcp_profile_contract.py": {
       "decision": "shared_helper_module",
@@ -67,6 +67,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
+    "scripts/ai/codex/setup.ps1": {
+      "decision": "windows_compatibility_wrapper",
+      "next_step": "Retain as a Windows compatibility setup wrapper while the canonical Codex setup flow remains split between WSL setup scripts and documented launcher entrypoints; promote only if it becomes the governed primary setup command. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-11-17"
+    },
     "scripts/ai/codex/setup_agents.sh": {
       "decision": "compatibility_wrapper",
       "next_step": "Retain as an optional validator/personal installer during native agent-discovery migration; trusted project sessions discover .codex/agents/*.toml directly.",
@@ -78,12 +84,6 @@
       "next_step": "Retain as an optional canonical validator/personal installer; trusted project sessions discover .codex/skills directly.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
-    },
-    "scripts/ai/codex/setup.ps1": {
-      "decision": "windows_compatibility_wrapper",
-      "next_step": "Retain as a Windows compatibility setup wrapper while the canonical Codex setup flow remains split between WSL setup scripts and documented launcher entrypoints; promote only if it becomes the governed primary setup command. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-11-17"
     },
     "scripts/ai/codex/sync_native_skills.py": {
       "decision": "compatibility_wrapper",
@@ -1549,15 +1549,15 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-30"
     },
-    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
-      "decision": "legacy_manual_utility",
-      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py --stack neo4j; do not add lifecycle behavior and remove after reference proof.",
-      "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
-    },
     "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
       "decision": "legacy_manual_utility",
       "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as historical operator guidance.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
+    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py --stack neo4j; do not add lifecycle behavior and remove after reference proof.",
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
