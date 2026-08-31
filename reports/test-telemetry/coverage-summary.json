@@ -1,11 +1,11 @@
 {
   "source_branch": "fix/pr-9882-live-review-config",
-  "source_commit": "9627d89332bbca137868386036d67294090f57bc",
-  "source_run_id": "33415476528",
+  "source_commit": "a13dc554f0b9a1f0e2c5df7eb06209177010ede0",
+  "source_run_id": "33423158461",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33415476528",
-  "source_tree_sha256": "ebddbd3c33c135a8498d76181e07e35db9a7426ed7aab148c25784e69bd9271a",
-  "refreshed_at_utc": "2026-08-31T16:53:58.855465+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33423158461",
+  "source_tree_sha256": "b77e8f4292d8606e470c6003d9aad4ef02834845561491af48a89d1819dece6e",
+  "refreshed_at_utc": "2026-08-31T18:16:47.214981+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.7,
   "coverage": {

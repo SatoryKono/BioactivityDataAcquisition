@@ -93,15 +93,15 @@
       "coverage_actual_percent": 96.7,
       "coverage_percent_fallback_used": false,
       "coverage_xml_present": true,
-      "refreshed_at_utc": "2026-08-31T16:53:58.855465+00:00",
+      "refreshed_at_utc": "2026-08-31T18:16:47.214981+00:00",
       "slowest_total_cases": 49516,
-      "source_commit": "9627d89332bbca137868386036d67294090f57bc",
-      "source_run_id": "33415476528",
+      "source_commit": "a13dc554f0b9a1f0e2c5df7eb06209177010ede0",
+      "source_run_id": "33423158461",
       "top_slow_zone": {
         "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
-        "test_count": 4,
-        "total_duration_s": 45.228,
-        "max_duration_s": 19.371
+        "test_count": 3,
+        "total_duration_s": 30.554,
+        "max_duration_s": 14.534
       }
     },
     "5702": {
