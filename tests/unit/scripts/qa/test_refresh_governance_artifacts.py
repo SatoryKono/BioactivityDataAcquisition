@@ -132,7 +132,6 @@ def test_refresh_propagates_generator_failure_before_later_steps(
     )
 
 
-
 def test_refresh_updates_remote_main_baseline_before_debt_rollup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -168,6 +167,7 @@ def test_refresh_updates_remote_main_baseline_before_debt_rollup(
         ]
     )
     assert remote_main_index < debt_rollup_index
+
 
 def test_scorecard_sync_fails_when_required_input_is_missing(
     monkeypatch: pytest.MonkeyPatch,
