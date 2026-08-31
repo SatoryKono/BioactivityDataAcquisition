@@ -42,9 +42,7 @@ jobs:
         run: uv run --frozen --no-build ruff check .
 
       - name: Ruff format check
-        run: |
-          uv run --frozen --no-build ruff format --diff tests/architecture/test_github_actions_runtime_policy.py || true
-          exit 1
+        run: uv run --frozen --no-build ruff format --check .
 
       - name: Mypy
         run: >-
