@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T12:53:59.159919+00:00",
+  "generated_at": "2026-08-31T15:49:36.626+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -1688,13 +1688,13 @@
         },
         {
           "path": ".zed/tasks.json",
-          "line": 366,
+          "line": 362,
           "source_group": "other",
           "text": "\"scripts/ai/codex/setup_mcp.py\","
         },
         {
           "path": ".zed/tasks.json",
-          "line": 381,
+          "line": 377,
           "source_group": "other",
           "text": "\"scripts/ai/codex/setup_mcp.py\","
         }
@@ -11771,13 +11771,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 358,
+          "line": 355,
           "source_group": "tests",
           "text": "assert arch[\"args\"] == [\"scripts/engineering/dev/zed_lint_imports.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 415,
+          "line": 412,
           "source_group": "tests",
           "text": "assert \"zed_lint_imports.py\" in serialized"
         }
@@ -11947,7 +11947,7 @@
       "references": [
         {
           "path": ".zed/tasks.json",
-          "line": 342,
+          "line": 338,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_vulture.py\""
         },
@@ -11965,13 +11965,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 372,
+          "line": 369,
           "source_group": "tests",
           "text": "assert dead_code[\"args\"] == [\"scripts/engineering/dev/zed_vulture.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 417,
+          "line": 414,
           "source_group": "tests",
           "text": "assert \"zed_vulture.py\" in serialized"
         }
@@ -11990,7 +11990,7 @@
       "references": [
         {
           "path": ".zed/tasks.json",
-          "line": 354,
+          "line": 350,
           "source_group": "other",
           "text": "\"scripts/engineering/dev/zed_xenon.py\""
         },
@@ -12020,13 +12020,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 365,
+          "line": 362,
           "source_group": "tests",
           "text": "assert complexity[\"args\"] == [\"scripts/engineering/dev/zed_xenon.py\"]"
         },
         {
           "path": "tests/unit/repo_backed/scripts/test_zed_workspace_config.py",
-          "line": 416,
+          "line": 413,
           "source_group": "tests",
           "text": "assert \"zed_xenon.py\" in serialized"
         }
@@ -17441,7 +17441,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 420,
+          "line": 421,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19388,7 +19388,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 340,
+          "line": 341,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

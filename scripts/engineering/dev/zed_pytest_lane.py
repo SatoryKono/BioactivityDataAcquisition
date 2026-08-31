@@ -36,6 +36,7 @@ from scripts.engineering.dev.zed_env_doctor import ensure_ready
 # Common local defaults for Zed interactive runs (not merge-gate authority).
 _TB_SHORT = "--tb=short"
 _TESTS_ROOT = "tests/"
+_IGNORE_UNIT_REPO_BACKED = "--ignore=tests/unit/repo_backed"
 _VCR_RECORD_NONE = "--vcr-record=none"
 _COMMON = (
     _TB_SHORT,
@@ -78,7 +79,7 @@ LANES: dict[str, tuple[str, ...]] = {
     "unit-fast": (
         "tests/unit/",
         "--ignore=tests/unit/scripts",
-        "--ignore=tests/unit/repo_backed",
+        _IGNORE_UNIT_REPO_BACKED,
         "-q",
         "-m",
         (
@@ -155,11 +156,20 @@ LANES: dict[str, tuple[str, ...]] = {
         # Script/tooling tests have a dedicated serial CI lane and can exceed the
         # Windows per-test timeout when instrumented inside this product estimate.
         "--ignore=tests/unit/scripts",
+        # Memory proof tests spawn git ls-files; under coverage they exceed the
+        # pytest-timeout and do not cover src/bioetl.
+        "--ignore=tests/unit/memory",
+        "--ignore=tests/integration/memory",
+        # Repo-backed tests spawn PowerShell/WSL/docker children; under coverage
+        # they stall the 98-99% Zed tail and do not cover src/bioetl.
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
-        "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
+        # term-missing dumps every uncovered line for ~2500 modules and can
+        # kill the Zed/Windows capture after tests have already passed.
+        # htmlcov for the full src/bioetl tree hangs the same way on Windows.
+        "--cov-report=term:skip-covered",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,
@@ -171,11 +181,13 @@ LANES: dict[str, tuple[str, ...]] = {
         "--ignore=tests/contract",
         "--ignore=tests/architecture",
         "--ignore=tests/unit/scripts",
+        "--ignore=tests/unit/memory",
+        "--ignore=tests/integration/memory",
+        _IGNORE_UNIT_REPO_BACKED,
         "-m",
         "not memory and not benchmark and not slow",
         "--cov=src/bioetl",
-        "--cov-report=term-missing",
-        "--cov-report=html:reports/coverage/htmlcov",
+        "--cov-report=term:skip-covered",
         "--cov-fail-under=85",
         "-q",
         _TB_SHORT,

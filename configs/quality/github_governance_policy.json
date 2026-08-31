@@ -136,7 +136,7 @@
       "check": "active_ruleset",
       "owner": "Repository administrators",
       "risk": "high",
-      "known_issue": 9800,
+      "known_issue": null,
       "due_days": 30
     },
     {
