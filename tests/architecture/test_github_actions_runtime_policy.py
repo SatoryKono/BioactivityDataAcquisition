@@ -672,6 +672,7 @@ def test_workflows_do_not_ship_temporary_files() -> None:
         "temporary GitHub Actions workflows must not remain on the default branch:\n"
         + "\n".join(temporary)
     )
+    )
 
 
 def test_named_workflows_declare_top_level_contents_read() -> None:
