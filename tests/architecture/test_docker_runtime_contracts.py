@@ -1402,7 +1402,7 @@ def test_docker_built_image_trivy_emits_full_evidence_and_blocks_all_medium_plus
 
 def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
-    assert workflow["permissions"] == {}
+    assert workflow["permissions"] == {"contents": "read"}
     assert all("permissions" in job for job in workflow["jobs"].values())
     steps = workflow["jobs"]["docker-build"]["steps"]
     provenance = next(

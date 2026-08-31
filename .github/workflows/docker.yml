@@ -44,8 +44,6 @@ on:
       - ".github/workflows/docker.yml"
       - ".github/actions/setup-python-uv/**"
 
-permissions: {}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.
