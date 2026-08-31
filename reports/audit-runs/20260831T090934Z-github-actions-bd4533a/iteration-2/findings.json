@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "iteration": 2,
+  "new_issues": 0,
+  "new_proven_p0_p1": 0,
+  "new_regressions": 0,
+  "proven_findings": [
+    {
+      "finding_id": "GHA-20260831-003",
+      "requirement_id": "REQ-DEP-002",
+      "priority": "P1",
+      "proof": "PROVEN",
+      "issue": 9881,
+      "title": "privileged prospective PR workflow executes with contents:write",
+      "root_cause": "checkout and execution of refs/pull/9879/merge followed by commit/push under inherited write token",
+      "path_evidence": [
+        ".github/workflows/tmp-prospective-governance.yml:9",
+        ".github/workflows/tmp-prospective-governance.yml:18",
+        ".github/workflows/tmp-prospective-governance.yml:21",
+        ".github/workflows/tmp-prospective-governance.yml:35",
+        ".github/workflows/tmp-prospective-governance.yml:46"
+      ],
+      "acceptance": "absent on main, regression guard on main, catalog parity and green required CI",
+      "state": "OPEN_REMEDIATION"
+    },
+    {
+      "finding_id": "GHA-20260831-001",
+      "requirement_id": "GH-RULESET-001",
+      "priority": "P1",
+      "proof": "PROVEN",
+      "issue": 9800,
+      "title": "main ruleset and required checks are not enforced",
+      "live_evidence": {
+        "protected": false,
+        "required_contexts": [],
+        "ruleset_15730586": "disabled",
+        "bypass_actors": []
+      },
+      "state": "OPEN_EXISTING"
+    },
+    {
+      "finding_id": "GHA-20260831-002",
+      "requirement_id": "REQ-DEP-002",
+      "priority": "P2",
+      "proof": "PROVEN",
+      "issue": 9865,
+      "title": "concurrency remediation exists but final CI/evidence acceptance remains open",
+      "state": "OPEN_EXISTING"
+    }
+  ],
+  "unproven_candidates": []
+}

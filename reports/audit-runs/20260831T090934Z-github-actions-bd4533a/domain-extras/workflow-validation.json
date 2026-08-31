@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "baseline_snapshot_at": "2026-08-31T09:09:34.943Z",
+  "final_snapshot_at": "2026-08-31T09:27:19.785Z",
+  "baseline_sha": "bd4533a2c923d464dfd971ffacf96df6bc9b70be",
+  "final_main_sha": "7add6987645a81e973a579aa4cc5b6db6d32f1b5",
+  "baseline": {
+    "scope_files": 58,
+    "workflows": 48,
+    "local_action_files": 9,
+    "dependabot_files": 1,
+    "external_action_refs": 232,
+    "immutable_pins": "232/232",
+    "trust_rows": 48,
+    "trust_failures": 1,
+    "artifact_retention": "71/71",
+    "cache_surfaces": 7,
+    "pr_concurrency": "29/29",
+    "catalog": "FAIL 48/47"
+  },
+  "final": {
+    "scope_files": 57,
+    "workflows": 47,
+    "local_action_files": 9,
+    "dependabot_files": 1,
+    "external_action_refs": 231,
+    "immutable_pins": "231/231",
+    "trust_rows": 47,
+    "trust_failures": 0,
+    "artifact_retention": "71/71",
+    "cache_surfaces": 7,
+    "pr_concurrency": "29/29",
+    "catalog": "PASS 47/47",
+    "temporary_workflow": "ABSENT",
+    "regression_guard_on_main": false
+  },
+  "checks": [
+    {
+      "id": "scope-non-empty",
+      "status": "PASS",
+      "evidence": "58 baseline SCOPE files; 57 final files after removal"
+    },
+    {
+      "id": "least-privilege",
+      "status": "BASELINE_FAIL_FINAL_PASS",
+      "evidence": "baseline tmp workflow granted contents:write; final 47-workflow set has no equivalent trust failure"
+    },
+    {
+      "id": "immutable-pins",
+      "status": "PASS",
+      "evidence": "232/232 baseline and 231/231 final external action refs use full SHA"
+    },
+    {
+      "id": "untrusted-pr-isolation",
+      "status": "PARTIAL",
+      "evidence": "baseline lines 9,18,21,35-38,46-58; workflow absent final; regression guard remains only on PR #9880"
+    },
+    {
+      "id": "pull-request-target",
+      "status": "PASS",
+      "evidence": "labeler.yml has no checkout and no payload interpolation into shell"
+    },
+    {
+      "id": "catalog",
+      "status": "BASELINE_FAIL_FINAL_PASS",
+      "evidence": "48/47 baseline; 47/47 final"
+    },
+    {
+      "id": "required-check-enforcement",
+      "status": "FAIL",
+      "evidence": "main protected=false, branch contexts empty, ruleset 15730586 disabled"
+    },
+    {
+      "id": "remote-zizmor",
+      "status": "PASS_WITH_GAP",
+      "evidence": "passed on remediation SHA but did not detect baseline privileged path"
+    },
+    {
+      "id": "local-validation",
+      "status": "DEGRADED",
+      "evidence": "unified executor failed to start: batch file arguments are invalid"
+    },
+    {
+      "id": "required-ci",
+      "status": "NOT_GREEN",
+      "evidence": "PR #9880 suite failed or remained pending; no bypass"
+    }
+  ],
+  "live_limits": {
+    "actions_permissions_api": "UNAVAILABLE_CONNECTOR",
+    "runner_inventory_api": "UNAVAILABLE_CONNECTOR",
+    "environment_inventory_api": "UNAVAILABLE_CONNECTOR"
+  },
+  "open_cycle_issues": [
+    9800,
+    9865,
+    9881
+  ],
+  "overall": "BLOCK"
+}
