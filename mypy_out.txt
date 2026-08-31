@@ -1,2 +1,0 @@
-pyproject.toml: note: unused section(s): module = ['boto3.*', 'botocore', 'botocore.*', 'memory', 'memory.*', 'orjson.*', 'psutil.*', 's3transfer', 's3transfer.*', 'vcr.*', 'yaml.*', 'zstandard.*']
-Success: no issues found in 2466 source files

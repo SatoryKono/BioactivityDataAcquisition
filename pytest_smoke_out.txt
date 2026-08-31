@@ -1,6 +1,0 @@
-...sss.................................................................. [ 94%]
-....                                                                     [100%]
-=========================== short test summary info ===========================
-SKIPPED [1] \mnt\e\github\BioactivityDataAcquisition\tests\smoke\test_neo4j_memory_mcp_smoke.py:46: MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)
-SKIPPED [1] \mnt\e\github\BioactivityDataAcquisition\tests\smoke\test_neo4j_memory_mcp_smoke.py:124: MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)
-SKIPPED [1] \mnt\e\github\BioactivityDataAcquisition\tests\smoke\test_neo4j_memory_mcp_smoke.py:203: MCP smoke test has timeout issues on Windows (platform-specific subprocess behavior)
