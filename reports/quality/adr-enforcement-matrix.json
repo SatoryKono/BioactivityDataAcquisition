@@ -2285,8 +2285,7 @@
         "configs/quality/public_lazy_facade_inventory.yaml",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_domain_aggregate_classification.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_domain_aggregate_classification.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -2295,8 +2294,7 @@
         "src/bioetl/domain/aggregates/batch.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_arch_s4_s9_gates.py",
-        "tests/architecture/test_domain_aggregate_classification.py",
-        "tests/unit/scripts/test_documentation_governance_check.py"
+        "tests/architecture/test_domain_aggregate_classification.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -2309,11 +2307,14 @@
       "decision_date": "2026-08-28",
       "decision_path": "docs/02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md",
       "enforcement_owner_paths": [
-        "configs/quality/scripts_inventory_manifest.json"
+        "configs/quality/scripts_inventory_manifest.json",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
         "configs/quality/scripts_inventory_manifest.json",
+        "docs/00-project/RULES.md",
         "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
         "docs/00-project/ai/prompts/compatibility/README.md",
         "docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md",
@@ -2340,7 +2341,9 @@
         "docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.scripts-inventory.md",
         "docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.security-secrets.md",
         "docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.vcr-http.md",
-        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md"
+        "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
+        "tests/architecture/test_adr_registry_governance_sync.py",
+        "tests/unit/scripts/test_documentation_governance_check.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
