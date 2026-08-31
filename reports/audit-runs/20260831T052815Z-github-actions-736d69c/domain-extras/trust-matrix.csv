@@ -1,48 +1,48 @@
-workflow,triggers,top_permissions,write_permissions,runners,privileged_trigger,untrusted_checkout,verdict
-".github/workflows/architecture-docs-nightly.yml","schedule;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;schedule:;generate-architecture-dependency-map:","","ubuntu-latest","false","false","PASS"
-".github/workflows/architecture.yml","","","","ubuntu-latest;windows-latest","false","false","PASS"
-".github/workflows/branch-hygiene.yml","pull_request;schedule;workflow_dispatch","contents: read;schedule:;validate-pr-branch-name:;inventory:","","ubuntu-latest","false","false","PASS"
-".github/workflows/chembl-baseline-smoke.yml","push;pull_request;workflow_dispatch","contents: read;baseline-cli-runner-smoke:;baseline-reconciliation-smoke:;baseline-architecture-smoke:","","ubuntu-24.04","false","false","PASS"
-".github/workflows/codeql.yml","push;pull_request;schedule","contents: read;push:;schedule:;group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }};cancel-in-progress: ${{ github.event_name == 'pull_request' }};analyze:","security-events: write","ubuntu-latest","false","false","PASS"
-".github/workflows/coderabbit.yml","push;workflow_dispatch","contents: read;group: coderabbit-${{ github.sha }};cancel-in-progress: true;cli-review:","","ubuntu-latest","false","false","PASS"
-".github/workflows/commit-lint.yml","pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;commit-lint:","","ubuntu-latest","false","false","PASS"
-".github/workflows/compiled-artifacts-block.yml","pull_request;push","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;no-pyc-check:","","ubuntu-latest","false","false","PASS"
-".github/workflows/consolidation-gates.yml","pull_request;push;workflow_dispatch","contents: read;quality-and-architecture:","","ubuntu-latest","false","false","PASS"
-".github/workflows/contract-governance-fast-check.yml","push;pull_request","contents: read;push:;fast-check:","","ubuntu-latest","false","false","PASS"
-".github/workflows/contract-tests.yml","schedule;workflow_dispatch","contents: read;contract-tests:;notify-success:","issues: write","ubuntu-latest","false","false","PASS"
-".github/workflows/dashboard-first-window-noscroll.yml","push;pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;first-window-noscroll:","","ubuntu-latest","false","false","PASS"
-".github/workflows/dashboard-render-host.yml","workflow_dispatch","contents: read;group: dashboard-render-host;cancel-in-progress: false;dashboard-render-release:","","[self-hosted, bioetl-observability]","false","false","PASS"
-".github/workflows/dependency-review.yml","pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;dependency-review:","","ubuntu-latest","false","false","PASS"
-".github/workflows/diagram-nightly.yml","schedule;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;schedule:;mermaid-minor-canary:","issues: write","ubuntu-latest","false","false","PASS"
-".github/workflows/docker.yml","workflow_dispatch;push;pull_request","job-scoped","security-events: write;packages: write","ubuntu-latest","false","false","PASS"
-".github/workflows/docs-kpi-weekly.yml","schedule;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;schedule:;docs-kpi:","","ubuntu-latest","false","false","PASS"
-".github/workflows/docs.yml","push;pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;docs-governance:;validate-mkdocs:;detect-diagram-changes:;render-generated-pipeline-dataflows:","","ubuntu-latest","false","false","PASS"
-".github/workflows/duplication-complexity.yml","push;pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;duplication-complexity:;constructor-args-check:;executor-complexity:","","ubuntu-latest","false","false","PASS"
-".github/workflows/e2e-matrix-health.yml","push;pull_request;schedule;workflow_dispatch","contents: read;push:;schedule:;matrix-smoke-blocking:;matrix-smoke-nightly-live:","","ubuntu-latest","false","false","PASS"
-".github/workflows/github-settings-quarterly-review.yml","schedule;workflow_dispatch","actions: read;contents: read;deployments: read;security-events: read;group: github-settings-review;cancel-in-progress: false;review:","","ubuntu-latest","false","false","PASS"
-".github/workflows/import-linter.yml","","","","ubuntu-latest","false","false","PASS"
-".github/workflows/labeler.yml","pull_request_target","contents: read;pull-requests: write;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;label:","pull-requests: write","ubuntu-latest","true","false","PASS"
-".github/workflows/memory-freshness.yml","pull_request;schedule;workflow_dispatch","contents: read;freshness:;open-review-issue:","issues: write","ubuntu-latest","false","false","PASS"
-".github/workflows/memory-retention.yml","schedule;workflow_dispatch;pull_request","contents: read;group: memory-retention-${{ github.ref }};cancel-in-progress: true;check-retention-policy:","","ubuntu-latest","false","false","PASS"
-".github/workflows/mutation-testing.yml","push;pull_request;schedule;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;schedule:;mutation-testing:","","ubuntu-latest","false","false","PASS"
-".github/workflows/nightly-replay-parity.yml","schedule;workflow_dispatch","contents: read;replay-parity:","","ubuntu-latest","false","false","PASS"
-".github/workflows/performance-nightly.yml","schedule;workflow_dispatch","contents: read;performance-regression-gate:","","ubuntu-latest","false","false","PASS"
-".github/workflows/port-contracts.yml","push;pull_request;workflow_dispatch","contents: read;push:;port-contracts:;hypothesis-contracts:;contracts-status:","","ubuntu-latest","false","false","PASS"
-".github/workflows/pr-hygiene.yml","schedule;workflow_dispatch","contents: read;issues: write;pull-requests: write;report-noise-pr-hygiene:","issues: write;pull-requests: write","ubuntu-latest","false","false","PASS"
-".github/workflows/provider-contract-drift.yml","pull_request;push;workflow_dispatch","contents: read;replay-gate:","","ubuntu-latest","false","false","PASS"
-".github/workflows/quality-debt-weekly.yml","schedule;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;schedule:;quality-debt-weekly:","","ubuntu-latest","false","false","PASS"
-".github/workflows/release.yml","release;workflow_dispatch","contents: read;release:;build:;test-install:;security-gate:;release-tests:;publish-testpypi:;publish-pypi:","id-token: write # Required for OIDC trusted publishing;id-token: write # Required for OIDC trusted publishing;contents: write # Required to upload release assets","ubuntu-latest","false","false","PASS"
-".github/workflows/reusable-mermaid-setup.yml","workflow_call","contents: read;setup:","","ubuntu-latest","false","false","PASS"
-".github/workflows/reusable-setup.yml","workflow_call","contents: read;setup:","","ubuntu-latest","false","false","PASS"
-".github/workflows/root-hygiene.yml","pull_request;push;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;root-hygiene:","","ubuntu-latest","false","false","PASS"
-".github/workflows/schema-governance.yml","push;pull_request","contents: read;push:;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;generated-artifacts:;contracts-export:;schema-parity:;silver-schema-drift:","","ubuntu-latest","false","false","PASS"
-".github/workflows/scorecard.yml","schedule;workflow_dispatch;push","contents: read;schedule:;push:;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;analysis:","security-events: write;id-token: write","ubuntu-latest","false","false","PASS"
-".github/workflows/security.yml","workflow_call;push;pull_request","contents: read;push:;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;detect-secrets:;pip-audit:;bandit:;gitleaks:","","ubuntu-latest","false","false","PASS"
-".github/workflows/semantic-governance.yml","push;pull_request","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;semantic-governance:","","ubuntu-latest","false","false","PASS"
-".github/workflows/skills-consistency.yml","workflow_dispatch;push;pull_request","contents: read;push:;verify-native-codex-runtime:;detect-runtime-skill-drift:;approved-runtime-skill-sync:;verify-codex-junie-runtime-parity:;verify-local-skills-mirror:","","ubuntu-latest","false","false","PASS"
-".github/workflows/stale.yml","schedule","contents: read;issues: write;pull-requests: write;stale:","issues: write;pull-requests: write","ubuntu-latest","false","false","PASS"
-".github/workflows/tests.yml","push;pull_request","contents: read;group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }};cancel-in-progress: ${{ github.event_name == 'pull_request' }};dependency-preflight:;smoke-check:;vcr-preflight:;contract-confidence:;flaky-telemetry:","","ubuntu-latest","false","false","PASS"
-".github/workflows/type-checking.yml","push;pull_request;workflow_dispatch","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;push:;dependency-preflight:;type-check:","","ubuntu-latest","false","false","PASS"
-".github/workflows/vacuum.yml","schedule;workflow_dispatch","contents: read;schedule:;vacuum:","","ubuntu-latest","false","false","PASS"
-".github/workflows/validate-vendored-mermaid-assets.yml","","contents: read;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true","","ubuntu-latest","false","false","PASS"
-".github/workflows/zizmor.yml","push;pull_request","contents: read;push:;group: ${{ github.workflow }}-${{ github.ref }};cancel-in-progress: true;zizmor:","security-events: write","ubuntu-latest","false","false","PASS"
+workflow,triggers,top_permissions,write_permissions,runners,privileged_trigger,untrusted_checkout,parse_complete,verdict
+.github/workflows/architecture-docs-nightly.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/architecture.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest;windows-latest,false,false,true,PASS
+.github/workflows/branch-hygiene.yml,pull_request;schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/chembl-baseline-smoke.yml,push;pull_request;workflow_dispatch,contents: read,,ubuntu-24.04,false,false,true,PASS
+.github/workflows/codeql.yml,push;pull_request;schedule,contents: read,security-events: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/coderabbit.yml,push;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/commit-lint.yml,pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/compiled-artifacts-block.yml,pull_request;push,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/consolidation-gates.yml,pull_request;push;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/contract-governance-fast-check.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/contract-tests.yml,schedule;workflow_dispatch,contents: read,issues: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/dashboard-first-window-noscroll.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/dashboard-render-host.yml,workflow_dispatch,contents: read,,"[self-hosted, bioetl-observability]",false,false,true,PASS
+.github/workflows/dependency-review.yml,pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/diagram-nightly.yml,schedule;workflow_dispatch,contents: read,issues: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/docker.yml,workflow_dispatch;push;pull_request,absent,security-events: write;packages: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/docs-kpi-weekly.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/docs.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/duplication-complexity.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/e2e-matrix-health.yml,push;pull_request;schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/github-settings-quarterly-review.yml,schedule;workflow_dispatch,actions: read;contents: read;deployments: read;security-events: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/import-linter.yml,push;pull_request;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/labeler.yml,pull_request_target,contents: read;pull-requests: write,pull-requests: write,ubuntu-latest,true,false,true,PASS
+.github/workflows/memory-freshness.yml,pull_request;schedule;workflow_dispatch,contents: read,issues: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/memory-retention.yml,schedule;workflow_dispatch;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/mutation-testing.yml,push;pull_request;schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/nightly-replay-parity.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/performance-nightly.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/port-contracts.yml,push;pull_request;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/pr-hygiene.yml,schedule;workflow_dispatch,contents: read;issues: write;pull-requests: write,issues: write;pull-requests: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/provider-contract-drift.yml,pull_request;push;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/quality-debt-weekly.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/release.yml,release;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/reusable-mermaid-setup.yml,workflow_call,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/reusable-setup.yml,workflow_call,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/root-hygiene.yml,pull_request;push;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/schema-governance.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/scorecard.yml,schedule;workflow_dispatch;push,contents: read,security-events: write;id-token: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/security.yml,workflow_call;push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/semantic-governance.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/skills-consistency.yml,workflow_dispatch;push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/stale.yml,schedule,contents: read;issues: write;pull-requests: write,issues: write;pull-requests: write,ubuntu-latest,false,false,true,PASS
+.github/workflows/tests.yml,push;pull_request,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/type-checking.yml,push;pull_request;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/vacuum.yml,schedule;workflow_dispatch,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/validate-vendored-mermaid-assets.yml,pull_request;push,contents: read,,ubuntu-latest,false,false,true,PASS
+.github/workflows/zizmor.yml,push;pull_request,contents: read,security-events: write,ubuntu-latest,false,false,true,PASS
