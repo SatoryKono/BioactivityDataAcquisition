@@ -155,7 +155,8 @@ def test_policy_and_workflow_preserve_read_only_contract() -> None:
     job_header = workflow.split("    steps:", 1)[0]
     assert "runner.temp" not in job_header
     assert "$RUNNER_TEMP/github-settings-review.json" in workflow
-    assert "python -m scripts.engineering.repo.github_settings_review" in workflow
+    assert "python -m scripts.engineering.repo github-settings-review" in workflow
+    assert "python -m scripts.engineering.repo.github_settings_review" not in workflow
     assert "python scripts/engineering/repo/github_settings_review.py" not in workflow
     assert ".github/tooling/github_settings_review.py" not in workflow
 
