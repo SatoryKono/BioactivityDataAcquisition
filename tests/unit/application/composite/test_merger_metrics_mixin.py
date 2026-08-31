@@ -265,3 +265,17 @@ class TestCalculateFieldCoverage:
         coverage = mixin._calculate_field_coverage(df)
         assert "a" in coverage
         assert "_private" not in coverage
+
+
+@pytest.mark.unit
+def test_metrics_edge_branches_keep_noop_inputs_unchanged() -> None:
+    """No-op mappings and private-only frames must stay deterministic."""
+    mixin = _make_mixin()
+    df = pl.DataFrame({"a": [1], "_private": [2]})
+
+    mixin._config.field_mappings = {}
+    assert mixin._apply_field_mappings(df).equals(df)
+
+    mixin._config.field_mappings = {"a": "a", "missing": "target"}
+    assert mixin._apply_field_mappings(df).equals(df)
+    assert mixin._calculate_field_coverage(df.select("_private")) == {}
