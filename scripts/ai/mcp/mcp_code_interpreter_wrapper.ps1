@@ -33,7 +33,9 @@ if ($python -and $python.Source) {
         }
     }
     catch {
-        # Probe is best-effort; uvx/Deno fallback remains available.
+        [Console]::Error.WriteLine(
+            "mcp-code-interpreter: local Python module probe failed; falling back to uvx/Deno. $($_.Exception.Message)"
+        )
     }
 }
 
