@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T07:29:52.269183+00:00",
+  "generated_at": "2026-08-31T07:34:01.321162+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -12324,7 +12324,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 398,
+      "reference_count": 397,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13994,7 +13994,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 28,
+      "reference_count": 26,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -14015,18 +14015,6 @@
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
-          "path": ".github/workflows/tmp-canonical-refresh.yml",
-          "line": 33,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
-        },
-        {
-          "path": ".github/workflows/tmp-canonical-refresh.yml",
-          "line": 45,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
-        },
-        {
           "path": ".pre-commit-config.yaml",
           "line": 344,
           "source_group": "ci",
@@ -14043,6 +14031,18 @@
           "line": 76,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 77,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 91,
+          "source_group": "docs",
+          "text": "- dependency map markdown/JSON: generated only by `scripts/engineering/qa/generate_architecture_dependency_map.py`"
         }
       ]
     },
@@ -17139,7 +17139,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 84,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17608,17 +17608,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 410,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
-        },
-        {
-          "path": ".github/workflows/tmp-canonical-refresh.yml",
-          "line": 34,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -17657,6 +17651,12 @@
           "line": 585,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-inventory \\"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
         }
       ]
     },
