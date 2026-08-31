@@ -933,9 +933,8 @@ def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
         if "${{ github.workflow }}" not in group:
             violations.append(f"{path.name}: group must include github.workflow")
         has_pr_number = "github.event.pull_request.number" in group
-        has_pr_ref = (
-            "pull_request_target" not in triggers
-            and any(ref in group for ref in ("github.ref", "github.head_ref"))
+        has_pr_ref = "pull_request_target" not in triggers and any(
+            ref in group for ref in ("github.ref", "github.head_ref")
         )
         if not (has_pr_number or has_pr_ref):
             violations.append(f"{path.name}: group must include stable PR identity")
