@@ -266,6 +266,7 @@ class TestCalculateFieldCoverage:
         assert "a" in coverage
         assert "_private" not in coverage
 
+
 @pytest.mark.unit
 def test_metrics_edge_branches_keep_noop_inputs_unchanged() -> None:
     """No-op mappings and private-only frames must stay deterministic."""

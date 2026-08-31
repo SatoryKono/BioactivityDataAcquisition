@@ -210,6 +210,7 @@ class TestSilverStatisticsHelpers:
             result["categorical_columns"]["category"]["top_values"][0]["value"] == "a"
         )
 
+
 @pytest.mark.unit
 def test_helper_edge_paths_cover_safe_fallbacks() -> None:
     """Fallback helpers keep empty and unsupported inputs fail-closed."""

@@ -1,0 +1,94 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\github\BioactivityDataAcquisition
+configfile: pyproject.toml
+plugins: anyio-4.14.2, hypothesis-6.157.0, archon-0.0.7, asyncio-1.4.0, cov-7.1.0, recording-0.13.4, timeout-2.4.0, xdist-3.8.0, respx-0.23.1, syrupy-5.5.3, typeguard-4.5.2
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=module, asyncio_default_test_loop_scope=module
+timeout: 60.0s
+timeout method: thread
+timeout func_only: False
+collected 6 items
+
+tests\architecture\test_arch_s4_s9_gates.py .F..F.                       [100%]
+
+================================== FAILURES ===================================
+_______________ test_s6_source_tree_manifest_is_the_pinned_sha ________________
+
+    def test_s6_source_tree_manifest_is_the_pinned_sha() -> None:
+        from scripts.engineering.qa.report_source_tree_manifest import (
+            build_manifest,
+            main as manifest_main,
+        )
+    
+        live = build_manifest()
+        payload = load_quality_json("source-tree-manifest.json")
+>       assert payload["source_tree_sha256"] == live["source_tree_sha256"]
+E       AssertionError: assert '35c9d6fea1d3...62dd5ba10a302' == '3fd4aa01034c...99b5e3057e676'
+E         
+E         - 3fd4aa01034c20aa69afe66af6ff359ca1410473497bd48765799b5e3057e676
+E         + 35c9d6fea1d37e468ee11400c2ca353b88b14e3d8ba75ff233a62dd5ba10a302
+
+tests\architecture\test_arch_s4_s9_gates.py:40: AssertionError
+___________________ test_s8_domain_framework_import_ratchet ___________________
+
+    def test_s8_domain_framework_import_ratchet() -> None:
+        config = yaml.safe_load(
+            (ROOT / "configs/quality/domain_dataframe_zoning.yaml").read_text(
+                encoding="utf-8"
+            )
+        )
+        allowed = tuple(config["allowed_libraries"])
+        domain = ROOT / "src/bioetl/domain"
+        count = 0
+        pandas_in_forbidden = []
+        forbidden = tuple(config["pandas_forbidden_path_prefixes"])
+        for path in domain.rglob("*.py"):
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+            rel = path.resolve().relative_to(ROOT.resolve()).as_posix()
+            for node in ast.walk(tree):
+                names: list[str] = []
+                if isinstance(node, ast.Import):
+                    names.extend(alias.name.split(".", 1)[0] for alias in node.names)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    names.append(node.module.split(".", 1)[0])
+                for name in names:
+                    if name not in allowed:
+                        continue
+                    count += 1
+                    if name == "pandas" and rel.startswith(forbidden):
+                        pandas_in_forbidden.append(rel)
+        assert count <= int(config["max_framework_imports"])
+        assert count == int(config["max_framework_imports"])
+        assert str(config["linked_issue"]) == "9630"
+        assert not pandas_in_forbidden
+>       inventory = load_quality_json("module-coverage-inventory.json")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\architecture\test_arch_s4_s9_gates.py:194: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+parts = ('module-coverage-inventory.json',)
+
+    def load_quality_json(*parts: str) -> Any:
+        """Load a committed quality JSON artifact.
+    
+        When the payload pins ``source_tree_sha256``, it must match the manifest.
+        """
+        path = quality_artifact_path(*parts)
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict) and "source_tree_sha256" in payload:
+            manifest = load_source_tree_manifest()
+            pinned = payload.get("source_tree_sha256")
+            canonical = manifest.get("source_tree_sha256")
+            if pinned != canonical and path.name != MANIFEST_NAME:
+>               raise AssertionError(
+                    f"{path.as_posix()} source_tree_sha256={pinned!r} "
+                    f"does not match manifest {canonical!r}"
+                )
+E               AssertionError: E:/github/BioactivityDataAcquisition/reports/quality/module-coverage-inventory.json source_tree_sha256='3fd4aa01034c20aa69afe66af6ff359ca1410473497bd48765799b5e3057e676' does not match manifest '35c9d6fea1d37e468ee11400c2ca353b88b14e3d8ba75ff233a62dd5ba10a302'
+
+tests\architecture\quality_artifacts.py:47: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/architecture/test_arch_s4_s9_gates.py::test_s6_source_tree_manifest_is_the_pinned_sha
+FAILED tests/architecture/test_arch_s4_s9_gates.py::test_s8_domain_framework_import_ratchet
+======================== 2 failed, 4 passed in 21.62s =========================
