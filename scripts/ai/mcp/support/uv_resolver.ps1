@@ -270,7 +270,7 @@ function Get-BioetlPathEntries {
       Split PATH without turning ``E:\tools`` into ``E`` + ``\tools``.
     #>
     if ([string]::IsNullOrWhiteSpace($env:PATH)) {
-        return , @()
+        return @()
     }
 
     $raw = $env:PATH
@@ -294,7 +294,7 @@ function Get-BioetlPathEntries {
             $entries.Add($item) | Out-Null
         }
     }
-    return , @($entries)
+    return @($entries)
 }
 
 function Resolve-BioetlUvxBin {
