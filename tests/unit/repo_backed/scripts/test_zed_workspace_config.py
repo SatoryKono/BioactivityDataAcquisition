@@ -310,6 +310,27 @@ def test_zed_tasks_use_venv_python_without_path_uv() -> None:
     assert "$ZED_FILE" in nearest["args"]
     assert "$ZED_SYMBOL" in nearest["args"]
 
+    dependencies = next(
+        task for task in tasks if task["label"] == "Audit: dependencies"
+    )
+    assert dependencies["args"] == [
+        "scripts/engineering/dev/zed_run.py",
+        "-m",
+        "pip_audit",
+        "--skip-editable",
+        "--ignore-vuln",
+        "CVE-2026-3219",
+        "--ignore-vuln",
+        "PYSEC-2026-3721",
+        "--cache-dir",
+        ".cache/pip-audit",
+    ]
+    security_workflow = (ROOT / ".github" / "workflows" / "security.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "--ignore-vuln CVE-2026-3219" in security_workflow
+    assert "--ignore-vuln PYSEC-2026-3721" in security_workflow
+
     architecture = next(
         task for task in tasks if task["label"] == "Test: architecture-fast"
     )
