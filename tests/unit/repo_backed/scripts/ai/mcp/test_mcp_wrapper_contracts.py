@@ -985,7 +985,8 @@ def test_powershell_uv_resolver_keeps_drive_letter_path_entries(
     command = f"""
 . {helper}
 function Get-Command {{ param($Name, $ErrorAction) $null }}
-$env:PATH = {fixture} + [IO.Path]::PathSeparator + 'C:\\Program Files\\GitHub CLI;C:\\Windows\\System32'
+# Use Windows PATH semantics even when PowerShell runs on a POSIX CI host.
+$env:PATH = {fixture} + ';C:\\Program Files\\GitHub CLI;C:\\Windows\\System32'
 [Console]::Out.WriteLine((Resolve-BioetlUvxBin))
 """
 
