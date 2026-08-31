@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **48** live GitHub Actions
+This page is the canonical published inventory of the **47** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -64,7 +64,6 @@ Use it when you need to answer:
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | Local skill mirrors plus Codex–Junie runtime parity |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
-| `tmp-prospective-governance.yml` | `Temporary prospective-merge governance refresh` | `push` | Temporary prospective-merge refresh of governance artifacts for `fix/prevent-root-test-captures-20260831` |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | Vendored Mermaid asset presence check |
 | `coderabbit.yml` | `CodeRabbit` | `push`, `workflow_dispatch` | CodeRabbit CLI automated code review |
