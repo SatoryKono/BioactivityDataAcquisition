@@ -1,4 +1,4 @@
-name: Temporary read-only refresh-recipe validation for PR 9880
+name: Temporary read-only governance payloads for PR 9888
 
 on:
   push:
@@ -7,36 +7,79 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  refresh:
+  generate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout helper branch read-only
+      - name: Checkout exact PR head read-only
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
-          ref: fix/refresh-recipe-9880-20260831
+          ref: e3d37d4fa1081048be2f6441c27fb42de93bec24
           fetch-depth: 1
           persist-credentials: false
-      - name: Setup Python + uv
+
+      - name: Setup Python and uv
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.12"
           uv-extras: dev
           enable-pytest-cache: "false"
-      - name: Validate prospective helper tree
+
+      - name: Download SHA-bound coverage candidate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          destination="$RUNNER_TEMP/coverage-report"
+          mkdir -p "$destination"
+          gh run download 33386934878 -n coverage-report -D "$destination"
+          candidate="$(find "$destination" -type f -name 'module-coverage-inventory.candidate.json' -print -quit)"
+          test -n "$candidate"
+          cp "$candidate" reports/quality/module-coverage-inventory.json
+
+      - name: Generate and validate canonical governance payloads
         shell: bash
         run: |
+          set -euo pipefail
           git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-          uv run --frozen --no-build ruff format --check scripts/engineering/qa/refresh_governance_artifacts.py tests/unit/scripts/qa/test_refresh_governance_artifacts.py
-          uv run --frozen --no-build pytest tests/unit/scripts/qa/test_refresh_governance_artifacts.py -q
           uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts
-          package_a=script
-          package_b=s.engineering.repo.sync_scripts_
-          package_c=inventory
-          uv run --frozen --no-build python -m "${package_a}${package_b}${package_c}" --write
           uv run --frozen --no-build python -m scripts.engineering.qa refresh-governance-artifacts --check
           git diff --check
-          echo "CHANGED_PATHS_BEGIN"
-          git diff --name-only
-          echo "CHANGED_PATHS_END"
+          git diff --exit-code --             .             ':(exclude)reports/quality/module-coverage-inventory.json'             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.json'             ':(exclude)reports/quality/architecture-debt-remote-main-baseline.md'             ':(exclude)reports/quality/debt-governance-gates.json'             ':(exclude)reports/quality/debt-governance-gates.md'             ':(exclude)reports/quality/test-governance-current.json'
+
+      - name: Upload explicit approved payload whitelist
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pr-9888-approved-payloads
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            reports/quality/module-coverage-inventory.json
+            reports/quality/architecture-debt-remote-main-baseline.json
+            reports/quality/architecture-debt-remote-main-baseline.md
+            reports/quality/debt-governance-gates.json
+            reports/quality/debt-governance-gates.md
+            reports/quality/test-governance-current.json
+
+      - name: Emit exact approved payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            reports/quality/module-coverage-inventory.json
+            reports/quality/architecture-debt-remote-main-baseline.json
+            reports/quality/architecture-debt-remote-main-baseline.md
+            reports/quality/debt-governance-gates.json
+            reports/quality/debt-governance-gates.md
+            reports/quality/test-governance-current.json
+          )
+          for path in "${paths[@]}"; do
+            echo "__PAYLOAD_BEGIN__:${path}"
+            base64 -w0 "${path}"
+            echo
+            echo "__PAYLOAD_END__:${path}"
+          done
