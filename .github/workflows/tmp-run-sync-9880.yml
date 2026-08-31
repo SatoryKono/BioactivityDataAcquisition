@@ -15,7 +15,7 @@ jobs:
       - name: Checkout synchronized content branch
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
-          ref: fix/sync-9880-main-20260831
+          ref: fix/sync-9880-main-v2-20260831
           fetch-depth: 1
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -52,4 +52,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(governance): refresh synchronized main artifacts"
-          git push origin HEAD:fix/sync-9880-main-20260831
+          git push origin HEAD:fix/sync-9880-main-v2-20260831
