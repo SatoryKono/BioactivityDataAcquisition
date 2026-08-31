@@ -54,6 +54,12 @@ temp_*
 .tox/
 .nox/
 .benchmarks/
+
+# Root-level local test-run captures are never repository artifacts.
+/pytest_*.txt
+/runner_*.txt
+/arch_hash.txt
+/arch_run_tmp.txt
 .coverage-sharded/
 test-checkpoints/
 .cache/
