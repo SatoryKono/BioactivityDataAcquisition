@@ -237,6 +237,14 @@ def _run_check_only() -> None:
         [
             sys.executable,
             "-m",
+            "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+            "--check",
+        ]
+    )
+    _run(
+        [
+            sys.executable,
+            "-m",
             "scripts.engineering.qa",
             "report-debt-governance-gates",
             "--check",
@@ -344,7 +352,17 @@ def _run_refresh() -> None:
         ]
     )
 
-    # 10) Debt governance gates rollup MUST run last (#7465).
+    # 10) Remote-main architecture debt evidence is an input to the final rollup.
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+            "--update",
+        ]
+    )
+
+    # 11) Debt governance gates rollup MUST run last (#7465).
     # Any scorecard/baseline input refresh above invalidates committed gates until
     # this step rewrites reports/quality/debt-governance-gates.{json,md}.
     _run(
@@ -359,6 +377,10 @@ def _run_refresh() -> None:
 
     print("REFRESH complete. Recommended verification:")
     print("  python -m scripts.engineering.qa.refresh_governance_artifacts --check")
+    print(
+        "  python -m scripts.engineering.qa "
+        "report-architecture-debt-remote-main-baseline --check"
+    )
     print("  python -m scripts.engineering.qa report-debt-governance-gates --check")
     print(
         "  pytest tests/architecture/test_quality_debt_scorecard.py "

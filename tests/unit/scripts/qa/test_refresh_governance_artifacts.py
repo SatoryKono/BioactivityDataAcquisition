@@ -66,6 +66,11 @@ def test_check_routes_every_governed_artifact_through_fail_closed_runner(
         ],
         [
             "-m",
+            "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+            "--check",
+        ],
+        [
+            "-m",
             "scripts.engineering.qa",
             "report-debt-governance-gates",
             "--check",
@@ -126,6 +131,43 @@ def test_refresh_propagates_generator_failure_before_later_steps(
         "scripts.engineering.qa.report_config_surface_backlog" in cmd for cmd in calls
     )
 
+
+
+def test_refresh_updates_remote_main_baseline_before_debt_rollup(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], *, check: bool = True) -> int:
+        assert check is True
+        calls.append(cmd[1:])
+        return 0
+
+    monkeypatch.setattr(refresh, "_run", fake_run)
+    monkeypatch.setattr(
+        refresh,
+        "_sync_scorecard_hotspot_metrics_from_baseline",
+        lambda: None,
+    )
+
+    refresh._run_refresh()
+
+    remote_main_index = calls.index(
+        [
+            "-m",
+            "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+            "--update",
+        ]
+    )
+    debt_rollup_index = calls.index(
+        [
+            "-m",
+            "scripts.engineering.qa",
+            "report-debt-governance-gates",
+            "--update",
+        ]
+    )
+    assert remote_main_index < debt_rollup_index
 
 def test_scorecard_sync_fails_when_required_input_is_missing(
     monkeypatch: pytest.MonkeyPatch,
