@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: memory-retention-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -242,32 +242,6 @@ def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
         )
 
 
-def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
-    """Every PR-facing workflow cancels superseded runs for the same PR."""
-    violations: list[str] = []
-    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
-        workflow = _load_yaml(path)
-        triggers = workflow.get("on")
-        if not isinstance(triggers, dict) or not {
-            "pull_request",
-            "pull_request_target",
-        }.intersection(triggers):
-            continue
-        concurrency = workflow.get("concurrency")
-        if not isinstance(concurrency, dict):
-            violations.append(f"{path.name}: missing workflow concurrency")
-            continue
-        group = str(concurrency.get("group", ""))
-        cancel = concurrency.get("cancel-in-progress")
-        if "${{ github.workflow }}" not in group:
-            violations.append(f"{path.name}: group must include github.workflow")
-        if cancel in {None, False, "false", ""}:
-            violations.append(
-                f"{path.name}: PR concurrency must cancel superseded runs"
-            )
-    assert violations == []
-
-
 def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
     violation = policy._validate_allowed_uses_ref(
         "docker://codiumai/pr-agent:latest",
@@ -937,3 +911,35 @@ def test_test_fast_and_test_matrix_use_distinct_python_versions() -> None:
     ]
     assert matrix_versions == ["3.13"]
     assert "coverage-verify" in workflow["jobs"]
+
+
+def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
+    """Every PR-facing workflow cancels superseded runs for the same PR."""
+    violations: list[str] = []
+    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+        workflow = _load_yaml(path)
+        triggers = workflow.get("on", workflow.get(True))
+        if not isinstance(triggers, dict) or not {
+            "pull_request",
+            "pull_request_target",
+        }.intersection(triggers):
+            continue
+        concurrency = workflow.get("concurrency")
+        if not isinstance(concurrency, dict):
+            violations.append(f"{path.name}: missing workflow concurrency")
+            continue
+        group = str(concurrency.get("group", ""))
+        cancel = concurrency.get("cancel-in-progress")
+        if "${{ github.workflow }}" not in group:
+            violations.append(f"{path.name}: group must include github.workflow")
+        has_pr_number = "github.event.pull_request.number" in group
+        has_pr_ref = "pull_request_target" not in triggers and any(
+            ref in group for ref in ("github.ref", "github.head_ref")
+        )
+        if not (has_pr_number or has_pr_ref):
+            violations.append(f"{path.name}: group must include stable PR identity")
+        if cancel in {None, False, "false", ""}:
+            violations.append(
+                f"{path.name}: PR concurrency must cancel superseded runs"
+            )
+    assert violations == []
