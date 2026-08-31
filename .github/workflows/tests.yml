@@ -768,7 +768,9 @@ jobs:
             --summary-out "$GITHUB_STEP_SUMMARY"
 
       - name: Review observability runtime cardinality evidence (live)
-        if: github.event_name != 'pull_request'
+        if: >-
+          github.event_name != 'pull_request' &&
+          vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL != ''
         env:
           BIOETL_OBSERVABILITY_PROMETHEUS_URL: ${{ vars.BIOETL_OBSERVABILITY_PROMETHEUS_URL }}
           BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN: ${{ secrets.BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN }}
