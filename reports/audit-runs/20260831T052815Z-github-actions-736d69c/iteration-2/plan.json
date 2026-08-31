@@ -1,0 +1,11 @@
+{
+  "iteration": 2,
+  "root_cause_issue": 9865,
+  "actions": [
+    "move inserted concurrency blocks after existing content to restore generated line anchors",
+    "require stable PR identity in the architecture guard",
+    "use pull request number for pull_request_target labeler concurrency",
+    "regenerate trust matrix with indentation-independent top-level parsing and parse_complete",
+    "publish post-fix validation and final summary after live CI"
+  ]
+}

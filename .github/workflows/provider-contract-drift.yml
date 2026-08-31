@@ -38,10 +38,6 @@ on:
       - "tests/fixtures/vcr/**"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 permissions:
   contents: read
 
@@ -94,3 +90,7 @@ jobs:
           name: provider-contract-drift-report
           path: reports/quality/provider-contract-drift-report.json
           retention-days: 30
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
