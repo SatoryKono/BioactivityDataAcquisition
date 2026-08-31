@@ -6,11 +6,11 @@ Audit date: 2026-08-28
 
 Audited repository: SatoryKono/BioactivityDataAcquisition
 
-Audited branch: fix/redos-inline-secret-20260828
+Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `e4d0fd5bdb320eebe8e6ca74b03fdcca80b4e6a34c405ab2f51aa3980d1b87b2`
+Evidence surface SHA-256: `32d9a45c36bf6b8869322ddf252fe0964cd0ef5a02f58bbc13722b6612ec9aa5`
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
 
@@ -18,7 +18,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "e4d0fd5bdb320eebe8e6ca74b03fdcca80b4e6a34c405ab2f51aa3980d1b87b2",
+  "evidence_surface_sha256": "32d9a45c36bf6b8869322ddf252fe0964cd0ef5a02f58bbc13722b6612ec9aa5",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
@@ -44,7 +44,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 }
 -->
 
-Refresh reason: Re-pin to post-merge remediation SHA 0687fbc75e after canonical regeneration on origin/main e862d6dbf6. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
+Refresh reason: Reconcile the current evidence surface and semantic summary with the canonical generated artifacts while preserving the accepted audited commit. The generated debt-governance evidence records 45/45 passing gates. No budget growth.
 
 ## Executive summary
 
