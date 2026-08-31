@@ -4,8 +4,8 @@
   "source_run_id": "33149935203",
   "source_event": "push",
   "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33149935203",
-  "source_tree_sha256": "6a20b0eb1ec210bfc2622924a312120ee61ebd0058c8ee8ab66a2d542e40b251",
-  "refreshed_at_utc": "2026-08-28T13:46:26.926300+00:00",
+  "source_tree_sha256": "11011e8c0a7fe1e3735b9480a64656f6b3ca1ee1bd700cc375c50b8510058fc9",
+  "refreshed_at_utc": "2026-08-31T14:54:09.616287+00:00",
   "refresh_status": "captured",
   "total_cases": 49226,
   "top_slowest": [
@@ -254,7 +254,7 @@
   ],
   "top_slowest_zones": [
     {
-      "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
+      "zone": "tests.unit.scripts.docs.passports.test_passport_projector",
       "test_count": 4,
       "total_duration_s": 47.748,
       "max_duration_s": 21.002
@@ -262,7 +262,7 @@
     {
       "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
       "test_count": 4,
-      "total_duration_s": 47.569,
+      "total_duration_s": 47.371,
       "max_duration_s": 17.322
     },
     {
@@ -292,26 +292,26 @@
     {
       "zone": "tests.unit.composition.factories.pipeline.test_registry",
       "test_count": 1,
-      "total_duration_s": 7.271,
-      "max_duration_s": 7.271
-    },
-    {
-      "zone": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction",
-      "test_count": 1,
-      "total_duration_s": 7.205,
-      "max_duration_s": 7.205
+      "total_duration_s": 7.216,
+      "max_duration_s": 7.216
     },
     {
       "zone": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures",
       "test_count": 1,
-      "total_duration_s": 6.906,
-      "max_duration_s": 6.906
+      "total_duration_s": 7.008,
+      "max_duration_s": 7.008
     },
     {
       "zone": "tests.unit.scripts.ops.test_recover_renderer",
       "test_count": 1,
       "total_duration_s": 6.004,
       "max_duration_s": 6.004
+    },
+    {
+      "zone": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency",
+      "test_count": 1,
+      "total_duration_s": 4.844,
+      "max_duration_s": 4.844
     }
   ],
   "execution_context": {

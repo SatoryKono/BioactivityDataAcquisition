@@ -2242,7 +2242,7 @@
       "symbol": "source_profile",
       "path": "src/bioetl/infrastructure/schemas/source_profile_config.py",
       "occurrence_count": 4,
-      "first_line": 53,
+      "first_line": 54,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2341,7 +2341,7 @@
       "symbol": "extraction_params",
       "path": "src/bioetl/infrastructure/schemas/source_profile_config.py",
       "occurrence_count": 14,
-      "first_line": 12,
+      "first_line": 13,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
