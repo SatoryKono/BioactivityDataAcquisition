@@ -132,7 +132,6 @@ def test_refresh_propagates_generator_failure_before_later_steps(
     )
 
 
-
 def test_refresh_updates_remote_main_baseline_before_debt_rollup(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
