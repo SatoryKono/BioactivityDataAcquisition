@@ -120,4 +120,4 @@ jobs:
       - name: Fail on HIGH/CRITICAL OSV findings
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json --ignore-vuln CVE-2026-3219 --ignore-vuln PYSEC-2026-3721
+        run: python -m scripts.engineering.repo.check_github_actions_runtime_policy --osv-json osv-results.json

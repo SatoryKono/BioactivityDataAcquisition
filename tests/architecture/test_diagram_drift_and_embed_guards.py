@@ -20,6 +20,8 @@ from types import ModuleType
 
 import pytest
 
+from tests.architecture._platform_skip_support import mounted_worktree_skip_reason
+
 pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -241,8 +243,12 @@ def test_active_markdown_paths_skip_generated_companion_trees() -> None:
     assert "02-architecture/system-context.md" in relative
 
 
+@pytest.mark.timeout(180)
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
+    skip_reason = mounted_worktree_skip_reason()
+    if skip_reason is not None:
+        pytest.skip(skip_reason)
 
     placeholder_re = re.compile(r"\b(placeholder|TODO|FIXME|stub)\b", re.IGNORECASE)
     init_re = re.compile(r"%%\s*\{\s*init\s*:", re.IGNORECASE)

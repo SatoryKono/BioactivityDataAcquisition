@@ -74,6 +74,8 @@ def test_runtime_policy_scans_workflows_and_composite_actions() -> None:
     assert ".github/workflows/contract-tests.yml" in scanned
     assert ".github/workflows/labeler.yml" in scanned
     assert ".github/actions/setup-python-uv/action.yml" in scanned
+    assert all("/node_modules/" not in path for path in scanned)
+    assert all("/vendor/" not in path for path in scanned)
 
 
 def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
