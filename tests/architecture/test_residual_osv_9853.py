@@ -90,7 +90,8 @@ def test_residual_osv_exception_has_not_expired() -> None:
     deadline = date.fromisoformat(EXPIRY)
     assert deadline == date(2026, 11, 30)
     assert EXPIRY == "2026-11-30"
-    # UTC clock keeps test-governance date_today_call_sites_max at 0.    assert datetime.now(UTC).date() <= deadline, (
+    # UTC clock keeps test-governance date_today_call_sites_max at 0.
+    assert datetime.now(UTC).date() <= deadline, (
         f"residual OSV exception expired on {EXPIRY}; upgrade mermaid/Grafana "
         "or renew the exception with a new dated issue"
     )
