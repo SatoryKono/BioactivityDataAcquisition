@@ -156,9 +156,7 @@ def write_debug_xlsx(
     *,
     max_rows_per_sheet: int,
 ) -> None:
-    # Keep the mypy ignore on the `from openpyxl import (` line. Ruff wrapping
-    # onto `Workbook` does not suppress [import-untyped] ("stubs not installed").
-    from openpyxl import (  # type: ignore[import-untyped]
+    from openpyxl import (
         Workbook,  # pyright: ignore[reportMissingModuleSource]
     )
 
