@@ -1793,6 +1793,124 @@ def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
     return 1
 
 
+_GRAFANA_CONTAINER = "bioetl-grafana"
+_GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
+
+
+def _grafana_bootstrap_timeout_retry_needed(
+    payload: Mapping[str, Any] | None,
+) -> bool:
+    """True when soft bootstrap stuck on a start-race timeout."""
+    if not isinstance(payload, Mapping):
+        return False
+    return (
+        str(payload.get("ops_http") or "").strip() == "deferred"
+        and str(payload.get("reason") or "").strip() == _GRAFANA_TIMEOUT_RETRY_REASON
+        and str(payload.get("dashboard_profile") or "").strip() == "prometheus_only"
+    )
+
+
+def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> str:
+    result = runner(
+        [
+            "docker",
+            "exec",
+            _GRAFANA_CONTAINER,
+            "printenv",
+            "BIOETL_EXPECTED_RUNTIME_SOURCE_ID",
+        ],
+        ROOT,
+        timeout,
+    )
+    if result.returncode != 0:
+        return ""
+    value = (result.stdout or "").strip().splitlines()
+    token = value[0].strip() if value else ""
+    if len(token) == 64 and not any(ch not in "0123456789abcdef" for ch in token):
+        return token
+    return ""
+
+
+def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> str:
+    result = runner(
+        [
+            "docker",
+            "exec",
+            _GRAFANA_CONTAINER,
+            "wget",
+            "-qO-",
+            "-T",
+            "3",
+            # NOSONAR - docker-internal HTTP URL is safe (ADR-010 local-only)
+            "http://bioetl:8000/ops/control-plane/ready",
+        ],
+        ROOT,
+        timeout,
+    )
+    if result.returncode != 0 or not result.stdout:
+        return ""
+    match = re.search(
+        r'"runtime_source_id"\s*:\s*"([0-9a-f]{64})"',
+        result.stdout,
+    )
+    return match.group(1) if match else ""
+
+
+def _post_start_grafana_bootstrap_gate(
+    *,
+    spec: StackSpec,
+    runner: Runner = _run,
+    timeout: float = 45.0,
+    sleep: Sleeper = time.sleep,
+    clock: Clock = time.monotonic,
+) -> int:
+    """Retry Grafana once when bootstrap lost the bioetl start race.
+
+    Soft bootstrap polls Ops HTTP for ~5s and then freezes prometheus_only
+    notices. If identity now matches, restart Grafana so the full provider
+    is selected. Always return 0: Grafana UI must stay up in soft mode.
+    """
+    if spec.name != "monitoring":
+        return 0
+    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }:
+        return 0
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return 0
+    payload, readable = _load_grafana_bootstrap_status(
+        runner, timeout=min(10.0, timeout)
+    )
+    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
+        return 0
+    expected = _grafana_expected_runtime_source_id(runner, timeout=min(10.0, timeout))
+    actual = _grafana_ops_ready_runtime_source_id(runner, timeout=min(10.0, timeout))
+    if not expected or expected != actual:
+        return 0
+    restart = runner(
+        ["docker", "restart", _GRAFANA_CONTAINER],
+        ROOT,
+        min(30.0, timeout),
+    )
+    if restart.returncode != 0:
+        return 0
+    deadline = clock() + min(40.0, max(timeout, 1.0))
+    while True:
+        payload, readable = _load_grafana_bootstrap_status(runner, timeout=5.0)
+        if readable and isinstance(payload, Mapping):
+            profile = str(payload.get("dashboard_profile") or "").strip()
+            reason = str(payload.get("reason") or "").strip()
+            if profile == "full" or (
+                reason and reason != _GRAFANA_TIMEOUT_RETRY_REASON
+            ):
+                return 0
+        if clock() >= deadline:
+            return 0
+        sleep(2.0)
+
+
 def start_or_recover(
     spec: StackSpec,
     contract_path: Path,
@@ -1883,6 +2001,15 @@ def start_or_recover(
             verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
             if verify_rc != 0:
                 return verify_rc
+            grafana_rc = _post_start_grafana_bootstrap_gate(
+                spec=spec,
+                runner=runner,
+                timeout=min(45.0, max(0.1, deadline - clock())),
+                sleep=sleep,
+                clock=clock,
+            )
+            if grafana_rc != 0:
+                return grafana_rc
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
