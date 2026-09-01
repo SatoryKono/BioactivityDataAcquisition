@@ -12,6 +12,9 @@ from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http import _processed_records_prometheus as _prom
 from bioetl.interfaces.http._processed_records_prometheus import (
+    DEFAULT_PROMETHEUS_BASE_URL,
+    DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS,
+    PROMETHEUS_QUERY_TIMEOUT_SECONDS,
     _candidate_prometheus_base_urls,
     _query_prometheus_vector_with_fallbacks,
 )
