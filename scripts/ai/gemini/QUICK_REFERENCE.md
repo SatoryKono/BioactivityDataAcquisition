@@ -53,7 +53,7 @@ bash scripts/ai/gemini/run-gemini.sh exec "refactor all Python files"
 # Install or repair managed Gemini CLI runtime
 .\scripts\ai\gemini\run-gemini.ps1 setup
 
-# Update Gemini CLI to latest version
+# Reinstall the reviewed lockfile-pinned Gemini CLI
 .\scripts\ai\gemini\run-gemini.ps1 update
 
 # Verify MCP server configuration
@@ -71,7 +71,7 @@ bash scripts/ai/gemini/run-gemini.sh check
 # First-time setup (installs Node 22 + Gemini CLI)
 bash scripts/ai/gemini/run-gemini.sh setup
 
-# Update Gemini CLI to latest version
+# Reinstall the reviewed lockfile-pinned Gemini CLI
 bash scripts/ai/gemini/run-gemini.sh update
 
 # Verify MCP server configuration
@@ -127,8 +127,8 @@ Commands in interactive mode:
 
 ```
 .cache/tools/gemini-cli/
-├── npm-global/bin/gemini     # ← Main executable
-├── npm-global/lib/           # ← Gemini CLI code
+├── npm-global/bin/gemini     # ← Managed executable link
+├── npm-global/node_modules/  # ← Lockfile-backed toolchain
 ├── npm-cache/                # ← npm package cache
 └── home/                      # ← Settings & cache
 

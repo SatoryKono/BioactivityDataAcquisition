@@ -1,0 +1,13 @@
+{
+  "name": "bioetl-gemini-cli-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pinned Node.js and Gemini CLI toolchain for the managed BioETL launcher.",
+  "dependencies": {
+    "@google/gemini-cli": "0.57.0"
+  },
+  "optionalDependencies": {
+    "node-linux-arm64": "22.18.0",
+    "node-linux-x64": "22.18.0"
+  }
+}
