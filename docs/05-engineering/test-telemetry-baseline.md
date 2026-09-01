@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/medallion-cycle-1ba86729`
-- Source commit: `b29220707f3766a224e5fe5f8bda16fb815ed8e0`
-- Source run id: `b29220707f`
+- Source branch: `main`
+- Source commit: `497769829c4a729ddeaba77fc1e695e159b27650`
+- Source run id: `33538771189`
 - Source event: `push`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33480065022`
-- Source tree sha256: `74ecef52870e9a492cf0d7ffffe872909193cbc62851399cc2427eb5912a27b5`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33538771189`
+- Source tree sha256: `3075b3f6038522c3348d0b151de4486b58040cb7f984c1ce77fdad64247e7491`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-01T16:41:47.838485+00:00`
+- Refreshed at (UTC): `2026-09-01T19:20:14.241741+00:00`
 
 ## Branch-accurate provenance (#5729)
 
@@ -55,7 +55,7 @@ trend evidence only.
 ## Coverage
 
 - Hard threshold: `85.0%`
-- Actual coverage: `96.7`
+- Actual coverage: `96.70%`
 - Threshold satisfied: `True`
 
 ## Duration Telemetry

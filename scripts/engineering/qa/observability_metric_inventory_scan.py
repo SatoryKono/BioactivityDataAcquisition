@@ -507,6 +507,7 @@ def _iter_candidate_paths_with_git_grep(
                 "-C",
                 _REPO_ROOT.as_posix(),
                 "grep",
+                "--no-color",
                 "--untracked",
                 "-I",
                 "-l",
