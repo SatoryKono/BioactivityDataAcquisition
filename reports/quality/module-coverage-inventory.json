@@ -21616,11 +21616,11 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 127,
+      "coverage_percent": 97.64,
+      "coverage_status": "partially_covered",
+      "covered_lines": 124,
       "executable_lines": 127,
-      "missing_lines": 0,
+      "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
       "source_lines": 327
@@ -46288,11 +46288,11 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 127,
+      "coverage_percent": 97.64,
+      "coverage_status": "partially_covered",
+      "covered_lines": 124,
       "executable_lines": 127,
-      "missing_lines": 0,
+      "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
       "source_lines": 327
@@ -49508,9 +49508,9 @@
     "source_module_count": 2467,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1606,
+      "fully_covered": 1605,
       "no_executable_lines": 4,
-      "partially_covered": 857,
+      "partially_covered": 858,
       "uncovered": 0,
       "unmeasured": 0
     },
