@@ -67,8 +67,12 @@
     "@grafana/runtime": "13.2.0",
     "@grafana/ui": "13.2.0",
     "@grafana/schema": "12.4.2",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "packageManager": "npm@10.8.2"
+  "packageManager": "npm@10.8.2",
+  "overrides": {
+    "uuid": "11.1.1",
+    "nanoid": "5.1.6"
+  }
 }
