@@ -29,6 +29,9 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 1. Separate implementation, tests, docs/mirrors, generated outputs, and closeout.
 1. Include rollback for high-risk steps and exact approval boundaries.
 1. Do not plan repo-wide work from counts alone or raise debt allowances.
+1. When the plan edits markdown links or `Owner:` / `Status:` / `Class:`
+   headers, include `python -m scripts.docs generate-cleanup-inventory --update`
+   in the same changeset. `--check` reads the working tree, not `HEAD`.
 
 V1/V2 may use a direct checklist; V3/V4 require explicit planning and
 post-change gates.

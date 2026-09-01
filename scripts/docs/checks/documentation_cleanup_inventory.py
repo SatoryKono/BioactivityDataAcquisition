@@ -1333,7 +1333,7 @@ def _write_if_changed(path: Path, content: str) -> bool:
         return False
     safe_path.parent.mkdir(parents=True, exist_ok=True)
     safe_path.write_text(
-        content, encoding="utf-8"
+        content, encoding="utf-8", newline="\n"
     )  # NOSONAR - confined by resolve_output_path
     return True
 
@@ -1364,22 +1364,133 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _rows_by_path(rows: object) -> dict[str, dict[str, Any]]:
+    mapping: dict[str, dict[str, Any]] = {}
+    if not isinstance(rows, list):
+        return mapping
+    for row in rows:
+        if isinstance(row, dict) and isinstance(row.get("path"), str):
+            mapping[str(row["path"])] = row
+    return mapping
+
+
+def _append_diff(lines: list[str], line: str, limit: int) -> bool:
+    lines.append(line)
+    return len(lines) >= limit
+
+
+def _collect_path_presence_diffs(
+    lines: list[str],
+    generated_files: dict[str, dict[str, Any]],
+    committed_files: dict[str, dict[str, Any]],
+    limit: int,
+) -> None:
+    for path in sorted(set(generated_files) - set(committed_files)):
+        if _append_diff(lines, f"  files[{path}]: generated-only", limit):
+            return
+    for path in sorted(set(committed_files) - set(generated_files)):
+        if _append_diff(lines, f"  files[{path}]: committed-only", limit):
+            return
+
+
+def _collect_mapping_field_diffs(
+    lines: list[str],
+    left: dict[str, Any],
+    right: dict[str, Any],
+    *,
+    prefix: str,
+    limit: int,
+) -> None:
+    for key in sorted(set(left) | set(right)):
+        left_value = left.get(key)
+        right_value = right.get(key)
+        if left_value != right_value and _append_diff(
+            lines,
+            f"{prefix}.{key}: generated={left_value!r} committed={right_value!r}",
+            limit,
+        ):
+            return
+
+
+def _inventory_field_diffs(
+    generated: dict[str, Any],
+    committed: dict[str, Any],
+    *,
+    limit: int = 12,
+) -> list[str]:
+    """Return compact field-level diffs for a stale cleanup-inventory JSON."""
+    lines: list[str] = []
+    generated_files = _rows_by_path(generated.get("files"))
+    committed_files = _rows_by_path(committed.get("files"))
+    _collect_path_presence_diffs(lines, generated_files, committed_files, limit)
+    if len(lines) < limit:
+        for path in sorted(set(generated_files) & set(committed_files)):
+            _collect_mapping_field_diffs(
+                lines,
+                generated_files[path],
+                committed_files[path],
+                prefix=f"  files[{path}]",
+                limit=limit,
+            )
+            if len(lines) >= limit:
+                break
+    generated_summary = generated.get("summary")
+    committed_summary = committed.get("summary")
+    if (
+        len(lines) < limit
+        and isinstance(generated_summary, dict)
+        and isinstance(committed_summary, dict)
+    ):
+        _collect_mapping_field_diffs(
+            lines,
+            generated_summary,
+            committed_summary,
+            prefix="  summary",
+            limit=limit,
+        )
+    return lines
+
+
+def _json_inventory_field_diffs(
+    generated_content: str, on_disk_content: str
+) -> list[str]:
+    try:
+        generated_payload = json.loads(generated_content)
+        on_disk_payload = json.loads(on_disk_content)
+    except json.JSONDecodeError:
+        return ["  [detail] JSON parse failed; compare the inventory files directly"]
+    if not isinstance(generated_payload, dict) or not isinstance(on_disk_payload, dict):
+        return ["  [detail] JSON root is not an object"]
+    diffs = _inventory_field_diffs(generated_payload, on_disk_payload)
+    if not diffs:
+        return ["  [detail] serialized JSON differs without parsed field changes"]
+    return diffs
+
+
 def _check_inventory_drift(
     *,
     json_output: Path,
     markdown_output: Path,
     json_content: str,
     md_content: str,
-) -> list[str]:
-    """Return relative paths whose on-disk content differs from the built inventory."""
+) -> tuple[list[str], list[str]]:
+    """Return mismatched relative paths and compact JSON field diffs."""
     mismatches: list[str] = []
+    details: list[str] = []
     for path, content in (
         (json_output, json_content),
         (markdown_output, md_content),
     ):
-        if not path.exists() or path.read_text(encoding="utf-8") != content:
+        if not path.exists():
             mismatches.append(_repo_relative(path))
-    return mismatches
+            continue
+        on_disk = path.read_text(encoding="utf-8")
+        if on_disk == content:
+            continue
+        mismatches.append(_repo_relative(path))
+        if path.suffix.lower() == EXT_JSON:
+            details.extend(_json_inventory_field_diffs(content, on_disk))
+    return mismatches, details
 
 
 def _print_route_violations(route_violations: list[str]) -> None:
@@ -1390,6 +1501,62 @@ def _print_route_violations(route_violations: list[str]) -> None:
         print(f"  ... and {len(route_violations) - 20} more")
 
 
+def _print_drift_report(mismatches: list[str], details: list[str]) -> None:
+    for mismatch in mismatches:
+        print(f"[drift] mismatch: {mismatch}")
+    for detail in details:
+        print(detail)
+    print("[hint] run: python -m scripts.docs generate-cleanup-inventory --update")
+    print(
+        "[hint] markdown link, Owner/Status/Class, or duplicate-body "
+        "changes require this refresh before architecture-fast"
+    )
+
+
+def _run_check_mode(
+    *,
+    json_output: Path,
+    markdown_output: Path,
+    json_content: str,
+    md_content: str,
+    payload: dict[str, Any],
+) -> int:
+    mismatches, details = _check_inventory_drift(
+        json_output=json_output,
+        markdown_output=markdown_output,
+        json_content=json_content,
+        md_content=md_content,
+    )
+    if mismatches:
+        _print_drift_report(mismatches, details)
+        return 1
+    route_violations = _generated_route_violations(payload)
+    if route_violations:
+        _print_route_violations(route_violations)
+        print("[hint] add a route to configs/quality/generated_artifact_routing.yaml")
+        return 1
+    print("[documentation-cleanup-inventory] inventory is synchronized")
+    return 0
+
+
+def _run_update_mode(
+    *,
+    json_output: Path,
+    markdown_output: Path,
+    json_content: str,
+    md_content: str,
+) -> int:
+    changed = [
+        _write_if_changed(json_output, json_content),
+        _write_if_changed(markdown_output, md_content),
+    ]
+    if any(changed):
+        print("[documentation-cleanup-inventory] inventory updated")
+    else:
+        print("[documentation-cleanup-inventory] inventory already synchronized")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     payload = _build_inventory()
@@ -1397,48 +1564,24 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     )
     md_content = _render_markdown(payload)
-
     if args.print_summary:
         print(
             json.dumps(payload["summary"], ensure_ascii=False, indent=2, sort_keys=True)
         )
-
     if args.check:
-        mismatches = _check_inventory_drift(
+        return _run_check_mode(
             json_output=args.json_output,
             markdown_output=args.markdown_output,
             json_content=json_content,
             md_content=md_content,
+            payload=payload,
         )
-        if mismatches:
-            for mismatch in mismatches:
-                print(f"[drift] mismatch: {mismatch}")
-            print(
-                "[hint] run: python -m scripts.docs generate-cleanup-inventory --update"
-            )
-            return 1
-        route_violations = _generated_route_violations(payload)
-        if route_violations:
-            _print_route_violations(route_violations)
-            print(
-                "[hint] add a route to configs/quality/generated_artifact_routing.yaml"
-            )
-            return 1
-        print("[documentation-cleanup-inventory] inventory is synchronized")
-        return 0
-
-    if args.update or not args.check:
-        changed = [
-            _write_if_changed(args.json_output, json_content),
-            _write_if_changed(args.markdown_output, md_content),
-        ]
-        if any(changed):
-            print("[documentation-cleanup-inventory] inventory updated")
-        else:
-            print("[documentation-cleanup-inventory] inventory already synchronized")
-        return 0
-
-    return 0
+    return _run_update_mode(
+        json_output=args.json_output,
+        markdown_output=args.markdown_output,
+        json_content=json_content,
+        md_content=md_content,
+    )
 
 
 if __name__ == "__main__":

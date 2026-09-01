@@ -75,4 +75,7 @@ owner, and maintenance cost are documented in the same change.
 - Uses memory plus repo search to identify related tests, docs, contracts, and
   configs before narrowing the validation scope.
 - Mentions required verification commands (`make lint`, `make test`, architecture tests).
+- After markdown link or `Owner:` / `Status:` / `Class:` header changes, includes
+  `python -m scripts.docs generate-cleanup-inventory --update` in the same
+  changeset (`--check` reads the working tree, not HEAD).
 - Includes migration notes when introducing breaking changes.

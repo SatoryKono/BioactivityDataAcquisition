@@ -97,7 +97,7 @@ default.
 
 | Tier | Typical scope | Minimum checks |
 | --- | --- | --- |
-| V1 | docs-only | targeted links/drift and mirror sync |
+| V1 | docs-only | targeted links/drift, cleanup-inventory `--check`, and mirror sync |
 | V2 | focused Python/tooling | targeted Ruff plus related unit tests |
 | V3 | config/runtime contract | schema/contract checks plus related tests |
 | V4 | architecture or broad change | architecture gates, lint/type checks, and relevant broad tests |
