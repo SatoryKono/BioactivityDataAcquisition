@@ -193,7 +193,6 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
     ) -> None:
         """
         Write an uncompressed JSON Lines copy of the records to the bronze path.
-        
         Parameters
         ----------
         records : list[bytes]
@@ -206,7 +205,6 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             Date component used to construct the destination filename.
         batch_id : BatchID
             Batch identifier used to construct the destination filename.
-        
         Notes
         -----
         The destination is written atomically. An existing file with identical
@@ -216,7 +214,6 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         def _write() -> None:
             """
             Write the batch records to the resolved bronze JSONL path.
-            
             Raises
             ------
             FileExistsError
@@ -252,21 +249,21 @@ def _existing_payload_matches(
 
 def _publish_new_file_exclusive(source: Path, target: Path) -> None:
     """Publish a completed file at the target path without overwriting it.
-    
+
     Parameters
     ----------
     source : pathlib.Path
         Temporary file to link to the target.
     target : pathlib.Path
         Destination path, which must not already exist.
-    
+
     Raises
     ------
     FileExistsError
         If the target path already exists because a concurrent writer created it first.
     OSError
         If the hard link cannot be created for another reason.
-    
+
     Notes
     -----
     The source file is removed after linking when possible.
@@ -285,7 +282,7 @@ def write_bytes_if_absent_or_same(
     target: Path, data: bytes, *, mismatch_message: str
 ) -> None:
     """Write bytes to a target only if it is absent or already contains the same data.
-    
+
     Parameters
     ----------
     target : pathlib.Path
@@ -295,12 +292,12 @@ def write_bytes_if_absent_or_same(
     mismatch_message : str
         Message for the ``FileExistsError`` raised when the target contains
         different bytes.
-    
+
     Raises
     ------
     FileExistsError
         If the target exists with different contents.
-    
+
     Notes
     -----
     Creates the target's parent directories as needed and removes temporary files

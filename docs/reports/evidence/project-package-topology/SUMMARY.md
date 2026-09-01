@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-01): hash-only reconcile after Bronze exclusive publish; `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-01): SHA-bound reconciliation after the main Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259`
+`source_tree_sha256=840dcecaa5977f96e755b8c01656bc8a4a801cf79476d870e134f3ac3d9c60bf`
 
 `source_module_count=2467`
 
@@ -16,7 +16,7 @@ from the last valid inventory and adding
 `src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
 Current source baseline is
 `source_module_count=2467` with
-`source_tree_sha256=47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56`.
+`source_tree_sha256=d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff`.
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
