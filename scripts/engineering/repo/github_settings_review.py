@@ -38,6 +38,13 @@ MUTATING_GH_ARGUMENTS = frozenset(
 READ_ONLY_GH_COMMANDS = frozenset({("api",), ("repo", "view")})
 _GITHUB_DIRNAME = ".github"
 ControlResult = tuple[bool | None, str]
+_CAPTURED_TEXT = {
+    "capture_output": True,
+    "check": False,
+    "encoding": "utf-8",
+    "errors": "replace",
+    "text": True,
+}
 
 
 class GitHubReviewError(RuntimeError):
@@ -120,9 +127,7 @@ class ReadOnlyGitHubClient:
                 ["gh", "api", "user", "--silent"],
                 cwd=self.repo_root,
                 env=self._environment(candidate),
-                text=True,
-                capture_output=True,
-                check=False,
+                **_CAPTURED_TEXT,
             )
             if completed.returncode == 0:
                 self._active_token = candidate or ""
@@ -136,9 +141,7 @@ class ReadOnlyGitHubClient:
             ["gh", *args],
             cwd=self.repo_root,
             env=self._environment(self._active_token),
-            text=True,
-            capture_output=True,
-            check=False,
+            **_CAPTURED_TEXT,
         )
 
     def json(self, args: Sequence[str]) -> Any:
@@ -208,9 +211,7 @@ def _git_head(repo_root: Path, source_ref: str = "HEAD") -> str:
     completed = subprocess.run(
         ["git", "rev-parse", "--verify", source_ref + "^{commit}"],
         cwd=repo_root,
-        text=True,
-        capture_output=True,
-        check=False,
+        **_CAPTURED_TEXT,
     )
     return completed.stdout.strip() if completed.returncode == 0 else "unavailable"
 
@@ -755,7 +756,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     ):
         target = resolve_output_path(output_path, root=repo_root)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8", newline="\n")
+        tmp = target.with_suffix(target.suffix + ".tmp")
+        tmp.write_text(content, encoding="utf-8", newline="\n")
+        os.replace(tmp, target)
 
     sys.stdout.write(
         "GitHub governance review: "
