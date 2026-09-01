@@ -17853,13 +17853,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 174,
+          "line": 187,
           "source_group": "tests",
           "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 175,
+          "line": 188,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
