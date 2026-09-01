@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: Informational
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-08-27'
+  Last verified: '2026-09-01'
 
 ______________________________________________________________________
 
@@ -65,6 +65,7 @@ ______________________________________________________________________
 | --------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
 | [Checkpoint Debugging](checkpoint-debugging.md)                             | Debugging checkpoint issues                                          | P2       |
 | [Codex WSL/Docker Sandbox Troubleshooting](codex-wsl-docker-sandbox-troubleshooting.md) | Optional Codex sandbox failure triage with a guarded WSL recovery path | P2       |
+| [Docker Security Baseline](docker-security-baseline.md) | Reproduce RF-001/RF-002 image baseline and attach bounded Trivy/SBOM evidence | P2       |
 | [Neo4j Backend Recovery Quick Start](neo4j-backend-recovery-quick-start.md) | Short recovery checklist for local Neo4j backend incidents           | P2       |
 | [Stale Lock](stale-lock.md)                                                 | Handling stale lock situations                                       | P1       |
 | [Graceful Shutdown](../../03-guides/pipeline-lifecycle.md#graceful-shutdown) | SIGTERM/SIGINT: finish batch, save checkpoint, release lock          | P1       |
