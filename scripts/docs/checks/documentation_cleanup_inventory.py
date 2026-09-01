@@ -1333,7 +1333,7 @@ def _write_if_changed(path: Path, content: str) -> bool:
         return False
     safe_path.parent.mkdir(parents=True, exist_ok=True)
     safe_path.write_text(
-        content, encoding="utf-8"
+        content, encoding="utf-8", newline="\n"
     )  # NOSONAR - confined by resolve_output_path
     return True
 
@@ -1364,22 +1364,101 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _inventory_field_diffs(
+    generated: dict[str, Any],
+    committed: dict[str, Any],
+    *,
+    limit: int = 12,
+) -> list[str]:
+    """Return compact field-level diffs for a stale cleanup-inventory JSON."""
+    lines: list[str] = []
+
+    def _add(line: str) -> bool:
+        lines.append(line)
+        return len(lines) >= limit
+
+    generated_files = {
+        str(row.get("path")): row
+        for row in generated.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("path"), str)
+    }
+    committed_files = {
+        str(row.get("path")): row
+        for row in committed.get("files", [])
+        if isinstance(row, dict) and isinstance(row.get("path"), str)
+    }
+    for path in sorted(set(generated_files) - set(committed_files)):
+        if _add(f"  files[{path}]: generated-only"):
+            return lines
+    for path in sorted(set(committed_files) - set(generated_files)):
+        if _add(f"  files[{path}]: committed-only"):
+            return lines
+    for path in sorted(set(generated_files) & set(committed_files)):
+        generated_row = generated_files[path]
+        committed_row = committed_files[path]
+        for key in sorted(set(generated_row) | set(committed_row)):
+            generated_value = generated_row.get(key)
+            committed_value = committed_row.get(key)
+            if generated_value != committed_value:
+                if _add(
+                    f"  files[{path}].{key}: generated={generated_value!r} "
+                    f"committed={committed_value!r}"
+                ):
+                    return lines
+
+    generated_summary = generated.get("summary")
+    committed_summary = committed.get("summary")
+    if isinstance(generated_summary, dict) and isinstance(committed_summary, dict):
+        for key in sorted(set(generated_summary) | set(committed_summary)):
+            generated_value = generated_summary.get(key)
+            committed_value = committed_summary.get(key)
+            if generated_value != committed_value:
+                if _add(
+                    f"  summary.{key}: generated={generated_value!r} "
+                    f"committed={committed_value!r}"
+                ):
+                    return lines
+    return lines
+
+
+def _json_inventory_field_diffs(generated_content: str, on_disk_content: str) -> list[str]:
+    try:
+        generated_payload = json.loads(generated_content)
+        on_disk_payload = json.loads(on_disk_content)
+    except json.JSONDecodeError:
+        return ["  [detail] JSON parse failed; compare the inventory files directly"]
+    if not isinstance(generated_payload, dict) or not isinstance(on_disk_payload, dict):
+        return ["  [detail] JSON root is not an object"]
+    diffs = _inventory_field_diffs(generated_payload, on_disk_payload)
+    if not diffs:
+        return ["  [detail] serialized JSON differs without parsed field changes"]
+    return diffs
+
+
 def _check_inventory_drift(
     *,
     json_output: Path,
     markdown_output: Path,
     json_content: str,
     md_content: str,
-) -> list[str]:
-    """Return relative paths whose on-disk content differs from the built inventory."""
+) -> tuple[list[str], list[str]]:
+    """Return mismatched relative paths and compact JSON field diffs."""
     mismatches: list[str] = []
+    details: list[str] = []
     for path, content in (
         (json_output, json_content),
         (markdown_output, md_content),
     ):
-        if not path.exists() or path.read_text(encoding="utf-8") != content:
+        if not path.exists():
             mismatches.append(_repo_relative(path))
-    return mismatches
+            continue
+        on_disk = path.read_text(encoding="utf-8")
+        if on_disk == content:
+            continue
+        mismatches.append(_repo_relative(path))
+        if path.suffix.lower() == EXT_JSON:
+            details.extend(_json_inventory_field_diffs(content, on_disk))
+    return mismatches, details
 
 
 def _print_route_violations(route_violations: list[str]) -> None:
@@ -1404,7 +1483,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.check:
-        mismatches = _check_inventory_drift(
+        mismatches, details = _check_inventory_drift(
             json_output=args.json_output,
             markdown_output=args.markdown_output,
             json_content=json_content,
@@ -1413,8 +1492,14 @@ def main(argv: list[str] | None = None) -> int:
         if mismatches:
             for mismatch in mismatches:
                 print(f"[drift] mismatch: {mismatch}")
+            for detail in details:
+                print(detail)
             print(
                 "[hint] run: python -m scripts.docs generate-cleanup-inventory --update"
+            )
+            print(
+                "[hint] markdown link, Owner/Status/Class, or duplicate-body "
+                "changes require this refresh before architecture-fast"
             )
             return 1
         route_violations = _generated_route_violations(payload)
