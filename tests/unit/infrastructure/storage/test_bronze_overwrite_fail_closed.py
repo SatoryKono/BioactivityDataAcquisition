@@ -132,6 +132,8 @@ def test_payload_publish_failure_leaves_no_partial_final_target(
 
     assert not target.exists()
     assert source.read_bytes() == b"complete-payload"
+
+
 @pytest.mark.unit
 def test_publish_existing_target_raises_file_exists_cross_platform(
     tmp_path: Path,
