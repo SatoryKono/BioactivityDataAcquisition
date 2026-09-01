@@ -22,6 +22,9 @@ summary: Pack of cyclic domain audits — 10-domain prompt.audit.cycle.* program
 max_body_lines: 160
 ---
 
+> **ADR-060:** domain paste SSOT is `generated/<domain>/audit-readonly.md`, not the old cycle megacards.
+
+
 # Cyclic audit pack (tests / docs / tech-debt / repo hygiene / …)
 
 Снимок полных paste-текстов: [materialized-v3](project/materialized-v3/README.md).
