@@ -29,11 +29,11 @@ flowchart LR
     composition -->|240 OK| infrastructure
     domain -->|1243 OK| domain
     infrastructure -->|761 OK| domain
-    infrastructure -->|1200 OK| infrastructure
+    infrastructure -->|1199 OK| infrastructure
     interfaces -->|51 OK| application
     interfaces -->|48 OK| composition
     interfaces -->|69 OK| domain
-    interfaces -->|395 OK| interfaces
+    interfaces -->|396 OK| interfaces
 ```
 
 ## Layer Edge Table
@@ -48,11 +48,11 @@ flowchart LR
 | `composition`    | `infrastructure` |     240 | allowed |
 | `domain`         | `domain`         |    1243 | allowed |
 | `infrastructure` | `domain`         |     761 | allowed |
-| `infrastructure` | `infrastructure` |    1200 | allowed |
+| `infrastructure` | `infrastructure` |    1199 | allowed |
 | `interfaces`     | `application`    |      51 | allowed |
 | `interfaces`     | `composition`    |      48 | allowed |
 | `interfaces`     | `domain`         |      69 | allowed |
-| `interfaces`     | `interfaces`     |     395 | allowed |
+| `interfaces`     | `interfaces`     |     396 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
