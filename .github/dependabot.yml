@@ -72,6 +72,18 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: "npm"
+    directory: "/scripts/ai/gemini/npm-tooling"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci/cd"
+    groups:
+      npm-gemini-cli:
+        patterns: ["*"]
+
+  - package-ecosystem: "npm"
     directory: "/grafana/plugins/bioetl-scenes-app"
     schedule:
       interval: "weekly"
