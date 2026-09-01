@@ -64,11 +64,11 @@ def test_concurrent_identical_bronze_payload_is_idempotent(
     def publish_other_writer(source: Path, final_target: Path) -> None:
         """
         Simulate another writer publishing a file before reporting a conflict.
-        
+
         Parameters:
             source (Path): Path containing the bytes to publish.
             final_target (Path): Destination path for the published bytes.
-        
+
         Raises:
             FileExistsError: Always raised after the bytes are written to the destination.
         """
@@ -167,7 +167,7 @@ def test_sidecar_publish_failure_leaves_no_partial_final_target(
     def fail_publish(source: Path, final_target: Path) -> None:
         """
         Simulate a failure while publishing a temporary file.
-        
+
         Raises:
             OSError: Always, to represent a publish failure.
         """
@@ -200,9 +200,9 @@ def test_concurrent_different_sidecar_is_not_overwritten(
     def publish_other_writer(source: Path, final_target: Path) -> None:
         """
         Publish competing content at the target path and then signal that it already exists.
-        
+
         Parameters:
-        	final_target (Path): Path to the target file to populate before raising the error.
+            final_target (Path): Path to the target file to populate before raising the error.
         """
         del source
         final_target.write_bytes(b"other-writer")
