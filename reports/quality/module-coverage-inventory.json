@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "a520acde7b14e69985f903eff3d536e668aefe48cc705a2f228b63eaaec1bc5b",
+  "coverage_xml_sha256": "c183bbf920403b5d955bec26e416621b2c1c6e5dd2ce0557fc69b82c9616c36c",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -21563,7 +21563,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.atomic",
       "path": "src/bioetl/infrastructure/storage/atomic.py",
-      "source_lines": 33
+      "source_lines": 32
     },
     {
       "coverage_percent": 94.12,
@@ -21616,14 +21616,14 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 96.69,
+      "coverage_percent": 96.06,
       "coverage_status": "partially_covered",
-      "covered_lines": 117,
-      "executable_lines": 121,
-      "missing_lines": 4,
+      "covered_lines": 122,
+      "executable_lines": 127,
+      "missing_lines": 5,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
-      "source_lines": 256
+      "source_lines": 252
     },
     {
       "coverage_percent": 76.19,
@@ -46235,7 +46235,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.atomic",
       "path": "src/bioetl/infrastructure/storage/atomic.py",
-      "source_lines": 33
+      "source_lines": 32
     },
     {
       "coverage_percent": 94.12,
@@ -46288,14 +46288,14 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 96.69,
+      "coverage_percent": 96.06,
       "coverage_status": "partially_covered",
-      "covered_lines": 117,
-      "executable_lines": 121,
-      "missing_lines": 4,
+      "covered_lines": 122,
+      "executable_lines": 127,
+      "missing_lines": 5,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
-      "source_lines": 256
+      "source_lines": 252
     },
     {
       "coverage_percent": 76.19,
@@ -49350,7 +49350,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-09-01",
-  "source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
+  "source_tree_sha256": "d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

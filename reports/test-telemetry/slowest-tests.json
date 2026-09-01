@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/medallion-cycle-1ba86729",
-  "source_commit": "b29220707f3766a224e5fe5f8bda16fb815ed8e0",
-  "source_run_id": "b29220707f",
+  "source_branch": "main",
+  "source_commit": "64379be36ad9342a9c4fa74bb62ac9e2eb5eb254",
+  "source_run_id": "33480065022",
   "source_event": "push",
-  "source_run_url": null,
-  "source_tree_sha256": "96c3444c318e791c3f65dc02c928de6ef8c98a239d26bf0cae1577e2b1e05687",
-  "refreshed_at_utc": "2026-09-01T16:41:47.838485+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33480065022",
+  "source_tree_sha256": "c0d1748de619d81c940454594e6ba3a6a7c7601fbdc71f7122b2142cb354d41c",
+  "refreshed_at_utc": "2026-09-01T14:01:50.406129+00:00",
   "refresh_status": "captured",
   "total_cases": 49518,
   "top_slowest": [

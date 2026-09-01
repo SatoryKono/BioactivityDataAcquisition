@@ -61,3 +61,5 @@ docker-compose.neo4j-audit.yml
 docker-compose.neo4j.yml
 docker-compose.yml
 Dockerfile.bioetl
+
+osv-scanner.toml

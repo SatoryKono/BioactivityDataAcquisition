@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import errno
 import os
 import tempfile
 from collections.abc import Callable, Iterator
@@ -261,14 +262,21 @@ def _publish_new_file_exclusive(source: Path, target: Path) -> None:
 
     Raises
     ------
+    FileExistsError
+        If the target path already exists because a concurrent writer created it first.
     OSError
-        If the hard link cannot be created.
+        If the hard link cannot be created for another reason.
 
     Notes
     -----
     The source file is removed after linking when possible.
     """
-    os.link(os.fspath(source), os.fspath(target))
+    try:
+        os.link(os.fspath(source), os.fspath(target))
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and not isinstance(exc, FileExistsError):
+            raise FileExistsError(*exc.args) from exc
+        raise
     with contextlib.suppress(OSError):
         source.unlink()
 
