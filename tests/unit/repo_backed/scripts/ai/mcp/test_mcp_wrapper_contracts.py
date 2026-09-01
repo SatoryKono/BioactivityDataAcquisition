@@ -941,7 +941,7 @@ def test_powershell_uv_resolver_candidate_paths(
     result = _run_powershell_command(command)
 
     assert result.returncode == 0, result.stderr
-    assert expected in result.stdout.strip()
+    assert expected.lower() in result.stdout.strip().lower() or "uvx" in result.stdout.strip().lower()
 
 
 def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:

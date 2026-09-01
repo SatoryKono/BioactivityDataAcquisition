@@ -244,6 +244,7 @@ def test_active_markdown_paths_skip_generated_companion_trees() -> None:
 
 
 @pytest.mark.timeout(180)
+@pytest.mark.timeout(180)
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
     skip_reason = mounted_worktree_skip_reason()
