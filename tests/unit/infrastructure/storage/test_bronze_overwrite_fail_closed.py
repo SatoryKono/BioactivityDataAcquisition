@@ -71,6 +71,20 @@ def test_bronze_different_payload_raises_file_exists(
     assert not failed_target.exists()
     assert list(tmp_path.glob(".open-failure_*.tmp")) == []
 
+    compressor_failed_target = tmp_path / "compressor-failure.zst"
+    monkeypatch.setattr(
+        mixin,
+        "_build_stream_compressor",
+        MagicMock(side_effect=OSError("compressor failed")),
+    )
+    with pytest.raises(OSError, match="compressor failed"):
+        mixin._write_atomic_stream(
+            iter([b'{"id": 4}\n']),
+            compressor_failed_target,
+        )
+    assert not compressor_failed_target.exists()
+    assert list(tmp_path.glob(".compressor-failure_*.tmp")) == []
+
 
 @pytest.mark.unit
 def test_concurrent_identical_bronze_payload_is_idempotent(
