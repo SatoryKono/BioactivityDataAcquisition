@@ -1,12 +1,12 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "4c6b0d4b3fc394237243e14d4e1a9f525c259de16f5a6d6677d9992174079343",
+      "blob_sha256": "4f5f693805261a0cddce1928d401bd979d29a5f3d9077c4f3ebd02e0c567dba8",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true,
         "integral_score": 9.14,
@@ -15,19 +15,19 @@
       }
     },
     {
-      "blob_sha256": "524a569e53cbbac77f91819a29b94afc427835cbf148da725c41b5e7e7caedc1",
+      "blob_sha256": "77c03e231dc6433ee1a85dd907871ad4ec3700116e221f159f17a237a969a858",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true,
-        "coverage_xml_sha256": "7ac3c38a380857605a5bfe5b70b192a5da6642d63a242f02ea71d3a47aa5be09",
+        "coverage_xml_sha256": "c183bbf920403b5d955bec26e416621b2c1c6e5dd2ce0557fc69b82c9616c36c",
         "schema_version": 1,
-        "snapshot_date": "2026-08-31",
+        "snapshot_date": "2026-09-01",
         "source_module_count": 2467,
-        "source_tree_sha256": "0208cdddee7a21ad24cdb83659c7d18cb01002c9ee0ece8e5a1f26725e08b123",
+        "source_tree_sha256": "2c61c91ad498dcf87aa513912c0d793ab77eaec904070cbe2c14b96dcdc74197",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -76,13 +76,13 @@
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+      "source_revision": "28a2163ea74dbc06d2129403e61005feaa1e4926",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "ab16da6e186900e82a624c9288f51d4eda9a4c2fbc09f87cf0abfaa8fb7a9dee",
+  "baseline_artifact_fingerprint": "3c87e945e91421b6fa0fa9314dab5098991a87f1e835afaad0562b6a7dc278e0",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+  "local_tracking_ref_sha": "28a2163ea74dbc06d2129403e61005feaa1e4926",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "2c5f4894d141470e8935c89e80a34f15b0776d54",
+  "remote_main_sha": "28a2163ea74dbc06d2129403e61005feaa1e4926",
   "schema_version": 1
 }
