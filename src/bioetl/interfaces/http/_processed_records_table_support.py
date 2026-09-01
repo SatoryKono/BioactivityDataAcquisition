@@ -12,9 +12,6 @@ from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http import _processed_records_prometheus as _prom
 from bioetl.interfaces.http._processed_records_prometheus import (
-    DEFAULT_PROMETHEUS_BASE_URL,
-    DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS,
-    PROMETHEUS_QUERY_TIMEOUT_SECONDS,
     _candidate_prometheus_base_urls,
     _query_prometheus_vector_with_fallbacks,
 )
@@ -38,6 +35,15 @@ DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = _prom.DEFAULT_PROMETHEUS_BASE_URL_FALLBA
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = _prom.PROMETHEUS_QUERY_TIMEOUT_SECONDS
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
+
+__all__ = (
+    "DEFAULT_PROMETHEUS_BASE_URL",
+    "PROCESSED_RECORDS_ROW_SPECS",
+    "PROCESSED_RECORDS_TABLE_CONTRACT",
+    "ProcessedRecordRowSpec",
+    "fetch_processed_record_values",
+    "read_processed_records_run_id",
+)
 
 _Denominator = Literal["constant_100", "bronze"]
 _PercentFormat = Literal["constant_100", "fixed_1", "trimmed_3"]
