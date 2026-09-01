@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Any, cast
 
 import pytest
 import yaml
+
+from bioetl.application.runtime_clock import current_utc_time
 
 pytestmark = pytest.mark.architecture
 
@@ -90,8 +92,7 @@ def test_residual_osv_exception_has_not_expired() -> None:
     deadline = date.fromisoformat(EXPIRY)
     assert deadline == date(2026, 11, 30)
     assert EXPIRY == "2026-11-30"
-    # UTC clock keeps test-governance date_today_call_sites_max at 0.
-    assert datetime.now(UTC).date() <= deadline, (
+    assert current_utc_time().date() <= deadline, (
         f"residual OSV exception expired on {EXPIRY}; upgrade mermaid/Grafana "
         "or renew the exception with a new dated issue"
     )

@@ -118,7 +118,7 @@ def load_schema(path: Path = DEFAULT_SCHEMA_PATH) -> dict[str, Any]:
 def _isolated_git_env() -> dict[str, str]:
     """Drop inherited GIT_* so fixture repos cannot see the host checkout."""
     env = os.environ.copy()
-    for name in list(env):
+    for name in os.environ:
         if name.startswith("GIT_"):
             env.pop(name, None)
     return env
