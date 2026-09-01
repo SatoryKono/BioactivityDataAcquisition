@@ -47,6 +47,9 @@ Render helpers:
 - No `.env` create/edit/delete without explicit approval
 - No tech-debt budget / exemption / threshold increases
 - No root scratch (`_tmp_*.py`, `nul`/`NUL`)
+- After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
+  `python -m scripts.docs generate-cleanup-inventory --update` in the same
+  changeset (`--check` reads the working tree, not HEAD)
 - No `reset --hard`, force-push, or commits to `main`
 - Protect foreign uncommitted WIP; use worktree if main is dirty
 - Answer in Russian when the operator writes Russian; keep technical literals original
