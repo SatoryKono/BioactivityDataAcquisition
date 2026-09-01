@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-31T22:42:13.481625+00:00",
+  "generated_at": "2026-09-01T05:23:02.673085+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -7263,7 +7263,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 167,
+          "line": 219,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
