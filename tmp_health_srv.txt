@@ -1,0 +1,356 @@
+# Boundary object/payload typing residual at this module.
+"""HTTP Health Server for BioETL.
+
+Provides standard liveness and readiness probes.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import time
+from dataclasses import dataclass
+
+from bioetl.application.observability.control_plane_evidence import (
+    ControlPlaneEvidenceService,
+)
+from bioetl.application.services.quality.quarantine_service import QuarantineService
+from bioetl.domain.ports import (
+    CheckpointPort,
+    ClockPort,
+    HealthMetricsExpositionPort,
+    HealthMonitorPort,
+    LoggerPort,
+    RunLedgerPort,
+    RunManifestPort,
+    WorkflowManifestPort,
+)
+from bioetl.interfaces.http._forensic_request_budget import (
+    FORENSIC_ENDPOINT_CONCURRENCY,
+)
+from bioetl.interfaces.http._health_server_control_plane_metrics_refresh import (
+    CONTROL_PLANE_METRICS_REFRESH_INTERVAL_SECONDS,
+    ControlPlaneMetricsRefresher,
+    refresh_control_plane_metrics,
+    run_periodic_control_plane_metrics_refresh,
+    stop_control_plane_metrics_refresh,
+)
+from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
+from bioetl.interfaces.http.health_server_routing_mixin import (
+    HealthServerRoutingMixin,
+)
+from bioetl.interfaces.http.health_server_state_mixin import HealthServerStateMixin
+from bioetl.interfaces.http.processed_records_table import (
+    DEFAULT_PROMETHEUS_BASE_URL,
+)
+from bioetl.interfaces.http.types import HealthResponse
+
+# Pure liveness fallback when no exposition adapter is injected (unit tests).
+_DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION = (
+    "# HELP bioetl_health_server_scrape_up Health server /metrics scrape "
+    "liveness (1=serving).\n"
+    "# TYPE bioetl_health_server_scrape_up gauge\n"
+    "bioetl_health_server_scrape_up 1\n"
+)
+
+
+class _StaticHealthMetricsExposition:
+    """Interfaces-local fallback exposition (no infrastructure import)."""
+
+    def build_exposition(self) -> str:
+        return _DEFAULT_HEALTH_SCRAPE_UP_EXPOSITION
+
+
+@dataclass(frozen=True, slots=True)
+class HealthServerControlPlaneDeps:
+    """Collaborator bag for optional health-server control-plane ports."""
+
+    health_monitor: HealthMonitorPort | None = None
+    quarantine_service: QuarantineService | None = None
+    checkpoint_port: CheckpointPort | None = None
+    run_manifest_port: RunManifestPort | None = None
+    run_ledger_port: RunLedgerPort | None = None
+    workflow_manifest_port: WorkflowManifestPort | None = None
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None
+    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None
+    metrics_exposition: HealthMetricsExpositionPort | None = None
+    runtime_source_id: str | None = None
+
+
+class HealthServer(
+    HealthServerHTTPMixin,
+    HealthServerRoutingMixin,
+    HealthServerStateMixin,
+):
+    """Async HTTP server for health check endpoints."""
+
+    _server_close_timeout_seconds: float = 1.0
+
+    _LEGACY_CONTROL_PLANE_KEYS = frozenset(
+        {
+            "health_monitor",
+            "quarantine_service",
+            "checkpoint_port",
+            "run_manifest_port",
+            "run_ledger_port",
+            "workflow_manifest_port",
+            "control_plane_evidence_service",
+            "control_plane_integrity_refresher",
+            "metrics_exposition",
+            "runtime_source_id",
+        }
+    )
+
+    @classmethod
+    def _recognized_legacy_ports(
+        cls, legacy_ports: dict[str, object]
+    ) -> dict[str, object]:
+        """Validate and filter legacy port kwargs; raise on unknown names."""
+        if not legacy_ports:
+            return {}
+        unknown = set(legacy_ports) - cls._LEGACY_CONTROL_PLANE_KEYS
+        if unknown:
+            raise TypeError(
+                "HealthServer() got unexpected keyword argument(s): "
+                + ", ".join(sorted(str(k) for k in unknown))
+            )
+        return {
+            k: legacy_ports[k]
+            for k in cls._LEGACY_CONTROL_PLANE_KEYS
+            if k in legacy_ports
+        }
+
+    @staticmethod
+    def _resolve_control_plane_deps(
+        control_plane: HealthServerControlPlaneDeps | None,
+        legacy_ports: dict[str, object],
+    ) -> HealthServerControlPlaneDeps:
+        """Fold legacy port kwargs into control_plane collaborator bag."""
+        recognized = HealthServer._recognized_legacy_ports(legacy_ports)
+        if control_plane is not None and recognized:
+            raise TypeError(
+                "HealthServer() accepts either control_plane or legacy port "
+                "kwargs, not both"
+            )
+        if control_plane is None and recognized:
+            control_plane = HealthServerControlPlaneDeps(
+                **recognized  # type: ignore[arg-type]  # pyright: ignore[reportArgumentType]
+            )
+        return control_plane or HealthServerControlPlaneDeps()
+
+    def __init__(
+        self,
+        host: str = "127.0.0.1",
+        port: int = 8000,
+        control_plane: HealthServerControlPlaneDeps | None = None,
+        prometheus_base_url: str | None = None,
+        logger: LoggerPort | None = None,
+        **legacy_ports: object,
+    ) -> None:
+        """Initialize health server.
+
+        Prefer ``control_plane``. Transitional/unit callers may still pass the
+        individual port kwargs, which are folded into the collaborator bag.
+        """
+        # Always validate legacy kwargs so unknown names fail closed even when
+        # control_plane is also supplied.
+        deps = self._resolve_control_plane_deps(control_plane, legacy_ports)
+        self.host = host
+        self.port = port
+        self._health_monitor = deps.health_monitor
+        self._quarantine_service = deps.quarantine_service
+        self._checkpoint_port = deps.checkpoint_port
+        self._run_manifest_port = deps.run_manifest_port
+        self._run_ledger_port = deps.run_ledger_port
+        self._workflow_manifest_port = deps.workflow_manifest_port
+        self._control_plane_evidence_service = deps.control_plane_evidence_service
+        self._control_plane_integrity_refresher = deps.control_plane_integrity_refresher
+        self._control_plane_integrity_refresh_task: asyncio.Task[None] | None = None
+        self._control_plane_integrity_refresh_interval_seconds = (
+            CONTROL_PLANE_METRICS_REFRESH_INTERVAL_SECONDS
+        )
+        self._runtime_source_id = deps.runtime_source_id
+        self._metrics_exposition: HealthMetricsExpositionPort = (
+            deps.metrics_exposition or _StaticHealthMetricsExposition()
+        )
+        self._data_root: str | None = None
+        self._prometheus_base_url = (
+            prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
+        ).rstrip("/")
+        self._logger = logger
+        self._clock: ClockPort | None = None
+        self._server: asyncio.Server | None = None
+        self._forensic_endpoint_limiter = asyncio.Semaphore(
+            FORENSIC_ENDPOINT_CONCURRENCY
+        )
+        self._start_time: float | None = None
+        self._request_error_allowlist = (
+            UnicodeDecodeError,
+            ValueError,
+            RuntimeError,
+            OSError,
+            ConnectionError,
+            asyncio.IncompleteReadError,
+        )
+        self._writer_close_allowlist = (
+            OSError,
+            RuntimeError,
+            ConnectionError,
+            BrokenPipeError,
+        )
+
+    def set_data_root(self, data_root: str | None) -> None:
+        """Set the explicit data root served by read-only explorer ports."""
+        self._data_root = data_root
+
+    def set_clock(self, clock: ClockPort | None) -> None:
+        """Set the optional response clock after server construction."""
+        self._clock = clock
+
+    async def start(self) -> None:
+        """Start the health server."""
+        self._start_time = time.monotonic()
+        try:
+            self._server = await asyncio.start_server(
+                self._handle_connection,
+                self.host,
+                self.port,
+                reuse_address=False,
+            )
+        except OSError as exc:
+            if self._logger:
+                self._logger.warning(
+                    "health_server_bind_failed",
+                    host=self.host,
+                    port=self.port,
+                    error=str(exc),
+                    reason_code="HEALTH_SERVER_BIND_FAILED",
+                )
+            raise
+        if self._control_plane_integrity_refresher is not None:
+            try:
+                await refresh_control_plane_metrics(
+                    self._control_plane_integrity_refresher
+                )
+            except BaseException:
+                await self.stop()
+                raise
+            self._control_plane_integrity_refresh_task = asyncio.create_task(
+                run_periodic_control_plane_metrics_refresh(
+                    self._control_plane_integrity_refresher,
+                    interval_seconds=(
+                        self._control_plane_integrity_refresh_interval_seconds
+                    ),
+                ),
+                name="bioetl-control-plane-integrity-refresh",
+            )
+        if self._logger:
+            self._logger.info("health_server_started", host=self.host, port=self.port)
+
+    async def stop(self) -> None:
+        """Stop the health server gracefully."""
+        await stop_control_plane_metrics_refresh(
+            self._control_plane_integrity_refresh_task
+        )
+        self._control_plane_integrity_refresh_task = None
+        if not self._server:
+            return
+        self._server.close()
+        try:
+            await asyncio.wait_for(
+                self._server.wait_closed(),
+                timeout=self._server_close_timeout_seconds,
+            )
+        except TimeoutError as exc:
+            if self._logger:
+                self._logger.warning(
+                    "health_server_shutdown_timeout",
+                    host=self.host,
+                    port=self.port,
+                    error=str(exc),
+                    reason_code="HEALTH_SERVER_SHUTDOWN_TIMEOUT",
+                )
+        self._server = None
+        if self._logger:
+            self._logger.info("health_server_stopped")
+
+    @property
+    def is_running(self) -> bool:
+        """Check if server is running."""
+        return self._server is not None and self._server.is_serving()
+
+    @property
+    def uptime_seconds(self) -> float:
+        """Get server uptime in seconds."""
+        if self._start_time is None:
+            return 0.0
+        return time.monotonic() - self._start_time
+
+
+async def run_health_server(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    health_monitor: HealthMonitorPort | None = None,
+    quarantine_service: QuarantineService | None = None,
+    checkpoint_port: CheckpointPort | None = None,
+    run_manifest_port: RunManifestPort | None = None,
+    run_ledger_port: RunLedgerPort | None = None,
+    workflow_manifest_port: WorkflowManifestPort | None = None,
+    control_plane_evidence_service: ControlPlaneEvidenceService | None = None,
+    control_plane_integrity_refresher: ControlPlaneMetricsRefresher | None = None,
+    prometheus_base_url: str | None = None,
+    logger: LoggerPort | None = None,
+    clock: ClockPort | None = None,
+) -> None:
+    """Run the health server until interrupted.
+
+    Starts the HealthServer and keeps it alive until the coroutine is cancelled
+    (e.g., via asyncio.CancelledError from a task group or signal handler).
+
+    Args:
+        host: IP address to bind to. Defaults to loopback (127.0.0.1);
+            wider binding requires explicit opt-in.
+        port: TCP port to listen on. Defaults to 8000.
+        health_monitor: Optional monitor providing provider health states.
+            Health endpoints report no provider data when None.
+        quarantine_service: Optional read-only quarantine explorer service.
+        checkpoint_port: Optional read-only checkpoint storage.
+        run_manifest_port: Optional read-only control-plane manifest catalog.
+        run_ledger_port: Optional read-only control-plane run ledger.
+        workflow_manifest_port: Optional read-only workflow manifest catalog.
+        control_plane_evidence_service: Optional bounded validation collaborator.
+        control_plane_integrity_refresher: Optional periodic aggregate refresher.
+        prometheus_base_url: Optional Prometheus HTTP API base URL.
+        logger: Optional LoggerPort for structured server event logging.
+        clock: Optional ClockPort for response timestamps.
+    """
+    server = HealthServer(
+        host=host,
+        port=port,
+        control_plane=HealthServerControlPlaneDeps(
+            health_monitor=health_monitor,
+            quarantine_service=quarantine_service,
+            checkpoint_port=checkpoint_port,
+            run_manifest_port=run_manifest_port,
+            run_ledger_port=run_ledger_port,
+            workflow_manifest_port=workflow_manifest_port,
+            control_plane_evidence_service=control_plane_evidence_service,
+            control_plane_integrity_refresher=control_plane_integrity_refresher,
+        ),
+        prometheus_base_url=prometheus_base_url,
+        logger=logger,
+    )
+    server.set_clock(clock)
+    await server.start()
+    try:
+        while True:
+            await asyncio.sleep(1)
+    finally:
+        await server.stop()
+
+
+__all__ = [
+    "HealthResponse",
+    "HealthServer",
+    "HealthServerControlPlaneDeps",
+    "run_health_server",
+]
