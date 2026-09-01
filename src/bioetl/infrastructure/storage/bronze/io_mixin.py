@@ -261,6 +261,8 @@ def _publish_new_file_exclusive(source: Path, target: Path) -> None:
     
     Raises
     ------
+    FileExistsError
+        If the target path already exists because a concurrent writer created it first.
     OSError
         If the hard link cannot be created.
     
