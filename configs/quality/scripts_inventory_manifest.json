@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-01T09:08:12.283Z",
+  "generated_at": "2026-09-01T12:18:18.664405+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -11,7 +11,7 @@
       "agents": 7,
       "build": 17,
       "ci": 82,
-      "docs": 254,
+      "docs": 253,
       "other": 74,
       "scripts": 508,
       "skills": 12,
@@ -16750,14 +16750,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 5,
       "references": [
-        {
-          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
-          "line": 192,
-          "source_group": "docs",
-          "text": "REQ-PROVIDER-002,MUST,Приложение: Provider Health Checks,docs/00-project/RULES.md,\"11. API, transport and resilience\",,Проверить реализацию health check для PubChem,src/bioetl/infrastructure/adapters/"
-        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 77,
@@ -18743,7 +18737,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -18788,10 +18782,10 @@
           "text": "REQ-DR-003,SHOULD,5. Операции > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,Проверить наличие зафиксированного restore drill или rehear"
         },
         {
-          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
-          "line": 182,
-          "source_group": "docs",
-          "text": "REQ-ROLLBACK-001,MUST,7. Управление Изменениями > 7.2 Rollback,docs/00-project/RULES.md,\"17. Changes, documentation and technical debt\",,\"Проверить наличие manual rollback procedure и placeholder/guar"
+          "path": "scripts/ops/data/__main__.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "\"vacuum\": \"vacuum_delta.py\","
         }
       ]
     },
