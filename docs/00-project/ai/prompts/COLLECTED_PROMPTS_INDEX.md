@@ -16,7 +16,7 @@ ______________________________________________________________________
 *Статус: internal-published (Internal / Extended)*
 
 This page is a curated discoverability index for unique prompt artifacts kept in
-`docs/00-project/ai/prompts/collected/`.
+`docs/00-project/ai/prompts/archive/` (collected/ was never shipped).
 
 These files are **not** the canonical source of project governance or runtime
 workflow policy. Prefer:
@@ -31,7 +31,7 @@ maintained root-level twin, not to override current guidance.
 
 ## Current Inventory
 
-- Target folder: `docs/00-project/ai/prompts/collected/`
+- Target folder: `docs/00-project/ai/prompts/archive/` (collected/ was never shipped)
 - Collected files: **2**
 - Surface role: archive-only prompt snapshots retained for historical
   discoverability
@@ -67,16 +67,9 @@ checks, multi-BI notes. **Archived campaign** — active paste:
 `prompt.observability.dashboard-panel-audit`.
 V5 leftover pack: `prompt.observability.dashboard-v5.pack`.
 
-### Diagram Expansion Archive
+### Diagram archives
 
-- `docs/00-project/ai/prompts/collected/docs/02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md`
-
-Historical archive prompt for earlier architecture diagram expansion waves.
-Treat as reference-only and validate against current Mermaid skills and docs.
-
-### Diagram Optimization Archive
-
-- `docs/00-project/ai/prompts/collected/docs/plans/diagram-optimization-prompts-v3.md`
+Use current Mermaid skills and `library/audit/cycle/diagrams.md` (redirects to generated).
 
 Historical optimization-wave prompt captured from an earlier diagrams plan.
 Contains time-bound repository state and should not be treated as active policy.

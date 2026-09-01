@@ -10,6 +10,8 @@ ______________________________________________________________________
 
 # Dashboard V5 residual pack
 
+> **Deprecated.** Use `prompt.observability.dashboard-full-cycle` and `prompt.observability.grafana-audit.master`.
+
 Operator-paste cards for the Manus V4 → V5 Grafana leftover program.
 Not runtime SSOT. Precedence: `.codex/skills/observability-dashboard/` →
 `AGENTS.md` → these cards.
