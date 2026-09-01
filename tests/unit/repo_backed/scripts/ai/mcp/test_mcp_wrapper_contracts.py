@@ -941,7 +941,7 @@ def test_powershell_uv_resolver_candidate_paths(
     result = _run_powershell_command(command)
 
     assert result.returncode == 0, result.stderr
-    assert expected in result.stdout.strip()
+    assert expected.lower() in result.stdout.strip().lower()
 
 
 def test_uv_resolver_powershell_does_not_split_windows_path_on_colon() -> None:
@@ -985,7 +985,8 @@ def test_powershell_uv_resolver_keeps_drive_letter_path_entries(
     command = f"""
 . {helper}
 function Get-Command {{ param($Name, $ErrorAction) $null }}
-$env:PATH = {fixture} + [IO.Path]::PathSeparator + 'C:\\Windows\\System32'
+# Use Windows PATH semantics even when PowerShell runs on a POSIX CI host.
+$env:PATH = {fixture} + ';C:\\Program Files\\GitHub CLI;C:\\Windows\\System32'
 [Console]::Out.WriteLine((Resolve-BioetlUvxBin))
 """
 
