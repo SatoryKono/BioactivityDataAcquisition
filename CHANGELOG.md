@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Grafana Ops HTTP bootstrap:** `runtime_manager start|recover --stack monitoring`
+  retries Grafana once when soft bootstrap froze `prometheus_only` notices after
+  `identity_timeout_or_unreachable` and `/ops/control-plane/ready` now matches.
+  Exact-run Processed Records stay on RunLedger (UNKNOWN when empty); placeholder
+  `$run_id` remains `selection=required`.
+
 - **Zed xenon gate:** `Audit: complexity` invokes the `xenon` console script
   (CI-aligned) instead of `python -m xenon`, which has no `__main__` module, and
   fails closed through the environment doctor when extra `dev` is missing.
