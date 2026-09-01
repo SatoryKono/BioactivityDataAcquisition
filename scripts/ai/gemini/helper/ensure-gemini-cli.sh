@@ -100,12 +100,14 @@ if [[ ! -f "${GEMINI_TOOLING_MANIFEST}" || ! -f "${GEMINI_TOOLING_LOCK}" ]]; the
 fi
 
 lock_sha256() {
+    local lockfile_path="$1"
+
     if command -v sha256sum >/dev/null 2>&1; then
-        sha256sum "$1" | awk '{print $1}'
+        sha256sum "${lockfile_path}" | awk '{print $1}'
     elif command -v shasum >/dev/null 2>&1; then
-        shasum -a 256 "$1" | awk '{print $1}'
+        shasum -a 256 "${lockfile_path}" | awk '{print $1}'
     else
-        node -e 'const fs=require("fs");const crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$1"
+        node -e 'const fs=require("fs");const crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "${lockfile_path}"
     fi
 }
 
