@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -187,6 +188,97 @@ def test_safe_iter_local_doc_tree_ignores_transient_link_report(
 
     assert paths == ["docs/reports/index.md"]
     assert errors == []
+
+
+def test_inventory_field_diffs_reports_link_count_and_row_changes() -> None:
+    """--check should name the stale file fields instead of only the JSON path."""
+    generated = {
+        "summary": {"total_doc_like": 2},
+        "files": [
+            {
+                "path": "docs/05-operations/runbooks/index.md",
+                "outbound_links": 47,
+            },
+            {
+                "path": "docs/05-operations/runbooks/docker-security-baseline.md",
+                "inbound_links": 1,
+            },
+        ],
+    }
+    committed = {
+        "summary": {"total_doc_like": 1},
+        "files": [
+            {
+                "path": "docs/05-operations/runbooks/index.md",
+                "outbound_links": 46,
+            },
+        ],
+    }
+
+    diffs = inventory._inventory_field_diffs(generated, committed, limit=12)
+
+    assert (
+        "  files[docs/05-operations/runbooks/docker-security-baseline.md]: "
+        "generated-only"
+    ) in diffs
+    assert (
+        "  files[docs/05-operations/runbooks/index.md].outbound_links: "
+        "generated=47 committed=46"
+    ) in diffs
+    assert "  summary.total_doc_like: generated=2 committed=1" in diffs
+
+
+def test_check_inventory_drift_includes_json_field_details(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """JSON mismatches must surface compact field diffs for docs-cycle edits."""
+    monkeypatch.setattr(inventory, "PROJECT_ROOT", tmp_path)
+    json_output = tmp_path / "documentation-cleanup-inventory.json"
+    markdown_output = tmp_path / "documentation-cleanup-inventory.md"
+    generated_payload = {
+        "files": [
+            {
+                "path": "docs/05-operations/runbooks/index.md",
+                "outbound_links": 47,
+            }
+        ]
+    }
+    json_output.write_text(
+        json.dumps(
+            {
+                "files": [
+                    {
+                        "path": "docs/05-operations/runbooks/index.md",
+                        "outbound_links": 46,
+                    }
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    markdown_output.write_text("# stale\n", encoding="utf-8", newline="\n")
+    json_content = (
+        json.dumps(generated_payload, ensure_ascii=False, indent=2, sort_keys=True)
+        + "\n"
+    )
+
+    mismatches, details = inventory._check_inventory_drift(
+        json_output=json_output,
+        markdown_output=markdown_output,
+        json_content=json_content,
+        md_content="# current\n",
+    )
+
+    assert mismatches == [
+        "documentation-cleanup-inventory.json",
+        "documentation-cleanup-inventory.md",
+    ]
+    assert any("outbound_links" in line for line in details)
 
 
 def test_generated_route_violations_reports_unowned_generated_rows() -> None:
