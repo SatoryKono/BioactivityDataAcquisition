@@ -5,6 +5,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || (cd "${SCRIPT_DIR}/../../../.." && pwd))}"
+GEMINI_TOOLING_DIR="${REPO_ROOT}/scripts/ai/gemini/npm-tooling"
+GEMINI_TOOLING_MANIFEST="${GEMINI_TOOLING_DIR}/package.json"
+GEMINI_TOOLING_LOCK="${GEMINI_TOOLING_DIR}/package-lock.json"
 
 GEMINI_TOOL_HOME_DEFAULT="${REPO_ROOT}/.cache/tools/gemini-cli"
 # Windows-mounted paths under /mnt/* often reject npm rename (EACCES) and are
@@ -33,6 +36,21 @@ if [[ -z "${GEMINI_CLI_HOME:-}" ]]; then
 fi
 GEMINI_BIN="${GEMINI_NPM_PREFIX}/bin/gemini"
 GEMINI_NODE_BIN="${GEMINI_NPM_PREFIX}/bin/node"
+GEMINI_CACHE_STAMP="${GEMINI_NPM_PREFIX}/.toolchain-cache-id"
+
+case "$(uname -s):$(uname -m)" in
+    Linux:x86_64)
+        GEMINI_NODE_PACKAGE="node-linux-x64"
+        ;;
+    Linux:aarch64 | Linux:arm64)
+        GEMINI_NODE_PACKAGE="node-linux-arm64"
+        ;;
+    *)
+        echo "[ensure-gemini] ERROR: Unsupported managed Node platform: $(uname -s):$(uname -m)" >&2
+        exit 1
+        ;;
+esac
+GEMINI_NODE_SOURCE="${GEMINI_NPM_PREFIX}/node_modules/${GEMINI_NODE_PACKAGE}/bin/node"
 
 MODE_ENSURE="ensure"
 MODE_UPDATE="update"
@@ -76,6 +94,24 @@ if ! command -v npm >/dev/null 2>&1; then
     exit 1
 fi
 
+if [[ ! -f "${GEMINI_TOOLING_MANIFEST}" || ! -f "${GEMINI_TOOLING_LOCK}" ]]; then
+    echo "[ensure-gemini] ERROR: Pinned tooling manifest or lockfile is missing: ${GEMINI_TOOLING_DIR}" >&2
+    exit 1
+fi
+
+lock_sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$1" | awk '{print $1}'
+    elif command -v shasum >/dev/null 2>&1; then
+        shasum -a 256 "$1" | awk '{print $1}'
+    else
+        node -e 'const fs=require("fs");const crypto=require("crypto");process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"))' "$1"
+    fi
+}
+
+EXPECTED_LOCK_SHA="$(lock_sha256 "${GEMINI_TOOLING_LOCK}")"
+EXPECTED_CACHE_ID="${EXPECTED_LOCK_SHA}:${GEMINI_NODE_PACKAGE}"
+
 if [[ "${ALLOW_INSTALL}" -eq 1 ]]; then
     mkdir -p "${GEMINI_NPM_PREFIX}"
     mkdir -p "${GEMINI_NPM_CACHE}"
@@ -89,8 +125,17 @@ export npm_config_cache="${GEMINI_NPM_CACHE}"
 export PATH="${GEMINI_NPM_PREFIX}/bin:${PATH}"
 
 need_install=0
-if [[ "${MODE}" == "${MODE_UPDATE}" || ! -x "${GEMINI_BIN}" || ! -x "${GEMINI_NODE_BIN}" ]]; then
+CURRENT_CACHE_ID=""
+if [[ -f "${GEMINI_CACHE_STAMP}" ]]; then
+    CURRENT_CACHE_ID="$(tr -d '[:space:]' < "${GEMINI_CACHE_STAMP}")"
+fi
+if [[ "${MODE}" == "${MODE_UPDATE}" || ! -x "${GEMINI_BIN}" || ! -x "${GEMINI_NODE_BIN}" || ! -x "${GEMINI_NODE_SOURCE}" || "${CURRENT_CACHE_ID}" != "${EXPECTED_CACHE_ID}" ]]; then
     need_install=1
+fi
+
+if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 0 ]]; then
+    echo "[ensure-gemini] ERROR: Managed Gemini CLI is missing or stale for package-lock.json; run with --ensure" >&2
+    exit 1
 fi
 
 if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
@@ -100,12 +145,21 @@ if [[ "${need_install}" -eq 1 && "${ALLOW_INSTALL}" -eq 1 ]]; then
         echo "[ensure-gemini] Installing Gemini CLI in ${GEMINI_NPM_PREFIX}..." >&2
     fi
 
-    # Scorecard PinnedDependencies (alerts 1410/1411): version-pinned dev bootstrap
-    # in ephemeral cache (.cache/tools/gemini-cli) — not runtime uv.lock/scratch.
-    # Hash pin via npm registry integrity is verified by npm; renovate/dependabot
-    # tracks version bumps. Intentional for semver dev helper.
-    npm --global --prefix "${GEMINI_NPM_PREFIX}" --silent install node@22.18.0 @google/gemini-cli@0.57.0 \
-        2>/dev/null || npm --global --prefix "${GEMINI_NPM_PREFIX}" install node@22.18.0 @google/gemini-cli@0.57.0 >&2
+    # Scorecard PinnedDependencies (alerts 1410/1411): install only the committed
+    # integrity-pinned dependency graph. Never fall back to an unlocked install.
+    cp "${GEMINI_TOOLING_MANIFEST}" "${GEMINI_NPM_PREFIX}/package.json"
+    cp "${GEMINI_TOOLING_LOCK}" "${GEMINI_NPM_PREFIX}/package-lock.json"
+    npm ci --prefix "${GEMINI_NPM_PREFIX}" --omit=dev --ignore-scripts --no-fund --no-audit >&2
+
+    mkdir -p "${GEMINI_NPM_PREFIX}/bin"
+    if [[ ! -x "${GEMINI_NPM_PREFIX}/node_modules/.bin/gemini" || ! -x "${GEMINI_NODE_SOURCE}" ]]; then
+        echo "[ensure-gemini] ERROR: Locked dependency installation did not produce the expected binaries" >&2
+        exit 1
+    fi
+    ln -sfn ../node_modules/.bin/gemini "${GEMINI_BIN}"
+    ln -sfn "../node_modules/${GEMINI_NODE_PACKAGE}/bin/node" "${GEMINI_NODE_BIN}"
+    printf '%s\n' "${EXPECTED_CACHE_ID}" > "${GEMINI_CACHE_STAMP}.tmp"
+    mv -f "${GEMINI_CACHE_STAMP}.tmp" "${GEMINI_CACHE_STAMP}"
 fi
 
 if [[ ! -x "${GEMINI_BIN}" ]]; then

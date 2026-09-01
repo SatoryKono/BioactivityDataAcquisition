@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.5
+Version: 1.2.8
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-30'
+  Last verified: '2026-09-01'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-08-30*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-01*
 
 ______________________________________________________________________
 
@@ -313,7 +313,7 @@ ruleset `root-hygiene-required-check` while enforcement is active. Repo-side evi
 repository ruleset state plus the workflows that materialize
 `checks-complete` and `root-hygiene` on pull requests.
 
-Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set).
+Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection.
 
 Live GitHub enforcement state:
 
@@ -322,19 +322,24 @@ Live GitHub enforcement state:
 - Enforcement: `active`.
 - Direct updates to main are blocked by this ruleset when required checks are missing or failing.
 - Defined status checks: exactly `checks-complete` and `root-hygiene`
-  (`strict_required_status_checks_policy: false`).
+  (`strict_required_status_checks_policy: true`).
 - The ruleset has no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rule on `main`: required status checks from ruleset `15730586`.
-- Tracking references: `#3380`, `#8619`, `#9800`.
+- Applied rules on `main`: required status checks from ruleset `15730586`;
+  deletion and non-fast-forward protection from ruleset `13643213`.
+- Tracking references: `#3380`, `#8619`, `#9800`, Scorecard `#1272`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
 
-The legacy repository ruleset `main`
+The companion repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-is also **disabled** and is not part of the gate set.
+targets `refs/heads/main`, is **active**, and has exactly the `deletion` and
+`non_fast_forward` rules with no bypass actors. It intentionally omits required
+signatures and pull-request approvals: the repository currently has one direct
+collaborator, so an independent-approval requirement would create a governance
+deadlock. Scorecard CodeReview alert `#1295` therefore remains open.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -641,17 +646,17 @@ ______________________________________________________________________
 *See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*
 
 
-### Main ruleset (RF-008 / GH-RULESET-001 — required checks active)
+### Main rulesets (RF-008 / GH-RULESET-001 — required checks and ref protection active)
 
 Target: `refs/heads/main` (ruleset `15730586` `root-hygiene-required-check`).
-Rules currently enforced: required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:false`). No bypass actors (`current_user_can_bypass: never`). Additional review/linear-history rules remain out of this ruleset. Rollback: `gh api --method PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586` with `enforcement=disabled` + record in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
+Rules currently enforced: required status checks `[checks-complete, root-hygiene]` (`strict_required_status_checks_policy:true`). Companion ruleset `13643213` `main` enforces `deletion` and `non_fast_forward` protection on the same ref. Both rulesets have no bypass actors (`current_user_can_bypass: never`). Additional review/linear-history/signature rules remain out of these rulesets. Rollback requires an explicitly approved PUT for the affected ruleset and a new entry in §3 Evidence. Tracking: Scorecard #1272 (BranchProtection), #1295 (CodeReview), #1296 (CIIBestPractices).
 
 ### Quarterly Read-Only Review Runbook (read-only, no mutations)
 
 Owner: @SatoryKono · Cadence: quarterly · Last: 2026-08-28 → Next: 2026-11-28 · Due: +5 days after quarter (Q4 due `2026-12-05`, cron `23 6 1 1,4,7,10`) · Evidence: `reports/governance/quarterly-review-YYYY-QN.md` + `reports/quality/github-settings-review*.json` (30d retention, `automation_mutated_github:false`).
 
 Checklist (read-only `GET`, `--paginate` where paginated, no `PUT/PATCH/POST/DELETE`):
-`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 active + legacy 13643213) → `GET /rules/branches/main` (required status checks when 15730586 is active) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
+`GET /repos/{owner}/{repo}/rulesets` → `GET /rulesets/{id}` (15730586 and 13643213 both active) → `GET /rules/branches/main` (required status checks when 15730586 is active) → `GET /code-scanning/alerts?per_page=100` → `GET /labels?per_page=100 --paginate` (209 labels) → `GET /repos/{repo} --jq '{has_wiki,default_branch}'`.
 Escalation: drift → open/update governance issue (high-risk → Security lane/Release engineering day of review); do not expand token scopes.
 Verification (no token, dry-run): `pytest tests/architecture/test_github_governance_review.py` (`READ_ONLY_GH_COMMANDS` + `workflow_dispatch` + `cron 23 6 1 1,4,7,10`).
 
@@ -688,6 +693,31 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
 ```
 
 Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/merge` returned HTTP 405 `Required status check "checks-complete" is expected.` while ruleset 15730586 was `active`.
+
+### Evidence (2026-09-01)
+
+```json
+{
+  "rulesets": [
+    {
+      "id": 15730586,
+      "name": "root-hygiene-required-check",
+      "enforcement": "active",
+      "strict_required_status_checks_policy": true,
+      "required_status_checks": ["checks-complete", "root-hygiene"],
+      "bypass_actors": []
+    },
+    {
+      "id": 13643213,
+      "name": "main",
+      "enforcement": "active",
+      "include": ["refs/heads/main"],
+      "rules": ["deletion", "non_fast_forward"],
+      "bypass_actors": []
+    }
+  ]
+}
+```
 
 ### Migration notes (1.2.2)
 
@@ -732,3 +762,12 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - #9800 closeout: ruleset `15730586` `root-hygiene-required-check` is `active`
   on `refs/heads/main` with required contexts `checks-complete` and
   `root-hygiene`, no bypass actors. Rollback remains `enforcement=disabled`.
+
+### Migration notes (1.2.8)
+
+- Scorecard #1272 partial remediation: activated ruleset `13643213` on
+  `refs/heads/main` with only deletion and non-fast-forward protection.
+- Enabled strict up-to-date policy for the existing required contexts in
+  ruleset `15730586`; no bypass actors were added.
+- Scorecard #1295 stays open because the live repository has one direct
+  collaborator and an independent-approval rule would deadlock maintenance.

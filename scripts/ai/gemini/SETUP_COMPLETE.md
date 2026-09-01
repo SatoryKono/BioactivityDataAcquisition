@@ -7,9 +7,9 @@ Your Gemini CLI is fully configured and ready for interactive use:
 | Component | Status | Details |
 |-----------|--------|---------|
 | **WSL** | ✅ Active | Uses the default WSL distro, or `BIOETL_WSL_DISTRO` when set |
-| **Node.js** | ✅ Installed | v18.19.1 |
+| **Node.js** | ✅ Installed | v22.18.0 (managed, integrity-pinned Linux package) |
 | **npm** | ✅ Installed | v9.2.0 |
-| **Gemini CLI** | ✅ Installed | v0.39.1 (managed in `.cache/tools/gemini-cli/`) |
+| **Gemini CLI** | ✅ Installed | v0.57.0 (managed in `.cache/tools/gemini-cli/`) |
 | **API Key** | ✅ Configured | Set in `.env.gemini` |
 | **MCP Servers** | ✅ Ready | `filesystem`, `git`, `docker` (if running) |
 | **Workspace Config** | ✅ Synced | `.gemini/settings.json` auto-created at startup |
@@ -143,9 +143,9 @@ bash scripts/ai/gemini/run-gemini.sh mcp-setup
 ## 📋 Setup Checklist
 
 - [x] WSL environment verified
-- [x] Node.js 18+ installed
+- [x] Managed Node.js v22.18.0 installed
 - [x] npm installed
-- [x] Gemini CLI v0.39.1 installed (managed in `.cache/tools/gemini-cli/`)
+- [x] Gemini CLI v0.57.0 installed (managed in `.cache/tools/gemini-cli/`)
 - [x] API key configured in `.env.gemini`
 - [x] MCP servers configured and synced
 - [x] Interactive launchers created (`gemini-interactive.ps1/sh`)
@@ -178,7 +178,7 @@ bash scripts/ai/gemini/run-gemini.sh mcp-setup
 # Check everything is OK
 bash scripts/ai/gemini/run-gemini.sh check
 
-# Update Gemini CLI to latest
+# Reinstall the reviewed lockfile-pinned Gemini CLI
 bash scripts/ai/gemini/run-gemini.sh update
 
 # Show all available commands
