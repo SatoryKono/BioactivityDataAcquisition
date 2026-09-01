@@ -87,6 +87,16 @@ def test_write_bytes_if_absent_or_same_handles_exclusive_create_race(
     target.write_bytes(existing)
 
     def simulate_concurrent_publish(source: Path, final_target: Path) -> None:
+        """
+        Simulate a concurrent publication collision.
+        
+        Parameters:
+        	source (Path): Temporary source path for the simulated publication.
+        	final_target (Path): Target path reported as already published.
+        
+        Raises:
+        	FileExistsError: Always, using `final_target` as the conflicting path.
+        """
         del source
         raise FileExistsError(final_target)
 
