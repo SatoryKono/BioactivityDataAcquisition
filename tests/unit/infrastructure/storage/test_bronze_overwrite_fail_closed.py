@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import errno
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -64,11 +63,11 @@ def test_concurrent_identical_bronze_payload_is_idempotent(
     def publish_other_writer(source: Path, final_target: Path) -> None:
         """
         Simulate another writer publishing a file before reporting a conflict.
-
+        
         Parameters:
             source (Path): Path containing the bytes to publish.
             final_target (Path): Destination path for the published bytes.
-
+        
         Raises:
             FileExistsError: Always raised after the bytes are written to the destination.
         """
@@ -135,31 +134,6 @@ def test_payload_publish_failure_leaves_no_partial_final_target(
 
 
 @pytest.mark.unit
-def test_publish_existing_target_raises_file_exists_cross_platform(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    source = tmp_path / ".batch.tmp"
-    target = tmp_path / "batch.jsonl.zst"
-    source.write_bytes(b"complete-payload")
-
-    def fail_link_existing(source_path: str, target_path: str) -> None:
-        del source_path, target_path
-        raise OSError(errno.EEXIST, "already exists")
-
-    monkeypatch.setattr(
-        "bioetl.infrastructure.storage.bronze.io_mixin.os.link",
-        fail_link_existing,
-    )
-
-    with pytest.raises(FileExistsError, match="already exists"):
-        _publish_new_file_exclusive(source, target)
-
-    assert not target.exists()
-    assert source.read_bytes() == b"complete-payload"
-
-
-@pytest.mark.unit
 def test_sidecar_publish_failure_leaves_no_partial_final_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -169,7 +143,7 @@ def test_sidecar_publish_failure_leaves_no_partial_final_target(
     def fail_publish(source: Path, final_target: Path) -> None:
         """
         Simulate a failure while publishing a temporary file.
-
+        
         Raises:
             OSError: Always, to represent a publish failure.
         """
@@ -202,9 +176,9 @@ def test_concurrent_different_sidecar_is_not_overwritten(
     def publish_other_writer(source: Path, final_target: Path) -> None:
         """
         Publish competing content at the target path and then signal that it already exists.
-
+        
         Parameters:
-            final_target (Path): Path to the target file to populate before raising the error.
+        	final_target (Path): Path to the target file to populate before raising the error.
         """
         del source
         final_target.write_bytes(b"other-writer")

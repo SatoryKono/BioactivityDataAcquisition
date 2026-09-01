@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `main`
-- Source commit: `64379be36ad9342a9c4fa74bb62ac9e2eb5eb254`
-- Source run id: `33480065022`
+- Source branch: `fix/medallion-cycle-1ba86729`
+- Source commit: `b29220707f3766a224e5fe5f8bda16fb815ed8e0`
+- Source run id: `b29220707f`
 - Source event: `push`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33480065022`
 - Source tree sha256: `74ecef52870e9a492cf0d7ffffe872909193cbc62851399cc2427eb5912a27b5`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-01T14:01:50.406129+00:00`
+- Refreshed at (UTC): `2026-09-01T16:41:47.838485+00:00`
 
 ## Branch-accurate provenance (#5729)
 

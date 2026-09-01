@@ -1,7 +1,7 @@
 {
-  "source_branch": "main",
-  "source_commit": "64379be36ad9342a9c4fa74bb62ac9e2eb5eb254",
-  "source_run_id": "33480065022",
+  "source_branch": "fix/medallion-cycle-1ba86729",
+  "source_commit": "b29220707f3766a224e5fe5f8bda16fb815ed8e0",
+  "source_run_id": "b29220707f",
   "source_event": "push",
   "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33480065022",
   "source_tree_sha256": "74ecef52870e9a492cf0d7ffffe872909193cbc62851399cc2427eb5912a27b5",
