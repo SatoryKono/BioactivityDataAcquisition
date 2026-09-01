@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-01): SHA-bound reconciliation after the main Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-02): SHA-bound reconciliation for the observability Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=840dcecaa5977f96e755b8c01656bc8a4a801cf79476d870e134f3ac3d9c60bf`
+`source_tree_sha256=92103f31ddf31453c02bd3db0807fc88a5c0789c5e879d137dfe4b3f114662dc`
 
 `source_module_count=2467`
 
