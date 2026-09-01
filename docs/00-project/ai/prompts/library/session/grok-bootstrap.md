@@ -66,7 +66,10 @@ Short start card for everyday work. Not a substitute for audit/closeout cards.
 3. Prefer worktree when main is dirty
 4. Implement or report with file-level evidence
 5. Focused tests/checks for touched surface
-6. Post-change validation; mirror parity if `.codex/**` / `.junie/**` changed
+6. Post-change validation; mirror parity if `.codex/**` / `.junie/**` changed.
+   Markdown link or `Owner:` / `Status:` / `Class:` header changes require
+   `python -m scripts.docs generate-cleanup-inventory --update` in the same
+   changeset (`--check` reads the working tree, not HEAD).
 
 ## Done when
 

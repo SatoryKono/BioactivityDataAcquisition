@@ -25,6 +25,10 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 1. Verify each claim against its canonical code/config/runtime/ADR owner.
 1. Edit canonical source before mirrors or generated output.
 1. Refresh derived artifacts only with their owner command.
+1. After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
+   `python -m scripts.docs generate-cleanup-inventory --update` and commit
+   `docs/reports/generated/documentation-cleanup-inventory.{json,md}` with the
+   docs change. `--check` reads the working tree, not `HEAD`.
 1. Re-scan links, terminology, freshness, navigation, and runtime parity.
 1. Do not preserve remembered counts or present inventory as normative debt.
 

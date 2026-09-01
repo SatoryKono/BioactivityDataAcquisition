@@ -30,6 +30,10 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 1. Separate valid-by-design, pre-existing, environment, and introduced issues.
 1. Do not infer debt from counts alone or raise any budget/threshold.
 1. Report `improved`, `unchanged`, or `worsened` debt outcome.
+1. When reviewing docs diffs, fail closed if local markdown links or
+   `Owner:` / `Status:` / `Class:` headers changed without
+   `python -m scripts.docs generate-cleanup-inventory --update` in the same
+   changeset.
 
 Do not duplicate the import matrix, scoring table, thresholds, or command
 catalog here; read their current canonical owners.

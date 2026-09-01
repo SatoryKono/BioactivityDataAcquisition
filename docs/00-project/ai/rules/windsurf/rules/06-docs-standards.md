@@ -15,4 +15,5 @@ description: "Documentation standards and governance sync"
 - Avoid ambiguous guidance; prefer explicit, testable statements.
 - Contributor-facing CLI/scripts/bootstrap steps **MUST** stay in sync with `CONTRIBUTING.md` / `docs/contributing/**` (or equivalent) in the same diff.
 - Docs that describe architecture boundaries, required gates, or sanctioned tooling **MUST NOT** contradict `.importlinter`, CI workflows, `AGENTS.md`, or `RULES.md`.
+- After markdown/docs changes that add, remove, or retarget local links, or that change `Owner:` / `Status:` / `Class:` headers, **MUST** run `python -m scripts.docs generate-cleanup-inventory --update` and commit `docs/reports/generated/documentation-cleanup-inventory.{json,md}` with the docs change. `--check` reads the working tree, not HEAD.
 - Breaking CLI/API/schema/config changes **MUST** include labeled Migration / Breaking notes (what/who/how) in the same change set.
