@@ -359,6 +359,7 @@
         "docs/05-operations/runbooks/data-recovery.md",
         "docs/05-operations/runbooks/docker-compose-project-migration.md",
         "docs/05-operations/runbooks/docker-image-resource-promotion.md",
+        "docs/05-operations/runbooks/docker-security-baseline.md",
         "docs/05-operations/runbooks/docker-stability.md",
         "docs/05-operations/runbooks/game-day.md",
         "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
