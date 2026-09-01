@@ -10,7 +10,7 @@ import re
 import subprocess
 import sys
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -36,6 +36,8 @@ MUTATING_GH_ARGUMENTS = frozenset(
     }
 )
 READ_ONLY_GH_COMMANDS = frozenset({("api",), ("repo", "view")})
+_GITHUB_DIRNAME = ".github"
+ControlResult = tuple[bool | None, str]
 
 
 class GitHubReviewError(RuntimeError):
@@ -298,7 +300,7 @@ def collect_snapshot(
         )
     labels.sort(key=lambda item: item["name"].casefold())
 
-    issue_template_dir = repo_root / ".github" / "ISSUE_TEMPLATE"
+    issue_template_dir = repo_root / _GITHUB_DIRNAME / "ISSUE_TEMPLATE"
     issue_files = sorted(
         path.name for path in issue_template_dir.iterdir() if path.is_file()
     )
@@ -308,7 +310,7 @@ def collect_snapshot(
         if Path(name).suffix.casefold() in {".yml", ".yaml"} and name != "config.yml"
     ]
     codeowners_candidates = [
-        repo_root / ".github" / "CODEOWNERS",
+        repo_root / _GITHUB_DIRNAME / "CODEOWNERS",
         repo_root / "CODEOWNERS",
         repo_root / "docs" / "CODEOWNERS",
     ]
@@ -415,87 +417,160 @@ def _optional_payload_value(container: dict[str, Any], key: str) -> Any:
     return payload.get(key) if isinstance(payload, dict) else None
 
 
+def _control_active_ruleset(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    active = [
+        item["name"]
+        for item in snapshot["rulesets"]
+        if item.get("enforcement") == "active"
+    ]
+    return bool(active), f"active rulesets: {active or 'none'}"
+
+
+def _control_sha_pinning_required(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = _optional_payload_value(
+        snapshot["actions_permissions"], "sha_pinning_required"
+    )
+    if value is None:
+        return None, f"sha_pinning_required={value}"
+    return value is True, f"sha_pinning_required={value}"
+
+
+def _control_protected_environments(
+    snapshot: dict[str, Any], policy: dict[str, Any]
+) -> ControlResult:
+    by_name = {item["name"]: item for item in snapshot["environments"]}
+    missing: list[str] = []
+    unprotected: list[str] = []
+    for name in policy["protected_environments"]:
+        item = by_name.get(name)
+        if item is None:
+            missing.append(name)
+        elif not item["protection_rules"] and not item["deployment_branch_policy"]:
+            unprotected.append(name)
+    evidence = f"missing={missing or 'none'}; unprotected={unprotected or 'none'}"
+    return not missing and not unprotected, evidence
+
+
+def _control_dependabot_security_updates(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    alerts = snapshot["dependabot"]["alerts"].get("enabled")
+    updates = snapshot["dependabot"]["security_updates"].get("enabled")
+    evidence = f"alerts={alerts}; security_updates={updates}"
+    if alerts is None or updates is None:
+        return None, evidence
+    return alerts is True and updates is True, evidence
+
+
+def _control_advanced_codeql(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    exists = snapshot["codeql"]["advanced_workflow_exists"]
+    return exists, f"{_GITHUB_DIRNAME}/workflows/codeql.yml exists={exists}"
+
+
+def _control_secret_scanning(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = snapshot["settings"]["secret_scanning"]
+    if value is None:
+        return None, f"secret_scanning={value}"
+    return value == "enabled", f"secret_scanning={value}"
+
+
+def _control_codeowners(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = snapshot["codeowners"]["exists"]
+    return value, f"path={snapshot['codeowners']['path']}"
+
+
+def _control_squash_only(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    settings = snapshot["settings"]
+    value = (
+        settings["allow_squash_merge"] is True
+        and settings["allow_merge_commit"] is False
+        and settings["allow_rebase_merge"] is False
+    )
+    evidence = (
+        f"squash={settings['allow_squash_merge']}; "
+        f"merge_commit={settings['allow_merge_commit']}; "
+        f"rebase={settings['allow_rebase_merge']}"
+    )
+    return value, evidence
+
+
+def _control_wiki_disabled(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    value = snapshot["settings"]["has_wiki"]
+    if value is None:
+        return None, f"has_wiki={value}"
+    return value is False, f"has_wiki={value}"
+
+
+def _control_issue_forms(
+    snapshot: dict[str, Any], policy: dict[str, Any]
+) -> ControlResult:
+    intake = policy["issue_intake"]
+    expected = set(intake["primary_forms"] + intake["specialized_forms"])
+    actual = set(snapshot["issue_intake"]["forms"])
+    value = actual == expected and snapshot["issue_intake"]["config_exists"]
+    evidence = (
+        f"forms={sorted(actual)}; config_exists="
+        f"{snapshot['issue_intake']['config_exists']}"
+    )
+    return value, evidence
+
+
+def _control_automation_labels(
+    snapshot: dict[str, Any], policy: dict[str, Any]
+) -> ControlResult:
+    actual = {item["name"] for item in snapshot["labels"]["items"]}
+    missing = sorted(set(policy["labels"]["automation_required"]) - actual)
+    return not missing, f"missing={missing or 'none'}"
+
+
+_CONTROL_CHECKS: dict[
+    str, Callable[[dict[str, Any], dict[str, Any]], ControlResult]
+] = {
+    "active_ruleset": _control_active_ruleset,
+    "sha_pinning_required": _control_sha_pinning_required,
+    "protected_environments": _control_protected_environments,
+    "dependabot_security_updates": _control_dependabot_security_updates,
+    "advanced_codeql": _control_advanced_codeql,
+    "secret_scanning": _control_secret_scanning,
+    "codeowners": _control_codeowners,
+    "squash_only": _control_squash_only,
+    "wiki_disabled": _control_wiki_disabled,
+    "issue_forms": _control_issue_forms,
+    "automation_labels": _control_automation_labels,
+}
+
+
 def _check_control(
     check: str,
     snapshot: dict[str, Any],
     policy: dict[str, Any],
-) -> tuple[bool | None, str]:
-    if check == "active_ruleset":
-        active = [
-            item["name"]
-            for item in snapshot["rulesets"]
-            if item.get("enforcement") == "active"
-        ]
-        return bool(active), f"active rulesets: {active or 'none'}"
-    if check == "sha_pinning_required":
-        value = _optional_payload_value(
-            snapshot["actions_permissions"], "sha_pinning_required"
-        )
-        return (
-            None if value is None else value is True
-        ), f"sha_pinning_required={value}"
-    if check == "protected_environments":
-        by_name = {item["name"]: item for item in snapshot["environments"]}
-        missing: list[str] = []
-        unprotected: list[str] = []
-        for name in policy["protected_environments"]:
-            item = by_name.get(name)
-            if item is None:
-                missing.append(name)
-            elif not item["protection_rules"] and not item["deployment_branch_policy"]:
-                unprotected.append(name)
-        evidence = f"missing={missing or 'none'}; unprotected={unprotected or 'none'}"
-        return not missing and not unprotected, evidence
-    if check == "dependabot_security_updates":
-        alerts = snapshot["dependabot"]["alerts"].get("enabled")
-        updates = snapshot["dependabot"]["security_updates"].get("enabled")
-        if alerts is None or updates is None:
-            return None, f"alerts={alerts}; security_updates={updates}"
-        return alerts is True and updates is True, (
-            f"alerts={alerts}; security_updates={updates}"
-        )
-    if check == "advanced_codeql":
-        exists = snapshot["codeql"]["advanced_workflow_exists"]
-        return exists, f".github/workflows/codeql.yml exists={exists}"
-    if check == "secret_scanning":
-        value = snapshot["settings"]["secret_scanning"]
-        return (None if value is None else value == "enabled"), (
-            f"secret_scanning={value}"
-        )
-    if check == "codeowners":
-        value = snapshot["codeowners"]["exists"]
-        return value, f"path={snapshot['codeowners']['path']}"
-    if check == "squash_only":
-        settings = snapshot["settings"]
-        value = (
-            settings["allow_squash_merge"] is True
-            and settings["allow_merge_commit"] is False
-            and settings["allow_rebase_merge"] is False
-        )
-        evidence = (
-            f"squash={settings['allow_squash_merge']}; "
-            f"merge_commit={settings['allow_merge_commit']}; "
-            f"rebase={settings['allow_rebase_merge']}"
-        )
-        return value, evidence
-    if check == "wiki_disabled":
-        value = snapshot["settings"]["has_wiki"]
-        return (None if value is None else value is False), f"has_wiki={value}"
-    if check == "issue_forms":
-        intake = policy["issue_intake"]
-        expected = set(intake["primary_forms"] + intake["specialized_forms"])
-        actual = set(snapshot["issue_intake"]["forms"])
-        value = actual == expected and snapshot["issue_intake"]["config_exists"]
-        evidence = (
-            f"forms={sorted(actual)}; config_exists="
-            f"{snapshot['issue_intake']['config_exists']}"
-        )
-        return value, evidence
-    if check == "automation_labels":
-        actual = {item["name"] for item in snapshot["labels"]["items"]}
-        missing = sorted(set(policy["labels"]["automation_required"]) - actual)
-        return not missing, f"missing={missing or 'none'}"
-    raise GitHubReviewError(f"unknown governance control: {check}")
+) -> ControlResult:
+    handler = _CONTROL_CHECKS.get(check)
+    if handler is None:
+        raise GitHubReviewError(f"unknown governance control: {check}")
+    return handler(snapshot, policy)
+
+
+def _control_status(passed: bool | None) -> str:
+    if passed is True:
+        return "pass"
+    if passed is None:
+        return "unavailable"
+    return "drift"
 
 
 def evaluate_snapshot(
@@ -510,9 +585,7 @@ def evaluate_snapshot(
     results: list[dict[str, Any]] = []
     for control in policy["controls"]:
         passed, evidence = _check_control(control["check"], snapshot, policy)
-        status = (
-            "pass" if passed is True else ("unavailable" if passed is None else "drift")
-        )
+        status = _control_status(passed)
         due_date = (
             (reviewed_at + timedelta(days=control["due_days"])).date().isoformat()
         )
