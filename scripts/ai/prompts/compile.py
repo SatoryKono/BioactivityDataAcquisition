@@ -171,17 +171,6 @@ def _format_param(value: Any) -> str:
     return str(value)
 
 
-_PROFILE_PARAM_KEYS = {
-    "MODE",
-    "AUDIT_MODE",
-    "N",
-    "LANGUAGE",
-    "SCOPE",
-    "BASE_BRANCH",
-    "WORK_BRANCH",
-}
-
-
 def resolve_params(
     overlay_data: dict[str, Any],
     profile_data: dict[str, Any],
@@ -194,7 +183,17 @@ def resolve_params(
     for key, val in profile_data.items():
         if key in {"name", "description"}:
             continue
-        if key in params or key.startswith("ALLOW_") or key in _PROFILE_PARAM_KEYS:
+        if key in params:
+            params[key] = val
+        elif key.startswith("ALLOW_") or key in {
+            "MODE",
+            "AUDIT_MODE",
+            "N",
+            "LANGUAGE",
+            "SCOPE",
+            "BASE_BRANCH",
+            "WORK_BRANCH",
+        }:
             params[key] = val
 
     # Overlay-derived SCOPE: SCOPE is array in overlay, string in kernel
@@ -458,63 +457,50 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _fail_missing(kind: str, directory: Path) -> int:
-    LOGGER.error("no %s found in %s", kind, directory)
-    print(f"no {kind} found in {directory}", file=sys.stderr)
-    return 1
-
-
-def _result_status(result: dict[str, Any]) -> str:
-    if result.get("error"):
-        return "FAIL"
-    if result.get("drift"):
-        return "DRIFT"
-    if result.get("written"):
-        return "WROTE"
-    return "OK"
-
-
-def _emit_compile_results(results: list[dict[str, Any]]) -> None:
-    for result in results:
-        status = _result_status(result)
-        msg = (
-            f"{status} {result['domain']}/{result['profile']}: "
-            f"{result.get('error') or result.get('output_path', '')}"
-        )
-        if result.get("error") or result.get("drift"):
-            LOGGER.error("%s", msg)
-        else:
-            LOGGER.info("%s", msg)
-        print(msg, file=sys.stderr)
-
-
-def _compile_exit_code(check: bool, results: list[dict[str, Any]]) -> int:
-    errors = [item for item in results if item.get("error")]
-    drifts = [item for item in results if item.get("drift")]
-    if errors or (check and drifts):
-        return 1
-    return 0
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
     if args.all:
         domains = discover_overlays()
-        if not domains:
-            return _fail_missing("overlays", OVERLAYS_DIR)
         profiles = discover_profiles()
+        if not domains:
+            LOGGER.error("no overlays found in %s", OVERLAYS_DIR)
+            print(f"no overlays found in {OVERLAYS_DIR}", file=sys.stderr)
+            return 1
         if not profiles:
-            return _fail_missing("profiles", PROFILES_DIR)
+            LOGGER.error("no profiles found in %s", PROFILES_DIR)
+            print(f"no profiles found in {PROFILES_DIR}", file=sys.stderr)
+            return 1
         results = compile_many(domains, profiles, check=args.check)
     else:
         if not args.domain or not args.profile:
             parser.error("--domain and --profile are required unless --all is set")
         results = [compile_one(args.domain, args.profile, check=args.check)]
 
-    _emit_compile_results(results)
-    return _compile_exit_code(args.check, results)
+    errors = [r for r in results if r.get("error")]
+    drifts = [r for r in results if r.get("drift")]
+
+    for r in results:
+        status = "OK"
+        if r.get("error"):
+            status = "FAIL"
+        elif r.get("drift"):
+            status = "DRIFT"
+        elif r.get("written"):
+            status = "WROTE"
+        msg = f"{status} {r['domain']}/{r['profile']}: {r.get('error') or r.get('output_path', '')}"
+        if r.get("error") or r.get("drift"):
+            LOGGER.error("%s", msg)
+        else:
+            LOGGER.info("%s", msg)
+        print(msg, file=sys.stderr)
+
+    if args.check and (errors or drifts):
+        return 1
+    if errors:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
