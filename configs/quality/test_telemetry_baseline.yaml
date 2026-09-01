@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: master20260831-7
-refreshed_at_utc: '2026-08-31T22:37:55.730789+00:00'
+refreshed_at_utc: '2026-09-01T05:27:33.184222+00:00'
 refresh_status: captured
 source_commit: 10a3a11558f1d655239dd5ec733926999be48188
 source_run_id: '33445113707'
