@@ -3,12 +3,14 @@
 Дата: 2026-08-17
 Статус: refreshed
 
+Refresh note (2026-09-01): hash-only reconcile after Silver schema.items() iteration; `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`.
+
 Refresh note (2026-08-31): hash-only reconcile after restoring coverage measurements
 from the last valid inventory and adding
 `src/bioetl/infrastructure/adapters/uniprot/_idmapping_url_policy.py`.
 Current source baseline is
 `source_module_count=2467` with
-`source_tree_sha256=2c61c91ad498dcf87aa513912c0d793ab77eaec904070cbe2c14b96dcdc74197`.
+`source_tree_sha256=47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56`.
 
 Refresh note (2026-08-26): governance closeout refresh after the composition registry consolidation; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
