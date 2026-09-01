@@ -382,7 +382,6 @@
         "src/bioetl/composition/entrypoints.py",
         "src/bioetl/domain/locking.py",
         "src/bioetl/infrastructure/observability/tracing.py",
-        "src/bioetl/interfaces/http/_processed_records_table_support.py",
         "tests/architecture/test_docker_runtime_contracts.py",
         "tests/architecture/test_docs_root_surface_governance_alignment.py",
         "tests/architecture/test_forbidden_imports.py",
