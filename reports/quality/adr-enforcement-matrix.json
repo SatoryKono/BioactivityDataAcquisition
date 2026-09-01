@@ -20,7 +20,6 @@
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
-        "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",
         "docs/00-project/glossary.md",
         "docs/00-project/index.md",
         "docs/01-requirements/REQUIREMENTS.md",

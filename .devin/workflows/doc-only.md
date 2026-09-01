@@ -61,6 +61,9 @@ make devin-update-docs
 - No MUST findings from py-audit-bot
 - Links and references are valid
 - Documentation follows project style guide
+- If local markdown links or `Owner:` / `Status:` / `Class:` headers changed,
+  `python -m scripts.docs generate-cleanup-inventory --check` passes and the
+  generated JSON/MD is in the same changeset
 
 ## When NOT to Use
 - Code changes included
