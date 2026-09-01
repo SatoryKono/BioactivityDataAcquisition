@@ -1,5 +1,11 @@
 # Сводка evidence: project-package-topology
 
+Refresh note (2026-09-01): hash-only reconcile after Bronze exclusive publish; `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`.
+
+`source_tree_sha256=f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259`
+
+`source_module_count=2467`
+
 Дата: 2026-08-17
 Статус: refreshed
 
