@@ -15,6 +15,8 @@ Extracted from SilverDQAnalyzer (RF-010).
 
 from __future__ import annotations
 
+from itertools import islice
+
 import polars as pl
 
 from bioetl.application.services.dq.silver_statistics_helpers import (
@@ -159,11 +161,7 @@ class SilverStatisticsCalculator:
         numeric_cols: dict[str, NumericDistribution] = {}
         categorical_cols: dict[str, CategoricalDistribution] = {}
 
-        import itertools
-
-        for col, dtype in itertools.islice(
-            df.schema.items(), 20
-        ):  # Limit to first 20 columns
+        for col, dtype in islice(df.schema.items(), 20):
             if dtype in (pl.Float64, pl.Float32, pl.Int64, pl.Int32, pl.Int16, pl.Int8):
                 numeric_dist = _profile_numeric_column(df, col, _SILVER_PROFILE_ERRORS)
                 if numeric_dist is not None:

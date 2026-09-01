@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "7ac3c38a380857605a5bfe5b70b192a5da6642d63a242f02ea71d3a47aa5be09",
+  "coverage_xml_sha256": "c183bbf920403b5d955bec26e416621b2c1c6e5dd2ce0557fc69b82c9616c36c",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -22836,24 +22836,24 @@
       "source_lines": 9
     },
     {
-      "coverage_percent": 96.15,
+      "coverage_percent": 96.3,
       "coverage_status": "partially_covered",
-      "covered_lines": 50,
-      "executable_lines": 52,
+      "covered_lines": 52,
+      "executable_lines": 54,
       "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.support._atomic_replace",
       "path": "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
-      "source_lines": 109
+      "source_lines": 127
     },
     {
-      "coverage_percent": 98.21,
+      "coverage_percent": 98.28,
       "coverage_status": "partially_covered",
-      "covered_lines": 55,
-      "executable_lines": 56,
+      "covered_lines": 57,
+      "executable_lines": 58,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.support.atomic_group",
       "path": "src/bioetl/infrastructure/storage/support/atomic_group.py",
-      "source_lines": 104
+      "source_lines": 108
     },
     {
       "coverage_percent": 100.0,
@@ -47508,24 +47508,24 @@
       "source_lines": 9
     },
     {
-      "coverage_percent": 96.15,
+      "coverage_percent": 96.3,
       "coverage_status": "partially_covered",
-      "covered_lines": 50,
-      "executable_lines": 52,
+      "covered_lines": 52,
+      "executable_lines": 54,
       "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.support._atomic_replace",
       "path": "src/bioetl/infrastructure/storage/support/_atomic_replace.py",
-      "source_lines": 109
+      "source_lines": 127
     },
     {
-      "coverage_percent": 98.21,
+      "coverage_percent": 98.28,
       "coverage_status": "partially_covered",
-      "covered_lines": 55,
-      "executable_lines": 56,
+      "covered_lines": 57,
+      "executable_lines": 58,
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.support.atomic_group",
       "path": "src/bioetl/infrastructure/storage/support/atomic_group.py",
-      "source_lines": 104
+      "source_lines": 108
     },
     {
       "coverage_percent": 100.0,
@@ -49349,8 +49349,8 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-08-31",
-  "source_tree_sha256": "82258c2a31072778ca6331f64737928bbb07281de1b969135473d14262da5b4b",
+  "snapshot_date": "2026-09-01",
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
