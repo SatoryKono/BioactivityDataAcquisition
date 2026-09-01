@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate/check the documentation cleanup inventory.
 
-The inventory is intentionally deterministic: it is derived from tracked files,
-bounded local documentation scans, normalized duplicate groups for scanned
-documents, and the generated artifact routing registry. It does not use
-wall-clock time.
+The inventory is intentionally deterministic: it is derived from git-tracked
+files, normalized duplicate groups for scanned documents, and the generated
+artifact routing registry. Bounded local docs/reports scans still run for
+scan errors, but gitignored machine-local files are not mixed into committed
+--check/--update artifacts. It does not use wall-clock time.
 """
 
 from __future__ import annotations
@@ -987,8 +988,10 @@ def _accumulate_inventory_counts(
 def _build_inventory() -> dict[str, Any]:
     tracked_all = set(_run_git_ls_files())
     tracked = [path for path in sorted(tracked_all) if _is_doc_like(path)]
-    local_docs_reports, scan_errors = _safe_iter_local_docs_reports()
-    source_paths = sorted(set(tracked) | set(local_docs_reports))
+    _, scan_errors = _safe_iter_local_docs_reports()
+    # Committed inventory must be checkout-invariant: ignore gitignored local
+    # docs/reports clutter so --check matches CI.
+    source_paths = sorted(tracked)
     catalog = _load_structure_catalog()
     plan_lifecycle = _plan_lifecycle_map(catalog)
     docs_draft_successors = _docs_draft_successor_map(catalog)
@@ -1077,7 +1080,9 @@ def _build_inventory() -> dict[str, Any]:
             "total_doc_like_ignored_local": sum(
                 1 for row in records if row["tracking_state"] == "ignored_local"
             ),
-            "docs_reports_local_count": len(local_docs_reports),
+            "docs_reports_local_count": sum(
+                1 for path in tracked if path.startswith(DOCS_REPORTS_PREFIX)
+            ),
             "by_status": dict(sorted(status_counts.items())),
             "by_surface_family": dict(sorted(surface_counts.items())),
             "by_tracking_state": dict(sorted(tracking_state_counts.items())),

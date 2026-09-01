@@ -83,6 +83,12 @@ def _passing_snapshot() -> dict:
     }
 
 
+def test_captured_subprocess_output_uses_utf8() -> None:
+    assert TOOL._CAPTURED_TEXT["encoding"] == "utf-8"
+    assert TOOL._CAPTURED_TEXT["errors"] == "replace"
+    assert TOOL._CAPTURED_TEXT["text"] is True
+
+
 def test_client_rejects_mutating_gh_surfaces() -> None:
     with pytest.raises(TOOL.GitHubReviewError):
         TOOL.ReadOnlyGitHubClient.assert_read_only(
@@ -106,6 +112,14 @@ def test_cli_paths_are_confined_but_explicit_runner_temp_is_supported(
         TOOL.resolve_output_path(external_output, root=ROOT)
         == external_output.resolve()
     )
+
+
+def test_unused_github_environments_are_not_required_protection_surfaces() -> None:
+    protected = set(_policy()["protected_environments"])
+    assert "ghcr-publish" in protected
+    assert "observability-render-host" in protected
+    assert "staging" not in protected
+    assert "copilot" not in protected
 
 
 def test_unknown_labels_are_retained_by_default() -> None:

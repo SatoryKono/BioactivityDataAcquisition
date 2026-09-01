@@ -126,8 +126,7 @@
   },
   "protected_environments": [
     "ghcr-publish",
-    "observability-render-host",
-    "staging"
+    "observability-render-host"
   ],
   "controls": [
     {
@@ -154,7 +153,7 @@
       "check": "protected_environments",
       "owner": "Release engineering",
       "risk": "high",
-      "known_issue": 9785,
+      "known_issue": null,
       "due_days": 30
     },
     {
