@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-01T12:57:31.792306+00:00",
+  "generated_at": "2026-09-01T15:55:04.946833+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -2710,7 +2710,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 39,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -4977,7 +4977,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 89,
       "references": [
         {
           "path": "docs/00-project/ai/README.md",
@@ -6030,7 +6030,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 80,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
@@ -8009,7 +8009,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 236,
+      "reference_count": 225,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -8241,7 +8241,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 41,
+      "reference_count": 39,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -11188,7 +11188,7 @@
         "CODEX-RUNTIME",
         "py-test-bot"
       ],
-      "reference_count": 56,
+      "reference_count": 54,
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
@@ -11233,10 +11233,10 @@
           "text": "- WSL/Linux: `setup_env_wsl.sh`, `run_pytest.sh`, `run_mypy.sh`"
         },
         {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/run/tests.md",
-          "line": 90,
+          "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/05-tests__prompt.audit.cycle.tests.md",
+          "line": 49,
           "source_group": "docs",
-          "text": "- Runners: `scripts/engineering/dev/run_pytest.sh` / `.ps1`"
+          "text": "- Canonical runners: scripts/engineering/dev/run_pytest.sh|.ps1."
         }
       ]
     },
@@ -12337,7 +12337,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 398,
+      "reference_count": 393,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -18228,7 +18228,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/ai/agents/guides/MEMORY_USAGE.md",
@@ -18243,30 +18243,6 @@
           "text": "bash scripts/memory/run_workflow.sh pre-task \\"
         },
         {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/agents-memory.md",
-          "line": 97,
-          "source_group": "docs",
-          "text": "- Helper: `bash scripts/memory/run_workflow.sh …` (venv + `PYTHONPATH=src`)"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/agents-memory.md",
-          "line": 119,
-          "source_group": "docs",
-          "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/run/agents-memory.md",
-          "line": 92,
-          "source_group": "docs",
-          "text": "- Helper: `bash scripts/memory/run_workflow.sh …` (venv + `PYTHONPATH=src`)"
-        },
-        {
-          "path": "docs/00-project/ai/prompts/library/audit/cycle/run/agents-memory.md",
-          "line": 114,
-          "source_group": "docs",
-          "text": "| **C Memory** | Catalog ↔ schema. Smoke `python -m memory.tooling.workflow smoke` (or `run_workflow.sh smoke`). Check actor provenance, promote-only durable knowledge, no secrets in notes/handoffs, n"
-        },
-        {
           "path": "scripts/memory/README.md",
           "line": 14,
           "source_group": "scripts",
@@ -18277,6 +18253,12 @@
           "line": 48,
           "source_group": "tests",
           "text": "\"\"\"run_workflow.sh must discover .venv-win on native Windows (#9121).\"\"\""
+        },
+        {
+          "path": "tests/architecture/test_ai_memory_program_contracts.py",
+          "line": 49,
+          "source_group": "tests",
+          "text": "script = Path(\"scripts/memory/run_workflow.sh\").read_text(encoding=\"utf-8\")"
         }
       ]
     },
