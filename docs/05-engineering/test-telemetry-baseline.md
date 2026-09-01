@@ -28,7 +28,7 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `master20260831-7`
-- Source commit: `10a3a11558f1d655239dd5ec733926999be48188`
+- Source commit: `a4f8a2f70c5870275c6da17bcb20867465aeebbe`
 - Source run id: `33445113707`
 - Source event: `pull_request`
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33445113707`
