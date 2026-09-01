@@ -144,7 +144,7 @@
       "check": "sha_pinning_required",
       "owner": "Security lane",
       "risk": "high",
-      "known_issue": 9784,
+      "known_issue": null,
       "due_days": 14
     },
     {
@@ -162,7 +162,7 @@
       "check": "dependabot_security_updates",
       "owner": "Security lane",
       "risk": "high",
-      "known_issue": 9783,
+      "known_issue": null,
       "due_days": 14
     },
     {
@@ -171,7 +171,7 @@
       "check": "advanced_codeql",
       "owner": "Security lane",
       "risk": "high",
-      "known_issue": 9786,
+      "known_issue": null,
       "due_days": 14
     },
     {
@@ -180,7 +180,7 @@
       "check": "secret_scanning",
       "owner": "Security lane",
       "risk": "high",
-      "known_issue": 9796,
+      "known_issue": null,
       "due_days": 14
     },
     {
