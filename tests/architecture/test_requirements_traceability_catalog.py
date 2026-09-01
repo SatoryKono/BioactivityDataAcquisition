@@ -137,3 +137,67 @@ def test_req_arch_040_041_protocol_headings_present_in_rules() -> None:
     text = (_ROOT / "docs" / "00-project" / "RULES.md").read_text(encoding="utf-8")
     assert "Обязательная Двойная Верификация (REQ-ARCH-040)" in text
     assert "Причины Ложных Утверждений (REQ-ARCH-041)" in text
+
+
+_SURFACE_PATH_RE = re.compile(
+    r"(?:`)?("
+    r"(?:tests|src|scripts|docs|configs|grafana|\.github|reports)/[A-Za-z0-9_./\-]+"
+    r"|(?:pyproject\.toml|uv\.lock|\.importlinter|\.pre-commit-config\.yaml|"
+    r"\.gitignore|\.env\.example|\.gitleaks\.toml|docker-compose\.yml|"
+    r"Dockerfile(?:\.[A-Za-z0-9_\-]+)?|Makefile|mkdocs\.yml)"
+    r")(?:`)?"
+)
+_ROOT_SURFACE_FILES = {
+    "pyproject.toml",
+    "uv.lock",
+    ".importlinter",
+    ".pre-commit-config.yaml",
+    ".gitignore",
+    ".env.example",
+    ".gitleaks.toml",
+    "docker-compose.yml",
+    "Makefile",
+    "mkdocs.yml",
+}
+
+
+def _executable_surface_paths(surface: str) -> list[str]:
+    """Extract checkout-relative path tokens from a CSV executable_surface cell."""
+    found: list[str] = []
+    seen: set[str] = set()
+    for match in _SURFACE_PATH_RE.finditer(surface):
+        token = match.group(1).split("::", 1)[0].rstrip("/")
+        if token not in seen:
+            seen.add(token)
+            found.append(token)
+    for chunk in re.split(r"[;+]", surface):
+        chunk = chunk.strip().strip("`").split("::", 1)[0].strip()
+        if chunk.startswith(
+            ("tests/", "src/", "scripts/", "docs/", "configs/", "grafana/", ".github/")
+        ):
+            token = chunk.rstrip("/")
+        elif chunk in _ROOT_SURFACE_FILES or chunk.startswith("Dockerfile"):
+            token = chunk
+        else:
+            continue
+        if token not in seen:
+            seen.add(token)
+            found.append(token)
+    return found
+
+
+def test_executable_surface_paths_exist() -> None:
+    """REQ-ARCH-041: confirmed CSV surfaces must cite paths that exist (#9940)."""
+    with _CSV.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    missing: list[str] = []
+    for row in rows:
+        req_id = row["requirement_id"]
+        surface = row.get("executable_surface") or ""
+        for rel in _executable_surface_paths(surface):
+            if not (_ROOT / rel).exists():
+                missing.append(f"{req_id}: {rel}")
+    assert not missing, (
+        "crosswalk executable_surface cites paths missing from checkout:\n"
+        + "\n".join(f"  {item}" for item in missing)
+    )

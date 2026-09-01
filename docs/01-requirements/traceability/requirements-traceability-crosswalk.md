@@ -1,6 +1,6 @@
 # Requirements Traceability Crosswalk
 
-- snapshot_date: 2026-08-28
+- snapshot_date: 2026-09-01
 - source: `docs/01-requirements/REQUIREMENTS.md` v1.12.7
 - canonical_rules_owner: `docs/00-project/RULES.md` v6.1.11
 - artifact: `docs/01-requirements/traceability/requirements-traceability-crosswalk.csv`
@@ -21,6 +21,8 @@
 
 ## Updated Rows
 
+- 59 `executable_surface` cells retargeted from stale/nonexistent paths to
+  live checkout files (`REQ-ARCH-041`, #9940). Catalog IDs and counts unchanged.
 - `REQ-CB-004` — canonical Prometheus metric naming synchronized
 - `REQ-OBS-001` — `run_id` correlation wording synchronized with Prometheus label guardrail
 - `REQ-DQ-001` — canonical `bioetl_*` Prometheus naming synchronized
