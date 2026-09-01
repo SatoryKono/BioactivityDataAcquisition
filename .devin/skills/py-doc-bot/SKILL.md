@@ -30,6 +30,10 @@ Run the role-specific workflow as defined in the py-doc-bot profile. This skill 
 1. Open and follow `../../agents/py-doc-bot/AGENT.md`.
 1. Keep output artifacts and scope aligned with `../../agents/ORCHESTRATION.md`.
 1. Respect BioETL architecture rules from `AGENTS.md` and project constraints.
+1. After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
+   `python -m scripts.docs generate-cleanup-inventory --update` and keep
+   `docs/reports/generated/documentation-cleanup-inventory.{json,md}` in the
+   same changeset. `--check` reads the working tree, not `HEAD`.
 1. After doc work, run `python -m memory.tooling.workflow post-task ...` and promote only durable documentation guidance.
 
 ## Skill vs Agent Usage

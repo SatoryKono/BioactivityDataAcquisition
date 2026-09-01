@@ -32,15 +32,28 @@ This skill is a checklist, not a second policy.
 
    (or the current canonical refresh entry from POST_CHANGE_VALIDATION)
 
-5. **Focused tests** for the touched surface (prefer project pytest wrappers).
-6. **Prompt library** — if `docs/00-project/ai/prompts/**` changed:
+5. **Documentation cleanup inventory** — if markdown/docs changes add, remove,
+   or retarget local links, or change `Owner:` / `Status:` / `Class:` headers:
+
+   ```powershell
+   .\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --update
+   .\.venv-win\Scripts\python.exe -m scripts.docs generate-cleanup-inventory --check
+   ```
+
+   Commit `docs/reports/generated/documentation-cleanup-inventory.{json,md}`
+   with the docs change. `--check` reads the working tree, not HEAD; skipping
+   `--update` fails `test_documentation_cleanup_inventory_check_passes` and
+   stops `architecture-fast`.
+
+6. **Focused tests** for the touched surface (prefer project pytest wrappers).
+7. **Prompt library** — if `docs/00-project/ai/prompts/**` changed:
 
    ```powershell
    .\.venv-win\Scripts\python.exe -m scripts.ai.prompts check
    .\.venv-win\Scripts\python.exe -m scripts.ai.prompts catalog
    ```
 
-7. **Report** explicitly: checks run, checks skipped, mirror-sync status.
+8. **Report** explicitly: checks run, checks skipped, mirror-sync status.
 
 ## Guardrails
 

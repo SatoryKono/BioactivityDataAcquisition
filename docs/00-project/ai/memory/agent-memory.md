@@ -4,7 +4,7 @@ Version: 2.0.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
-Last verified: '2026-08-07'
+Last verified: '2026-09-01'
 
 ______________________________________________________________________
 
@@ -95,6 +95,13 @@ or current dependency versions.
   increased.
 - Preserve unrelated worktree changes and use canonical generators for derived
   artifacts.
+- After markdown/docs changes that add, remove, or retarget local links, or
+  that change `Owner:` / `Status:` / `Class:` headers, refresh
+  `docs/reports/generated/documentation-cleanup-inventory.{json,md}` with
+  `python -m scripts.docs generate-cleanup-inventory --update` in the same
+  changeset. `--check` reads the working tree, not `HEAD`; skipping `--update`
+  fails `test_documentation_cleanup_inventory_check_passes` and stops
+  `architecture-fast`.
 
 These bullets are reminders only; cite and apply the current normative source.
 

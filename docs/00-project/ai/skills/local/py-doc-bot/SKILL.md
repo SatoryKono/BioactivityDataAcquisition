@@ -51,6 +51,12 @@ bounded surface and `mode=broad` for the retired cascade-audit workflow.
 Use targeted docs checks such as `python -m scripts.docs check-links` and
 `python -m scripts.docs check-drift --runtime-mirrors --freshness`.
 
+After markdown link or `Owner:` / `Status:` / `Class:` header changes, also
+run `python -m scripts.docs generate-cleanup-inventory --update` and
+`--check`. Commit the generated JSON/MD with the docs change; skipping this
+fails `test_documentation_cleanup_inventory_check_passes` and stops
+`architecture-fast`.
+
 ## Fallback
 
 If docs validation is too broad for the environment, report the skipped command

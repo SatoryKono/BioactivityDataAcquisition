@@ -29,6 +29,7 @@ anti_patterns:
   - Inventing install/test commands not in manifests
   - Writing artifacts to repo root
   - Overlap dump of docs-pipeline findings (use prompt.audit.docs-pipeline)
+  - Editing markdown links or Owner/Status/Class headers without generate-cleanup-inventory --update
 tags: [audit, docs, content, operator]
 summary: Evidence-based audit of project documentation content and drift
 max_body_lines: 140
@@ -81,6 +82,7 @@ and publish pipeline → `prompt.audit.docs-pipeline`.
 - [ ] Links resolve; runtime versions vs CI
 - [ ] API reference vs schema/code
 - [ ] No dangerous/stale deploy/runbook steps
+- [ ] After local link or Owner/Status/Class header edits, cleanup inventory `--update` is in the same changeset
 
 ## Surface score (this domain)
 
