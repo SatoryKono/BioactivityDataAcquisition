@@ -27,7 +27,11 @@ type TelemetryPayload = dict[str, Any]
 
 
 def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> str:
-    """Hash maintained test sources and lane policy, excluding generated evidence."""
+    """Hash maintained test sources and lane policy, excluding generated evidence.
+
+    Newlines are normalized to LF so Windows working trees with CRLF smudge
+    match Linux CI checkouts (eol=lf in .gitattributes).
+    """
     paths = list((repo_root / "tests").rglob("*.py"))
     paths.extend(
         repo_root / path
@@ -43,7 +47,8 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
             continue
         digest.update(path.relative_to(repo_root).as_posix().encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        payload = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        digest.update(payload)
         digest.update(b"\0")
     return digest.hexdigest()
 
