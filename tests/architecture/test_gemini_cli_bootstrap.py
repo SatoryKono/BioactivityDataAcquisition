@@ -73,6 +73,8 @@ def test_gemini_bootstrap_is_lockfile_only_and_invalidates_stale_cache() -> None
     assert 'GEMINI_NODE_PACKAGE="node-linux-x64"' in helper
     assert 'GEMINI_NODE_PACKAGE="node-linux-arm64"' in helper
     assert "EXPECTED_LOCK_SHA" in helper
+    assert 'local lockfile_path="$1"' in helper
+    assert helper.count('"${lockfile_path}"') == 3
     assert 'EXPECTED_CACHE_ID="${EXPECTED_LOCK_SHA}:${GEMINI_NODE_PACKAGE}"' in helper
     assert "GEMINI_CACHE_STAMP" in helper
     assert 'CURRENT_CACHE_ID}" != "${EXPECTED_CACHE_ID}' in helper
