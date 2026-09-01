@@ -222,7 +222,7 @@ def _existing_payload_matches(
 
 
 def _publish_new_file_exclusive(source: Path, target: Path) -> None:
-    """Publish a complete same-filesystem temp file without overwriting target."""
+    """Hard-link a complete same-filesystem temp file to target (exclusive) and unlink the source."""
     os.link(os.fspath(source), os.fspath(target))
     with contextlib.suppress(OSError):
         source.unlink()
