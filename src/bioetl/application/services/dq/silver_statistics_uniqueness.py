@@ -100,7 +100,10 @@ def check_uniqueness_stats(
         )
 
     total_count = len(df)
-    unique_count = df.select(existing_keys).unique(maintain_order=False).height
+    # ⚡ Bolt: Use df.n_unique(subset=...) instead of df.select().unique().height
+    # Performance impact: Avoids materializing a new DataFrame in memory and skips an intermediate .select() projection.
+    # Reduces peak memory usage and compute time significantly for large datasets.
+    unique_count = df.n_unique(subset=existing_keys)
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0
     column_stats = _profile_column_cardinality(
