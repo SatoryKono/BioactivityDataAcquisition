@@ -53,14 +53,20 @@ bash scripts/ai/gemini/run-gemini.sh "explain this repository"
 | `setup` | `run-gemini.sh setup` | Install/configure Gemini CLI |
 | `mcp-check` | `run-gemini.sh mcp-check` | Verify MCP servers |
 | `mcp-setup` | `run-gemini.sh mcp-setup` | Sync MCP configuration |
-| `update` | `run-gemini.sh update` | Update Gemini CLI to latest |
+| `update` | `run-gemini.sh update` | Reinstall the reviewed lockfile-pinned toolchain |
 
 ## Runtime Environment
 
 The managed Gemini CLI is installed in `.cache/tools/gemini-cli/`:
-- `npm-global/` — Node.js 22 + Gemini CLI
+- `npm-global/` — lockfile-backed Node.js 22.18.0 + Gemini CLI 0.57.0
 - `npm-cache/` — npm package cache
 - `home/` — Gemini CLI home directory (settings, cache, MCP state)
+
+The dependency graph is tracked in `scripts/ai/gemini/npm-tooling/package-lock.json`.
+It includes integrity-pinned Linux x64/arm64 Node binary packages. `update`
+reinstalls that graph with `npm ci --ignore-scripts`; it does not fetch an
+unreviewed latest version or execute dependency lifecycle scripts. Cache
+validation combines the lockfile SHA with the selected Node platform package.
 
 ## MCP Integration
 
@@ -132,6 +138,7 @@ scripts/ai/gemini/
 ├── gemini-interactive.ps1          # Thin compatibility launcher
 ├── gemini-interactive.sh           # Thin compatibility launcher
 ├── .env.gemini                     # API key config (git-ignored)
+├── npm-tooling/                    # Pinned manifest + integrity lockfile
 ├── helper/
 │   ├── run-gemini-impl.sh          # Runtime launcher
 │   ├── check-env.sh                # Verify setup
@@ -141,7 +148,7 @@ scripts/ai/gemini/
 └── README.md                       # Documentation
 
 .cache/tools/gemini-cli/            # Managed runtime
-├── npm-global/                     # Node 22 + @google/gemini-cli
+├── npm-global/                     # Locked node_modules + managed bin links
 ├── npm-cache/                      # npm cache
 └── home/                           # GEMINI_CLI_HOME
 

@@ -16,6 +16,9 @@ scripts/ai/gemini/
 ├── headless.ps1                   # PowerShell transport that skips MCP sync
 ├── headless.sh                    # WSL/Bash launcher without MCP sync
 ├── .env.gemini                    # Local API key config, git-ignored
+├── npm-tooling/                   # Integrity-pinned Node/Gemini dependency graph
+│   ├── package.json
+│   └── package-lock.json
 ├── helper/
 │   ├── check-env.ps1              # PowerShell compatibility check wrapper
 │   ├── check-env.sh               # Environment check
@@ -58,7 +61,7 @@ bash scripts/ai/gemini/run-gemini.sh check         # Check setup
 bash scripts/ai/gemini/run-gemini.sh setup         # Install managed CLI
 bash scripts/ai/gemini/run-gemini.sh mcp-check     # Check MCP configuration
 bash scripts/ai/gemini/run-gemini.sh mcp-setup     # Sync MCP configuration
-bash scripts/ai/gemini/run-gemini.sh update        # Reinstall/update CLI
+bash scripts/ai/gemini/run-gemini.sh update        # Reinstall pinned CLI toolchain
 bash scripts/ai/gemini/headless.sh exec "..."      # Launch without MCP sync
 ```
 
@@ -70,7 +73,7 @@ bash scripts/ai/gemini/headless.sh exec "..."      # Launch without MCP sync
 .\scripts\ai\gemini\run-gemini.ps1 setup           # Install managed CLI via WSL
 .\scripts\ai\gemini\run-gemini.ps1 mcp-check       # Check MCP configuration
 .\scripts\ai\gemini\run-gemini.ps1 mcp-setup       # Sync MCP configuration
-.\scripts\ai\gemini\run-gemini.ps1 update          # Reinstall/update CLI
+.\scripts\ai\gemini\run-gemini.ps1 update          # Reinstall pinned CLI toolchain
 .\scripts\ai\gemini\launch-gemini-wsl.ps1 start    # Thin alias for interactive mode
 ```
 
@@ -85,12 +88,19 @@ The managed runtime lives under:
 
 ```text
 .cache/tools/gemini-cli/
-├── npm-global/   # node@22 + @google/gemini-cli
+├── npm-global/   # lockfile-backed node_modules plus managed bin links
 ├── npm-cache/
 └── home/         # GEMINI_CLI_HOME
 ```
 
-`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupported by the system Node 18 in this WSL image.
+`helper/ensure-gemini-cli.sh` copies the tracked `npm-tooling/package.json` and
+`package-lock.json` into the managed prefix and runs `npm ci --ignore-scripts`.
+The lockfile currently pins `@google/gemini-cli@0.57.0` plus the Linux x64/arm64
+Node 22.18.0 binary packages, including npm registry integrity hashes. `update`
+deliberately reinstalls that reviewed dependency graph; version changes arrive
+through the dedicated Dependabot configuration and review. The cache identity
+combines the lockfile SHA with the selected Linux architecture, so a cache
+created for x64 is never accepted on arm64 (or vice versa).
 
 ## Configuration
 
