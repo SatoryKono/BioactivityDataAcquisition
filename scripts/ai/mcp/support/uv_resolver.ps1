@@ -264,57 +264,13 @@ raise SystemExit(subprocess.call(sys.argv[1:]))
     }
 }
 
-function Add-BioetlFlattenedStrings {
-    <#
-    .SYNOPSIS
-      Flatten nested string collections without walking string characters.
-    #>
-    param(
-        [Parameter(Mandatory = $true)]
-        [System.Collections.IList]$Target,
-
-        $Value
-    )
-
-    if ($null -eq $Value) {
-        return
-    }
-
-    $pending = [System.Collections.ArrayList]::new()
-    [void]$pending.Add($Value)
-    while ($pending.Count -gt 0) {
-        $current = $pending[0]
-        $pending.RemoveAt(0)
-        if ($null -eq $current) {
-            continue
-        }
-        if ($current -is [string]) {
-            $item = $current.Trim()
-            if (-not [string]::IsNullOrWhiteSpace($item)) {
-                [void]$Target.Add($item)
-            }
-            continue
-        }
-        if ($current -is [System.Collections.IEnumerable]) {
-            foreach ($nested in $current) {
-                [void]$pending.Add($nested)
-            }
-            continue
-        }
-        $text = "$current".Trim()
-        if (-not [string]::IsNullOrWhiteSpace($text)) {
-            [void]$Target.Add($text)
-        }
-    }
-}
-
 function Get-BioetlPathEntries {
     <#
     .SYNOPSIS
       Split PATH without turning ``E:\tools`` into ``E`` + ``\tools``.
     #>
     if ([string]::IsNullOrWhiteSpace($env:PATH)) {
-        return [string[]]@()
+        return , @()
     }
 
     $raw = $env:PATH
@@ -322,16 +278,13 @@ function Get-BioetlPathEntries {
     # on ':' is correct for POSIX pwsh, but it corrupts ``E:\github\...``.
     $windowsStyle = $raw.Contains(';') -or ($raw -match '^[A-Za-z]:[\\/]')
     if ($windowsStyle) {
-        # ``-split`` avoids Windows PowerShell 5.1 binding String.Split(char[],
-        # StringSplitOptions) to Split(char[], int count).
-        $parts = $raw -split ';'
+        $parts = $raw.Split([char[]]@(';'), [StringSplitOptions]::RemoveEmptyEntries)
     }
     else {
-        $separators = [regex]::Escape([string][IO.Path]::PathSeparator)
-        if ([IO.Path]::PathSeparator -ne ':') {
-            $separators = "$separators|:"
-        }
-        $parts = $raw -split $separators
+        $parts = $raw.Split(
+            [char[]]@([IO.Path]::PathSeparator, ':'),
+            [StringSplitOptions]::RemoveEmptyEntries
+        )
     }
 
     $entries = [System.Collections.Generic.List[string]]::new()
@@ -341,9 +294,7 @@ function Get-BioetlPathEntries {
             $entries.Add($item) | Out-Null
         }
     }
-    # Typed string[] still enumerates through the pipeline. Callers should use
-    # ``@(Get-BioetlPathEntries)`` so 0/1/N entries stay a collection.
-    return [string[]]$entries.ToArray()
+    return , @($entries)
 }
 
 function Resolve-BioetlUvxBin {
@@ -351,19 +302,15 @@ function Resolve-BioetlUvxBin {
     .SYNOPSIS
       Locate uvx even when Scripts/ is not on PATH.
     #>
-    $pathEntries = [System.Collections.Generic.List[string]]::new()
-    # Unary-comma array wraps plus ``@(Get-BioetlPathEntries)`` nest the whole
-    # PATH as one object. ``Path.Combine`` then joins entries with spaces and
-    # probes a non-existent ``C:\Program Files\... C:\other\uvx.exe``.
-    Add-BioetlFlattenedStrings -Target $pathEntries -Value (Get-BioetlPathEntries)
+    $candidates = @()
 
-    $candidates = [System.Collections.Generic.List[string]]::new()
     # Prefer explicit PATH probes first so test fakes (uvx.ps1) and non-Windows
     # pwsh path separators are honored before host-wide installs.
+    $pathEntries = @(Get-BioetlPathEntries)
     foreach ($entry in $pathEntries) {
         foreach ($name in @("uvx.exe", "uvx.cmd", "uvx.ps1", "uvx")) {
             try {
-                $candidates.Add([System.IO.Path]::Combine($entry, $name)) | Out-Null
+                $candidates += [System.IO.Path]::Combine($entry.Trim(), $name)
             }
             catch {
                 Write-Verbose "Skipping unusable PATH entry '${entry}': $($_.Exception.Message)"
@@ -371,8 +318,8 @@ function Resolve-BioetlUvxBin {
         }
     }
 
-    Add-BioetlFlattenedStrings -Target $candidates -Value (Get-BioetlUvxCommandCandidates)
-    Add-BioetlFlattenedStrings -Target $candidates -Value (Get-BioetlUvxInstallCandidates)
+    $candidates += Get-BioetlUvxCommandCandidates
+    $candidates += Get-BioetlUvxInstallCandidates
 
     foreach ($candidate in $candidates) {
         if ($candidate -and (Test-Path -LiteralPath $candidate)) {
@@ -404,7 +351,7 @@ function Get-BioetlUvxCommandCandidates {
             }
         }
     }
-    return [string[]]$candidates
+    return ,$candidates
 }
 
 function Test-BioetlWindowsRuntime {
@@ -464,7 +411,7 @@ function Get-BioetlWindowsUvxInstallCandidates {
         -BasePath ($env:USERPROFILE) `
         -RelativePaths @(".local\bin\uvx.exe", ".cargo\bin\uvx.exe") `
         -SkipLabel "user-profile"
-    return [string[]]$candidates.ToArray()
+    return ,@($candidates)
 }
 
 function Get-BioetlUnixUvxInstallCandidates {
@@ -474,14 +421,14 @@ function Get-BioetlUnixUvxInstallCandidates {
         -BasePath ($env:HOME) `
         -RelativePaths @(".local/bin/uvx", ".cargo/bin/uvx") `
         -SkipLabel "home"
-    return [string[]]$candidates.ToArray()
+    return ,@($candidates)
 }
 
 function Get-BioetlUvxInstallCandidates {
     if (Test-BioetlWindowsRuntime) {
-        return [string[]]@(Get-BioetlWindowsUvxInstallCandidates)
+        return ,(Get-BioetlWindowsUvxInstallCandidates)
     }
-    return [string[]]@(Get-BioetlUnixUvxInstallCandidates)
+    return ,(Get-BioetlUnixUvxInstallCandidates)
 }
 
 function Test-BioetlUvxAvailable {

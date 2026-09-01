@@ -15,10 +15,7 @@ from bioetl.infrastructure.storage.delta.resilience import (
 )
 from bioetl.infrastructure.storage.support._atomic_replace import (
     AtomicWriteError,
-    _confined_replace_pair,
-)
-from bioetl.infrastructure.storage.support._atomic_replace import (
-    _replace_prevalidated_with_retry as _replace_with_retry,
+    _replace_with_retry,
 )
 
 
@@ -46,8 +43,7 @@ class AtomicWriteGroup:
         try:
             with os.fdopen(fd, "wb") as f:
                 f.write(data)
-            target_resolved, temp_resolved = _confined_replace_pair(temp_path, target)
-            self._pending.append((target_resolved, temp_resolved, data))
+            self._pending.append((target, temp_path, data))
         except (OSError, ValueError, TypeError, RuntimeError):
             with suppress(OSError):
                 temp_path.unlink()

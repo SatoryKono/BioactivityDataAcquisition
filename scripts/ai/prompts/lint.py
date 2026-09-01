@@ -62,9 +62,6 @@ CONTROLLER_EXTRA_RE = re.compile(
 )
 
 ALLOWED_ALLOW_PROFILE = "full-write"
-_YAML_GLOB = "*.yaml"
-_CONTROLLER_PHRASE_LABEL = "controller phrase"
-_OVERLAY_IDENTITY_KEYS = frozenset({"domain", "id", "successor"})
 
 ALLOW_KEYS = {
     "ALLOW_ISSUE_WRITE",
@@ -216,7 +213,10 @@ def _has_jsonschema() -> bool:
         return False
 
 
-def _check_overlay_schema(report: LintReport, path: Path, data: dict[str, Any]) -> None:
+def check_overlay(
+    report: LintReport, path: Path, data: dict[str, Any], raw_text: str
+) -> None:
+    # -- overlay_schema_valid
     schema = _load_json(SCHEMA_DIR / "domain-overlay.schema.json")
     if schema is None:
         report.add_warning(
@@ -224,37 +224,32 @@ def _check_overlay_schema(report: LintReport, path: Path, data: dict[str, Any]) 
             f"schema not found: {SCHEMA_DIR / 'domain-overlay.schema.json'}",
             path.as_posix(),
         )
-        return
-    msgs = (
-        _validate_with_jsonschema(data, schema)
-        if _has_jsonschema()
-        else _minimal_overlay_checks(data)
-    )
-    for msg in msgs:
-        report.add_error("overlay_schema_valid", msg, path.as_posix())
+    else:
+        if _has_jsonschema():
+            errs = _validate_with_jsonschema(data, schema)
+            for msg in errs:
+                report.add_error("overlay_schema_valid", msg, path.as_posix())
+        else:
+            for msg in _minimal_overlay_checks(data):
+                report.add_error("overlay_schema_valid", msg, path.as_posix())
 
-
-def _check_overlay_allow_keys(
-    report: LintReport, path: Path, data: dict[str, Any]
-) -> None:
-    for key in data:
+    # -- guard_non_weakening: overlay must not contain ALLOW_*=true or weakening keys
+    # Schema already bans ALLOW_*; this guard gives a clearer fail-closed message
+    # and the raw-text scan below covers nested ALLOW_*: true literals.
+    for key, _val in data.items():
         if key.startswith("ALLOW_"):
             report.add_error(
                 "guard_non_weakening",
                 f"overlay must not declare {key} (fail-closed); move ALLOW_* to profile",
                 path.as_posix(),
             )
-
-
-def _check_overlay_allow_literals(
-    report: LintReport, path: Path, raw_text: str
-) -> None:
-    for match in re.finditer(r"ALLOW_[A-Z_]+\s*:\s*true", raw_text):
-        snippet = match.group(0).strip()
+    # Scan raw text for ALLOW_*=true literal — covers nested cases
+    for m in re.finditer(r"ALLOW_[A-Z_]+\s*:\s*true", raw_text):
+        snippet = m.group(0).strip()
         already = any(
-            snippet.split(":")[0].strip() in issue.message
-            for issue in report.errors
-            if issue.path == path.as_posix()
+            snippet.split(":")[0].strip() in e.message
+            for e in report.errors
+            if e.path == path.as_posix()
         )
         if not already:
             report.add_error(
@@ -263,103 +258,54 @@ def _check_overlay_allow_literals(
                 path.as_posix(),
             )
 
-
-def _joined_overlay_value(value: Any) -> str | None:
-    if isinstance(value, list):
-        return " ".join(str(item) for item in value)
-    if isinstance(value, str):
-        return value
-    return None
-
-
-def _check_overlay_controller_keywords(
-    report: LintReport, path: Path, data: dict[str, Any]
-) -> None:
+    # Check for controller-weakening keywords in free-form values
     guard_keywords_re = re.compile(
         r"\b(Iteration|Issue-sync|ALLOW_NETWORK|ALLOW_FULL_SUITE)\b", re.I
     )
-    for key, value in data.items():
-        joined = _joined_overlay_value(value)
-        if joined is None:
+    for key, val in data.items():
+        if isinstance(val, list):
+            joined = " ".join(str(x) for x in val)
+        elif isinstance(val, str):
+            joined = val
+        else:
             continue
-        match = guard_keywords_re.search(joined)
-        if (
-            match is not None
-            and key not in _OVERLAY_IDENTITY_KEYS
-            and (
-                re.search(r"\bIteration\b", joined, re.I) is not None
-                or re.search(r"Issue-sync", joined, re.I) is not None
-            )
-        ):
-            report.add_error(
-                "guard_non_weakening",
-                f"overlay field {key!r} contains controller keyword '{match.group(0)}'",
-                path.as_posix(),
-            )
+        if guard_keywords_re.search(joined) and key not in {
+            "domain",
+            "id",
+            "successor",
+        }:
+            if re.search(r"\bIteration\b", joined, re.I) or re.search(
+                r"Issue-sync", joined, re.I
+            ):
+                report.add_error(
+                    "guard_non_weakening",
+                    f"overlay field {key!r} contains controller keyword '{guard_keywords_re.search(joined).group(0)}'",
+                    path.as_posix(),
+                )
 
-
-def _overlay_values_text(data: dict[str, Any]) -> str:
+    # -- no_controller_duplication: regex scan for controller orchestration phrases
+    # Build values-only text to avoid matching YAML keys like ``VALIDATION:``.
     values_parts: list[str] = []
-    for value in data.values():
-        if isinstance(value, list):
-            values_parts.extend(str(item) for item in value)
-        elif isinstance(value, str):
-            values_parts.append(value)
-    return "\n".join(values_parts)
-
-
-def _check_overlay_controller_phrases(
-    report: LintReport, path: Path, data: dict[str, Any]
-) -> None:
-    values_text = _overlay_values_text(data)
-    for pattern in (CONTROLLER_RE, CONTROLLER_VALIDATE_RE, CONTROLLER_EXTRA_RE):
-        match = pattern.search(values_text)
-        if match:
-            snippet = match.group(0).strip()
+    for v in data.values():
+        if isinstance(v, list):
+            values_parts.extend(str(x) for x in v)
+        elif isinstance(v, str):
+            values_parts.append(v)
+    values_text = "\n".join(values_parts)
+    for pat, label in (
+        (CONTROLLER_RE, "controller phrase"),
+        (CONTROLLER_VALIDATE_RE, "controller phrase"),
+        (CONTROLLER_EXTRA_RE, "controller phrase"),
+    ):
+        m = pat.search(values_text)
+        if m:
+            snippet = m.group(0).strip()
             report.add_error(
                 "no_controller_duplication",
-                f"overlay contains {_CONTROLLER_PHRASE_LABEL} '{snippet}' — controller belongs in kernel fragment",
+                f"overlay contains {label} '{snippet}' — controller belongs in kernel fragment",
                 path.as_posix(),
             )
-            return
-
-
-def check_overlay(
-    report: LintReport, path: Path, data: dict[str, Any], raw_text: str
-) -> None:
-    _check_overlay_schema(report, path, data)
-    _check_overlay_allow_keys(report, path, data)
-    _check_overlay_allow_literals(report, path, raw_text)
-    _check_overlay_controller_keywords(report, path, data)
-    _check_overlay_controller_phrases(report, path, data)
-
-
-def _lint_profile_file(
-    report: LintReport,
-    path: Path,
-    schema: dict[str, Any] | None,
-    has_js: bool,
-) -> None:
-    try:
-        raw = path.read_text(encoding="utf-8")
-        data = yaml.safe_load(raw) or {}
-    except (OSError, UnicodeError, yaml.YAMLError) as exc:
-        report.add_error("profile_parse", str(exc), path.as_posix())
-        return
-    if not isinstance(data, dict):
-        report.add_error("profile_parse", "profile must be a mapping", path.as_posix())
-        return
-    if schema is not None and has_js:
-        for msg in _validate_with_jsonschema(data, schema):
-            report.add_error("profile_schema_valid", msg, path.as_posix())
-    is_full_write = path.stem == ALLOWED_ALLOW_PROFILE
-    for key in ALLOW_KEYS:
-        if data.get(key) is True and not is_full_write:
-            report.add_error(
-                "full_profile_explicit",
-                f"{key}=true only allowed in {ALLOWED_ALLOW_PROFILE}.yaml (found in {path.stem}.yaml)",
-                path.as_posix(),
-            )
+            break  # one error per overlay for this check is enough
 
 
 def check_profiles(report: LintReport) -> None:
@@ -370,8 +316,34 @@ def check_profiles(report: LintReport) -> None:
         return
     schema = _load_json(SCHEMA_DIR / "execution-profile.schema.json")
     has_js = _has_jsonschema()
-    for path in sorted(PROFILES_DIR.glob(_YAML_GLOB)):
-        _lint_profile_file(report, path, schema, has_js)
+    for path in sorted(PROFILES_DIR.glob("*.yaml")):
+        try:
+            raw = path.read_text(encoding="utf-8")
+            data = yaml.safe_load(raw) or {}
+        except Exception as exc:
+            report.add_error("profile_parse", str(exc), path.as_posix())
+            continue
+
+        if not isinstance(data, dict):
+            report.add_error(
+                "profile_parse", "profile must be a mapping", path.as_posix()
+            )
+            continue
+
+        if schema is not None and has_js:
+            errs = _validate_with_jsonschema(data, schema)
+            for msg in errs:
+                report.add_error("profile_schema_valid", msg, path.as_posix())
+
+        # -- full_profile_explicit: ALLOW_*=true only in full-write profile
+        is_full_write = path.stem == ALLOWED_ALLOW_PROFILE
+        for key in ALLOW_KEYS:
+            if data.get(key) is True and not is_full_write:
+                report.add_error(
+                    "full_profile_explicit",
+                    f"{key}=true only allowed in {ALLOWED_ALLOW_PROFILE}.yaml (found in {path.stem}.yaml)",
+                    path.as_posix(),
+                )
 
 
 def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict handled by caller
@@ -383,7 +355,7 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
             "overlays_missing", f"overlays dir not found: {OVERLAYS_DIR}"
         )
     else:
-        for path in sorted(OVERLAYS_DIR.glob(_YAML_GLOB)):
+        for path in sorted(OVERLAYS_DIR.glob("*.yaml")):
             try:
                 raw = path.read_text(encoding="utf-8")
                 data = yaml.safe_load(raw) or {}
@@ -402,10 +374,10 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
     report.stats = {
         "errors": len(report.errors),
         "warnings": len(report.warnings),
-        "overlays": len(list(OVERLAYS_DIR.glob(_YAML_GLOB)))
+        "overlays": len(list(OVERLAYS_DIR.glob("*.yaml")))
         if OVERLAYS_DIR.is_dir()
         else 0,
-        "profiles": len(list(PROFILES_DIR.glob(_YAML_GLOB)))
+        "profiles": len(list(PROFILES_DIR.glob("*.yaml")))
         if PROFILES_DIR.is_dir()
         else 0,
     }
