@@ -52,6 +52,32 @@ def test_bronze_different_payload_raises_file_exists(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
+def test_concurrent_identical_bronze_payload_is_idempotent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A concurrent identical publish is accepted without replacing its payload."""
+    mixin = _Mixin(tmp_path)
+    target = tmp_path / "batch.jsonl.zst"
+
+    def publish_other_writer(source: Path, final_target: Path) -> None:
+        final_target.write_bytes(source.read_bytes())
+        raise FileExistsError(final_target)
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin._publish_new_file_exclusive",
+        publish_other_writer,
+    )
+
+    record_count, uncompressed_size = mixin._write_atomic_stream(
+        iter([b'{"id": 1}\n']), target
+    )
+
+    assert (record_count, uncompressed_size) == (1, 10)
+    assert target.exists()
+
+
+@pytest.mark.unit
 def test_sidecar_same_bytes_is_idempotent(tmp_path: Path) -> None:
     path = tmp_path / "batch.meta.json"
     payload = b'{"k": 1}'
