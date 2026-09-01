@@ -190,9 +190,37 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         date_str: str,
         batch_id: BatchID,
     ) -> None:
-        """Write uncompressed JSONL copy atomically."""
+        """
+        Write an uncompressed JSON Lines copy of the records to the bronze path.
+        
+        Parameters
+        ----------
+        records : list[bytes]
+            JSON Lines records to write.
+        provider : str
+            Data provider identifier.
+        entity : str
+            Entity identifier.
+        date_str : str
+            Date component used to construct the destination filename.
+        batch_id : BatchID
+            Batch identifier used to construct the destination filename.
+        
+        Notes
+        -----
+        The destination is written atomically. An existing file with identical
+        contents is accepted; a differing existing file raises ``FileExistsError``.
+        """
 
         def _write() -> None:
+            """
+            Write the batch records to the resolved bronze JSONL path.
+            
+            Raises
+            ------
+            FileExistsError
+                If the destination exists with different content.
+            """
             json_filename = f"batch_{date_str}_{batch_id}.jsonl"
             json_relative_path = self._resolve_bronze_path(
                 provider, entity, date_str, json_filename
@@ -222,7 +250,24 @@ def _existing_payload_matches(
 
 
 def _publish_new_file_exclusive(source: Path, target: Path) -> None:
-    """Hard-link a complete same-filesystem temp file to target (exclusive) and unlink the source."""
+    """Publish a completed file at the target path without overwriting it.
+    
+    Parameters
+    ----------
+    source : pathlib.Path
+        Temporary file to link to the target.
+    target : pathlib.Path
+        Destination path, which must not already exist.
+    
+    Raises
+    ------
+    OSError
+        If the hard link cannot be created.
+    
+    Notes
+    -----
+    The source file is removed after linking when possible.
+    """
     os.link(os.fspath(source), os.fspath(target))
     with contextlib.suppress(OSError):
         source.unlink()
@@ -231,7 +276,28 @@ def _publish_new_file_exclusive(source: Path, target: Path) -> None:
 def write_bytes_if_absent_or_same(
     target: Path, data: bytes, *, mismatch_message: str
 ) -> None:
-    """Publish complete bytes once while preserving idempotent same-payload replay."""
+    """Write bytes to a target only if it is absent or already contains the same data.
+    
+    Parameters
+    ----------
+    target : pathlib.Path
+        Destination path.
+    data : bytes
+        Complete byte payload to publish.
+    mismatch_message : str
+        Message for the ``FileExistsError`` raised when the target contains
+        different bytes.
+    
+    Raises
+    ------
+    FileExistsError
+        If the target exists with different contents.
+    
+    Notes
+    -----
+    Creates the target's parent directories as needed and removes temporary files
+    after publication or failure.
+    """
     target.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_path_str = tempfile.mkstemp(
         suffix=".tmp",
