@@ -386,28 +386,32 @@ entries:
 
   - id: prompt.observability.dashboard-v5.pack
     path: library/observability/dashboard-v5/pack.md
-    status: active
+    status: deprecated
+    successor: prompt.observability.dashboard-full-cycle
     class: operator-paste
     tags: [observability, dashboard, grafana, v5, pack, operator]
     summary: Route V5 Grafana residuals — R-A/R-E/R-B landed; R-C PR; R-D/R-F leftover
 
   - id: prompt.observability.dashboard-v5.implement
     path: library/observability/dashboard-v5/implement.md
-    status: active
+    status: deprecated
+    successor: prompt.observability.dashboard-full-cycle
     class: operator-paste
     tags: [observability, dashboard, grafana, v5, implement, operator]
     summary: Implement leftover V5 residuals — babysit #8987, optional R-D validator
 
   - id: prompt.observability.dashboard-v5.closeout
     path: library/observability/dashboard-v5/closeout.md
-    status: active
+    status: deprecated
+    successor: prompt.closeout.grok
     class: operator-paste
     tags: [observability, dashboard, grafana, v5, closeout, operator]
     summary: Close V5 residual issues/PRs with origin/main evidence only
 
   - id: prompt.observability.dashboard-v5.audit-rf
     path: library/observability/dashboard-v5/audit-rf.md
-    status: active
+    status: deprecated
+    successor: prompt.observability.grafana-audit.master
     class: operator-paste
     tags: [observability, dashboard, grafana, v5, audit, rf, visual, operator]
     summary: V5 R-F visual cycle — THEME dark+light, ZOOM 200, VIEWPORT 1920, leftover NV; not a selector refactor
@@ -669,56 +673,64 @@ entries:
   # --- ten-domain cyclic pack (library/audit/cycle/) ---
   - id: prompt.audit.cycle.docs
     path: library/audit/cycle/docs.md
-    status: active
+    status: deprecated
+    successor: generated/docs/audit-readonly.md
     class: operator-paste
     tags: [audit, docs, cycle, content, pipeline, scripts, operator]
     summary: Cyclic audit of documentation content and docs helper scripts
 
   - id: prompt.audit.cycle.diagrams
     path: library/audit/cycle/diagrams.md
-    status: active
+    status: deprecated
+    successor: generated/diagrams/audit-readonly.md
     class: operator-paste
     tags: [audit, diagrams, mermaid, cycle, scripts, operator]
     summary: Cyclic audit of version-controlled diagrams and render scripts
 
   - id: prompt.audit.cycle.agents-memory
     path: library/audit/cycle/agents-memory.md
-    status: active
+    status: deprecated
+    successor: generated/agents-memory/audit-readonly.md
     class: operator-paste
     tags: [audit, agents, memory, runtime, scripts, cycle, operator]
     summary: Cyclic audit of AI runtime, agent scripts, and agent memory
 
   - id: prompt.audit.cycle.configs
     path: library/audit/cycle/configs.md
-    status: active
+    status: deprecated
+    successor: generated/configs/audit-readonly.md
     class: operator-paste
     tags: [audit, configs, schema, cycle, operator]
     summary: Cyclic audit of project config files, schemas, and compatibility
 
   - id: prompt.audit.cycle.tests
     path: library/audit/cycle/tests.md
-    status: active
+    status: deprecated
+    successor: generated/tests/audit-readonly.md
     class: operator-paste
     tags: [audit, tests, cycle, quality, operator]
     summary: Cyclic audit of the test system -- lanes, gates, flaky, fix, re-verify
 
   - id: prompt.audit.cycle.tech-debt
     path: library/audit/cycle/tech-debt.md
-    status: active
+    status: deprecated
+    successor: generated/tech-debt/audit-readonly.md
     class: operator-paste
     tags: [audit, debt, cycle, quality, operator]
     summary: Cyclic technical-debt audit -- register, trend, paydown, residual re-check
 
   - id: prompt.audit.cycle.architecture
     path: library/audit/cycle/architecture.md
-    status: active
+    status: deprecated
+    successor: generated/architecture/audit-readonly.md
     class: operator-paste
     tags: [architecture, audit, cycle, scorecard, hexagonal, operator]
     summary: Cyclic architecture audit -- 10-category scorecard, plan, implement waves
 
   - id: prompt.audit.cycle.telemetry
     path: library/audit/cycle/telemetry.md
-    status: active
+    status: deprecated
+    successor: generated/telemetry/audit-readonly.md
     class: operator-paste
     tags:
       [audit, observability, telemetry, metrics, prometheus, cycle, operator]
@@ -726,14 +738,16 @@ entries:
 
   - id: prompt.audit.cycle.dashboards
     path: library/audit/cycle/dashboards.md
-    status: active
+    status: deprecated
+    successor: generated/dashboards/audit-readonly.md
     class: operator-paste
     tags: [observability, dashboard, grafana, render, design, cycle, operator]
     summary: Cyclic dashboard audit bound to DASHBOARD_REQUIREMENTS.md — THEME/ZOOM, bands, DASH-* gates
 
   - id: prompt.audit.cycle.coderabbit
     path: library/audit/cycle/coderabbit.md
-    status: active
+    status: deprecated
+    successor: generated/coderabbit/audit-readonly.md
     class: operator-paste
     tags: [audit, cycle, coderabbit, project, exhaustive, operator]
     summary: Exhaustive cyclic project audit with CodeRabbit dual-pass
