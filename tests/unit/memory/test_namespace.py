@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
 
 from memory.scope import RepositoryScope, safe_component
+from tests.helpers.isolated_git import init_tracked_fixture_repo
 
 pytestmark = pytest.mark.unit
 
@@ -35,17 +35,12 @@ def test_safe_component_removes_path_traversal() -> None:
 
 
 def test_repository_scope_discovers_local_git_identity(tmp_path: Path) -> None:
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    subprocess.run(["git", "init", "-q", str(repo)], check=True)
-    subprocess.run(["git", "-C", str(repo), "config", "user.name", "Test"], check=True)
-    subprocess.run(
-        ["git", "-C", str(repo), "config", "user.email", "test@example.invalid"],
-        check=True,
+    repo = init_tracked_fixture_repo(
+        tmp_path / "repo",
+        filename="README.md",
+        content="test\n",
+        message="initial",
     )
-    (repo / "README.md").write_text("test\n", encoding="utf-8")
-    subprocess.run(["git", "-C", str(repo), "add", "README.md"], check=True)
-    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "initial"], check=True)
 
     scope = RepositoryScope.discover(repo, task_id="Task 123")
 
