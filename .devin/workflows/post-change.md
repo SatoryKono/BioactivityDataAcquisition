@@ -30,6 +30,14 @@ This workflow is coordinated by `master.md` which provides:
 
 3. If `src/bioetl/**/*.py` changed: refresh `reports/quality/module-coverage-inventory.json` (`source_tree_sha256` MUST change)
 
+3a. If markdown/docs changes add, remove, or retarget local links, or change
+    `Owner:` / `Status:` / `Class:` headers: run
+    `python -m scripts.docs generate-cleanup-inventory --update` and commit
+    `docs/reports/generated/documentation-cleanup-inventory.{json,md}` with the
+    docs change. `--check` reads the working tree, not HEAD; skipping `--update`
+    fails `test_documentation_cleanup_inventory_check_passes` and stops
+    `architecture-fast`.
+
 4. If AI guidance rules changed under `docs/00-project/ai/rules/cursor/`:
    ```bash
    uv run python -m scripts.ai.sync.cursor --deploy

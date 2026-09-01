@@ -45,6 +45,7 @@ anti_patterns:
   - Mixing docs-pipeline build failures into content audit without INCLUDE_PIPELINE
   - Empty form cycles
   - Inventing commands not in manifests/CI
+  - Editing markdown links or Owner/Status/Class headers without generate-cleanup-inventory --update
 tags: [audit, docs, cycle, content, operator]
 summary: Cyclic documentation audit — content drift, commands, links, fix, re-verify
 max_body_lines: 160
@@ -103,8 +104,8 @@ Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLO
 | **A Audit** | Run `prompt.audit.docs-content` on SCOPE. Verify purpose, bootstrap, install/test/run commands vs manifests/CI, env vars (names only), links, ADR/index freshness, contradictions. If `INCLUDE_PIPELINE=true`, also run `prompt.audit.docs-pipeline` and tag findings `pipeline` vs `content`. |
 | **B Plan** | Cluster by surface (onboarding / API / ops / ADR / AI mirrors). Prefer fixes that restore SSOT links over rewriting prose. |
 | **C Issues** | Dedupe (`docs`, `documentation`). Create only if ALLOW_ISSUE_WRITE + PROVEN. |
-| **D Fix** | Minimal doc/code-comment fixes; regenerate only when project commands exist; no root scratch. |
-| **E Validate** | Re-check changed claims; link/command sample; optional docs build if pipeline in scope. |
+| **D Fix** | Minimal doc/code-comment fixes; regenerate only when project commands exist; no root scratch. After local markdown link or `Owner:` / `Status:` / `Class:` header changes, run `python -m scripts.docs generate-cleanup-inventory --update` in the same changeset. |
+| **E Validate** | Re-check changed claims; link/command sample; `python -m scripts.docs generate-cleanup-inventory --check`; optional docs build if pipeline in scope. |
 | **F Post** | Delta: resolved / unchanged / regressed / new. |
 
 ## Focus checklist (each cycle)
@@ -115,6 +116,7 @@ Default **`N=10`**, **`MODE=full`**, **`INCLUDE_PIPELINE=true`**, все **`ALLO
 - [ ] Security/ops runbooks without stale dangerous steps
 - [ ] ADR/index entry points not orphaned
 - [ ] AI mirrors do not redefine runtime (precedence to `.codex`/`.junie`)
+- [ ] Cleanup inventory `--check` is green after link/header edits (`--update` committed with the docs change)
 
 ## Stop
 

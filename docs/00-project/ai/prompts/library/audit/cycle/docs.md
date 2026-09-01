@@ -53,6 +53,7 @@ anti_patterns:
   - Empty form cycles
   - Publishing docs from audit mode
   - Returning retired top-level scripts/docs shims
+  - Editing markdown links or Owner/Status/Class headers without generate-cleanup-inventory --update
 tags: [audit, docs, cycle, content, pipeline, scripts, operator]
 summary: Cyclic audit of documentation content and docs helper scripts
 max_body_lines: 240
@@ -117,8 +118,8 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 | **B Pipeline** | If `INCLUDE_PIPELINE=true`: map `python -m scripts.docs` entrypoints, MkDocs, CI docs jobs. Prove SoT → generator → validation → artifact. Run `verify` / `check-drift` / `check-links` as evidence. Exit 0 ≠ semantic correctness. Tag findings `pipeline`. |
 | **C Plan** | Cluster: onboarding / API / ops / ADR / AI mirrors / generator / CI. Prefer restore-SSOT-link over rewriting prose. One root-cause per issue. |
 | **D Issues** | Dedupe. Create if ALLOW_ISSUE_WRITE + PROVEN + `requirement_id`. Title `[docs][<REQ-id>][P#]`. Cap MAX_ISSUES. |
-| **E Fix** | Minimal doc/comment fixes. Regenerations only via `python -m scripts.docs <cmd>`. Do not reintroduce retired top-level `scripts/docs/*.py` shims. No root scratch. |
-| **F Validate** | Re-check changed claims; sample links/commands; optional `build-site` if pipeline in scope. Delta: resolved / unchanged / regressed / new. |
+| **E Fix** | Minimal doc/comment fixes. Regenerations only via `python -m scripts.docs <cmd>`. After local markdown link or `Owner:` / `Status:` / `Class:` header changes, run `python -m scripts.docs generate-cleanup-inventory --update` in the same changeset. Do not reintroduce retired top-level `scripts/docs/*.py` shims. No root scratch. |
+| **F Validate** | Re-check changed claims; sample links/commands; `python -m scripts.docs generate-cleanup-inventory --check`; optional `build-site` if pipeline in scope. Delta: resolved / unchanged / regressed / new. |
 
 `MODE=audit` stops after C. `audit+issues` after D. `full` through F.
 
@@ -133,6 +134,7 @@ Loop shell: `prompt.audit.orchestrator`. Default **`N=10`**, **`MODE=full`**,
 - [ ] `python -m scripts.docs verify` evidence recorded when pipeline in scope
 - [ ] Generated tracked artifacts have no random timestamps
 - [ ] Findings tagged `content` vs `pipeline`
+- [ ] Cleanup inventory `--check` is green after link/header edits (`--update` committed with the docs change)
 
 ## Stop
 
