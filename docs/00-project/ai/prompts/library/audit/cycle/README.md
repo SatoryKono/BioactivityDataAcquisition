@@ -1,47 +1,37 @@
 ______________________________________________________________________
 
-Version: 1.0.0
-Status: active
+Version: 1.1.0
+Status: deprecated
 Class: internal (repo-only index; not a paste card)
 Owner: BioETL Team
-Last verified: '2026-08-13'
+Last verified: '2026-09-01'
 
 ______________________________________________________________________
 
-# Cyclic audit pack (10 domains)
+# Cyclic audit pack (10 domains) — redirects
 
-Десять полных operator-paste карточек для циклического аудита BioETL.
-Не runtime SSOT. Precedence: `.codex/**` ≡ `.junie/**` → `AGENTS.md` →
-`NORMATIVE_SOURCES.md` → эта папка.
+These files are **bookmarks**. SSOT is ADR-060 kernel + overlay + generated render.
+Do not paste the old megacards; they duplicated the cyclic controller (D1) and
+defaulted `ALLOW_*` unsafely (D2).
 
-Render:
-
-```powershell
-.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.audit.cycle.docs `
-  --param N=10 --param MODE=full --param LANGUAGE=ru
+```bash
+python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly
+python -m scripts.ai.prompts compile --domain <domain> --profile full-write
 ```
 
-| # | Id | File | Domain |
+| # | Legacy id | Overlay | Generated default |
 | --- | --- | --- | --- |
-| 1 | `prompt.audit.cycle.docs` | [docs.md](docs.md) | Документация + `scripts/docs` |
-| 2 | `prompt.audit.cycle.diagrams` | [diagrams.md](diagrams.md) | Диаграммы + `scripts/diagrams` |
-| 3 | `prompt.audit.cycle.agents-memory` | [agents-memory.md](agents-memory.md) | Агенты, skills, память |
-| 4 | `prompt.audit.cycle.configs` | [configs.md](configs.md) | Конфиг-файлы и схемы |
-| 5 | `prompt.audit.cycle.tests` | [tests.md](tests.md) | Тестовый слой |
-| 6 | `prompt.audit.cycle.tech-debt` | [tech-debt.md](tech-debt.md) | Технический долг |
-| 7 | `prompt.audit.cycle.architecture` | [architecture.md](architecture.md) | Общая архитектура |
-| 8 | `prompt.audit.cycle.telemetry` | [telemetry.md](telemetry.md) | Наблюдаемость / наполнение дашбордов |
-| 9 | `prompt.audit.cycle.dashboards` | [dashboards.md](dashboards.md) | Рендер/дизайн панелей (`DASHBOARD_REQUIREMENTS.md`) |
-| 10 | `prompt.audit.cycle.coderabbit` | [coderabbit.md](coderabbit.md) | Полный аудит + CodeRabbit |
+| 1 | `prompt.audit.cycle.docs` | `overlays/docs.yaml` | `generated/docs/audit-readonly.md` |
+| 2 | `prompt.audit.cycle.diagrams` | `overlays/diagrams.yaml` | `generated/diagrams/audit-readonly.md` |
+| 3 | `prompt.audit.cycle.agents-memory` | `overlays/agents-memory.yaml` | `generated/agents-memory/audit-readonly.md` |
+| 4 | `prompt.audit.cycle.configs` | `overlays/configs.yaml` | `generated/configs/audit-readonly.md` |
+| 5 | `prompt.audit.cycle.tests` | `overlays/tests.yaml` | `generated/tests/audit-readonly.md` |
+| 6 | `prompt.audit.cycle.tech-debt` | `overlays/tech-debt.yaml` | `generated/tech-debt/audit-readonly.md` |
+| 7 | `prompt.audit.cycle.architecture` | `overlays/architecture.yaml` | `generated/architecture/audit-readonly.md` |
+| 8 | `prompt.audit.cycle.telemetry` | `overlays/telemetry.yaml` | `generated/telemetry/audit-readonly.md` |
+| 9 | `prompt.audit.cycle.dashboards` | `overlays/dashboards.yaml` | `generated/dashboards/audit-readonly.md` |
+| 10 | `prompt.audit.cycle.coderabbit` | `overlays/coderabbit.yaml` | `generated/coderabbit/audit-readonly.md` |
 
-Порядок прогона: 1→10. `#8` перед `#9`. `#10` замыкает dual-pass.
-
-Снимок полных inlined-текстов: [materialized-v3](../project/materialized-v3/README.md).
-Редактируемые source cards остаются в этой папке; router — `prompt.audit.project.pack`.
-
-Исчерпывающий прогон всей папки с ISSUE/FIX/CLOSE после каждой карточки:
-`prompt.audit.sequential-run` ([../sequential-run.md](../sequential-run.md)).
-
-Смежные one-shot / старые циклы остаются в `library/audit/`,
-`library/architecture/`, `library/observability/`. Эта папка — канонический
-набор из 10 полных циклических текстов.
+Compatibility wrappers: `compatibility/<legacy-id>.md`.
+Migration: [MIGRATION-GUIDE-KERNEL-V3.md](../../../MIGRATION-GUIDE-KERNEL-V3.md).
+Frozen snapshot: [materialized-v3](../project/materialized-v3/README.md).

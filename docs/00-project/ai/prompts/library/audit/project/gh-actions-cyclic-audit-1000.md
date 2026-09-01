@@ -1,36 +1,21 @@
 ---
 id: prompt.audit.project.gh-actions-cyclic-1000
-version: 1.0.0
-status: active
+version: 1.1.0
+status: deprecated
 class: operator-paste
 owner: BioETL Team
-runtimes: [grok, any]
-params: [PR_NUMBER, BRANCH, HEAD_SHA, MERGE_SHA]
-includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-related_ssot:
-  - AGENTS.md
-  - docs/00-project/NORMATIVE_SOURCES.md
-anti_patterns:
-  - Raising tech-debt budgets
-  - Committing to main
-  - Skipping hooks
-tags: [gh-actions, cyclic, audit, operator]
-summary: GH Actions cyclic audit 1000x test->fix->retest
+successor: generated/github-actions/audit-readonly.md
+summary: Weak 1000x stub retired; use compiled github-actions overlay
 ---
 
-# GH Actions Cyclic Audit — 1000x test->fix->retest
+# Redirect — GH Actions cyclic stub
 
-**Repo:** `SatoryKono/BioactivityDataAcquisition`
-**PR:** `{{PR_NUMBER}}` | **Branch:** `{{BRANCH}}` | **Base:** `main`
-**Head SHA:** `{{HEAD_SHA}}`
-**Merge SHA:** `{{MERGE_SHA}}`
+> **Removed as a weak duplicate.** A 1000-iteration empty loop is not an audit method.
+>
+> Use [`generated/github-actions/audit-readonly.md`](../../../generated/github-actions/audit-readonly.md)
+> and `prompt.tests.fix-retest` for test→fix→retest.
 
-## Цель
-Довести PR до зелёного `checks-complete` за 1000 итераций.
-
-## Цикл
-for i in 1..1000: test -> fix -> retest
+```bash
+python -m scripts.ai.prompts compile --domain github-actions --profile audit-readonly
+python -m scripts.ai.prompts render prompt.tests.fix-retest
+```
