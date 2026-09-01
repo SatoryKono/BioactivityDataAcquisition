@@ -122,6 +122,19 @@ def test_unused_github_environments_are_not_required_protection_surfaces() -> No
     assert "copilot" not in protected
 
 
+def test_passed_security_controls_do_not_pin_closed_known_issues() -> None:
+    """Conformant security controls must not route future drift to closed issues."""
+    by_id = {control["id"]: control for control in _policy()["controls"]}
+    for control_id in (
+        "GH-ACTIONS-001",
+        "GH-DEPENDABOT-001",
+        "GH-CODEQL-001",
+        "GH-SECRET-001",
+        "GH-ENV-001",
+    ):
+        assert by_id[control_id]["known_issue"] is None, control_id
+
+
 def test_unknown_labels_are_retained_by_default() -> None:
     classification, replacement = TOOL._classification(
         "project-specific-label",
