@@ -43,9 +43,10 @@ def test_bronze_same_payload_is_idempotent(tmp_path: Path) -> None:
     first = target.read_bytes()
     mixin._write_atomic_stream(iter(records), target)
     assert target.read_bytes() == first
-    assert asyncio.run(mixin._calculate_checksum(target)) == hashlib.blake2b(
-        first
-    ).hexdigest()
+    assert (
+        asyncio.run(mixin._calculate_checksum(target))
+        == hashlib.blake2b(first).hexdigest()
+    )
 
 
 @pytest.mark.unit
