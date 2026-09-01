@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -26,7 +28,7 @@ except ImportError:
 GENERATED_ROOT = PROMPTS_ROOT / "generated"
 
 
-_ALLOWED_TOKEN = __import__("re").compile(r"^[A-Za-z0-9_.-]+$")
+_ALLOWED_TOKEN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 def _validate_token(value: str, label: str) -> None:
@@ -39,25 +41,20 @@ def _read(d: str, p: str) -> str:
     _validate_token(p, "profile")
     # Resolve + containment check — prevent llm-driven path traversal (S8707/S8705).
     raw = GENERATED_ROOT / d / f"{p}.md"
-    try:
-        f = raw.resolve()
-        base = GENERATED_ROOT.resolve()
-    except FileNotFoundError:
-        # Resolve the parent if file does not yet exist (FileNotFoundError path).
-        f = raw.resolve()
-        base = GENERATED_ROOT.resolve()
-    if f != base and not str(f).startswith(str(base) + __import__("os").sep):
+    resolved = raw.resolve()
+    base = GENERATED_ROOT.resolve()
+    if resolved != base and not str(resolved).startswith(str(base) + os.sep):
         raise ValueError(f"path escapes generated root: {raw}")
-    if not f.is_file():
-        raise FileNotFoundError(f"generated file not found: {f}")
-    return f.read_text(encoding="utf-8").replace("\r\n", "\n")
+    if not resolved.is_file():
+        raise FileNotFoundError(f"generated file not found: {resolved}")
+    return resolved.read_text(encoding="utf-8").replace("\r\n", "\n")
 
 
-def diff_domain(d: str, p: str, c: str | None, n: int) -> int:
+def diff_domain(d: str, p: str, c: str | None, n: int) -> None:
     a = _read(d, p)
     if c is None:
         sys.stdout.write(a)
-        return 0
+        return
     b = _read(d, c)
     diff = difflib.unified_diff(
         a.splitlines(True),
@@ -69,9 +66,8 @@ def diff_domain(d: str, p: str, c: str | None, n: int) -> int:
     out = "".join(diff)
     if not out:
         print(f"no diff: {d}/{p}.md == {d}/{c}.md")
-        return 0
+        return
     sys.stdout.write(out)
-    return 0
 
 
 def diff_catalog(n: int) -> int:
@@ -120,10 +116,11 @@ def main(argv: list[str] | None = None) -> int:
         return diff_catalog(a.unified)
     if a.domain and a.profile:
         try:
-            return diff_domain(a.domain, a.profile, a.compare, a.unified)
+            diff_domain(a.domain, a.profile, a.compare, a.unified)
         except FileNotFoundError as e:
             print(str(e), file=sys.stderr)
             return 1
+        return 0
     build_parser().error("use --catalog or --domain <d> --profile <p> [--compare <p2>]")
     return 2
 
