@@ -9,10 +9,11 @@ description: "BioETL AI agent workflow, validation, and guardrails"
 
 ## Precedence
 
-1. Runtime source: `.codex/agents/`; use `.gemini/**` only when a tracked runtime tree is added and verified in the same change
-2. `docs/00-project/RULES.md`
-3. `docs/01-requirements/REQUIREMENTS.md`
-4. Accepted ADRs in `docs/02-architecture/decisions/`
+1. Runtime source: .codex/agents/ + .junie/agents/ + .devin/agents/ (equal peers); use .gemini/** only when tracked and verified
+1a. docs/00-project/NORMATIVE_SOURCES.md
+2. docs/00-project/RULES.md
+3. docs/01-requirements/REQUIREMENTS.md
+4. Accepted ADRs in docs/02-architecture/decisions/
 
 ## Before Editing
 
@@ -26,6 +27,7 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`:
 
 - Re-scan impacted code, configs, docs, tests
 - After `src/bioetl/**/*.py` changes: refresh `reports/quality/module-coverage-inventory.json`
+- After markdown/docs changes that add, remove, or retarget local links, or that change `Owner:` / `Status:` / `Class:` headers: run `python -m scripts.docs generate-cleanup-inventory --update` and commit `docs/reports/generated/documentation-cleanup-inventory.{json,md}` with the docs change. `--check` reads the working tree, not HEAD; skipping `--update` fails `test_documentation_cleanup_inventory_check_passes` and stops `architecture-fast`
 - Report checks run, skipped checks, mirror-sync status
 
 ## Hard Guardrails
@@ -38,6 +40,7 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`:
 - **No silent breaking changes** to CLI/API/schema contracts
 - BioETL stays **local-only by default** (no Docker/Redis unless task requires it)
 - After `src/bioetl/**/*.py` changes: refresh `reports/quality/module-coverage-inventory.json` (`source_tree_sha256` MUST change)
+- After markdown link or `Owner:` / `Status:` / `Class:` header changes: `python -m scripts.docs generate-cleanup-inventory --update` in the same changeset
 
 ## Response Language
 

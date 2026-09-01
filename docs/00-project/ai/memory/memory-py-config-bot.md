@@ -27,6 +27,9 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 1. Edit the canonical owner; do not add legacy path overrides.
 1. Refresh derived artifacts through their generator.
 1. Run focused config/schema and related docs/architecture checks.
+1. If the change also edits markdown links or `Owner:` / `Status:` / `Class:`
+   headers, run `python -m scripts.docs generate-cleanup-inventory --update`
+   in the same changeset.
 
 Never place secrets or machine-local values in tracked config, change an `.env`
 file without explicit approval, or increase a debt budget/threshold.

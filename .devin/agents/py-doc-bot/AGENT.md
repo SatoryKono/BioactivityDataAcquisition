@@ -57,6 +57,10 @@ ______________________________________________________________________
 1. Документация MUST быть актуальной.
 1. **ЗАПРЕЩЕНО УВЕЛИЧИВАТЬ ЛИМИТЫ ТЕХ. ДОЛГА.**
 1. Записывать документацию только в `docs/` и docstrings.
+1. После изменения локальных markdown-ссылок или шапки `Owner:` / `Status:` /
+   `Class:` выполнить `python -m scripts.docs generate-cleanup-inventory --update`
+   и закоммитить `docs/reports/generated/documentation-cleanup-inventory.{json,md}`
+   в том же changeset. `--check` читает working tree, не `HEAD`.
 
 ______________________________________________________________________
 

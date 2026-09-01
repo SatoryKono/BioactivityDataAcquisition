@@ -153,6 +153,15 @@ uv run python -m scripts.docs generate-cleanup-inventory --check
 Use this when you change documentation surfaces, generated artifact routing,
 or need a deterministic per-file classification matrix for cleanup work.
 
+**How not to fail `architecture-fast`:** `--check` rebuilds the inventory from
+the working tree (inbound/outbound links, `Owner:` / `Status:` / `Class:`
+headers, duplicate groups) and compares it to the committed JSON. Any new or
+retargeted local markdown link requires `--update` in the **same changeset**.
+Skipping that refresh fails
+`tests/architecture/test_documentation_cleanup_inventory.py::test_documentation_cleanup_inventory_check_passes`
+and stops `architecture-fast` at the first failure. `--check` prints
+field-level diffs; do not treat a bare JSON-path mismatch as a flake.
+
 Outputs:
 
 - `docs/reports/generated/documentation-cleanup-inventory.json`

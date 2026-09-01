@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-01T12:18:18.664405+00:00",
+  "generated_at": "2026-09-01T11:32:51.320755+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -8,10 +8,10 @@
       "supporting": 271
     },
     "reference_group_coverage": {
-      "agents": 7,
+      "agents": 8,
       "build": 17,
       "ci": 82,
-      "docs": 253,
+      "docs": 254,
       "other": 74,
       "scripts": 508,
       "skills": 12,
@@ -8006,10 +8006,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [
+        "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 207,
+      "reference_count": 236,
       "references": [
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 66,
+          "source_group": "agents",
+          "text": "`python -m scripts.docs generate-cleanup-inventory --update` in the same"
+        },
+        {
+          "path": ".codex/agents/py-doc-bot.md",
+          "line": 42,
+          "source_group": "agents",
+          "text": "`python -m scripts.docs generate-cleanup-inventory --update` and keep"
+        },
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
           "line": 43,
@@ -8021,6 +8034,12 @@
           "line": 44,
           "source_group": "skills",
           "text": "`python -m scripts.docs check-drift --runtime-mirrors --freshness`."
+        },
+        {
+          "path": ".codex/skills/py-doc-bot/SKILL.md",
+          "line": 47,
+          "source_group": "skills",
+          "text": "run `python -m scripts.docs generate-cleanup-inventory --update` and"
         },
         {
           "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
@@ -8039,24 +8058,6 @@
           "line": 79,
           "source_group": "other",
           "text": "python3 -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
-          "line": 80,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-drift --runtime-mirrors --freshness"
-        },
-        {
-          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
-          "line": 69,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
-          "line": 70,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-drift --runtime-mirrors --freshness"
         }
       ]
     },
@@ -8325,7 +8326,7 @@
         },
         {
           "path": "tests/unit/scripts/test_documentation_cleanup_inventory.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.docs.checks import documentation_cleanup_inventory as inventory"
         }
@@ -15919,7 +15920,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 81,
+          "line": 95,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
@@ -16750,8 +16751,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+          "line": 192,
+          "source_group": "docs",
+          "text": "REQ-PROVIDER-002,MUST,Приложение: Provider Health Checks,docs/00-project/RULES.md,\"11. API, transport and resilience\",,Проверить реализацию health check для PubChem,src/bioetl/infrastructure/adapters/"
+        },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 77,
@@ -17759,7 +17766,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "line": 100,
+          "line": 107,
           "source_group": "agents",
           "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
         },
@@ -18737,7 +18744,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -18782,10 +18789,10 @@
           "text": "REQ-DR-003,SHOULD,5. Операции > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,Проверить наличие зафиксированного restore drill или rehear"
         },
         {
-          "path": "scripts/ops/data/__main__.py",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "\"vacuum\": \"vacuum_delta.py\","
+          "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
+          "line": 182,
+          "source_group": "docs",
+          "text": "REQ-ROLLBACK-001,MUST,7. Управление Изменениями > 7.2 Rollback,docs/00-project/RULES.md,\"17. Changes, documentation and technical debt\",,\"Проверить наличие manual rollback procedure и placeholder/guar"
         }
       ]
     },

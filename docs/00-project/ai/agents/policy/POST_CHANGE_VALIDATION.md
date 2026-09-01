@@ -62,6 +62,20 @@ Verify changes against the current normative stack:
 - verify runtime/mirror consistency when AI guidance or published examples changed
 - run `python -m scripts.docs check-links --links --specs --configs`
 - run `python -m scripts.docs check-drift --runtime-mirrors --freshness`
+- when markdown/docs changes add, remove, or retarget local links, or change
+  `Owner:` / `Status:` / `Class:` headers, refresh the documentation cleanup
+  inventory in the **same changeset**:
+  - `python -m scripts.docs generate-cleanup-inventory --update`
+  - verify: `python -m scripts.docs generate-cleanup-inventory --check`
+  - artifacts: `docs/reports/generated/documentation-cleanup-inventory.json`
+    and `docs/reports/generated/documentation-cleanup-inventory.md`
+  - `--check` rebuilds from the working tree, not `HEAD`. A docs-cycle that
+    edits links or headers without `--update` fails
+    `tests/architecture/test_documentation_cleanup_inventory.py::test_documentation_cleanup_inventory_check_passes`
+    and stops `architecture-fast` at the first failure
+  - `--check` prints field-level diffs (`inbound_links`, `outbound_links`,
+    `declared_status`, generated-only rows). Do not treat a bare JSON-path
+    mismatch as a flake
 
 ### Code and tests
 
