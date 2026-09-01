@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.infrastructure.storage.bronze.io_mixin import (
     BronzeWriterIOMixin,
+    _publish_new_file_exclusive,
     write_bytes_if_absent_or_same,
 )
 
@@ -69,3 +70,82 @@ def test_sidecar_different_bytes_raises(tmp_path: Path) -> None:
         write_bytes_if_absent_or_same(
             path, b'{"k": 2}', mismatch_message="sidecar mismatch"
         )
+
+
+@pytest.mark.unit
+def test_payload_publish_failure_leaves_no_partial_final_target(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / ".batch.tmp"
+    target = tmp_path / "batch.jsonl.zst"
+    source.write_bytes(b"complete-payload")
+
+    def fail_link(source_path: str, target_path: str) -> None:
+        del source_path, target_path
+        raise OSError("simulated publish failure")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin.os.link",
+        fail_link,
+    )
+
+    with pytest.raises(OSError, match="simulated publish failure"):
+        _publish_new_file_exclusive(source, target)
+
+    assert not target.exists()
+    assert source.read_bytes() == b"complete-payload"
+
+
+@pytest.mark.unit
+def test_sidecar_publish_failure_leaves_no_partial_final_target(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "batch.meta.json"
+
+    def fail_publish(source: Path, final_target: Path) -> None:
+        del source, final_target
+        raise OSError("simulated publish failure")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin._publish_new_file_exclusive",
+        fail_publish,
+    )
+
+    with pytest.raises(OSError, match="simulated publish failure"):
+        write_bytes_if_absent_or_same(
+            target,
+            b"complete-metadata",
+            mismatch_message="sidecar mismatch",
+        )
+
+    assert not target.exists()
+    assert list(tmp_path.glob(".*_*.tmp")) == []
+
+
+@pytest.mark.unit
+def test_concurrent_different_sidecar_is_not_overwritten(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "batch.meta.json"
+
+    def publish_other_writer(source: Path, final_target: Path) -> None:
+        del source
+        final_target.write_bytes(b"other-writer")
+        raise FileExistsError(final_target)
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin._publish_new_file_exclusive",
+        publish_other_writer,
+    )
+
+    with pytest.raises(FileExistsError, match="sidecar mismatch"):
+        write_bytes_if_absent_or_same(
+            target,
+            b"candidate",
+            mismatch_message="sidecar mismatch",
+        )
+
+    assert target.read_bytes() == b"other-writer"

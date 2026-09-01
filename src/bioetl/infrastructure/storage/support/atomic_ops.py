@@ -3,7 +3,7 @@
 Implements atomic write pattern (temp file + rename) for data integrity.
 
 Requirements:
-- REQ-DATA-004: Atomic writes to prevent partial/corrupted files
+- docs/00-project/RULES.md section 4.3 atomic-publication contract
 - Cross-platform compatibility (Unix, Windows)
 
 Architecture:
