@@ -64,7 +64,7 @@ For each issue in SCOPE:
    - already fixed on main → `VERIFIED_ALREADY_RESOLVED` + evidence (SHA, path, command)
    - cannot proceed → `BLOCKED` + exact blocker + acceptance gaps
 3. **Verify** focused tests/checks; list commands
-4. **Post-change** for touched surfaces (`POST_CHANGE_VALIDATION.md`); mirror parity if runtime trees changed
+4. **Post-change** for touched surfaces (`POST_CHANGE_VALIDATION.md`); mirror parity if runtime trees changed. Markdown link or `Owner:` / `Status:` / `Class:` header changes require `python -m scripts.docs generate-cleanup-inventory --update` in the same changeset.
 5. **Ship** PR if product/docs delta; else evidence-only comment
 6. **Close** only when acceptance met; comment with verdict + commands + SHA/PR
 
