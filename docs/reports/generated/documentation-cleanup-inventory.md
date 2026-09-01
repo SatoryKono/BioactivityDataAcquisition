@@ -61,8 +61,8 @@
 | Active | 750 |
 | Archived | 170 |
 | Canonical | 73 |
-| Deprecated | 32 |
-| Generated | 1287 |
+| Deprecated | 51 |
+| Generated | 1268 |
 | Working | 1416 |
 
 ## Surface Families
@@ -72,8 +72,8 @@
 | active | 750 |
 | archive | 170 |
 | canonical | 73 |
-| duplicate | 32 |
-| generated | 1287 |
+| duplicate | 51 |
+| generated | 1268 |
 | working | 1416 |
 
 ## Recommended Actions
@@ -82,25 +82,25 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 919 |
-| generate-automatically | 1287 |
+| generate-automatically | 1268 |
 | keep | 1146 |
 | reconcile-with-github-state | 8 |
-| replace-with-link | 32 |
+| replace-with-link | 51 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.architecture.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.coderabbit.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.configs.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.dashboards.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.diagrams.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.docs.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tech-debt.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.telemetry.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tests.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.architecture.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.coderabbit.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.configs.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.dashboards.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.diagrams.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.docs.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tech-debt.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.telemetry.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tests.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.cli-compat.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.control-plane.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.dq-contracts.md` | Deprecated | 0 | replace-with-link |
@@ -116,6 +116,25 @@
 | `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.security-secrets.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.vcr-http.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/fragments/grafana-six-contract.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/README.md` | Deprecated | 6 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/agents-memory.md` | Deprecated | 2 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/architecture.md` | Deprecated | 2 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/coderabbit.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/configs.md` | Deprecated | 2 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/dashboards.md` | Deprecated | 2 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/diagrams.md` | Deprecated | 3 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/docs.md` | Deprecated | 3 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/agents-memory.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/configs.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/dashboards.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/diagrams.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/docs.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/tech-debt.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/run/tests.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/tech-debt.md` | Deprecated | 3 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/telemetry.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cycle/tests.md` | Deprecated | 3 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/project/gh-actions-cyclic-audit-1000.md` | Deprecated | 0 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/consolidate.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/data.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/evidence.md` | Deprecated | 1 | replace-with-link |
@@ -152,25 +171,6 @@
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/requirement-graph.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/untraced-tests.csv` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/final-summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/delta.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/validation.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/delta.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/plan.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/run.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
-| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 

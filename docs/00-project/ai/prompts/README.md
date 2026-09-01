@@ -68,16 +68,16 @@ docs/00-project/ai/prompts/
 | `prompt.audit.cyclic-pack` | [library/audit/cyclic-pack.md](library/audit/cyclic-pack.md) | Pack routing: 10-domain `prompt.audit.cycle.*` |
 | `prompt.audit.project.pack` | [library/audit/project/pack.md](library/audit/project/pack.md) | Full project-audit pastes (tech-debt, tests, docs, diagrams, 10-domain cycle) |
 | `prompt.audit.sequential-run` | [library/audit/sequential-run.md](library/audit/sequential-run.md) | Sequential `library/audit` run: cycle 1→10, issue/fix/close after each card |
-| `prompt.audit.cycle.docs` | [library/audit/cycle/docs.md](library/audit/cycle/docs.md) | Cyclic **docs + scripts/docs** |
-| `prompt.audit.cycle.diagrams` | [library/audit/cycle/diagrams.md](library/audit/cycle/diagrams.md) | Cyclic **diagrams + scripts/diagrams** |
-| `prompt.audit.cycle.agents-memory` | [library/audit/cycle/agents-memory.md](library/audit/cycle/agents-memory.md) | Cyclic **agents + memory** |
-| `prompt.audit.cycle.configs` | [library/audit/cycle/configs.md](library/audit/cycle/configs.md) | Cyclic **project configs** |
-| `prompt.audit.cycle.tests` | [library/audit/cycle/tests.md](library/audit/cycle/tests.md) | Cyclic **test layer** |
-| `prompt.audit.cycle.tech-debt` | [library/audit/cycle/tech-debt.md](library/audit/cycle/tech-debt.md) | Cyclic **tech-debt** |
-| `prompt.audit.cycle.architecture` | [library/audit/cycle/architecture.md](library/audit/cycle/architecture.md) | Cyclic **architecture** (10 categories) |
-| `prompt.audit.cycle.telemetry` | [library/audit/cycle/telemetry.md](library/audit/cycle/telemetry.md) | Cyclic **observability / dashboard feed** |
-| `prompt.audit.cycle.dashboards` | [library/audit/cycle/dashboards.md](library/audit/cycle/dashboards.md) | Cyclic **dashboard** audit (`DASHBOARD_REQUIREMENTS.md`) |
-| `prompt.audit.cycle.coderabbit` | [library/audit/cycle/coderabbit.md](library/audit/cycle/coderabbit.md) | Cyclic **full project + CodeRabbit** |
+| `prompt.audit.cycle.docs` | [generated/docs/audit-readonly.md](generated/docs/audit-readonly.md) | Cyclic **docs** (ADR-060 generated; library card is a redirect) |
+| `prompt.audit.cycle.diagrams` | [generated/diagrams/audit-readonly.md](generated/diagrams/audit-readonly.md) | Cyclic **diagrams** (generated) |
+| `prompt.audit.cycle.agents-memory` | [generated/agents-memory/audit-readonly.md](generated/agents-memory/audit-readonly.md) | Cyclic **agents + memory** (generated) |
+| `prompt.audit.cycle.configs` | [generated/configs/audit-readonly.md](generated/configs/audit-readonly.md) | Cyclic **configs** (generated) |
+| `prompt.audit.cycle.tests` | [generated/tests/audit-readonly.md](generated/tests/audit-readonly.md) | Cyclic **tests** (generated) |
+| `prompt.audit.cycle.tech-debt` | [generated/tech-debt/audit-readonly.md](generated/tech-debt/audit-readonly.md) | Cyclic **tech-debt** (generated) |
+| `prompt.audit.cycle.architecture` | [generated/architecture/audit-readonly.md](generated/architecture/audit-readonly.md) | Cyclic **architecture** (generated) |
+| `prompt.audit.cycle.telemetry` | [generated/telemetry/audit-readonly.md](generated/telemetry/audit-readonly.md) | Cyclic **telemetry** (generated) |
+| `prompt.audit.cycle.dashboards` | [generated/dashboards/audit-readonly.md](generated/dashboards/audit-readonly.md) | Cyclic **dashboards** (generated) |
+| `prompt.audit.cycle.coderabbit` | [generated/coderabbit/audit-readonly.md](generated/coderabbit/audit-readonly.md) | Cyclic **CodeRabbit** (generated) |
 | Materialized audit snapshot | [library/audit/project/materialized-v3/](library/audit/project/materialized-v3/README.md) | Frozen 24-card operator-paste evidence; not editable source cards |
 | `prompt.audit.role-auditor` | [library/audit/role-auditor.md](library/audit/role-auditor.md) | Dual-agent Auditor (A) duties |
 | `prompt.audit.role-planner` | [library/audit/role-planner.md](library/audit/role-planner.md) | Dual-agent Planner (B) duties |
