@@ -11,6 +11,9 @@ from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
 from bioetl.interfaces.http._processed_records_prometheus import (
+    DEFAULT_PROMETHEUS_BASE_URL,
+    DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS,
+    PROMETHEUS_QUERY_TIMEOUT_SECONDS,
     _candidate_prometheus_base_urls,
     _query_prometheus_vector_with_fallbacks,
 )
@@ -29,12 +32,6 @@ from bioetl.interfaces.http._processed_records_value_support import (
 )
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
-# Local-only Prometheus endpoints (ADR-010); cleartext is intentional for loopback.
-DEFAULT_PROMETHEUS_BASE_URL = (
-    "http://localhost:9090"  # NOSONAR - loopback probe default
-)
-DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS: tuple[str, ...] = ()
-PROMETHEUS_QUERY_TIMEOUT_SECONDS = 3.0
 
 _Denominator = Literal["constant_100", "bronze"]
 _PercentFormat = Literal["constant_100", "fixed_1", "trimmed_3"]

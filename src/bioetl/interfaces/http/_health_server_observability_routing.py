@@ -294,16 +294,23 @@ async def handle_processed_records_table(
         operation = build_selection_required
     elif run_ledger is not None:
 
-        def build_from_ledger() -> dict[str, object]:
-            return build_processed_records_table_payload_from_ledger(
-                ledger_entries=tuple(
-                    run_ledger.list_entries_by_run_id(selected_run_id)
-                ),
+        def _build_from_ledger_with_fallback() -> dict[str, object]:
+            entries = tuple(run_ledger.list_entries_by_run_id(selected_run_id))
+            if entries:
+                return build_processed_records_table_payload_from_ledger(
+                    ledger_entries=entries,
+                    pipeline=pipeline,
+                    run_type=run_type,
+                )
+            # Ledger exists but has no entry for this run_id - fallback to
+            # live Prometheus current metrics instead of empty UNKNOWN rows.
+            return build_processed_records_table_payload_from_prometheus(
+                prometheus_base_url=host._prometheus_base_url,
                 pipeline=pipeline,
                 run_type=run_type,
             )
 
-        operation = build_from_ledger
+        operation = _build_from_ledger_with_fallback
     else:
 
         def build_from_prometheus() -> dict[str, object]:
