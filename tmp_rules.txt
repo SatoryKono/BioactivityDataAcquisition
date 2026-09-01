@@ -1,9 +1,0 @@
-groups:
-  - name: bioetl
-    interval: 30s
-    rules:
-      - alert: PrometheusDown
-        expr: up{job="prometheus"} == 0
-        for: 5m
-        annotations:
-          summary: "Prometheus is down"
