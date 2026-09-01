@@ -48,9 +48,11 @@ first_screen_shell_panels:
     id: 906
     owner: "@bioetl-observability"
     rationale: >-
-      First-window next-step rail; native title omitted so h=2 Review Recovery
-      Action fits DASH-FIT-004 without pushing KPI stats past viewport_rows.
-    retire_when: the CTA can use h=3 without folding KPI stats past row 18
+      First-window next-step rail; native title omitted so h=3 Review Recovery
+      Action fits DASH-FIT-004 at 200% without pushing KPI stats past
+      viewport_rows. Navigation is h=3 so tables keep min-height 5, 9401 stays
+      h=4 (DASH-DENSITY-002), and the CTA occupies y=12..15.
+    retire_when: the CTA can keep a native title without overflowing at 200%
   - dashboard: bioetl-control-plane-v1.json
     id: 9400
     owner: "@bioetl-observability"
@@ -290,7 +292,6 @@ answer_panels:
   bioetl-run-explorer-v1.json:
     - id: 3010
       title: Inspect Recent Runs (last 10)
-
 
 trust_gate_panels:
   - dashboard: bioetl-control-plane-v1.json
