@@ -1421,7 +1421,9 @@ def _inventory_field_diffs(
     return lines
 
 
-def _json_inventory_field_diffs(generated_content: str, on_disk_content: str) -> list[str]:
+def _json_inventory_field_diffs(
+    generated_content: str, on_disk_content: str
+) -> list[str]:
     try:
         generated_payload = json.loads(generated_content)
         on_disk_payload = json.loads(on_disk_content)
