@@ -85,12 +85,16 @@ def test_write_bytes_if_absent_or_same_handles_exclusive_create_race(
     """A concurrent creator must be validated without overwriting its payload."""
     target = tmp_path / "race.bin"
     target.write_bytes(existing)
+
+    def simulate_concurrent_publish(source: Path, final_target: Path) -> None:
+        del source
+        raise FileExistsError(final_target)
+
     monkeypatch.setattr(
-        io_mixin.os,
-        "open",
-        MagicMock(side_effect=FileExistsError),
+        io_mixin,
+        "_publish_new_file_exclusive",
+        simulate_concurrent_publish,
     )
-    monkeypatch.setattr(Path, "exists", lambda self: False)
 
     if existing == b"same":
         io_mixin.write_bytes_if_absent_or_same(

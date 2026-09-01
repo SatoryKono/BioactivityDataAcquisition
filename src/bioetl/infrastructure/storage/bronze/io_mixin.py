@@ -17,7 +17,6 @@ from bioetl.infrastructure.storage.bronze.facade_contracts import BRONZE_WRITE_E
 from bioetl.infrastructure.storage.bronze.read_cleanup_mixin import (
     BronzeWriterReadCleanupMixin,
 )
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort, MetricsPort
@@ -202,16 +201,14 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
             jsonl_content = b"".join(records)
 
             json_full_path = self.base_path / json_relative_path
-            json_full_path.parent.mkdir(parents=True, exist_ok=True)
-            if json_full_path.exists():
-                if json_full_path.read_bytes() == jsonl_content:
-                    return
-                raise FileExistsError(
+            write_bytes_if_absent_or_same(
+                json_full_path,
+                jsonl_content,
+                mismatch_message=(
                     "Bronze JSON copy already exists with different payload: "
                     f"{json_full_path}"
-                )
-
-            atomic_write_bytes(json_full_path, jsonl_content)
+                ),
+            )
 
         await asyncio.to_thread(_write)
 
@@ -225,28 +222,35 @@ def _existing_payload_matches(
 
 
 def _publish_new_file_exclusive(source: Path, target: Path) -> None:
-    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-    fd = os.open(os.fspath(target), flags)
-    os.close(fd)
-    source.replace(target)
+    """Publish a complete same-filesystem temp file without overwriting target."""
+    os.link(os.fspath(source), os.fspath(target))
+    with contextlib.suppress(OSError):
+        source.unlink()
 
 
 def write_bytes_if_absent_or_same(
     target: Path, data: bytes, *, mismatch_message: str
 ) -> None:
-    if target.exists():
-        if target.read_bytes() != data:
-            raise FileExistsError(mismatch_message)
-        return
+    """Publish complete bytes once while preserving idempotent same-payload replay."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path_str = tempfile.mkstemp(
+        suffix=".tmp",
+        prefix="." + target.stem + "_",
+        dir=target.parent,
+    )
+    temp_path = Path(temp_path_str)
     try:
-        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
-        fd = os.open(os.fspath(target), flags)
-    except FileExistsError:
-        if target.read_bytes() != data:
-            raise FileExistsError(mismatch_message) from None
-        return
-    os.close(fd)
-    atomic_write_bytes(target, data)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+        try:
+            _publish_new_file_exclusive(temp_path, target)
+        except FileExistsError:
+            if target.read_bytes() != data:
+                raise FileExistsError(mismatch_message) from None
+    finally:
+        with contextlib.suppress(OSError):
+            if temp_path.exists():
+                temp_path.unlink()
 
 
 __all__ = ["BronzeWriterIOMixin"]
