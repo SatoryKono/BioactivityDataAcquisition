@@ -6,7 +6,7 @@
 ## Summary
 
 - Scanned modules: `2465`
-- Internal import edges (raw): `7699`
+- Internal import edges (raw): `7698`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `327`
