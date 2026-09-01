@@ -916,7 +916,7 @@ class TestBronzeWriterListBatches:
 
 @pytest.mark.unit
 class TestBronzeWriterAtomicWrite:
-    """Tests for BronzeWriter atomic write guarantees (REQ-DATA-004)."""
+    """Tests for the BronzeWriter atomic-write guarantee."""
 
     @pytest.mark.asyncio
     async def test_no_partial_files_on_write_failure(
@@ -932,7 +932,7 @@ class TestBronzeWriterAtomicWrite:
         """Test that no partial files remain if write fails mid-operation.
 
         Simulates a failure during the atomic write commit phase.
-        Verifies REQ-DATA-004: Atomic writes.
+        Verifies the atomic publication contract from RULES.md section 4.3.
         """
         writer = BronzeWriter(
             base_path=tmp_path,
@@ -941,11 +941,13 @@ class TestBronzeWriterAtomicWrite:
         )
         date = datetime(2024, 1, 15, tzinfo=UTC)
 
-        # Mock Path.replace to fail (simulating rename failure)
-        # Note: We now use Path.replace directly in _write_atomic_stream
+        # Fail at the exclusive publication boundary after the complete
+        # same-directory temporary file has been written.
         with (
             patch(
-                "pathlib.Path.replace", side_effect=OSError("Simulated rename failure")
+                "bioetl.infrastructure.storage.bronze.io_mixin."
+                "_publish_new_file_exclusive",
+                side_effect=OSError("Simulated rename failure"),
             ),
             pytest.raises(OSError, match="Simulated rename failure"),
         ):
