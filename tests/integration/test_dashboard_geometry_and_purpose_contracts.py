@@ -432,7 +432,7 @@ def test_first_screen_budget_excludes_nav_and_named_shell() -> None:
         "id": 906,
         "type": "text",
         "title": "",
-        "gridPos": {"x": 0, "y": 13, "w": 24, "h": 2},
+        "gridPos": {"x": 0, "y": 12, "w": 24, "h": 3},
     }
     data = {
         "id": 9401,
