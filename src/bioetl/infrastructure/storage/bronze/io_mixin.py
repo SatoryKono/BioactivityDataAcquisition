@@ -194,6 +194,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         """
         Write an uncompressed JSON Lines copy of the records to the bronze path.
 
+
         Parameters
         ----------
         records : list[bytes]
@@ -207,6 +208,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         batch_id : BatchID
             Batch identifier used to construct the destination filename.
 
+
         Notes
         -----
         The destination is written atomically. An existing file with identical
@@ -216,6 +218,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
         def _write() -> None:
             """
             Write the batch records to the resolved bronze JSONL path.
+
 
             Raises
             ------
