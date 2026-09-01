@@ -2,7 +2,7 @@
 
 > **Путь:** `docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md`  
 > **Статус:** active | **Версия:** 1.0.0 | **Дата:** 2026-08-31  
-> **Issue:** #9810 (P3 — Deprecation) | **ADR:** [ADR-060](../../02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) §7  
+> **Issue:** #9810 (P3 — Deprecation) | **ADR:** [ADR-060](../../../02-architecture/decisions/ADR-060-prompt-kernel-and-overlay-architecture.md) §7
 > **Источник SSOT:** `BIOETL-PROMPT-ARCH-KERNEL-V3-003` @ `main@3aba8559` (2026-08-28) — `docs/00-project/ai/prompts/library/audit/project/materialized-v3/` frozen snapshot (30 файлов, не редактировать)  
 > **Владелец:** Prompt-system self-audit (fragments / _schema / scripts/ai/prompts / REGISTRY freshness)
 

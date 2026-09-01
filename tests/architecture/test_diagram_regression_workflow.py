@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import os
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -20,6 +21,28 @@ import sys
 import pytest
 
 pytestmark = pytest.mark.architecture
+
+_STALE_WORKFLOW_NEEDLE = b"validate-mermaid.yml"
+_STALE_SCAN_SKIP_DIRS = frozenset(
+    {
+        "99-archive",
+        "archive",
+        "reports",
+        "site",
+        "exports",
+        "generated",
+        "descriptions",
+        "bundles",
+        "__pycache__",
+    }
+)
+_MAX_STALE_SCAN_BYTES = 1_048_576
+_FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x00040000
+_FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x00400000
+_CLOUD_PLACEHOLDER_ATTRIBUTES = (
+    _FILE_ATTRIBUTE_RECALL_ON_OPEN | _FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS
+)
+_STALE_SCAN_SUFFIXES = {".md", ".yml", ".yaml", ".py"}
 
 ROUTER_IMPORT_COMMANDS = (
     "check-quality-gates",
@@ -137,6 +160,34 @@ def test_docs_workflow_render_requires_strict_svgo() -> None:
     assert "Render diagrams with unified script" in workflow
 
 
+def _is_cloud_placeholder(st: os.stat_result) -> bool:
+    attrs = int(getattr(st, "st_file_attributes", 0) or 0)
+    return bool(attrs & _CLOUD_PLACEHOLDER_ATTRIBUTES)
+
+
+def _iter_stale_workflow_scan_files(root: Path) -> list[Path]:
+    """Walk active trees, skipping archive/generated/cloud placeholders."""
+    if not root.exists():
+        return []
+    found: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name not in _STALE_SCAN_SKIP_DIRS]
+        for name in filenames:
+            path = Path(dirpath) / name
+            if path.suffix not in _STALE_SCAN_SUFFIXES:
+                continue
+            try:
+                st = path.stat()
+            except OSError:
+                continue
+            if not stat.S_ISREG(st.st_mode) or _is_cloud_placeholder(st):
+                continue
+            if st.st_size > _MAX_STALE_SCAN_BYTES:
+                continue
+            found.append(path)
+    return found
+
+
 def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
     old_workflow = Path(".github/workflows/validate-mermaid.yml")
     new_workflow = Path(".github/workflows/validate-vendored-mermaid-assets.yml")
@@ -153,11 +204,12 @@ def test_vendored_mermaid_workflow_renamed_and_references_are_current() -> None:
     ]
     stale_hits: list[str] = []
     for root in active_paths:
-        for path in root.rglob("*"):
-            if not path.is_file() or path.suffix not in {".md", ".yml", ".yaml", ".py"}:
+        for path in _iter_stale_workflow_scan_files(root):
+            try:
+                payload = path.read_bytes()
+            except OSError:
                 continue
-            text = path.read_text(encoding="utf-8")
-            if "validate-mermaid.yml" in text:
+            if _STALE_WORKFLOW_NEEDLE in payload:
                 stale_hits.append(path.as_posix())
 
     assert stale_hits == []
