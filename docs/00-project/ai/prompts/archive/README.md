@@ -6,6 +6,8 @@ Historical and non-default prompt material. **Not** default operator paste SSOT.
 | --- | --- |
 | `mirrors/` | Snapshots that duplicated runtime agents/skills/workflows — prefer `.codex/**` / `.junie/**` / `.devin/**` |
 | `campaigns/` | Long playbooks and pre-library megaprompts (evaluation bloat retained for history) |
+| `retired-project-new/` | Unregistered 10-card `project/new/` megacards; use overlays + `generated/` |
+| `retired-project-new2/` | Unregistered 14-card `project/new2/` megacards (`ALLOW_*=true`); use `compatibility/prompt.audit.project.new2.*` |
 
 **Discovery:** active paste lives under [`../library/`](../library/) via
 [`../REGISTRY.yaml`](../REGISTRY.yaml) / `python -m scripts.ai.prompts list`.
