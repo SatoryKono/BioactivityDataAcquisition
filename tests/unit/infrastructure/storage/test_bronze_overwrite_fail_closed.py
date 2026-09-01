@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import errno
+import hashlib
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -41,15 +43,32 @@ def test_bronze_same_payload_is_idempotent(tmp_path: Path) -> None:
     first = target.read_bytes()
     mixin._write_atomic_stream(iter(records), target)
     assert target.read_bytes() == first
+    assert asyncio.run(mixin._calculate_checksum(target)) == hashlib.blake2b(
+        first
+    ).hexdigest()
 
 
 @pytest.mark.unit
-def test_bronze_different_payload_raises_file_exists(tmp_path: Path) -> None:
+def test_bronze_different_payload_raises_file_exists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     mixin = _Mixin(tmp_path)
     target = tmp_path / "batch.jsonl.zst"
     mixin._write_atomic_stream(iter([b'{"id": 1}\n']), target)
     with pytest.raises(FileExistsError, match="already exists with different payload"):
         mixin._write_atomic_stream(iter([b'{"id": 2}\n']), target)
+
+    failed_target = tmp_path / "open-failure.zst"
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin.open",
+        MagicMock(side_effect=OSError("open failed")),
+        raising=False,
+    )
+    with pytest.raises(OSError, match="open failed"):
+        mixin._write_atomic_stream(iter([b'{"id": 3}\n']), failed_target)
+    assert not failed_target.exists()
+    assert list(tmp_path.glob(".open-failure_*.tmp")) == []
 
 
 @pytest.mark.unit
