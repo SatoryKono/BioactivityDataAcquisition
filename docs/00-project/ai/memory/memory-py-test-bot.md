@@ -29,3 +29,10 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 
 Do not modify an `.env` file without explicit approval or increase any debt,
 coverage, exemption, or threshold allowance.
+
+If `architecture-fast` fails on
+`test_documentation_cleanup_inventory_check_passes`, do not skip or weaken the
+gate. The owning refresh is
+`python -m scripts.docs generate-cleanup-inventory --update` after markdown
+link or `Owner:` / `Status:` / `Class:` header changes; `--check` reads the
+working tree, not `HEAD`.

@@ -44,6 +44,10 @@ otherwise; they must not redefine runtime behavior.
 1. Keep terminology aligned with `docs/00-project/glossary.md` and navigation
    aligned with `docs/00-project/00-map.md`.
 1. Refresh generated docs only through the owning command.
+1. After markdown link or `Owner:` / `Status:` / `Class:` header changes, run
+   `python -m scripts.docs generate-cleanup-inventory --update` and keep
+   `docs/reports/generated/documentation-cleanup-inventory.{json,md}` in the
+   same changeset. `--check` reads the working tree, not `HEAD`.
 1. Re-scan related references and run focused link/drift/freshness checks.
 1. For Codex/Junie runtime changes, run the required mirror parity gate.
 

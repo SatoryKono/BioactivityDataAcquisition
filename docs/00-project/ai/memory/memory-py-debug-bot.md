@@ -28,3 +28,9 @@ Status: active navigational memory. Parent: `agent-memory.md`.
 
 Do not recommend state deletion, threshold increases, or `.env` changes as a
 shortcut. Never expose secrets from traces or local runtime state.
+
+If `architecture-fast` fails on
+`test_documentation_cleanup_inventory_check_passes`, the remediation is
+`python -m scripts.docs generate-cleanup-inventory --update` after markdown
+link or `Owner:` / `Status:` / `Class:` header edits — not a skip and not a
+flake. `--check` reads the working tree, not `HEAD`.

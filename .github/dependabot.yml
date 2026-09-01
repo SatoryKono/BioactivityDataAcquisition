@@ -10,8 +10,7 @@ updates:
     groups:
       pip-minor-patch:
         patterns: ["*"]
-        update-types:
-          ["version-update:semver-minor", "version-update:semver-patch"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

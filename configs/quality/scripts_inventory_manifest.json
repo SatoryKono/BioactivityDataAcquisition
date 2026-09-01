@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-01T09:08:12.283Z",
+  "generated_at": "2026-09-01T12:10:33.940967+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -8,7 +8,7 @@
       "supporting": 271
     },
     "reference_group_coverage": {
-      "agents": 7,
+      "agents": 8,
       "build": 17,
       "ci": 82,
       "docs": 254,
@@ -1648,7 +1648,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
@@ -5532,7 +5532,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 4,
       "references": [
         {
           "path": "Makefile",
@@ -5542,6 +5542,18 @@
         },
         {
           "path": "Makefile",
+          "line": 264,
+          "source_group": "build",
+          "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
+        },
+        {
+          "path": "makefile",
+          "line": 260,
+          "source_group": "build",
+          "text": "@echo \"Or use: python scripts/ai/update_deepwiki.py --check\""
+        },
+        {
+          "path": "makefile",
           "line": 264,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
@@ -7307,10 +7319,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
+          "line": 397,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "makefile",
           "line": 397,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -7350,12 +7368,6 @@
           "line": 97,
           "source_group": "scripts",
           "text": "\"render/generate_all_bundles.py\", \"--collection\", \"architecture\""
-        },
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 102,
-          "source_group": "scripts",
-          "text": "\"render/generate_all_bundles.py\", \"--collection\", \"views\""
         }
       ]
     },
@@ -7675,7 +7687,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 23,
       "references": [
         {
           "path": "Makefile",
@@ -8006,10 +8018,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [
+        "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 207,
+      "reference_count": 236,
       "references": [
+        {
+          "path": ".codex/agents/ORCHESTRATION.md",
+          "line": 66,
+          "source_group": "agents",
+          "text": "`python -m scripts.docs generate-cleanup-inventory --update` in the same"
+        },
+        {
+          "path": ".codex/agents/py-doc-bot.md",
+          "line": 42,
+          "source_group": "agents",
+          "text": "`python -m scripts.docs generate-cleanup-inventory --update` and keep"
+        },
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
           "line": 43,
@@ -8021,6 +8046,12 @@
           "line": 44,
           "source_group": "skills",
           "text": "`python -m scripts.docs check-drift --runtime-mirrors --freshness`."
+        },
+        {
+          "path": ".codex/skills/py-doc-bot/SKILL.md",
+          "line": 47,
+          "source_group": "skills",
+          "text": "run `python -m scripts.docs generate-cleanup-inventory --update` and"
         },
         {
           "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
@@ -8039,24 +8070,6 @@
           "line": 79,
           "source_group": "other",
           "text": "python3 -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
-          "line": 80,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-drift --runtime-mirrors --freshness"
-        },
-        {
-          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
-          "line": 69,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
-          "line": 70,
-          "source_group": "other",
-          "text": "python3 -m scripts.docs check-drift --runtime-mirrors --freshness"
         }
       ]
     },
@@ -8325,7 +8338,7 @@
         },
         {
           "path": "tests/unit/scripts/test_documentation_cleanup_inventory.py",
-          "line": 19,
+          "line": 20,
           "source_group": "tests",
           "text": "from scripts.docs.checks import documentation_cleanup_inventory as inventory"
         }
@@ -9649,7 +9662,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -11244,7 +11257,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "Makefile",
@@ -12053,7 +12066,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 16,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -15919,7 +15932,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 81,
+          "line": 95,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
@@ -17151,7 +17164,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 82,
+      "reference_count": 85,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17765,7 +17778,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "line": 100,
+          "line": 107,
           "source_group": "agents",
           "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
         },
@@ -18347,7 +18360,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 67,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
@@ -18905,7 +18918,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 45,
       "references": [
         {
           "path": "Makefile",
@@ -19268,7 +19281,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
@@ -19287,6 +19300,12 @@
           "line": 323,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
+        },
+        {
+          "path": "makefile",
+          "line": 344,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -19311,12 +19330,6 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 107,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -21331,7 +21344,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 94,
+      "reference_count": 95,
       "references": [
         {
           "path": "Makefile",
@@ -21505,7 +21518,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "Makefile",
@@ -21518,6 +21531,12 @@
           "line": 127,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/mcp/apply-shared-to-devin.py`"
+        },
+        {
+          "path": "makefile",
+          "line": 155,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
         },
         {
           "path": "scripts/ops/runtime/mcp/OPERATOR.md",
@@ -21626,7 +21645,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -21665,16 +21684,16 @@
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
-          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 318,
-          "source_group": "scripts",
-          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
+          "path": "makefile",
+          "line": 170,
+          "source_group": "build",
+          "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
-          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 153,
-          "source_group": "scripts",
-          "text": "local health=\"${REPO_ROOT}/scripts/ops/runtime/mcp/health-shared.sh\""
+          "path": "makefile",
+          "line": 236,
+          "source_group": "build",
+          "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal"
         }
       ],
       "owner": "@bioetl-platform",
@@ -21744,7 +21763,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 20,
       "references": [
         {
           "path": "Makefile",
@@ -21777,22 +21796,22 @@
           "text": "bounds `start-shared.sh`; callers must not wrap ensure with a smaller"
         },
         {
-          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 317,
-          "source_group": "scripts",
-          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
+          "path": "makefile",
+          "line": 169,
+          "source_group": "build",
+          "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
         {
-          "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
-          "line": 152,
-          "source_group": "scripts",
-          "text": "local launcher=\"${REPO_ROOT}/scripts/ops/runtime/mcp/start-shared.sh\""
+          "path": "makefile",
+          "line": 235,
+          "source_group": "build",
+          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal"
         },
         {
-          "path": "scripts/ops/runtime/mcp/OPERATOR.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "./scripts/ops/runtime/mcp/start-shared.sh"
+          "path": "makefile",
+          "line": 240,
+          "source_group": "build",
+          "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard"
         }
       ],
       "owner": "@bioetl-platform",

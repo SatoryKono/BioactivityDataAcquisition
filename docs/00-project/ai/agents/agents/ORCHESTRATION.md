@@ -13,7 +13,7 @@ Load only the role- and risk-relevant sources selected by those contracts.
 
 # BioETL Codex orchestration
 
-Status: active runtime source. Owner: BioETL Team. Last verified: 2026-08-07.
+Status: active runtime source. Owner: BioETL Team. Last verified: 2026-09-01.
 
 ## Authority and bootstrap
 
@@ -68,6 +68,9 @@ root agent performs the same responsibilities directly.
 1. Validate proportionately and follow
    `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` for writes.
 1. Synchronize runtime/docs/generated mirrors only from their canonical owner.
+   Markdown link or `Owner:` / `Status:` / `Class:` header changes require
+   `python -m scripts.docs generate-cleanup-inventory --update` in the same
+   changeset.
 1. Run the memory `post-task` workflow and report evidence, skips, mirror
    status, and debt outcome.
 
