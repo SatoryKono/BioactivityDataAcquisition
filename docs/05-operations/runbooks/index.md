@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: Informational
   Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
-  Last verified: '2026-08-27'
+  Last verified: '2026-09-01'
 
 ______________________________________________________________________
 
