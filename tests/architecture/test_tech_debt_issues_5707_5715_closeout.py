@@ -193,6 +193,7 @@ def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
 
 
 def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
+    """Validate that architecture performance evidence is consistent with its baseline and isolated test-lane configuration."""
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5710"]
     baseline = _load_yaml(TELEMETRY_BASELINE)

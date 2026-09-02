@@ -237,6 +237,7 @@ def test_root_data_panels_have_a_visible_target() -> None:
 
 
 def test_navigation_bus_uses_full_width_short_band() -> None:
+    """Validate that each dashboard contains exactly one full-width, short navigation bus with the required title metadata and responsive layout markers."""
     for path in get_dashboard_files():
         dashboard = load_dashboard(path)
         buses = [
