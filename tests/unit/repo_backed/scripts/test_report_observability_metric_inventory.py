@@ -347,6 +347,7 @@ def test_iter_text_files_prefers_git_discovery_before_path_stat(
     inventory._TEXT_FILE_DISCOVERY_CACHE.clear()
     scan_root = inventory._REPO_ROOT / "src" / "bioetl"
     discovered = [scan_root / "example.py"]
+    original_scan_discovery = inventory_scan._iter_text_files_with_git_ls_files
 
     monkeypatch.setattr(
         inventory,
@@ -361,6 +362,7 @@ def test_iter_text_files_prefers_git_discovery_before_path_stat(
     try:
         assert inventory._iter_text_files(scan_root) == discovered
     finally:
+        inventory_scan._iter_text_files_with_git_ls_files = original_scan_discovery
         inventory._TEXT_FILE_DISCOVERY_CACHE.clear()
 
 

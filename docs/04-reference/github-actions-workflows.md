@@ -46,7 +46,7 @@ Use it when you need to answer:
 | `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `push`, `pull_request`, `workflow_dispatch` | ChEMBL baseline smoke and reconciliation checks |
 | `commit-lint.yml` | `Commit Lint` | `workflow_call` | Conventional-commit policy gate |
 | `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `workflow_call`, `push` | Blocks checked-in `.pyc` and similar compiled artifacts |
-| `consolidation-gates.yml` | `consolidation-gates` | `push`, `pull_request`, `workflow_dispatch` | Merge-campaign quality/architecture gate |
+| `consolidation-gates.yml` | `consolidation-gates` | `workflow_dispatch` | Merge-campaign quality/architecture gate |
 | `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `push`, `pull_request` | Fast contract-registry and schema governance checks |
 | `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push`, `pull_request` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `docs.yml` | `Docs & Diagrams` | `workflow_call`, `push` | Docs governance, MkDocs validation, Mermaid validation, diagram drift |
