@@ -5,6 +5,7 @@
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
 <<<<<<< HEAD
+<<<<<<< HEAD
 - baseline_artifact_fingerprint: `2053e9294685155544bbb9989025bed0933e223c6169612a8e1fc4f3adf8fbb8`
 ||||||| 497769829c
 - baseline_artifact_fingerprint: `2838c548365bbe88ed91c0fa4ed46b909621803f8b20830574ded39abf9c7ca0`
@@ -17,6 +18,11 @@
 - baseline_artifact_fingerprint: `c442cc09369818d30e1f63754a970012ea93f5270074650bdfcab8f17211b02a`
 >>>>>>> Stashed changes
 >>>>>>> master20260902-1
+||||||| 497769829c
+- baseline_artifact_fingerprint: `2838c548365bbe88ed91c0fa4ed46b909621803f8b20830574ded39abf9c7ca0`
+=======
+- baseline_artifact_fingerprint: `c442cc09369818d30e1f63754a970012ea93f5270074650bdfcab8f17211b02a`
+>>>>>>> fix/obs-stack-live-errors
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |

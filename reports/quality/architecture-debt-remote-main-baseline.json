@@ -26,11 +26,11 @@
         "available": true
 ||||||| 497769829c
         "available": true,
-        "coverage_xml_sha256": "c183bbf920403b5d955bec26e416621b2c1c6e5dd2ce0557fc69b82c9616c36c",
+        "coverage_xml_sha256": "a520acde7b14e69985f903eff3d536e668aefe48cc705a2f228b63eaaec1bc5b",
         "schema_version": 1,
         "snapshot_date": "2026-09-01",
         "source_module_count": 2467,
-        "source_tree_sha256": "977c319b93bdf2503b023b5904227bc3ec3e649b479a21a8a6da4b00416bdea9",
+        "source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
         "unmeasured_module_count": 0
 =======
         "available": true,
@@ -105,6 +105,7 @@
     }
   ],
 <<<<<<< HEAD
+<<<<<<< HEAD
   "baseline_artifact_fingerprint": "2053e9294685155544bbb9989025bed0933e223c6169612a8e1fc4f3adf8fbb8",
 ||||||| 497769829c
   "baseline_artifact_fingerprint": "2838c548365bbe88ed91c0fa4ed46b909621803f8b20830574ded39abf9c7ca0",
@@ -117,6 +118,11 @@
   "baseline_artifact_fingerprint": "c442cc09369818d30e1f63754a970012ea93f5270074650bdfcab8f17211b02a",
 >>>>>>> Stashed changes
 >>>>>>> master20260902-1
+||||||| 497769829c
+  "baseline_artifact_fingerprint": "2838c548365bbe88ed91c0fa4ed46b909621803f8b20830574ded39abf9c7ca0",
+=======
+  "baseline_artifact_fingerprint": "c442cc09369818d30e1f63754a970012ea93f5270074650bdfcab8f17211b02a",
+>>>>>>> fix/obs-stack-live-errors
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",

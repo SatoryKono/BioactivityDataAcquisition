@@ -2049,12 +2049,24 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2402,
+<<<<<<< HEAD
     "total_test_functions": 25287,
+||||||| 497769829c
+    "total_test_functions": 25281,
+=======
+    "total_test_functions": 25280,
+>>>>>>> fix/obs-stack-live-errors
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
+<<<<<<< HEAD
   "source_tree_sha256": "15c7c7ee0be0e2f88a6f2bd45405475d6ad3e405bfe817ef4a75f4a64b0aa043",
+||||||| 497769829c
+  "source_tree_sha256": "3f353cee94b4ab6897a3d4f57a0f3d2caaad3a597ef8833a3f5b7f1e3a42e446",
+=======
+  "source_tree_sha256": "c1c5b9f7a2e14769c6e53aad734c5dc27be767a608e01166db01e880e2a8faab",
+>>>>>>> fix/obs-stack-live-errors
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 87,
@@ -2117,7 +2129,13 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2402,
+<<<<<<< HEAD
   "total_test_functions": 25287,
+||||||| 497769829c
+  "total_test_functions": 25281,
+=======
+  "total_test_functions": 25280,
+>>>>>>> fix/obs-stack-live-errors
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
