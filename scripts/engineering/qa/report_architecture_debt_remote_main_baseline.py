@@ -99,6 +99,12 @@ def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:
 
 
 def _json_blob_summary(blob: bytes | None) -> dict[str, object]:
+    """Summarize a JSON blob's key fields, returning availability info.
+
+    Attempts to recover from unresolved git merge-conflict markers
+    (e.g., <<<<<<<, |||||||, =======, >>>>>>>) before giving up and
+    reporting only availability.
+    """
     if blob is None:
         return {"available": False}
     blob_text = blob.decode("utf-8", errors="replace")
