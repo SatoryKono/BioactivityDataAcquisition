@@ -348,10 +348,18 @@ def test_iter_text_files_prefers_git_discovery_before_path_stat(
     scan_root = inventory._REPO_ROOT / "src" / "bioetl"
     discovered = [scan_root / "example.py"]
 
+    def fake_git_discovery(root: Path) -> list[Path] | None:
+        return discovered if root == scan_root else None
+
     monkeypatch.setattr(
         inventory,
         "_iter_text_files_with_git_ls_files",
-        lambda root: discovered if root == scan_root else None,
+        fake_git_discovery,
+    )
+    monkeypatch.setattr(
+        inventory_scan,
+        "_iter_text_files_with_git_ls_files",
+        fake_git_discovery,
     )
 
     def fail_exists(self: Path) -> bool:
