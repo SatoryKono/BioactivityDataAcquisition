@@ -599,6 +599,89 @@ def test_reseed_neo4j_auth_is_noop_for_other_stacks() -> None:
     )
 
 
+def test_post_start_grafana_cutover_restarts_when_deferred(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(
+        runtime_manager,
+        "_load_grafana_bootstrap_status",
+        lambda *_args, **_kwargs: (
+            {
+                "ops_http": "deferred",
+                "reason": "identity_timeout_or_unreachable",
+                "dashboard_profile": "prometheus_only",
+            },
+            True,
+        ),
+    )
+    seen: list[list[str]] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        seen.append(list(cmd))
+        return runtime_manager.CommandResult(list(cmd), 0)
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+    )
+    assert result is not None
+    assert result["restart_returncode"] == 0
+    assert result["previous_reason"] == "identity_timeout_or_unreachable"
+    assert seen == [["docker", "restart", "bioetl-grafana"]]
+
+
+def test_post_start_grafana_cutover_skips_when_ops_http_ready(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(
+        runtime_manager,
+        "_load_grafana_bootstrap_status",
+        lambda *_args, **_kwargs: (
+            {
+                "ops_http": "ready",
+                "reason": "identity_matched",
+                "dashboard_profile": "full",
+            },
+            True,
+        ),
+    )
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    assert (
+        runtime_manager._post_start_grafana_ops_cutover(
+            spec=_spec(),
+            runner=runner,
+            timeout=5.0,
+        )
+        is None
+    )
+
+
+def test_post_start_grafana_cutover_skips_under_pytest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PYTEST_CURRENT_TEST", "test_post_start_grafana_cutover")
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    assert (
+        runtime_manager._post_start_grafana_ops_cutover(
+            spec=_spec(),
+            runner=runner,
+            timeout=5.0,
+        )
+        is None
+    )
+
+
 def test_status_grafana_bootstrap_deferred_is_finding() -> None:
     findings = runtime_manager._status_grafana_bootstrap_findings(
         {
