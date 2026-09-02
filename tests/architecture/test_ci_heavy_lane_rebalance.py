@@ -107,7 +107,9 @@ class TestCiHeavyLaneRebalance:
             assert scenario["path"] not in block
             assert scenario["new_lane"] == "test-fast"
 
-    def test_coverage_verify_consumes_dedicated_serial_subset(self) -> None:
+    def test_coverage_verify_consumes_dedicated_serial_subset_without_pytest_rerun(
+        self,
+    ) -> None:
         policy = _load_policy()
         workflow = _read_workflow(policy)
         serial_block = _job_block(workflow, "serial-coverage")

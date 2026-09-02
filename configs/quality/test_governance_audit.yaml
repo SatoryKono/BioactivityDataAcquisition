@@ -1174,6 +1174,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/docker/runtime_manager.py
+    - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py
+      target_lane: repo-backed-unit
+      protected_surface: scripts/ops/runtime/docker/runtime_manager.py recovery and shared-network contracts
     - path: tests/unit/repo_backed/scripts/ops/docker/test_recreate_cutover_stacks.py
       target_lane: repo-backed-unit
       protected_surface: scripts/ops/runtime/docker/recreate_cutover_stacks.py
