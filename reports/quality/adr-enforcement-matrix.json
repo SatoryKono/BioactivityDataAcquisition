@@ -1667,7 +1667,8 @@
       "enforcement_owner_paths": [
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
         "tests/architecture/test_documentation_audit_remediation.py",
-        "tests/unit/domain/ports/test_control_plane_port_exports.py"
+        "tests/unit/domain/ports/test_control_plane_port_exports.py",
+        "tests/unit/interfaces/http/test_processed_records_table.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1698,9 +1699,11 @@
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/run-manifest-inspection.md",
         "src/bioetl/domain/ports/control_plane/__init__.py",
+        "src/bioetl/interfaces/http/_processed_records_table_support.py",
         "tests/architecture/test_control_plane_runtime_docs_alignment.py",
         "tests/architecture/test_documentation_audit_remediation.py",
-        "tests/unit/domain/ports/test_control_plane_port_exports.py"
+        "tests/unit/domain/ports/test_control_plane_port_exports.py",
+        "tests/unit/interfaces/http/test_processed_records_table.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
