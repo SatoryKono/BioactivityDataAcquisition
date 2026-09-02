@@ -15,6 +15,7 @@ python -m scripts.engineering.ci <command> [args...]
 | ---------------- | ------------------------------------------------------ | --------------------------------------------------------------------------- |
 | `run-tests`      | `scripts/engineering/ci/run_pytest_resilient.py`       | Run pytest with resilient retry logic                                       |
 | `quality-gate`   | `scripts/engineering/ci/quality_integral_gate.py`      | Integral quality gate for CI with descriptive test-health classification    |
+| `pr-gate`         | `scripts/engineering/ci/pr_gate.py`                    | Fail-closed classification and aggregation for required PR checks            |
 | `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |
 | `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |
 | `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |
@@ -26,6 +27,7 @@ python -m scripts.engineering.ci <command> [args...]
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `run-tests`    | Primary test execution in CI; wraps pytest with xdist parallelization and serial fallback on worker crashes                                                                                       | CI pipeline (automatic)                |
 | `quality-gate` | Pre-merge quality validation; computes integral quality score, blocks PR if below quarterly target, and emits descriptive `fully exercised` / `staged` / `environment-limited` test-health status | CI gate (`architecture.yml`, every PR) |
+| `pr-gate`       | Required-check coordinator classifier and final exact-SHA aggregator                                                                                                                             | CI gate (`pr-required.yml`, supported PR bases) |
 
 Canonical taxonomy:
 
