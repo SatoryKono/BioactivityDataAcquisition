@@ -44,12 +44,14 @@ jobs:
 
             -   name: Ruff format (strict full gate - src + tests)
                 run: |
-                    # Temporary SHA-bound diagnostics; removed after exact artifacts are captured.
-                    uv run --frozen --no-build ruff format --diff src tests || true
-                    uv run --frozen --no-build python scripts/engineering/qa/report_config_surface_backlog.py
-                    echo '=== CONFIG_SURFACE_BACKLOG_BEGIN ==='
-                    cat reports/quality/config-surface-backlog.json
-                    echo '=== CONFIG_SURFACE_BACKLOG_END ==='
+                    # Temporary SHA-bound diagnostics; removed after exact hashes are captured.
+                    uv run --frozen --no-build ruff format src tests
+                    git lfs pull
+                    uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json
+                    echo '=== FINAL_TEST_GOVERNANCE_HASH ==='
+                    uv run --frozen --no-build python -c "import json; print(json.load(open('reports/quality/test-governance-current.json', encoding='utf-8'))['source_tree_sha256'])"
+                    echo '=== FINAL_TEST_TELEMETRY_HASH ==='
+                    uv run --frozen --no-build python -c "from scripts.engineering.ci.update_test_telemetry_baseline import compute_test_telemetry_source_tree_sha256; print(compute_test_telemetry_source_tree_sha256())"
                     exit 1
 
             -   name: Ruff isort (strict full gate - src + tests)
