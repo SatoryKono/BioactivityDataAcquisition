@@ -27,7 +27,7 @@ jobs:
           automation='^(dependabot|renovate|devin|bolt|copilot)/.+'
           if [[ ! "$HEAD_REF" =~ $pattern && ! "$HEAD_REF" =~ $master_pattern && ! "$HEAD_REF" =~ $automation ]]; then
             echo "Non-compliant branch name: $HEAD_REF" >&2
-            echo "Use <type>/<lowercase-kebab-description>." >&2
+            echo "Use <type>/<lowercase-kebab-description> or an approved automation prefix (dependabot/, renovate/, devin/, bolt/, copilot/)." >&2
             exit 1
           fi
 
