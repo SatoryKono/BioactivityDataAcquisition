@@ -98,28 +98,31 @@ def _git_blob(repo_root: Path, revision: str, path: str) -> bytes | None:
     return result.stdout
 
 
+_CONFLICT_MARKER_PREFIXES = ("<<<<<<<", "|||||||", "=======", ">>>>>>>")
+
+
+def _has_conflict_markers(text: str) -> bool:
+    return any(
+        line.startswith(_CONFLICT_MARKER_PREFIXES) for line in text.splitlines()
+    )
+
+
 def _json_blob_summary(blob: bytes | None) -> dict[str, object]:
     """Summarize a JSON blob's key fields, returning availability info.
 
-    Attempts to recover from unresolved git merge-conflict markers
-    (e.g., <<<<<<<, |||||||, =======, >>>>>>>) before giving up and
-    reporting only availability.
+    Blobs that contain unresolved git merge-conflict markers are treated as
+    ambiguous evidence and reported as unavailable so that duplicate keys from
+    both branch payloads are never silently merged.
     """
     if blob is None:
         return {"available": False}
     blob_text = blob.decode("utf-8", errors="replace")
+    if _has_conflict_markers(blob_text):
+        return {"available": False, "conflict_markers_detected": True}
     try:
         payload = json.loads(blob_text)
     except json.JSONDecodeError:
-        conflict_sanitized = "\n".join(
-            line
-            for line in blob_text.splitlines()
-            if not line.startswith(("<<<<<<<", "|||||||", "=======", ">>>>>>>"))
-        )
-        try:
-            payload = json.loads(conflict_sanitized)
-        except json.JSONDecodeError:
-            return {"available": True}
+        return {"available": True}
     if not isinstance(payload, dict):
         return {"available": True}
 
