@@ -31,7 +31,6 @@ def emit_checkpoint_save_event(
     operation: str,
     status: str,
 ) -> None:
-    """Emit checkpoint save event counter metric."""
     metrics = getattr(host, "_metrics", None)
     if metrics is None:
         return
@@ -53,7 +52,6 @@ def observe_checkpoint_save_duration(
     status: str,
     duration_seconds: float,
 ) -> None:
-    """Record checkpoint save duration histogram metric."""
     metrics = getattr(host, "_metrics", None)
     if metrics is None:
         return
@@ -72,7 +70,6 @@ def set_checkpoint_saved_at(
     host: _CompositeRunnerSupportHostProtocol,
     checkpoint_saved_at_epoch_seconds: float | None,
 ) -> None:
-    """Update checkpoint saved timestamp gauge metric."""
     metrics = getattr(host, "_metrics", None)
     if metrics is None or checkpoint_saved_at_epoch_seconds is None:
         return
@@ -86,7 +83,6 @@ def set_checkpoint_saved_at(
 def checkpoint_saved_at_epoch_seconds(
     host: _CompositeRunnerSupportHostProtocol,
 ) -> float | None:
-    """Get current timestamp in epoch seconds for checkpoint save."""
     clock = getattr(host, "_clock", None)
     if clock is None:
         return None
@@ -98,7 +94,6 @@ def start_checkpoint_save_span(
     *,
     operation: str,
 ) -> Span | None:
-    """Start distributed tracing span for checkpoint save operation."""
     tracer = cast("TracingPort | None", getattr(host, "_tracing", None))
     if tracer is None:
         return None
@@ -127,7 +122,6 @@ def close_checkpoint_save_span(
     status: str,
     error: BaseException | None = None,
 ) -> None:
-    """Close checkpoint save tracing span and record status."""
     if span is None:
         return
     span.set_attribute("bioetl.checkpoint.status", status)

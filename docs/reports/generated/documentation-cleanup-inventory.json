@@ -24521,34 +24521,6 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/00-project/consolidation-20260901-12h.md",
-      "recommended_action": "keep",
-      "root_doc_kind": null,
-      "section": "00-project",
-      "status": "Active",
-      "surface_family": "active",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "current",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
       "path": "docs/00-project/consolidation-20260901.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -105231,13 +105203,13 @@
       "archive-after-github-state-check": 336,
       "archive-after-migration": 919,
       "generate-automatically": 1268,
-      "keep": 1147,
+      "keep": 1146,
       "reconcile-with-github-state": 8,
       "replace-with-link": 51
     },
     "by_section": {
       ".github": 352,
-      "00-project": 540,
+      "00-project": 539,
       "01-requirements": 4,
       "02-architecture": 991,
       "03-data-model": 2,
@@ -105266,7 +105238,7 @@
       "security": 2
     },
     "by_status": {
-      "Active": 751,
+      "Active": 750,
       "Archived": 170,
       "Canonical": 73,
       "Deprecated": 51,
@@ -105274,7 +105246,7 @@
       "Working": 1416
     },
     "by_surface_family": {
-      "active": 751,
+      "active": 750,
       "archive": 170,
       "canonical": 73,
       "duplicate": 51,
@@ -105282,7 +105254,7 @@
       "working": 1416
     },
     "by_tracking_state": {
-      "tracked": 3729
+      "tracked": 3728
     },
     "docs_reports_local_count": 35,
     "duplicate_group_count": 2,
@@ -105298,8 +105270,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3729,
+    "total_doc_like": 3728,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3729
+    "total_doc_like_tracked": 3728
   }
 }

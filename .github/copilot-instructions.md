@@ -34,9 +34,6 @@ below.
 
 ## Copilot Session Guardrails
 
-- The GitHub review body and all inline review comments produced through
-  `gh pr review` or an equivalent GitHub API **MUST** be written in Russian,
-  regardless of the surrounding conversation language.
 - Preserve hexagonal import boundaries and composition-root DI (see RULES §1).
 - Preserve Medallion invariants: Bronze append-only, Silver/Gold Delta Lake
   (see RULES §2).

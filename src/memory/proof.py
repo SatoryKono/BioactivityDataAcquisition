@@ -121,8 +121,6 @@ def _isolated_git_env() -> dict[str, str]:
     for name in os.environ:
         if name.startswith("GIT_"):
             env.pop(name, None)
-    env["GIT_TERMINAL_PROMPT"] = "0"
-    env["GIT_OPTIONAL_LOCKS"] = "0"
     return env
 
 
@@ -139,7 +137,6 @@ def _git(
             command,
             check=False,
             capture_output=True,
-            stdin=subprocess.DEVNULL,
             timeout=timeout,
             env=_isolated_git_env(),
         )

@@ -41,9 +41,6 @@ and then invokes the installed `devin` CLI.
 ## Response Language
 
 - By default, answer the user in Russian when the user writes in Russian.
-- The GitHub review body and all inline review comments produced through
-  `gh pr review` or an equivalent GitHub API **MUST** be written in Russian,
-  regardless of the surrounding conversation language.
 - Keep code, commands, file paths, identifiers, API field names, and other technical literals in their valid original form.
 
 ## Technical Debt Guardrail

@@ -22,9 +22,7 @@ class DQDetectorConfig(Protocol):
         *,
         min_value: float,
         max_value: float,
-    ) -> None:
-        """Set DQ threshold bounds for a specific metric."""
-        ...
+    ) -> None: ...
 
 
 @runtime_checkable

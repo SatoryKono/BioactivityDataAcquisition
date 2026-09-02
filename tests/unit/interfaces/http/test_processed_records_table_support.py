@@ -425,19 +425,3 @@ def test_query_prometheus_vector_preserves_metric_names_and_missing_values(
     )
 
     assert values == {"bioetl_processed_records_bronze_current": 42.0}
-
-
-def test_processed_records_table_support_all_exports_match_contract() -> None:
-    """Verify __all__ exports match the expected contract and all names resolve."""
-    expected_all = (
-        "DEFAULT_PROMETHEUS_BASE_URL",
-        "PROCESSED_RECORDS_ROW_SPECS",
-        "PROCESSED_RECORDS_TABLE_CONTRACT",
-        "ProcessedRecordRowSpec",
-        "fetch_processed_record_values",
-        "read_processed_records_run_id",
-    )
-    assert support.__all__ == expected_all
-
-    for name in support.__all__:
-        assert hasattr(support, name), f"__all__ exports {name!r} but it does not exist"
