@@ -285,9 +285,7 @@ def test_check_grafana_dashboards_fails_without_password_before_fetch(
 
     monkeypatch.setattr(vlo, "_fetch_json", fail_fetch)
 
-    result = vlo.check_grafana_dashboards(
-        "http://grafana:3000", "admin", "   ", 1.0
-    )
+    result = vlo.check_grafana_dashboards("http://grafana:3000", "admin", "   ", 1.0)
 
     assert result.status == "fail"
     assert result.details is not None
