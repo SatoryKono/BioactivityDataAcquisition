@@ -384,7 +384,8 @@ jobs:
           test "${GITHUB_HEAD_REF}" = "fix/pr-gate-complete-9975-v2"
           test "$(git rev-parse HEAD)" = "${EVENT_HEAD_SHA}"
           git merge-base --is-ancestor "${EVENT_BASE_SHA}" "${EVENT_HEAD_SHA}"
-          git merge-base --is-ancestor "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}"
+          git fetch --no-tags origin refs/pull/10000/head
+          test "$(git rev-parse FETCH_HEAD)" = "${SOURCE_HEAD_SHA}"
           test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .head_sha)" = "${SOURCE_HEAD_SHA}"
           git diff --quiet "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}" -- src/bioetl
           echo "EVENT_HEAD_SHA=${EVENT_HEAD_SHA}" >> "${GITHUB_ENV}"
@@ -454,7 +455,7 @@ jobs:
             scripts.engineering.ci.update_test_telemetry_baseline \
             --coverage-percent "${coverage_percent}" \
             --source-branch "fix/pr-gate-complete-9975-v2" \
-            --source-commit "${SOURCE_HEAD_SHA}" \
+            --source-commit "${EVENT_HEAD_SHA}" \
             --source-run-id "${SOURCE_RUN_ID}" \
             --source-event pull_request \
             --source-run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}"
