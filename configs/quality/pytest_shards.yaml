@@ -80,6 +80,7 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/**/*closeout*.py
+      - --ignore-glob=tests/architecture/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
       # TEST-SYS-04: merged former a2 (letter c) into a → letters a–c
@@ -120,8 +121,10 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/**/*closeout*.py
+      - --ignore-glob=tests/architecture/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
+      - --ignore-glob=tests/architecture/*/test_*.py
       - --ignore-glob=tests/architecture/test_[a-c]*.py
       - --ignore-glob=tests/architecture/test_[g-z]*.py
       - --ignore=tests/architecture/test_diagram_regression_workflow.py
@@ -163,8 +166,10 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/**/*closeout*.py
+      - --ignore-glob=tests/architecture/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
+      - --ignore-glob=tests/architecture/*/test_*.py
       - --ignore-glob=tests/architecture/test_[a-f]*.py
       - --ignore-glob=tests/architecture/test_[m-z]*.py
       - --ignore=tests/architecture/test_any_budget.py
@@ -233,8 +238,10 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/**/*closeout*.py
+      - --ignore-glob=tests/architecture/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
+      - --ignore-glob=tests/architecture/*/test_*.py
       - --ignore-glob=tests/architecture/test_[a-l]*.py
       - --ignore-glob=tests/architecture/test_[s-z]*.py
       - --ignore=tests/architecture/test_any_budget.py
@@ -402,8 +409,10 @@ shards:
     extra_pytest_args:
       - --timeout=300
       - --ignore-glob=tests/architecture/**/*closeout*.py
+      - --ignore-glob=tests/architecture/*closeout*.py
       - --ignore-glob=tests/architecture/test_tech_debt*.py
       - --ignore-glob=tests/architecture/test_issue_*.py
+      - --ignore-glob=tests/architecture/*/test_*.py
       - --ignore-glob=tests/architecture/test_[a-r]*.py
       - --ignore=tests/architecture/test_any_budget.py
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
