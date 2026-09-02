@@ -1601,6 +1601,7 @@ def test_unmeasurable_docker_root_does_not_mean_daemon_unavailable(
 
 def test_recover_continues_when_preflight_only_reports_container_health(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Recover must not fail closed solely because the target service is unhealthy."""
     preflight_path = tmp_path / "docker-runtime-main-preflight.json"
@@ -1679,6 +1680,18 @@ def test_recover_continues_when_preflight_only_reports_container_health(
             return runtime_manager.CommandResult(current, 0)
         raise AssertionError(current)
 
+    successful_cutover = {
+        "action": "grafana_ops_http_cutover",
+        "restart_returncode": 0,
+        "previous_reason": "identity_timeout_or_unreachable",
+        "previous_dashboard_profile": "prometheus_only",
+    }
+    monkeypatch.setattr(
+        runtime_manager,
+        "_post_start_grafana_ops_cutover",
+        lambda **_kwargs: successful_cutover,
+    )
+
     result = runtime_manager.start_or_recover(
         _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
         Path("contract.yml"),
@@ -1694,6 +1707,27 @@ def test_recover_continues_when_preflight_only_reports_container_health(
     # Main stack force-recreates on attempt 1 so stale Desktop report binds cannot stick.
     assert "--force-recreate" in up_calls[0]
     assert not list(tmp_path.glob("docker-incident-*.json"))
+    cutover_report = tmp_path / "docker-runtime-grafana-ops-cutover.json"
+    assert json.loads(cutover_report.read_text(encoding="utf-8")) == successful_cutover
+
+    failed_cutover = {**successful_cutover, "restart_returncode": 1}
+    monkeypatch.setattr(
+        runtime_manager,
+        "_post_start_grafana_ops_cutover",
+        lambda **_kwargs: failed_cutover,
+    )
+
+    failed_result = runtime_manager.start_or_recover(
+        _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        sleep=lambda _seconds: None,
+    )
+
+    assert failed_result == 1
+    assert json.loads(cutover_report.read_text(encoding="utf-8")) == failed_cutover
 
 
 def test_recovery_force_recreates_only_after_first_failed_attempt(
