@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **47** live GitHub Actions
+This page is the canonical published inventory of the **48** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -96,6 +96,7 @@ Use it when you need to answer:
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
 | `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
+| `pr-required.yml` | `PR Gate Complete` | `workflow_dispatch` | Manual-only draft coordinator for the atomic required-check owner cutover |
 | `release.yml` | `Release` | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
 
 ### Reusable / compatibility-only helpers
