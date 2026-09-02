@@ -8009,7 +8009,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 229,
+      "reference_count": 227,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -12374,7 +12374,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 394,
+      "reference_count": 393,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -17235,9 +17235,9 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 420,
+          "line": 480,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo             sync-inventory"
+          "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --lifecycle-registry configs/quality/scripts_"
         }
       ]
     },
@@ -17662,9 +17662,9 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 428,
+          "line": 480,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo             check-inventory             --manifest configs/quality/scripts_inventory_manifest.json             --check-lifecycle          "
+          "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --lifecycle-registry configs/quality/scripts_"
         },
         {
           "path": ".github/workflows/tests.yml",
