@@ -12,9 +12,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
+
+import pytest
+import yaml
 
 
 pytestmark = pytest.mark.architecture
@@ -53,3 +54,38 @@ def test_e2e_matrix_nightly_job_enforces_strict_mode_policy() -> None:
     assert 'BIOETL_TEST_MODE: "false"' in workflow
     assert "Enforce strict health-check policy" in workflow
     assert "Strict job forbids probe/test-mode fallback" in workflow
+
+
+def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
+    workflow = yaml.safe_load(
+        Path(".github/workflows/e2e-matrix-health.yml").read_text(encoding="utf-8")
+    )
+    jobs = workflow["jobs"]
+    full = jobs["e2e-nightly-full-replay"]
+    live = jobs["matrix-smoke-nightly-live"]
+    prompt = jobs["prompt-tests-nightly"]
+    complete = jobs["e2e-nightly-complete"]
+    full_runs = "\n".join(str(step.get("run") or "") for step in full["steps"])
+    live_runs = "\n".join(str(step.get("run") or "") for step in live["steps"])
+    prompt_runs = "\n".join(str(step.get("run") or "") for step in prompt["steps"])
+    complete_runs = "\n".join(
+        str(step.get("run") or "") for step in complete["steps"]
+    )
+
+    assert "tests/e2e" in full_runs
+    assert "e2e and not e2e_smoke and not benchmark and not memory" in full_runs
+    assert "--record-mode=none" in full_runs
+    assert "-p no:xdist" in full_runs
+    assert "e2e_smoke and not benchmark and not memory" in live_runs
+    assert "tests/prompts/" in prompt_runs
+    assert "-p no:xdist" in prompt_runs
+    assert set(complete["needs"]) == {
+        "matrix-smoke-blocking",
+        "matrix-smoke-nightly-live",
+        "e2e-nightly-full-replay",
+        "prompt-tests-nightly",
+    }
+    assert "Schedule requires nightly jobs success" in complete_runs
+    assert "Manual nightly requires blocking smoke" in complete_runs
+    assert "pull_request" not in str(full["if"])
+    assert "pull_request" not in str(prompt["if"])
