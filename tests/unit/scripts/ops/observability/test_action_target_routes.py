@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from scripts.ops.observability.grafana.action_target_routes import (
     ACTION_DASHBOARD_UID_BY_TARGET,
     DQ_REASON_RULES_RUNBOOK,
     dashboard_uid_for_target,
     row_aware_dashboard_url,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_dashboard_uid_for_target_is_allowlisted_and_fail_closed() -> None:
