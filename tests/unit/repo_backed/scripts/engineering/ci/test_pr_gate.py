@@ -17,6 +17,8 @@ from scripts.engineering.ci.pr_gate import (
 )
 
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
 HEAD_SHA = "a" * 40
 
 

@@ -1542,13 +1542,13 @@ def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     trigger = workflow.get("on", workflow.get(True))
     assert isinstance(trigger, dict)
     assert "workflow_call" in trigger
-    for event in ("push", "pull_request"):
-        paths = set(trigger[event]["paths"])
-        assert {
-            "Dockerfile.bioetl",
-            "pyproject.toml",
-            "uv.lock",
-            "src/**",
-            "configs/**",
-            ".dockerignore",
-        } <= paths
+    assert "pull_request" not in trigger
+    paths = set(trigger["push"]["paths"])
+    assert {
+        "Dockerfile.bioetl",
+        "pyproject.toml",
+        "uv.lock",
+        "src/**",
+        "configs/**",
+        ".dockerignore",
+    } <= paths

@@ -20,11 +20,12 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 
-def test_import_linter_workflow_runs_for_all_pr_and_push_changes() -> None:
-    """Import-linter gate must always materialize for PR and push events."""
+def test_import_linter_workflow_runs_as_reusable_pr_owner_and_on_push() -> None:
+    """Import-linter must be called once by the PR coordinator and run on push."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
 
-    assert "pull_request:" in workflow
+    assert "workflow_call:" in workflow
+    assert "pull_request:" not in workflow
     assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow

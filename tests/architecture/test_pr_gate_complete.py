@@ -4,9 +4,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-import yaml
+from typing import Any
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.architecture
 
@@ -26,6 +27,8 @@ EXPECTED_GATES = {
     "root-hygiene",
     "generated-artifacts",
     "compiled-artifacts",
+    "commit-governance",
+    "docs-governance",
 }
 EXPECTED_CANONICAL_CHECKS = {
     "ruff",
@@ -38,17 +41,20 @@ EXPECTED_CANONICAL_CHECKS = {
     "compiled-artifacts",
     "security-scans",
     "canonical-manifest-hashes",
+    "commit-governance",
+    "docs-governance",
 }
 
-def _load_yaml(path: Path) -> dict:
+def _load_yaml(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
 
 def test_catalog_exists_and_has_expected_gates() -> None:
     assert CATALOG.is_file()
     data = _load_yaml(CATALOG)
     assert data.get("aggregator") == "pr-gate-complete"
     assert data.get("coordinator_workflow") == ".github/workflows/pr-required.yml"
-    assert data.get("version") == 1
+    assert data.get("version") == 2
     assert data.get("schema_version") == 1
     gates = {g["id"] for g in data.get("gates", [])}
     assert EXPECTED_GATES.issubset(gates)
@@ -70,12 +76,14 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert check["status"] in {"blocking", "advisory_evidence"}
         assert check["duplicate_policy"] == "forbidden"
 
-def test_coordinator_is_manual_until_owner_cutover() -> None:
+
+def test_coordinator_materializes_on_every_main_pr_after_owner_cutover() -> None:
     assert COORDINATOR.is_file()
     data = _load_yaml(COORDINATOR)
     on = data.get("on", data.get(True, {}))
     assert isinstance(on, dict)
-    assert set(on) == {"workflow_dispatch"}
+    assert set(on) == {"pull_request", "workflow_dispatch"}
+    assert on["pull_request"] == {"branches": ["main"]}
     perms = data.get("permissions", {})
     assert perms == {"contents": "read"} or perms.get("contents") == "read"
     conc = data.get("concurrency", {})
@@ -83,6 +91,7 @@ def test_coordinator_is_manual_until_owner_cutover() -> None:
     assert "github.workflow" in group
     assert "github.event.pull_request.number" in group or "github.sha" in group
     assert "cancel-in-progress" in conc
+
 
 def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     data = _load_yaml(COORDINATOR)
@@ -98,6 +107,7 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
 
+
 def test_leaf_workflows_expose_workflow_call() -> None:
     data = _load_yaml(CATALOG)
     for gate in data["gates"]:
@@ -109,12 +119,15 @@ def test_leaf_workflows_expose_workflow_call() -> None:
         on = wf.get("on", wf.get(True, {}))
         assert isinstance(on, dict)
         assert "workflow_call" in on
+        assert "pull_request" not in on
+
 
 def test_policy_doc_mentions_shadow_aggregator() -> None:
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "pr-gate-complete" in text
     assert "configs/quality/github_required_checks.yaml" in text
     assert "shadow" in text.lower()
+
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
