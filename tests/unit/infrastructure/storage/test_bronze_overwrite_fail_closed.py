@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+import asyncio
+import errno
+import hashlib
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -40,15 +43,47 @@ def test_bronze_same_payload_is_idempotent(tmp_path: Path) -> None:
     first = target.read_bytes()
     mixin._write_atomic_stream(iter(records), target)
     assert target.read_bytes() == first
+    assert (
+        asyncio.run(mixin._calculate_checksum(target))
+        == hashlib.blake2b(first).hexdigest()
+    )
 
 
 @pytest.mark.unit
-def test_bronze_different_payload_raises_file_exists(tmp_path: Path) -> None:
+def test_bronze_different_payload_raises_file_exists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     mixin = _Mixin(tmp_path)
     target = tmp_path / "batch.jsonl.zst"
     mixin._write_atomic_stream(iter([b'{"id": 1}\n']), target)
     with pytest.raises(FileExistsError, match="already exists with different payload"):
         mixin._write_atomic_stream(iter([b'{"id": 2}\n']), target)
+
+    failed_target = tmp_path / "open-failure.zst"
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin.open",
+        MagicMock(side_effect=OSError("open failed")),
+        raising=False,
+    )
+    with pytest.raises(OSError, match="open failed"):
+        mixin._write_atomic_stream(iter([b'{"id": 3}\n']), failed_target)
+    assert not failed_target.exists()
+    assert list(tmp_path.glob(".open-failure_*.tmp")) == []
+
+    compressor_failed_target = tmp_path / "compressor-failure.zst"
+    monkeypatch.setattr(
+        mixin,
+        "_build_stream_compressor",
+        MagicMock(side_effect=OSError("compressor failed")),
+    )
+    with pytest.raises(OSError, match="compressor failed"):
+        mixin._write_atomic_stream(
+            iter([b'{"id": 4}\n']),
+            compressor_failed_target,
+        )
+    assert not compressor_failed_target.exists()
+    assert list(tmp_path.glob(".compressor-failure_*.tmp")) == []
 
 
 @pytest.mark.unit
@@ -134,6 +169,31 @@ def test_payload_publish_failure_leaves_no_partial_final_target(
 
 
 @pytest.mark.unit
+def test_publish_existing_target_raises_file_exists_cross_platform(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / ".batch.tmp"
+    target = tmp_path / "batch.jsonl.zst"
+    source.write_bytes(b"complete-payload")
+
+    def fail_link_existing(source_path: str, target_path: str) -> None:
+        del source_path, target_path
+        raise OSError(errno.EEXIST, "already exists")
+
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.bronze.io_mixin.os.link",
+        fail_link_existing,
+    )
+
+    with pytest.raises(FileExistsError, match="already exists"):
+        _publish_new_file_exclusive(source, target)
+
+    assert not target.exists()
+    assert source.read_bytes() == b"complete-payload"
+
+
+@pytest.mark.unit
 def test_sidecar_publish_failure_leaves_no_partial_final_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -178,7 +238,7 @@ def test_concurrent_different_sidecar_is_not_overwritten(
         Publish competing content at the target path and then signal that it already exists.
 
         Parameters:
-                final_target (Path): Path to the target file to populate before raising the error.
+            final_target (Path): Path to the target file to populate before raising the error.
         """
         del source
         final_target.write_bytes(b"other-writer")
