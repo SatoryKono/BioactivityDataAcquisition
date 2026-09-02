@@ -1856,62 +1856,58 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
     return match.group(1).lower() if match else ""
 
 
-def _post_start_grafana_bootstrap_gate(
+def _remaining_timeout(
+    deadline: float,
+    clock: Clock,
     *,
-    spec: StackSpec,
-    runner: Runner = _run,
-    timeout: float = 45.0,
-    sleep: Sleeper = time.sleep,
-    clock: Clock = time.monotonic,
-) -> int:
-    """Retry Grafana once when bootstrap lost the bioetl start race.
+    limit: float | None = None,
+) -> float:
+    """Return the non-negative time left, optionally capped by limit."""
+    remaining = max(0.0, deadline - clock())
+    return remaining if limit is None else min(limit, remaining)
 
-    Soft bootstrap polls Ops HTTP for ~5s and then freezes prometheus_only
-    notices. If identity now matches, restart Grafana so the full provider
-    is selected. Always return 0: Grafana UI must stay up in soft mode.
-    """
-    if spec.name != "monitoring":
-        return 0
-    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-    }:
-        return 0
-    if os.environ.get("PYTEST_CURRENT_TEST"):
-        return 0
-    gate_start = clock()
-    gate_deadline = gate_start + timeout
-    payload, readable = _load_grafana_bootstrap_status(
-        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
+
+def _grafana_bootstrap_retry_allowed(spec: StackSpec) -> bool:
+    test_mode = os.environ.get("BIOETL_TEST_MODE", "").strip().lower()
+    return (
+        spec.name == "monitoring"
+        and test_mode not in {"1", "true", "yes"}
+        and not os.environ.get("PYTEST_CURRENT_TEST")
     )
-    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
-        return 0
-    expected = _grafana_expected_runtime_source_id(
-        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
-    )
-    actual = _grafana_ops_ready_runtime_source_id(
-        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
-    )
-    if not expected or expected != actual:
-        return 0
-    restart = runner(
-        ["docker", "restart", _GRAFANA_CONTAINER],
-        ROOT,
-        min(30.0, max(0.0, gate_deadline - clock())),
-    )
-    if restart.returncode != 0:
-        return 0
-    deadline = min(gate_deadline, clock() + 40.0)
-    if deadline <= clock():
-        return 0
+
+
+def _grafana_bootstrap_identity_matches(
+    runner: Runner,
+    *,
+    deadline: float,
+    clock: Clock,
+) -> bool:
+    expected_timeout = _remaining_timeout(deadline, clock, limit=10.0)
+    if expected_timeout <= 0:
+        return False
+    expected = _grafana_expected_runtime_source_id(runner, timeout=expected_timeout)
+
+    actual_timeout = _remaining_timeout(deadline, clock, limit=10.0)
+    if actual_timeout <= 0:
+        return False
+    actual = _grafana_ops_ready_runtime_source_id(runner, timeout=actual_timeout)
+    return bool(expected and expected == actual)
+
+
+def _wait_for_grafana_full_profile(
+    runner: Runner,
+    *,
+    deadline: float,
+    sleep: Sleeper,
+    clock: Clock,
+) -> None:
     while True:
-        now = clock()
-        remaining = max(0.0, deadline - now)
-        if remaining <= 0.0:
-            return 0
+        remaining = _remaining_timeout(deadline, clock)
+        if remaining <= 0:
+            return
         payload, readable = _load_grafana_bootstrap_status(
-            runner, timeout=min(5.0, remaining)
+            runner,
+            timeout=min(5.0, remaining),
         )
         if readable and isinstance(payload, Mapping):
             profile = str(payload.get("dashboard_profile") or "").strip()
@@ -1919,10 +1915,97 @@ def _post_start_grafana_bootstrap_gate(
             if profile == "full" or (
                 reason and reason != _GRAFANA_TIMEOUT_RETRY_REASON
             ):
-                return 0
-        now = clock()
-        sleep(min(2.0, max(0.0, deadline - now)))
+                return
+        remaining = _remaining_timeout(deadline, clock)
+        if remaining <= 0:
+            return
+        sleep(min(2.0, remaining))
 
+
+def _post_start_grafana_bootstrap_gate(
+    *,
+    spec: StackSpec,
+    runner: Runner = _run,
+    timeout: float = 45.0,
+    sleep: Sleeper = time.sleep,
+    clock: Clock = time.monotonic,
+) -> None:
+    """Retry Grafana once when bootstrap lost the bioetl start race.
+
+    Soft bootstrap polls Ops HTTP for about five seconds and then freezes
+    prometheus_only notices. If identity now matches, restart Grafana so the
+    full provider is selected. Retry failures remain soft.
+    """
+    if not _grafana_bootstrap_retry_allowed(spec):
+        return
+
+    deadline = clock() + max(0.0, timeout)
+    initial_timeout = _remaining_timeout(deadline, clock, limit=10.0)
+    if initial_timeout <= 0:
+        return
+    payload, readable = _load_grafana_bootstrap_status(
+        runner,
+        timeout=initial_timeout,
+    )
+    if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
+        return
+    if not _grafana_bootstrap_identity_matches(
+        runner,
+        deadline=deadline,
+        clock=clock,
+    ):
+        return
+
+    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
+    if restart_timeout <= 0:
+        return
+    restart = runner(
+        ["docker", "restart", _GRAFANA_CONTAINER],
+        ROOT,
+        restart_timeout,
+    )
+    if restart.returncode != 0:
+        return
+    _wait_for_grafana_full_profile(
+        runner,
+        deadline=deadline,
+        sleep=sleep,
+        clock=clock,
+    )
+
+
+def _post_start_grafana_ops_cutover(
+    *,
+    spec: StackSpec,
+    runner: Runner = _run,
+    timeout: float = 45.0,
+) -> dict[str, Any] | None:
+    """Restart Grafana when a successful main start finds deferred Ops HTTP."""
+    if spec.name != "main":
+        return None
+    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }:
+        return None
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        return None
+    payload, readable = _load_grafana_bootstrap_status(
+        runner,
+        timeout=min(max(0.1, timeout), 10.0),
+    )
+    if not readable or not isinstance(payload, Mapping):
+        return None
+    if str(payload.get("ops_http") or "").strip() != "deferred":
+        return None
+    restart = runner(["docker", "restart", _GRAFANA_CONTAINER], ROOT, timeout)
+    return {
+        "action": "grafana_ops_http_cutover",
+        "restart_returncode": restart.returncode,
+        "previous_reason": str(payload.get("reason") or ""),
+        "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
+    }
 
 def start_or_recover(
     spec: StackSpec,
@@ -2014,15 +2097,23 @@ def start_or_recover(
             verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
             if verify_rc != 0:
                 return verify_rc
-            grafana_rc = _post_start_grafana_bootstrap_gate(
+            _post_start_grafana_bootstrap_gate(
                 spec=spec,
                 runner=runner,
                 timeout=min(45.0, max(0.1, deadline - clock())),
                 sleep=sleep,
                 clock=clock,
             )
-            if grafana_rc != 0:
-                return grafana_rc
+            cutover = _post_start_grafana_ops_cutover(
+                spec=spec,
+                runner=runner,
+                timeout=min(45.0, max(5.0, deadline - clock())),
+            )
+            if cutover is not None:
+                write_report(
+                    report_dir / "docker-runtime-grafana-cutover.json",
+                    cutover,
+                )
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
@@ -2177,7 +2268,7 @@ def _load_grafana_bootstrap_status(
         [
             "docker",
             "exec",
-            "bioetl-grafana",
+            _GRAFANA_CONTAINER,
             "cat",
             "/var/lib/grafana/bioetl-bootstrap-status.json",
         ],
