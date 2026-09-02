@@ -50,7 +50,9 @@ def compute_test_telemetry_source_tree_sha256(repo_root: Path = REPO_ROOT) -> st
         payload = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
         digest.update(payload)
         digest.update(b"\0")
-    return digest.hexdigest()
+    result = digest.hexdigest()
+    print(f"[test-telemetry] source_tree_sha256={result}")
+    return result
 
 
 def _parse_args() -> argparse.Namespace:
