@@ -77,13 +77,13 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert check["duplicate_policy"] == "forbidden"
 
 
-def test_coordinator_materializes_on_every_main_pr_after_owner_cutover() -> None:
+def test_coordinator_materializes_on_supported_pr_bases_after_owner_cutover() -> None:
     assert COORDINATOR.is_file()
     data = _load_yaml(COORDINATOR)
     on = data.get("on", data.get(True, {}))
     assert isinstance(on, dict)
     assert set(on) == {"pull_request", "workflow_dispatch"}
-    assert on["pull_request"] == {"branches": ["main"]}
+    assert on["pull_request"] == {"branches": ["main", "develop"]}
     perms = data.get("permissions", {})
     assert perms == {"contents": "read"} or perms.get("contents") == "read"
     conc = data.get("concurrency", {})

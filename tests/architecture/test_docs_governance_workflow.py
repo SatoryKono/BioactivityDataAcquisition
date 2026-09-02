@@ -52,8 +52,21 @@ def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
     catalog = Path("configs/quality/github_required_checks.yaml").read_text(
         encoding="utf-8"
     )
-    docs_gate = catalog.split("- id: docs-governance", maxsplit=1)[1]
+    docs_gate = catalog.rsplit("- id: docs-governance", maxsplit=1)[1]
+    former_trigger_paths = (
+        ".github/actions/setup-python-uv/**",
+        "scripts/engineering/qa/check_xwalk_missing_backlog.py",
+        "src/bioetl/application/pipelines/chembl/activity_transformer.py",
+        "src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_check_doc_links_guardrails.py",
+        "tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py",
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    )
     assert ".github/workflows/**" in docs_gate
+    for path in former_trigger_paths:
+        assert path in trigger_block
+        assert path in docs_gate
 
 
 def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
@@ -61,6 +74,7 @@ def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
     assert 'EVENT_NAME: ${{ github.event_name }}' in workflow
+    assert '"${BASE_REF}" != "main" && "${BASE_REF}" != "develop"' in workflow
     assert 'git diff --name-only "origin/${BASE_REF}"...HEAD' in workflow
     assert "'*.mmd' '*.mermaid'" in workflow
     assert '"${lint_targets[@]}" --json' in workflow

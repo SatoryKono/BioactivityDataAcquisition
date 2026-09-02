@@ -83,16 +83,42 @@ def load_catalog(path: Path) -> dict[str, Any]:
     return data
 
 
+def _match_path_pattern(path: str, pattern: str) -> bool:
+    """Match GitHub-style path globs without allowing stars to cross slashes."""
+    path_parts = tuple(path.replace("\\", "/").split("/"))
+    pattern_parts = tuple(pattern.replace("\\", "/").split("/"))
+    memo: dict[tuple[int, int], bool] = {}
+
+    def visit(pattern_index: int, path_index: int) -> bool:
+        key = (pattern_index, path_index)
+        if key in memo:
+            return memo[key]
+        if pattern_index == len(pattern_parts):
+            matched = path_index == len(path_parts)
+        elif pattern_parts[pattern_index] == "**":
+            matched = visit(pattern_index + 1, path_index) or (
+                path_index < len(path_parts)
+                and visit(pattern_index, path_index + 1)
+            )
+        else:
+            matched = (
+                path_index < len(path_parts)
+                and fnmatch.fnmatchcase(
+                    path_parts[path_index], pattern_parts[pattern_index]
+                )
+                and visit(pattern_index + 1, path_index + 1)
+            )
+        memo[key] = matched
+        return matched
+
+    return visit(0, 0)
+
+
 def _matches(path: str, patterns: list[object]) -> bool:
     for raw_pattern in patterns:
         if not isinstance(raw_pattern, str) or not raw_pattern:
             raise CatalogError("path patterns must be non-empty strings")
-        pattern = raw_pattern.replace("\\", "/")
-        if pattern == "**" or fnmatch.fnmatchcase(path, pattern):
-            return True
-        if pattern.endswith("/**") and path.startswith(pattern[:-3]):
-            return True
-        if pattern == path:
+        if _match_path_pattern(path, raw_pattern):
             return True
     return False
 
@@ -170,6 +196,28 @@ def classify_changes(
     }
 
 
+def _parse_name_status_paths(raw: bytes) -> list[str]:
+    """Return every path from a NUL-delimited git name-status diff."""
+    tokens = raw.split(b"\0")
+    if tokens and tokens[-1] == b"":
+        tokens.pop()
+
+    paths: list[str] = []
+    index = 0
+    while index < len(tokens):
+        status = os.fsdecode(tokens[index])
+        index += 1
+        if not status or status[0] not in "ACDMRTUXB":
+            raise CatalogError(f"malformed git name-status record: {status!r}")
+
+        path_count = 2 if status[0] in {"C", "R"} else 1
+        if index + path_count > len(tokens):
+            raise CatalogError(f"incomplete git name-status record: {status!r}")
+        paths.extend(os.fsdecode(item) for item in tokens[index : index + path_count])
+        index += path_count
+    return paths
+
+
 def collect_changed_files(
     *,
     event_name: str,
@@ -188,12 +236,21 @@ def collect_changed_files(
         diff_range = f"{head_sha}^...{head_sha}"
 
     completed = subprocess.run(
-        ["git", "diff", "--name-only", "--diff-filter=ACMR", diff_range],
+        [
+            "git",
+            "diff",
+            "--name-status",
+            "-z",
+            "--find-renames",
+            "--find-copies",
+            "--diff-filter=ACDMRTUXB",
+            diff_range,
+        ],
         check=True,
         capture_output=True,
-        text=True,
+        text=False,
     )
-    return [line for line in completed.stdout.splitlines() if line.strip()]
+    return _parse_name_status_paths(completed.stdout)
 
 
 def evaluate_results(

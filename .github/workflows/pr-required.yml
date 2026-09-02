@@ -4,7 +4,7 @@ name: PR Gate Complete
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:

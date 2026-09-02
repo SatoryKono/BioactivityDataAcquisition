@@ -11,7 +11,10 @@ from scripts.engineering.ci.pr_gate import (
     NOT_APPLICABLE,
     REQUIRED,
     CatalogError,
+    _matches,
+    _parse_name_status_paths,
     classify_changes,
+    collect_changed_files,
     evaluate_results,
     load_catalog,
 )
@@ -96,6 +99,59 @@ def test_classifier_fails_closed_for_empty_or_unclassified_diff() -> None:
         assert {
             value["decision"] for value in matrix["decisions"].values()
         } == {REQUIRED}
+
+
+def test_path_globs_preserve_root_only_star_semantics() -> None:
+    assert _matches("README.md", ["*.md"])
+    assert not _matches("grafana/README.md", ["*.md"])
+    assert _matches("grafana/README.md", ["**/*.md"])
+    assert _matches("docs/guides/setup.md", ["docs/**"])
+    assert not _matches("docs/guides/setup.md", ["docs/*.md"])
+
+
+def test_name_status_parser_keeps_deletions_and_both_rename_paths() -> None:
+    raw = (
+        b"D\0docs/deleted.md\0"
+        b"R100\0docs/old-name.md\0docs/new-name.md\0"
+        b"M\0src/bioetl/module.py\0"
+    )
+
+    assert _parse_name_status_paths(raw) == [
+        "docs/deleted.md",
+        "docs/old-name.md",
+        "docs/new-name.md",
+        "src/bioetl/module.py",
+    ]
+
+
+def test_collect_changed_files_uses_nul_delimited_full_status_diff(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, Any] = {}
+
+    def fake_run(args: list[str], **kwargs: Any) -> Any:
+        observed["args"] = args
+        observed["kwargs"] = kwargs
+        return type(
+            "Completed",
+            (),
+            {"stdout": b"D\0docs/deleted.md\0R100\0old.md\0new.md\0"},
+        )()
+
+    monkeypatch.setattr("scripts.engineering.ci.pr_gate.subprocess.run", fake_run)
+
+    paths = collect_changed_files(
+        event_name="pull_request",
+        base_sha="b" * 40,
+        before_sha="",
+        head_sha=HEAD_SHA,
+    )
+
+    assert paths == ["docs/deleted.md", "old.md", "new.md"]
+    assert "--name-status" in observed["args"]
+    assert "-z" in observed["args"]
+    assert "--diff-filter=ACDMRTUXB" in observed["args"]
+    assert observed["kwargs"]["text"] is False
 
 
 @pytest.mark.parametrize("conclusion", ["failure", "cancelled", "skipped", None])

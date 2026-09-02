@@ -218,8 +218,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
-            if [[ "${BASE_REF}" != "main" ]]; then
-              echo "unexpected pull-request base ref" >&2
+            if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+              echo "unsupported pull-request base ref" >&2
               exit 1
             fi
             base="origin/${BASE_REF}"
@@ -333,8 +333,8 @@ jobs:
           # remains the full-corpus freshness owner.
           lint_targets=(docs/02-architecture/diagrams)
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
-            if [[ "${BASE_REF}" != "main" ]]; then
-              echo "unexpected pull-request base ref" >&2
+            if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+              echo "unsupported pull-request base ref" >&2
               exit 1
             fi
             git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
@@ -476,8 +476,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
-          if [[ "${BASE_REF}" != "main" ]]; then
-            echo "unexpected pull-request base ref" >&2
+          if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+            echo "unsupported pull-request base ref" >&2
             exit 1
           fi
           base_ref="origin/${BASE_REF}"
