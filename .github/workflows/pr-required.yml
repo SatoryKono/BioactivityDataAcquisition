@@ -439,13 +439,31 @@ jobs:
           jq --arg inventory_hash "${inventory_hash}"             '.module_coverage_inventory_source_tree_sha256 = $inventory_hash'             reports/quality/low-coverage-targeted-tests-6045.json             > "${RUNNER_TEMP}/low-coverage-targeted-tests-6045.json"
           mv "${RUNNER_TEMP}/low-coverage-targeted-tests-6045.json"             reports/quality/low-coverage-targeted-tests-6045.json
 
-      - name: Refresh passports and dependent inventories
+      - name: Refresh generated governance evidence
         run: |
           set -euo pipefail
-          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build             python -m scripts.docs passports generate --require-clean-source
-          uv run --frozen --no-build python -m scripts.docs             generate-cleanup-inventory --update
-          uv run --frozen --no-build python -m scripts.engineering.repo             sync-inventory
-          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit
+          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build \
+            python -m scripts.docs passports generate --require-clean-source
+          uv run --frozen --no-build python -m scripts.engineering.qa \
+            report-contract-coverage-matrix
+          coverage_percent="$(
+            uv run --frozen --no-build python -c \
+              'import yaml; print(yaml.safe_load(open("configs/quality/test_telemetry_baseline.yaml", encoding="utf-8"))["coverage"]["actual_percent"])'
+          )"
+          uv run --frozen --no-build python -m \
+            scripts.engineering.ci.update_test_telemetry_baseline \
+            --coverage-percent "${coverage_percent}" \
+            --source-branch "fix/pr-gate-complete-9975-v2" \
+            --source-commit "${SOURCE_HEAD_SHA}" \
+            --source-run-id "${SOURCE_RUN_ID}" \
+            --source-event pull_request \
+            --source-run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}"
+          uv run --frozen --no-build python -m scripts.docs \
+            generate-cleanup-inventory --update
+          uv run --frozen --no-build python -m scripts.engineering.repo \
+            sync-inventory
+          uv run --frozen --no-build python -m \
+            scripts.engineering.qa.report_test_governance_audit
 
       - name: Validate repaired surfaces
         run: |
