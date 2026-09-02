@@ -378,7 +378,9 @@ jobs:
       - name: Refresh deterministic governance cascade
         run: |
           set -euo pipefail
-          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \\
+            --json-out reports/quality/test-governance-current.json \\
+            --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
           uv run --frozen --no-build python -m scripts.engineering.qa.report_architecture_quality_scorecard
           uv run --frozen --no-build python -m scripts.engineering.qa \
             report-debt-governance-gates --update
