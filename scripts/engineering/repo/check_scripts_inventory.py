@@ -1336,9 +1336,7 @@ def _first_field_drift(
     actual: dict[str, object],
 ) -> tuple[str, object, object] | None:
     """Return the first differing field (key, expected, actual) if any."""
-    for key in sorted(
-        set(expected) | set(actual), key=lambda item: (item != "references", item)
-    ):
+    for key in sorted(set(expected) | set(actual)):
         if expected.get(key) != actual.get(key):
             return key, expected.get(key), actual.get(key)
     return None
@@ -1359,7 +1357,7 @@ def _print_field_drift_samples(
     *,
     expected_by_path: dict[str, dict[str, object]],
     actual_by_path: dict[str, dict[str, object]],
-    sample_limit: int = 100,
+    sample_limit: int = 8,
 ) -> int:
     """Print up to sample_limit field-level drift samples; return total changed count."""
     changed = 0
