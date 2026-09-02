@@ -14540,13 +14540,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 747,
+          "line": 764,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import observability_metric_inventory_cli as _metric_cli"
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 748,
+          "line": 765,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_cli import ("
         },
@@ -14577,7 +14577,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 210,
+          "line": 227,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_report import ("
         }
@@ -14602,19 +14602,19 @@
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 253,
+          "line": 270,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 256,
+          "line": 273,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         },
         {
           "path": "scripts/engineering/qa/report_observability_metric_inventory.py",
-          "line": 259,
+          "line": 276,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_runtime import ("
         }

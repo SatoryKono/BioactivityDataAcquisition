@@ -107,16 +107,16 @@ class TestCiHeavyLaneRebalance:
             assert scenario["path"] not in block
             assert scenario["new_lane"] == "test-fast"
 
-    def test_coverage_verify_remains_serial_subset_not_full_suite_rerun(self) -> None:
+    def test_coverage_verify_consumes_serial_shard_without_pytest_rerun(self) -> None:
         policy = _load_policy()
         workflow = _read_workflow(policy)
         block = _job_block(workflow, "coverage-verify")
         metric = policy["success_metrics"]["coverage_verify_scope"]  # type: ignore[index]
 
-        assert f'--parallel-marker "{metric["serial_marker"]}"' in block
-        for excluded_path in metric["known_exclusions"]:
-            assert f"--ignore={excluded_path}" in block
-        assert "--skip-serial-pass" in block
+        assert f"- {metric['serial_producer_job']}" in block
+        assert metric["serial_shard"] in block
+        assert "--parallel-marker" not in block
+        assert "--skip-serial-pass" not in block
         assert "coverage combine --keep reports/coverage" in block
 
     def test_memory_and_performance_lanes_stay_isolated(self) -> None:

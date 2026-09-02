@@ -42,12 +42,14 @@ def test_import_linter_workflow_keeps_checks_complete_as_blocking_gate() -> None
     assert "if: ${{ always() }}" in workflow
 
 
-def test_import_linter_workflow_requires_full_capabilities_for_arch_tests() -> None:
+def test_import_linter_workflow_requires_capabilities_for_sharded_arch_tests() -> None:
     """Required CI must fail fast on capability drift during architecture tests."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
 
     assert "arch-tests:" in workflow
     assert 'BIOETL_REQUIRE_TEST_CAPABILITIES: "1"' in workflow
+    assert "strategy:" in workflow
+    assert "matrix:" in workflow
     assert "bash scripts/engineering/dev/run_pytest_sharded.sh" in workflow
     assert '--shard "${{ matrix.shard }}"' in workflow
     assert "--skip-preflight" in workflow
