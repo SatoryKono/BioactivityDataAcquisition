@@ -220,6 +220,10 @@ def test_ruleset_required_checks_materialize_on_every_pr() -> None:
         assert check_name in workflow["jobs"]
         assert f"`{check_name}`" in required_section
 
+    # Shadow aggregator pr-gate-complete must materialize on every PR (via pr-required.yml)
+    assert "pr-gate-complete" in policy_doc
+    assert "configs/quality/github_required_checks.yaml" in policy_doc
+
     for path_scoped_check in (
         "coverage-verify",
         "schema-governance-status",
