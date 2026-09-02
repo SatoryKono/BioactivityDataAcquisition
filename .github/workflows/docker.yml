@@ -25,28 +25,6 @@ on:
       - ".dockerignore"
       - ".github/workflows/docker.yml"
       - ".github/actions/setup-python-uv/**"
-  # Keep the direct PR owner until #9975 has a successful shadow coordinator.
-
-  pull_request:
-    branches: [main, master, develop]
-    paths:
-      - "Dockerfile.bioetl"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "src/**"
-      - "configs/**"
-      - "docker-compose*.yml"
-      - "scripts/ops/runtime/docker/**"
-      - "scripts/engineering/qa/docker_stability_campaign/**"
-      - "scripts/engineering/qa/run_docker_stability_campaign.py"
-      - "configs/quality/docker_runtime_contracts.yaml"
-      - "tests/architecture/test_docker_runtime_contracts.py"
-      - "tests/unit/repo_backed/scripts/ops/docker/**"
-      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
-      - ".dockerignore"
-      - ".github/workflows/docker.yml"
-      - ".github/actions/setup-python-uv/**"
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.

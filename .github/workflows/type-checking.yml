@@ -18,12 +18,6 @@ on:
       - '*.md'
       - '.ai/**'
       - 'LICENSE'
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
   workflow_dispatch:
 
 jobs:
