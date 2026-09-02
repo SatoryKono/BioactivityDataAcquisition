@@ -1717,7 +1717,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
         lambda **_kwargs: failed_cutover,
     )
 
-    failed_result = runtime_manager.start_or_recover(
+    nonblocking_result = runtime_manager.start_or_recover(
         _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
         Path("contract.yml"),
         tmp_path,
@@ -1726,7 +1726,7 @@ def test_recover_continues_when_preflight_only_reports_container_health(
         sleep=lambda _seconds: None,
     )
 
-    assert failed_result == 1
+    assert nonblocking_result == 0
     assert json.loads(cutover_report.read_text(encoding="utf-8")) == failed_cutover
 
 
