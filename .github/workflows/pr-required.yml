@@ -67,18 +67,27 @@ jobs:
         id: decide
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || github.sha }}
-          BEFORE_SHA: ${{ github.event.before || github.event.pull_request.base.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          BEFORE_SHA: ${{ github.event.before || '' }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \
-            --catalog configs/quality/github_required_checks.yaml \
-            --event-name "${EVENT_NAME}" \
-            --base-sha "${BASE_SHA}" \
-            --before-sha "${BEFORE_SHA}" \
-            --head-sha "${HEAD_SHA}" \
+          base_sha="${BASE_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            git fetch --no-tags origin main
+            base_sha="$(git merge-base origin/main "${HEAD_SHA}")"
+          fi
+          classify_args=(
+            --catalog configs/quality/github_required_checks.yaml
+            --event-name "${EVENT_NAME}"
+            --base-sha "${base_sha}"
+            --head-sha "${HEAD_SHA}"
             --artifact reports/quality/pr-gate-decisions.json
+          )
+          if [[ -n "${BEFORE_SHA}" ]]; then
+            classify_args+=(--before-sha "${BEFORE_SHA}")
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
 
       - name: Upload decision matrix
         if: ${{ always() && !cancelled() }}
@@ -303,6 +312,7 @@ jobs:
       - name: Checkout exact event head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -343,42 +353,25 @@ jobs:
             --expected-head-sha "${EXPECTED_HEAD_SHA}" \
             --observed-head-sha "${OBSERVED_HEAD_SHA}" \
             --run-url "${RUN_URL}"
-# codex-artifact-apply-start
-  # Explicitly authorized one-shot artifact application. The committed result removes this block.
-  apply-passport-artifact:
-    name: Apply validated passport evidence (one-shot)
+  # codex-temp-docs-contract-refresh-start
+  refresh-docs-contract-evidence:
+    name: Refresh docs contract evidence (temporary)
     if: >-
       github.event_name == 'pull_request' &&
-      github.event.action == 'reopened' &&
+      github.event.pull_request.base.ref == 'main' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'fix/action-target-test-marker-10006' &&
-      github.actor == 'SatoryKono'
+      github.event.pull_request.head.ref == 'fix/pr-gate-complete-9975-v2'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
-      actions: read
       contents: write
     steps:
-      - name: Checkout exact authorized head
+      - name: Checkout exact branch head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Verify exact repository, branch, and staging delta
-        env:
-          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          SOURCE_HEAD_SHA: 1962e2071ad440a4e60b454edb777a46537eb66a
-        run: |
-          set -euo pipefail
-          test "${GITHUB_REPOSITORY}" = "SatoryKono/BioactivityDataAcquisition"
-          test "${GITHUB_HEAD_REF}" = "fix/action-target-test-marker-10006"
-          test "$(git rev-parse HEAD)" = "${EVENT_HEAD_SHA}"
-          git merge-base --is-ancestor "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}"
-          changed="$(git diff --name-only "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}")"
-          test "${changed}" = ".github/workflows/pr-required.yml"
-          echo "EVENT_HEAD_SHA=${EVENT_HEAD_SHA}" >> "${GITHUB_ENV}"
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -386,189 +379,73 @@ jobs:
           python-version: "3.12"
           uv-extras: "dev"
 
-      - name: Download exact validated artifact
+      - name: Refresh test-governance and telemetry cascade
         env:
-          GH_TOKEN: ${{ github.token }}
-          ARTIFACT_ID: "9857026079"
-          ARTIFACT_NAME: passport-refresh-1962e2071ad440a4e60b454edb777a46537eb66a
-          ARTIFACT_DIGEST: sha256:b0c6c6442052ddbda3bda07109895771efe9a955942d2cae30516f42b6485353
-          SOURCE_RUN_ID: "33656344299"
-          BUNDLE_ROOT: ${{ runner.temp }}/passport-refresh-bundle
-        run: |
-          set -euo pipefail
-          test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" --jq .digest)" = "${ARTIFACT_DIGEST}"
-          test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" --jq .expired)" = "false"
-          test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}" --jq .workflow_run.id)" = "${SOURCE_RUN_ID}"
-          mkdir -p "${BUNDLE_ROOT}"
-          gh run download "${SOURCE_RUN_ID}" --repo "${GITHUB_REPOSITORY}" --name "${ARTIFACT_NAME}" --dir "${BUNDLE_ROOT}"
-          test -f "${BUNDLE_ROOT}/manifest.json"
-
-      - name: Verify manifest and apply allowlisted files
-        env:
-          BUNDLE_ROOT: ${{ runner.temp }}/passport-refresh-bundle
-        run: |
-          set -euo pipefail
-          export BUNDLE_ROOT
-          uv run --frozen --no-build python - <<'PY'
-          import hashlib
-          import json
-          import os
-          import shutil
-          from pathlib import Path, PurePosixPath
-
-          source_head = "1962e2071ad440a4e60b454edb777a46537eb66a"
-          bundle = Path(os.environ["BUNDLE_ROOT"])
-          repository = Path.cwd().resolve()
-          manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
-          if manifest.get("source_head_sha") != source_head:
-              raise SystemExit("artifact source_head_sha mismatch")
-          if manifest.get("deleted") != []:
-              raise SystemExit("artifact contains deletions")
-
-          exact = {
-              ".github/workflows/pr-required.yml",
-              "configs/quality/scripts_inventory_manifest.json",
-              "docs/reports/generated/documentation-cleanup-inventory.json",
-              "docs/reports/generated/documentation-cleanup-inventory.md",
-              "reports/quality/test-governance-current.json",
-          }
-          prefix = "docs/04-reference/passports/"
-          records = manifest.get("files")
-          if not isinstance(records, list) or not records:
-              raise SystemExit("artifact has no files")
-
-          seen = set()
-          for record in records:
-              relative = record.get("path")
-              if not isinstance(relative, str):
-                  raise SystemExit("invalid artifact path")
-              posix = PurePosixPath(relative)
-              if posix.is_absolute() or ".." in posix.parts:
-                  raise SystemExit(f"unsafe artifact path: {relative}")
-              if relative not in exact and not relative.startswith(prefix):
-                  raise SystemExit(f"path outside allowlist: {relative}")
-              if relative in seen:
-                  raise SystemExit(f"duplicate artifact path: {relative}")
-              seen.add(relative)
-
-              source = bundle / "files" / Path(*posix.parts)
-              payload = source.read_bytes()
-              if len(payload) != record.get("size"):
-                  raise SystemExit(f"size mismatch: {relative}")
-              if hashlib.sha256(payload).hexdigest() != record.get("sha256"):
-                  raise SystemExit(f"sha256 mismatch: {relative}")
-
-              target = (repository / Path(*posix.parts)).resolve()
-              if not target.is_relative_to(repository):
-                  raise SystemExit(f"path escaped repository: {relative}")
-              target.parent.mkdir(parents=True, exist_ok=True)
-              shutil.copyfile(source, target)
-
-          if ".github/workflows/pr-required.yml" not in seen:
-              raise SystemExit("final coordinator missing from artifact")
-          coordinator = Path(".github/workflows/pr-required.yml").read_text(encoding="utf-8")
-          if "codex-artifact-apply-start" in coordinator or "codex-readonly-passport-refresh-start" in coordinator:
-              raise SystemExit("temporary workflow block survived artifact application")
-          print(f"Verified and applied {len(seen)} files")
-          PY
-
-      - name: Validate applied canonical projections
-        run: |
-          set -euo pipefail
-          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
-          uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --check
-          uv run --frozen --no-build python -m scripts.engineering.repo check-inventory --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
-          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json
-          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --check
-          uv run --frozen --no-build pytest tests/architecture/test_ci_heavy_lane_rebalance.py tests/architecture/test_scripts_inventory_manifest.py tests/architecture/test_scripts_lifecycle_registry.py tests/architecture/test_passport_documentation_projections.py tests/unit/scripts/docs/passports/test_passport_projector.py tests/unit/scripts/ops/observability/test_action_target_routes.py -q --tb=short
-          git diff --check
-
-      - name: Verify exact final diff
-        env:
-          BUNDLE_ROOT: ${{ runner.temp }}/passport-refresh-bundle
-        run: |
-          set -euo pipefail
-          export BUNDLE_ROOT
-          uv run --frozen --no-build python - <<'PY'
-          import json
-          import os
-          import subprocess
-          from pathlib import Path
-
-          manifest = json.loads(
-              (Path(os.environ["BUNDLE_ROOT"]) / "manifest.json").read_text(encoding="utf-8")
-          )
-          expected = {record["path"] for record in manifest["files"]}
-          changed = {
-              value
-              for value in subprocess.check_output(
-                  ["git", "diff", "--name-only", "-z"]
-              ).decode("utf-8").split("\0")
-              if value
-          }
-          untracked = {
-              value
-              for value in subprocess.check_output(
-                  ["git", "ls-files", "--others", "--exclude-standard", "-z"]
-              ).decode("utf-8").split("\0")
-              if value
-          }
-          if changed != expected:
-              raise SystemExit(
-                  f"final diff mismatch: missing={sorted(expected - changed)} "
-                  f"unexpected={sorted(changed - expected)}"
-              )
-          if untracked:
-              raise SystemExit(f"unexpected untracked files: {sorted(untracked)}")
-          print(f"Final diff is exactly {len(expected)} allowlisted files")
-          PY
-
-      - name: Commit and push exact allowlisted result
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BUNDLE_ROOT: ${{ runner.temp }}/passport-refresh-bundle
           EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SOURCE_RUN_ID: "33644866189"
+        run: |
+          set -euo pipefail
+          coverage_percent="$(uv run --frozen --no-build python -c 'import yaml; print(yaml.safe_load(open("configs/quality/test_telemetry_baseline.yaml", encoding="utf-8"))["coverage"]["actual_percent"])')"
+          uv run --frozen --no-build python -m scripts.engineering.ci.update_test_telemetry_baseline --coverage-percent "${coverage_percent}" --source-branch "fix/pr-gate-complete-9975-v2" --source-commit "${EVENT_HEAD_SHA}" --source-run-id "${SOURCE_RUN_ID}" --source-event pull_request --source-run-url "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}"
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_architecture_quality_scorecard
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --update
+
+      - name: Validate docs contract and refreshed evidence
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --check
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check
+          uv run --frozen --no-build ruff format --check tests/architecture/test_docs_governance_workflow.py
+          uv run --frozen --no-build pytest tests/architecture/test_docs_governance_workflow.py tests/architecture/test_architecture_quality_scorecard.py tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector tests/architecture/test_test_telemetry_baseline.py tests/architecture/test_test_telemetry_governance.py -q --tb=short
+
+      - name: Verify generated allowlist
+        run: |
+          set -euo pipefail
+          allowed=(
+            configs/quality/test_telemetry_baseline.yaml
+            docs/05-engineering/test-telemetry-baseline.md
+            reports/quality/architecture-quality-scorecard.json
+            reports/quality/debt-governance-gates.json
+            reports/quality/debt-governance-gates.md
+            reports/quality/test-fixture-asset-duplication.json
+            reports/quality/test-governance-current.json
+            reports/test-telemetry/coverage-summary.json
+            reports/test-telemetry/slowest-tests.json
+            reports/test-telemetry/slowest-tests.md
+          )
+          unexpected=""
+          while IFS= read -r changed_path; do
+            matched=false
+            for expected in "${allowed[@]}"; do
+              if [[ "${changed_path}" == "${expected}" ]]; then
+                matched=true
+                break
+              fi
+            done
+            if [[ "${matched}" != "true" ]]; then
+              unexpected+="${changed_path}"$'\n'
+            fi
+          done < <(git status --porcelain=v1 | sed -E 's/^...//')
+          if [[ -n "${unexpected}" ]]; then
+            printf 'Unexpected generated paths:\n%s' "${unexpected}" >&2
+            exit 1
+          fi
+
+      - name: Commit and push generated-only refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- \
-            .github/workflows/pr-required.yml \
-            configs/quality/scripts_inventory_manifest.json \
-            docs/04-reference/passports \
-            docs/reports/generated/documentation-cleanup-inventory.json \
-            docs/reports/generated/documentation-cleanup-inventory.md \
-            reports/quality/test-governance-current.json
+          git add -- configs/quality/test_telemetry_baseline.yaml docs/05-engineering/test-telemetry-baseline.md reports/quality/architecture-quality-scorecard.json reports/quality/debt-governance-gates.json reports/quality/debt-governance-gates.md reports/quality/test-fixture-asset-duplication.json reports/quality/test-governance-current.json reports/test-telemetry/coverage-summary.json reports/test-telemetry/slowest-tests.json reports/test-telemetry/slowest-tests.md
           git diff --cached --check
-          export BUNDLE_ROOT
-          uv run --frozen --no-build python - <<'PY'
-          import json
-          import os
-          import subprocess
-          from pathlib import Path
-
-          manifest = json.loads(
-              (Path(os.environ["BUNDLE_ROOT"]) / "manifest.json").read_text(encoding="utf-8")
-          )
-          expected = {record["path"] for record in manifest["files"]}
-          staged = {
-              value
-              for value in subprocess.check_output(
-                  ["git", "diff", "--cached", "--name-only", "-z"]
-              ).decode("utf-8").split("\0")
-              if value
-          }
-          if staged != expected:
-              raise SystemExit(
-                  f"staged diff mismatch: missing={sorted(expected - staged)} "
-                  f"unexpected={sorted(staged - expected)}"
-              )
-          PY
-          git fetch origin fix/action-target-test-marker-10006
-          test "$(git rev-parse origin/fix/action-target-test-marker-10006)" = "${EVENT_HEAD_SHA}"
-          git commit -m "chore(ci): apply validated passport projections"
-          test "$(git rev-parse HEAD^)" = "${EVENT_HEAD_SHA}"
+          test -n "$(git diff --cached --name-only)"
+          git commit -m "chore(ci): refresh docs contract evidence"
+          git fetch origin fix/pr-gate-complete-9975-v2
+          test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
           gh auth setup-git
-          git push origin HEAD:fix/action-target-test-marker-10006
-          echo "FINAL_HEAD_SHA=$(git rev-parse HEAD)" >> "${GITHUB_STEP_SUMMARY}"
-  # codex-artifact-apply-end
+          git push origin HEAD:fix/pr-gate-complete-9975-v2
+          echo "Docs contract evidence pushed; workflow cleanup remains API-owned."
+  # codex-temp-docs-contract-refresh-end

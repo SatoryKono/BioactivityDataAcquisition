@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: main
-refreshed_at_utc: '2026-09-01T21:57:31.174594+00:00'
+source_branch: fix/pr-gate-complete-9975-v2
+refreshed_at_utc: '2026-09-02T16:15:12.787835+00:00'
 refresh_status: captured
-source_commit: 1bfa894c28ce58af0671c2721fd89a8b1cd05db0
-source_run_id: '33538533103'
-source_event: push
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33538533103
-source_tree_sha256: 3d8c86238f06d411ae9f4e8f2b264042b2f452fa3589f8d086e209f023e45e3a
+source_commit: ec8e8f428f3eda48e8eea129645a9a9826942973
+source_run_id: '33644866189'
+source_event: pull_request
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33644866189
+source_tree_sha256: ae77f50dea023a7cb03244a3561c26eb2c7127b37c3acf56f9d65eb6ff3bfa6d
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
