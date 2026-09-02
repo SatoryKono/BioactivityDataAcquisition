@@ -15,6 +15,9 @@ import json
 import sys
 from pathlib import Path
 
+from scripts.ops.observability.grafana.action_target_routes import (
+    ACTION_DASHBOARD_UID_BY_TARGET,
+)
 from scripts.ops.observability.grafana.dashboard_context_links import (
     build_handoff_url,
 )
@@ -74,6 +77,13 @@ FILE_BY_UID = {
     "bioetl-incident-v1": "bioetl-incident-v1.json",
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
+
+def _validate_action_route_uids() -> None:
+    """Fail closed when an action target points outside the shipped portfolio."""
+    unknown = set(ACTION_DASHBOARD_UID_BY_TARGET.values()) - set(FILE_BY_UID)
+    if unknown:
+        raise SystemExit(f"action routes reference unknown dashboard UIDs: {sorted(unknown)}")
+
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
 NAV_HEIGHT = 4
@@ -437,6 +447,7 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
 def main(argv: list[str] | None = None) -> int:
     from scripts.engineering.common.repo_paths import ensure_path_within_root
 
+    _validate_action_route_uids()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",
