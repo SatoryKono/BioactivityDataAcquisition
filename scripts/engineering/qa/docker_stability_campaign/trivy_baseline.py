@@ -173,7 +173,10 @@ def export_trivy_baseline_csv(
 
 def _vulnerability_rows(payload: Mapping[str, Any]) -> Iterable[dict[str, str]]:
     """Return normalized vulnerability rows from full Trivy JSON evidence."""
-    for result in _mapping_list(payload.get("Results", []), label="Results"):
+    results = payload.get("Results")
+    if not isinstance(results, list) or not results:
+        raise ValueError("Trivy JSON Results must be a non-empty list")
+    for result in _mapping_list(results, label="Results"):
         target = _text(result.get("Target"))
         yield from _result_vulnerability_rows(result, target=target)
 
@@ -219,6 +222,14 @@ def is_fixable_blocking_finding(row: Mapping[str, str]) -> bool:
         row["severity"] in BLOCKING_SEVERITIES
         and bool(row["fixed_version"])
         and row["status"] != "not_affected"
+    )
+
+
+def is_strict_blocking_finding(row: Mapping[str, str]) -> bool:
+    """Match Trivy's strict zero policy for every reported CHM vulnerability."""
+    return (
+        row["severity"] in BLOCKING_SEVERITIES
+        and row.get("status") != "not_affected"
     )
 
 
@@ -290,6 +301,11 @@ def parse_fixability_gate_args(argv: Sequence[str] | None = None) -> argparse.Na
         action="store_true",
         help="Вернуть ненулевой exit code при исправимых Critical/High/Medium findings.",
     )
+    parser.add_argument(
+        "--fail-on-blocking",
+        action="store_true",
+        help="Вернуть ненулевой exit code при любом Critical/High/Medium finding.",
+    )
     return parser.parse_args(argv)
 
 
@@ -302,10 +318,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     summary = audit["summary"]
     assert isinstance(summary, Mapping)
-    blocking = summary["fixable_blocking_findings"]
-    assert isinstance(blocking, int)
-    if args.fail_on_fixable and blocking:
-        print(f"Fixable Critical/High/Medium Trivy findings: {blocking}")
+    fixable_blocking = summary["fixable_blocking_findings"]
+    assert isinstance(fixable_blocking, int)
+    all_findings = audit["all_findings"]
+    assert isinstance(all_findings, list)
+    strict_blocking = sum(
+        1
+        for finding in all_findings
+        if isinstance(finding, Mapping) and is_strict_blocking_finding(finding)
+    )
+    if args.fail_on_blocking and strict_blocking:
+        print(f"Critical/High/Medium Trivy findings: {strict_blocking}")
+        return 1
+    if args.fail_on_fixable and fixable_blocking:
+        print(
+            "Fixable Critical/High/Medium Trivy findings: "
+            f"{fixable_blocking}"
+        )
         return 1
     return 0
 
