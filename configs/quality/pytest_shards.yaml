@@ -249,6 +249,7 @@ shards:
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_public_facade_inventory.py
+      - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -316,6 +317,7 @@ shards:
       - tests/architecture/test_diagram_issues_6205_6211_closeout.py
       - tests/architecture/test_documentation_issues_6487_6488_closeout.py
       - tests/architecture/test_documentation_issues_6497_6498_closeout.py
+      - tests/architecture/test_gha_8618_8619_closeout.py
       - tests/architecture/test_issue_5053_pipeline_transformer_closeout.py
       - tests/architecture/test_issue_5265_domain_invariants_closeout.py
       - tests/architecture/test_issue_5272_application_core_coverage_closeout.py
@@ -380,6 +382,7 @@ shards:
       - tests/architecture/test_tech_debt_issues_6159_6169_closeout.py
       - tests/architecture/test_tech_debt_issues_6220_6229_closeout.py
       - tests/architecture/test_tech_debt_planning_mirror_governance.py
+      - tests/architecture/test_tech_debt_roadmap_7461_7465.py
       - tests/architecture/test_test_audit_issues_5996_6003_closeout.py
       - tests/architecture/test_test_infrastructure_refactor_closeout_6042_6044.py
       - tests/architecture/test_wave3_adapter_facade_closeout.py
