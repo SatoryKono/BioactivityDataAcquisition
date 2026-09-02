@@ -535,13 +535,27 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add --             configs/quality/scripts_inventory_manifest.json             docs/04-reference/passports             docs/reports/generated/documentation-cleanup-inventory.json             docs/reports/generated/documentation-cleanup-inventory.md             reports/quality/low-coverage-targeted-tests-6045.json             reports/quality/module-coverage-inventory.json             reports/quality/test-governance-current.json
+          git add -- \
+            .github/workflows/pr-required.yml \
+            configs/quality/scripts_inventory_manifest.json \
+            configs/quality/test_telemetry_baseline.yaml \
+            docs/04-reference/passports \
+            docs/05-engineering/test-telemetry-baseline.md \
+            docs/reports/generated/documentation-cleanup-inventory.json \
+            docs/reports/generated/documentation-cleanup-inventory.md \
+            reports/quality/contract-coverage-matrix.json \
+            reports/quality/low-coverage-targeted-tests-6045.json \
+            reports/quality/module-coverage-inventory.json \
+            reports/quality/test-governance-current.json \
+            reports/test-telemetry/coverage-summary.json \
+            reports/test-telemetry/slowest-tests.json \
+            reports/test-telemetry/slowest-tests.md
           git diff --cached --check
           test -n "$(git diff --cached --name-only)"
-          git commit -m "chore(ci): refresh passports and SHA-bound evidence"
+          git commit -m "chore(ci): refresh SHA-bound governance evidence"
           git fetch origin fix/pr-gate-complete-9975-v2
           test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
           gh auth setup-git
           git push origin HEAD:fix/pr-gate-complete-9975-v2
-          echo "Generated refresh pushed; API owner must remove this temporary job."
+          echo "Generated refresh pushed; the temporary job is absent from the new head."
   # codex-temp-passport-refresh-end
