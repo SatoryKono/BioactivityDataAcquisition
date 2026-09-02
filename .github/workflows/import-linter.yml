@@ -43,7 +43,7 @@ jobs:
                 run: uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
 
             -   name: Ruff format (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff format --check src tests
+                run: uv run --frozen --no-build ruff format --diff src tests
 
             -   name: Ruff isort (strict full gate - src + tests)
                 run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
