@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.9
+Version: 1.2.10
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-01'
+  Last verified: '2026-09-02'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-01*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-02*
 
 ______________________________________________________________________
 
@@ -48,7 +48,7 @@ ______________________________________________________________________
 - `refactor/storage-clear-contract`
 
 Automation-owned branches MAY use a provider prefix already established by
-the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`). Human-created
+the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`, `copilot/`). Human-created
 branches MUST use one of the project types above and a lowercase kebab-case
 description. Opaque names (`a1`, `tmp`, numeric-only names), date-only names,
 and persistent `backup/*` branches are non-compliant.

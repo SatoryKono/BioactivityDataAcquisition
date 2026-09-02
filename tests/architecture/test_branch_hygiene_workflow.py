@@ -23,6 +23,16 @@ def test_branch_hygiene_workflow_enforces_only_current_pr_head() -> None:
     assert "apply-branch-cleanup" not in workflow
 
 
+def test_branch_hygiene_allows_established_automation_providers() -> None:
+    """Workflow and policy must agree on supported automation branch prefixes."""
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    policy = POLICY.read_text(encoding="utf-8")
+
+    for provider in ("dependabot", "renovate", "devin", "bolt", "copilot"):
+        assert provider in workflow
+        assert f"`{provider}/`" in policy
+
+
 def test_branch_lifecycle_policy_protects_active_work() -> None:
     policy = POLICY.read_text(encoding="utf-8")
 

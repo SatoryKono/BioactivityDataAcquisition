@@ -301,6 +301,8 @@ jobs:
       - prompt-tests-nightly
     steps:
       - name: Validate E2E nightly results (fail-closed)
+        env:
+          RUN_LIVE: ${{ github.event.inputs.run_live }}
         run: |
           set -euo pipefail
           echo "Event: ${{ github.event_name }}"
@@ -334,11 +336,11 @@ jobs:
               echo "::error::Manual nightly requires blocking smoke, full replay, and prompt tests success"
               exit 1
             fi
-            if [ "${{ github.event.inputs.run_live }}" = "true" ] && [ "${{ needs.matrix-smoke-nightly-live.result }}" != "success" ]; then
+            if [ "$RUN_LIVE" = "true" ] && [ "${{ needs.matrix-smoke-nightly-live.result }}" != "success" ]; then
               echo "::error::Manual live request requires the live sublane to succeed"
               exit 1
             fi
-            if [ "${{ github.event.inputs.run_live }}" != "true" ] && [ "${{ needs.matrix-smoke-nightly-live.result }}" != "skipped" ]; then
+            if [ "$RUN_LIVE" != "true" ] && [ "${{ needs.matrix-smoke-nightly-live.result }}" != "skipped" ]; then
               echo "::error::Replay-only manual run must skip the live sublane"
               exit 1
             fi
