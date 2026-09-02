@@ -349,8 +349,9 @@ jobs:
     name: Refresh passports and SHA-bound evidence (temporary)
     if: >-
       github.event_name == 'pull_request' &&
+      github.event.action == 'reopened' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'fix/pr-gate-complete-9975-v2' &&
+      github.event.pull_request.head.ref == 'fix/action-target-test-marker-10006' &&
       github.actor == 'SatoryKono'
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -374,7 +375,7 @@ jobs:
         run: |
           set -euo pipefail
           test "${GITHUB_REPOSITORY}" = "SatoryKono/BioactivityDataAcquisition"
-          test "${GITHUB_HEAD_REF}" = "fix/pr-gate-complete-9975-v2"
+          test "${GITHUB_HEAD_REF}" = "fix/action-target-test-marker-10006"
           test "$(git rev-parse HEAD)" = "${EVENT_HEAD_SHA}"
           git merge-base --is-ancestor "${EVENT_BASE_SHA}" "${EVENT_HEAD_SHA}"
           test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .head_sha)" = "${SOURCE_HEAD_SHA}"
@@ -391,10 +392,11 @@ jobs:
       - name: Materialize final coordinator
         run: |
           set -euo pipefail
-          cp .github/workflows/pr-required.yml "${RUNNER_TEMP}/pr-required-temporary.yml"
           sed -i '/^  # codex-temp-passport-refresh-start$/,/^  # codex-temp-passport-refresh-end$/d'             .github/workflows/pr-required.yml
           uv run --frozen --no-build python -c 'from pathlib import Path; path = Path(".github/workflows/pr-required.yml"); path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")'
           ! grep -q 'codex-temp-passport-refresh' .github/workflows/pr-required.yml
+          rm -f .github/workflows/tmp-generated-artifact-refresh.yml
+          test ! -e .github/workflows/tmp-generated-artifact-refresh.yml
 
       - name: Consume exact-head coverage candidate
         env:
@@ -429,15 +431,15 @@ jobs:
           uv run --frozen --no-build ruff format --check             tests/architecture/test_ci_heavy_lane_rebalance.py             tests/unit/scripts/ops/observability/test_action_target_routes.py
           uv run --frozen --no-build pytest             tests/architecture/test_ci_heavy_lane_rebalance.py             tests/architecture/test_low_coverage_targeted_tests_6045.py             tests/architecture/test_module_coverage_inventory_freshness.py             tests/architecture/test_scripts_inventory_manifest.py             tests/architecture/test_scripts_lifecycle_registry.py             tests/architecture/test_scripts_inventory_zero_reference_ratchet.py             tests/unit/scripts/ops/observability/test_action_target_routes.py             -q --tb=short
 
-      - name: Restore temporary coordinator and verify generated allowlist
+      - name: Verify final coordinator and generated allowlist
         run: |
           set -euo pipefail
-          cp "${RUNNER_TEMP}/pr-required-temporary.yml" .github/workflows/pr-required.yml
-          git diff --exit-code -- .github/workflows/pr-required.yml
+          ! grep -q 'codex-temp-passport-refresh' .github/workflows/pr-required.yml
+          test ! -e .github/workflows/tmp-generated-artifact-refresh.yml
           unexpected="$(
             git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r path; do
               case "${path}" in
-                configs/quality/scripts_inventory_manifest.json|                docs/04-reference/passports/*|                docs/reports/generated/documentation-cleanup-inventory.json|                docs/reports/generated/documentation-cleanup-inventory.md|                reports/quality/low-coverage-targeted-tests-6045.json|                reports/quality/module-coverage-inventory.json|                reports/quality/test-governance-current.json)
+                .github/workflows/pr-required.yml|                .github/workflows/tmp-generated-artifact-refresh.yml|                configs/quality/scripts_inventory_manifest.json|                docs/04-reference/passports/*|                docs/reports/generated/documentation-cleanup-inventory.json|                docs/reports/generated/documentation-cleanup-inventory.md|                reports/quality/low-coverage-targeted-tests-6045.json|                reports/quality/module-coverage-inventory.json|                reports/quality/test-governance-current.json)
                   ;;
                 *)
                   printf '%s\n' "${path}"
@@ -457,13 +459,13 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add --             configs/quality/scripts_inventory_manifest.json             docs/04-reference/passports             docs/reports/generated/documentation-cleanup-inventory.json             docs/reports/generated/documentation-cleanup-inventory.md             reports/quality/low-coverage-targeted-tests-6045.json             reports/quality/module-coverage-inventory.json             reports/quality/test-governance-current.json
+          git add --             .github/workflows/pr-required.yml             .github/workflows/tmp-generated-artifact-refresh.yml             configs/quality/scripts_inventory_manifest.json             docs/04-reference/passports             docs/reports/generated/documentation-cleanup-inventory.json             docs/reports/generated/documentation-cleanup-inventory.md             reports/quality/low-coverage-targeted-tests-6045.json             reports/quality/module-coverage-inventory.json             reports/quality/test-governance-current.json
           git diff --cached --check
           test -n "$(git diff --cached --name-only)"
-          git commit -m "chore(ci): refresh passports and SHA-bound evidence"
-          git fetch origin fix/pr-gate-complete-9975-v2
-          test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
+          git commit -m "chore(ci): refresh evidence and remove temporary workflows"
+          git fetch origin fix/action-target-test-marker-10006
+          test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/action-target-test-marker-10006)"
           gh auth setup-git
-          git push origin HEAD:fix/pr-gate-complete-9975-v2
-          echo "Generated refresh pushed; API owner must remove this temporary job."
+          git push origin HEAD:fix/action-target-test-marker-10006
+          echo "Generated refresh pushed with temporary workflows removed."
   # codex-temp-passport-refresh-end
