@@ -35,6 +35,21 @@ DEFAULT_PROMETHEUS_BASE_URL_FALLBACKS = _prom.DEFAULT_PROMETHEUS_BASE_URL_FALLBA
 PROMETHEUS_QUERY_TIMEOUT_SECONDS = _prom.PROMETHEUS_QUERY_TIMEOUT_SECONDS
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
+# v2: introduces UNKNOWN-row semantics for exact-UUID lookups with no ledger
+# entries (DASH-STATE-001).  v1 is preserved for the populated-entries path
+# and for Prometheus-backed responses so existing Grafana panels continue to
+# work without changes.
+#
+# ADR reference: ADR-044 (run-manifest-ledger-control-plane) §Ops-HTTP contract.
+#
+# Migration notes: Grafana panels that pattern-match on the ``contract`` field
+# must accept both "processed_records_table_v1" and
+# "processed_records_table_v2".  No schema change is required; v2 adds an
+# explicit version signal only.
+#
+# Rollback: set PROCESSED_RECORDS_TABLE_CONTRACT_V2 = PROCESSED_RECORDS_TABLE_CONTRACT
+# to revert the empty-ledger path to v1 without changing any other behaviour.
+PROCESSED_RECORDS_TABLE_CONTRACT_V2 = "processed_records_table_v2"
 
 __all__ = (
     "DEFAULT_PROMETHEUS_BASE_URL",
@@ -323,7 +338,7 @@ def format_percentage(
     denominator: _Denominator,
     percent_format: _PercentFormat,
 ) -> str:
-    """Format a percentage cell or return UNKNOWN for invalid inputs."""
+    """Format a row percentage, or UNKNOWN for missing or invalid inputs."""
     if denominator == "constant_100":
         return "100%" if value is not None else "UNKNOWN"
     if value is None or bronze_value is None or bronze_value == 0:

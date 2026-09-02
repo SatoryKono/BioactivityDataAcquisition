@@ -1825,8 +1825,8 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     if result.returncode != 0:
         return ""
     value = (result.stdout or "").strip().splitlines()
-    token = value[0].strip() if value else ""
-    if len(token) == 64 and not any(ch not in "0123456789abcdef" for ch in token):
+    token = value[0].strip().lower() if value else ""
+    if len(token) == 64 and all(ch in "0123456789abcdef" for ch in token):
         return token
     return ""
 
@@ -1850,10 +1850,10 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
     if result.returncode != 0 or not result.stdout:
         return ""
     match = re.search(
-        r'"runtime_source_id"\s*:\s*"([0-9a-f]{64})"',
+        r'"runtime_source_id"\s*:\s*"([0-9a-fA-F]{64})"',
         result.stdout,
     )
-    return match.group(1) if match else ""
+    return match.group(1).lower() if match else ""
 
 
 def _remaining_timeout(

@@ -40,6 +40,7 @@ _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 PROCESSED_RECORDS_PANEL_TITLE = "Processed Records"
 _PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
+_PROCESSED_RECORDS_CONTRACT_V2 = "processed_records_table_v2"
 _UNRESOLVED_IDENTITY_MODES = frozenset(
     {
         "aggregate_scope_requires_exact_run_id",
@@ -1050,7 +1051,7 @@ def _is_nonnegative_number(raw: str) -> bool:
 def _validate_processed_records_percentage(
     parameter: str, percentage: str
 ) -> str | None:
-    if percentage == "No data":
+    if percentage in {"No data", "UNKNOWN"}:
         return None
     if percentage.endswith("%") and _is_nonnegative_number(percentage[:-1]):
         return None
@@ -1072,7 +1073,7 @@ def _processed_records_parameter(
 def _processed_records_numeric_value(
     parameter: str, value: str
 ) -> tuple[float | None, bool, str | None]:
-    if value == "No data":
+    if value in {"No data", "UNKNOWN"}:
         return (None, True, None)
     if not _is_nonnegative_number(value):
         return (
@@ -1150,7 +1151,10 @@ def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str
             "expected_empty",
             "SELECT RUN — processed records require an exact run_id",
         )
-    if payload.get("contract") != _PROCESSED_RECORDS_CONTRACT:
+    if payload.get("contract") not in {
+        _PROCESSED_RECORDS_CONTRACT,
+        _PROCESSED_RECORDS_CONTRACT_V2,
+    }:
         return (
             "invalid_shape",
             "Processed Records payload has an unknown or missing contract",
