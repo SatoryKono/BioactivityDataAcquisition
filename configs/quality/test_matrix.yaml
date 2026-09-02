@@ -64,6 +64,8 @@ test_lanes:
       - e2e
       - e2e-smoke
       - e2e-nightly-full
+      - e2e-nightly-live
+      - prompt-tests-nightly
       - memory
       - performance
     vcr_parallel_policy: >
@@ -147,6 +149,40 @@ test_lanes:
       - --cov-report=html
     powershell_env_example: '$env:PYTHONPATH="src"'
     bash_env_example: PYTHONPATH=src
+  ci_fixed_shards:
+    schema_version: 1
+    telemetry_source: reports/test-telemetry/slowest-tests.json
+    lanes:
+      test-fast:
+        python_version: "3.12"
+        coverage_producer: false
+        shards:
+          - name: unit-domain
+            path: tests/unit/domain/
+          - name: unit-application
+            path: tests/unit/application/
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/
+      repo-backed-unit:
+        coverage_producer: true
+        shards:
+          - name: product
+            path: tests/unit/repo_backed/application/ tests/unit/repo_backed/composition/ tests/unit/repo_backed/contracts/ tests/unit/repo_backed/coverage_gap/ tests/unit/repo_backed/domain/ tests/unit/repo_backed/infrastructure/ tests/unit/repo_backed/interfaces/
+          - name: tooling
+            path: tests/unit/repo_backed/scripts/ tests/unit/repo_backed/tools/ --ignore=tests/unit/repo_backed/scripts/ops/
+          - name: ops
+            path: tests/unit/repo_backed/scripts/ops/
+      unit-scripts-tooling:
+        coverage_producer: true
+        shards:
+          - name: passport
+            path: tests/unit/scripts/docs/passports/
+          - name: debt-governance
+            path: tests/unit/scripts/qa/test_report_debt_governance_gates.py
+          - name: other
+            path: tests/unit/scripts/ --ignore=tests/unit/scripts/docs/passports/ --ignore=tests/unit/scripts/qa/test_report_debt_governance_gates.py
   lanes:
     smoke:
       suite_name: smoke
@@ -582,8 +618,9 @@ test_lanes:
     e2e-nightly-full:
       suite_name: e2e-nightly-full
       description: >
-        Nightly full E2E matrix per entity rows. Canonical CI owner:
-        .github/workflows/e2e-matrix-health.yml matrix-smoke-nightly-live and schedule.
+        Full offline cassette-replay E2E suite. Canonical CI owner:
+        .github/workflows/e2e-matrix-health.yml job e2e-nightly-full-replay;
+        e2e-nightly-complete joins it with the separate live and prompt sublanes.
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -593,7 +630,53 @@ test_lanes:
         - tests/e2e/
         - -m
         - e2e and not e2e_smoke and not benchmark and not memory
+        - -p
+        - no:xdist
+      replay_mode: vcr_replay_only
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    e2e-nightly-live:
+      suite_name: e2e-nightly-live
+      description: >
+        Opt-in/scheduled strict live matrix smoke sublane, isolated from PR
+        replay and owned by e2e-matrix-health.yml job matrix-smoke-nightly-live.
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/e2e/test_pipeline_matrix_e2e.py
+      marker_expression: "e2e_smoke and not benchmark and not memory"
+      pytest_args:
+        - tests/e2e/test_pipeline_matrix_e2e.py
+        - -k
+        - test_pipeline_matrix_smoke
+        - -m
+        - e2e_smoke and not benchmark and not memory
       replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    prompt-tests-nightly:
+      suite_name: prompt-tests-nightly
+      description: >
+        Scheduled/manual owner for prompt-library contracts, joined into the
+        fail-closed nightly E2E aggregate without running on pull requests.
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/prompts/
+      marker_expression: "not benchmark and not memory"
+      pytest_args:
+        - tests/prompts/
+        - -m
+        - not benchmark and not memory
+        - -p
+        - no:xdist
+      replay_mode: not_applicable
       coverage_gate: none
       expected_artifacts:
         junit_xml: true

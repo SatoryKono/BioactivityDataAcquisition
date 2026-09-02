@@ -3,7 +3,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: type-checking-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -18,57 +18,11 @@ on:
       - '*.md'
       - '.ai/**'
       - 'LICENSE'
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
   workflow_dispatch:
 
 jobs:
 
-  dependency-preflight:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
-
-      - name: Setup Python + uv
-        uses: ./.github/actions/setup-python-uv
-
-      - name: Check uv lock drift
-        run: |
-          mkdir -p reports/ci
-          set -o pipefail
-          {
-            echo "Dependency preflight diagnostics"
-            echo "Timestamp (UTC): $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-            echo
-            echo "Running: uv lock --check"
-            uv lock --check
-          } 2>&1 | tee reports/ci/dependency-preflight.log
-
-      - name: Upload dependency preflight diagnostics
-        if: ${{ failure() && !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
-        with:
-          name: type-checking-dependency-preflight
-          path: reports/ci/dependency-preflight.log
-          if-no-files-found: error
-          retention-days: 3
-
-      - name: Publish dependency preflight summary
-        if: always()
-        run: |
-          {
-            echo "## Dependency preflight"
-            echo "Diagnostic artifact: type-checking-dependency-preflight/reports/ci/dependency-preflight.log"
-          } >> "$GITHUB_STEP_SUMMARY"
   type-check:
-    needs: dependency-preflight
     runs-on: ubuntu-latest
     timeout-minutes: 40
 

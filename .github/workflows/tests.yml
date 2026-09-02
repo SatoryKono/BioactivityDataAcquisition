@@ -10,19 +10,11 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-  pull_request:
-    branches: [main, master, develop]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  group: tests-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -192,7 +184,7 @@ jobs:
   control-plane-e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
     env:
@@ -255,7 +247,7 @@ jobs:
   contract-confidence:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -314,7 +306,7 @@ jobs:
   flaky-telemetry:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -482,9 +474,6 @@ jobs:
 
       - name: Pre-merge naming convention audit
         run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming --check
-
-      - name: DQ consistency validation (fail-fast)
-        run: uv run --frozen --no-build python -m scripts.engineering.qa validate-dq-consistency
 
       - name: Validate ADR enforcement matrix artifacts
         run: uv run --frozen --no-build python -m scripts.engineering.qa report-adr-enforcement-matrix --check
@@ -685,7 +674,7 @@ jobs:
   track-d-gates:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
     env:
@@ -816,11 +805,24 @@ jobs:
   # Unit paths overlap test-matrix by interpreter split, not by duplicate 3.13
   # full-tree: test-matrix unit-* shards are 3.13-only for coverage-verify (#9740).
   test-fast:
+    name: Unit fast (${{ matrix.test-group.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: smoke-check # Only minimal dependency smoke should gate fast tests
+    needs: dependency-preflight
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: unit-domain
+            path: tests/unit/domain/
+          - name: unit-application
+            path: tests/unit/application/
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/ --ignore=tests/unit/scripts/ --ignore=tests/unit/repo_backed/
 
     steps:
       - name: Checkout code
@@ -831,7 +833,7 @@ jobs:
         with:
           python-version: "3.12"
           enable-pytest-cache: "true"
-          pytest-cache-prefix: "pytest-fast"
+          pytest-cache-prefix: "pytest-fast-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
       - name: Run canonical unit-fast lane
@@ -841,30 +843,39 @@ jobs:
           # serial_or_bounded (#9729): do not inherit pytest-xdist.
           # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
           HYPOTHESIS_PROFILE=fast \
-          uv run --frozen --no-build pytest tests/unit/ \
-            --ignore=tests/unit/scripts \
-            --ignore=tests/unit/repo_backed \
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "not fs_contract and not repo_backed and not subprocess_backed and not slow and not benchmark and not memory" \
             -p no:xdist \
             -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-fast.xml
+            --junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
 
       - name: Upload fast test telemetry
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: test-telemetry-fast
-          path: reports/test-telemetry/junit-fast.xml
+          name: test-telemetry-fast-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml
           if-no-files-found: warn
           retention-days: 3
 
   # Checked-in repository contracts are unit-owned but intentionally serial.
   repo-backed-unit:
+    name: Repo-backed unit (${{ matrix.test-group.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: product
+            path: tests/unit/repo_backed/application/ tests/unit/repo_backed/composition/ tests/unit/repo_backed/contracts/ tests/unit/repo_backed/coverage_gap/ tests/unit/repo_backed/domain/ tests/unit/repo_backed/infrastructure/ tests/unit/repo_backed/interfaces/
+          - name: tooling
+            path: tests/unit/repo_backed/scripts/ tests/unit/repo_backed/tools/ --ignore=tests/unit/repo_backed/scripts/ops/
+          - name: ops
+            path: tests/unit/repo_backed/scripts/ops/
 
     steps:
       - name: Checkout code
@@ -874,20 +885,20 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           enable-pytest-cache: "true"
-          pytest-cache-prefix: "pytest-repo-backed-unit"
+          pytest-cache-prefix: "pytest-repo-backed-unit-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/repo_backed/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
       - name: Run canonical repo-backed-unit lane
         env:
-          COVERAGE_FILE: reports/coverage/.coverage.repo-backed-unit
+          COVERAGE_FILE: reports/coverage/.coverage.repo-backed-unit-${{ matrix.test-group.name }}
         run: |
           set +e
           mkdir -p reports/test-telemetry
           mkdir -p reports/coverage
-          uv run --frozen --no-build pytest tests/unit/repo_backed/ \
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
             -m "repo_backed and not slow and not benchmark and not memory" \
             -p no:xdist -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-repo-backed-unit.xml \
+            --junitxml=reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
           cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
@@ -901,8 +912,8 @@ jobs:
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: test-telemetry-repo-backed-unit
-          path: reports/test-telemetry/junit-repo-backed-unit.xml
+          name: test-telemetry-repo-backed-unit-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-repo-backed-unit.${{ matrix.test-group.name }}.xml
           if-no-files-found: warn
           retention-days: 3
 
@@ -910,19 +921,30 @@ jobs:
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: coverage-data-repo-backed-unit
-          path: reports/coverage/.coverage.repo-backed-unit
+          name: coverage-data-repo-backed-unit-${{ matrix.test-group.name }}
+          path: reports/coverage/.coverage.repo-backed-unit-${{ matrix.test-group.name }}
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
 
   # Tooling/script unit tests (passport projector, ops scripts). Single canonical lane (#8327/#8328).
   unit-scripts-tooling:
+    name: Unit scripts tooling (${{ matrix.test-group.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        test-group:
+          - name: passport
+            path: tests/unit/scripts/docs/passports/
+          - name: debt-governance
+            path: tests/unit/scripts/qa/test_report_debt_governance_gates.py
+          - name: other
+            path: tests/unit/scripts/ --ignore=tests/unit/scripts/docs/passports/ --ignore=tests/unit/scripts/qa/test_report_debt_governance_gates.py
 
     steps:
       - name: Checkout code
@@ -932,21 +954,21 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           enable-pytest-cache: "true"
-          pytest-cache-prefix: "pytest-unit-scripts-tooling"
+          pytest-cache-prefix: "pytest-unit-scripts-tooling-${{ matrix.test-group.name }}"
           pytest-cache-fingerprint: ${{ hashFiles('tests/unit/scripts/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
       - name: Run canonical unit-scripts-tooling lane
         env:
-          COVERAGE_FILE: reports/coverage/.coverage.unit-scripts-tooling
+          COVERAGE_FILE: reports/coverage/.coverage.unit-scripts-tooling-${{ matrix.test-group.name }}
         run: |
           set +e
           mkdir -p reports/test-telemetry
           mkdir -p reports/coverage
           # Serial: passport projector and many script tests use repo FS/subprocess.
-          uv run --frozen --no-build pytest tests/unit/scripts/ \
-            -m "not benchmark and not memory" \
+          uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
+            -m "not slow and not benchmark and not memory" \
             -p no:xdist -q --tb=short \
-            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.xml \
+            --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
           TEST_EXIT=$?
           cp .coverage "$COVERAGE_FILE" 2>/dev/null || true
@@ -960,8 +982,8 @@ jobs:
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: test-telemetry-unit-scripts-tooling
-          path: reports/test-telemetry/junit-unit-scripts-tooling.xml
+          name: test-telemetry-unit-scripts-tooling-${{ matrix.test-group.name }}
+          path: reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml
           if-no-files-found: warn
           retention-days: 3
 
@@ -969,8 +991,8 @@ jobs:
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: coverage-data-unit-scripts-tooling
-          path: reports/coverage/.coverage.unit-scripts-tooling
+          name: coverage-data-unit-scripts-tooling-${{ matrix.test-group.name }}
+          path: reports/coverage/.coverage.unit-scripts-tooling-${{ matrix.test-group.name }}
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
@@ -981,7 +1003,7 @@ jobs:
   unit-filesystem-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -1040,7 +1062,7 @@ jobs:
   unit-subprocess-backed:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -1102,7 +1124,7 @@ jobs:
   test-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check # Allow matrix to start after minimal dependency smoke only
+    needs: dependency-preflight
     permissions:
       contents: read
     strategy:
@@ -1193,7 +1215,7 @@ jobs:
   memory-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -1228,7 +1250,7 @@ jobs:
   performance-budgets:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: smoke-check
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -1302,7 +1324,54 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-  # Final coverage verification (combine shard coverage + serial-only pass)
+  serial-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: dependency-preflight
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          enable-pytest-cache: "true"
+          pytest-cache-prefix: "pytest-serial-coverage"
+          pytest-cache-fingerprint: ${{ hashFiles('tests/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+
+      - name: Run serial-only coverage producer
+        env:
+          COVERAGE_FILE: reports/coverage/.coverage.serial
+        run: |
+          set +e
+          mkdir -p reports/coverage reports/pytest/serial-coverage
+          uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
+            --target tests/ \
+            --reports-dir reports/pytest/serial-coverage \
+            --parallel-marker "serial and not e2e and not benchmark and not memory" \
+            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
+            --skip-serial-pass
+          TEST_EXIT=$?
+          if [ ! -s "$COVERAGE_FILE" ]; then
+            echo "::error::Serial coverage shard was not produced."
+            exit 1
+          fi
+          exit "$TEST_EXIT"
+
+      - name: Upload serial coverage shard
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: coverage-data-serial
+          path: reports/coverage/.coverage.serial
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # Final coverage verification combines producer artifacts only.
   coverage-verify:
     if: ${{ always() && !cancelled() }}
     runs-on: ubuntu-latest
@@ -1315,6 +1384,7 @@ jobs:
       - unit-filesystem-contracts
       - unit-subprocess-backed
       - test-matrix
+      - serial-coverage
     timeout-minutes: 20
     permissions:
       contents: read
@@ -1344,8 +1414,12 @@ jobs:
           required_shards=(
             reports/coverage/.coverage.smoke
             reports/coverage/.coverage.contract-confidence
-            reports/coverage/.coverage.repo-backed-unit
-            reports/coverage/.coverage.unit-scripts-tooling
+            reports/coverage/.coverage.repo-backed-unit-product
+            reports/coverage/.coverage.repo-backed-unit-tooling
+            reports/coverage/.coverage.repo-backed-unit-ops
+            reports/coverage/.coverage.unit-scripts-tooling-passport
+            reports/coverage/.coverage.unit-scripts-tooling-debt-governance
+            reports/coverage/.coverage.unit-scripts-tooling-other
             reports/coverage/.coverage.unit-filesystem-contracts
             reports/coverage/.coverage.unit-subprocess-backed
             reports/coverage/.coverage.unit-domain
@@ -1354,6 +1428,7 @@ jobs:
             reports/coverage/.coverage.unit-other
             reports/coverage/.coverage.integration
             reports/coverage/.coverage.security
+            reports/coverage/.coverage.serial
           )
           for shard in "${required_shards[@]}"; do
             if [ ! -s "$shard" ]; then
@@ -1361,18 +1436,6 @@ jobs:
               exit 1
             fi
           done
-
-      - name: Run serial-only tests with resilient pytest runner
-        run: |
-          mkdir -p reports/coverage
-          # Canonical serial subset: -m "serial and not e2e and not benchmark"
-          COVERAGE_FILE=reports/coverage/.coverage.serial uv run --frozen --no-build python \
-            scripts/engineering/ci/run_pytest_resilient.py \
-            --target tests/ \
-            --reports-dir reports/pytest/coverage-verify \
-            --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
-            --skip-serial-pass
 
       - name: Combine coverage shards and build SHA-bound candidate
         run: |
@@ -1435,6 +1498,36 @@ jobs:
             exit 1
           fi
 
+  tests-complete:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - vcr-preflight
+      - control-plane-e2e
+      - flaky-telemetry
+      - neo4j-memory-live-audit
+      - config-schema-preflight
+      - track-d-gates
+      - dq-consistency-gate
+      - quality-metrics-gate
+      - memory-tests
+      - performance-budgets
+      - coverage-inventory-currentness
+    permissions:
+      contents: read
+    steps:
+      - name: Fail closed on every blocking Tests lane
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          if ! jq -e 'all(.[]; .result == "success")' <<< "$NEEDS_JSON"; then
+            echo "::error::One or more blocking Tests lanes failed, were cancelled, or were skipped."
+            jq -r 'to_entries[] | "\(.key)=\(.value.result)"' <<< "$NEEDS_JSON"
+            exit 1
+          fi
+          echo "All blocking Tests lanes completed successfully."
+
   duration-telemetry:
     if: always()
     runs-on: ubuntu-latest
@@ -1475,9 +1568,9 @@ jobs:
           shopt -s nullglob
 
           unit_junit=()
-          if [ -f reports/test-telemetry/raw/junit-fast.xml ]; then
-            unit_junit+=(reports/test-telemetry/raw/junit-fast.xml)
-          fi
+          for junit_path in reports/test-telemetry/raw/junit-fast.*.xml; do
+            unit_junit+=("$junit_path")
+          done
           for junit_path in reports/test-telemetry/raw/junit.unit-*.xml; do
             unit_junit+=("$junit_path")
           done
@@ -1494,13 +1587,30 @@ jobs:
               "${junit_args[@]}"
           fi
 
-          if [ -f reports/test-telemetry/raw/junit-repo-backed-unit.xml ]; then
+          repo_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-repo-backed-unit.*.xml; do
+            repo_junit+=(--junit "$junit_path")
+          done
+          if [ "${#repo_junit[@]}" -gt 0 ]; then
             uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
               --suite repo-backed-unit \
               --run-id "repo-backed-unit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
               --reports-dir reports/quality/test-runs \
-              --junit reports/test-telemetry/raw/junit-repo-backed-unit.xml \
-              --command "tests.yml repo-backed-unit lane"
+              --command "tests.yml repo-backed-unit shards" \
+              "${repo_junit[@]}"
+          fi
+
+          scripts_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-unit-scripts-tooling.*.xml; do
+            scripts_junit+=(--junit "$junit_path")
+          done
+          if [ "${#scripts_junit[@]}" -gt 0 ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite unit-scripts-tooling \
+              --run-id "unit-scripts-tooling-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --command "tests.yml unit-scripts-tooling shards" \
+              "${scripts_junit[@]}"
           fi
 
           if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then

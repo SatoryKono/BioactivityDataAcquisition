@@ -1,7 +1,7 @@
 # Canonical required-check catalog for pr-gate-complete aggregator.
 # RF-001 of #9975. One source of truth for GitHub PR gate decisions.
 schema_version: 1
-version: 1
+version: 2
 aggregator: pr-gate-complete
 coordinator_workflow: .github/workflows/pr-required.yml
 policy:
@@ -9,6 +9,105 @@ policy:
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
+canonical_checks:
+  - id: ruff
+    owner_workflow: .github/workflows/import-linter.yml
+    owner_jobs: [lint]
+    selectors: [ruff check, ruff format --check]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: mypy
+    owner_workflow: .github/workflows/type-checking.yml
+    owner_jobs: [type-check]
+    selectors: [mypy --strict --no-incremental src/bioetl]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [type-checking-reports-on-failure]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: dependency-lock
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [dependency-preflight]
+    selectors: [uv lock --check]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [dependency-preflight-on-failure]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: architecture
+    owner_workflow: .github/workflows/import-linter.yml
+    owner_jobs: [arch-tests]
+    selectors: [pytest tests/architecture -m not-slow-not-benchmark-not-memory]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [architecture-telemetry]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: integration
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [test-matrix]
+    selectors: [integration test-matrix shard]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [coverage-shards, test-telemetry]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: dq-consistency
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [dq-consistency-gate]
+    selectors: [python -m scripts.engineering.qa validate-dq-consistency]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: root-hygiene
+    owner_workflow: .github/workflows/root-hygiene.yml
+    owner_jobs: [root-hygiene]
+    selectors: [python -m scripts.engineering.repo.check_root_hygiene]
+    events: [coordinator_pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: compiled-artifacts
+    owner_workflow: .github/workflows/compiled-artifacts-block.yml
+    owner_jobs: [no-pyc-check]
+    selectors: [tracked compiled Python artifact scan]
+    events: [coordinator_pull_request, default_branch_push, workflow_call]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: security-scans
+    owner_workflow: .github/workflows/security.yml
+    owner_jobs: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
+    selectors: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
+    events: [coordinator_pull_request, default_branch_push, workflow_call]
+    artifacts: [security-reports]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: canonical-manifest-hashes
+    owner_workflow: .github/workflows/consolidation-gates.yml
+    owner_jobs: [canonical-manifest-hashes]
+    selectors: [sha256sum tests tree, sha256sum src tree]
+    events: [workflow_dispatch]
+    artifacts: [canonical-manifest-hashes]
+    status: advisory_evidence
+    duplicate_policy: forbidden
+
+  - id: commit-governance
+    owner_workflow: .github/workflows/commit-lint.yml
+    owner_jobs: [commit-lint]
+    selectors: [conventional commit lint]
+    events: [coordinator_pull_request, workflow_call]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: docs-governance
+    owner_workflow: .github/workflows/docs.yml
+    owner_jobs: [docs-governance, validate-mkdocs, check-diagram-drift]
+    selectors: [documentation governance, mkdocs validation, diagram drift]
+    events: [coordinator_pull_request, default_branch_push, workflow_call]
+    artifacts: [rendered-pipeline-dataflows, rendered-diagrams]
+    status: blocking
+    duplicate_policy: forbidden
+
 gates:
   - id: lint-arch
     display_name: Lint and Architecture Gates
@@ -68,11 +167,11 @@ gates:
   - id: docker
     display_name: Docker Build and Compose
     owner_workflow: .github/workflows/docker.yml
-    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build]
+    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build, docker-complete]
     legacy_context: docker-build
     decision: path_scoped
     paths:
-      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, configs/quality/docker_runtime_contracts.yaml, .dockerignore, .github/workflows/docker.yml]
+      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, scripts/engineering/ci/pr_gate.py, configs/quality/docker_runtime_contracts.yaml, configs/quality/github_required_checks.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/workflows/pr-required.yml, .github/actions/setup-python-uv/**]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
@@ -107,7 +206,7 @@ gates:
     legacy_context: schema-governance-status
     decision: path_scoped
     paths:
-      include: [src/bioetl/domain/schemas/**, src/bioetl/domain/contracts/**, src/bioetl/domain/entities/**, src/bioetl/infrastructure/schemas/**, tests/contract/silver_schemas/**, scripts/schema/**, docs/03-guides/silver-schema-testing-guide.md, docs/03-data-model/json-field-typing-inventory.md, .github/workflows/schema-governance.yml]
+      include: [src/bioetl/domain/schemas/**, src/bioetl/domain/contracts/**, src/bioetl/domain/entities/**, src/bioetl/infrastructure/schemas/**, tests/contract/silver_schemas/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, configs/quality/github_required_checks.yaml, docs/03-guides/silver-schema-testing-guide.md, docs/03-data-model/json-field-typing-inventory.md, .github/workflows/schema-governance.yml, .github/workflows/pr-required.yml]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
@@ -123,4 +222,32 @@ gates:
     allowed_results: [success]
     not_applicable_allowed: false
     artifacts: []
+    sha_binding: true
+  - id: commit-governance
+    display_name: Commit Governance
+    owner_workflow: .github/workflows/commit-lint.yml
+    owner_jobs: [commit-lint]
+    legacy_context: commit-lint
+    decision: path_scoped
+    paths:
+      include: ["**"]
+      exclude: [docs/**, "*.md", .ai/**, .github/workflows/**, LICENSE]
+    unknown_path_anchor: false
+    allowed_results: [success, not_applicable]
+    not_applicable_allowed: true
+    not_applicable_reason_required: true
+    artifacts: []
+    sha_binding: true
+  - id: docs-governance
+    display_name: Documentation Governance
+    owner_workflow: .github/workflows/docs.yml
+    owner_jobs: [docs-governance, validate-mkdocs, check-diagram-drift]
+    legacy_context: docs-governance
+    decision: path_scoped
+    paths:
+      include: [AGENTS.md, GEMINI.md, README.md, LICENSE, .ai/**, .cursor/**, .windsurf/**, .codex/**, .junie/**, .devin/**, .github/copilot-instructions.md, .github/instructions/**, .github/workflows/**, .github/actions/setup-python-uv/**, grafana/README.md, docs/**, scripts/docs/**, scripts/diagrams/**, scripts/schema/**, scripts/engineering/ci/pr_gate.py, scripts/engineering/qa/check_xwalk_missing_backlog.py, configs/base/**, configs/entities/**, configs/providers/**, configs/composites/**, configs/workflows/**, configs/contracts/**, configs/quality/github_required_checks.yaml, configs/quality/xwalk_missing_backlog.yaml, src/bioetl/application/pipelines/chembl/activity_transformer.py, src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py, src/bioetl/domain/schemas/**, src/bioetl/infrastructure/schemas/**, src/bioetl/domain/contracts/gold/**, tests/architecture/test_ai_runtime_governance_links.py, tests/architecture/test_check_doc_links_guardrails.py, tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py, tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py, mkdocs.yml, pyproject.toml, uv.lock]
+    allowed_results: [success, not_applicable]
+    not_applicable_allowed: true
+    not_applicable_reason_required: true
+    artifacts: [rendered-pipeline-dataflows, rendered-diagrams]
     sha_binding: true

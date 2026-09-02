@@ -3,13 +3,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: root-hygiene-${{ github.ref }}
   cancel-in-progress: true
 
 on:
   workflow_call:
-  pull_request:
   push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:

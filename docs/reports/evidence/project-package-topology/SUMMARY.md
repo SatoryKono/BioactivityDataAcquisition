@@ -2,7 +2,7 @@
 
 Refresh note (2026-09-02): SHA-bound reconciliation for the consolidate Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc`
+`source_tree_sha256=f1a1bc88b94cccf0522df217c196fc97def99f68003c2dcb0465d5686a1343b3`
 
 `source_module_count=2467`
 
@@ -107,6 +107,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `dcf4c865e564cc429c76b1d30de7c1c99100466c47eb3d9155bf1a1e7efb0a92`
+- source_tree_sha256: `f1a1bc88b94cccf0522df217c196fc97def99f68003c2dcb0465d5686a1343b3`
 
-`source_module_count=2465`
+`source_module_count=2467`

@@ -6,21 +6,14 @@ permissions:
 on:
   workflow_call:
   push:
-    branches: [main, master, develop]
+    branches: [main]
     paths-ignore:
       - "docs/**"
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-  pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: security-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
