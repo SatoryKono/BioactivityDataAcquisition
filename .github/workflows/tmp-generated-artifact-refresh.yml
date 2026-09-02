@@ -92,7 +92,7 @@ jobs:
           }
           allowed = passport_paths | inventory_paths | {workflow_path}
           unexpected = sorted(set(paths) - allowed)
-          missing_required = sorted((inventory_paths | {workflow_path}) - set(paths))
+          changed_inventory_paths = set(paths) & inventory_paths\n          missing_required = sorted({workflow_path} - set(paths))
 
           if unexpected:
               print("Unexpected generated paths:", file=sys.stderr)
@@ -113,7 +113,7 @@ jobs:
               raise SystemExit(f"Expected 89 allowlisted paths, got {len(paths)}")
 
           print(f"GENERATED_PATH_COUNT::{len(paths)}")
-          print(f"PASSPORT_PATH_COUNT::{len(passport_paths)}")
+          print(f"PASSPORT_PATH_COUNT::{len(passport_paths)}")\n          print(f"INVENTORY_PATH_COUNT::{len(changed_inventory_paths)}")
           for path_text in paths:
               path = Path(path_text)
               if not path.exists():
