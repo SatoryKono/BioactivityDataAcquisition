@@ -1850,10 +1850,10 @@ def _grafana_ops_ready_runtime_source_id(runner: Runner, *, timeout: float) -> s
     if result.returncode != 0 or not result.stdout:
         return ""
     match = re.search(
-        r'"runtime_source_id"\s*:\s*"([0-9a-f]{64})"',
+        r'"runtime_source_id"\s*:\s*"([0-9a-fA-F]{64})"',
         result.stdout,
     )
-    return match.group(1) if match else ""
+    return match.group(1).lower() if match else ""
 
 
 def _post_start_grafana_bootstrap_gate(
@@ -1880,23 +1880,29 @@ def _post_start_grafana_bootstrap_gate(
         return 0
     if os.environ.get("PYTEST_CURRENT_TEST"):
         return 0
+    gate_start = clock()
+    gate_deadline = gate_start + timeout
     payload, readable = _load_grafana_bootstrap_status(
-        runner, timeout=min(10.0, timeout)
+        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
     )
     if not readable or not _grafana_bootstrap_timeout_retry_needed(payload):
         return 0
-    expected = _grafana_expected_runtime_source_id(runner, timeout=min(10.0, timeout))
-    actual = _grafana_ops_ready_runtime_source_id(runner, timeout=min(10.0, timeout))
+    expected = _grafana_expected_runtime_source_id(
+        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
+    )
+    actual = _grafana_ops_ready_runtime_source_id(
+        runner, timeout=min(10.0, max(0.0, gate_deadline - clock()))
+    )
     if not expected or expected != actual:
         return 0
     restart = runner(
         ["docker", "restart", _GRAFANA_CONTAINER],
         ROOT,
-        min(30.0, timeout),
+        min(30.0, max(0.0, gate_deadline - clock())),
     )
     if restart.returncode != 0:
         return 0
-    remaining = min(40.0, max(0.0, timeout))
+    remaining = min(40.0, max(0.0, gate_deadline - clock()))
     if remaining <= 0.0:
         return 0
     deadline = clock() + remaining
