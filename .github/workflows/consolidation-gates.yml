@@ -38,6 +38,14 @@ jobs:
           uv-extras: "dev tracing"
           uv-sync-args: "--frozen --dev"
 
+      - name: Report current source and test-governance identities
+        run: |
+          mv reports/quality/test-governance-current.json "$RUNNER_TEMP/test-governance-committed.json"
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out "$RUNNER_TEMP/test-governance-current.json"
+          mv "$RUNNER_TEMP/test-governance-committed.json" reports/quality/test-governance-current.json
+          uv run --frozen --no-build python -c "import json, os; from pathlib import Path; p=json.loads((Path(os.environ['RUNNER_TEMP']) / 'test-governance-current.json').read_text(encoding='utf-8')); print('TEST_GOVERNANCE_SOURCE_TREE_SHA256=' + str(p['source_tree_sha256'])); print('TEST_GOVERNANCE_TOTAL_TEST_FILES=' + str(p['total_test_files'])); print('TEST_GOVERNANCE_TOTAL_TESTS=' + str(p['total_test_functions']))"
+          uv run --frozen --no-build python -c "from pathlib import Path; from scripts.engineering.qa.report_module_coverage_inventory import _read_stable_source_module_snapshots as read_snapshots; print('SOURCE_TREE_SHA256=' + read_snapshots(Path('.').resolve())[1])"
+
       - name: Ruff check
         run: uv run --frozen --no-build ruff check .
 
