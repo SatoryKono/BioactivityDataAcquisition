@@ -20,23 +20,8 @@ on:
       - 'docs/03-guides/silver-schema-testing-guide.md'
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
-  pull_request:
-    paths:
-      - 'src/bioetl/domain/schemas/**'
-      - 'src/bioetl/domain/contracts/**'
-      - 'src/bioetl/domain/entities/**'
-      - 'src/bioetl/infrastructure/schemas/**'
-      - 'tests/contract/silver_schemas/**'
-      - 'scripts/schema/generation/generate_contracts.py'
-      - 'scripts/schema/generation/generate_schema_artifacts.py'
-      - 'scripts/schema/validation/verify_schema_parity.py'
-      - 'scripts/schema/analysis/generate_json_field_typing_inventory.py'
-      - 'docs/03-guides/silver-schema-testing-guide.md'
-      - 'docs/03-data-model/json-field-typing-inventory.md'
-      - '.github/workflows/schema-governance.yml'
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: schema-governance-${{ github.ref }}
   cancel-in-progress: true
 
 env:

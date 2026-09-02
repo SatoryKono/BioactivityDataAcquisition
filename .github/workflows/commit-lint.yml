@@ -4,17 +4,9 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
-    branches: [main, master, develop]
-
+  workflow_call:
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: commit-lint-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

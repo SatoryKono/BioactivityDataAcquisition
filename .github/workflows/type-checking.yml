@@ -3,7 +3,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: type-checking-${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -13,12 +13,6 @@ on:
       - main
       - master
       - develop
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'LICENSE'
-  pull_request:
     paths-ignore:
       - 'docs/**'
       - '*.md'

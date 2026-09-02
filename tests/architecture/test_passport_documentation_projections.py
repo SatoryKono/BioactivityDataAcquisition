@@ -61,7 +61,7 @@ def test_passport_cli_is_wired_into_docs_governance() -> None:
         "configs/workflows/**",
         "configs/contracts/**",
     ):
-        assert workflow.count(source_path) == 2
+        assert workflow.count(source_path) == 1
 
 
 def test_passport_nightly_and_release_gates_are_blocking() -> None:

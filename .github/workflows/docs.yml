@@ -3,10 +3,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: docs-governance-${{ github.ref }}
   cancel-in-progress: true
 
 on:
+  workflow_call:
   push:
     branches: [ "main" ]
     paths:
@@ -57,57 +58,6 @@ on:
       - 'uv.lock'
       - '.github/workflows/docs.yml'
       - '.github/workflows/**'
-  pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'AGENTS.md'
-      - 'GEMINI.md'
-      - 'README.md'
-      - '.cursor/**'
-      - '.windsurf/**'
-      - '.codex/skills/**'
-      - '.codex/agents/**'
-      - '.junie/agents/**'
-      - '.junie/skills/**'
-      - '.devin/skills/**'
-      - '.github/copilot-instructions.md'
-      - '.github/instructions/**'
-      - 'grafana/README.md'
-      - 'configs/quality/xwalk_missing_backlog.yaml'
-      - 'docs/**'
-      - 'scripts/docs/**'
-      - 'scripts/diagrams/**'
-      - 'scripts/schema/analysis/generate_unified_schema_map.py'
-      - 'configs/base/pipeline.yaml'
-      - 'configs/base/quality.yaml'
-      - 'configs/entities/**'
-      - 'configs/providers/**'
-      - 'configs/composites/**'
-      - 'configs/workflows/**'
-      - 'configs/contracts/**'
-      - 'configs/providers/chembl.yaml'
-      - 'configs/entities/chembl/activity.yaml'
-      - 'src/bioetl/application/pipelines/chembl/activity_transformer.py'
-      - 'src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py'
-      - 'src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py'
-      - 'src/bioetl/domain/schemas/chembl/activity.py'
-      - 'src/bioetl/infrastructure/schemas/silver_chembl_core.py'
-      - 'docs/02-architecture/generated/pipeline-dataflows/**'
-      - 'src/bioetl/domain/schemas/**'
-      - 'src/bioetl/infrastructure/schemas/**'
-      - 'src/bioetl/domain/contracts/gold/**'
-      - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
-      - '.github/actions/setup-python-uv/**'
-      - 'tests/architecture/test_ai_runtime_governance_links.py'
-      - 'tests/architecture/test_check_doc_links_guardrails.py'
-      - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
-      - 'tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py'
-      - 'mkdocs.yml'
-      - 'pyproject.toml'
-      - 'uv.lock'
-      - '.github/workflows/docs.yml'
-      - '.github/workflows/**'
-
 jobs:
   docs-governance:
     runs-on: ubuntu-latest
@@ -268,8 +218,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
-            if [[ "${BASE_REF}" != "main" ]]; then
-              echo "unexpected pull-request base ref" >&2
+            if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+              echo "unsupported pull-request base ref" >&2
               exit 1
             fi
             base="origin/${BASE_REF}"
@@ -375,14 +325,37 @@ jobs:
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Diagram policy lint report
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
+          # PRs own only changed diagram sources; the scheduled nightly workflow
+          # remains the full-corpus freshness owner.
+          lint_targets=(docs/02-architecture/diagrams)
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+              echo "unsupported pull-request base ref" >&2
+              exit 1
+            fi
+            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
+            mapfile -t lint_targets < <(
+              git diff --name-only "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid'
+            )
+            if (( ${#lint_targets[@]} == 0 )); then
+              mkdir -p /tmp/empty-diagram-lint-scope
+              lint_targets=(/tmp/empty-diagram-lint-scope)
+            fi
+            printf 'PR diagram lint targets:\n'
+            printf '  %s\n' "${lint_targets[@]}"
+          fi
+
           set +e
-          python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
+          python3 scripts/diagrams/lint/lint_diagrams.py "${lint_targets[@]}" --json > /tmp/diagram-lint.json
           lint_status=$?
           set -e
           python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json
           if [ "$lint_status" -ne 0 ]; then
-            echo "::error::Diagram lint failed. Fix the reported issues or update the accepted diagram budget."
+            echo "::error::Diagram lint failed for the owned PR scope."
             exit "$lint_status"
           fi
 
@@ -503,8 +476,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
-          if [[ "${BASE_REF}" != "main" ]]; then
-            echo "unexpected pull-request base ref" >&2
+          if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
+            echo "unsupported pull-request base ref" >&2
             exit 1
           fi
           base_ref="origin/${BASE_REF}"

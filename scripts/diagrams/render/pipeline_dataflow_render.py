@@ -529,7 +529,7 @@ def render_passport(ir: PipelineDataflowIR) -> str:
         f"Generated: **{ir.generated_date}**",
         f"Generator: **{ir.generator_version}**  ",
         f"IR schema: **{ir.schema_version}**  ",
-        f"Effective config SHA256: `{ir.effective_config_sha256}`  ",
+        f"Effective config SHA256: `{ir.effective_config_sha256}`<br>",
         f"Effective loader: `{ir.effective_config_loader}`",
         "",
         (

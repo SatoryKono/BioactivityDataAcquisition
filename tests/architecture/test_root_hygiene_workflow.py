@@ -20,13 +20,16 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 
-def test_root_hygiene_workflow_runs_for_all_pr_and_push_changes() -> None:
+def test_root_hygiene_workflow_is_called_once_by_pr_coordinator() -> None:
     workflow = Path(".github/workflows/root-hygiene.yml").read_text(encoding="utf-8")
+    coordinator = Path(".github/workflows/pr-required.yml").read_text(encoding="utf-8")
 
-    assert "pull_request:" in workflow
+    assert "workflow_call:" in workflow
+    assert "pull_request:" not in workflow
     assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
+    assert "uses: ./.github/workflows/root-hygiene.yml" in coordinator
 
 
 def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
