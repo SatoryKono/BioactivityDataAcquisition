@@ -414,6 +414,73 @@ def test_grafana_bootstrap_timeout_retry_restarts_when_identity_now_matches(
     assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
 
 
+def test_grafana_bootstrap_timeout_retry_stops_wait_on_terminal_reason(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    mismatch = {
+        "ops_http": "deferred",
+        "reason": "identity_mismatch",
+        "dashboard_profile": "prometheus_only",
+    }
+    commands: list[list[str]] = []
+    status_reads = {"n": 0}
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            status_reads["n"] += 1
+            payload = deferred if status_reads["n"] == 1 else mismatch
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "printenv",
+        ]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=source_id + "\n")
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "wget",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": source_id}),
+            )
+        if cmd[:2] == ["docker", "restart"]:
+            return runtime_manager.CommandResult(list(cmd), 0)
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: (_ for _ in ()).throw(
+            AssertionError("sleep not expected after terminal reason")
+        ),
+        clock=lambda: 0.0,
+    )
+
+    assert result is None
+    assert status_reads["n"] == 2
+    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
+
+
 def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
