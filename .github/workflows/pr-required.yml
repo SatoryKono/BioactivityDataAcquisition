@@ -417,13 +417,12 @@ jobs:
           python-version: "3.12"
           uv-extras: "dev"
 
-      - name: Materialize final coordinator
+      - name: Verify temporary coordinator scope
         run: |
           set -euo pipefail
-          sed -i '/^  # codex-temp-passport-refresh-start$/,/^  # codex-temp-passport-refresh-end$/d' \
-            .github/workflows/pr-required.yml
-          uv run --frozen --no-build python -c 'from pathlib import Path; path = Path(".github/workflows/pr-required.yml"); path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")'
-          ! grep -q 'codex-temp-passport-refresh' .github/workflows/pr-required.yml
+          grep -q '^  # codex-temp-passport-refresh-start$' .github/workflows/pr-required.yml
+          grep -q '^  # codex-temp-passport-refresh-end$' .github/workflows/pr-required.yml
+          git diff --quiet -- .github/workflows/pr-required.yml
 
       - name: Consume exact-head coverage candidate
         env:
@@ -539,7 +538,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
-            .github/workflows/pr-required.yml \
             configs/quality/scripts_inventory_manifest.json \
             configs/quality/test_telemetry_baseline.yaml \
             docs/04-reference/passports \
@@ -561,5 +559,5 @@ jobs:
           test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
           gh auth setup-git
           git push origin HEAD:fix/pr-gate-complete-9975-v2
-          echo "Generated refresh pushed; the temporary job is absent from the new head."
+          echo "Generated evidence pushed; the temporary job remains for removal by the follow-up API commit."
   # codex-temp-passport-refresh-end
