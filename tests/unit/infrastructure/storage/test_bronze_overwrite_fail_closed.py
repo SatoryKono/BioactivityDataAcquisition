@@ -178,7 +178,6 @@ def test_publish_existing_target_raises_file_exists_cross_platform(
     source.write_bytes(b"complete-payload")
 
     def fail_link_existing(source_path: str, target_path: str) -> None:
-        """Raise an `OSError` indicating that the target already exists."""
         del source_path, target_path
         raise OSError(errno.EEXIST, "already exists")
 
@@ -236,13 +235,10 @@ def test_concurrent_different_sidecar_is_not_overwritten(
 
     def publish_other_writer(source: Path, final_target: Path) -> None:
         """
-        Publish competing content at the target path and signal that it already exists.
+        Publish competing content at the target path and then signal that it already exists.
 
         Parameters:
-            final_target (Path): Path to the target file to populate.
-
-        Raises:
-            FileExistsError: Always raised after writing the competing content.
+            final_target (Path): Path to the target file to populate before raising the error.
         """
         del source
         final_target.write_bytes(b"other-writer")

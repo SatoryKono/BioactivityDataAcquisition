@@ -497,31 +497,52 @@ async def test_processed_records_prefers_exact_run_ledger(
         {"contract": "processed_records_table_v1", "rows": [1]},
     )
 
+
+@pytest.mark.asyncio
+async def test_processed_records_empty_ledger_does_not_query_prometheus(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exact run_id with no ledger entries stays UNKNOWN, not Prom current."""
+    host = _ObservabilityHost()
+    writer = _writer()
+    run_id = "00000000-0000-0000-0000-000000000001"
+    prometheus_calls: list[object] = []
+
     class _EmptyLedger:
         @staticmethod
-        def list_entries_by_run_id(_run_id: object) -> list[object]:
-            """
-            Return no entries for the specified run identifier.
-
-            Parameters:
-                _run_id (object): Run identifier used to select entries.
-
-            Returns:
-                list[object]: An empty list.
-            """
+        def list_entries_by_run_id(run_id: object) -> list[object]:
+            del run_id
             return []
 
+    def build_from_ledger(**kwargs: object) -> dict[str, object]:
+        return {
+            "contract": "processed_records_table_v1",
+            "rows": [{"parameter": "01 bronze_records", "value": "UNKNOWN"}],
+            "ledger_entries": kwargs.get("ledger_entries"),
+        }
+
     def build_from_prometheus(**kwargs: object) -> dict[str, object]:
-        seen.clear()
-        seen.update(kwargs)
-        return {"contract": "processed_records_table_v1", "rows": [2]}
+        prometheus_calls.append(kwargs)
+        raise AssertionError("exact run_id with empty ledger must not query Prometheus")
 
     host._run_ledger_port = _EmptyLedger()
+    monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
+    monkeypatch.setattr(
+        observability_routing,
+        "run_bounded_forensic_operation",
+        _run_operation_directly,
+    )
+    monkeypatch.setattr(
+        observability_routing,
+        "build_processed_records_table_payload_from_ledger",
+        build_from_ledger,
+    )
     monkeypatch.setattr(
         observability_routing,
         "build_processed_records_table_payload_from_prometheus",
         build_from_prometheus,
     )
+
     await observability_routing.handle_processed_records_table(
         host,
         writer,
@@ -532,16 +553,13 @@ async def test_processed_records_prefers_exact_run_ledger(
         },
     )
 
-    assert seen == {
-        "prometheus_base_url": "http://prometheus.test",
-        "pipeline": "chembl_activity",
-        "run_type": "incremental",
-    }
-    assert host.sent[-1] == (
-        "payload",
-        200,
-        {"contract": "processed_records_table_v1", "rows": [2]},
-    )
+    assert prometheus_calls == []
+    assert host.sent[-1][0] == "payload"
+    assert host.sent[-1][1] == 200
+    payload = host.sent[-1][2]
+    assert isinstance(payload, dict)
+    assert payload["ledger_entries"] == ()
+    assert payload["rows"][0]["value"] == "UNKNOWN"
 
 
 @pytest.mark.asyncio

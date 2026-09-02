@@ -28,6 +28,7 @@ def _git(repo_root: Path, *args: str) -> str:
         ["git", "-C", str(repo_root), *args],
         check=True,
         capture_output=True,
+        stdin=subprocess.DEVNULL,
         text=True,
         timeout=_GIT_TIMEOUT_SECONDS,
     )
