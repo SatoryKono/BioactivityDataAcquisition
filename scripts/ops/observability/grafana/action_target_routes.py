@@ -19,6 +19,7 @@ DQ_REASON_RULES_RUNBOOK = (
     "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/"
     "docs/05-operations/runbooks/observability-checklist.md"
 )
+OPEN_PIPELINE_DIAGNOSTICS_TITLE = "Open Pipeline Diagnostics"
 
 
 class ActionRoute(TypedDict):
@@ -32,7 +33,7 @@ class ActionRoute(TypedDict):
 RUNTIME_BLOCKER_ACTION_MAP: dict[str, ActionRoute] = {
     "runtime": {
         "uid": "bioetl-runtime",
-        "title": "Open Pipeline Diagnostics",
+        "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },
     "control_plane": {
@@ -47,7 +48,7 @@ RUNTIME_BLOCKER_ACTION_MAP: dict[str, ActionRoute] = {
     },
     "workflow": {
         "uid": "bioetl-runtime",
-        "title": "Open Pipeline Diagnostics",
+        "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },
 }
@@ -68,7 +69,7 @@ DQ_REASON_ACTION_MAP: dict[str, ActionRoute] = {
 INCIDENT_DOMAIN_ACTION_MAP: dict[str, ActionRoute] = {
     "runtime": {
         "uid": "bioetl-runtime",
-        "title": "Open Pipeline Diagnostics",
+        "title": OPEN_PIPELINE_DIAGNOSTICS_TITLE,
         "kind": "dashboard",
     },
     "provider": {
@@ -98,18 +99,31 @@ UNKNOWN_ACTION_TEXT = "UNKNOWN"
 
 
 def row_aware_dashboard_url() -> str:
-    """Single Grafana field-link URL keyed by the row's action_dashboard_uid."""
+    """Return a fail-closed dashboard link populated from the selected row.
+
+    Grafana field links cannot branch on the dynamic destination UID, so the
+    URL carries the union of destination selectors. Dashboards ignore selectors
+    they do not declare, while Runtime/DQ receive stage=All and Provider Health
+    receives an explicit provider reset plus row pipeline context.
+    """
     uid = "${__data.fields.action_dashboard_uid}"
+    row = "${__data.fields"
     return (
-        f"/d/{uid}/{uid}?var-workflow=$workflow&var-pipeline=$pipeline"
-        f"&var-run_type=$run_type&var-run_id=$run_id&{TIME_TOKEN}"
+        f"/d/{uid}/{uid}?var-workflow={row}.workflow}}"
+        f"&var-pipeline={row}.pipeline}}"
+        f"&var-run_type={row}.run_type}}"
+        f"&var-run_id={row}.run_id}}"
+        "&var-stage=$__all&var-provider=unknown"
+        f"&var-pipeline_context={row}.pipeline}}&{TIME_TOKEN}"
     )
 
 
 def dashboard_uid_for_target(action_target: str) -> str | None:
     """Return the allowlisted UID, or None for runbook/unknown targets."""
-    route = RUNTIME_BLOCKER_ACTION_MAP.get(action_target) or DQ_REASON_ACTION_MAP.get(
-        action_target
+    route = (
+        RUNTIME_BLOCKER_ACTION_MAP.get(action_target)
+        or DQ_REASON_ACTION_MAP.get(action_target)
+        or INCIDENT_DOMAIN_ACTION_MAP.get(action_target)
     )
     if route is None:
         return None

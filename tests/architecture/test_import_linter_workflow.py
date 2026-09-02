@@ -52,6 +52,7 @@ def test_import_linter_workflow_requires_capabilities_for_sharded_arch_tests() -
     assert "scripts/engineering/dev/run_pytest_sharded.sh" in workflow
     assert "strategy:" in workflow
     assert "matrix:" in workflow
+    assert "bash scripts/engineering/dev/run_pytest_sharded.sh" in workflow
     assert '--shard "${{ matrix.shard }}"' in workflow
     assert "--skip-preflight" in workflow
     assert '-m "not slow and not benchmark and not memory"' in workflow
