@@ -1,0 +1,57 @@
+name: Temporary generated-artifact refresh evidence
+
+on:
+  push:
+    branches:
+      - fix/main-ci-20260902
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Generate canonical evidence
+        run: |
+          rm -f .github/workflows/tmp-generated-artifact-refresh.yml
+          uv run --frozen --no-build python -m scripts.engineering.repo sync-inventory --write
+          uv run --frozen --no-build python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
+          uv run --frozen --no-build python - <<'PY'
+          import base64
+          import json
+          from pathlib import Path
+
+          manifest_path = Path("configs/quality/scripts_inventory_manifest.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          wanted = {
+              "scripts/ops/observability/grafana/action_target_routes.py",
+              "scripts/ops/observability/grafana/dashboard_context_links.py",
+          }
+          subset = {
+              "generated_at": manifest["generated_at"],
+              "summary": manifest["summary"],
+              "scripts": [row for row in manifest["scripts"] if row["path"] in wanted],
+          }
+          print("BEGIN_MANIFEST_SUBSET")
+          print(json.dumps(subset, indent=2, sort_keys=True))
+          print("END_MANIFEST_SUBSET")
+          for path in (
+              Path("reports/quality/architecture-debt-remote-main-baseline.json"),
+              Path("reports/quality/architecture-debt-remote-main-baseline.md"),
+          ):
+              print(f"BEGIN_BASE64:{path.as_posix()}")
+              print(base64.b64encode(path.read_bytes()).decode("ascii"))
+              print(f"END_BASE64:{path.as_posix()}")
+          PY
