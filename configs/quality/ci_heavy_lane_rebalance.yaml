@@ -18,6 +18,10 @@ success_metrics:
     target: "Coverage verification combines independently produced shards, including serial coverage, without rerunning pytest."
     serial_producer_job: serial-coverage
     serial_shard: reports/coverage/.coverage.serial
+    serial_marker: "serial and not e2e and not benchmark and not memory"
+    known_exclusions:
+      - tests/e2e
+      - tests/contract
   duration_telemetry:
     target: "JUnit duration artifacts remain available for before/after lane timing review."
     artifact: test-duration-telemetry

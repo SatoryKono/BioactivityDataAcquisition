@@ -228,8 +228,7 @@ def is_fixable_blocking_finding(row: Mapping[str, str]) -> bool:
 def is_strict_blocking_finding(row: Mapping[str, str]) -> bool:
     """Match Trivy's strict zero policy for every reported CHM vulnerability."""
     return (
-        row["severity"] in BLOCKING_SEVERITIES
-        and row.get("status") != "not_affected"
+        row["severity"] in BLOCKING_SEVERITIES and row.get("status") != "not_affected"
     )
 
 
@@ -331,10 +330,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Critical/High/Medium Trivy findings: {strict_blocking}")
         return 1
     if args.fail_on_fixable and fixable_blocking:
-        print(
-            "Fixable Critical/High/Medium Trivy findings: "
-            f"{fixable_blocking}"
-        )
+        print(f"Fixable Critical/High/Medium Trivy findings: {fixable_blocking}")
         return 1
     return 0
 
