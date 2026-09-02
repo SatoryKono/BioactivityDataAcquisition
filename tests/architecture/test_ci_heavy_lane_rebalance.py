@@ -134,7 +134,9 @@ class TestCiHeavyLaneRebalance:
         assert download_pattern in verify_block
         assert serial_shard in verify_block
         assert combine_command in verify_block
-        assert verify_block.index(download_pattern) < verify_block.index(combine_command)
+        assert verify_block.index(download_pattern) < verify_block.index(
+            combine_command
+        )
         assert verify_block.index(serial_shard) < verify_block.index(combine_command)
         assert "run_pytest_resilient.py" not in verify_block
 
