@@ -78,11 +78,14 @@ FILE_BY_UID = {
     "bioetl-run-explorer-v1": "bioetl-run-explorer-v1.json",
 }
 
+
 def _validate_action_route_uids() -> None:
     """Fail closed when an action target points outside the shipped portfolio."""
     unknown = set(ACTION_DASHBOARD_UID_BY_TARGET.values()) - set(FILE_BY_UID)
     if unknown:
-        raise SystemExit(f"action routes reference unknown dashboard UIDs: {sorted(unknown)}")
+        raise SystemExit(
+            f"action routes reference unknown dashboard UIDs: {sorted(unknown)}"
+        )
 
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
