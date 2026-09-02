@@ -25,25 +25,6 @@ on:
       - ".dockerignore"
       - ".github/workflows/docker.yml"
       - ".github/actions/setup-python-uv/**"
-  pull_request:
-    branches: [main, master, develop]
-    paths:
-      - "Dockerfile.bioetl"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "src/**"
-      - "configs/**"
-      - "docker-compose*.yml"
-      - "scripts/ops/runtime/docker/**"
-      - "scripts/engineering/qa/docker_stability_campaign/**"
-      - "scripts/engineering/qa/run_docker_stability_campaign.py"
-      - "configs/quality/docker_runtime_contracts.yaml"
-      - "tests/architecture/test_docker_runtime_contracts.py"
-      - "tests/unit/repo_backed/scripts/ops/docker/**"
-      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
-      - ".dockerignore"
-      - ".github/workflows/docker.yml"
-      - ".github/actions/setup-python-uv/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -217,10 +198,13 @@ jobs:
           ignore-unfixed: false
           version: "v0.70.0"
 
-      - name: Convert Trivy JSON to SARIF (deduplicated scan)
+      - name: Convert canonical Trivy JSON evidence
         run: |
-          docker run --rm -v "$(pwd)/reports/security:/reports" aquasec/trivy:0.70.0 convert --format sarif --output /reports/trivy-results.sarif /reports/trivy-results.json
+          set -euo pipefail
+          trivy convert --format sarif --output reports/security/trivy-results.sarif reports/security/trivy-results.json
+          trivy convert --format table --output reports/security/trivy-results.table.txt reports/security/trivy-results.json
           test -s reports/security/trivy-results.sarif
+          test -s reports/security/trivy-results.table.txt
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
@@ -285,6 +269,7 @@ jobs:
             reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
+            reports/security/trivy-results.table.txt
             reports/security/trivy-version.json
           )
           for evidence in "${required[@]}"; do
@@ -308,37 +293,18 @@ jobs:
             reports/security/trivy-fixability-audit.json
             reports/security/trivy-results.json
             reports/security/trivy-results.sarif
+            reports/security/trivy-results.table.txt
             reports/security/trivy-version.json
             reports/security/baseline.sha256
           if-no-files-found: error
           retention-days: 30
 
-      - name: Enforce Trivy Critical High Medium policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
-          ignore-unfixed: true
-          version: "v0.70.0"
-
-      - name: Enforce full Trivy Critical High Medium zero policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
-          ignore-unfixed: false
-          version: "v0.70.0"
-
-      - name: Enforce fixable Trivy Critical High Medium policy
+      - name: Enforce canonical Trivy Critical High Medium zero policy
         run: |
           python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json \
-            --fail-on-fixable
+            --fail-on-blocking
 
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -366,15 +332,37 @@ jobs:
       - docker-compose-validate
       - docker-build
     if: always()
+    permissions:
+      contents: read
     steps:
-      - name: Aggregate Docker checks
+      - name: Aggregate Docker checks (fail-closed)
+        env:
+          DOCKER_RUNTIME_CONTRACTS_RESULT: ${{ needs.docker-runtime-contracts.result }}
+          DOCKER_LINT_RESULT: ${{ needs.docker-lint.result }}
+          DOCKER_COMPOSE_VALIDATE_RESULT: ${{ needs.docker-compose-validate.result }}
+          DOCKER_BUILD_RESULT: ${{ needs.docker-build.result }}
         run: |
-          echo "docker-complete=success"
+          set -euo pipefail
+          failures=0
+          for result in \
+            "docker-runtime-contracts=${DOCKER_RUNTIME_CONTRACTS_RESULT}" \
+            "docker-lint=${DOCKER_LINT_RESULT}" \
+            "docker-compose-validate=${DOCKER_COMPOSE_VALIDATE_RESULT}" \
+            "docker-build=${DOCKER_BUILD_RESULT}"; do
+            echo "${result}"
+            case "${result}" in
+              *=success) ;;
+              *) echo "::error::${result}"; failures=1 ;;
+            esac
+          done
+          test "${failures}" -eq 0
 
   docker-push:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: docker-build
+    needs:
+      - docker-build
+      - docker-complete
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: ghcr-publish
     concurrency:

@@ -68,11 +68,11 @@ gates:
   - id: docker
     display_name: Docker Build and Compose
     owner_workflow: .github/workflows/docker.yml
-    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build]
+    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build, docker-complete]
     legacy_context: docker-build
     decision: path_scoped
     paths:
-      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, configs/quality/docker_runtime_contracts.yaml, .dockerignore, .github/workflows/docker.yml]
+      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, scripts/engineering/qa/docker_stability_campaign/**, scripts/engineering/qa/run_docker_stability_campaign.py, configs/quality/docker_runtime_contracts.yaml, tests/architecture/test_docker_runtime_contracts.py, tests/unit/repo_backed/scripts/ops/docker/**, tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py, .dockerignore, .github/workflows/docker.yml, .github/actions/setup-python-uv/**]
     allowed_results: [success, not_applicable]
     not_applicable_allowed: true
     not_applicable_reason_required: true
