@@ -1,0 +1,126 @@
+# Canonical required-check catalog for pr-gate-complete aggregator.
+# RF-001 of #9975. One source of truth for GitHub PR gate decisions.
+schema_version: 1
+version: 1
+aggregator: pr-gate-complete
+coordinator_workflow: .github/workflows/pr-required.yml
+policy:
+  allow_skipped_as_success: false
+  allow_cancelled_as_success: false
+  require_sha_binding: true
+  not_applicable_requires_reason: true
+gates:
+  - id: lint-arch
+    display_name: Lint and Architecture Gates
+    owner_workflow: .github/workflows/import-linter.yml
+    owner_jobs: [lint, c901-governance, arch-tests, checks-complete]
+    legacy_context: checks-complete
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: tests
+    display_name: Tests and Coverage
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [smoke-check, governance-preflight, test-fast, test-matrix, coverage-verify]
+    legacy_context: coverage-verify
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: [coverage-verify]
+    sha_binding: true
+  - id: type-checking
+    display_name: Type Checking (Strict)
+    owner_workflow: .github/workflows/type-checking.yml
+    owner_jobs: [type-check]
+    legacy_context: type-check
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: security
+    display_name: Security Scans
+    owner_workflow: .github/workflows/security.yml
+    owner_jobs: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
+    legacy_context: detect-secrets
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: codeql
+    display_name: CodeQL
+    owner_workflow: .github/workflows/codeql.yml
+    owner_jobs: [analyze]
+    legacy_context: codeql-analyze
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: docker
+    display_name: Docker Build and Compose
+    owner_workflow: .github/workflows/docker.yml
+    owner_jobs: [docker-runtime-contracts, docker-lint, docker-compose-validate, docker-build]
+    legacy_context: docker-build
+    decision: path_scoped
+    paths:
+      include: [Dockerfile.bioetl, pyproject.toml, uv.lock, src/**, configs/**, docker-compose*.yml, scripts/ops/runtime/docker/**, configs/quality/docker_runtime_contracts.yaml, .dockerignore, .github/workflows/docker.yml]
+    allowed_results: [success, not_applicable]
+    not_applicable_allowed: true
+    not_applicable_reason_required: true
+    artifacts: []
+    sha_binding: true
+  - id: duplication
+    display_name: Duplication and Complexity
+    owner_workflow: .github/workflows/duplication-complexity.yml
+    owner_jobs: [duplication-complexity]
+    legacy_context: duplication-complexity
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: root-hygiene
+    display_name: Root Hygiene
+    owner_workflow: .github/workflows/root-hygiene.yml
+    owner_jobs: [root-hygiene]
+    legacy_context: root-hygiene
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
+  - id: generated-artifacts
+    display_name: Schema and Generated Artifacts Governance
+    owner_workflow: .github/workflows/schema-governance.yml
+    owner_jobs: [generated-artifacts, contracts-export, schema-parity, schema-governance-status]
+    legacy_context: schema-governance-status
+    decision: path_scoped
+    paths:
+      include: [src/bioetl/domain/schemas/**, src/bioetl/domain/contracts/**, src/bioetl/domain/entities/**, src/bioetl/infrastructure/schemas/**, tests/contract/silver_schemas/**, scripts/schema/**, docs/03-guides/silver-schema-testing-guide.md, docs/03-data-model/json-field-typing-inventory.md, .github/workflows/schema-governance.yml]
+    allowed_results: [success, not_applicable]
+    not_applicable_allowed: true
+    not_applicable_reason_required: true
+    artifacts: []
+    sha_binding: true
+  - id: compiled-artifacts
+    display_name: Compiled Artifacts Block
+    owner_workflow: .github/workflows/compiled-artifacts-block.yml
+    owner_jobs: [no-pyc-check]
+    legacy_context: no-pyc-check
+    decision: always_required
+    paths: []
+    allowed_results: [success]
+    not_applicable_allowed: false
+    artifacts: []
+    sha_binding: true
