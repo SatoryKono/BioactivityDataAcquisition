@@ -43,6 +43,7 @@ function Write-WslConfig {
 memory=${MemoryGb}GB
 swap=4GB
 processors=4
+dnsProxy=true
 localhostForwarding=true
 kernelCommandLine=sysctl.vm.swappiness=10 sysctl.vm.overcommit_memory=1
 

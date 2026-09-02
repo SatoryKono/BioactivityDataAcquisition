@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-01): hash-only reconcile after Bronze exclusive publish; `source_tree_sha256` matches `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-02): SHA-bound reconciliation for the consolidate Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259`
+`source_tree_sha256=0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc`
 
 `source_module_count=2467`
 

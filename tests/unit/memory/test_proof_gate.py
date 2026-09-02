@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -18,22 +17,13 @@ from memory.proof import (
     verify_bundle,
 )
 from tests.helpers.clock import FIXED_TEST_TIME
+from tests.helpers.isolated_git import init_tracked_fixture_repo
 
 pytestmark = pytest.mark.unit
 
 
-def _git(repo: Path, *args: str) -> None:
-    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
-
-
 def _init_repo(repo: Path) -> None:
-    repo.mkdir()
-    _git(repo, "init", "-b", "main")
-    _git(repo, "config", "user.email", "proof@example.invalid")
-    _git(repo, "config", "user.name", "Proof Test")
-    (repo / "tracked.py").write_text("VALUE = 1\n", encoding="utf-8")
-    _git(repo, "add", "tracked.py")
-    _git(repo, "commit", "-m", "test fixture")
+    init_tracked_fixture_repo(repo)
 
 
 def _bundle(tmp_path: Path, *, status: str = "pass") -> tuple[Path, dict[str, object]]:

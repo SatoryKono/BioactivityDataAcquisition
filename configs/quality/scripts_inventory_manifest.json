@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-01T15:55:04.946833+00:00",
+  "generated_at": "2026-09-02T07:08:33.989750+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 508,
       "skills": 12,
-      "tests": 418
+      "tests": 419
     }
   },
   "scripts": [
@@ -317,13 +317,13 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 56,
+          "line": 59,
           "source_group": "agents",
           "text": "`.\\.venv-win\\Scripts\\python.exe scripts/ai/codex/doctor.py static --no-write`,"
         },
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 57,
+          "line": 60,
           "source_group": "agents",
           "text": "elsewhere `python scripts/ai/codex/doctor.py static --no-write`."
         },
@@ -2738,7 +2738,7 @@
         },
         {
           "path": "AGENTS.md",
-          "line": 86,
+          "line": 89,
           "source_group": "agents",
           "text": "`bash scripts/ai/junie/check_junie_mirror.sh --check` and report the"
         },
@@ -11018,7 +11018,7 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 112,
+          "line": 115,
           "source_group": "agents",
           "text": "(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back"
         },
@@ -11192,7 +11192,7 @@
       "references": [
         {
           "path": ".codex/agents/CODEX-RUNTIME.md",
-          "line": 112,
+          "line": 115,
           "source_group": "agents",
           "text": "(matching `scripts/engineering/dev/run_pytest.sh` / `run_mypy.sh`) and fall back"
         },
@@ -14623,7 +14623,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/qa/observability_metric_inventory_report.py",
@@ -14648,6 +14648,12 @@
           "line": 112,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.observability_metric_inventory_scan import ("
+        },
+        {
+          "path": "tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py",
+          "line": 22,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import observability_metric_inventory_scan as inventory_scan"
         }
       ],
       "owner": "@bioetl-observability",
@@ -14897,7 +14903,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -14928,6 +14934,12 @@
           "line": 185,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
+        },
+        {
+          "path": "tests/unit/scripts/qa/test_report_architecture_debt_remote_main_baseline.py",
+          "line": 19,
+          "source_group": "tests",
+          "text": "from scripts.engineering.qa import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -17760,7 +17772,7 @@
       "references": [
         {
           "path": "AGENTS.md",
-          "line": 107,
+          "line": 110,
           "source_group": "agents",
           "text": "`scripts/engineering/repo/cleanup_root_local_clutter.py`. See"
         },
@@ -19671,7 +19683,7 @@
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 166,
+          "line": 198,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
@@ -20118,7 +20130,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 430,
+          "line": 433,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
@@ -20143,13 +20155,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 426,
+          "line": 429,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 432,
+          "line": 435,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -20167,7 +20179,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2161,
+          "line": 2431,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
@@ -20859,13 +20871,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 359,
+          "line": 362,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 368,
+          "line": 371,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -20945,7 +20957,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 360,
+          "line": 363,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -21090,13 +21102,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 350,
+          "line": 353,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 353,
+          "line": 356,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -21129,13 +21141,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 356,
+          "line": 359,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 375,
+          "line": 378,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -21236,7 +21248,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 363,
+          "line": 366,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -21285,7 +21297,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 333,
+          "line": 336,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -21525,7 +21537,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 370,
+          "line": 373,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -21580,7 +21592,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 369,
+          "line": 372,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -21680,7 +21692,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 367,
+          "line": 370,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
