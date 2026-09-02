@@ -51,14 +51,14 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def test_catalog_exists_and_has_expected_gates() -> None:
-    assert CATALOG.is_file()
+    assert CATALOG.is_file(), "catalog configs/quality/github_required_checks.yaml must exist"
     data = _load_yaml(CATALOG)
     assert data.get("aggregator") == "pr-gate-complete"
     assert data.get("coordinator_workflow") == ".github/workflows/pr-required.yml"
     assert data.get("version") == 2
     assert data.get("schema_version") == 1
     gates = {g["id"] for g in data.get("gates", [])}
-    assert EXPECTED_GATES.issubset(gates)
+    assert EXPECTED_GATES.issubset(gates), f"missing gates: {EXPECTED_GATES - gates}"
     policy = data.get("policy", {})
     assert policy.get("allow_skipped_as_success") is False
     assert policy.get("require_sha_binding") is True
@@ -77,9 +77,8 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert check["status"] in {"blocking", "advisory_evidence"}
         assert check["duplicate_policy"] == "forbidden"
 
-
 def test_coordinator_materializes_on_supported_pr_bases_after_owner_cutover() -> None:
-    assert COORDINATOR.is_file()
+    assert COORDINATOR.is_file(), "pr-required.yml must exist"
     data = _load_yaml(COORDINATOR)
     on = data.get("on", data.get(True, {}))
     assert isinstance(on, dict)
@@ -104,7 +103,7 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     needs = agg.get("needs", [])
     assert "classify-changes" in needs
     for gate in EXPECTED_GATES:
-        assert gate in needs or f"{gate}-not-applicable" in needs
+        assert gate in needs or f"{gate}-not-applicable" in needs, f"missing {gate} in pr-gate-complete needs"
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
 
@@ -115,13 +114,12 @@ def test_leaf_workflows_expose_workflow_call() -> None:
         if gate["id"] not in EXPECTED_GATES:
             continue
         wf_path = ROOT / gate["owner_workflow"]
-        assert wf_path.is_file()
+        assert wf_path.is_file(), f"{wf_path} missing"
         wf = _load_yaml(wf_path)
         on = wf.get("on", wf.get(True, {}))
         assert isinstance(on, dict)
-        assert "workflow_call" in on
+        assert "workflow_call" in on, f"{wf_path.name} must expose workflow_call for reusable invocation"
         assert "pull_request" not in on
-
 
 def test_policy_doc_mentions_shadow_aggregator() -> None:
     text = GITHUB_POLICY.read_text(encoding="utf-8")
