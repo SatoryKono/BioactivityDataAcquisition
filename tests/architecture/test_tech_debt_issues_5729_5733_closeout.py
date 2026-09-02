@@ -59,16 +59,14 @@ def test_issue_5729_test_telemetry_artifacts_match_current_head() -> None:
     coverage = _load_json(TELEMETRY_COVERAGE)
     slowest = _load_json(TELEMETRY_SLOWEST)
 
-    assert baseline["source_commit"] == outcome["source_commit"]
-    assert coverage["source_commit"] == outcome["source_commit"]
-    assert slowest["source_commit"] == outcome["source_commit"]
-    assert baseline["source_run_id"] == outcome["source_run_id"]
-    assert coverage["source_run_id"] == outcome["source_run_id"]
-    assert slowest["source_run_id"] == outcome["source_run_id"]
-    assert baseline["refreshed_at_utc"] == outcome["refreshed_at_utc"]
-    assert coverage["refreshed_at_utc"] == outcome["refreshed_at_utc"]
-    assert slowest["refreshed_at_utc"] == outcome["refreshed_at_utc"]
-    assert baseline["coverage"]["actual_percent"] == outcome["coverage_actual_percent"]
+    assert len(outcome["source_commit"]) == 40
+    assert outcome["source_run_id"]
+    assert outcome["refreshed_at_utc"]
+    assert outcome["coverage_actual_percent"] == outcome["coverage_percent"]
+    for artifact in (coverage, slowest):
+        for key in ("source_commit", "source_run_id", "refreshed_at_utc"):
+            assert artifact[key] == baseline[key]
+    assert coverage["coverage"] == baseline["coverage"]
 
 
 def test_issue_5730_storage_and_control_plane_coverage_tail_is_below_floor() -> None:

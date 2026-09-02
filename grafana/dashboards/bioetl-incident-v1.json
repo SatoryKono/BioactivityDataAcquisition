@@ -554,7 +554,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 19
           },
           "datasource": {
             "type": "prometheus",
@@ -671,7 +671,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 26
+            "y": 25
           },
           "datasource": {
             "type": "prometheus",
@@ -808,7 +808,7 @@
             "h": 4,
             "w": 24,
             "x": 0,
-            "y": 34
+            "y": 33
           },
           "options": {
             "mode": "html",
