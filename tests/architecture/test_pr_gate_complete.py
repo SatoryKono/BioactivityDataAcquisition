@@ -28,8 +28,10 @@ EXPECTED_GATES = {
     "compiled-artifacts",
 }
 
+
 def _load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
 
 def test_catalog_exists_and_has_expected_gates() -> None:
     assert CATALOG.is_file()
@@ -47,6 +49,7 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert "owner_workflow" in gate
         assert "allowed_results" in gate
 
+
 def test_coordinator_exists_and_is_always_on() -> None:
     assert COORDINATOR.is_file()
     data = _load_yaml(COORDINATOR)
@@ -54,7 +57,9 @@ def test_coordinator_exists_and_is_always_on() -> None:
     assert isinstance(on, dict)
     assert "pull_request" in on
     pr = on["pull_request"]
-    assert pr is None or not {"paths", "paths-ignore"}.intersection(pr if isinstance(pr, dict) else {})
+    assert pr is None or not {"paths", "paths-ignore"}.intersection(
+        pr if isinstance(pr, dict) else {}
+    )
     perms = data.get("permissions", {})
     assert perms == {"contents": "read"} or perms.get("contents") == "read"
     conc = data.get("concurrency", {})
@@ -62,6 +67,7 @@ def test_coordinator_exists_and_is_always_on() -> None:
     assert "github.workflow" in group
     assert "github.event.pull_request.number" in group or "github.sha" in group
     assert "cancel-in-progress" in conc
+
 
 def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     data = _load_yaml(COORDINATOR)
@@ -77,6 +83,7 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
 
+
 def test_leaf_workflows_expose_workflow_call() -> None:
     data = _load_yaml(CATALOG)
     for gate in data["gates"]:
@@ -89,11 +96,13 @@ def test_leaf_workflows_expose_workflow_call() -> None:
         assert isinstance(on, dict)
         assert "workflow_call" in on
 
+
 def test_policy_doc_mentions_shadow_aggregator() -> None:
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "pr-gate-complete" in text
     assert "configs/quality/github_required_checks.yaml" in text
     assert "shadow" in text.lower()
+
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
