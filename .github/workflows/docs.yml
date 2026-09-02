@@ -313,6 +313,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Mermaid CLI
@@ -329,21 +330,32 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
         run: |
-          # PRs own only changed diagram sources; the scheduled nightly workflow
-          # remains the full-corpus freshness owner.
+          set -euo pipefail
+          # Source-only PRs lint existing changed destinations. Tooling changes
+          # own the full diagram corpus because they can affect every source.
           lint_targets=(docs/02-architecture/diagrams)
           if [[ "${EVENT_NAME}" == "pull_request" ]]; then
             if [[ "${BASE_REF}" != "main" && "${BASE_REF}" != "develop" ]]; then
               echo "unsupported pull-request base ref" >&2
               exit 1
             fi
-            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
-            mapfile -t lint_targets < <(
-              git diff --name-only "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid'
-            )
-            if (( ${#lint_targets[@]} == 0 )); then
-              mkdir -p /tmp/empty-diagram-lint-scope
-              lint_targets=(/tmp/empty-diagram-lint-scope)
+            git fetch --no-tags origin "${BASE_REF}"
+            if git diff --quiet "origin/${BASE_REF}"...HEAD -- \
+              scripts/diagrams .github/actions/setup-mermaid; then
+              changed_targets="${RUNNER_TEMP}/changed-diagram-targets.txt"
+              git diff --diff-filter=ACMRTUXB --name-only \
+                "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid' \
+                > "${changed_targets}"
+              mapfile -t lint_targets < "${changed_targets}"
+              if (( ${#lint_targets[@]} == 0 )); then
+                mkdir -p "${RUNNER_TEMP}/empty-diagram-lint-scope"
+                lint_targets=("${RUNNER_TEMP}/empty-diagram-lint-scope")
+              fi
+            else
+              diff_status=$?
+              if [[ "${diff_status}" -gt 1 ]]; then
+                exit "${diff_status}"
+              fi
             fi
             printf 'PR diagram lint targets:\n'
             printf '  %s\n' "${lint_targets[@]}"
