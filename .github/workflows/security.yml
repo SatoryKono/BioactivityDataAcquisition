@@ -6,7 +6,7 @@ permissions:
 on:
   workflow_call:
   push:
-    branches: [main, master, develop]
+    branches: [main]
     paths-ignore:
       - "docs/**"
       - "*.md"

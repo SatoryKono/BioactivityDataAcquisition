@@ -27,6 +27,18 @@ EXPECTED_GATES = {
     "generated-artifacts",
     "compiled-artifacts",
 }
+EXPECTED_CANONICAL_CHECKS = {
+    "ruff",
+    "mypy",
+    "dependency-lock",
+    "architecture",
+    "integration",
+    "dq-consistency",
+    "root-hygiene",
+    "compiled-artifacts",
+    "security-scans",
+    "canonical-manifest-hashes",
+}
 
 def _load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -47,14 +59,23 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert "owner_workflow" in gate
         assert "allowed_results" in gate
 
-def test_coordinator_exists_and_is_always_on() -> None:
+    canonical_checks = data.get("canonical_checks", [])
+    assert {check["id"] for check in canonical_checks} == EXPECTED_CANONICAL_CHECKS
+    assert len({check["id"] for check in canonical_checks}) == len(canonical_checks)
+    for check in canonical_checks:
+        assert check["owner_workflow"].startswith(".github/workflows/")
+        assert check["owner_jobs"]
+        assert check["selectors"]
+        assert check["events"]
+        assert check["status"] in {"blocking", "advisory_evidence"}
+        assert check["duplicate_policy"] == "forbidden"
+
+def test_coordinator_is_manual_until_owner_cutover() -> None:
     assert COORDINATOR.is_file()
     data = _load_yaml(COORDINATOR)
     on = data.get("on", data.get(True, {}))
     assert isinstance(on, dict)
-    assert "pull_request" in on
-    pr = on["pull_request"]
-    assert pr is None or not {"paths", "paths-ignore"}.intersection(pr if isinstance(pr, dict) else {})
+    assert set(on) == {"workflow_dispatch"}
     perms = data.get("permissions", {})
     assert perms == {"contents": "read"} or perms.get("contents") == "read"
     conc = data.get("concurrency", {})

@@ -1,11 +1,9 @@
 name: PR Gate Complete
-# RF-002 / RF-005 of #9975 — always-materialized aggregator for all required checks.
-# Single required context: pr-gate-complete (fail-closed).
-# Coordinator runs on every pull_request without path exclusion.
+# Draft coordinator for #9975. During #9974 it is manual-only so the direct
+# canonical owners remain the sole PR validation path.
+# Do not restore pull_request until the atomic #9975 owner cutover.
 
 on:
-  pull_request:
-    branches: [main, master, develop]
   workflow_dispatch:
 
 permissions:
