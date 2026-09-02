@@ -456,8 +456,9 @@ jobs:
           )
           PY
 
-      - name: Remove temporary job before canonical inventory generation
+      - name: Materialize final coordinator for canonical inventory generation
         run: |
+          cp .github/workflows/pr-required.yml "${RUNNER_TEMP}/pr-required-temporary.yml"
           sed -i '/^  # codex-temp-refresh-start$/,/^  # codex-temp-refresh-end$/d' \
             .github/workflows/pr-required.yml
           uv run --frozen --no-build python -c 'from pathlib import Path; path = Path(".github/workflows/pr-required.yml"); path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")'
@@ -474,13 +475,17 @@ jobs:
             report-artifact-duplication-audit \
             --json-out reports/quality/config-contract-registry-artifact-duplication.json
 
+      - name: Restore temporary coordinator before generated-only push
+        run: |
+          cp "${RUNNER_TEMP}/pr-required-temporary.yml" .github/workflows/pr-required.yml
+          git diff --exit-code -- .github/workflows/pr-required.yml
+
       - name: Verify generated change allowlist
         run: |
           set -euo pipefail
           unexpected="$(
             git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r path; do
               case "$path" in
-                .github/workflows/pr-required.yml|\
                 scripts/engineering/ci/pr_gate.py|\
                 configs/quality/scripts_inventory_manifest.json|\
                 docs/reports/generated/documentation-cleanup-inventory.json|\
@@ -538,7 +543,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
-            .github/workflows/pr-required.yml \
             scripts/engineering/ci/pr_gate.py \
             configs/quality/scripts_inventory_manifest.json \
             docs/02-architecture/diagrams/architecture \
@@ -569,4 +573,5 @@ jobs:
           git fetch origin fix/pr-gate-complete-9975-v2
           test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
           git push origin HEAD:fix/pr-gate-complete-9975-v2
+          echo "Generated-only refresh pushed; API owner must now remove this temporary job."
   # codex-temp-refresh-end
