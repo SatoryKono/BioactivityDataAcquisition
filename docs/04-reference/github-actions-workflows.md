@@ -55,7 +55,6 @@ Use it when you need to answer:
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | Ruff/import-linter/architecture fast gates |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | Always-materialized fail-closed coordinator for the canonical reusable owners |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | Port-protocol and hypothesis contract tests |
-| `pr-required.yml` | `pr-gate-complete` | `workflow_dispatch` | Manual shadow aggregator for canonical required-check ownership and SHA-bound cutover validation |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | Generated artifacts, schema parity, schema drift |
