@@ -48,9 +48,10 @@ on:
       - ".github/actions/setup-python-uv/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.
-  cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
+  # PR revisions supersede each other. Main validation uses a run-scoped group
+  # so a protected docker-push awaiting approval cannot block newer SHA checks.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: "${{ github.event_name == 'pull_request' }}"
 
 jobs:
   docker-runtime-contracts:
