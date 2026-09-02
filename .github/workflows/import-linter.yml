@@ -160,12 +160,47 @@ jobs:
                       --baseline-file scripts/engineering/baselines/c901_baseline.json \
                       --mode "${mode}"
 
+    import-contracts:
+        name: Import contracts
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+
+            -   name: Run import-linter architecture contracts
+                run: uv run --frozen --no-build lint-imports --config .importlinter
+
     arch-tests:
+        name: Architecture (${{ matrix.shard }})
         runs-on: ubuntu-latest
         timeout-minutes: 30
         permissions:
             contents: read
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - shard: S7-crosscutting-architecture-a
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-a3
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-b
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-c
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-d
+                      requires_lfs: true
+                    - shard: S7-crosscutting-architecture-guardrails
+                      requires_lfs: false
         env:
+            BIOETL_PYTEST_SHARDED_TEST_HEALTH: '0'
             BIOETL_REQUIRE_TEST_CAPABILITIES: "1"
 
         steps:
@@ -176,6 +211,7 @@ jobs:
                     fetch-depth: 0
 
             -   name: Fetch Git LFS objects for architecture governance
+                if: ${{ matrix.requires_lfs }}
                 run: |
                     set -euo pipefail
                     # Test-governance source identity includes VCR fixture payloads.
@@ -195,16 +231,32 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
 
-            -   name: Run import-linter architecture contracts
-                run: uv run --frozen --no-build lint-imports --config .importlinter
+            -   name: Run canonical architecture shard
+                shell: bash
+                run: |
+                    bash scripts/engineering/dev/run_pytest_sharded.sh \
+                      --shard "${{ matrix.shard }}" \
+                      --stream \
+                      --skip-preflight \
+                      --junit-dir "reports/quality/test-runs/junit/architecture/${{ matrix.shard }}" \
+                      -- \
+                      --no-cov \
+                      -m "not slow and not benchmark and not memory"
 
-            -   name: Run canonical full architecture gate
-                run: uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"
+            -   name: Upload architecture JUnit artifact
+                if: ${{ always() && !cancelled() }}
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: architecture-junit-${{ matrix.shard }}-${{ github.sha }}
+                    path: reports/quality/test-runs/junit/architecture/${{ matrix.shard }}/*.xml
+                    if-no-files-found: error
+                    retention-days: 14
 
     checks-complete:
         needs:
             - lint
             - c901-governance
+            - import-contracts
             - arch-tests
         runs-on: ubuntu-latest
         timeout-minutes: 5
@@ -216,10 +268,12 @@ jobs:
                 env:
                     LINT_RESULT: ${{ needs.lint.result }}
                     C901_RESULT: ${{ needs['c901-governance'].result }}
+                    IMPORT_CONTRACTS_RESULT: ${{ needs['import-contracts'].result }}
                     ARCH_RESULT: ${{ needs['arch-tests'].result }}
                 run: |
                     if [[ "$LINT_RESULT" != "success" || \
                           "$C901_RESULT" != "success" || \
+                          "$IMPORT_CONTRACTS_RESULT" != "success" || \
                           "$ARCH_RESULT" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1

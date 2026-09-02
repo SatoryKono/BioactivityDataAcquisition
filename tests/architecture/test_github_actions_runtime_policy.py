@@ -904,12 +904,13 @@ def test_architecture_full_hook_matches_ci_arch_tests_and_test_matrix() -> None:
     hook_markers = _pytest_marker_expression(hook_entry.replace("\n", " "))
 
     import_linter = _load_yaml(ALWAYS_ON_REQUIRED_CHECKS["checks-complete"])
+    arch_job = import_linter["jobs"]["arch-tests"]
     arch_runs = [
         str(step.get("run") or "")
-        for step in import_linter["jobs"]["arch-tests"]["steps"]
+        for step in arch_job["steps"]
         if isinstance(step, dict)
     ]
-    pytest_run = next(run for run in arch_runs if "pytest tests/architecture/" in run)
+    pytest_run = next(run for run in arch_runs if "run_pytest_sharded.sh" in run)
     ci_markers = _pytest_marker_expression(pytest_run)
 
     matrix = yaml.safe_load(
@@ -922,6 +923,8 @@ def test_architecture_full_hook_matches_ci_arch_tests_and_test_matrix() -> None:
     assert hook_markers == ARCHITECTURE_FULL_MARKERS
     assert ci_markers == ARCHITECTURE_FULL_MARKERS
     assert lane_markers == ARCHITECTURE_FULL_MARKERS
+    assert '--shard "${{ matrix.shard }}"' in pytest_run
+    assert "--no-cov" in pytest_run
 
     policy = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "### Architecture lane names (`architecture-full`)" in policy
