@@ -244,22 +244,6 @@ def _existing_payload_matches(
     candidate_path: Path,
     matches: Callable[[Path, Path], bool],
 ) -> bool:
-    """Check if the target path exists and its payload matches the candidate.
-
-    Parameters
-    ----------
-    target_path : pathlib.Path
-        Path to the existing target file.
-    candidate_path : pathlib.Path
-        Path to the candidate file to compare against.
-    matches : Callable[[Path, Path], bool]
-        Function that compares two file paths for payload equality.
-
-    Returns
-    -------
-    bool
-        True if the target exists and matches the candidate, False otherwise.
-    """
     return target_path.exists() and matches(target_path, candidate_path)
 
 

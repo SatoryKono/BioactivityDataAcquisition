@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "a520acde7b14e69985f903eff3d536e668aefe48cc705a2f228b63eaaec1bc5b",
+  "coverage_xml_sha256": "94f232212a122d01fb1a47f5e633a9ac9647dd9553495829581c3969f6da33b5",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -24308,12 +24308,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 128,
-      "executable_lines": 128,
+      "covered_lines": 125,
+      "executable_lines": 125,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 351
+      "source_lines": 347
     },
     {
       "coverage_percent": 97.37,
@@ -48980,12 +48980,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 128,
-      "executable_lines": 128,
+      "covered_lines": 125,
+      "executable_lines": 125,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 351
+      "source_lines": 347
     },
     {
       "coverage_percent": 97.37,
@@ -49349,8 +49349,66 @@
     }
   ],
   "schema_version": 1,
+<<<<<<< Updated upstream
   "snapshot_date": "2026-09-01",
+<<<<<<< HEAD
+  "source_tree_sha256": "0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc",
+||||||| 497769829c
+<<<<<<< HEAD
+<<<<<<< HEAD
+  "source_tree_sha256": "d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff",
+||||||| c60ec93b39
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "2887bc183b7371b5b12eaee7724095dfddbf1184c9b6ed232e625f1c73a8fcf2",
+>>>>>>> codex/all-tests-c1cbad61-20260901
+||||||| 7f0408734b
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
+>>>>>>> fix/medallion-cycle-1ba86729
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  "source_tree_sha256": "d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff",
+||||||| c60ec93b39
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "2887bc183b7371b5b12eaee7724095dfddbf1184c9b6ed232e625f1c73a8fcf2",
+>>>>>>> codex/all-tests-c1cbad61-20260901
+||||||| 7f0408734b
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
+>>>>>>> fix/medallion-cycle-1ba86729
+||||||| Stash base
+  "snapshot_date": "2026-09-02",
   "source_tree_sha256": "840dcecaa5977f96e755b8c01656bc8a4a801cf79476d870e134f3ac3d9c60bf",
+=======
+<<<<<<< HEAD
+  "snapshot_date": "2026-09-02",
+  "source_tree_sha256": "840dcecaa5977f96e755b8c01656bc8a4a801cf79476d870e134f3ac3d9c60bf",
+||||||| 497769829c
+  "snapshot_date": "2026-09-01",
+<<<<<<< HEAD
+<<<<<<< HEAD
+  "source_tree_sha256": "d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff",
+||||||| c60ec93b39
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "2887bc183b7371b5b12eaee7724095dfddbf1184c9b6ed232e625f1c73a8fcf2",
+>>>>>>> codex/all-tests-c1cbad61-20260901
+||||||| 7f0408734b
+  "source_tree_sha256": "47036980745fc43906012c286be0df2c397b475d95dbdf6b0afc434712a8cd56",
+=======
+  "source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
+>>>>>>> fix/medallion-cycle-1ba86729
+=======
+  "snapshot_date": "2026-09-01",
+  "source_tree_sha256": "8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c",
+>>>>>>> fix/obs-stack-live-errors
+>>>>>>> Stashed changes
+>>>>>>> master20260902-1
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
