@@ -42,7 +42,8 @@ jobs:
           uv run --frozen --no-build python -m scripts.engineering.qa \
             report-contract-coverage-matrix
           uv run --frozen --no-build python -m \
-            scripts.engineering.qa.report_test_governance_audit
+            scripts.engineering.qa.report_test_governance_audit \
+            --json-out reports/quality/test-governance-current.json
 
       - name: Validate generated evidence and repaired contracts
         run: |
