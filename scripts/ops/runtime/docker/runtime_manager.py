@@ -2153,6 +2153,8 @@ def start_or_recover(
                     report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
+                if int(cutover.get("restart_returncode", 1)) != 0:
+                    return 1
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
