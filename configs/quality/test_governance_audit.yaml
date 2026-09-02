@@ -1058,6 +1058,9 @@ repo_backed_unit_test_exceptions:
     - path: tests/unit/repo_backed/scripts/test_report_observability_metric_inventory_cli.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/qa/report_observability_metric_inventory.py CLI/main entrypoint and Prometheus cardinality review contract
+    - path: tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py
+      target_lane: repo-backed-unit
+      protected_surface: .github/workflows/pr-required.yml + configs/quality/github_required_checks.yaml fail-closed decision matrix
     - path: tests/unit/repo_backed/scripts/engineering/dev/test_setup_env_wsl_branches.py
       target_lane: repo-backed-unit
       protected_surface: scripts/engineering/dev/setup_env_wsl.sh optional agent-tool installation branches executed with deterministic local stubs
