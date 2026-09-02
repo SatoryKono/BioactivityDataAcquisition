@@ -1357,7 +1357,7 @@ def _print_field_drift_samples(
     *,
     expected_by_path: dict[str, dict[str, object]],
     actual_by_path: dict[str, dict[str, object]],
-    sample_limit: int = 8,
+    sample_limit: int = 100,
 ) -> int:
     """Print up to sample_limit field-level drift samples; return total changed count."""
     changed = 0
