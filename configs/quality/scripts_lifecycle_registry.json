@@ -745,6 +745,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/pr_gate.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-01"
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",

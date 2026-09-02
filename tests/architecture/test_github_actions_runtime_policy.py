@@ -219,7 +219,7 @@ def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners()
     assert set(triggers) == {"pull_request", "workflow_dispatch"}
     pull_request = triggers["pull_request"]
     assert isinstance(pull_request, dict)
-    assert pull_request["branches"] == ["main"]
+    assert pull_request["branches"] == ["main", "develop"]
     assert not {"paths", "paths-ignore"}.intersection(pull_request)
     assert "pr-gate-complete" in coordinator["jobs"]
     assert coordinator["permissions"] == {"contents": "read"}
