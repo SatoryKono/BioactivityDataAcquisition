@@ -4,14 +4,14 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- baseline_artifact_fingerprint: `5804f19c84f0ea28229a3ecd5d858492a3ba7c226744f0bae65d903343b04a04`
-- local_tracking_ref_matches_remote: `True`
+- baseline_artifact_fingerprint: `a992092843d734714369424573a7792ddd514d56c868aa6b39d78639a2174b81`
+- local_tracking_ref_matches_remote: `true`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `5cd9007e46902c72ba9fbf6a4afc911a126469265ec19aac6877180c0357f5a1` | `False` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `064450b58968d326c52bd98fe497d9971da3dc5e00cf5ef6fe11e127b22e07d5` | `False` | `True` | `False` |
-| `reports/quality/compatibility-importer-census.json` | `5b4f604fa5f15bc9053285ef6c714a4e891a498791751bdb2840f6e5374e26c1` | `True` | `True` | `False` |
-| `reports/quality/dead-code-inventory.json` | `e7c3a87120cdb2f4bdc499764839bd18d33dd32c78d17995e4b36b61f8118385` | `True` | `True` | `False` |
-| `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
-| `reports/observability/runtime_cardinality_inventory.json` | `4f1d007b23f29c148ac6a1e7a7268bef771fe1b141c6cad5013f3a3ea0561acb` | `True` | `False` | `False` |
+| `reports/quality/architecture-quality-scorecard.json` | `aafc858e7ed954886a57f8a14f688576b9c3339a01208c70858067b30931c366` | `true` | `true` | `false` |
+| `reports/quality/module-coverage-inventory.json` | `ac8213894499656050e558fddfc3beb01c6276db7652198960aeaaf250898d80` | `true` | `true` | `false` |
+| `reports/quality/compatibility-importer-census.json` | `5b4f604fa5f15bc9053285ef6c714a4e891a498791751bdb2840f6e5374e26c1` | `true` | `true` | `false` |
+| `reports/quality/dead-code-inventory.json` | `e7c3a87120cdb2f4bdc499764839bd18d33dd32c78d17995e4b36b61f8118385` | `true` | `true` | `false` |
+| `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `true` | `true` | `false` |
+| `reports/observability/runtime_cardinality_inventory.json` | `4f1d007b23f29c148ac6a1e7a7268bef771fe1b141c6cad5013f3a3ea0561acb` | `true` | `false` | `false` |
