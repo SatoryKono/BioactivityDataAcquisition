@@ -1336,7 +1336,9 @@ def _first_field_drift(
     actual: dict[str, object],
 ) -> tuple[str, object, object] | None:
     """Return the first differing field (key, expected, actual) if any."""
-    for key in sorted(set(expected) | set(actual)):
+    for key in sorted(
+        set(expected) | set(actual), key=lambda item: (item != "references", item)
+    ):
         if expected.get(key) != actual.get(key):
             return key, expected.get(key), actual.get(key)
     return None
