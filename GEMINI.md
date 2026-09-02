@@ -34,6 +34,9 @@ accepted ADRs before trusting memory or mirrors.
 
 ## 1. Session Guardrails (AI workflow only)
 
+- **GitHub review language:** The review body and all inline review comments
+  produced through `gh pr review` or an equivalent GitHub API **MUST** be written
+  in Russian, regardless of the surrounding conversation language.
 - **Technical debt:** ЗАПРЕЩЕНО увеличивать лимиты тех. долга (scorecard
   budgets, exemptions, hotspot thresholds).
 - **Local-only default:** do not introduce Docker/Redis/external orchestration
