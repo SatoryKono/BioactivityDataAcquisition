@@ -75,7 +75,10 @@ def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
 
     assert "EVENT_NAME: ${{ github.event_name }}" in workflow
     assert '"${BASE_REF}" != "main" && "${BASE_REF}" != "develop"' in workflow
-    assert 'git diff --name-only "origin/${BASE_REF}"...HEAD' in workflow
+    assert "git diff --diff-filter=ACMRTUXB --name-only" in workflow
+    assert '"origin/${BASE_REF}"...HEAD -- \'*.mmd\' \'*.mermaid\'' in workflow
+    assert 'mapfile -t lint_targets < "${changed_targets}"' in workflow
+    assert "scripts/diagrams .github/actions/setup-mermaid" in workflow
     assert "'*.mmd' '*.mermaid'" in workflow
     assert '"${lint_targets[@]}" --json' in workflow
 
