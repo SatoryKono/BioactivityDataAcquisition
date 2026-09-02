@@ -325,14 +325,37 @@ jobs:
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Diagram policy lint report
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
+          # PRs own only changed diagram sources; the scheduled nightly workflow
+          # remains the full-corpus freshness owner.
+          lint_targets=(docs/02-architecture/diagrams)
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            if [[ "${BASE_REF}" != "main" ]]; then
+              echo "unexpected pull-request base ref" >&2
+              exit 1
+            fi
+            git fetch --no-tags --depth=1 origin "${BASE_REF}" 2>/dev/null || true
+            mapfile -t lint_targets < <(
+              git diff --name-only "origin/${BASE_REF}"...HEAD -- '*.mmd' '*.mermaid'
+            )
+            if (( ${#lint_targets[@]} == 0 )); then
+              mkdir -p /tmp/empty-diagram-lint-scope
+              lint_targets=(/tmp/empty-diagram-lint-scope)
+            fi
+            printf 'PR diagram lint targets:\n'
+            printf '  %s\n' "${lint_targets[@]}"
+          fi
+
           set +e
-          python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
+          python3 scripts/diagrams/lint/lint_diagrams.py "${lint_targets[@]}" --json > /tmp/diagram-lint.json
           lint_status=$?
           set -e
           python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json
           if [ "$lint_status" -ne 0 ]; then
-            echo "::error::Diagram lint failed. Fix the reported issues or update the accepted diagram budget."
+            echo "::error::Diagram lint failed for the owned PR scope."
             exit "$lint_status"
           fi
 
