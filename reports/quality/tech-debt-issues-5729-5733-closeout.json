@@ -52,22 +52,10 @@
     "5729": {
       "coverage_actual_percent": 96.7,
       "coverage_percent": 96.7,
-<<<<<<< HEAD
       "refreshed_at_utc": "2026-09-01T21:57:31.174594+00:00",
       "source_commit": "1bfa894c28ce58af0671c2721fd89a8b1cd05db0",
       "source_run_id": "33538533103",
       "source_tree_sha256": "0cd89c6cca5506529244b487be2c63ff31a8a8db8f0410d2341106d31261b996"
-||||||| 497769829c
-      "refreshed_at_utc": "2026-09-01T14:01:50.406129+00:00",
-      "source_commit": "64379be36ad9342a9c4fa74bb62ac9e2eb5eb254",
-      "source_run_id": "33480065022",
-      "source_tree_sha256": "f87ba546ffc6f8aaca0f9925735b2af3f145822ef2adfaa3de55128b58798618"
-=======
-      "refreshed_at_utc": "2026-09-01T19:20:14.241741+00:00",
-      "source_commit": "497769829c4a729ddeaba77fc1e695e159b27650",
-      "source_run_id": "33538771189",
-      "source_tree_sha256": "3075b3f6038522c3348d0b151de4486b58040cb7f984c1ce77fdad64247e7491"
->>>>>>> fix/obs-stack-live-errors
     },
     "5730": {
       "minimum_coverage_percent": 54,
