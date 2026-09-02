@@ -48,10 +48,10 @@ on:
       - ".github/actions/setup-python-uv/**"
 
 concurrency:
-  # PR revisions supersede each other. Main validation uses a run-scoped group
-  # so a protected docker-push awaiting approval cannot block newer SHA checks.
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
-  cancel-in-progress: "${{ github.event_name == 'pull_request' }}"
+  # Only main push validation is run-scoped so protected publish approval cannot
+  # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
+  cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
 
 jobs:
   docker-runtime-contracts:
