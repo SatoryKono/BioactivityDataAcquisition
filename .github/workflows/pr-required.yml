@@ -344,6 +344,7 @@ jobs:
             --observed-head-sha "${OBSERVED_HEAD_SHA}" \
             --run-url "${RUN_URL}"
   # codex-temp-passport-refresh-start
+  # transient push trigger; removed with the temporary job
   refresh-passports-and-evidence:
     name: Refresh passports and SHA-bound evidence (temporary)
     if: >-
