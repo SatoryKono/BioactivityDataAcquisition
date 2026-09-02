@@ -343,11 +343,7 @@ def format_percentage(
     finite_bronze_value = _as_float(bronze_value)
     if denominator == "constant_100":
         return "100%" if finite_value is not None else "UNKNOWN"
-    if (
-        finite_value is None
-        or finite_bronze_value is None
-        or finite_bronze_value == 0
-    ):
+    if finite_value is None or finite_bronze_value is None or finite_bronze_value == 0:
         return "UNKNOWN"
 
     percentage = finite_value / finite_bronze_value * 100
