@@ -277,7 +277,6 @@ def test_live_audit_rejects_malformed_processed_record_cells(
     assert expected_error in error
 
 
-
 def test_live_audit_accepts_v2_processed_records_no_data_payload() -> None:
     classification, detail = audit_subject._classify_processed_records_payload(
         {
@@ -295,6 +294,7 @@ def test_live_audit_accepts_v2_processed_records_no_data_payload() -> None:
 
     assert classification == "no_data"
     assert "only No data values" in detail
+
 
 def test_semantic_gate_maps_unknown_denominator_to_review_required(
     monkeypatch: Any,
