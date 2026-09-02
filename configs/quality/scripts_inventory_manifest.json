@@ -19683,7 +19683,7 @@
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 198,
+          "line": 206,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },
@@ -20179,7 +20179,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 2431,
+          "line": 2433,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana import recover_renderer as rr"
         },
