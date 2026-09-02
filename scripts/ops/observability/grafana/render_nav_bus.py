@@ -295,6 +295,11 @@ def _fail_closed_provider_handoffs(value: object, *, provider_declared: bool) ->
         _rewrite_list_provider_handoffs(value)
 
 
+def _root_panels(panels: list[object]) -> list[dict[str, object]]:
+    """Return root panels without collapsed-row children."""
+    return [panel for panel in panels if isinstance(panel, dict)]
+
+
 def _panel_grid(panel: object) -> dict[str, object] | None:
     if not isinstance(panel, dict):
         return None
@@ -302,21 +307,58 @@ def _panel_grid(panel: object) -> dict[str, object] | None:
     return grid if isinstance(grid, dict) else None
 
 
+def _panel_geometry(panel: object) -> tuple[dict[str, object], int, int] | None:
+    grid = _panel_grid(panel)
+    if grid is None:
+        return None
+    y = grid.get("y")
+    height = grid.get("h")
+    if not isinstance(y, int) or not isinstance(height, int):
+        return None
+    return grid, y, height
+
+
 def _first_window_overflow(panels: list[object]) -> int:
     overflow = 0
-    for panel in _walk_panels(panels):
-        if panel.get("type") == "row":
+    for panel in _root_panels(panels):
+        geometry = _panel_geometry(panel)
+        if panel.get("type") == "row" or geometry is None:
             continue
-        grid = _panel_grid(panel)
-        if grid is None:
-            continue
-        y = grid.get("y")
-        height = grid.get("h")
-        if not isinstance(y, int) or not isinstance(height, int):
-            continue
+        _, y, height = geometry
         if 0 <= y < VIEWPORT_ROWS:
             overflow = max(overflow, y + height - VIEWPORT_ROWS)
     return overflow
+
+
+def _slack_candidate(
+    panel: dict[str, object],
+    *,
+    nav: dict[str, object],
+    overflow: int,
+) -> tuple[int, dict[str, object]] | None:
+    geometry = _panel_geometry(panel)
+    if panel is nav or panel.get("type") != "text" or geometry is None:
+        return None
+    _, y, height = geometry
+    if panel.get("id") == 1000 or y >= VIEWPORT_ROWS or height - overflow < 2:
+        return None
+    return y, panel
+
+
+def _shift_root_panels_up(
+    panels: list[object],
+    *,
+    excluded_ids: frozenset[int],
+    from_y: int,
+    delta: int,
+) -> None:
+    for panel in _root_panels(panels):
+        geometry = _panel_geometry(panel)
+        if id(panel) in excluded_ids or geometry is None:
+            continue
+        grid, y, _ = geometry
+        if y >= from_y:
+            grid["y"] = y - delta
 
 
 def _reclaim_first_window_overflow(
@@ -326,39 +368,30 @@ def _reclaim_first_window_overflow(
     overflow = _first_window_overflow(panels)
     if overflow <= 0:
         return
-    slack: dict[str, object] | None = None
-    slack_y = -1
-    for panel in _walk_panels(panels):
-        if panel is nav or panel.get("type") != "text" or panel.get("id") == 1000:
-            continue
-        grid = _panel_grid(panel)
-        if grid is None:
-            continue
-        y = grid.get("y")
-        height = grid.get("h")
-        if not isinstance(y, int) or not isinstance(height, int):
-            continue
-        if y < VIEWPORT_ROWS and height - overflow >= 2 and y >= slack_y:
-            slack = panel
-            slack_y = y
-    if slack is None:
+    candidates = [
+        candidate
+        for panel in _root_panels(panels)
+        if (candidate := _slack_candidate(panel, nav=nav, overflow=overflow))
+        is not None
+    ]
+    if not candidates:
         raise SystemExit(
             "navigation height expansion would overflow the first window and "
             "no text rail can reclaim the extra row"
         )
-    slack_grid = _panel_grid(slack)
-    if slack_grid is None:
+    _, slack = max(candidates, key=lambda item: item[0])
+    geometry = _panel_geometry(slack)
+    if geometry is None:  # pragma: no cover - candidates require geometry
         raise SystemExit("slack text rail is missing gridPos")
-    old_bottom = int(slack_grid["y"]) + int(slack_grid["h"])
-    slack_grid["h"] = int(slack_grid["h"]) - overflow
-    for panel in _walk_panels(panels):
-        if panel is slack or panel is nav:
-            continue
-        grid = _panel_grid(panel)
-        if grid is None or not isinstance(grid.get("y"), int):
-            continue
-        if grid["y"] >= old_bottom:
-            grid["y"] = int(grid["y"]) - overflow
+    slack_grid, y, height = geometry
+    old_bottom = y + height
+    slack_grid["h"] = height - overflow
+    _shift_root_panels_up(
+        panels,
+        excluded_ids=frozenset({id(slack), id(nav)}),
+        from_y=old_bottom,
+        delta=overflow,
+    )
 
 
 def _expand_nav_height(
