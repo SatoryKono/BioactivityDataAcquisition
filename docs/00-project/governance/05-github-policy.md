@@ -48,7 +48,7 @@ ______________________________________________________________________
 - `refactor/storage-clear-contract`
 
 Automation-owned branches MAY use a provider prefix already established by
-the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`). Human-created
+the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`, `codex/`). Human-created
 branches MUST use one of the project types above and a lowercase kebab-case
 description. Opaque names (`a1`, `tmp`, numeric-only names), date-only names,
 and persistent `backup/*` branches are non-compliant.
