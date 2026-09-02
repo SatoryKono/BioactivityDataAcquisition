@@ -1,0 +1,35 @@
+name: Codex Inventory Diagnostic
+
+on:
+  push:
+    branches:
+      - fix/main-ci-20260902
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Generate canonical scripts inventory
+        shell: bash
+        run: |
+          python -m scripts.engineering.repo sync-inventory
+          python - <<'PY'
+          import base64
+          import gzip
+          from pathlib import Path
+          path = Path("configs/quality/scripts_inventory_manifest.json")
+          data = path.read_bytes()
+          print("INVENTORY_SHA256_BEGIN")
+          import hashlib
+          print(hashlib.sha256(data).hexdigest())
+          print("INVENTORY_SHA256_END")
+          print("INVENTORY_GZIP_BASE64_BEGIN")
+          print(base64.b64encode(gzip.compress(data, mtime=0)).decode("ascii"))
+          print("INVENTORY_GZIP_BASE64_END")
+          PY
