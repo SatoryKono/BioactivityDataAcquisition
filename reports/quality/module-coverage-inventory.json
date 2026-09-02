@@ -21616,14 +21616,14 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 96.69,
+      "coverage_percent": 97.64,
       "coverage_status": "partially_covered",
-      "covered_lines": 117,
-      "executable_lines": 121,
-      "missing_lines": 4,
+      "covered_lines": 124,
+      "executable_lines": 127,
+      "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
-      "source_lines": 256
+      "source_lines": 327
     },
     {
       "coverage_percent": 76.19,
@@ -24308,12 +24308,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 125,
-      "executable_lines": 125,
+      "covered_lines": 128,
+      "executable_lines": 128,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 344
+      "source_lines": 351
     },
     {
       "coverage_percent": 97.37,
@@ -24373,13 +24373,13 @@
       "missing_lines": 21,
       "module": "bioetl.interfaces.http._processed_records_prometheus",
       "path": "src/bioetl/interfaces/http/_processed_records_prometheus.py",
-      "source_lines": 180
+      "source_lines": 183
     },
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 107,
-      "executable_lines": 107,
+      "covered_lines": 108,
+      "executable_lines": 108,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._processed_records_table_support",
       "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
@@ -46288,14 +46288,14 @@
       "source_lines": 48
     },
     {
-      "coverage_percent": 96.69,
+      "coverage_percent": 97.64,
       "coverage_status": "partially_covered",
-      "covered_lines": 117,
-      "executable_lines": 121,
-      "missing_lines": 4,
+      "covered_lines": 124,
+      "executable_lines": 127,
+      "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.bronze.io_mixin",
       "path": "src/bioetl/infrastructure/storage/bronze/io_mixin.py",
-      "source_lines": 256
+      "source_lines": 327
     },
     {
       "coverage_percent": 76.19,
@@ -48980,12 +48980,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 125,
-      "executable_lines": 125,
+      "covered_lines": 128,
+      "executable_lines": 128,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._health_server_observability_routing",
       "path": "src/bioetl/interfaces/http/_health_server_observability_routing.py",
-      "source_lines": 344
+      "source_lines": 351
     },
     {
       "coverage_percent": 97.37,
@@ -49045,13 +49045,13 @@
       "missing_lines": 21,
       "module": "bioetl.interfaces.http._processed_records_prometheus",
       "path": "src/bioetl/interfaces/http/_processed_records_prometheus.py",
-      "source_lines": 180
+      "source_lines": 183
     },
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 107,
-      "executable_lines": 107,
+      "covered_lines": 108,
+      "executable_lines": 108,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http._processed_records_table_support",
       "path": "src/bioetl/interfaces/http/_processed_records_table_support.py",
@@ -49349,8 +49349,8 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-09-01",
-  "source_tree_sha256": "8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c",
+  "snapshot_date": "2026-09-02",
+  "source_tree_sha256": "27ea80bc80cdd96af12bdfa6b9aa9e1ef376f6591a18cba9b5c1d4959042737d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

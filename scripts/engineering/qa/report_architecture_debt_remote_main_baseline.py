@@ -102,9 +102,7 @@ _CONFLICT_MARKER_PREFIXES = ("<<<<<<<", "|||||||", "=======", ">>>>>>>")
 
 
 def _has_conflict_markers(text: str) -> bool:
-    return any(
-        line.startswith(_CONFLICT_MARKER_PREFIXES) for line in text.splitlines()
-    )
+    return any(line.startswith(_CONFLICT_MARKER_PREFIXES) for line in text.splitlines())
 
 
 def _json_blob_summary(blob: bytes | None) -> dict[str, object]:
