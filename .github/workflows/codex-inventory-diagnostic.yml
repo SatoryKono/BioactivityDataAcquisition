@@ -21,15 +21,13 @@ jobs:
           python -m scripts.engineering.repo sync-inventory
           python - <<'PY'
           import base64
-          import gzip
-          from pathlib import Path
-          path = Path("configs/quality/scripts_inventory_manifest.json")
-          data = path.read_bytes()
-          print("INVENTORY_SHA256_BEGIN")
           import hashlib
-          print(hashlib.sha256(data).hexdigest())
-          print("INVENTORY_SHA256_END")
-          print("INVENTORY_GZIP_BASE64_BEGIN")
-          print(base64.b64encode(gzip.compress(data, mtime=0)).decode("ascii"))
-          print("INVENTORY_GZIP_BASE64_END")
+          from pathlib import Path
+          data = Path("configs/quality/scripts_inventory_manifest.json").read_bytes()
+          print("INVENTORY_SHA256=" + hashlib.sha256(data).hexdigest())
+          encoded = base64.b64encode(data).decode("ascii")
+          print("INVENTORY_BASE64_BEGIN")
+          for offset in range(0, len(encoded), 12000):
+              print(encoded[offset:offset + 12000])
+          print("INVENTORY_BASE64_END")
           PY
