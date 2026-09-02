@@ -500,6 +500,15 @@ async def test_processed_records_prefers_exact_run_ledger(
     class _EmptyLedger:
         @staticmethod
         def list_entries_by_run_id(_run_id: object) -> list[object]:
+            """
+            Return no entries for the specified run identifier.
+
+            Parameters:
+                _run_id (object): Run identifier used to select entries.
+
+            Returns:
+                list[object]: An empty list.
+            """
             return []
 
     def build_from_prometheus(**kwargs: object) -> dict[str, object]:
