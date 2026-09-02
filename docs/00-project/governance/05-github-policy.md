@@ -211,7 +211,8 @@ The final activation set for repository ruleset
 The legacy contexts remain saved in the disabled ruleset, but their leaf workflows
 no longer own direct PR triggers after the atomic #9975 cutover. Every PR targeting
 `main` now materializes the repo-side shadow coordinator `pr-gate-complete`, which
-classifies the exact head SHA, invokes each reusable leaf owner once, and fails
+classifies the exact head SHA, invokes each reusable leaf owner once in a distinct
+owner-namespaced concurrency group, and fails
 closed on failure, cancellation, skip, missing result, invalid N/A evidence, or SHA
 mismatch. Five-class shadow validation and the 20-run ambiguity/timing sample remain
 required before #9979. Live ruleset enforcement remains `disabled`; any ruleset
@@ -821,7 +822,9 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
 - #9975 repo-side cutover: `pr-gate-complete` now materializes on every pull
   request targeting `main` and owns one reusable invocation per catalog gate.
 - Direct PR triggers were removed from the twelve called leaf workflows in the
-  same change; their push, schedule, and manual triggers remain intact.
+  same change; their push, schedule, and manual triggers remain intact. Reusable
+  concurrency groups use owner-specific prefixes because `github.workflow`
+  resolves to the common caller name inside called workflows.
 - The coordinator uses exact-head classification, explicit SHA-bound N/A
   evidence, and fail-closed aggregation. Rulesets remain unchanged and disabled;
   #9979 still requires five-class shadow evidence, 20 unambiguous runs, timing

@@ -21,7 +21,7 @@ on:
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: schema-governance-${{ github.ref }}
   cancel-in-progress: true
 
 env:

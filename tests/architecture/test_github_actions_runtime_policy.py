@@ -41,6 +41,14 @@ ALWAYS_ON_REQUIRED_CHECKS = {
 SHA_OR_PR_CONCURRENCY_GROUP = (
     "${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}"
 )
+SHA_OR_PR_CONCURRENCY_SUFFIX = (
+    "${{ github.event.pull_request.number || github.sha }}"
+)
+REUSABLE_MAIN_CONCURRENCY_PREFIXES = {
+    TESTS_WORKFLOW: "tests-",
+    ALWAYS_ON_REQUIRED_CHECKS["checks-complete"]: "lint-architecture-",
+    ROOT / ".github" / "workflows" / "codeql.yml": "codeql-",
+}
 PR_ONLY_CANCEL_IN_PROGRESS = "${{ github.event_name == 'pull_request' }}"
 MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS = (
     ARCHITECTURE_WORKFLOW,
@@ -256,7 +264,15 @@ def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
     for path in MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS:
         workflow = _load_yaml(path)
         concurrency = cast(dict[str, Any], workflow["concurrency"])
-        assert concurrency["group"] == SHA_OR_PR_CONCURRENCY_GROUP, path.name
+        group = str(concurrency["group"])
+        if path in REUSABLE_MAIN_CONCURRENCY_PREFIXES:
+            assert group == (
+                REUSABLE_MAIN_CONCURRENCY_PREFIXES[path]
+                + SHA_OR_PR_CONCURRENCY_SUFFIX
+            ), path.name
+            assert "${{ github.workflow }}" not in group, path.name
+        else:
+            assert group == SHA_OR_PR_CONCURRENCY_GROUP, path.name
         assert concurrency["cancel-in-progress"] == PR_ONLY_CANCEL_IN_PROGRESS, (
             path.name
         )
