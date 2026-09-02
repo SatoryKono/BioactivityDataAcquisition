@@ -150,10 +150,9 @@ def test_cli_strict_gate_blocks_unfixed_medium_plus_finding(tmp_path: Path) -> N
 def test_strict_gate_matches_trivy_medium_plus_policy(
     severity: str, status: str, expected: bool
 ) -> None:
-    assert (
-        is_strict_blocking_finding({"severity": severity, "status": status})
-        is expected
-    )
+    assert is_strict_blocking_finding(
+        {"severity": severity, "status": status}
+    ) is expected
 
 
 @pytest.mark.parametrize(
