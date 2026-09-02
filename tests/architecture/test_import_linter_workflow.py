@@ -48,10 +48,10 @@ def test_import_linter_workflow_requires_full_capabilities_for_arch_tests() -> N
 
     assert "arch-tests:" in workflow
     assert 'BIOETL_REQUIRE_TEST_CAPABILITIES: "1"' in workflow
-    assert (
-        'uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"'
-        in workflow
-    )
+    assert "bash scripts/engineering/dev/run_pytest_sharded.sh" in workflow
+    assert '--shard "${{ matrix.shard }}"' in workflow
+    assert "--skip-preflight" in workflow
+    assert '-m "not slow and not benchmark and not memory"' in workflow
 
 
 def test_import_linter_changed_file_gate_stays_below_arg_max() -> None:
