@@ -373,6 +373,7 @@ jobs:
 
       - name: Verify exact synchronized branch
         env:
+          GH_TOKEN: ${{ github.token }}
           EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           SOURCE_HEAD_SHA: 024c3596cd5a25069c6fc21b66f6b8015b72bcec
