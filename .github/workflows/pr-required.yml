@@ -388,7 +388,26 @@ jobs:
           test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .head_sha)" = "${SOURCE_HEAD_SHA}"
           git diff --quiet "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}" -- src/bioetl
           echo "EVENT_HEAD_SHA=${EVENT_HEAD_SHA}" >> "${GITHUB_ENV}"
+          echo "SOURCE_HEAD_SHA=${SOURCE_HEAD_SHA}" >> "${GITHUB_ENV}"
           echo "SOURCE_RUN_ID=${SOURCE_RUN_ID}" >> "${GITHUB_ENV}"
+
+      - name: Wait for exact-head coverage artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          artifact_count=0
+          for _ in {1..60}; do
+            artifact_count="$(
+              gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/artifacts" \
+                --jq '[.artifacts[] | select(.name == "coverage-report" and .expired == false)] | length'
+            )"
+            if [[ "${artifact_count}" == "1" ]]; then
+              break
+            fi
+            sleep 30
+          done
+          test "${artifact_count}" = "1"
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
