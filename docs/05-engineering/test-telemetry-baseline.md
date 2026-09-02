@@ -28,13 +28,36 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
+<<<<<<< HEAD
 - Source commit: `1bfa894c28ce58af0671c2721fd89a8b1cd05db0`
 - Source run id: `33538533103`
+||||||| 497769829c
+- Source branch: `fix/medallion-cycle-1ba86729`
+- Source commit: `b29220707f3766a224e5fe5f8bda16fb815ed8e0`
+- Source run id: `b29220707f`
+=======
+- Source commit: `497769829c4a729ddeaba77fc1e695e159b27650`
+- Source run id: `33538771189`
+>>>>>>> fix/obs-stack-live-errors
 - Source event: `push`
+<<<<<<< HEAD
 - Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33538533103`
 - Source tree sha256: `0bbd807fc80a746cde80a37ddd98cabd81cb0b7f2b5703bccb164ac05e3b7f6b`
+||||||| 497769829c
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33480065022`
+- Source tree sha256: `74ecef52870e9a492cf0d7ffffe872909193cbc62851399cc2427eb5912a27b5`
+=======
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33538771189`
+- Source tree sha256: `3075b3f6038522c3348d0b151de4486b58040cb7f984c1ce77fdad64247e7491`
+>>>>>>> fix/obs-stack-live-errors
 - Refresh status: `captured`
+<<<<<<< HEAD
 - Refreshed at (UTC): `2026-09-01T21:57:31.174594+00:00`
+||||||| 497769829c
+- Refreshed at (UTC): `2026-09-01T16:41:47.838485+00:00`
+=======
+- Refreshed at (UTC): `2026-09-01T19:20:14.241741+00:00`
+>>>>>>> fix/obs-stack-live-errors
 
 ## Branch-accurate provenance (#5729)
 

@@ -17,8 +17,16 @@
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
+<<<<<<< HEAD
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc` | `0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc'}` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+||||||| 497769829c
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff` | `d6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'd6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff'}` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'd6a552f7216d140a38347be81dd03b630947f4850a8f6cb34e08a7138b5622ff'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+=======
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c` | `8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c'}` | `{'source_module_count': 2467, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+>>>>>>> fix/obs-stack-live-errors
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -51,7 +59,7 @@
 | `observability_runtime_cardinality_review_required` | `pass` | `runtime_cardinality_review_required` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_runtime_cardinality_threshold_violations` | `pass` | `runtime_cardinality_threshold_violations` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_release_review_status` | `pass` | `status` | `passed` | `passed` | `reports/observability/runtime_cardinality_review.json` |
-| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `4` | `21` | `reports/observability/runtime_cardinality_review.json` |
+| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `0` | `21` | `reports/observability/runtime_cardinality_review.json` |
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |

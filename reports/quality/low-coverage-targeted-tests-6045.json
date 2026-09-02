@@ -10,7 +10,13 @@
   },
   "debt_budget_policy": "flat_or_decreasing_only",
   "issue": 6045,
+<<<<<<< HEAD
   "module_coverage_inventory_source_tree_sha256": "0941b6992e668590dc92e30f61e500d549c6ed9b7b536ea7bb15318acb564bcc",
+||||||| 497769829c
+  "module_coverage_inventory_source_tree_sha256": "f56e3a862231bb7b6dfc12b4f1d68d4f2ec670fb20f776e8c377bb131e51c259",
+=======
+  "module_coverage_inventory_source_tree_sha256": "8dfc8a75a9dc2bac9bff9f8f445e6920f50a67b420d9fdb8a09077341e48134c",
+>>>>>>> fix/obs-stack-live-errors
   "reviewed_on": "2026-07-20",
   "schema_version": "low-coverage-targeted-tests-6045-v1",
   "targeted_modules": [
