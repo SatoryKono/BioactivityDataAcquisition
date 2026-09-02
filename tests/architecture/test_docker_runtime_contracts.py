@@ -1341,6 +1341,19 @@ def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
     return seen
 
 
+def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    build = next(step for step in steps if step.get("name") == "Build Docker image")
+
+    assert build["with"]["cache-from"] == "type=gha"
+    cache_to = str(build["with"]["cache-to"])
+    assert "github.event_name == 'push'" in cache_to
+    assert "github.ref == 'refs/heads/main'" in cache_to
+    assert "type=gha,mode=max" in cache_to
+    assert "pull_request" not in cache_to
+
+
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     job = workflow["jobs"]["docker-push"]
