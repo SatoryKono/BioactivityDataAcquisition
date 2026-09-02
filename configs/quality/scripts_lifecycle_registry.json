@@ -1626,6 +1626,12 @@
       "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ops/observability/grafana/action_target_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the allowlisted action-target routing contract for Grafana dashboard handoffs; keep it supporting and add a governed direct consumer or consolidate it into the canonical navigation tooling by the review date.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"
