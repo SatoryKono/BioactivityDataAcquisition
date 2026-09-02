@@ -1,9 +1,6 @@
 name: consolidation-gates
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - "consolidation/**"
