@@ -93,6 +93,29 @@ NAV_HEIGHT = 4
 # layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
 # push always-visible first-window panels past this fold.
 VIEWPORT_ROWS = 18
+# First-window copy that was explicitly designed and tested at h=3 must not be
+# sacrificed when the shared navigation grows to its canonical h=4.
+_MINIMUM_FIRST_WINDOW_HEIGHTS: dict[str, dict[int, int]] = {
+    "bioetl-run-explorer-v1": {1: 3},
+}
+# Run Explorer's ten-row browse table has one row of layout slack after the
+# navigation/provenance bands. Keep this explicit instead of turning arbitrary
+# data panels into generic overflow donors.
+_FALLBACK_COMPACTION_HEIGHTS: dict[str, dict[int, int]] = {
+    "bioetl-run-explorer-v1": {3010: 11},
+}
+_CONTROL_PLANE_FIRST_WINDOW_GEOMETRY: dict[int, tuple[int, int, int, int]] = {
+    9400: (0, 4, 16, 3),
+    9401: (16, 4, 8, 3),
+    9418: (0, 7, 12, 5),
+    9416: (12, 7, 12, 5),
+    906: (0, 12, 24, 3),
+    891: (0, 15, 6, 3),
+    892: (6, 15, 6, 3),
+    893: (12, 15, 6, 3),
+    907: (18, 15, 6, 3),
+}
+_CONTROL_PLANE_FIRST_DETAIL_ROW_Y = 18
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;"
@@ -340,7 +363,7 @@ def _slack_candidate(
     if panel is nav or panel.get("type") != "text" or geometry is None:
         return None
     _, y, height = geometry
-    if panel.get("id") == 1000 or y >= VIEWPORT_ROWS or height - overflow < 2:
+    if panel.get("id") == 1000 or y >= VIEWPORT_ROWS or height - overflow < 3:
         return None
     return y, panel
 
@@ -361,10 +384,199 @@ def _shift_root_panels_up(
             grid["y"] = y - delta
 
 
-def _reclaim_first_window_overflow(
-    nav: dict[str, object], panels: list[object]
+def _shift_root_panels_down(
+    panels: list[object],
+    *,
+    excluded_ids: frozenset[int],
+    from_y: int,
+    delta: int,
 ) -> None:
-    """Shrink the lowest first-window text rail so nav h=4 still fits the fold."""
+    for panel in _root_panels(panels):
+        geometry = _panel_geometry(panel)
+        if id(panel) in excluded_ids or geometry is None:
+            continue
+        grid, y, _ = geometry
+        if y >= from_y:
+            grid["y"] = y + delta
+
+
+def _restore_minimum_first_window_heights(
+    panels: list[object], *, current_uid: str
+) -> None:
+    minimums = _MINIMUM_FIRST_WINDOW_HEIGHTS.get(current_uid, {})
+    by_id = {panel.get("id"): panel for panel in _root_panels(panels)}
+    for panel_id, minimum_height in minimums.items():
+        panel = by_id.get(panel_id)
+        geometry = _panel_geometry(panel)
+        if panel is None or geometry is None:
+            raise SystemExit(
+                f"{current_uid}: missing protected first-window panel id={panel_id}"
+            )
+        grid, y, height = geometry
+        if height >= minimum_height:
+            continue
+        delta = minimum_height - height
+        old_bottom = y + height
+        grid["h"] = minimum_height
+        _shift_root_panels_down(
+            panels,
+            excluded_ids=frozenset({id(panel)}),
+            from_y=old_bottom,
+            delta=delta,
+        )
+
+
+def _compact_shared_band(
+    slack: dict[str, object],
+    panels: list[object],
+    *,
+    nav: dict[str, object],
+    overflow: int,
+) -> None:
+    geometry = _panel_geometry(slack)
+    if geometry is None:  # pragma: no cover - candidates require geometry
+        raise SystemExit("slack text rail is missing gridPos")
+    _, y, height = geometry
+    old_bottom = y + height
+    band: list[dict[str, object]] = []
+    for panel in _root_panels(panels):
+        panel_geometry = _panel_geometry(panel)
+        if panel is nav or panel.get("type") == "row" or panel_geometry is None:
+            continue
+        _, panel_y, panel_height = panel_geometry
+        if panel_y == y and panel_y + panel_height == old_bottom:
+            if panel_height - overflow < 3:
+                raise SystemExit(
+                    "navigation height expansion cannot compact a shared "
+                    "first-window band below h=3"
+                )
+            band.append(panel)
+    if not band:
+        raise SystemExit("slack text rail has no compactable first-window band")
+    for panel in band:
+        panel_grid = _panel_grid(panel)
+        if panel_grid is None:  # pragma: no cover - band requires geometry
+            raise SystemExit("compactable first-window panel is missing gridPos")
+        panel_grid["h"] = int(panel_grid["h"]) - overflow
+    excluded = {id(nav)}
+    excluded.update(id(panel) for panel in band)
+    _shift_root_panels_up(
+        panels,
+        excluded_ids=frozenset(excluded),
+        from_y=old_bottom,
+        delta=overflow,
+    )
+
+
+def _compact_fallback_panel(
+    panels: list[object], *, current_uid: str, overflow: int
+) -> bool:
+    minimums = _FALLBACK_COMPACTION_HEIGHTS.get(current_uid, {})
+    for panel in _root_panels(panels):
+        panel_id = panel.get("id")
+        minimum_height = minimums.get(panel_id) if isinstance(panel_id, int) else None
+        geometry = _panel_geometry(panel)
+        if minimum_height is None or geometry is None:
+            continue
+        grid, y, height = geometry
+        if y >= VIEWPORT_ROWS or y + height <= VIEWPORT_ROWS:
+            continue
+        if height - overflow < minimum_height:
+            continue
+        old_bottom = y + height
+        grid["h"] = height - overflow
+        _shift_root_panels_up(
+            panels,
+            excluded_ids=frozenset({id(panel)}),
+            from_y=old_bottom,
+            delta=overflow,
+        )
+        return True
+    return False
+
+
+def _normalize_collapsed_row_children(panels: list[object]) -> None:
+    """Repair the one-row child drift left by legacy recursive nav shifts."""
+    for row in _root_panels(panels):
+        if row.get("type") != "row":
+            continue
+        children = row.get("panels")
+        row_geometry = _panel_geometry(row)
+        if not isinstance(children, list) or row_geometry is None:
+            continue
+        descendants = _walk_panels(children)
+        child_geometries = [
+            geometry
+            for child in descendants
+            if (geometry := _panel_geometry(child)) is not None
+        ]
+        if not child_geometries:
+            continue
+        _, row_y, _ = row_geometry
+        offset = min(y for _, y, _ in child_geometries) - (row_y + 1)
+        if offset not in {-1, 1}:
+            continue
+        for child_grid, child_y, _ in child_geometries:
+            child_grid["y"] = child_y - offset
+
+
+def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
+    for descendant in _walk_panels([panel]):
+        grid = _panel_grid(descendant)
+        if grid is not None and isinstance(grid.get("y"), int):
+            grid["y"] = int(grid["y"]) + delta
+
+
+def _layout_control_plane_first_window(panels: list[object]) -> None:
+    """Keep Trust density/readability while fitting the canonical h=4 nav."""
+    root = _root_panels(panels)
+    by_id = {panel.get("id"): panel for panel in root}
+    missing = set(_CONTROL_PLANE_FIRST_WINDOW_GEOMETRY) - set(by_id)
+    if missing:
+        raise SystemExit(
+            f"bioetl-control-plane-v1: missing layout panels {sorted(missing)}"
+        )
+    rows = [panel for panel in root if panel.get("type") == "row"]
+    row_geometries = [
+        geometry for row in rows if (geometry := _panel_geometry(row)) is not None
+    ]
+    if not row_geometries:
+        raise SystemExit("bioetl-control-plane-v1: missing collapsed detail rows")
+    first_row_y = min(y for _, y, _ in row_geometries)
+    row_delta = _CONTROL_PLANE_FIRST_DETAIL_ROW_Y - first_row_y
+    if row_delta:
+        for panel in root:
+            geometry = _panel_geometry(panel)
+            if (
+                geometry is None
+                or panel.get("id") in _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY
+            ):
+                continue
+            _, y, _ = geometry
+            if y >= first_row_y:
+                _shift_panel_tree(panel, delta=row_delta)
+    for panel_id, (x, y, width, height) in _CONTROL_PLANE_FIRST_WINDOW_GEOMETRY.items():
+        grid = _panel_grid(by_id[panel_id])
+        if grid is None:  # pragma: no cover - required panels have geometry
+            raise SystemExit(
+                f"bioetl-control-plane-v1: panel id={panel_id} missing gridPos"
+            )
+        grid.update({"x": x, "y": y, "w": width, "h": height})
+    cta = by_id[906]
+    cta["description"] = (
+        "Next-step rail kept at readable h=3 on the first screen under the "
+        "canonical h=4 navigation. Do not replay this run if its Trust status is "
+        "INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust "
+        "(9418) and Review Retention Compliance (9416). Review Lineage Validation "
+        "is the first collapsed row (9419) and contains table 9415. Monitor Replay "
+        "Readiness (9401) is current Prometheus for the pipeline, not this run."
+    )
+
+
+def _reclaim_first_window_overflow(
+    nav: dict[str, object], panels: list[object], *, current_uid: str | None = None
+) -> None:
+    """Compact a safe first-window band so nav h=4 still fits the fold."""
     overflow = _first_window_overflow(panels)
     if overflow <= 0:
         return
@@ -375,23 +587,16 @@ def _reclaim_first_window_overflow(
         is not None
     ]
     if not candidates:
+        if current_uid is not None and _compact_fallback_panel(
+            panels, current_uid=current_uid, overflow=overflow
+        ):
+            return
         raise SystemExit(
             "navigation height expansion would overflow the first window and "
-            "no text rail can reclaim the extra row"
+            "no protected layout band can reclaim the extra row"
         )
     _, slack = max(candidates, key=lambda item: item[0])
-    geometry = _panel_geometry(slack)
-    if geometry is None:  # pragma: no cover - candidates require geometry
-        raise SystemExit("slack text rail is missing gridPos")
-    slack_grid, y, height = geometry
-    old_bottom = y + height
-    slack_grid["h"] = height - overflow
-    _shift_root_panels_up(
-        panels,
-        excluded_ids=frozenset({id(slack), id(nav)}),
-        from_y=old_bottom,
-        delta=overflow,
-    )
+    _compact_shared_band(slack, panels, nav=nav, overflow=overflow)
 
 
 def _expand_nav_height(
@@ -405,7 +610,7 @@ def _expand_nav_height(
         return
     delta = new_height - old_height
     old_bottom = int(grid_pos.get("y", 0)) + old_height
-    for panel in _walk_panels(panels):
+    for panel in _root_panels(panels):
         if panel is nav:
             continue
         grid = panel.get("gridPos")
@@ -447,7 +652,11 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
         raise SystemExit("navigation panel gridPos must be an object")
     grid_pos["h"] = NAV_HEIGHT
     grid_pos.update({"w": 24, "x": 0, "y": 0})
-    _reclaim_first_window_overflow(nav, panels)
+    _restore_minimum_first_window_heights(panels, current_uid=current_uid)
+    if current_uid == "bioetl-control-plane-v1":
+        _layout_control_plane_first_window(panels)
+    _reclaim_first_window_overflow(nav, panels, current_uid=current_uid)
+    _normalize_collapsed_row_children(panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,

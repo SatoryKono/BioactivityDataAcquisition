@@ -273,7 +273,7 @@ def get_metric_label_sets() -> dict[str, frozenset[str]]:
 @cache
 def get_dashboard_files() -> tuple[Path, ...]:
     """Get all Grafana dashboard JSON files."""
-    return tuple(Path("grafana/dashboards").glob("*.json"))
+    return tuple(sorted(Path("grafana/dashboards").glob("*.json")))
 
 
 @cache
