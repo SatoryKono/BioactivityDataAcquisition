@@ -22,7 +22,7 @@ Maps issue #6543 required diagram themes to **existing** ADR-040-governed source
 | Location | All under `docs/02-architecture/diagrams/` |
 | Lint / quality | `python -m scripts.diagrams lint` · `make render-diagrams` · CI diagram jobs |
 | Rendered baselines | Tracked `svg/` / `png/` next to families |
-| Registry / catalog | [README.md](README.md#architecture-diagrams-48-core) |
+| Registry / catalog | [README.md](README.md#architecture-diagrams-52-core-49-52-added) |
 | Views | `views/*.mermaid` presentation slices (not SSOT replacements) |
 
 ## Required themes → canonical sources

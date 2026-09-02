@@ -116,8 +116,78 @@ def test_overflow_reclamation_fails_when_no_text_rail_has_slack() -> None:
     too_short = _panel(1001, "text", y=4, height=3)
     overflowing = _panel(1002, "table", y=12, height=8)
 
-    with pytest.raises(SystemExit, match="no text rail can reclaim"):
+    with pytest.raises(SystemExit, match="no protected layout band can reclaim"):
         nav_bus._reclaim_first_window_overflow(nav, [nav, too_short, overflowing])
+
+
+def test_nav_expansion_shifts_only_root_panels() -> None:
+    nav = _panel(1000, "text", y=0, height=3)
+    nested = _panel(9601, "table", y=4, height=6)
+    collapsed_row = _panel(9600, "row", y=3, height=1, nested=[nested])
+
+    nav_bus._expand_nav_height(nav, [nav, collapsed_row], new_height=4)
+
+    assert collapsed_row["gridPos"]["y"] == 4
+    assert nested["gridPos"]["y"] == 4
+
+
+def test_trust_layout_preserves_scalar_area_and_readable_cta() -> None:
+    nav = _panel(1000, "text", y=0, height=4)
+    scope = _panel(9400, "text", y=4, height=4)
+    status = _panel(9401, "stat", y=4, height=4)
+    trust = _panel(9418, "table", y=8, height=5)
+    retention = _panel(9416, "table", y=8, height=5)
+    recovery = _panel(906, "text", y=13, height=2)
+    kpis = [
+        _panel(891, "stat", y=15, height=3),
+        _panel(892, "stat", y=15, height=3),
+        _panel(893, "stat", y=15, height=3),
+        _panel(907, "stat", y=15, height=3),
+    ]
+    nested = _panel(894, "text", y=20, height=5)
+    collapsed_row = _panel(902, "row", y=18, height=1, nested=[nested])
+    panels: list[object] = [
+        nav,
+        scope,
+        status,
+        trust,
+        retention,
+        recovery,
+        *kpis,
+        collapsed_row,
+    ]
+
+    nav_bus._layout_control_plane_first_window(panels)
+    nav_bus._normalize_collapsed_row_children(panels)
+
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 16, "h": 3}
+    assert status["gridPos"] == {"x": 16, "y": 4, "w": 8, "h": 3}
+    assert status["gridPos"]["w"] * status["gridPos"]["h"] == 24
+    assert trust["gridPos"]["y"] == retention["gridPos"]["y"] == 7
+    assert all(kpi["gridPos"]["y"] == 15 for kpi in kpis)
+    assert recovery["gridPos"] == {"x": 0, "y": 12, "w": 24, "h": 3}
+    assert collapsed_row["gridPos"]["y"] == 18
+    assert nested["gridPos"]["y"] == 19
+    assert nav_bus._first_window_overflow(panels) == 0
+
+
+def test_run_explorer_restores_scope_and_compacts_reviewed_table() -> None:
+    nav = _panel(1000, "text", y=0, height=4)
+    scope = _panel(1, "text", y=4, height=2)
+    browse = _panel(3010, "table", y=6, height=12)
+    collapsed_row = _panel(3099, "row", y=18, height=1)
+    panels: list[object] = [nav, scope, browse, collapsed_row]
+
+    nav_bus._restore_minimum_first_window_heights(
+        panels, current_uid="bioetl-run-explorer-v1"
+    )
+    nav_bus._reclaim_first_window_overflow(
+        nav, panels, current_uid="bioetl-run-explorer-v1"
+    )
+
+    assert scope["gridPos"] == {"x": 0, "y": 4, "w": 24, "h": 3}
+    assert browse["gridPos"] == {"x": 0, "y": 7, "w": 24, "h": 11}
+    assert collapsed_row["gridPos"]["y"] == 18
 
 
 def test_apply_to_dashboard_expands_nav_and_reclaims_first_window(

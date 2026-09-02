@@ -352,7 +352,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         ]
         assert len(containers) == 1, path.name
         container_style = containers[0].get("style", "")
-        for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
+        for token in ("display:flex", "flex-wrap:nowrap", "overflow:visible"):
             assert token in container_style, (path.name, token)
 
         anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
@@ -378,7 +378,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         for attrs in handoff_links:
             style = attrs.get("style", "")
             for token in (
-                "flex:1 1 120px",
+                "flex:1 1 0",
                 "text-align:center",
                 "color:#f8fafc",
                 "background:#334155",
@@ -388,7 +388,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             assert attrs.get("href"), path.name
         current_style = current[0].get("style", "")
         for token in (
-            "flex:1 1 120px",
+            "flex:1 1 0",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):
@@ -1164,7 +1164,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 12
+    assert int(grid.get("h") or 0) == 11
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"

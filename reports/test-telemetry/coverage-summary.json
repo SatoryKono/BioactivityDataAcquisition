@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/pr-gate-complete-9975-v2",
-  "source_commit": "ec8e8f428f3eda48e8eea129645a9a9826942973",
-  "source_run_id": "33644866189",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33644866189",
-  "source_tree_sha256": "ae77f50dea023a7cb03244a3561c26eb2c7127b37c3acf56f9d65eb6ff3bfa6d",
-  "refreshed_at_utc": "2026-09-02T16:15:12.787835+00:00",
+  "source_branch": "main",
+  "source_commit": "f8f4f1777d9aab3ede13754376cb94bf1d226f2d",
+  "source_run_id": "33664907741",
+  "source_event": "push",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33664907741",
+  "source_tree_sha256": "7035b3b1989b3bff482f7ff7d3305e163d9672c8897282125e9cc971c2553b25",
+  "refreshed_at_utc": "2026-09-02T20:52:26.407181+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.7,
   "coverage": {

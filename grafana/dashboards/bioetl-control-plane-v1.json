@@ -116,8 +116,8 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
-        "w": 18,
+        "h": 3,
+        "w": 16,
         "x": 0,
         "y": 4
       },
@@ -134,9 +134,9 @@
       "type": "stat",
       "title": "Monitor Replay Readiness",
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
+        "h": 3,
+        "w": 8,
+        "x": 16,
         "y": 4
       },
       "datasource": {
@@ -248,7 +248,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
@@ -566,7 +566,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 7
       },
       "id": 9416,
       "options": {
@@ -663,10 +663,10 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 12
       },
       "options": {
         "bioetlDisplayTitle": "Review Recovery Action",
@@ -700,7 +700,7 @@
         ]
       },
       "transparent": false,
-      "description": "Next-step rail (native title omitted so h=3 fits DASH-FIT-004 at 200%). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
+      "description": "Next-step rail kept at readable h=3 on the first screen under the canonical h=4 navigation. Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -1162,7 +1162,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 19
           },
           "id": 9415,
           "options": {
@@ -1220,7 +1220,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 21
+            "y": 20
           },
           "id": 894,
           "options": {
@@ -1291,7 +1291,7 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 26
+            "y": 25
           },
           "id": 130,
           "options": {
@@ -1382,7 +1382,7 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 26
+            "y": 25
           },
           "id": 3,
           "options": {
@@ -1473,7 +1473,7 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 26
+            "y": 25
           },
           "id": 104,
           "options": {
@@ -1564,7 +1564,7 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 26
+            "y": 25
           },
           "id": 120,
           "options": {
@@ -1655,7 +1655,7 @@
             "h": 3,
             "w": 6,
             "x": 0,
-            "y": 29
+            "y": 28
           },
           "id": 101,
           "options": {
@@ -1746,7 +1746,7 @@
             "h": 3,
             "w": 6,
             "x": 6,
-            "y": 29
+            "y": 28
           },
           "id": 102,
           "options": {
@@ -1837,7 +1837,7 @@
             "h": 3,
             "w": 6,
             "x": 12,
-            "y": 29
+            "y": 28
           },
           "id": 103,
           "options": {
@@ -1928,7 +1928,7 @@
             "h": 3,
             "w": 6,
             "x": 18,
-            "y": 29
+            "y": 28
           },
           "id": 121,
           "options": {
@@ -1991,7 +1991,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 32
+            "y": 31
           },
           "id": 5,
           "options": {
@@ -2058,7 +2058,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 38
+            "y": 37
           },
           "id": 134,
           "options": {
@@ -2129,7 +2129,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 38
+            "y": 37
           },
           "id": 135,
           "options": {
@@ -2200,7 +2200,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 43
           },
           "id": 105,
           "options": {
@@ -2282,7 +2282,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 50
           },
           "id": 106,
           "options": {
@@ -2353,7 +2353,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 58
+            "y": 57
           },
           "id": 9413,
           "options": {

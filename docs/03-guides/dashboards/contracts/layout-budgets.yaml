@@ -48,10 +48,9 @@ first_screen_shell_panels:
     id: 906
     owner: "@bioetl-observability"
     rationale: >-
-      First-window next-step rail; native title omitted so h=3 Review Recovery
-      Action fits DASH-FIT-004 at 200% without pushing KPI stats past
-      viewport_rows. Navigation is h=3 so tables keep min-height 5, 9401 stays
-      h=4 (DASH-DENSITY-002), and the CTA occupies y=12..15.
+      First-window next-step rail stays readable at h=3 when navigation is h=4.
+      The compact scope/status band uses h=3 and widths 16/8; status area stays
+      24 grid cells, preserving DASH-DENSITY-002. The CTA occupies y=12..15.
     retire_when: the CTA can keep a native title without overflowing at 200%
   - dashboard: bioetl-control-plane-v1.json
     id: 9400

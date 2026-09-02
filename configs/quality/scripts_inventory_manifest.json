@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T16:15:30.495671+00:00",
+  "generated_at": "2026-09-02T18:58:09.608171+00:00",
   "summary": {
     "total_scripts": 611,
     "status_counts": {
@@ -10,7 +10,7 @@
     "reference_group_coverage": {
       "agents": 8,
       "build": 17,
-      "ci": 86,
+      "ci": 83,
       "docs": 253,
       "other": 74,
       "scripts": 510,
@@ -8009,7 +8009,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 229,
+      "reference_count": 225,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -9654,13 +9654,13 @@
       "references": [
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 80,
+          "line": 90,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \\"
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \"${classify_args[@]}\""
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 345,
+          "line": 349,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
@@ -10186,14 +10186,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 484,
-          "source_group": "ci",
-          "text": "scripts/engineering/ci/update_test_telemetry_baseline.py \\"
-        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 204,
@@ -11288,7 +11282,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -12380,7 +12374,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 397,
+      "reference_count": 395,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -17195,7 +17189,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 85,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17240,10 +17234,10 @@
           "text": "python -m scripts.engineering.repo github-settings-review"
         },
         {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 464,
+          "path": ".github/workflows/release.yml",
+          "line": 44,
           "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
+          "text": "run: python -m scripts.engineering.repo check-versions"
         }
       ]
     },
@@ -17664,14 +17658,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 479,
-          "source_group": "ci",
-          "text": "check-inventory \\"
-        },
         {
           "path": ".github/workflows/tests.yml",
           "line": 403,
@@ -17713,6 +17701,12 @@
           "line": 585,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-inventory \\"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
         }
       ]
     },
@@ -19809,12 +19803,6 @@
       "reference_count": 4,
       "references": [
         {
-          "path": ".github/workflows/tmp-generated-artifact-refresh.yml",
-          "line": 39,
-          "source_group": "ci",
-          "text": "\"scripts/ops/observability/grafana/action_target_routes.py\","
-        },
-        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 18,
           "source_group": "scripts",
@@ -19831,6 +19819,12 @@
           "line": 17,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.action_target_routes import ("
+        },
+        {
+          "path": "tests/unit/scripts/ops/observability/test_grafana_nav_bus.py",
+          "line": 12,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana import action_target_routes as routes"
         }
       ],
       "owner": "@bioetl-observability",
@@ -20044,14 +20038,8 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
-        {
-          "path": ".github/workflows/tmp-generated-artifact-refresh.yml",
-          "line": 40,
-          "source_group": "ci",
-          "text": "\"scripts/ops/observability/grafana/dashboard_context_links.py\","
-        },
         {
           "path": "scripts/ops/observability/grafana/action_target_routes.py",
           "line": 13,
@@ -20324,7 +20312,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": ".github/ISSUES/DS2-2026-07-28-DASHBOARD-SYSTEM-2-REFACTOR-ISSUE-PACK.md",

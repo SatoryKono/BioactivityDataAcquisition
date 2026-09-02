@@ -95,11 +95,11 @@ def test_cross_scope_links_have_required_tooltip_tokens():
             if tooltip and (
                 "scope reset" in tooltip.lower() or "context mapping" in tooltip.lower()
             ):
-                has_scope_reset = "reset scope" in tooltip.lower()
+                has_scope_reset = "scope reset" in tooltip.lower()
                 has_context_mapping = "context mapping" in tooltip.lower()
                 assert has_scope_reset or has_context_mapping, (
                     f"{dashboard_path.name}: link {link.get('title')} has scope-related tooltip "
-                    f"but doesn't mention 'reset scope' or 'context mapping', got '{tooltip}'"
+                    f"but doesn't mention 'scope reset' or 'context mapping', got '{tooltip}'"
                 )
 
 

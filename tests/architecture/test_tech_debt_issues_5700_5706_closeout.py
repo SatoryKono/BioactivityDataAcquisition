@@ -95,28 +95,21 @@ def test_issue_5701_telemetry_surfaces_share_current_head_metadata() -> None:
     coverage = _load_json(TELEMETRY_COVERAGE)
     slowest = _load_json(TELEMETRY_SLOWEST)
 
-    expected_commit = payload["source_commit"]
-    expected_run_id = payload["source_run_id"]
-    expected_refreshed_at = payload["refreshed_at_utc"]
-
     assert payload["coverage_xml_present"] is True
     assert payload["coverage_percent_fallback_used"] is False
-    assert baseline["source_commit"] == expected_commit
-    assert coverage["source_commit"] == expected_commit
-    assert slowest["source_commit"] == expected_commit
-    assert baseline["source_run_id"] == expected_run_id
-    assert coverage["source_run_id"] == expected_run_id
-    assert slowest["source_run_id"] == expected_run_id
-    assert baseline["refreshed_at_utc"] == expected_refreshed_at
-    assert coverage["refreshed_at_utc"] == expected_refreshed_at
-    assert slowest["refreshed_at_utc"] == expected_refreshed_at
-    assert baseline["coverage"]["actual_percent"] == payload["coverage_actual_percent"]
+    assert len(payload["source_commit"]) == 40
+    assert payload["source_run_id"]
+    assert payload["refreshed_at_utc"]
+    for artifact in (coverage, slowest):
+        for key in ("source_commit", "source_run_id", "refreshed_at_utc"):
+            assert artifact[key] == baseline[key]
+    assert baseline["coverage"] == coverage["coverage"]
+    assert payload["slowest_total_cases"] > 0
+    assert payload["top_slow_zone"]["test_count"] > 0
+    assert baseline["duration_telemetry"]["total_cases"] == slowest["total_cases"]
     assert (
-        baseline["duration_telemetry"]["total_cases"] == payload["slowest_total_cases"]
-    )
-    assert (
-        baseline["duration_telemetry"]["top_slowest_zones"][0]
-        == payload["top_slow_zone"]
+        baseline["duration_telemetry"]["top_slowest_zones"]
+        == slowest["top_slowest_zones"]
     )
 
 

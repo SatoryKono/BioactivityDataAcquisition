@@ -1506,7 +1506,7 @@
             "h": 6,
             "w": 24,
             "x": 0,
-            "y": 19
+            "y": 20
           },
           "datasource": {
             "type": "prometheus",
@@ -1732,7 +1732,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 25
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",
@@ -1825,7 +1825,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 25
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",
@@ -1918,7 +1918,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 25
+            "y": 26
           },
           "datasource": {
             "type": "prometheus",

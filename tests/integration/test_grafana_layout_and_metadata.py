@@ -409,7 +409,7 @@ def test_control_plane_long_first_screen_titles_keep_extra_width() -> None:
 
 
 def test_control_plane_trust_panels_follow_reference_widths() -> None:
-    """Trust panels should align with the 18/6 scope and readiness columns."""
+    """Trust top band preserves scalar area; disclosure rows keep 18/6 columns."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     panels = index_panels_by_base_title(get_dashboard_panels(dashboard))
 
@@ -419,19 +419,26 @@ def test_control_plane_trust_panels_follow_reference_widths() -> None:
     processed = panels["Review Processed Records"]["gridPos"]
     telemetry = panels["Monitor Telemetry"]["gridPos"]
 
-    assert run_summary["w"] == scope["w"] == 18
-    assert processed["w"] == telemetry["w"] == readiness["w"] == 6
+    assert scope == {"x": 0, "y": 4, "w": 16, "h": 3}
+    assert readiness == {"x": 16, "y": 4, "w": 8, "h": 3}
+    assert readiness["w"] * readiness["h"] == 24
+    assert run_summary["w"] == 18
+    assert processed["w"] == telemetry["w"] == 6
     assert run_summary["x"] == 0
-    assert processed["x"] == telemetry["x"] == readiness["x"] == 18
+    assert processed["x"] == telemetry["x"] == 18
 
-    third_width = scope["w"] // 3
-    third_panels = [
+    quarter_width = 24 // 4
+    quarter_panels = [
         panels["Monitor Replay Safety"]["gridPos"],
         panels["Monitor Checkpoint Age"]["gridPos"],
         panels["Monitor Manifest/Ledger"]["gridPos"],
     ]
-    assert [grid["w"] for grid in third_panels] == [third_width] * 3
-    assert [grid["x"] for grid in third_panels] == [0, third_width, 2 * third_width]
+    assert [grid["w"] for grid in quarter_panels] == [quarter_width] * 3
+    assert [grid["x"] for grid in quarter_panels] == [
+        0,
+        quarter_width,
+        2 * quarter_width,
+    ]
 
 
 def test_control_plane_terminal_events_table_has_readable_width() -> None:
