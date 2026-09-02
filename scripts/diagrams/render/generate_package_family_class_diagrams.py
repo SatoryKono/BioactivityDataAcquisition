@@ -15,7 +15,7 @@ import sys
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import date
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -274,7 +274,7 @@ def build_diagram_text(slice_: FamilySlice) -> str:
         "%% Components: top-level classes grouped by source module.",
         "%% @version 1.0.0",
         "%% @type    classDiagram",
-        f"%% @date    {datetime.now(UTC).date().isoformat()}",
+        f"%% @date    {date.today().isoformat()}",
         "%% @level   Package Family / Inventory Slice",
         f"%% @nodes   {len(slice_.classes)}",
         f"%% @reference {_slice_reference(slice_)}",
