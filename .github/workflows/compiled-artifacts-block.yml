@@ -17,6 +17,7 @@ on:
       - '.github/workflows/**'
       - 'LICENSE'
   push:
+    branches: [main]
     paths-ignore:
       - 'docs/**'
       - '*.md'
