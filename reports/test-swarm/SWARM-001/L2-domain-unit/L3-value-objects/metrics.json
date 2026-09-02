@@ -1,24 +1,24 @@
 {
-  "agent_id": "L2-infra-unit-integ",
-  "level": "L2",
-  "scope": "tests/unit/infrastructure/ tests/integration/",
+  "agent_id": "L3-value-objects",
+  "level": "L3",
+  "scope": "tests/unit/domain/value_objects/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 140,
-    "passed": 140,
+    "total_tests": 50,
+    "passed": 50,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 86,
+    "coverage_pct": 100.0,
     "median_duration_ms": 10,
     "p95_duration_ms": 50
   },
   "metrics_after": {
-    "total_tests": 140,
-    "passed": 140,
+    "total_tests": 50,
+    "passed": 50,
     "failed": 0,
     "skipped": 0,
-    "coverage_pct": 86,
+    "coverage_pct": 100.0,
     "median_duration_ms": 10,
     "p95_duration_ms": 50
   },
