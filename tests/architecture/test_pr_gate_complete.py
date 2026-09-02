@@ -40,8 +40,10 @@ EXPECTED_CANONICAL_CHECKS = {
     "canonical-manifest-hashes",
 }
 
+
 def _load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
+
 
 def test_catalog_exists_and_has_expected_gates() -> None:
     assert CATALOG.is_file()
@@ -70,6 +72,7 @@ def test_catalog_exists_and_has_expected_gates() -> None:
         assert check["status"] in {"blocking", "advisory_evidence"}
         assert check["duplicate_policy"] == "forbidden"
 
+
 def test_coordinator_is_manual_until_owner_cutover() -> None:
     assert COORDINATOR.is_file()
     data = _load_yaml(COORDINATOR)
@@ -83,6 +86,7 @@ def test_coordinator_is_manual_until_owner_cutover() -> None:
     assert "github.workflow" in group
     assert "github.event.pull_request.number" in group or "github.sha" in group
     assert "cancel-in-progress" in conc
+
 
 def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     data = _load_yaml(COORDINATOR)
@@ -98,6 +102,7 @@ def test_coordinator_has_classify_and_aggregate_jobs() -> None:
     classify = jobs["classify-changes"]
     assert "head_sha" in str(classify.get("outputs", {}))
 
+
 def test_leaf_workflows_expose_workflow_call() -> None:
     data = _load_yaml(CATALOG)
     for gate in data["gates"]:
@@ -110,11 +115,13 @@ def test_leaf_workflows_expose_workflow_call() -> None:
         assert isinstance(on, dict)
         assert "workflow_call" in on
 
+
 def test_policy_doc_mentions_shadow_aggregator() -> None:
     text = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "pr-gate-complete" in text
     assert "configs/quality/github_required_checks.yaml" in text
     assert "shadow" in text.lower()
+
 
 def test_aggregator_does_not_use_continue_on_error() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
