@@ -68,9 +68,7 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     full_runs = "\n".join(str(step.get("run") or "") for step in full["steps"])
     live_runs = "\n".join(str(step.get("run") or "") for step in live["steps"])
     prompt_runs = "\n".join(str(step.get("run") or "") for step in prompt["steps"])
-    complete_runs = "\n".join(
-        str(step.get("run") or "") for step in complete["steps"]
-    )
+    complete_runs = "\n".join(str(step.get("run") or "") for step in complete["steps"])
 
     assert "tests/e2e" in full_runs
     assert "e2e and not e2e_smoke and not benchmark and not memory" in full_runs
