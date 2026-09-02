@@ -1,11 +1,12 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T13:36:52.594628+00:00",
+  "generated_at": "2026-09-02T14:20:53.121461+00:00",
   "summary": {
-    "total_scripts": 610,
+    "total_scripts": 611,
     "status_counts": {
-      "active": 339,
-      "supporting": 271
+      "active": 338,
+      "orphan": 1,
+      "supporting": 272
     },
     "reference_group_coverage": {
       "agents": 8,
@@ -13,7 +14,7 @@
       "ci": 83,
       "docs": 253,
       "other": 74,
-      "scripts": 508,
+      "scripts": 509,
       "skills": 12,
       "tests": 420
     }
@@ -9650,8 +9651,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 17,
       "references": [
+        {
+          "path": ".github/workflows/pr-required.yml",
+          "line": 75,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \\"
+        },
+        {
+          "path": ".github/workflows/pr-required.yml",
+          "line": 339,
+          "source_group": "ci",
+          "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
+        },
         {
           "path": ".github/workflows/tests.yml",
           "line": 430,
@@ -9687,18 +9700,6 @@
           "line": 141,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory-live`."
-        },
-        {
-          "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 603,
-          "source_group": "docs",
-          "text": "python -m scripts.engineering.ci quality-gate            # Quality gates"
-        },
-        {
-          "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 604,
-          "source_group": "docs",
-          "text": "python -m scripts.engineering.ci test_runner             # Test runner"
         }
       ]
     },
@@ -9711,7 +9712,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 46,
+          "line": 48,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
         },
@@ -9760,7 +9761,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 47,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
@@ -9815,7 +9816,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 45,
+          "line": 47,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
         },
@@ -9840,7 +9841,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
         },
@@ -9865,13 +9866,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 36,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -9904,13 +9905,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "| `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 31,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -9943,13 +9944,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "| `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 32,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -9982,7 +9983,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -9997,7 +9998,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 33,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10006,17 +10007,33 @@
     {
       "path": "scripts/engineering/ci/pr_gate.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/engineering/ci/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "| `pr-gate`         | `scripts/engineering/ci/pr_gate.py`                    | Fail-closed classification and aggregation for required PR checks            |"
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 32,
+          "source_group": "scripts",
+          "text": "\"pr-gate\": \"pr_gate.py\","
+        },
         {
           "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
           "line": 10,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.pr_gate import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-12-01",
+      "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command."
     },
     {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
@@ -10033,7 +10050,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 30,
+          "line": 31,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
@@ -10090,13 +10107,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "| `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 35,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10141,7 +10158,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -10408,7 +10425,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -19780,6 +19797,14 @@
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
+      "path": "scripts/ops/observability/grafana/action_target_routes.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
       "type": "py",
       "status": "supporting",
@@ -19985,11 +20010,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
+          "path": "scripts/ops/observability/grafana/action_target_routes.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
+        },
+        {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 17,
+          "line": 18,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
