@@ -53,7 +53,9 @@ def _files_for_path_spec(path_spec: str) -> set[str]:
     return {
         path
         for path in files
-        if not any(path == ignored or path.startswith(f"{ignored}/") for ignored in ignores)
+        if not any(
+            path == ignored or path.startswith(f"{ignored}/") for ignored in ignores
+        )
     }
 
 
@@ -237,9 +239,7 @@ class TestCanonicalTestLanes:
             ]
             assert workflow_shards == shards
 
-            shard_files = [
-                _files_for_path_spec(str(shard["path"])) for shard in shards
-            ]
+            shard_files = [_files_for_path_spec(str(shard["path"])) for shard in shards]
             assert set().union(*shard_files) == expected_files[lane_name]
             duplicated = set().union(
                 *(
