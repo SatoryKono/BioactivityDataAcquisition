@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T11:39:23.184+00:00",
+  "generated_at": "2026-09-02T14:16:27.369+00:00",
   "summary": {
-    "total_scripts": 609,
+    "total_scripts": 610,
     "status_counts": {
       "active": 338,
+      "orphan": 1,
       "supporting": 271
     },
     "reference_group_coverage": {
@@ -19771,6 +19772,14 @@
       "next_step": "Retain only as a one-off DSA residual migration helper for auditability; do not promote it to an active operator workflow."
     },
     {
+      "path": "scripts/ops/observability/grafana/action_target_routes.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
       "type": "py",
       "status": "supporting",
@@ -19976,8 +19985,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "scripts/ops/observability/grafana/action_target_routes.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
+        },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
           "line": 17,
