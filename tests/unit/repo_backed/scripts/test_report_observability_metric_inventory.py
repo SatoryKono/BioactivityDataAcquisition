@@ -407,6 +407,11 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
         )
 
     monkeypatch.setattr(
+        inventory,
+        "_run_text_discovery_command",
+        fake_run_text_discovery_command,
+    )
+    monkeypatch.setattr(
         inventory_scan,
         "_run_text_discovery_command",
         fake_run_text_discovery_command,
