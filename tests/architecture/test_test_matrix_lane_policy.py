@@ -13,8 +13,10 @@
 from __future__ import annotations
 
 import tomllib
+import shlex
 
 import pytest
+import yaml
 
 from tests.architecture._test_matrix_policy_support import (
     ROOT,
@@ -27,6 +29,39 @@ from tests.architecture._test_matrix_policy_support import (
     must_unit_layers,
     required_provider_names,
 )
+
+
+def _files_for_path_spec(path_spec: str) -> set[str]:
+    tokens = shlex.split(path_spec)
+    ignores = [
+        token.split("=", maxsplit=1)[1].rstrip("/")
+        for token in tokens
+        if token.startswith("--ignore=")
+    ]
+    files: set[str] = set()
+    for token in tokens:
+        if token.startswith("--ignore="):
+            continue
+        candidate = ROOT / token
+        if candidate.is_file() and candidate.name.startswith("test_"):
+            files.add(candidate.relative_to(ROOT).as_posix())
+        elif candidate.is_dir():
+            files.update(
+                path.relative_to(ROOT).as_posix()
+                for path in candidate.rglob("test_*.py")
+            )
+    return {
+        path
+        for path in files
+        if not any(path == ignored or path.startswith(f"{ignored}/") for ignored in ignores)
+    }
+
+
+def _tree_test_files(relative_root: str) -> set[str]:
+    return {
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / relative_root).rglob("test_*.py")
+    }
 
 
 @pytest.mark.architecture
@@ -114,6 +149,8 @@ class TestCanonicalTestLanes:
         "e2e",
         "e2e-smoke",
         "e2e-nightly-full",
+        "e2e-nightly-live",
+        "prompt-tests-nightly",
         "memory",
         "performance",
         "integration-determinism",
@@ -167,6 +204,51 @@ class TestCanonicalTestLanes:
             else:
                 assert artifacts.get("junit_xml") is True
                 assert artifacts.get("json_summary") is True
+
+    def test_fixed_ci_shards_match_workflow_and_form_exact_file_unions(self) -> None:
+        matrix = load_matrix()
+        fixed = matrix["test_lanes"]["ci_fixed_shards"]
+        workflow = yaml.safe_load(
+            (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+        )
+        lane_jobs = {
+            "test-fast": "test-fast",
+            "repo-backed-unit": "repo-backed-unit",
+            "unit-scripts-tooling": "unit-scripts-tooling",
+        }
+        expected_files = {
+            "test-fast": {
+                path
+                for path in _tree_test_files("tests/unit")
+                if not path.startswith(
+                    ("tests/unit/repo_backed/", "tests/unit/scripts/")
+                )
+            },
+            "repo-backed-unit": _tree_test_files("tests/unit/repo_backed"),
+            "unit-scripts-tooling": _tree_test_files("tests/unit/scripts"),
+        }
+
+        assert fixed["schema_version"] == 1
+        assert (ROOT / fixed["telemetry_source"]).is_file()
+        for lane_name, job_name in lane_jobs.items():
+            shards = fixed["lanes"][lane_name]["shards"]
+            workflow_shards = workflow["jobs"][job_name]["strategy"]["matrix"][
+                "test-group"
+            ]
+            assert workflow_shards == shards
+
+            shard_files = [
+                _files_for_path_spec(str(shard["path"])) for shard in shards
+            ]
+            assert set().union(*shard_files) == expected_files[lane_name]
+            duplicated = set().union(
+                *(
+                    left & right
+                    for index, left in enumerate(shard_files)
+                    for right in shard_files[index + 1 :]
+                )
+            )
+            assert not duplicated
 
     def test_canonical_test_lane_paths_and_runners_exist(self) -> None:
         matrix = load_matrix()
@@ -281,6 +363,50 @@ class TestCanonicalTestLanes:
             in policy["benchmark_parallel_policy"]
         )
 
+    def test_tests_workflow_has_parallel_producers_and_combine_only_tail(self) -> None:
+        workflow = yaml.safe_load(
+            (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
+        )
+        jobs = workflow["jobs"]
+        independent_jobs = {
+            "control-plane-e2e",
+            "contract-confidence",
+            "flaky-telemetry",
+            "track-d-gates",
+            "test-fast",
+            "repo-backed-unit",
+            "unit-scripts-tooling",
+            "unit-filesystem-contracts",
+            "unit-subprocess-backed",
+            "test-matrix",
+            "memory-tests",
+            "performance-budgets",
+            "serial-coverage",
+        }
+        assert all(
+            jobs[job_name]["needs"] == "dependency-preflight"
+            for job_name in independent_jobs
+        )
+
+        serial_runs = "\n".join(
+            str(step.get("run") or "") for step in jobs["serial-coverage"]["steps"]
+        )
+        coverage_runs = "\n".join(
+            str(step.get("run") or "") for step in jobs["coverage-verify"]["steps"]
+        )
+        assert "run_pytest_resilient.py" in serial_runs
+        assert ".coverage.serial" in str(jobs["serial-coverage"])
+        assert "serial-coverage" in jobs["coverage-verify"]["needs"]
+        assert "run_pytest_resilient.py" not in coverage_runs
+        assert "coverage combine --keep" in coverage_runs
+        assert ".coverage.serial" in coverage_runs
+
+        complete_needs = set(jobs["tests-complete"]["needs"])
+        assert "coverage-inventory-currentness" in complete_needs
+        assert "duration-telemetry" not in complete_needs
+        assert "proof-or-stop-advisory" not in complete_needs
+        assert jobs["tests-complete"]["if"] == "${{ always() }}"
+
     def test_lane_marker_boundaries_match_current_policy(self) -> None:
         matrix = load_matrix()
         lanes = matrix["test_lanes"]["lanes"]
@@ -302,7 +428,7 @@ class TestCanonicalTestLanes:
 
         workflow = (ROOT / ".github/workflows/tests.yml").read_text(encoding="utf-8")
         assert "repo-backed-unit:" in workflow
-        assert "pytest tests/unit/repo_backed/" in workflow
+        assert "pytest ${{ matrix.test-group.path }}" in workflow
         assert (
             '-m "repo_backed and not slow and not benchmark and not memory"' in workflow
         )
@@ -386,6 +512,14 @@ class TestCanonicalTestLanes:
         assert lanes["e2e-nightly-full"]["marker_expression"] == (
             "e2e and not e2e_smoke and not benchmark and not memory"
         )
+        assert lanes["e2e-nightly-full"]["replay_mode"] == "vcr_replay_only"
+        assert "no:xdist" in lanes["e2e-nightly-full"]["pytest_args"]
+        assert lanes["e2e-nightly-live"]["paths"] == [
+            "tests/e2e/test_pipeline_matrix_e2e.py"
+        ]
+        assert lanes["e2e-nightly-live"]["replay_mode"] == "mixed"
+        assert lanes["prompt-tests-nightly"]["paths"] == ["tests/prompts/"]
+        assert "no:xdist" in lanes["prompt-tests-nightly"]["pytest_args"]
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["memory"]["paths"] == [
             "tests/smoke/test_neo4j_memory_mcp_smoke.py"
@@ -449,7 +583,8 @@ class TestCanonicalTestLanes:
         assert 'xdist_args: "-p no:xdist"' in integration_block
         assert "-n auto" not in integration_block
 
-        unit_domain_idx = workflow.index("- name: unit-domain\n")
+        test_matrix_idx = workflow.index("\n  test-matrix:")
+        unit_domain_idx = workflow.index("- name: unit-domain\n", test_matrix_idx)
         unit_app_idx = workflow.index("- name: unit-application\n", unit_domain_idx)
         unit_domain_block = workflow[unit_domain_idx:unit_app_idx]
         assert "-n auto" in unit_domain_block

@@ -1341,6 +1341,19 @@ def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
     return seen
 
 
+def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    build = next(step for step in steps if step.get("name") == "Build Docker image")
+
+    assert build["with"]["cache-from"] == "type=gha"
+    cache_to = str(build["with"]["cache-to"])
+    assert "github.event_name == 'push'" in cache_to
+    assert "github.ref == 'refs/heads/main'" in cache_to
+    assert "type=gha,mode=max" in cache_to
+    assert "pull_request" not in cache_to
+
+
 def test_docker_push_uses_environment_and_does_not_publish_latest_on_main() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     job = workflow["jobs"]["docker-push"]
@@ -1362,42 +1375,60 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert "docker-lint" in ancestors
     assert "docker-compose-validate" in ancestors
     assert "docker-build" in ancestors
+    complete = jobs["docker-complete"]
+    assert complete["permissions"] == {"contents": "read"}
+    assert set(_workflow_needs(complete)) == {
+        "docker-runtime-contracts",
+        "docker-lint",
+        "docker-compose-validate",
+        "docker-build",
+    }
+    rendered = json.dumps(complete)
+    for dependency in _workflow_needs(complete):
+        assert f"needs.{dependency}.result" in rendered
+    assert 'test "${failures}" -eq 0' in complete["steps"][0]["run"]
 
 
-def test_docker_built_image_trivy_emits_full_evidence_and_blocks_all_medium_plus() -> (
-    None
-):
+def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus(
+) -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
-    built = {
-        str(step.get("name")): step
+    app_scans = [
+        step
         for step in steps
         if step.get("uses", "").startswith("aquasecurity/trivy-action@")
-        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
-    }
-    evidence = [step for name, step in built.items() if "evidence scan" in name]
-    assert {step["with"]["format"] for step in evidence} == {"json", "sarif"}
-    assert all(str(step["with"].get("exit-code")) == "0" for step in evidence)
-    assert all(
-        step["with"]["severity"] == "CRITICAL,HIGH,MEDIUM,UNKNOWN" for step in evidence
+        and "bioetl:${{ github.sha }}" in str(
+            step.get("with", {}).get("image-ref", "")
+        )
+    ]
+
+    assert len(app_scans) == 1
+    evidence = app_scans[0]
+    assert evidence["name"] == "Run full Trivy JSON evidence scan"
+    assert evidence["with"]["format"] == "json"
+    assert str(evidence["with"].get("exit-code")) == "0"
+    assert evidence["with"]["severity"] == "CRITICAL,HIGH,MEDIUM,UNKNOWN"
+    assert evidence["with"].get("ignore-unfixed") is False
+    assert evidence["with"].get("version") == "v0.70.0"
+
+    conversion = next(
+        step
+        for step in steps
+        if step.get("name") == "Convert canonical Trivy JSON evidence"
     )
-    enforcement = built["Enforce Trivy Critical High Medium policy"]
-    assert str(enforcement["with"].get("exit-code")) == "1"
-    assert enforcement["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
-    assert all(step["with"].get("ignore-unfixed") is False for step in evidence)
-    assert enforcement["with"].get("ignore-unfixed") is True
-    strict = built["Enforce full Trivy Critical High Medium zero policy"]
-    assert str(strict["with"].get("exit-code")) == "1"
-    assert strict["with"]["severity"] == "CRITICAL,HIGH,MEDIUM"
-    assert {
-        name: step["with"].get("ignore-unfixed") for name, step in built.items()
-    } == {
-        "Run full Trivy JSON evidence scan": False,
-        "Run full Trivy SARIF evidence scan": False,
-        "Enforce Trivy Critical High Medium policy": True,
-        "Enforce full Trivy Critical High Medium zero policy": False,
-    }
-    assert all(step["with"].get("version") == "v0.70.0" for step in built.values())
+    conversion_run = str(conversion["run"])
+    assert "trivy convert --format sarif" in conversion_run
+    assert "aquasec/trivy:" not in conversion_run
+    assert "test -s reports/security/trivy-results.sarif" in conversion_run
+
+    enforcement = next(
+        step
+        for step in steps
+        if step.get("name")
+        == "Enforce canonical Trivy Critical High Medium zero policy"
+    )
+    assert "--trivy-json reports/security/trivy-results.json" in enforcement["run"]
+    assert "--fail-on-blocking" in enforcement["run"]
 
 
 def test_docker_workflow_probes_shellless_runtime_and_default_health() -> None:
@@ -1501,18 +1532,16 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert step_names.index("Generate Trivy fixability audit") < step_names.index(
         "Validate complete security baseline"
     )
-    assert step_names.index("Enforce fixable Trivy Critical High Medium policy") < (
-        step_names.index("Export exact scanned image for publication")
-    )
-    assert step_names.index("Enforce full Trivy Critical High Medium zero policy") < (
-        step_names.index("Export exact scanned image for publication")
-    )
+    assert step_names.index(
+        "Enforce canonical Trivy Critical High Medium zero policy"
+    ) < step_names.index("Export exact scanned image for publication")
 
 
 def test_docker_security_gate_covers_dependency_build_inputs() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     trigger = workflow.get("on", workflow.get(True))
     assert isinstance(trigger, dict)
+    assert "workflow_call" in trigger
     for event in ("push", "pull_request"):
         paths = set(trigger[event]["paths"])
         assert {
