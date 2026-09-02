@@ -468,11 +468,33 @@ jobs:
       - name: Validate repaired surfaces
         run: |
           set -euo pipefail
-          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build             python -m scripts.docs passports check --require-clean-source
-          uv run --frozen --no-build python -m scripts.docs             generate-cleanup-inventory --check
-          uv run --frozen --no-build python -m scripts.engineering.repo             check-inventory             --manifest configs/quality/scripts_inventory_manifest.json             --check-lifecycle             --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
-          uv run --frozen --no-build ruff format --check             tests/architecture/test_ci_heavy_lane_rebalance.py             tests/unit/scripts/ops/observability/test_action_target_routes.py
-          uv run --frozen --no-build pytest             tests/architecture/test_ci_heavy_lane_rebalance.py             tests/architecture/test_low_coverage_targeted_tests_6045.py             tests/architecture/test_module_coverage_inventory_freshness.py             tests/architecture/test_scripts_inventory_manifest.py             tests/architecture/test_scripts_lifecycle_registry.py             tests/architecture/test_scripts_inventory_zero_reference_ratchet.py             tests/unit/scripts/ops/observability/test_action_target_routes.py             -q --tb=short
+          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build \
+            python -m scripts.docs passports check --require-clean-source
+          uv run --frozen --no-build python -m scripts.docs \
+            generate-cleanup-inventory --check
+          uv run --frozen --no-build python -m scripts.engineering.qa \
+            report-contract-coverage-matrix --check
+          uv run --frozen --no-build python -m scripts.engineering.repo \
+            check-inventory \
+            --manifest configs/quality/scripts_inventory_manifest.json \
+            --check-lifecycle \
+            --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+          uv run --frozen --no-build ruff format --check \
+            scripts/engineering/ci/update_test_telemetry_baseline.py \
+            tests/architecture/test_ci_heavy_lane_rebalance.py \
+            tests/unit/scripts/ops/observability/test_action_target_routes.py
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_ci_heavy_lane_rebalance.py \
+            tests/architecture/test_contract_coverage_matrix_drift.py \
+            tests/architecture/test_github_actions_runtime_policy.py::test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners \
+            tests/architecture/test_low_coverage_targeted_tests_6045.py \
+            tests/architecture/test_module_coverage_inventory_freshness.py \
+            tests/architecture/test_scripts_inventory_manifest.py \
+            tests/architecture/test_scripts_lifecycle_registry.py \
+            tests/architecture/test_scripts_inventory_zero_reference_ratchet.py \
+            tests/architecture/test_test_telemetry_governance.py \
+            tests/unit/scripts/ops/observability/test_action_target_routes.py \
+            -q --tb=short
 
       - name: Restore temporary coordinator and verify generated allowlist
         run: |
