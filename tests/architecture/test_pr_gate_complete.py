@@ -45,6 +45,7 @@ EXPECTED_CANONICAL_CHECKS = {
     "docs-governance",
 }
 
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 

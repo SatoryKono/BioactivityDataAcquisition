@@ -41,9 +41,7 @@ ALWAYS_ON_REQUIRED_CHECKS = {
 SHA_OR_PR_CONCURRENCY_GROUP = (
     "${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}"
 )
-SHA_OR_PR_CONCURRENCY_SUFFIX = (
-    "${{ github.event.pull_request.number || github.sha }}"
-)
+SHA_OR_PR_CONCURRENCY_SUFFIX = "${{ github.event.pull_request.number || github.sha }}"
 REUSABLE_MAIN_CONCURRENCY_PREFIXES = {
     TESTS_WORKFLOW: "tests-",
     ALWAYS_ON_REQUIRED_CHECKS["checks-complete"]: "lint-architecture-",
@@ -209,8 +207,9 @@ def test_github_policy_python_version_claims_match_workflows() -> None:
     assert "2. Test Install  → Python 3.13" in policy_doc
 
 
-def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners(
-) -> None:
+def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners() -> (
+    None
+):
     policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
     coordinator_path = ROOT / ".github" / "workflows" / "pr-required.yml"
     coordinator = _load_yaml(coordinator_path)
@@ -267,8 +266,7 @@ def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
         group = str(concurrency["group"])
         if path in REUSABLE_MAIN_CONCURRENCY_PREFIXES:
             assert group == (
-                REUSABLE_MAIN_CONCURRENCY_PREFIXES[path]
-                + SHA_OR_PR_CONCURRENCY_SUFFIX
+                REUSABLE_MAIN_CONCURRENCY_PREFIXES[path] + SHA_OR_PR_CONCURRENCY_SUFFIX
             ), path.name
             assert "${{ github.workflow }}" not in group, path.name
         else:

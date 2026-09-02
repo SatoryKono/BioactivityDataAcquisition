@@ -96,9 +96,9 @@ def test_classifier_fails_closed_for_empty_or_unclassified_diff() -> None:
     unknown = classify_changes(_catalog(), ["unowned.file"], head_sha=HEAD_SHA)
 
     for matrix in (empty, unknown):
-        assert {
-            value["decision"] for value in matrix["decisions"].values()
-        } == {REQUIRED}
+        assert {value["decision"] for value in matrix["decisions"].values()} == {
+            REQUIRED
+        }
 
 
 def test_path_globs_preserve_root_only_star_semantics() -> None:

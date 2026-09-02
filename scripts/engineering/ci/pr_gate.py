@@ -97,8 +97,7 @@ def _match_path_pattern(path: str, pattern: str) -> bool:
             matched = path_index == len(path_parts)
         elif pattern_parts[pattern_index] == "**":
             matched = visit(pattern_index + 1, path_index) or (
-                path_index < len(path_parts)
-                and visit(pattern_index, path_index + 1)
+                path_index < len(path_parts) and visit(pattern_index, path_index + 1)
             )
         else:
             matched = (
@@ -138,11 +137,7 @@ def classify_changes(
 ) -> dict[str, Any]:
     """Return a versioned decision matrix; unclassified paths fail closed."""
     normalized = sorted(
-        {
-            path.strip().replace("\\", "/")
-            for path in changed_files
-            if path.strip()
-        }
+        {path.strip().replace("\\", "/") for path in changed_files if path.strip()}
     )
     gates = [cast(dict[str, Any], gate) for gate in catalog["gates"]]
     anchor_gates = [
@@ -274,8 +269,7 @@ def evaluate_results(
         failures.append("decision matrix config_version mismatch")
 
     gates = {
-        cast(str, gate["id"]): cast(dict[str, Any], gate)
-        for gate in catalog["gates"]
+        cast(str, gate["id"]): cast(dict[str, Any], gate) for gate in catalog["gates"]
     }
     decisions = decision_matrix.get("decisions")
     if not isinstance(decisions, dict):

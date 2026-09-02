@@ -73,7 +73,7 @@ def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
     """Unchanged full-corpus freshness remains owned by diagram-nightly."""
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
 
-    assert 'EVENT_NAME: ${{ github.event_name }}' in workflow
+    assert "EVENT_NAME: ${{ github.event_name }}" in workflow
     assert '"${BASE_REF}" != "main" && "${BASE_REF}" != "develop"' in workflow
     assert 'git diff --name-only "origin/${BASE_REF}"...HEAD' in workflow
     assert "'*.mmd' '*.mermaid'" in workflow

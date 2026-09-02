@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-08-11T13:16:25+00:00_
+_Generated: 2026-09-02T13:36:31+00:00_
 
 ## High Level Hexagonal Simple
 
@@ -200,57 +200,57 @@ _Generated: 2026-08-11T13:16:25+00:00_
 
 ---
 
-## 13a Data Storage Ports
+## 13adata Storage Ports
 
 ![13a-data-storage-ports](./13a-data-storage-ports.svg)
 
 ---
 
-## 13g Port Contracts Data Sources
-
-![13g-port-contracts-data-sources](./13g-port-contracts-data-sources.svg)
-
----
-
-## 13b Operational Ports
+## 13boperational Ports
 
 ![13b-operational-ports](./13b-operational-ports.svg)
 
 ---
 
-## 13h Port Contracts Storage
-
-![13h-port-contracts-storage](./13h-port-contracts-storage.svg)
-
----
-
-## 13i Port Contracts Observability
-
-![13i-port-contracts-observability](./13i-port-contracts-observability.svg)
-
----
-
-## 13c Validation DQ Ports
+## 13cvalidation Dq Ports
 
 ![13c-validation-dq-ports](./13c-validation-dq-ports.svg)
 
 ---
 
-## 13d Port Contracts Services
+## 13dport Contracts Services
 
 ![13d-port-contracts-services](./13d-port-contracts-services.svg)
 
 ---
 
-## 13e Operational Ports Domain
+## 13eoperational Ports Domain
 
 ![13e-operational-ports-domain](./13e-operational-ports-domain.svg)
 
 ---
 
-## 13f Operational Ports Infra
+## 13foperational Ports Infra
 
 ![13f-operational-ports-infra](./13f-operational-ports-infra.svg)
+
+---
+
+## 13gport Contracts Data Sources
+
+![13g-port-contracts-data-sources](./13g-port-contracts-data-sources.svg)
+
+---
+
+## 13hport Contracts Storage
+
+![13h-port-contracts-storage](./13h-port-contracts-storage.svg)
+
+---
+
+## 13iport Contracts Observability
+
+![13i-port-contracts-observability](./13i-port-contracts-observability.svg)
 
 ---
 

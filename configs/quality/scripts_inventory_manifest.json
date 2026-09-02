@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T08:25:32.958437+00:00",
+  "generated_at": "2026-09-02T13:36:52.594628+00:00",
   "summary": {
-    "total_scripts": 609,
+    "total_scripts": 610,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 271
     },
     "reference_group_coverage": {
       "agents": 8,
       "build": 17,
-      "ci": 82,
+      "ci": 83,
       "docs": 253,
       "other": 74,
       "scripts": 508,
       "skills": 12,
-      "tests": 419
+      "tests": 420
     }
   },
   "scripts": [
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1787,
+          "line": 1898,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -5794,7 +5794,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 227,
+          "line": 177,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.data_quality"
         },
@@ -5985,7 +5985,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 474,
+          "line": 467,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -6040,7 +6040,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 131,
+          "line": 81,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \\"
         },
@@ -6154,13 +6154,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 340,
+          "line": 290,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 425,
+          "line": 398,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_artifacts.py \\"
         },
@@ -6211,7 +6211,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 447,
+          "line": 420,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_quality_gates.py \\"
         },
@@ -6288,7 +6288,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 436,
+          "line": 409,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_diagram_visual_smoke.py \\"
         },
@@ -6366,13 +6366,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 343,
+          "line": 293,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 430,
+          "line": 403,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check/check_svg_text_visibility.py \\"
         },
@@ -6802,7 +6802,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 442,
+          "line": 415,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/fix/harmonize_link_styles.py --dry-run --fail-on-errors"
         },
@@ -7098,9 +7098,9 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 380,
+          "line": 353,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/lint/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
+          "text": "python3 scripts/diagrams/lint/lint_diagrams.py \"${lint_targets[@]}\" --json > /tmp/diagram-lint.json"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
@@ -7143,7 +7143,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 383,
+          "line": 356,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -7419,7 +7419,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 138,
+          "line": 88,
           "source_group": "ci",
           "text": "scripts/diagrams/render/generate_package_family_class_diagrams.py --check"
         },
@@ -7903,7 +7903,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 373,
+          "line": 323,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -8269,7 +8269,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 216,
+          "line": 166,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.docs check-links --report-json reports/docs-link-check-report.json"
         },
@@ -9654,13 +9654,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 437,
+          "line": 430,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 613,
+          "line": 603,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -9898,7 +9898,7 @@
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 196,
+          "line": 197,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -10004,6 +10004,21 @@
       ]
     },
     {
+      "path": "scripts/engineering/ci/pr_gate.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py",
+          "line": 10,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.pr_gate import ("
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/ci/quality_integral_gate.py",
       "type": "py",
       "status": "active",
@@ -10098,13 +10113,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1369,
+          "line": 1351,
           "source_group": "ci",
-          "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
+          "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
         {
           "path": "docs/03-guides/coverage-configuration.md",
@@ -10141,6 +10156,12 @@
           "line": 216,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
+        },
+        {
+          "path": "tests/architecture/test_test_matrix_lane_policy.py",
+          "line": 397,
+          "source_group": "tests",
+          "text": "assert \"run_pytest_resilient.py\" in serial_runs"
         }
       ]
     },
@@ -10833,7 +10854,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1856,
+          "line": 1967,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -11245,8 +11266,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 24,
       "references": [
+        {
+          "path": ".github/workflows/import-linter.yml",
+          "line": 236,
+          "source_group": "ci",
+          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
+        },
         {
           "path": "Makefile",
           "line": 368,
@@ -11288,12 +11315,6 @@
           "line": 943,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
-        },
-        {
-          "path": "docs/03-guides/testing.md",
-          "line": 980,
-          "source_group": "docs",
-          "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
       ]
     },
@@ -12058,7 +12079,7 @@
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 41,
+          "line": 42,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -12851,7 +12872,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 480,
+          "line": 473,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -13238,7 +13259,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 421,
+          "line": 414,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -13287,13 +13308,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 49,
-          "source_group": "ci",
-          "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 99,
+          "line": 50,
           "source_group": "ci",
           "text": "- 'scripts/engineering/qa/check_xwalk_missing_backlog.py'"
         },
@@ -13308,6 +13323,12 @@
           "line": 109,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
+        },
+        {
+          "path": "tests/architecture/test_docs_governance_workflow.py",
+          "line": 58,
+          "source_group": "tests",
+          "text": "\"scripts/engineering/qa/check_xwalk_missing_backlog.py\","
         },
         {
           "path": "tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py",
@@ -14011,19 +14032,19 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 234,
+          "line": 184,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 238,
+          "line": 188,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 665,
+          "line": 655,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -16487,7 +16508,7 @@
         },
         {
           "path": "tests/architecture/test_test_matrix_lane_policy.py",
-          "line": 371,
+          "line": 497,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/run_architecture_audit_read_only.py\""
         },
@@ -16508,17 +16529,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
         {
           "path": ".github/workflows/docker.yml",
-          "line": 19,
-          "source_group": "ci",
-          "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
-        },
-        {
-          "path": ".github/workflows/docker.yml",
-          "line": 38,
+          "line": 20,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
@@ -16878,19 +16893,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 177,
+          "line": 170,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 180,
+          "line": 173,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 186,
+          "line": 179,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -16976,7 +16991,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 177,
+          "line": 170,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -17027,7 +17042,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 180,
+          "line": 173,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -17084,7 +17099,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 186,
+          "line": 179,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -17186,13 +17201,13 @@
         },
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
-          "line": 51,
+          "line": 46,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-cleanliness"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 213,
+          "line": 163,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-versions"
         },
@@ -17460,7 +17475,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 426,
+          "line": 458,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17574,7 +17589,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 418,
+          "line": 411,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -17631,7 +17646,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 410,
+          "line": 403,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -19389,7 +19404,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 346,
+          "line": 378,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
@@ -19460,7 +19475,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 183,
+          "line": 176,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
@@ -22276,7 +22291,7 @@
         },
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 46,
+          "line": 47,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/ops/support/repo/cleanup_repository.py"
         },
@@ -22306,7 +22321,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 64,
+          "line": 67,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         },
@@ -22473,13 +22488,13 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 67,
+          "line": 53,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema generate-artifacts --check"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 123,
+          "line": 109,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.schema verify-schema-parity --mode blocking"
         }
@@ -22628,17 +22643,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 18,
-          "source_group": "ci",
-          "text": "- 'scripts/schema/analysis/generate_json_field_typing_inventory.py'"
-        },
-        {
-          "path": ".github/workflows/schema-governance.yml",
-          "line": 32,
+          "line": 19,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_json_field_typing_inventory.py'"
         },
@@ -22667,17 +22676,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 30,
-          "source_group": "ci",
-          "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
-        },
-        {
-          "path": ".github/workflows/docs.yml",
-          "line": 80,
+          "line": 31,
           "source_group": "ci",
           "text": "- 'scripts/schema/analysis/generate_unified_schema_map.py'"
         },
@@ -22724,17 +22727,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 15,
-          "source_group": "ci",
-          "text": "- 'scripts/schema/generation/generate_contracts.py'"
-        },
-        {
-          "path": ".github/workflows/schema-governance.yml",
-          "line": 29,
+          "line": 16,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_contracts.py'"
         },
@@ -22773,6 +22770,12 @@
           "line": 70,
           "source_group": "tests",
           "text": "/ \"generate_contracts.py\""
+        },
+        {
+          "path": "tests/unit/scripts/test_generate_contracts.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.schema.generation import generate_contracts as generator"
         }
       ]
     },
@@ -22872,17 +22875,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 6,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 16,
-          "source_group": "ci",
-          "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
-        },
-        {
-          "path": ".github/workflows/schema-governance.yml",
-          "line": 30,
+          "line": 17,
           "source_group": "ci",
           "text": "- 'scripts/schema/generation/generate_schema_artifacts.py'"
         },
@@ -23152,17 +23149,11 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 17,
-          "source_group": "ci",
-          "text": "- 'scripts/schema/validation/verify_schema_parity.py'"
-        },
-        {
-          "path": ".github/workflows/schema-governance.yml",
-          "line": 31,
+          "line": 18,
           "source_group": "ci",
           "text": "- 'scripts/schema/validation/verify_schema_parity.py'"
         },
