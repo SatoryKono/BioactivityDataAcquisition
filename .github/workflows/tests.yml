@@ -977,7 +977,7 @@ jobs:
           mkdir -p reports/coverage
           # Serial: passport projector and many script tests use repo FS/subprocess.
           uv run --frozen --no-build pytest ${{ matrix.test-group.path }} \
-            -m "not benchmark and not memory" \
+            -m "not slow and not benchmark and not memory" \
             -p no:xdist -q --tb=short \
             --junitxml=reports/test-telemetry/junit-unit-scripts-tooling.${{ matrix.test-group.name }}.xml \
             --cov=src/bioetl --cov-report=
@@ -1509,6 +1509,36 @@ jobs:
             exit 1
           fi
 
+  tests-complete:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - vcr-preflight
+      - control-plane-e2e
+      - flaky-telemetry
+      - neo4j-memory-live-audit
+      - config-schema-preflight
+      - track-d-gates
+      - dq-consistency-gate
+      - quality-metrics-gate
+      - memory-tests
+      - performance-budgets
+      - coverage-inventory-currentness
+    permissions:
+      contents: read
+    steps:
+      - name: Fail closed on every blocking Tests lane
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          if ! jq -e 'all(.[]; .result == "success")' <<< "$NEEDS_JSON"; then
+            echo "::error::One or more blocking Tests lanes failed, were cancelled, or were skipped."
+            jq -r 'to_entries[] | "\(.key)=\(.value.result)"' <<< "$NEEDS_JSON"
+            exit 1
+          fi
+          echo "All blocking Tests lanes completed successfully."
+
   duration-telemetry:
     if: always()
     runs-on: ubuntu-latest
@@ -1549,9 +1579,9 @@ jobs:
           shopt -s nullglob
 
           unit_junit=()
-          if [ -f reports/test-telemetry/raw/junit-fast.xml ]; then
-            unit_junit+=(reports/test-telemetry/raw/junit-fast.xml)
-          fi
+          for junit_path in reports/test-telemetry/raw/junit-fast.*.xml; do
+            unit_junit+=("$junit_path")
+          done
           for junit_path in reports/test-telemetry/raw/junit.unit-*.xml; do
             unit_junit+=("$junit_path")
           done
@@ -1568,13 +1598,30 @@ jobs:
               "${junit_args[@]}"
           fi
 
-          if [ -f reports/test-telemetry/raw/junit-repo-backed-unit.xml ]; then
+          repo_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-repo-backed-unit.*.xml; do
+            repo_junit+=(--junit "$junit_path")
+          done
+          if [ "${#repo_junit[@]}" -gt 0 ]; then
             uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
               --suite repo-backed-unit \
               --run-id "repo-backed-unit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
               --reports-dir reports/quality/test-runs \
-              --junit reports/test-telemetry/raw/junit-repo-backed-unit.xml \
-              --command "tests.yml repo-backed-unit lane"
+              --command "tests.yml repo-backed-unit shards" \
+              "${repo_junit[@]}"
+          fi
+
+          scripts_junit=()
+          for junit_path in reports/test-telemetry/raw/junit-unit-scripts-tooling.*.xml; do
+            scripts_junit+=(--junit "$junit_path")
+          done
+          if [ "${#scripts_junit[@]}" -gt 0 ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite unit-scripts-tooling \
+              --run-id "unit-scripts-tooling-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --command "tests.yml unit-scripts-tooling shards" \
+              "${scripts_junit[@]}"
           fi
 
           if [ -f reports/test-telemetry/raw/junit.integration.xml ]; then
