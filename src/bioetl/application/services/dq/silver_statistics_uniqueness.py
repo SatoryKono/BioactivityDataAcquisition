@@ -100,9 +100,7 @@ def check_uniqueness_stats(
         )
 
     total_count = len(df)
-    # ⚡ Bolt: Use df.n_unique(subset=...) instead of df.select().unique().height
-    # Performance impact: Avoids materializing a new DataFrame in memory and skips an intermediate .select() projection.
-    # Reduces peak memory usage and compute time significantly for large datasets.
+    # Count distinct key tuples without materializing a unique DataFrame.
     unique_count = df.n_unique(subset=existing_keys)
     duplicate_count = total_count - unique_count
     duplicate_rate = duplicate_count / total_count if total_count > 0 else 0.0

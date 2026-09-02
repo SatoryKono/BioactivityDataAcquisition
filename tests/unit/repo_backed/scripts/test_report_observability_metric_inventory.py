@@ -19,6 +19,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from scripts.engineering.qa import observability_metric_inventory_scan as inventory_scan
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 
 # Repo-backed lane: two entrypoint tests spawn the module via subprocess with
@@ -1386,3 +1387,39 @@ def test_load_drift_allowlist_rejects_non_iso_review_dates(
         raise AssertionError(
             "runtime_cardinality_review_required must reject non-ISO review_date values"
         )
+
+
+def test_iter_candidate_paths_with_git_grep_includes_no_color_flag(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test that _iter_candidate_paths_with_git_grep passes --no-color to prevent ANSI-suffixed paths."""
+    scan_root = inventory_scan._REPO_ROOT / "src" / "bioetl"
+    captured_commands: list[list[str]] = []
+
+    def fake_run_text_discovery_command(
+        command: list[str],
+        *,
+        timeout: float,
+    ) -> tuple[subprocess.CompletedProcess[str], str]:
+        captured_commands.append(command)
+        assert timeout == inventory_scan._TEXT_DISCOVERY_TIMEOUT_SECONDS
+        return (
+            subprocess.CompletedProcess(args=command, returncode=0),
+            "src/bioetl/example_module.py\n",
+        )
+
+    monkeypatch.setattr(
+        inventory_scan,
+        "_run_text_discovery_command",
+        fake_run_text_discovery_command,
+    )
+
+    paths = inventory_scan._iter_candidate_paths_with_git_grep(
+        scan_root,
+        markers=("increment_counter",),
+        excluded_parts=(),
+    )
+
+    assert len(captured_commands) == 1
+    assert "--no-color" in captured_commands[0]
+    assert paths == [inventory_scan._REPO_ROOT / "src/bioetl/example_module.py"]

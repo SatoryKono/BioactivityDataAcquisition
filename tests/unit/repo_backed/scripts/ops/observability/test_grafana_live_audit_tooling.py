@@ -277,6 +277,25 @@ def test_live_audit_rejects_malformed_processed_record_cells(
     assert expected_error in error
 
 
+def test_live_audit_accepts_v2_processed_records_no_data_payload() -> None:
+    classification, detail = audit_subject._classify_processed_records_payload(
+        {
+            "contract": "processed_records_table_v2",
+            "rows": [
+                {
+                    "parameter": "01 bronze_records",
+                    "value": "UNKNOWN",
+                    "percentage": "UNKNOWN",
+                    "row_status": "",
+                }
+            ],
+        }
+    )
+
+    assert classification == "no_data"
+    assert "only No data values" in detail
+
+
 def test_semantic_gate_maps_unknown_denominator_to_review_required(
     monkeypatch: Any,
 ) -> None:
