@@ -1,0 +1,1 @@
+for j in data['jobs']:\n    if j['name']=='repo-backed-unit':\n        print(fmt(j));\n        for s in j['steps']:\n            if s['conclusion']!='success':\n                print('  ', s['name'], s['conclusion'], '-, s['completedAt'])\",\"C:\Users\Fedor\AppData\Local\Temp\parse_jobs.py
