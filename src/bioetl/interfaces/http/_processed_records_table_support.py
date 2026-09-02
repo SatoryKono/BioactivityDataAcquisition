@@ -154,7 +154,22 @@ def fetch_processed_record_values(
     pipeline: str,
     run_type: str | None,
 ) -> dict[str, float | None]:
-    """Fetch all visible Processed Records values in one Prometheus request."""
+    """Fetch all visible Processed Records values in one Prometheus request.
+
+    Parameters
+    ----------
+    prometheus_base_url : str
+        Base URL of the Prometheus server.
+    pipeline : str
+        Pipeline name to filter metrics.
+    run_type : str | None
+        Run type to filter metrics, or None for all run types.
+
+    Returns
+    -------
+    dict[str, float | None]
+        Dictionary mapping metric names to their values, or None if unavailable.
+    """
     metric_values: dict[str, float | None] = {
         spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS
     }
@@ -172,7 +187,18 @@ def fetch_processed_record_values(
 
 
 def read_processed_records_run_id(raw: str | None) -> RunID | None:
-    """Return an exact RunID selector, treating dashboard placeholder tokens as empty."""
+    """Return an exact RunID selector, treating dashboard placeholder tokens as empty.
+
+    Parameters
+    ----------
+    raw : str | None
+        Raw string value from query parameter.
+
+    Returns
+    -------
+    RunID | None
+        Parsed RunID if valid UUID string, None for placeholder tokens or invalid input.
+    """
     tokens = _selector_tokens(raw)
     if len(tokens) != 1:
         return None
@@ -188,6 +214,18 @@ def read_processed_records_run_id(raw: str | None) -> RunID | None:
 def latest_metrics_snapshot(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> dict[str, int] | None:
+    """Extract the most recent metrics snapshot from ledger entries.
+
+    Parameters
+    ----------
+    ledger_entries : tuple[RunLedgerEntry, ...]
+        Run ledger entries to search, in chronological order.
+
+    Returns
+    -------
+    dict[str, int] | None
+        Most recent metrics snapshot dictionary, or None if no snapshot found.
+    """
     for entry in reversed(ledger_entries):
         if entry.metrics_snapshot:
             return dict(entry.metrics_snapshot)
@@ -197,6 +235,18 @@ def latest_metrics_snapshot(
 def published_layer_artifact_counts(
     ledger_entries: tuple[RunLedgerEntry, ...],
 ) -> dict[str, int]:
+    """Extract record counts for published artifacts from ledger entries.
+
+    Parameters
+    ----------
+    ledger_entries : tuple[RunLedgerEntry, ...]
+        Run ledger entries containing artifact publication events.
+
+    Returns
+    -------
+    dict[str, int]
+        Mapping of layer names (bronze, silver, gold) to their record counts.
+    """
     counts: dict[str, int] = {}
     for entry in ledger_entries:
         if entry.event_type != ARTIFACT_PUBLISHED_EVENT:
@@ -215,6 +265,22 @@ def _processed_record_value_query(
     pipeline: str,
     run_type: str | None,
 ) -> str:
+    """Build a PromQL query to fetch a single processed record metric value.
+
+    Parameters
+    ----------
+    metric : str
+        Metric name to query.
+    pipeline : str
+        Pipeline name selector.
+    run_type : str | None
+        Run type selector, or None for all run types.
+
+    Returns
+    -------
+    str
+        PromQL query string with rounded sum aggregation.
+    """
     pipeline_regex = _promql_string(_selector_regex(pipeline))
     run_type_regex = _promql_string(_selector_regex(run_type))
     return (
@@ -228,7 +294,20 @@ def _processed_record_values_query(
     pipeline: str,
     run_type: str | None,
 ) -> str:
-    """Build one vector query while retaining metric names as row keys."""
+    """Build one vector query while retaining metric names as row keys.
+
+    Parameters
+    ----------
+    pipeline : str
+        Pipeline name selector.
+    run_type : str | None
+        Run type selector, or None for all run types.
+
+    Returns
+    -------
+    str
+        PromQL query string that aggregates all processed record metrics.
+    """
     pipeline_regex = _promql_string(_selector_regex(pipeline))
     run_type_regex = _promql_string(_selector_regex(run_type))
     metric_regex = (
@@ -244,14 +323,50 @@ def _processed_record_values_query(
 
 
 def selector_tokens(raw: str | None) -> tuple[str, ...]:
+    """Parse a raw selector string into individual tokens.
+
+    Parameters
+    ----------
+    raw : str | None
+        Raw selector string to parse.
+
+    Returns
+    -------
+    tuple[str, ...]
+        Tuple of individual selector tokens.
+    """
     return _selector_tokens(raw)
 
 
 def is_unknown_scope(raw: str | None) -> bool:
+    """Check if a raw selector represents an unknown scope.
+
+    Parameters
+    ----------
+    raw : str | None
+        Raw selector string to check.
+
+    Returns
+    -------
+    bool
+        True if the selector represents unknown scope, False otherwise.
+    """
     return _selector_tokens(raw) == (_UNKNOWN_SCOPE,)
 
 
 def as_float(value: float | int | None) -> float | None:
+    """Convert a numeric value to float.
+
+    Parameters
+    ----------
+    value : float | int | None
+        Numeric value to convert.
+
+    Returns
+    -------
+    float | None
+        Float representation of the value, or None if input is None.
+    """
     return _as_float(value)
 
 
@@ -259,14 +374,54 @@ def sum_metric_values(
     metric_values: dict[str, float | int | None],
     metrics: tuple[str, ...],
 ) -> float | None:
+    """Sum values for multiple metrics from a metric values dictionary.
+
+    Parameters
+    ----------
+    metric_values : dict[str, float | int | None]
+        Dictionary mapping metric names to their values.
+    metrics : tuple[str, ...]
+        Tuple of metric names to sum.
+
+    Returns
+    -------
+    float | None
+        Sum of the metric values, or None if all values are None.
+    """
     return _sum_metric_values(metric_values, metrics)
 
 
 def count_text(value: float | None) -> str:
+    """Convert a numeric count to its string representation.
+
+    Parameters
+    ----------
+    value : float | None
+        Numeric count value.
+
+    Returns
+    -------
+    str
+        String representation of the count, or "UNKNOWN" if value is None.
+    """
     return _count_text(value)
 
 
 def padded_count_text(value: float | None, width: int) -> str:
+    """Convert a numeric count to right-justified string representation.
+
+    Parameters
+    ----------
+    value : float | None
+        Numeric count value.
+    width : int
+        Minimum field width for right justification.
+
+    Returns
+    -------
+    str
+        Right-justified string representation, or "UNKNOWN" if value is None.
+    """
     count_text = _count_text(value)
     if value is None:
         return count_text
@@ -291,6 +446,22 @@ def row_status(
     silver_deficit: bool,
     gold_deficit: bool,
 ) -> str:
+    """Determine the status indicator for a processed records table row.
+
+    Parameters
+    ----------
+    parameter : str
+        Row parameter identifier.
+    silver_deficit : bool
+        Whether a silver layer deficit exists.
+    gold_deficit : bool
+        Whether a gold layer deficit exists.
+
+    Returns
+    -------
+    str
+        Status string ("silver_deficit", "gold_deficit", or empty string).
+    """
     if silver_deficit and parameter in _SILVER_PARAMETERS:
         return "silver_deficit"
     if gold_deficit and parameter in _GOLD_PARAMETERS:
@@ -305,6 +476,24 @@ def format_percentage(
     denominator: _Denominator,
     percent_format: _PercentFormat,
 ) -> str:
+    """Format a processed record value as a percentage string.
+
+    Parameters
+    ----------
+    value : float | None
+        Numerator value.
+    bronze_value : float | None
+        Denominator value (bronze record count).
+    denominator : _Denominator
+        Denominator type ("constant_100" or "bronze").
+    percent_format : _PercentFormat
+        Format style ("constant_100", "fixed_1", or "trimmed_3").
+
+    Returns
+    -------
+    str
+        Formatted percentage string, or "UNKNOWN" if values unavailable.
+    """
     if denominator == "constant_100":
         return "100%" if value is not None else "UNKNOWN"
     if value is None or bronze_value is None or bronze_value == 0:

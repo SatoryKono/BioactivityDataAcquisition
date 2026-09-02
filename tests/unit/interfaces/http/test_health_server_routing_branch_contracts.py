@@ -25,7 +25,10 @@ class _Writer:
 
 
 class _ObservabilityHost:
+    """Test fixture host for observability endpoint routing tests."""
+
     def __init__(self) -> None:
+        """Initialize the observability host with mock dependencies."""
         self.sent: list[tuple[str, int, object]] = []
         self._forensic_endpoint_limiter = asyncio.Semaphore(1)
         self._prometheus_base_url = "http://prometheus.test"
@@ -33,6 +36,25 @@ class _ObservabilityHost:
 
     @staticmethod
     def _read_required_param(query: dict[str, str], name: str) -> str:
+        """Read a required query parameter.
+
+        Parameters
+        ----------
+        query : dict[str, str]
+            Query parameter dictionary.
+        name : str
+            Parameter name to read.
+
+        Returns
+        -------
+        str
+            Parameter value.
+
+        Raises
+        ------
+        ValueError
+            If parameter is missing or empty.
+        """
         value = query.get(name, "").strip()
         if not value:
             raise ValueError(f"Missing required query parameter: {name}")
@@ -40,6 +62,20 @@ class _ObservabilityHost:
 
     @staticmethod
     def _read_optional_param(query: dict[str, str], name: str) -> str | None:
+        """Read an optional query parameter.
+
+        Parameters
+        ----------
+        query : dict[str, str]
+            Query parameter dictionary.
+        name : str
+            Parameter name to read.
+
+        Returns
+        -------
+        str | None
+            Parameter value, or None if missing or empty.
+        """
         value = query.get(name, "").strip()
         return value or None
 
@@ -49,6 +85,17 @@ class _ObservabilityHost:
         status_code: int,
         message: str,
     ) -> None:
+        """Send a text response.
+
+        Parameters
+        ----------
+        writer : _Writer
+            Mock writer instance.
+        status_code : int
+            HTTP status code.
+        message : str
+            Response message text.
+        """
         self.sent.append(("text", status_code, message))
 
     async def _send_payload_response(
@@ -57,21 +104,51 @@ class _ObservabilityHost:
         status_code: int,
         payload: dict[str, object],
     ) -> None:
+        """Send a JSON payload response.
+
+        Parameters
+        ----------
+        writer : _Writer
+            Mock writer instance.
+        status_code : int
+            HTTP status code.
+        payload : dict[str, object]
+            JSON payload dictionary.
+        """
         self.sent.append(("payload", status_code, payload))
 
 
 class _ListPort:
+    """Mock port for listing items."""
+
     def __init__(self, items: tuple[object, ...] = ()) -> None:
+        """Initialize the list port with items.
+
+        Parameters
+        ----------
+        items : tuple[object, ...]
+            Items to return from list_all calls.
+        """
         self.items = items
         self.calls = 0
 
     def list_all(self) -> tuple[object, ...]:
+        """List all items and increment call counter.
+
+        Returns
+        -------
+        tuple[object, ...]
+            Configured items tuple.
+        """
         self.calls += 1
         return self.items
 
 
 class _RoutingHost(_ObservabilityHost):
+    """Test fixture host for control plane routing tests."""
+
     def __init__(self) -> None:
+        """Initialize the routing host with mock dependencies."""
         super().__init__()
         self._control_plane_evidence_service: object | None = None
         self._checkpoint_port: object | None = object()
@@ -82,6 +159,18 @@ class _RoutingHost(_ObservabilityHost):
 
     @staticmethod
     def _is_all_scope_token(value: str | None) -> bool:
+        """Check if a value represents an all-scope token.
+
+        Parameters
+        ----------
+        value : str | None
+            Value to check.
+
+        Returns
+        -------
+        bool
+            True if value is an all-scope token.
+        """
         return value in {"all", "$__all"}
 
     def _read_int_param(
@@ -92,6 +181,29 @@ class _RoutingHost(_ObservabilityHost):
         *,
         minimum: int,
     ) -> int:
+        """Read an integer query parameter with validation.
+
+        Parameters
+        ----------
+        query : dict[str, str]
+            Query parameter dictionary.
+        name : str
+            Parameter name.
+        default : int
+            Default value if parameter missing.
+        minimum : int
+            Minimum allowed value.
+
+        Returns
+        -------
+        int
+            Parameter value.
+
+        Raises
+        ------
+        ValueError
+            If value is below minimum.
+        """
         value = int(query.get(name, default))
         if value < minimum:
             raise ValueError(f"{name} must be >= {minimum}")
@@ -103,6 +215,20 @@ class _RoutingHost(_ObservabilityHost):
         query: dict[str, str],
         name: str,
     ) -> tuple[str, ...]:
+        """Read a comma-separated scope parameter.
+
+        Parameters
+        ----------
+        query : dict[str, str]
+            Query parameter dictionary.
+        name : str
+            Parameter name.
+
+        Returns
+        -------
+        tuple[str, ...]
+            Tuple of scope values, empty if all-scope token.
+        """
         value = cls._read_optional_param(query, name)
         if value is None or cls._is_all_scope_token(value):
             return ()
@@ -115,6 +241,22 @@ async def _inline_to_thread(
     *args: object,
     **kwargs: object,
 ) -> object:
+    """Execute a function inline instead of in a thread (test helper).
+
+    Parameters
+    ----------
+    function : Callable[..., object]
+        Function to execute.
+    *args : object
+        Positional arguments to pass to function.
+    **kwargs : object
+        Keyword arguments to pass to function.
+
+    Returns
+    -------
+    object
+        Result of function execution.
+    """
     return function(*args, **kwargs)
 
 
@@ -123,11 +265,32 @@ async def _run_operation_directly(
     limiter: asyncio.Semaphore,
     operation_factory: Callable[[], Awaitable[object]],
 ) -> object:
+    """Run an operation directly without limiter constraints (test helper).
+
+    Parameters
+    ----------
+    limiter : asyncio.Semaphore
+        Semaphore limiter (ignored in tests).
+    operation_factory : Callable[[], Awaitable[object]]
+        Factory function that produces the operation to execute.
+
+    Returns
+    -------
+    object
+        Result of the operation.
+    """
     del limiter
     return await operation_factory()
 
 
 def _writer() -> asyncio.StreamWriter:
+    """Create a mock StreamWriter for testing.
+
+    Returns
+    -------
+    asyncio.StreamWriter
+        Mock writer instance cast to StreamWriter type.
+    """
     return cast("asyncio.StreamWriter", _Writer())
 
 
@@ -135,6 +298,7 @@ def _writer() -> asyncio.StreamWriter:
 async def test_observability_dispatch_routes_every_endpoint_and_unknown(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test that observability dispatch correctly routes all endpoints and handles unknown paths."""
     host = _ObservabilityHost()
     writer = _writer()
     calls: list[tuple[str, dict[str, str]]] = []
@@ -182,6 +346,7 @@ async def test_observability_dispatch_routes_every_endpoint_and_unknown(
 async def test_observability_dispatch_maps_value_and_runtime_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test that observability dispatch maps ValueError to 400 and RuntimeError to 502."""
     host = _ObservabilityHost()
 
     async def invalid_request(*_args: object, **_kwargs: object) -> None:
@@ -221,6 +386,7 @@ async def test_observability_dispatch_maps_value_and_runtime_errors(
 async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test pipeline run report returns correct structure for unresolved and missing reports."""
     host = _ObservabilityHost()
     writer = _writer()
 
@@ -278,6 +444,7 @@ async def test_pipeline_run_report_returns_unresolved_and_missing_shells(
 async def test_workflow_report_handles_found_and_missing_payloads(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test workflow report handler returns correct status for found and missing payloads."""
     host = _ObservabilityHost()
     writer = _writer()
     monkeypatch.setattr(observability_routing.asyncio, "to_thread", _inline_to_thread)
@@ -319,6 +486,7 @@ async def test_workflow_report_handles_found_and_missing_payloads(
 async def test_report_lists_bound_limits_and_reject_invalid_values(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test report list endpoints enforce limit bounds and reject invalid limit values."""
     host = _ObservabilityHost()
     writer = _writer()
     calls: list[tuple[str, str | None, int]] = []
@@ -413,6 +581,7 @@ async def test_observability_endpoints_return_bounded_failure_contract(
     query: dict[str, str],
     endpoint: str,
 ) -> None:
+    """Test observability endpoints return correct failure contract when capacity exhausted."""
     host = _ObservabilityHost()
 
     async def capacity_exhausted(**_kwargs: object) -> object:
@@ -449,6 +618,7 @@ async def test_observability_endpoints_return_bounded_failure_contract(
 async def test_processed_records_prefers_exact_run_ledger(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test processed records table prefers exact run ledger over Prometheus fallback."""
     host = _ObservabilityHost()
     writer = _writer()
     seen: dict[str, object] = {}
@@ -539,6 +709,7 @@ async def test_processed_records_prefers_exact_run_ledger(
 async def test_control_plane_dispatch_fails_closed_for_missing_dependencies(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test control plane dispatch fails closed when required dependencies are missing."""
     host = _RoutingHost()
     writer = _writer()
 
@@ -604,6 +775,7 @@ async def test_control_plane_dispatch_fails_closed_for_missing_dependencies(
 async def test_control_plane_ops_dispatch_maps_runtime_errors_to_503(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test control plane ops dispatch maps runtime errors to 503 status."""
     host = _RoutingHost()
     writer = _writer()
 
@@ -632,6 +804,7 @@ async def test_control_plane_ops_dispatch_maps_runtime_errors_to_503(
 async def test_control_plane_ops_dispatch_delegates_every_endpoint(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test control plane ops dispatch correctly delegates to all endpoint handlers."""
     host = _RoutingHost()
     writer = _writer()
     calls: list[tuple[str, dict[str, str]]] = []
@@ -691,6 +864,7 @@ async def test_control_plane_ops_dispatch_delegates_every_endpoint(
 async def test_routing_helpers_cover_non_list_and_workflow_port_paths(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Test routing helper functions handle non-list payloads and workflow ports."""
     assert routing_support._string_payload_items({"items": []}) == ()
 
     workflow_port = _ListPort(("workflow-a", "workflow-b"))
@@ -706,6 +880,7 @@ async def test_routing_helpers_cover_non_list_and_workflow_port_paths(
 
 @pytest.mark.asyncio
 async def test_control_plane_ready_reports_missing_catalog_without_scanning() -> None:
+    """Test control plane ready endpoint reports missing catalog without scanning."""
     host = _RoutingHost()
     host._run_manifest_port = None
 

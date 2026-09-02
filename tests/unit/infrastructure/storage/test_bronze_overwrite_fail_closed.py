@@ -19,11 +19,20 @@ from bioetl.infrastructure.storage.bronze.io_mixin import (
 
 
 class _Mixin(BronzeWriterIOMixin):
+    """Test fixture providing a concrete BronzeWriterIOMixin implementation."""
+
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = 1
     COMPRESSION_CHUNK_SIZE = 65536
 
     def __init__(self, base_path: Path) -> None:
+        """Initialize the test mixin with mock dependencies.
+
+        Parameters
+        ----------
+        base_path : Path
+            Base directory for bronze storage.
+        """
         self.base_path = base_path
         self._flat_structure = True
         self.logger = MagicMock()
@@ -36,6 +45,7 @@ class _Mixin(BronzeWriterIOMixin):
 
 @pytest.mark.unit
 def test_bronze_same_payload_is_idempotent(tmp_path: Path) -> None:
+    """Verify that writing identical Bronze payloads is idempotent."""
     mixin = _Mixin(tmp_path)
     target = tmp_path / "batch.jsonl.zst"
     records = [b'{"id": 1}\n', b'{"id": 2}\n']
@@ -54,6 +64,7 @@ def test_bronze_different_payload_raises_file_exists(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify that writing different payloads to the same target raises FileExistsError."""
     mixin = _Mixin(tmp_path)
     target = tmp_path / "batch.jsonl.zst"
     mixin._write_atomic_stream(iter([b'{"id": 1}\n']), target)
@@ -124,6 +135,7 @@ def test_concurrent_identical_bronze_payload_is_idempotent(
 
 @pytest.mark.unit
 def test_sidecar_same_bytes_is_idempotent(tmp_path: Path) -> None:
+    """Verify that writing identical sidecar bytes is idempotent."""
     path = tmp_path / "batch.meta.json"
     payload = b'{"k": 1}'
     write_bytes_if_absent_or_same(path, payload, mismatch_message="mismatch")
@@ -133,6 +145,7 @@ def test_sidecar_same_bytes_is_idempotent(tmp_path: Path) -> None:
 
 @pytest.mark.unit
 def test_sidecar_different_bytes_raises(tmp_path: Path) -> None:
+    """Verify that writing different sidecar bytes raises FileExistsError."""
     path = tmp_path / "batch.meta.json"
     write_bytes_if_absent_or_same(
         path, b'{"k": 1}', mismatch_message="sidecar mismatch"
@@ -148,6 +161,7 @@ def test_payload_publish_failure_leaves_no_partial_final_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify that publish failure does not leave partial target files."""
     source = tmp_path / ".batch.tmp"
     target = tmp_path / "batch.jsonl.zst"
     source.write_bytes(b"complete-payload")
@@ -173,6 +187,7 @@ def test_publish_existing_target_raises_file_exists_cross_platform(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify cross-platform FileExistsError handling when target exists."""
     source = tmp_path / ".batch.tmp"
     target = tmp_path / "batch.jsonl.zst"
     source.write_bytes(b"complete-payload")
@@ -198,6 +213,7 @@ def test_sidecar_publish_failure_leaves_no_partial_final_target(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify sidecar publish failure does not leave partial target files."""
     target = tmp_path / "batch.meta.json"
 
     def fail_publish(source: Path, final_target: Path) -> None:
@@ -231,6 +247,7 @@ def test_concurrent_different_sidecar_is_not_overwritten(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Verify concurrent sidecar writes with different content fail without overwriting."""
     target = tmp_path / "batch.meta.json"
 
     def publish_other_writer(source: Path, final_target: Path) -> None:
