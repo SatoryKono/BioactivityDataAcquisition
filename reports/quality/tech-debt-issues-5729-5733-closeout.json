@@ -52,7 +52,7 @@
     "5729": {
       "coverage_actual_percent": 96.7,
       "coverage_percent": 96.7,
-      "refreshed_at_utc": "2026-09-01T22:02:45.268862+00:00",
+      "refreshed_at_utc": "2026-09-01T21:57:31.174594+00:00",
       "source_commit": "1bfa894c28ce58af0671c2721fd89a8b1cd05db0",
       "source_run_id": "33538533103",
       "source_tree_sha256": "0cd89c6cca5506529244b487be2c63ff31a8a8db8f0410d2341106d31261b996"
