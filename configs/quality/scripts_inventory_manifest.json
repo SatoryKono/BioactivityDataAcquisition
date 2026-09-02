@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T14:16:27.369+00:00",
+  "generated_at": "2026-09-02T14:28:55.206+00:00",
   "summary": {
     "total_scripts": 610,
     "status_counts": {
       "active": 338,
-      "orphan": 1,
-      "supporting": 271
+      "supporting": 272
     },
     "reference_group_coverage": {
       "agents": 8,
@@ -16,7 +15,7 @@
       "other": 74,
       "scripts": 508,
       "skills": 12,
-      "tests": 419
+      "tests": 420
     }
   },
   "scripts": [
@@ -19774,10 +19773,21 @@
     {
       "path": "scripts/ops/observability/grafana/action_target_routes.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/unit/scripts/ops/observability/test_dashboard_context_links.py",
+          "line": 17,
+          "source_group": "tests",
+          "text": "from scripts.ops.observability.grafana.action_target_routes import ("
+        }
+      ],
+      "owner": "@bioetl-observability",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-11-30",
+      "next_step": "Retain as the allowlisted action-target routing helper for Grafana operator handoffs; keep it supporting while dashboards and contract tests consume its centralized route policy."
     },
     {
       "path": "scripts/ops/observability/grafana/apply_dux2_residual.py",
