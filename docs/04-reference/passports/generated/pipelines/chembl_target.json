@@ -11,7 +11,7 @@
     {
       "diagram_id": "data_flow",
       "kind": "flowchart",
-      "mermaid": "flowchart LR\n    Source[\"chembl.target.curated\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.target + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.target (scd2)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
+      "mermaid": "flowchart LR\n    Source[\"chembl.target.curated\"]\n    Filters[\"Effective request/input filters\"]\n    Bronze[\"Bronze append-only snapshot\"]\n    Silver[\"Silver profile: chembl.target + DQ\"]\n    Quarantine[\"Quarantine / exclusion evidence\"]\n    Gold[\"Gold: chembl.target (configured)\"]\n    Source --> Filters --> Bronze --> Silver\n    Silver -->|valid| Gold\n    Silver -->|invalid| Quarantine"
     }
   ],
   "execution": {
@@ -21,7 +21,7 @@
       "run_ledger": true,
       "run_manifest": true
     },
-    "effective_config_hash": "sha256:c595ae2cdcaee031b84d451fb81d6420a308aa37c6b1b39d465cf91be0bd22d8",
+    "effective_config_hash": "sha256:f68921cabc91b8897542d74ad9a831264324f3429c7317465615dce95acca802",
     "projection_profiles": [
       "batch",
       "http"
@@ -301,17 +301,7 @@
       "strict": true
     },
     "contract_version": "3.0.0",
-    "write": {
-      "enabled": true,
-      "idempotency_contract": "scd2",
-      "mode": "scd2",
-      "scd_config": {
-        "current_flag_col": "_is_current",
-        "valid_from_col": "_valid_from",
-        "valid_to_col": "_valid_to",
-        "version_col": "_version"
-      }
-    }
+    "write": {}
   },
   "identity": {
     "aliases": [],
@@ -387,8 +377,8 @@
   "passport_schema_version": "1.0.0",
   "provenance": {
     "projector_version": "1.1.0",
-    "semantic_content_hash": "sha256:1159eb255f8942869bbdf58d24082bb94211a315acae8a28b2c01190054af270",
-    "source_revision": "76f32bb632b55c9960491d8df05abd5a51cf8504"
+    "semantic_content_hash": "sha256:823c7ba585bf206d936d80b474551890f28f9a7e929f18f8b3d98d57019ce3c0",
+    "source_revision": "862cb1a4e0b57cc9d6f42924396467b5b81ac22f"
   },
   "silver": {
     "column_projection": {

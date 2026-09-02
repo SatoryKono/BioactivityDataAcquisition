@@ -1,6 +1,6 @@
 {
   "after": {
-    "average_passport_lines": 81.0,
+    "average_passport_lines": 80.9,
     "duplicate_diagram_groups": 0,
     "duplicate_line_groups": 72,
     "duplicate_paragraph_groups": 13,
@@ -8,7 +8,7 @@
     "identity_duplicate_count": 0,
     "maximum_passport_lines": 88,
     "passport_count": 27,
-    "total_markdown_lines": 2187
+    "total_markdown_lines": 2184
   },
   "before": {
     "average_passport_lines": 241.1,
