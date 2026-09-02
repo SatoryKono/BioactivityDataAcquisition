@@ -211,3 +211,84 @@ jobs:
             reports/e2e/pytest_exit_code_live.txt
           if-no-files-found: warn
           retention-days: 14
+
+  e2e-nightly-full-replay:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      BIOETL_TEST_MODE: "true"
+      BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          lfs: false
+
+      - name: Fetch Git LFS objects for E2E
+        run: |
+          set -euo pipefail
+          if ! git lfs pull; then
+            echo "::error::Git LFS pull failed for e2e-nightly-full"
+            exit 1
+          fi
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Run full E2E replay (e2e and not e2e_smoke)
+        run: |
+          mkdir -p reports/e2e
+          VCR_RECORD_MODE=none uv run --frozen --no-build pytest tests/e2e -m "e2e and not e2e_smoke and not benchmark and not memory" --record-mode=none -q --tb=short --junitxml=reports/e2e/e2e-nightly-full.xml
+
+      - name: Upload full E2E replay artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        if: ${{ always() && !cancelled() }}
+        with:
+          name: e2e-nightly-full-replay
+          path: reports/e2e/e2e-nightly-full.xml
+          if-no-files-found: error
+          retention-days: 14
+
+  e2e-nightly-complete:
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - matrix-smoke-blocking
+      - matrix-smoke-nightly-live
+      - e2e-nightly-full-replay
+    steps:
+      - name: Validate E2E nightly results (fail-closed)
+        run: |
+          set -euo pipefail
+          echo "Event: ${{ github.event_name }}"
+          echo "matrix-smoke-blocking: ${{ needs.matrix-smoke-blocking.result }}"
+          echo "matrix-smoke-nightly-live: ${{ needs.matrix-smoke-nightly-live.result }}"
+          echo "e2e-nightly-full-replay: ${{ needs.e2e-nightly-full-replay.result }}"
+          # Fail if any executed job failed/cancelled
+          for result in "${{ needs.matrix-smoke-blocking.result }}" "${{ needs.matrix-smoke-nightly-live.result }}" "${{ needs.e2e-nightly-full-replay.result }}"; do
+            if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
+              echo "::error::E2E job failed: $result"
+              exit 1
+            fi
+          done
+          # On PR, blocking must be success
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            if [ "${{ needs.matrix-smoke-blocking.result }}" != "success" ]; then
+              echo "::error::PR requires matrix-smoke-blocking success"
+              exit 1
+            fi
+          fi
+          # On schedule, nightly jobs must be success
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${{ needs.matrix-smoke-nightly-live.result }}" != "success" ] || [ "${{ needs.e2e-nightly-full-replay.result }}" != "success" ]; then
+              echo "::error::Schedule requires nightly jobs success"
+              exit 1
+            fi
+          fi
+          echo "e2e-nightly-complete=success"
+
+

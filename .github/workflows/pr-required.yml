@@ -1,0 +1,351 @@
+name: PR Gate Complete
+# RF-002 / RF-005 of #9975 — always-materialized aggregator for all required checks.
+# Single required context: pr-gate-complete (fail-closed).
+# Coordinator runs on every pull_request without path exclusion.
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  classify-changes:
+    name: Classify changes (decision matrix)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.meta.outputs.head_sha }}
+      config_version: ${{ steps.meta.outputs.config_version }}
+      lint-arch: ${{ steps.decide.outputs.lint-arch }}
+      tests: ${{ steps.decide.outputs.tests }}
+      type-checking: ${{ steps.decide.outputs.type-checking }}
+      security: ${{ steps.decide.outputs.security }}
+      codeql: ${{ steps.decide.outputs.codeql }}
+      docker: ${{ steps.decide.outputs.docker }}
+      duplication: ${{ steps.decide.outputs.duplication }}
+      root-hygiene: ${{ steps.decide.outputs.root-hygiene }}
+      generated-artifacts: ${{ steps.decide.outputs.generated-artifacts }}
+      compiled-artifacts: ${{ steps.decide.outputs.compiled-artifacts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Collect metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "config_version=1" >> "$GITHUB_OUTPUT"
+          cat configs/quality/github_required_checks.yaml | head -n 20
+
+      - name: Decide required / not_applicable per gate
+        id: decide
+        run: |
+          set -euo pipefail
+          python - << 'PYEOF'
+          import os, subprocess, pathlib, yaml, json, sys, fnmatch
+          cfg = pathlib.Path("configs/quality/github_required_checks.yaml")
+          data = yaml.safe_load(cfg.read_text(encoding="utf-8"))
+          base_ref = os.environ.get("BASE_REF") or "${{ github.base_ref }}"
+          event_name = "${{ github.event_name }}"
+          sha = "${{ github.sha }}"
+          before = "${{ github.event.before }}"
+          changed = []
+          try:
+              if event_name == "pull_request" and base_ref:
+                  subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", base_ref], check=False)
+                  diff_range = f"origin/{base_ref}...HEAD"
+              else:
+                  if before and before != "0000000000000000000000000000000000000000":
+                      diff_range = f"{before}...{sha}"
+                  else:
+                      diff_range = "HEAD^...HEAD"
+              out = subprocess.run(["git", "diff", "--name-only", "--diff-filter=ACMR", diff_range], capture_output=True, text=True)
+              changed = [l.strip() for l in out.stdout.splitlines() if l.strip()]
+          except Exception as e:
+              print(f"::error:: classifier failed: {e}")
+              sys.exit(1)
+          print(f"Changed files: {changed[:50]}")
+          def matches_any(path, patterns):
+              for pat in patterns:
+                  if fnmatch.fnmatch(path, pat):
+                      return True
+                  if pat.endswith("/**") and path.startswith(pat[:-3]):
+                      return True
+                  if pat == path:
+                      return True
+              return False
+          outputs = {}
+          decisions = {}
+          for gate in data.get("gates", []):
+              gid = gate["id"]
+              decision_kind = gate.get("decision")
+              not_applicable_allowed = gate.get("not_applicable_allowed", False)
+              inc = gate.get("paths", {}).get("include") if isinstance(gate.get("paths"), dict) else gate.get("paths") if isinstance(gate.get("paths"), list) else []
+              if inc is None:
+                  inc = []
+              if decision_kind == "always_required" or not not_applicable_allowed:
+                  outputs[gid] = "required"
+                  decisions[gid] = {"decision": "required", "reason": "always_required"}
+                  continue
+              if not changed:
+                  outputs[gid] = "required"
+                  decisions[gid] = {"decision": "required", "reason": "fail_closed_empty_diff"}
+                  continue
+              required = any(matches_any(f, inc) for f in changed)
+              if required:
+                  outputs[gid] = "required"
+                  decisions[gid] = {"decision": "required", "reason": "path_match"}
+              else:
+                  outputs[gid] = "not_applicable"
+                  decisions[gid] = {"decision": "not_applicable", "reason": "no_path_match"}
+          out_path = os.environ["GITHUB_OUTPUT"]
+          with open(out_path, "a", encoding="utf-8") as fh:
+              for k, v in outputs.items():
+                  fh.write(f"{k}={v}\n")
+          pathlib.Path("reports/quality").mkdir(parents=True, exist_ok=True)
+          artifact = {"head_sha": sha, "config_version": data.get("version"), "decisions": decisions, "changed_files": changed[:500]}
+          pathlib.Path("reports/quality/pr-gate-decisions.json").write_text(json.dumps(artifact, indent=2), encoding="utf-8")
+          print(json.dumps(artifact, indent=2))
+          PYEOF
+
+      - name: Upload decision matrix
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: pr-gate-decisions
+          path: reports/quality/pr-gate-decisions.json
+          retention-days: 7
+
+  lint-arch:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.lint-arch == 'required' }}
+    uses: ./.github/workflows/import-linter.yml
+    permissions:
+      contents: read
+  lint-arch-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.lint-arch == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "lint-arch not_applicable" && exit 1
+  tests:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.tests == 'required' }}
+    uses: ./.github/workflows/tests.yml
+    permissions:
+      contents: read
+  tests-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.tests == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "tests not_applicable not allowed" && exit 1
+  type-checking:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.type-checking == 'required' }}
+    uses: ./.github/workflows/type-checking.yml
+    permissions:
+      contents: read
+  type-checking-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.type-checking == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "type-checking not_applicable not allowed" && exit 1
+  security:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.security == 'required' }}
+    uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
+  security-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.security == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "security not_applicable not allowed" && exit 1
+  codeql:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.codeql == 'required' }}
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      contents: read
+      security-events: write
+  codeql-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.codeql == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "codeql not_applicable not allowed" && exit 1
+  docker:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.docker == 'required' }}
+    uses: ./.github/workflows/docker.yml
+    permissions:
+      contents: read
+  docker-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.docker == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: |
+          echo "docker not_applicable"
+          echo "head_sha=${{ needs.classify-changes.outputs.head_sha }}"
+  duplication:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.duplication == 'required' }}
+    uses: ./.github/workflows/duplication-complexity.yml
+    permissions:
+      contents: read
+  duplication-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.duplication == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "duplication not_applicable not allowed" && exit 1
+  root-hygiene:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.root-hygiene == 'required' }}
+    uses: ./.github/workflows/root-hygiene.yml
+    permissions:
+      contents: read
+  root-hygiene-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.root-hygiene == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "root-hygiene not_applicable not allowed" && exit 1
+  generated-artifacts:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.generated-artifacts == 'required' }}
+    uses: ./.github/workflows/schema-governance.yml
+    permissions:
+      contents: read
+  generated-artifacts-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.generated-artifacts == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "generated-artifacts not_applicable" && echo "head=${{ needs.classify-changes.outputs.head_sha }}"
+  compiled-artifacts:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.compiled-artifacts == 'required' }}
+    uses: ./.github/workflows/compiled-artifacts-block.yml
+    permissions:
+      contents: read
+  compiled-artifacts-not-applicable:
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.compiled-artifacts == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "compiled-artifacts not_applicable not allowed" && exit 1
+  pr-gate-complete:
+    name: pr-gate-complete
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ always() }}
+    needs: [classify-changes, lint-arch, lint-arch-not-applicable, tests, tests-not-applicable, type-checking, type-checking-not-applicable, security, security-not-applicable, codeql, codeql-not-applicable, docker, docker-not-applicable, duplication, duplication-not-applicable, root-hygiene, root-hygiene-not-applicable, generated-artifacts, generated-artifacts-not-applicable, compiled-artifacts, compiled-artifacts-not-applicable]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - name: Validate aggregator (fail-closed)
+        run: |
+          set -euo pipefail
+          python - << 'PYVAL'
+          import os, pathlib, yaml
+          results = {
+              "classify-changes": "${{ needs.classify-changes.result }}",
+              "lint-arch": "${{ needs.lint-arch.result }}",
+              "lint-arch-not-applicable": "${{ needs.lint-arch-not-applicable.result }}",
+              "tests": "${{ needs.tests.result }}",
+              "tests-not-applicable": "${{ needs.tests-not-applicable.result }}",
+              "type-checking": "${{ needs.type-checking.result }}",
+              "type-checking-not-applicable": "${{ needs.type-checking-not-applicable.result }}",
+              "security": "${{ needs.security.result }}",
+              "security-not-applicable": "${{ needs.security-not-applicable.result }}",
+              "codeql": "${{ needs.codeql.result }}",
+              "codeql-not-applicable": "${{ needs.codeql-not-applicable.result }}",
+              "docker": "${{ needs.docker.result }}",
+              "docker-not-applicable": "${{ needs.docker-not-applicable.result }}",
+              "duplication": "${{ needs.duplication.result }}",
+              "duplication-not-applicable": "${{ needs.duplication-not-applicable.result }}",
+              "root-hygiene": "${{ needs.root-hygiene.result }}",
+              "root-hygiene-not-applicable": "${{ needs.root-hygiene-not-applicable.result }}",
+              "generated-artifacts": "${{ needs.generated-artifacts.result }}",
+              "generated-artifacts-not-applicable": "${{ needs.generated-artifacts-not-applicable.result }}",
+              "compiled-artifacts": "${{ needs.compiled-artifacts.result }}",
+              "compiled-artifacts-not-applicable": "${{ needs.compiled-artifacts-not-applicable.result }}",
+          }
+          decisions = {
+              "lint-arch": "${{ needs.classify-changes.outputs.lint-arch }}",
+              "tests": "${{ needs.classify-changes.outputs.tests }}",
+              "type-checking": "${{ needs.classify-changes.outputs.type-checking }}",
+              "security": "${{ needs.classify-changes.outputs.security }}",
+              "codeql": "${{ needs.classify-changes.outputs.codeql }}",
+              "docker": "${{ needs.classify-changes.outputs.docker }}",
+              "duplication": "${{ needs.classify-changes.outputs.duplication }}",
+              "root-hygiene": "${{ needs.classify-changes.outputs.root-hygiene }}",
+              "generated-artifacts": "${{ needs.classify-changes.outputs.generated-artifacts }}",
+              "compiled-artifacts": "${{ needs.classify-changes.outputs.compiled-artifacts }}",
+          }
+          head_sha = "${{ needs.classify-changes.outputs.head_sha }}"
+          current_sha = "${{ github.sha }}"
+          print(f"head_sha={head_sha} current_sha={current_sha}")
+          if head_sha != current_sha:
+              print(f"::error::SHA mismatch")
+              raise SystemExit(1)
+          cfg = yaml.safe_load(pathlib.Path("configs/quality/github_required_checks.yaml").read_text(encoding="utf-8"))
+          allowed = {g["id"]: set(g.get("allowed_results", ["success"])) for g in cfg["gates"]}
+          failures = []
+          for gid, dec in decisions.items():
+              res = results.get(gid, "skipped")
+              na = results.get(f"{gid}-not-applicable", "skipped")
+              if dec == "required":
+                  if res != "success":
+                      failures.append(f"{gid}: required but result={res}")
+                  if na != "skipped":
+                      failures.append(f"{gid}: required but N/A={na}")
+              elif dec == "not_applicable":
+                  if "not_applicable" not in allowed.get(gid, set()):
+                      failures.append(f"{gid}: N/A not allowed")
+                  if na != "success":
+                      failures.append(f"{gid}: N/A but result={na}")
+                  if res != "skipped":
+                      failures.append(f"{gid}: N/A but required result={res}")
+              else:
+                  failures.append(f"{gid}: unknown {dec}")
+          if results["classify-changes"] != "success":
+              failures.append(f"classify-changes {results['classify-changes']}")
+          for k,v in results.items():
+              if v == "cancelled":
+                  failures.append(f"{k} cancelled")
+          if failures:
+              print("::error::pr-gate-complete FAILED")
+              for f in failures: print(f" - {f}")
+              raise SystemExit(1)
+          print("pr-gate-complete SUCCESS")
+          PYVAL
+      - run: echo "pr-gate-complete success for ${{ github.sha }}"

@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active** (`checks-complete`, `root-hygiene`). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** as of `2026-09-02` (`checks-complete`, `root-hygiene` still listed but not enforced). Shadow aggregator `pr-gate-complete` materializes on every PR — see §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -194,7 +194,7 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` **are** blocked by repository ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
+Updates to `main` **are currently NOT blocked** by repository ruleset `root-hygiene-required-check` (enforcement **disabled** as of `2026-09-02T09:24:27+03:00` for `main` (13643213) and `2026-09-02T09:41:27+03:00` for `root-hygiene-required-check` (15730586); see live evidence below). Direct
 push and merge to `main` require the always-on contexts `checks-complete` and `root-hygiene`. There are no bypass actors (`current_user_can_bypass: never`). The following checks are the
 GitHub-required quality gate for pull requests and for the `main` ref.
 
@@ -208,7 +208,7 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main`. The repository ruleset
+Both checks materialize on every PR targeting `main` (legacy required set). Since `2026-09-02` the **shadow** single required context `pr-gate-complete` (workflow `.github/workflows/pr-required.yml`) materializes on every PR via the aggregator defined in `configs/quality/github_required_checks.yaml` (#9975). It aggregates Tests, Architecture/lint/C901, Type Checking, Security, CodeQL, Docker, Duplication, Root Hygiene and generated-artifact checks (fail-closed, SHA-bound). Enforcement of `pr-gate-complete` is **not yet active** — this is repo-side shadow evidence for #9979; live enforcement remains `disabled` until 5 green shadow runs. The repository ruleset
 `root-hygiene-required-check` is defined with exactly this always-on set,
 and enforcement is **active**. Direct push/merge to `main` is blocked when these
 contexts are missing or failing. Further ruleset mutations remain external operations that require
@@ -315,11 +315,15 @@ repository ruleset state plus the workflows that materialize
 
 Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection.
 
-Live GitHub enforcement state:
+Live GitHub enforcement state (as of `2026-09-02`, `main@1b8f4edabb`):
 
-- Repository ruleset `root-hygiene-required-check` targets
+- Repository ruleset `root-hygiene-required-check` (15730586) targets
   `refs/heads/main`.
-- Enforcement: `active`.
+- Enforcement: `disabled` (was `active` until `2026-09-02T09:41:27+03:00`).
+- Companion ruleset `main` (13643213) targets `refs/heads/main`.
+- Enforcement: `disabled` (was `active` until `2026-09-02T09:24:27+03:00`).
+- Shadow aggregator `pr-gate-complete` materializes on every PR via `.github/workflows/pr-required.yml` (see `configs/quality/github_required_checks.yaml`); not yet enforced as required status check (tracked in #9975, activation in #9979).
+- Legacy required contexts still listed in disabled rulesets: `checks-complete`, `root-hygiene`.
 - Direct updates to main are blocked by this ruleset when required checks are missing or failing.
 - Defined status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: true`).
@@ -675,6 +679,19 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
 {
   "name": "root-hygiene-required-check",
   "enforcement": "disabled"
+}
+```
+
+### Evidence (2026-09-02) — live disabled + shadow aggregator
+
+```json
+{
+  "rulesets": [
+    {"id": 13643213, "name": "main", "enforcement": "disabled", "updated_at": "2026-09-02T09:24:27.854+03:00"},
+    {"id": 15730586, "name": "root-hygiene-required-check", "enforcement": "disabled", "updated_at": "2026-09-02T09:41:27.708+03:00"}
+  ],
+  "required_status_checks": ["checks-complete", "root-hygiene"],
+  "shadow_aggregator": {"context": "pr-gate-complete", "workflow": ".github/workflows/pr-required.yml", "materializes_on": "every PR", "enforcement": "shadow (not yet required)", "catalog": "configs/quality/github_required_checks.yaml"}
 }
 ```
 
