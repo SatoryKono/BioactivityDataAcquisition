@@ -1051,7 +1051,7 @@ def _is_nonnegative_number(raw: str) -> bool:
 def _validate_processed_records_percentage(
     parameter: str, percentage: str
 ) -> str | None:
-    if percentage == "No data":
+    if percentage in {"No data", "UNKNOWN"}:
         return None
     if percentage.endswith("%") and _is_nonnegative_number(percentage[:-1]):
         return None
@@ -1073,7 +1073,7 @@ def _processed_records_parameter(
 def _processed_records_numeric_value(
     parameter: str, value: str
 ) -> tuple[float | None, bool, str | None]:
-    if value == "No data":
+    if value in {"No data", "UNKNOWN"}:
         return (None, True, None)
     if not _is_nonnegative_number(value):
         return (
