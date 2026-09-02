@@ -406,13 +406,13 @@
       "status": "pass"
     },
     {
-      "current": "ee6cb68438bc0b9b357e00f9871528e176e6368ddd9ac10130f19e99309d7f31",
+      "current": "be1d5f575566f69e0908deca96510de60c1118e5ec423d78e5d3a9f10e525997",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -458,18 +458,20 @@
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 45,
+    "fail": 1,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 9.14,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 1,
+    "failing_gates": [
+      "remote_main_architecture_debt_baseline"
+    ],
     "gate_count": 45,
-    "pass_count": 45,
-    "release_gate_status": "passing",
+    "pass_count": 44,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }
