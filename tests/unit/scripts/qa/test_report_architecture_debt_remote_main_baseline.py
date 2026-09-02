@@ -16,7 +16,9 @@ import json
 
 import pytest
 
-from scripts.engineering.qa import report_architecture_debt_remote_main_baseline as baseline
+from scripts.engineering.qa import (
+    report_architecture_debt_remote_main_baseline as baseline,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -69,8 +71,8 @@ def test_json_blob_summary_extracts_keys_from_valid_json_blob() -> None:
     assert "extra_nested" not in summary
 
 
-def test_json_blob_summary_recovers_from_git_conflict_markers() -> None:
-    """_json_blob_summary should strip conflict markers and parse valid JSON beneath."""
+def test_json_blob_summary_rejects_git_conflict_markers() -> None:
+    """_json_blob_summary should reject conflict-marker-contaminated blobs."""
     conflict_blob_text = """\
 <<<<<<< HEAD
 |||||||
@@ -88,14 +90,11 @@ def test_json_blob_summary_recovers_from_git_conflict_markers() -> None:
 
     summary = baseline._json_blob_summary(blob)
 
-    assert summary["available"] is True
-    assert summary["schema_version"] == 1
-    assert summary["integral_score"] == 99
-    assert summary["source_module_count"] == 200
+    assert summary == {"available": False, "conflict_markers_detected": True}
 
 
 def test_json_blob_summary_returns_available_only_for_invalid_json() -> None:
-    """_json_blob_summary should return only availability for blobs that are invalid JSON even after conflict-marker stripping."""
+    """_json_blob_summary should return only availability for invalid JSON."""
     blob = b"not valid JSON at all"
 
     summary = baseline._json_blob_summary(blob)

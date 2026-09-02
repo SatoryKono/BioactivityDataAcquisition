@@ -1793,8 +1793,6 @@ def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
     return 1
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 _GRAFANA_CONTAINER = "bioetl-grafana"
 _GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
 
@@ -1970,8 +1968,8 @@ def _post_start_grafana_bootstrap_gate(
         sleep=sleep,
         clock=clock,
     )
-||||||| 497769829c
-=======
+
+
 def _post_start_grafana_ops_cutover(
     *,
     spec: StackSpec,
@@ -2005,43 +2003,6 @@ def _post_start_grafana_ops_cutover(
         "previous_reason": str(payload.get("reason") or ""),
         "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
     }
->>>>>>> master20260902-1
-||||||| 497769829c
-=======
-def _post_start_grafana_ops_cutover(
-    *,
-    spec: StackSpec,
-    runner: Runner = _run,
-    timeout: float = 45.0,
-) -> dict[str, Any] | None:
-    """Restart Grafana when Ops HTTP bootstrap deferred and bioetl is now ready.
-
-    Docker Desktop starts the monitoring project in parallel with main. Grafana
-    bootstrap then polls Ops HTTP for ~5s, writes prometheus-only, and never
-    retries until the container restarts. After main is healthy, one restart
-    cuts Grafana over to Infinity + full dashboards.
-    """
-    if spec.name != "main":
-        return None
-    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {"1", "true", "yes"}:
-        return None
-    if os.environ.get("PYTEST_CURRENT_TEST"):
-        return None
-    payload, readable = _load_grafana_bootstrap_status(
-        runner, timeout=min(max(0.1, timeout), 10.0)
-    )
-    if not readable or not isinstance(payload, Mapping):
-        return None
-    if str(payload.get("ops_http") or "").strip() != "deferred":
-        return None
-    restart = runner(["docker", "restart", "bioetl-grafana"], ROOT, timeout)
-    return {
-        "action": "grafana_ops_http_cutover",
-        "restart_returncode": restart.returncode,
-        "previous_reason": str(payload.get("reason") or ""),
-        "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
-    }
->>>>>>> fix/obs-stack-live-errors
 
 
 def start_or_recover(
@@ -2134,8 +2095,6 @@ def start_or_recover(
             verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
             if verify_rc != 0:
                 return verify_rc
-<<<<<<< HEAD
-<<<<<<< HEAD
             _post_start_grafana_bootstrap_gate(
                 spec=spec,
                 runner=runner,
@@ -2143,8 +2102,6 @@ def start_or_recover(
                 sleep=sleep,
                 clock=clock,
             )
-||||||| 497769829c
-=======
             cutover = _post_start_grafana_ops_cutover(
                 spec=spec,
                 runner=runner,
@@ -2155,20 +2112,6 @@ def start_or_recover(
                     report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
->>>>>>> master20260902-1
-||||||| 497769829c
-=======
-            cutover = _post_start_grafana_ops_cutover(
-                spec=spec,
-                runner=runner,
-                timeout=min(45.0, max(5.0, deadline - clock())),
-            )
-            if cutover is not None:
-                write_report(
-                    report_dir / "docker-runtime-grafana-ops-cutover.json",
-                    cutover,
-                )
->>>>>>> fix/obs-stack-live-errors
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock

@@ -323,7 +323,7 @@ def format_percentage(
     denominator: _Denominator,
     percent_format: _PercentFormat,
 ) -> str:
-    """Format a row's percentage cell based on denominator kind and percent format, returning 'UNKNOWN' when inputs are missing or invalid."""
+    """Format a percentage cell or return UNKNOWN for invalid inputs."""
     if denominator == "constant_100":
         return "100%" if value is not None else "UNKNOWN"
     if value is None or bronze_value is None or bronze_value == 0:
