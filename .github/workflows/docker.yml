@@ -81,6 +81,7 @@ jobs:
           uv run --frozen --no-build pytest -q --tb=line \
             tests/architecture/test_docker_runtime_contracts.py \
             tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py \
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
             tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
 
