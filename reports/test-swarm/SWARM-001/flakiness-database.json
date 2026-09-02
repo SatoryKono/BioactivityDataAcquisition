@@ -12,11 +12,35 @@
   "flaky_tests": [],
   "summary": {
     "total_flaky": 0,
-    "by_layer": {"domain": 0, "application": 0, "infrastructure": 0, "composition": 0, "interfaces": 0},
-    "by_category": {"State": 0, "Infrastructure": 0, "Import": 0, "Type": 0, "Data": 0, "Contract": 0},
-    "by_severity": {"P1": 0, "P2": 0, "P3": 0},
-    "by_triage": {"fixed": 0, "quarantined": 0, "manual-review": 0},
-    "by_alert_level": {"warning": 0, "critical": 0}
+    "by_layer": {
+      "domain": 0,
+      "application": 0,
+      "infrastructure": 0,
+      "composition": 0,
+      "interfaces": 0
+    },
+    "by_category": {
+      "State": 0,
+      "Infrastructure": 0,
+      "Import": 0,
+      "Type": 0,
+      "Data": 0,
+      "Contract": 0
+    },
+    "by_severity": {
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "by_triage": {
+      "fixed": 0,
+      "quarantined": 0,
+      "manual-review": 0
+    },
+    "by_alert_level": {
+      "warning": 0,
+      "critical": 0
+    }
   },
   "root_cause_clusters": []
 }
