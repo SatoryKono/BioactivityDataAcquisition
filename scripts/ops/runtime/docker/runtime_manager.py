@@ -1896,7 +1896,10 @@ def _post_start_grafana_bootstrap_gate(
     )
     if restart.returncode != 0:
         return 0
-    deadline = clock() + min(40.0, max(timeout, 1.0))
+    remaining = min(40.0, max(0.0, timeout))
+    if remaining <= 0.0:
+        return 0
+    deadline = clock() + remaining
     while True:
         payload, readable = _load_grafana_bootstrap_status(runner, timeout=5.0)
         if readable and isinstance(payload, Mapping):
@@ -1906,9 +1909,10 @@ def _post_start_grafana_bootstrap_gate(
                 reason and reason != _GRAFANA_TIMEOUT_RETRY_REASON
             ):
                 return 0
-        if clock() >= deadline:
+        now = clock()
+        if now >= deadline:
             return 0
-        sleep(2.0)
+        sleep(min(2.0, max(0.0, deadline - now)))
 
 
 def start_or_recover(
