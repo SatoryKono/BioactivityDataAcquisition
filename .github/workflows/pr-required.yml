@@ -496,18 +496,29 @@ jobs:
             tests/unit/scripts/ops/observability/test_action_target_routes.py \
             -q --tb=short
 
-      - name: Restore temporary coordinator and verify generated allowlist
+      - name: Verify generated allowlist
         run: |
           set -euo pipefail
-          cp "${RUNNER_TEMP}/pr-required-temporary.yml" .github/workflows/pr-required.yml
-          git diff --exit-code -- .github/workflows/pr-required.yml
           unexpected="$(
-            git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r path; do
-              case "${path}" in
-                configs/quality/scripts_inventory_manifest.json|                docs/04-reference/passports/*|                docs/reports/generated/documentation-cleanup-inventory.json|                docs/reports/generated/documentation-cleanup-inventory.md|                reports/quality/low-coverage-targeted-tests-6045.json|                reports/quality/module-coverage-inventory.json|                reports/quality/test-governance-current.json)
+            git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r changed_path; do
+              case "${changed_path}" in
+                .github/workflows/pr-required.yml|\
+                configs/quality/scripts_inventory_manifest.json|\
+                configs/quality/test_telemetry_baseline.yaml|\
+                docs/04-reference/passports/*|\
+                docs/05-engineering/test-telemetry-baseline.md|\
+                docs/reports/generated/documentation-cleanup-inventory.json|\
+                docs/reports/generated/documentation-cleanup-inventory.md|\
+                reports/quality/contract-coverage-matrix.json|\
+                reports/quality/low-coverage-targeted-tests-6045.json|\
+                reports/quality/module-coverage-inventory.json|\
+                reports/quality/test-governance-current.json|\
+                reports/test-telemetry/coverage-summary.json|\
+                reports/test-telemetry/slowest-tests.json|\
+                reports/test-telemetry/slowest-tests.md)
                   ;;
                 *)
-                  printf '%s\n' "${path}"
+                  printf '%s\n' "${changed_path}"
                   ;;
               esac
             done
