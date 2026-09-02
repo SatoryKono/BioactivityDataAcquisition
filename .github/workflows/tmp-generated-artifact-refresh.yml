@@ -44,17 +44,17 @@ jobs:
         run: |
           set -euo pipefail
           rm -f .github/workflows/tmp-generated-artifact-refresh.yml
-          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build             python -m scripts.docs passports generate --require-clean-source
-          uv run --frozen --no-build             python -m scripts.docs generate-cleanup-inventory --update
+          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build python -m scripts.docs passports generate --require-clean-source
+          uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --update
 
       - name: Validate generated documentation
         shell: bash
         run: |
           set -euo pipefail
-          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build             python -m scripts.docs passports check --require-clean-source
-          uv run --frozen --no-build             python -m scripts.docs generate-cleanup-inventory --check
-          uv run --frozen --no-build             python -m scripts.docs check-links --workflow-inventory
-          uv run --frozen --no-build pytest             tests/architecture/test_passport_documentation_projections.py             tests/unit/scripts/docs/passports/test_passport_projector.py             -q --tb=short
+          GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
+          uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --check
+          uv run --frozen --no-build python -m scripts.docs check-links --workflow-inventory
+          uv run --frozen --no-build pytest tests/architecture/test_passport_documentation_projections.py tests/unit/scripts/docs/passports/test_passport_projector.py -q --tb=short
 
       - name: Enforce generated-file allowlist and export contents
         shell: bash
@@ -90,9 +90,10 @@ jobs:
           passport_paths = {
               path for path in paths if path.startswith("docs/04-reference/passports/")
           }
+          changed_inventory_paths = set(paths) & inventory_paths
           allowed = passport_paths | inventory_paths | {workflow_path}
           unexpected = sorted(set(paths) - allowed)
-          changed_inventory_paths = set(paths) & inventory_paths\n          missing_required = sorted({workflow_path} - set(paths))
+          missing_required = sorted({workflow_path} - set(paths))
 
           if unexpected:
               print("Unexpected generated paths:", file=sys.stderr)
@@ -109,11 +110,16 @@ jobs:
               )
               print("\n".join(sorted(passport_paths)), file=sys.stderr)
               raise SystemExit(1)
-          if len(paths) != 89:
-              raise SystemExit(f"Expected 89 allowlisted paths, got {len(paths)}")
+
+          expected_path_count = 87 + len(changed_inventory_paths)
+          if len(paths) != expected_path_count:
+              raise SystemExit(
+                  f"Expected {expected_path_count} allowlisted paths, got {len(paths)}"
+              )
 
           print(f"GENERATED_PATH_COUNT::{len(paths)}")
-          print(f"PASSPORT_PATH_COUNT::{len(passport_paths)}")\n          print(f"INVENTORY_PATH_COUNT::{len(changed_inventory_paths)}")
+          print(f"PASSPORT_PATH_COUNT::{len(passport_paths)}")
+          print(f"INVENTORY_PATH_COUNT::{len(changed_inventory_paths)}")
           for path_text in paths:
               path = Path(path_text)
               if not path.exists():
