@@ -10,6 +10,7 @@ dashboard. Run from repo root:
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import sys
 from pathlib import Path
@@ -76,6 +77,9 @@ FILE_BY_UID = {
 
 NAV_DISPLAY_TITLE = "Navigate Dashboards"
 NAV_HEIGHT = 4
+# layout-budgets.yaml first_window_y / viewport_rows. Expanding nav must not
+# push always-visible first-window panels past this fold.
+VIEWPORT_ROWS = 18
 NAV_TITLE_STYLE = "font-size:19px;font-weight:600;line-height:1;margin:0 2px"
 CHIP_BASE = (
     "box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;"
@@ -98,6 +102,8 @@ CONTAINER_STYLE = (
     "padding:0 2px;overflow:visible;white-space:normal;font-size:16px"
 )
 _PROVIDER_VARIABLE_UIDS = {"bioetl-provider-health-v2", "bioetl-incident-v1"}
+_STAGE_TARGET_UIDS = {"bioetl-runtime", "bioetl-dq-v2"}
+_PRESERVE_SCOPE_TOOLTIP = "Preserves selected scope and time range."
 
 NAV_DESCRIPTION = (
     "Sanitizer-compatible navigation bus with native keyboard focus. "
@@ -120,10 +126,41 @@ def _html_href(url: str) -> str:
     )
 
 
+def nav_link_tooltip(*, source_uid: str, target: dict[str, str]) -> str:
+    """Return operator tooltip copy for one nav-bus handoff.
+
+    Cross-scope URL mutations from ``build_handoff_url`` are listed as
+    ``Scope reset: ...``. Same-scope handoffs use the design-system preserve
+    phrase. The tooltip never claims a selector the destination contract does
+    not receive.
+    """
+    short = target["title"].split(". ", 1)[-1]
+    base = f"{target['title']} ({short})"
+    target_uid = target["uid"]
+    resets: list[str] = []
+    preserved: list[str] = ["time range"]
+    if target_uid == "bioetl-provider-health-v2":
+        if source_uid in _PROVIDER_VARIABLE_UIDS:
+            preserved.append("provider")
+        else:
+            resets.append("provider=unknown")
+        preserved.append("pipeline context")
+    if target_uid in _STAGE_TARGET_UIDS:
+        resets.append("stage=All")
+    if source_uid == "bioetl-provider-health-v2" and target_uid != (
+        "bioetl-provider-health-v2"
+    ):
+        preserved.append("pipeline via pipeline_context")
+    if not resets:
+        return f"{base}. {_PRESERVE_SCOPE_TOOLTIP}"
+    preserve_clause = "; preserves " + ", ".join(dict.fromkeys(preserved)) + "."
+    return f"{base}. Scope reset: {', '.join(resets)}{preserve_clause}"
+
+
 def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> str:
     short = item["title"].split(". ", 1)[-1]
-    title_attr = f"{item['title']} ({short})"
     if item["uid"] == current_uid:
+        title_attr = html.escape(f"{item['title']} ({short})", quote=True)
         # Anchor keeps inline styles under Grafana sanitizer; not in tab order.
         return (
             f'<a class="bioetl-nav-current" href="#{item["uid"]}" '
@@ -131,6 +168,8 @@ def _chip_html(item: dict[str, str], *, current_uid: str, source_uid: str) -> st
             f'tabindex="-1" title="{title_attr}" style="{CURRENT_STYLE}">'
             f"{item['title']} (current)</a>"
         )
+    tooltip = nav_link_tooltip(source_uid=source_uid, target=item)
+    title_attr = html.escape(tooltip, quote=True)
     href = _html_href(_url_for(item, source_uid=source_uid))
     return (
         f'<a class="bioetl-nav-link" style="{LINK_STYLE}" title="{title_attr}" '
@@ -164,6 +203,7 @@ def render_links(*, current_uid: str) -> list[dict[str, object]]:
             {
                 "title": item["title"],
                 "url": _url_for(item, source_uid=current_uid),
+                "tooltip": nav_link_tooltip(source_uid=current_uid, target=item),
                 "type": "link",
                 "icon": "dashboard",
                 "targetBlank": False,
