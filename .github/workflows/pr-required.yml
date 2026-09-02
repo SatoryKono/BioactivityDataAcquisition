@@ -72,10 +72,15 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
+          base_sha="${BASE_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            git fetch --no-tags origin main
+            base_sha="$(git merge-base origin/main "${HEAD_SHA}")"
+          fi
           uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify \
             --catalog configs/quality/github_required_checks.yaml \
             --event-name "${EVENT_NAME}" \
-            --base-sha "${BASE_SHA}" \
+            --base-sha "${base_sha}" \
             --before-sha "${BEFORE_SHA}" \
             --head-sha "${HEAD_SHA}" \
             --artifact reports/quality/pr-gate-decisions.json
@@ -303,6 +308,7 @@ jobs:
       - name: Checkout exact event head
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
