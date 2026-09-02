@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.3
+Version: 1.0.4
 Status: active
 Class: published
 Owner: BioETL Team
@@ -44,28 +44,29 @@ Use it when you need to answer:
 | --- | --- | --- | --- |
 | `branch-hygiene.yml` | `Branch Hygiene` | `pull_request`, `schedule`, `workflow_dispatch` | Validates PR branch names and generates the periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | `ChemblBaseline Smoke` | `push`, `pull_request`, `workflow_dispatch` | ChEMBL baseline smoke and reconciliation checks |
-| `commit-lint.yml` | `Commit Lint` | `pull_request` | Conventional-commit policy gate |
-| `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `push`, `pull_request`, `workflow_call` | Blocks checked-in `.pyc` and similar compiled artifacts |
+| `commit-lint.yml` | `Commit Lint` | `workflow_call` | Conventional-commit policy gate |
+| `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `workflow_call`, `push` | Blocks checked-in `.pyc` and similar compiled artifacts |
 | `consolidation-gates.yml` | `consolidation-gates` | `workflow_dispatch` | Merge-campaign quality/architecture gate |
 | `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `push`, `pull_request` | Fast contract-registry and schema governance checks |
 | `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push`, `pull_request` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
-| `docs.yml` | `Docs & Diagrams` | `push`, `pull_request` | Docs governance, MkDocs validation, Mermaid validation, diagram drift |
-| `duplication-complexity.yml` | `Duplication and Complexity Checks` | `push`, `pull_request`, `workflow_call` | Duplication, constructor-args, and complexity gates |
+| `docs.yml` | `Docs & Diagrams` | `workflow_call`, `push` | Docs governance, MkDocs validation, Mermaid validation, diagram drift |
+| `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | Duplication, constructor-args, and complexity gates |
 | `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Blocking and nightly E2E matrix smoke lanes |
-| `import-linter.yml` | `Lint and Architecture Gates` | `push`, `pull_request`, `workflow_call`, `workflow_dispatch` | Ruff/import-linter/architecture fast gates |
+| `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | Ruff/import-linter/architecture fast gates |
+| `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | Always-materialized fail-closed coordinator for the canonical reusable owners |
 | `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | Port-protocol and hypothesis contract tests |
 | `pr-required.yml` | `pr-gate-complete` | `workflow_dispatch` | Manual shadow aggregator for canonical required-check ownership and SHA-bound cutover validation |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
-| `root-hygiene.yml` | `Root Hygiene` | `push`, `pull_request`, `workflow_call`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
-| `schema-governance.yml` | `Schema Governance` | `push`, `pull_request`, `workflow_call` | Generated artifacts, schema parity, schema drift |
-| `codeql.yml` | `CodeQL` | `push`, `pull_request`, `schedule`, `workflow_call` | Advanced Python CodeQL SAST; default setup off |
+| `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
+| `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | Generated artifacts, schema parity, schema drift |
+| `codeql.yml` | `CodeQL` | `workflow_call`, `push`, `schedule` | Advanced Python CodeQL SAST; default setup off |
 | `dependency-review.yml` | `Dependency review` | `pull_request` | PR-time HIGH/CRITICAL dependency review on lockfile/manifest changes |
-| `security.yml` | `Security Scans` | `workflow_call`, `push`, `pull_request` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
+| `security.yml` | `Security Scans` | `workflow_call`, `push` | Secrets, pip-audit, Bandit, Gitleaks, OSV-Scanner |
 | `zizmor.yml` | `zizmor` | `push`, `pull_request` | High-confidence GitHub Actions YAML audit |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request`, `workflow_dispatch` | Local skill mirrors plus Codex–Junie runtime parity |
-| `tests.yml` | `Tests` | `push`, `pull_request`, `workflow_call` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
-| `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_call`, `workflow_dispatch` | Strict mypy lane |
+| `tests.yml` | `Tests` | `workflow_call`, `push` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
+| `type-checking.yml` | `Type Checking (Strict)` | `workflow_call`, `push`, `workflow_dispatch` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | Vendored Mermaid asset presence check |
 | `coderabbit.yml` | `CodeRabbit` | `push`, `workflow_dispatch` | CodeRabbit CLI automated code review |
 
@@ -95,9 +96,8 @@ Use it when you need to answer:
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
 | `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
-| `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request`, `workflow_call`, `workflow_dispatch` | Optional helper-image and compose validation |
+| `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
-| `pr-required.yml` | `PR Gate Complete` | `workflow_dispatch` | Manual-only draft coordinator for the atomic required-check owner cutover |
 | `release.yml` | `Release` | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
 
 ### Reusable / compatibility-only helpers
@@ -111,7 +111,8 @@ Use it when you need to answer:
 
 | Need | Start with |
 | --- | --- |
-| Main PR validation/test matrix | `tests.yml` |
+| Main PR required-check coordinator | `pr-required.yml` |
+| Test matrix owner | `tests.yml` |
 | Docs, MkDocs, Mermaid, diagram drift | `docs.yml` |
 | Dashboard first-window no-scroll (DASH-FIT-004) | `dashboard-first-window-noscroll.yml` |
 | Schema and generated-artifact drift | `schema-governance.yml` |

@@ -4,18 +4,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: compiled-artifacts-${{ github.ref }}
   cancel-in-progress: true
 
 on:
   workflow_call:
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
   push:
     branches: [main]
     paths-ignore:
