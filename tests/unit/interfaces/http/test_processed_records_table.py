@@ -303,6 +303,8 @@ class TestProcessedRecordsTable:
             ),
         )
 
+        assert payload["contract"] == "processed_records_table_v1"
+
         rows = {row["parameter"]: row for row in payload["rows"]}
         assert rows["01 bronze_records"]["value"] == "10"
         assert rows["02 silver_valid_records"]["value"] == " 8"
