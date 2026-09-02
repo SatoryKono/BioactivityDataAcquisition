@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T14:11:05.840575+00:00",
+  "generated_at": "2026-09-02T14:20:00.971317+00:00",
   "summary": {
     "total_scripts": 610,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 83,
       "docs": 253,
       "other": 74,
-      "scripts": 508,
+      "scripts": 509,
       "skills": 12,
       "tests": 419
     }
@@ -19775,8 +19775,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ops/observability/grafana/render_nav_bus.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from scripts.ops.observability.grafana.action_target_routes import ("
+        }
+      ],
       "owner": "@bioetl-observability",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-11-30",
@@ -19998,7 +20005,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/render_nav_bus.py",
-          "line": 18,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_context_links import ("
         },
