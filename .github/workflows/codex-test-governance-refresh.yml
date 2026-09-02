@@ -1,0 +1,48 @@
+name: Codex test-governance refresh probe
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  refresh-test-governance:
+    name: Refresh test-governance evidence (read-only)
+    if: >-
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/main-actions-post-10018'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+
+      - name: Generate and validate canonical test-governance evidence
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --check
+
+      - name: Emit generated files for API-owned commit
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python -c 'import base64, pathlib; paths=("reports/quality/test-governance-current.json","reports/quality/test-fixture-asset-duplication.json"); [print("CODEX_GENERATED_FILE::"+path+"::"+base64.b64encode(pathlib.Path(path).read_bytes()).decode("ascii")) for path in paths]'
