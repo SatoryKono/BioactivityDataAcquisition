@@ -1389,17 +1389,16 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert 'test "${failures}" -eq 0' in complete["steps"][0]["run"]
 
 
-def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus(
-) -> None:
+def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     app_scans = [
         step
         for step in steps
         if step.get("uses", "").startswith("aquasecurity/trivy-action@")
-        and "bioetl:${{ github.sha }}" in str(
-            step.get("with", {}).get("image-ref", "")
-        )
+        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
     ]
 
     assert len(app_scans) == 1
