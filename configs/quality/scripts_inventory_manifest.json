@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T14:20:00.971317+00:00",
+  "generated_at": "2026-09-02T14:33:04.741341+00:00",
   "summary": {
     "total_scripts": 610,
     "status_counts": {
@@ -17164,7 +17164,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 83,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17191,12 +17191,6 @@
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo \\"
         },
         {
-          "path": ".github/workflows/codex-inventory-diagnostic.yml",
-          "line": 21,
-          "source_group": "ci",
-          "text": "python -m scripts.engineering.repo sync-inventory"
-        },
-        {
           "path": ".github/workflows/compiled-artifacts-block.yml",
           "line": 53,
           "source_group": "ci",
@@ -17213,6 +17207,12 @@
           "line": 31,
           "source_group": "ci",
           "text": "python -m scripts.engineering.repo github-settings-review"
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "line": 44,
+          "source_group": "ci",
+          "text": "run: python -m scripts.engineering.repo check-versions"
         }
       ]
     },
