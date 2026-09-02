@@ -480,6 +480,7 @@ jobs:
             git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r path; do
               case "$path" in
                 .github/workflows/pr-required.yml|\
+                scripts/engineering/ci/pr_gate.py|\
                 configs/quality/scripts_inventory_manifest.json|\
                 docs/reports/generated/documentation-cleanup-inventory.json|\
                 docs/reports/generated/documentation-cleanup-inventory.md|\
@@ -537,6 +538,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -- \
             .github/workflows/pr-required.yml \
+            scripts/engineering/ci/pr_gate.py \
             configs/quality/scripts_inventory_manifest.json \
             docs/02-architecture/diagrams/architecture \
             docs/02-architecture/diagrams/descriptions/architecture \
