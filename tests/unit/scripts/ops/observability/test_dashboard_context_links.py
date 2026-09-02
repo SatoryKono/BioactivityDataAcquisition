@@ -87,5 +87,5 @@ def test_action_targets_use_allowlisted_dashboard_routes() -> None:
 
     url = row_aware_dashboard_url()
     assert "${__data.fields.action_dashboard_uid}" in url
-    assert "var-run_id=$run_id" in url
+    assert "var-run_id=${__data.fields.run_id}" in url
     assert "${__url_time_range}" in url

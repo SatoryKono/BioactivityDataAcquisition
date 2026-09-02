@@ -41,14 +41,43 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
 
 
 def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
-    """Workflow YAML changes must trigger inventory parity (#9266)."""
+    """The leaf is reusable; the coordinator owns PR path decisions (#9975)."""
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
-    push_block, rest = workflow.split("pull_request:", maxsplit=1)
-    pr_block = rest.split("jobs:", maxsplit=1)[0]
-    for block_name, block in (("push", push_block), ("pull_request", pr_block)):
-        assert "'.github/workflows/**'" in block, (
-            f"{block_name} path filters must include .github/workflows/**"
-        )
+    trigger_block = workflow.split("jobs:", maxsplit=1)[0]
+
+    assert "workflow_call:" in trigger_block
+    assert "pull_request:" not in trigger_block
+    assert "'.github/workflows/**'" in trigger_block
+
+    catalog = Path("configs/quality/github_required_checks.yaml").read_text(
+        encoding="utf-8"
+    )
+    docs_gate = catalog.rsplit("- id: docs-governance", maxsplit=1)[1]
+    former_trigger_paths = (
+        ".github/actions/setup-python-uv/**",
+        "scripts/engineering/qa/check_xwalk_missing_backlog.py",
+        "src/bioetl/application/pipelines/chembl/activity_transformer.py",
+        "src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_check_doc_links_guardrails.py",
+        "tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py",
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    )
+    assert ".github/workflows/**" in docs_gate
+    for path in former_trigger_paths:
+        assert path in trigger_block
+        assert path in docs_gate
+
+
+def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
+    """Unchanged full-corpus freshness remains owned by diagram-nightly."""
+    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+
+    assert "EVENT_NAME: ${{ github.event_name }}" in workflow
+    assert '"${BASE_REF}" != "main" && "${BASE_REF}" != "develop"' in workflow
+    assert 'git diff --name-only "origin/${BASE_REF}"...HEAD' in workflow
+    assert "'*.mmd' '*.mermaid'" in workflow
+    assert '"${lint_targets[@]}" --json' in workflow
 
 
 def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:

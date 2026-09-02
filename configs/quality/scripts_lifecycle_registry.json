@@ -745,6 +745,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/pr_gate.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-12-01"
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification. Reconfirmed 2026-08-19 in #8999 closeout: file present, decision still valid; next review 2026-11-17.",
@@ -1369,12 +1375,6 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
     },
-    "scripts/ops/observability/grafana/action_target_routes.py": {
-      "decision": "shared_helper_module",
-      "next_step": "Retain as the allowlisted recording-rule action-target routing helper consumed by dashboard renderers and contract tests; keep it supporting so the active script budget does not duplicate an operator entrypoint.",
-      "owner": "@bioetl-observability",
-      "review_by": "2026-11-30"
-    },
     "scripts/ops/observability/grafana/dashboard_context_links.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the canonical /d/ context URL builder used by render_nav_bus.py and dashboard handoff tests; keep it supporting so the active script inventory does not duplicate the nav-bus helper.",
@@ -1632,6 +1632,12 @@
       "next_step": "Retain as the dashboard_state_fixture_v2 loader used by rerender --fixture-case (#8984); not a standalone entrypoint.",
       "owner": "@bioetl-platform",
       "review_by": "2026-11-17"
+    },
+    "scripts/ops/observability/grafana/action_target_routes.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the typed action-target allowlist shared by Grafana dashboard tooling and regression tests; keep it supporting unless promoted through the canonical scripts.ops command surface.",
+      "owner": "@bioetl-observability",
+      "review_by": "2026-11-30"
     }
   },
   "schema_version": "1.0"
