@@ -355,9 +355,9 @@ jobs:
     name: Refresh passports and SHA-bound evidence (temporary)
     if: >-
       github.event_name == 'pull_request' &&
+      github.event.pull_request.base.ref == 'main' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.head.ref == 'fix/pr-gate-complete-9975-v2' &&
-      github.actor == 'SatoryKono'
+      github.event.pull_request.head.ref == 'fix/pr-gate-complete-9975-v2'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -375,14 +375,16 @@ jobs:
         env:
           EVENT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          SOURCE_HEAD_SHA: 789b01364d40b82c1a2f352f585c0fdbb5e416ce
-          SOURCE_RUN_ID: "33641663469"
+          SOURCE_HEAD_SHA: 024c3596cd5a25069c6fc21b66f6b8015b72bcec
+          SOURCE_RUN_ID: "33644866189"
         run: |
           set -euo pipefail
           test "${GITHUB_REPOSITORY}" = "SatoryKono/BioactivityDataAcquisition"
+          test "${GITHUB_BASE_REF}" = "main"
           test "${GITHUB_HEAD_REF}" = "fix/pr-gate-complete-9975-v2"
           test "$(git rev-parse HEAD)" = "${EVENT_HEAD_SHA}"
           git merge-base --is-ancestor "${EVENT_BASE_SHA}" "${EVENT_HEAD_SHA}"
+          git merge-base --is-ancestor "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}"
           test "$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .head_sha)" = "${SOURCE_HEAD_SHA}"
           git diff --quiet "${SOURCE_HEAD_SHA}" "${EVENT_HEAD_SHA}" -- src/bioetl
           echo "EVENT_HEAD_SHA=${EVENT_HEAD_SHA}" >> "${GITHUB_ENV}"
