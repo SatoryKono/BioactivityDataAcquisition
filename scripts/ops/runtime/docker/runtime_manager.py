@@ -1793,7 +1793,6 @@ def _post_start_report_bind_gate(*, spec: StackSpec, report_dir: Path) -> int:
     return 1
 
 
-<<<<<<< HEAD
 _GRAFANA_CONTAINER = "bioetl-grafana"
 _GRAFANA_TIMEOUT_RETRY_REASON = "identity_timeout_or_unreachable"
 
@@ -1969,8 +1968,6 @@ def _post_start_grafana_bootstrap_gate(
         sleep=sleep,
         clock=clock,
     )
-||||||| 497769829c
-=======
 def _post_start_grafana_ops_cutover(
     *,
     spec: StackSpec,
@@ -2004,7 +2001,6 @@ def _post_start_grafana_ops_cutover(
         "previous_reason": str(payload.get("reason") or ""),
         "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
     }
->>>>>>> master20260902-1
 
 
 def start_or_recover(
@@ -2097,7 +2093,6 @@ def start_or_recover(
             verify_rc = _post_start_report_bind_gate(spec=spec, report_dir=report_dir)
             if verify_rc != 0:
                 return verify_rc
-<<<<<<< HEAD
             _post_start_grafana_bootstrap_gate(
                 spec=spec,
                 runner=runner,
@@ -2105,8 +2100,6 @@ def start_or_recover(
                 sleep=sleep,
                 clock=clock,
             )
-||||||| 497769829c
-=======
             cutover = _post_start_grafana_ops_cutover(
                 spec=spec,
                 runner=runner,
@@ -2117,7 +2110,6 @@ def start_or_recover(
                     report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
->>>>>>> master20260902-1
             return 0
         recent_logs = _capture_recent_logs(
             spec=spec, runner=runner, deadline=deadline, clock=clock
