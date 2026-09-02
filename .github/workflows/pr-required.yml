@@ -343,3 +343,227 @@ jobs:
             --expected-head-sha "${EXPECTED_HEAD_SHA}" \
             --observed-head-sha "${OBSERVED_HEAD_SHA}" \
             --run-url "${RUN_URL}"
+
+  # codex-temp-refresh-start
+  refresh-canonical-evidence:
+    name: Refresh canonical #9975 evidence (temporary)
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'fix/pr-gate-complete-9975-v2' &&
+      github.actor == 'SatoryKono'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Checkout exact branch head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+          ref: fix/pr-gate-complete-9975-v2
+
+      - name: Verify exact same-repository branch
+        env:
+          EVENT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REPOSITORY}" = "SatoryKono/BioactivityDataAcquisition"
+          test "${GITHUB_HEAD_REF}" = "fix/pr-gate-complete-9975-v2"
+          test "$(git rev-parse HEAD)" = "${EVENT_HEAD_SHA}"
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+
+      - name: Setup Mermaid renderer
+        uses: ./.github/actions/setup-mermaid
+        with:
+          install-librsvg: "true"
+
+      - name: Download exact SHA-bound coverage candidate
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
+        with:
+          name: coverage-report
+          path: ${{ runner.temp }}/coverage-report
+          run-id: 33629196368
+          github-token: ${{ github.token }}
+
+      - name: Format touched Python files
+        run: |
+          uv run --frozen --no-build ruff format \
+            scripts/engineering/ci/pr_gate.py \
+            tests/architecture/test_docker_runtime_contracts.py \
+            tests/architecture/test_docs_governance_workflow.py \
+            tests/architecture/test_e2e_health_mode_policy.py \
+            tests/architecture/test_github_actions_runtime_policy.py \
+            tests/architecture/test_pr_gate_complete.py \
+            tests/architecture/test_pytest_sharded_inventory.py \
+            tests/architecture/test_test_matrix_lane_policy.py \
+            tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py \
+            tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py \
+            tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py
+
+      - name: Refresh canonical dataflows and renders
+        env:
+          REQUIRE_SVGO: "1"
+        run: |
+          uv run --frozen --no-build python -m scripts.diagrams generate-dataflows \
+            --pipeline chembl_activity
+          bash docs/02-architecture/diagrams/tooling/render.sh \
+            --dir docs/02-architecture/diagrams/architecture \
+            --filter '*chembl-pipeline-activity*' \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Install exact coverage evidence and synchronize closeout
+        env:
+          COVERAGE_ROOT: ${{ runner.temp }}/coverage-report
+          EXPECTED_SOURCE_SHA256: f1a1bc88b94cccf0522df217c196fc97def99f68003c2dcb0465d5686a1343b3
+        run: |
+          set -euo pipefail
+          candidate="$(find "${COVERAGE_ROOT}" -type f -name module-coverage-inventory.candidate.json -print -quit)"
+          test -n "${candidate}"
+          export COVERAGE_CANDIDATE="${candidate}"
+          uv run --frozen --no-build python - <<'PY'
+          import json
+          import os
+          import shutil
+          from pathlib import Path
+
+          candidate = Path(os.environ["COVERAGE_CANDIDATE"])
+          inventory_payload = json.loads(candidate.read_text(encoding="utf-8"))
+          expected = os.environ["EXPECTED_SOURCE_SHA256"]
+          actual = inventory_payload.get("source_tree_sha256")
+          if actual != expected:
+              raise SystemExit(
+                  f"coverage candidate source SHA mismatch: {actual!r} != {expected!r}"
+              )
+          shutil.copyfile(
+              candidate,
+              Path("reports/quality/module-coverage-inventory.json"),
+          )
+
+          closeout_path = Path("reports/quality/low-coverage-targeted-tests-6045.json")
+          closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
+          closeout["module_coverage_inventory_source_tree_sha256"] = expected
+          closeout_path.write_text(
+              json.dumps(closeout, indent=2, ensure_ascii=False) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Remove temporary job before canonical inventory generation
+        run: |
+          sed -i '/^  # codex-temp-refresh-start$/,/^  # codex-temp-refresh-end$/d' \
+            .github/workflows/pr-required.yml
+          ! grep -q 'codex-temp-refresh' .github/workflows/pr-required.yml
+
+      - name: Refresh canonical inventories
+        run: |
+          uv run --frozen --no-build python -m scripts.docs \
+            generate-cleanup-inventory --update
+          uv run --frozen --no-build python -m scripts.engineering.repo \
+            sync-inventory
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit
+          uv run --frozen --no-build python -m scripts.engineering.qa \
+            report-artifact-duplication-audit \
+            --json-out reports/quality/config-contract-registry-artifact-duplication.json
+
+      - name: Verify generated change allowlist
+        run: |
+          set -euo pipefail
+          unexpected="$(
+            git status --porcelain=v1 | sed -E 's/^...//' | while IFS= read -r path; do
+              case "$path" in
+                .github/workflows/pr-required.yml|\
+                configs/quality/scripts_inventory_manifest.json|\
+                docs/reports/generated/documentation-cleanup-inventory.json|\
+                docs/reports/generated/documentation-cleanup-inventory.md|\
+                reports/quality/config-contract-registry-artifact-duplication.json|\
+                reports/quality/low-coverage-targeted-tests-6045.json|\
+                reports/quality/module-coverage-inventory.json|\
+                reports/quality/test-governance-current.json|\
+                tests/architecture/test_docker_runtime_contracts.py|\
+                tests/architecture/test_docs_governance_workflow.py|\
+                tests/architecture/test_e2e_health_mode_policy.py|\
+                tests/architecture/test_github_actions_runtime_policy.py|\
+                tests/architecture/test_pr_gate_complete.py|\
+                tests/architecture/test_pytest_sharded_inventory.py|\
+                tests/architecture/test_test_matrix_lane_policy.py|\
+                tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py|\
+                tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py|\
+                tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py|\
+                docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd|\
+                docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd|\
+                docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd|\
+                docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd|\
+                docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd|\
+                docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd|\
+                docs/02-architecture/diagrams/architecture/svg/49-chembl-pipeline-activity-dataflow.svg|\
+                docs/02-architecture/diagrams/architecture/svg/50-chembl-pipeline-activity-filter-criteria.svg|\
+                docs/02-architecture/diagrams/architecture/svg/51a-chembl-pipeline-activity-silver-fields-1.svg|\
+                docs/02-architecture/diagrams/architecture/svg/51b-chembl-pipeline-activity-silver-fields-2.svg|\
+                docs/02-architecture/diagrams/architecture/svg/52a-chembl-pipeline-activity-gold-fields-1.svg|\
+                docs/02-architecture/diagrams/architecture/svg/52b-chembl-pipeline-activity-gold-fields-2.svg|\
+                docs/02-architecture/diagrams/architecture/svg/INDEX.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/49-chembl-pipeline-activity-dataflow.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/50-chembl-pipeline-activity-filter-criteria.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/51a-chembl-pipeline-activity-silver-fields-1.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/51b-chembl-pipeline-activity-silver-fields-2.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/52a-chembl-pipeline-activity-gold-fields-1.md|\
+                docs/02-architecture/diagrams/descriptions/architecture/52b-chembl-pipeline-activity-gold-fields-2.md|\
+                docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-dataflow-ir.json|\
+                docs/02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md)
+                  ;;
+                *)
+                  printf '%s\n' "$path"
+                  ;;
+              esac
+            done
+          )"
+          if [[ -n "$unexpected" ]]; then
+            printf 'Unexpected generated paths:\n%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Commit and push canonical refresh
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            .github/workflows/pr-required.yml \
+            configs/quality/scripts_inventory_manifest.json \
+            docs/02-architecture/diagrams/architecture \
+            docs/02-architecture/diagrams/descriptions/architecture \
+            docs/02-architecture/generated/pipeline-dataflows/chembl_activity \
+            docs/reports/generated/documentation-cleanup-inventory.json \
+            docs/reports/generated/documentation-cleanup-inventory.md \
+            reports/quality/config-contract-registry-artifact-duplication.json \
+            reports/quality/low-coverage-targeted-tests-6045.json \
+            reports/quality/module-coverage-inventory.json \
+            reports/quality/test-governance-current.json \
+            tests/architecture/test_docker_runtime_contracts.py \
+            tests/architecture/test_docs_governance_workflow.py \
+            tests/architecture/test_e2e_health_mode_policy.py \
+            tests/architecture/test_github_actions_runtime_policy.py \
+            tests/architecture/test_pr_gate_complete.py \
+            tests/architecture/test_pytest_sharded_inventory.py \
+            tests/architecture/test_test_matrix_lane_policy.py \
+            tests/unit/repo_backed/scripts/engineering/ci/test_pr_gate.py \
+            tests/unit/repo_backed/scripts/test_report_observability_metric_inventory.py \
+            tests/unit/scripts/engineering/qa/docker_stability_campaign/test_trivy_fixability_gate.py
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "Canonical evidence already current."
+            exit 0
+          fi
+          git commit -m "chore(ci): refresh canonical evidence for #9975"
+          git fetch origin fix/pr-gate-complete-9975-v2
+          test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
+          git push origin HEAD:fix/pr-gate-complete-9975-v2
+  # codex-temp-refresh-end
