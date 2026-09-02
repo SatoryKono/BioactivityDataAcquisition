@@ -129,8 +129,11 @@ jobs:
     needs: classify-changes
     if: ${{ needs['classify-changes'].outputs['docker'] == 'required' }}
     uses: ./.github/workflows/docker.yml
+    # The reusable workflow declares a main-push-only GHCR job. The PR path
+    # never schedules it, and every executable PR job narrows its own token.
     permissions:
       contents: read
+      packages: write
       security-events: write
 
   docker-not-applicable:
