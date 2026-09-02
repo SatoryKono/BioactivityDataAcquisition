@@ -361,7 +361,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
           ref: fix/pr-gate-complete-9975-v2
 
       - name: Verify exact synchronized branch
@@ -506,6 +506,8 @@ jobs:
           fi
 
       - name: Commit and push generated-only refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -532,6 +534,7 @@ jobs:
           git commit -m "chore(ci): refresh current-main evidence for #9975"
           git fetch origin fix/pr-gate-complete-9975-v2
           test "$(git rev-parse HEAD^)" = "$(git rev-parse origin/fix/pr-gate-complete-9975-v2)"
+          gh auth setup-git
           git push origin HEAD:fix/pr-gate-complete-9975-v2
           echo "Generated-only refresh pushed; API owner must remove this temporary job."
   # codex-temp-refresh-main-end
