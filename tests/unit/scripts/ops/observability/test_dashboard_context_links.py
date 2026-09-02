@@ -14,6 +14,12 @@ from scripts.ops.observability.grafana.dashboard_context_links import (
     urls_for_context,
 )
 
+from scripts.ops.observability.grafana.action_target_routes import (
+    ACTION_DASHBOARD_UID_BY_TARGET,
+    dashboard_uid_for_target,
+    row_aware_dashboard_url,
+)
+
 pytestmark = pytest.mark.unit
 
 
@@ -70,3 +76,16 @@ def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:
         "var-run_id=68c11d41-1d2f-5dc9-b041-9265bc485046" in url
         for url in urls.values()
     )
+
+
+def test_action_targets_use_allowlisted_dashboard_routes() -> None:
+    assert dashboard_uid_for_target("runtime") == "bioetl-runtime"
+    assert dashboard_uid_for_target("data_quality") == "bioetl-dq-v2"
+    assert dashboard_uid_for_target("verify_dq_reason_rules") is None
+    assert dashboard_uid_for_target("unknown") is None
+    assert ACTION_DASHBOARD_UID_BY_TARGET["provider"] == "bioetl-provider-health-v2"
+
+    url = row_aware_dashboard_url()
+    assert "${__data.fields.action_dashboard_uid}" in url
+    assert "var-run_id=$run_id" in url
+    assert "${__url_time_range}" in url

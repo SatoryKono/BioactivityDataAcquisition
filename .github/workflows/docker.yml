@@ -48,8 +48,9 @@ on:
       - ".github/actions/setup-python-uv/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.
+  # Only main push validation is run-scoped so protected publish approval cannot
+  # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
   cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
 
 jobs:
@@ -80,6 +81,7 @@ jobs:
           uv run --frozen --no-build pytest -q --tb=line \
             tests/architecture/test_docker_runtime_contracts.py \
             tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py \
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
             tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
 

@@ -151,8 +151,7 @@ def test_strict_gate_matches_trivy_medium_plus_policy(
     severity: str, status: str, expected: bool
 ) -> None:
     assert (
-        is_strict_blocking_finding({"severity": severity, "status": status})
-        is expected
+        is_strict_blocking_finding({"severity": severity, "status": status}) is expected
     )
 
 

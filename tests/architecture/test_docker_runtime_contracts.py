@@ -1341,6 +1341,28 @@ def _workflow_ancestors(jobs: dict[str, Any], job_name: str) -> set[str]:
     return seen
 
 
+def test_main_docker_validation_only_decouples_main_push_from_publish_approval() -> (
+    None
+):
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    concurrency = workflow["concurrency"]
+    group = str(concurrency["group"])
+    cancel_in_progress = str(concurrency["cancel-in-progress"])
+
+    assert group == (
+        "${{ github.workflow }}-${{ github.event_name == 'push' && "
+        "github.ref == 'refs/heads/main' && github.run_id || github.ref }}"
+    )
+    assert cancel_in_progress == (
+        "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
+    )
+
+    publish = workflow["jobs"]["docker-push"]
+    assert publish["environment"] == "ghcr-publish"
+    assert publish["concurrency"]["group"] == "docker-ghcr-push-${{ github.ref }}"
+    assert publish["concurrency"]["cancel-in-progress"] is False
+
+
 def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
@@ -1389,17 +1411,16 @@ def test_docker_push_requires_all_validation_jobs() -> None:
     assert 'test "${failures}" -eq 0' in complete["steps"][0]["run"]
 
 
-def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus(
-) -> None:
+def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_plus() -> (
+    None
+):
     workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
     steps = workflow["jobs"]["docker-build"]["steps"]
     app_scans = [
         step
         for step in steps
         if step.get("uses", "").startswith("aquasecurity/trivy-action@")
-        and "bioetl:${{ github.sha }}" in str(
-            step.get("with", {}).get("image-ref", "")
-        )
+        and "bioetl:${{ github.sha }}" in str(step.get("with", {}).get("image-ref", ""))
     ]
 
     assert len(app_scans) == 1

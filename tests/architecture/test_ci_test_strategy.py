@@ -97,9 +97,16 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     workflow = _read_workflow(".github/workflows/tests.yml")
     test_fast = _workflow_job_block(workflow, "test-fast")
     unit_fast = load_matrix()["test_lanes"]["lanes"]["unit-fast"]
-    assert "pytest tests/unit/ \\" in test_fast, (
-        "test-fast job must run only the canonical unit-fast test path"
+    assert "pytest ${{ matrix.test-group.path }} \\" in test_fast, (
+        "test-fast job must run the canonical partition selected by its matrix"
     )
+    for unit_path in (
+        "tests/unit/domain/",
+        "tests/unit/application/",
+        "tests/unit/infrastructure/",
+        "tests/unit/ --ignore=tests/unit/domain/",
+    ):
+        assert unit_path in test_fast
     assert "tests/architecture/" not in test_fast, (
         "test-fast must not absorb the architecture-fast-boundary lane"
     )
@@ -121,9 +128,10 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"
     )
-    assert "--junitxml=reports/test-telemetry/junit-fast.xml" in workflow, (
-        "test-fast job should emit JUnit telemetry for slow-test duration analysis"
-    )
+    assert (
+        "--junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml"
+        in workflow
+    ), "test-fast job should emit JUnit telemetry for slow-test duration analysis"
     assert "pattern: test-telemetry-*" in workflow, (
         "duration telemetry job must download JUnit telemetry artifacts"
     )
