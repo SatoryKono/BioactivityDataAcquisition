@@ -1862,7 +1862,6 @@ def _remaining_timeout(
     *,
     limit: float | None = None,
 ) -> float:
-    """Return the non-negative time left, optionally capped by limit."""
     remaining = max(0.0, deadline - clock())
     return remaining if limit is None else min(limit, remaining)
 
@@ -1913,7 +1912,9 @@ def _wait_for_grafana_full_profile(
             profile = str(payload.get("dashboard_profile") or "").strip()
             reason = str(payload.get("reason") or "").strip()
             if profile == "full" or (
-                reason and reason != _GRAFANA_TIMEOUT_RETRY_REASON
+                reason
+                and reason != _GRAFANA_TIMEOUT_RETRY_REASON
+                and reason != "identity_matched"
             ):
                 return
         remaining = _remaining_timeout(deadline, clock)
@@ -1932,9 +1933,9 @@ def _post_start_grafana_bootstrap_gate(
 ) -> None:
     """Retry Grafana once when bootstrap lost the bioetl start race.
 
-    Soft bootstrap polls Ops HTTP for about five seconds and then freezes
-    prometheus_only notices. If identity now matches, restart Grafana so the
-    full provider is selected. Retry failures remain soft.
+    Soft bootstrap polls Ops HTTP for ~5s and then freezes prometheus_only
+    notices. If identity now matches, restart Grafana so the full provider
+    is selected. Retry failures remain soft so Grafana UI stays available.
     """
     if not _grafana_bootstrap_retry_allowed(spec):
         return
@@ -1979,33 +1980,69 @@ def _post_start_grafana_ops_cutover(
     spec: StackSpec,
     runner: Runner = _run,
     timeout: float = 45.0,
+    sleep: Sleeper = time.sleep,
+    clock: Clock = time.monotonic,
 ) -> dict[str, Any] | None:
-    """Restart Grafana when a successful main start finds deferred Ops HTTP."""
+    """Restart Grafana after main is healthy when bootstrap lost the start race.
+
+    Docker Desktop starts monitoring in parallel with main. Grafana bootstrap
+    then polls Ops HTTP for ~5s, writes prometheus-only, and never retries
+    until the container restarts. After main is healthy, one restart cuts
+    Grafana over to Infinity + full dashboards. Restart only the start-race
+    timeout; an identity mismatch will not heal by flapping Grafana.
+    """
     if spec.name != "main":
         return None
-    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-    }:
+    if os.environ.get("BIOETL_TEST_MODE", "").strip().lower() in {"1", "true", "yes"}:
         return None
     if os.environ.get("PYTEST_CURRENT_TEST"):
         return None
+
+    deadline = clock() + max(0.0, timeout)
+    initial_timeout = _remaining_timeout(deadline, clock, limit=10.0)
+    if initial_timeout <= 0:
+        return None
     payload, readable = _load_grafana_bootstrap_status(
         runner,
-        timeout=min(max(0.1, timeout), 10.0),
+        timeout=initial_timeout,
     )
-    if not readable or not isinstance(payload, Mapping):
+    if (
+        not readable
+        or not isinstance(payload, Mapping)
+        or not _grafana_bootstrap_timeout_retry_needed(payload)
+    ):
         return None
-    if str(payload.get("ops_http") or "").strip() != "deferred":
+    if not _grafana_bootstrap_identity_matches(
+        runner,
+        deadline=deadline,
+        clock=clock,
+    ):
         return None
-    restart = runner(["docker", "restart", _GRAFANA_CONTAINER], ROOT, timeout)
-    return {
+
+    restart_timeout = _remaining_timeout(deadline, clock, limit=30.0)
+    if restart_timeout <= 0:
+        return None
+    restart = runner(
+        ["docker", "restart", _GRAFANA_CONTAINER],
+        ROOT,
+        restart_timeout,
+    )
+    result = {
         "action": "grafana_ops_http_cutover",
         "restart_returncode": restart.returncode,
         "previous_reason": str(payload.get("reason") or ""),
         "previous_dashboard_profile": str(payload.get("dashboard_profile") or ""),
     }
+    if restart.returncode != 0:
+        return result
+    _wait_for_grafana_full_profile(
+        runner,
+        deadline=deadline,
+        sleep=sleep,
+        clock=clock,
+    )
+    return result
+
 
 def start_or_recover(
     spec: StackSpec,
@@ -2107,11 +2144,13 @@ def start_or_recover(
             cutover = _post_start_grafana_ops_cutover(
                 spec=spec,
                 runner=runner,
-                timeout=min(45.0, max(5.0, deadline - clock())),
+                timeout=min(45.0, max(0.1, deadline - clock())),
+                sleep=sleep,
+                clock=clock,
             )
             if cutover is not None:
                 write_report(
-                    report_dir / "docker-runtime-grafana-cutover.json",
+                    report_dir / "docker-runtime-grafana-ops-cutover.json",
                     cutover,
                 )
             return 0
