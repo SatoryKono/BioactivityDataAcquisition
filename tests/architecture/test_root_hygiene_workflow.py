@@ -119,9 +119,6 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     assert "#3380" in policy
     assert "root-hygiene-required-check" in policy
     assert "/rules/15730586" in policy
-    assert "Enforcement: `active`" in policy
+    assert "Enforcement: `disabled`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
-    assert (
-        "Direct updates to main are blocked by this ruleset when required checks are missing or failing."
-        in policy
-    )
+    assert "pr-gate-complete" in policy
