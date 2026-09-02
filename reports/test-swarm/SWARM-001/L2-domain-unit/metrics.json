@@ -1,20 +1,34 @@
 {
   "agent_id": "L2-domain-unit",
   "level": "L2",
-  "scope": "tests/unit/domain",
+  "scope": "tests/unit/domain/",
   "status": "completed",
   "overall_status": "GREEN",
   "metrics_before": {
-    "total_tests": 8000, "passed": 7985, "failed": 0, "skipped": 15,
-    "coverage_pct": 88.0, "median_duration_ms": 100000, "p95_duration_ms": 300000
+    "total_tests": 192,
+    "passed": 192,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 94,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
   },
   "metrics_after": {
-    "total_tests": 8000, "passed": 7985, "failed": 0, "skipped": 15,
-    "coverage_pct": 88.0, "median_duration_ms": 100000, "p95_duration_ms": 300000
+    "total_tests": 192,
+    "passed": 192,
+    "failed": 0,
+    "skipped": 0,
+    "coverage_pct": 94,
+    "median_duration_ms": 10,
+    "p95_duration_ms": 50
   },
   "actions": {
-    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
-    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
+    "tests_fixed": 0,
+    "tests_added": 0,
+    "tests_optimized": 0,
+    "flaky_found": 0,
+    "flaky_fixed": 0,
+    "flaky_quarantined": 0
   },
   "top_failures": [],
   "files_changed": [],

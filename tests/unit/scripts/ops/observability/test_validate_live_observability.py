@@ -136,6 +136,24 @@ def test_check_prometheus_targets_malformed_and_success(
     )
 
 
+def test_load_repo_environment_preserves_process_precedence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[object, bool]] = []
+
+    def fake_load_dotenv(*, dotenv_path: object, override: bool) -> None:
+        calls.append((dotenv_path, override))
+        monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "from-repo-env")
+
+    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
+    monkeypatch.setattr(vlo, "load_dotenv", fake_load_dotenv)
+
+    vlo._load_repo_environment()
+
+    assert calls == [(vlo.REPO_ENV_PATH, False)]
+    assert vlo.resolve_grafana_password() == "from-repo-env"
+
+
 def test_resolve_grafana_password_prefers_grafana_password(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -208,6 +226,36 @@ def test_check_grafana_datasources_passes_with_prometheus_and_ops_http(
     assert result.details["has_ops_http"] is True
 
 
+@pytest.mark.parametrize(
+    ("ops_name", "ops_uid"),
+    [
+        (vlo.EXPECTED_OPS_HTTP_DATASOURCE_NAME, "stale-ops-http"),
+        ("Stale Ops HTTP", vlo.EXPECTED_OPS_HTTP_DATASOURCE_UID),
+    ],
+)
+def test_check_grafana_datasources_requires_matching_ops_identity(
+    monkeypatch: pytest.MonkeyPatch,
+    ops_name: str,
+    ops_uid: str,
+) -> None:
+    monkeypatch.setattr(
+        vlo,
+        "_fetch_json",
+        lambda *args, **kwargs: [
+            {"name": "Prometheus", "uid": "prometheus"},
+            {"name": ops_name, "uid": ops_uid},
+        ],
+    )
+
+    result = vlo.check_grafana_datasources(
+        "http://grafana:3000", "admin", "secret", 1.0
+    )
+
+    assert result.status == "partial"
+    assert result.details is not None
+    assert result.details["has_ops_http"] is False
+
+
 def test_check_grafana_datasources_http_auth_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -227,6 +275,21 @@ def test_check_grafana_datasources_http_auth_error(
     assert result.status == "fail"
     assert result.details is not None
     assert result.details["code"] == 401
+
+
+def test_check_grafana_dashboards_fails_without_password_before_fetch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_fetch(*args: object, **kwargs: object) -> object:
+        raise AssertionError(f"unexpected Grafana request: {args}, {kwargs}")
+
+    monkeypatch.setattr(vlo, "_fetch_json", fail_fetch)
+
+    result = vlo.check_grafana_dashboards("http://grafana:3000", "admin", "   ", 1.0)
+
+    assert result.status == "fail"
+    assert result.details is not None
+    assert result.details["error"] == "missing_grafana_password"
 
 
 def test_check_grafana_dashboards_accepts_shipped_portfolio(

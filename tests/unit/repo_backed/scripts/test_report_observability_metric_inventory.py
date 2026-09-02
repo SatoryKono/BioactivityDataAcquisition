@@ -407,12 +407,12 @@ def test_iter_text_files_with_git_ls_files_filters_text_suffixes(
         )
 
     monkeypatch.setattr(
-        inventory,
+        inventory_scan,
         "_run_text_discovery_command",
         fake_run_text_discovery_command,
     )
 
-    assert inventory._iter_text_files_with_git_ls_files(scan_root) == [
+    assert inventory_scan._iter_text_files_with_git_ls_files(scan_root) == [
         inventory._REPO_ROOT / "src/bioetl/config.yaml",
         inventory._REPO_ROOT / "src/bioetl/example.py",
         inventory._REPO_ROOT / "src/bioetl/untracked.py",

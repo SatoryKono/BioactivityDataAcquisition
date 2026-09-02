@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T07:08:33.989750+00:00",
+  "generated_at": "2026-09-02T08:25:32.958437+00:00",
   "summary": {
     "total_scripts": 609,
     "status_counts": {
@@ -19683,7 +19683,7 @@
         },
         {
           "path": "scripts/ops/observability/validate_live_observability.py",
-          "line": 198,
+          "line": 206,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.check_prometheus_rules_health import ("
         },

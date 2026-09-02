@@ -5,7 +5,7 @@
 **Mode**: full_audit
 **Duration**: 00:05:00
 **Overall Status**: 🟢 GREEN
-**Agent Tree**: L1 → 5×L2 → 0×L3 (total: 5 agents)
+**Agent Tree**: L1 → 5×L2 → 5×L3 (total: 10 agents)
 
 ## Executive Summary
 
@@ -66,18 +66,23 @@ The test suite is fully passing. A single import failure in the Silver statistic
 
 | L2 Agent | L3 Agents | Tests Fixed | Tests Added | Coverage Δ | Flaky Found | Status |
 |----------|:---------:|:-----------:|:-----------:|:----------:|:-----------:|:------:|
-| L2-domain-unit | 0 | 0 | 0 | +0% | 0 | 🟢 |
+| L2-domain-unit | 3 | 0 | 0 | +0% | 0 | 🟢 |
 | L2-app-unit | 0 | 1 | 0 | +0% | 0 | 🟢 |
-| L2-infra-unit-integ | 0 | 0 | 0 | +0% | 0 | 🟢 |
+| L2-infra-unit-integ | 2 | 0 | 0 | +0% | 0 | 🟢 |
 | L2-comp-iface-unit | 0 | 0 | 0 | +0% | 0 | 🟢 |
 | L2-crosscutting | 0 | 0 | 0 | — | 0 | 🟢 |
-| **TOTAL** | **0** | **1** | **0** | **+0%** | **0** | |
+| **TOTAL** | **5** | **1** | **0** | **+0%** | **0** | |
 
 ## Agent Execution Log
 L1-orchestrator
 ├── L2-domain-unit (workload_score=35) → DONE
+│   ├── L3-schemas → DONE
+│   ├── L3-services → DONE
+│   └── L3-value-objects → DONE
 ├── L2-app-unit (workload_score=35) → DONE
 ├── L2-infra-unit-integ (workload_score=35) → DONE
+│   ├── L3-adapters-chembl → DONE
+│   └── L3-adapters-pubmed → DONE
 ├── L2-comp-iface-unit (workload_score=25) → DONE
 └── L2-crosscutting (workload_score=30) → DONE
 

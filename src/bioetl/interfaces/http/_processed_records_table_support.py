@@ -339,12 +339,14 @@ def format_percentage(
     percent_format: _PercentFormat,
 ) -> str:
     """Format a row percentage, or UNKNOWN for missing or invalid inputs."""
+    finite_value = _as_float(value)
+    finite_bronze_value = _as_float(bronze_value)
     if denominator == "constant_100":
-        return "100%" if value is not None else "UNKNOWN"
-    if value is None or bronze_value is None or bronze_value == 0:
+        return "100%" if finite_value is not None else "UNKNOWN"
+    if finite_value is None or finite_bronze_value is None or finite_bronze_value == 0:
         return "UNKNOWN"
 
-    percentage = value / bronze_value * 100
+    percentage = finite_value / finite_bronze_value * 100
     if percent_format == "fixed_1":
         return f"{percentage:.1f}%"
     if percent_format == "trimmed_3":
