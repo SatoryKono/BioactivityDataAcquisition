@@ -19,12 +19,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9401 | Monitor Replay Readiness |
 | bioetl-control-plane-v1.json | 9418 | Review Selected-Run Trust |
 | bioetl-control-plane-v1.json | 9416 | Review Retention Compliance |
+| bioetl-control-plane-v1.json | 906 | Review Recovery Action |
 | bioetl-control-plane-v1.json | 891 | Monitor Replay Safety |
 | bioetl-control-plane-v1.json | 892 | Monitor Checkpoint Age |
 | bioetl-control-plane-v1.json | 893 | Monitor Manifest/Ledger |
 | bioetl-control-plane-v1.json | 907 | Monitor Telemetry |
 | bioetl-control-plane-v1.json | 9419 | Review Lineage Validation |
-| bioetl-control-plane-v1.json | 906 | Review Recovery Action |
 | bioetl-control-plane-v1.json | 9415 | Review Lineage Validation |
 | bioetl-control-plane-v1.json | 902 | Inspect Replay & Checkpoint Evidence |
 | bioetl-control-plane-v1.json | 894 | Review Coverage Limits |
@@ -84,12 +84,12 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-dq-v2.json | 9401 | Monitor Current DQ Status |
 | bioetl-dq-v2.json | 9103 | Start DQ Triage |
 | bioetl-dq-v2.json | 9101 | Monitor DQ Threshold State |
+| bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
 | bioetl-dq-v2.json | 9405 | Selected Run · Identity & Accounting |
 | bioetl-dq-v2.json | 9402 | Inspect Run Identity |
 | bioetl-dq-v2.json | 9403 | Inspect Processed Records |
 | bioetl-dq-v2.json | 9406 | Review Selected Run Summary |
 | bioetl-dq-v2.json | 9404 | Selected Range · Impact & Freshness |
-| bioetl-dq-v2.json | 9102 | Inspect Current DQ Reasons |
 | bioetl-dq-v2.json | 2 | Monitor Volume-Weighted DQ Score |
 | bioetl-dq-v2.json | 5 | Monitor Worst-Entity DQ Score |
 | bioetl-dq-v2.json | 8 | Monitor Worst Freshness Age |

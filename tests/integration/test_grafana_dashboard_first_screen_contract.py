@@ -710,7 +710,7 @@ def test_run_explorer_identity_is_on_the_first_screen() -> None:
     assert 9402 not in panels
     assert 9403 not in panels
     browse_grid = browse.get("gridPos") or {}
-    assert browse_grid.get("h") == 12
+    assert browse_grid.get("h") == 11
     assert int(browse_grid.get("y", 0)) + int(browse_grid.get("h", 0)) <= FIRST_WINDOW_Y
     assert panel_declared_row_cap(browse) == 10
     collapsed_ids = {
