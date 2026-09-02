@@ -136,6 +136,78 @@ def test_check_prometheus_targets_malformed_and_success(
     )
 
 
+def test_resolve_grafana_password_prefers_grafana_password(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("GRAFANA_PASSWORD", "from-grafana")
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "from-gf")
+    assert vlo.resolve_grafana_password() == "from-grafana"
+
+
+def test_resolve_grafana_password_falls_back_to_gf_security(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GRAFANA_PASSWORD", raising=False)
+    monkeypatch.delenv("GRAFANA_ADMIN_PASSWORD", raising=False)
+    monkeypatch.setenv("GF_SECURITY_ADMIN_PASSWORD", "from-gf")
+    assert vlo.resolve_grafana_password() == "from-gf"
+
+
+def test_resolve_grafana_password_has_no_committed_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GRAFANA_PASSWORD", raising=False)
+    monkeypatch.delenv("GF_SECURITY_ADMIN_PASSWORD", raising=False)
+    monkeypatch.delenv("GRAFANA_ADMIN_PASSWORD", raising=False)
+    assert vlo.resolve_grafana_password() == ""
+    assert vlo.DEFAULT_GRAFANA_PASSWORD == ""
+
+
+def test_check_grafana_datasources_fails_without_password() -> None:
+    result = vlo.check_grafana_datasources("http://grafana:3000", "admin", "", 1.0)
+    assert result.status == "fail"
+    assert result.details is not None
+    assert result.details["error"] == "missing_grafana_password"
+
+
+def test_check_grafana_datasources_requires_ops_http(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        vlo,
+        "_fetch_json",
+        lambda *args, **kwargs: [
+            {"name": "Prometheus", "uid": "prometheus"},
+        ],
+    )
+    result = vlo.check_grafana_datasources(
+        "http://grafana:3000", "admin", "secret", 1.0
+    )
+    assert result.status == "partial"
+    assert result.details is not None
+    assert result.details["has_prometheus"] is True
+    assert result.details["has_ops_http"] is False
+
+
+def test_check_grafana_datasources_passes_with_prometheus_and_ops_http(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        vlo,
+        "_fetch_json",
+        lambda *args, **kwargs: [
+            {"name": "Prometheus", "uid": "prometheus"},
+            {"name": "BioETL Ops HTTP", "uid": "bioetl-ops-http"},
+        ],
+    )
+    result = vlo.check_grafana_datasources(
+        "http://grafana:3000", "admin", "secret", 1.0
+    )
+    assert result.status == "pass"
+    assert result.details is not None
+    assert result.details["has_ops_http"] is True
+
+
 def test_check_grafana_datasources_http_auth_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
