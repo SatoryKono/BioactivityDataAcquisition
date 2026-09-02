@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T17:53:22.137856+00:00",
+  "generated_at": "2026-09-02T17:52:39.722406+00:00",
   "summary": {
     "total_scripts": 611,
     "status_counts": {
@@ -7263,7 +7263,7 @@
         },
         {
           "path": "tests/architecture/test_diagram_regression_workflow.py",
-          "line": 219,
+          "line": 222,
           "source_group": "tests",
           "text": "wrapper = Path(\"scripts/diagrams/render.ps1\")"
         }
@@ -10163,7 +10163,7 @@
         },
         {
           "path": "tests/architecture/test_ci_heavy_lane_rebalance.py",
-          "line": 126,
+          "line": 141,
           "source_group": "tests",
           "text": "assert \"run_pytest_resilient.py\" not in verify_block"
         },
@@ -17189,7 +17189,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 83,
+      "reference_count": 84,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
