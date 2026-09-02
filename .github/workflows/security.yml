@@ -12,15 +12,8 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-  pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: security-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
