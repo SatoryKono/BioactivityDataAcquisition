@@ -478,6 +478,7 @@ jobs:
           GITHUB_EVENT_NAME=workflow_dispatch uv run --frozen --no-build python -m scripts.docs passports check --require-clean-source
           uv run --frozen --no-build python -m scripts.docs generate-cleanup-inventory --check
           uv run --frozen --no-build python -m scripts.engineering.repo check-inventory --manifest configs/quality/scripts_inventory_manifest.json --check-lifecycle --lifecycle-registry configs/quality/scripts_lifecycle_registry.json
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --json-out reports/quality/test-governance-current.json
           uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --check
           uv run --frozen --no-build pytest tests/architecture/test_ci_heavy_lane_rebalance.py tests/architecture/test_scripts_inventory_manifest.py tests/architecture/test_scripts_lifecycle_registry.py tests/architecture/test_passport_documentation_projections.py tests/unit/scripts/docs/passports/test_passport_projector.py tests/unit/scripts/ops/observability/test_action_target_routes.py -q --tb=short
           git diff --check
