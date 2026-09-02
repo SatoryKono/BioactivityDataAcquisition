@@ -271,6 +271,9 @@ class TestProcessedRecordsTable:
         assert len(payload["rows"]) == 11
         assert all("UNKNOWN" in str(row["value"]) for row in payload["rows"])
         assert all("UNKNOWN" in str(row["percentage"]) for row in payload["rows"])
+        # Empty-ledger responses carry v2 to signal the UNKNOWN-row semantic
+        # (ADR-044 §Ops-HTTP contract).  Populated-entries responses keep v1.
+        assert payload["contract"] == "processed_records_table_v2"
 
     def test_ledger_payload_uses_metrics_snapshot_when_artifacts_are_absent(
         self,
@@ -299,6 +302,8 @@ class TestProcessedRecordsTable:
                 ),
             ),
         )
+
+        assert payload["contract"] == "processed_records_table_v1"
 
         rows = {row["parameter"]: row for row in payload["rows"]}
         assert rows["01 bronze_records"]["value"] == "10"
