@@ -16,6 +16,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 import base64
 
+from dotenv import load_dotenv
+
 # Configuration
 DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
 DEFAULT_GRAFANA_URL = "http://localhost:3000"
@@ -26,6 +28,12 @@ DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
 EXPECTED_OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
 EXPECTED_OPS_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
+REPO_ENV_PATH = Path(__file__).resolve().parents[3] / ".env"
+
+
+def _load_repo_environment() -> None:
+    """Load the machine-local repository environment without overriding process env."""
+    load_dotenv(dotenv_path=REPO_ENV_PATH, override=False)
 
 
 def _env_first(*names: str, default: str = "") -> str:
@@ -349,7 +357,7 @@ def check_grafana_datasources(
         prometheus_ds = any("prometheus" in name.lower() for name in datasource_names)
         ops_http_ds = any(
             uid == EXPECTED_OPS_HTTP_DATASOURCE_UID
-            or name == EXPECTED_OPS_HTTP_DATASOURCE_NAME
+            and name == EXPECTED_OPS_HTTP_DATASOURCE_NAME
             for uid, name in zip(datasource_uids, datasource_names, strict=True)
         )
         if prometheus_ds and ops_http_ds:
@@ -565,6 +573,7 @@ def run_validation(
 
 
 def main():
+    _load_repo_environment()
     parser = argparse.ArgumentParser(
         description="Validate live BioETL observability stack (OBS-003)"
     )
