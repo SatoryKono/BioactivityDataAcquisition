@@ -1910,7 +1910,12 @@ def _wait_for_grafana_full_profile(
         )
         if readable and isinstance(payload, Mapping):
             profile = str(payload.get("dashboard_profile") or "").strip()
-            if profile == "full":
+            reason = str(payload.get("reason") or "").strip()
+            if profile == "full" or (
+                reason
+                and reason != _GRAFANA_TIMEOUT_RETRY_REASON
+                and reason != "identity_matched"
+            ):
                 return
         remaining = _remaining_timeout(deadline, clock)
         if remaining <= 0:
