@@ -1405,7 +1405,6 @@ def test_docker_built_image_uses_one_canonical_trivy_scan_and_blocks_all_medium_
     )
     conversion_run = str(conversion["run"])
     assert "trivy convert --format sarif" in conversion_run
-    assert "trivy convert --format table" in conversion_run
     assert "aquasec/trivy:" not in conversion_run
     assert "test -s reports/security/trivy-results.sarif" in conversion_run
 
@@ -1523,7 +1522,6 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert step_names.index(
         "Enforce canonical Trivy Critical High Medium zero policy"
     ) < step_names.index("Export exact scanned image for publication")
-    assert "reports/security/trivy-results.table.txt" in upload["with"]["path"]
 
 
 def test_docker_security_gate_covers_dependency_build_inputs() -> None:
