@@ -43,7 +43,14 @@ jobs:
                 run: uv run --frozen --no-build ruff check src/bioetl/infrastructure --output-format=github
 
             -   name: Ruff format (strict full gate - src + tests)
-                run: uv run --frozen --no-build ruff format --check src tests
+                run: |
+                    # Temporary SHA-bound diagnostics; removed after exact artifacts are captured.
+                    uv run --frozen --no-build ruff format --diff src tests || true
+                    uv run --frozen --no-build python scripts/engineering/qa/report_config_surface_backlog.py
+                    echo '=== CONFIG_SURFACE_BACKLOG_BEGIN ==='
+                    cat reports/quality/config-surface-backlog.json
+                    echo '=== CONFIG_SURFACE_BACKLOG_END ==='
+                    exit 1
 
             -   name: Ruff isort (strict full gate - src + tests)
                 run: uv run --frozen --no-build ruff check --select I src tests --output-format=github
