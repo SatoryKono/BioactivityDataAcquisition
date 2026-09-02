@@ -2330,6 +2330,7 @@
         "docs/00-project/ai/prompts/library/audit/cyclic-pack.md",
         "docs/00-project/ai/prompts/library/audit/project/README.md",
         "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
+        "docs/00-project/consolidation-20260901-12h.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
