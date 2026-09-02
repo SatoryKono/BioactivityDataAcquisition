@@ -128,7 +128,7 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"
     )
-    assert "--junitxml=reports/test-telemetry/junit-fast.xml" in workflow, (
+    assert "--junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml" in workflow, (
         "test-fast job should emit JUnit telemetry for slow-test duration analysis"
     )
     assert "pattern: test-telemetry-*" in workflow, (
