@@ -1902,12 +1902,17 @@ def _post_start_grafana_bootstrap_gate(
     )
     if restart.returncode != 0:
         return 0
-    remaining = min(40.0, max(0.0, gate_deadline - clock()))
-    if remaining <= 0.0:
+    deadline = min(gate_deadline, clock() + 40.0)
+    if deadline <= clock():
         return 0
-    deadline = clock() + remaining
     while True:
-        payload, readable = _load_grafana_bootstrap_status(runner, timeout=5.0)
+        now = clock()
+        remaining = max(0.0, deadline - now)
+        if remaining <= 0.0:
+            return 0
+        payload, readable = _load_grafana_bootstrap_status(
+            runner, timeout=min(5.0, remaining)
+        )
         if readable and isinstance(payload, Mapping):
             profile = str(payload.get("dashboard_profile") or "").strip()
             reason = str(payload.get("reason") or "").strip()
@@ -1916,8 +1921,6 @@ def _post_start_grafana_bootstrap_gate(
             ):
                 return 0
         now = clock()
-        if now >= deadline:
-            return 0
         sleep(min(2.0, max(0.0, deadline - now)))
 
 

@@ -446,6 +446,54 @@ def test_grafana_bootstrap_timeout_retry_skips_non_monitoring_stack(
     assert result == 0
 
 
+def test_grafana_bootstrap_timeout_retry_caps_status_poll_timeout_to_remaining_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "b" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    now = [0.0]
+    restarted = {"done": False}
+    post_restart_status_timeouts: list[float] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, timeout: float):
+        if cmd[:3] == ["docker", "exec", "bioetl-grafana"] and cmd[3] == "cat":
+            if restarted["done"]:
+                post_restart_status_timeouts.append(timeout)
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(deferred)
+            )
+        if cmd[:4] == ["docker", "exec", "bioetl-grafana", "printenv"]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=source_id + "\n")
+        if cmd[:4] == ["docker", "exec", "bioetl-grafana", "wget"]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": source_id}),
+            )
+        if cmd[:2] == ["docker", "restart"]:
+            restarted["done"] = True
+            return runtime_manager.CommandResult(list(cmd), 0)
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=1.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+
+    assert result == 0
+    assert post_restart_status_timeouts
+    assert all(timeout <= 1.0 for timeout in post_restart_status_timeouts)
+
+
 def test_preflight_errors_are_recoverable_for_dashboard_and_cross_stack(
     tmp_path: Path,
 ) -> None:
