@@ -418,8 +418,8 @@ jobs:
       - name: Materialize final coordinator
         run: |
           set -euo pipefail
-          cp .github/workflows/pr-required.yml "${RUNNER_TEMP}/pr-required-temporary.yml"
-          sed -i '/^  # codex-temp-passport-refresh-start$/,/^  # codex-temp-passport-refresh-end$/d'             .github/workflows/pr-required.yml
+          sed -i '/^  # codex-temp-passport-refresh-start$/,/^  # codex-temp-passport-refresh-end$/d' \
+            .github/workflows/pr-required.yml
           uv run --frozen --no-build python -c 'from pathlib import Path; path = Path(".github/workflows/pr-required.yml"); path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n", encoding="utf-8")'
           ! grep -q 'codex-temp-passport-refresh' .github/workflows/pr-required.yml
 
