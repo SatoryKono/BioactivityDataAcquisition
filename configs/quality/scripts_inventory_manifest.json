@@ -17189,7 +17189,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 84,
+      "reference_count": 83,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17232,12 +17232,6 @@
           "line": 31,
           "source_group": "ci",
           "text": "python -m scripts.engineering.repo github-settings-review"
-        },
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 420,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo             sync-inventory"
         }
       ]
     },
@@ -17658,14 +17652,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
-        {
-          "path": ".github/workflows/pr-required.yml",
-          "line": 428,
-          "source_group": "ci",
-          "text": "uv run --frozen --no-build python -m scripts.engineering.repo             check-inventory             --manifest configs/quality/scripts_inventory_manifest.json             --check-lifecycle          "
-        },
         {
           "path": ".github/workflows/tests.yml",
           "line": 403,
