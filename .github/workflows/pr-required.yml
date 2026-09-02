@@ -512,6 +512,7 @@ jobs:
                 docs/reports/generated/documentation-cleanup-inventory.json|\
                 docs/reports/generated/documentation-cleanup-inventory.md|\
                 reports/quality/contract-coverage-matrix.json|\
+                reports/quality/contract-coverage-matrix.md|\
                 reports/quality/low-coverage-targeted-tests-6045.json|\
                 reports/quality/module-coverage-inventory.json|\
                 reports/quality/test-governance-current.json|\
@@ -546,6 +547,7 @@ jobs:
             docs/reports/generated/documentation-cleanup-inventory.json \
             docs/reports/generated/documentation-cleanup-inventory.md \
             reports/quality/contract-coverage-matrix.json \
+            reports/quality/contract-coverage-matrix.md \
             reports/quality/low-coverage-targeted-tests-6045.json \
             reports/quality/module-coverage-inventory.json \
             reports/quality/test-governance-current.json \
