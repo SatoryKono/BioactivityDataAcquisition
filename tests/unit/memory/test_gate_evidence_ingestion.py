@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -17,13 +18,23 @@ from memory.proof import (
 )
 from memory.proof_cli import main
 from tests.helpers.clock import FIXED_TEST_TIME
-from tests.helpers.isolated_git import init_tracked_fixture_repo
 
 pytestmark = pytest.mark.integration
 
 
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+
+
 def _artifacts(tmp_path: Path) -> tuple[Path, Path, Path]:
-    repo = init_tracked_fixture_repo(tmp_path / "repo")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-b", "main")
+    _git(repo, "config", "user.email", "proof@example.invalid")
+    _git(repo, "config", "user.name", "Proof Test")
+    (repo / "tracked.py").write_text("VALUE = 1\n", encoding="utf-8")
+    _git(repo, "add", "tracked.py")
+    _git(repo, "commit", "-m", "test fixture")
     policy = load_policy()
     receipt = build_receipt(
         repo_root=repo,

@@ -125,7 +125,6 @@ log_test.txt
 /final_chunk*.xml
 /extra_chunk*.xml
 /tmp_sub_*.txt
-/tmp_*.txt
 /temp_closeout.json
 /.tmp_test_run.log
 /.mcp-server-context.md

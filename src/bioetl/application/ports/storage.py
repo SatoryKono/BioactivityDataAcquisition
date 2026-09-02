@@ -49,9 +49,7 @@ class SilverMergedWriteProtocol(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-    ) -> None:
-        """Write merged Silver layer records with schema and lineage."""
-        ...
+    ) -> None: ...
 
 
 @runtime_checkable
@@ -69,9 +67,7 @@ class GoldMergedWriteProtocol(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
-    ) -> None:
-        """Write merged Gold layer records with schema and completion metadata."""
-        ...
+    ) -> None: ...
 
 
 @runtime_checkable
@@ -79,9 +75,7 @@ class StorageContextProtocol(Protocol):
     """Minimal storage context required for checkpoint-port creation."""
 
     @property
-    def checkpoints_path(self) -> Path:
-        """Get path to pipeline checkpoints directory."""
-        ...
+    def checkpoints_path(self) -> Path: ...
 
 
 @runtime_checkable
@@ -99,6 +93,4 @@ class StorageFactoryProtocol(Protocol):
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
         pipeline_name: str | None = None,
-    ) -> StorageContext:
-        """Create storage context from settings and pipeline configuration."""
-        ...
+    ) -> StorageContext: ...

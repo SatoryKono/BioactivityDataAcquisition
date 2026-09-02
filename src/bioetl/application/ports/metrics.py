@@ -83,13 +83,9 @@ class MetricsService(Protocol):
         fail_fast: bool,
         retry_count: int,
         retry_delay: float,
-    ) -> StartResult:
-        """Start metrics HTTP server on the specified endpoint."""
-        ...
+    ) -> StartResult: ...
 
-    def get_status(self) -> MetricsServerStatus:
-        """Get current metrics server runtime status."""
-        ...
+    def get_status(self) -> MetricsServerStatus: ...
 
     def push_to_gateway(
         self,
@@ -98,9 +94,7 @@ class MetricsService(Protocol):
         run_label: str = "bioetl",
         grouping_key: dict[str, str] | None = None,
         metric_names: tuple[str, ...] | None = None,
-    ) -> PushResult:
-        """Push metrics to Prometheus Pushgateway."""
-        ...
+    ) -> PushResult: ...
 
     def delete_from_gateway(
         self,
@@ -108,9 +102,7 @@ class MetricsService(Protocol):
         gateway: str,
         run_label: str,
         grouping_key: dict[str, str],
-    ) -> DeleteResult:
-        """Delete metrics from Prometheus Pushgateway."""
-        ...
+    ) -> DeleteResult: ...
 
 
 # Deprecated aliases for backward compatibility (deprecated since 2026-08-26)

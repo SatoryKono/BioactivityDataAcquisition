@@ -8,7 +8,6 @@ from bioetl.interfaces.http import _processed_records_table_support as _support
 ProcessedRecordRowSpec = _support.ProcessedRecordRowSpec
 PROCESSED_RECORDS_ROW_SPECS = _support.PROCESSED_RECORDS_ROW_SPECS
 PROCESSED_RECORDS_TABLE_CONTRACT = _support.PROCESSED_RECORDS_TABLE_CONTRACT
-PROCESSED_RECORDS_TABLE_CONTRACT_V2 = _support.PROCESSED_RECORDS_TABLE_CONTRACT_V2
 DEFAULT_PROMETHEUS_BASE_URL = _support.DEFAULT_PROMETHEUS_BASE_URL
 fetch_processed_record_values = _support.fetch_processed_record_values
 read_processed_records_run_id = _support.read_processed_records_run_id
@@ -121,17 +120,11 @@ def build_processed_records_table_payload_from_ledger(
 ) -> dict[str, object]:
     """Build exact-run accounting rows from RunLedger source-of-truth entries."""
     if not ledger_entries:
-        # No ledger entries for the selected UUID → all rows render as UNKNOWN
-        # (DASH-STATE-001).  Use the v2 contract to signal this distinct
-        # semantic: v1 is reserved for populated-entries responses so existing
-        # clients that pattern-match on the contract string are not surprised.
-        payload = build_processed_records_table_payload(
+        return build_processed_records_table_payload(
             metric_values={spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS},
             pipeline=pipeline,
             run_type=run_type,
         )
-        payload["contract"] = PROCESSED_RECORDS_TABLE_CONTRACT_V2
-        return payload
 
     metric_values: dict[str, float | int | None] = {
         spec.metric: 0 for spec in PROCESSED_RECORDS_ROW_SPECS
@@ -206,7 +199,6 @@ __all__ = [
     "DEFAULT_PROMETHEUS_BASE_URL",
     "PROCESSED_RECORDS_ROW_SPECS",
     "PROCESSED_RECORDS_TABLE_CONTRACT",
-    "PROCESSED_RECORDS_TABLE_CONTRACT_V2",
     "ProcessedRecordRowSpec",
     "build_processed_records_table_payload",
     "build_processed_records_table_payload_from_ledger",

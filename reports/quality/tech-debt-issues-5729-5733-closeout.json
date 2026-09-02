@@ -52,13 +52,13 @@
     "5729": {
       "coverage_actual_percent": 96.7,
       "coverage_percent": 96.7,
-      "refreshed_at_utc": "2026-09-01T21:57:31.174594+00:00",
-      "source_commit": "1bfa894c28ce58af0671c2721fd89a8b1cd05db0",
-      "source_run_id": "33538533103",
-      "source_tree_sha256": "0cd89c6cca5506529244b487be2c63ff31a8a8db8f0410d2341106d31261b996"
+      "refreshed_at_utc": "2026-09-01T14:01:50.406129+00:00",
+      "source_commit": "64379be36ad9342a9c4fa74bb62ac9e2eb5eb254",
+      "source_run_id": "33480065022",
+      "source_tree_sha256": "f87ba546ffc6f8aaca0f9925735b2af3f145822ef2adfaa3de55128b58798618"
     },
     "5730": {
-      "minimum_coverage_percent": 54,
+      "minimum_coverage_percent": 54.0,
       "target_modules": [
         "bioetl.infrastructure.storage.support.checkpoint_writer",
         "bioetl.infrastructure.control_plane._file_lineage_index"
@@ -66,9 +66,9 @@
     },
     "5731": {
       "minimum_module_coverages": {
-        "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow": 77,
-        "bioetl.application.core.runner": 86,
-        "bioetl.application.observability.observer": 95
+        "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow": 77.0,
+        "bioetl.application.core.runner": 86.0,
+        "bioetl.application.observability.observer": 95.0
       }
     },
     "5732": {

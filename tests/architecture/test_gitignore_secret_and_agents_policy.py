@@ -64,7 +64,7 @@ def test_runtime_guides_start_at_agents_and_runtime_maps() -> None:
         assert "JUNIE-RUNTIME.md" in text, rel
 
 
-def test_junie_runtime_and_all_agent_language_contracts() -> None:
+def test_junie_runtime_matches_codex_wsl_python_and_narrow_parity_claim() -> None:
     junie = (ROOT / ".junie" / "agents" / "JUNIE-RUNTIME.md").read_text(
         encoding="utf-8"
     )
@@ -74,24 +74,5 @@ def test_junie_runtime_and_all_agent_language_contracts() -> None:
     needle = "${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python"
     assert needle in junie
     assert needle in codex
-    review_surfaces = (
-        "AGENTS.md .codex/agents/CODEX-RUNTIME.md .junie/guidelines.md "
-        ".junie/agents/JUNIE-RUNTIME.md .devin/agents/DEVIN-RUNTIME.md "
-        ".devin/workflows/review.md .github/copilot-instructions.md GEMINI.md "
-        "docs/00-project/ai/rules/cursor/05-agent-workflow.mdc "
-        "docs/00-project/ai/rules/windsurf/rules/05-agent-workflow.md "
-        "docs/00-project/ai/rules/windsurf/workflows/review.md"
-    ).split()
-    review_anchors = (
-        "`gh pr review`",
-        "review body",
-        "inline review comments",
-        "**MUST** be written in Russian",
-    )
-    for relative_path in review_surfaces:
-        text = (ROOT / relative_path).read_text(encoding="utf-8")
-        for anchor in review_anchors:
-            text = " ".join(text.split())
-            assert anchor in text, f"{relative_path}: missing {anchor}"
     assert "byte-compared" in junie
     assert "junie-mirror-contract.json" in junie

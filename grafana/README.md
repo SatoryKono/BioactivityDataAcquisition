@@ -1022,7 +1022,7 @@ Common context panels on primary dashboards outside Overview:
 | `Inspect Scope & Evidence` | `9400` | Visible operator question plus plain-language evidence-scope definitions; selector details stay in the panel tooltip/description. |
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | BioETL Ops HTTP identity table for `pipeline/run_type/run_id`. |
-| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`. Exact `$run_id` scopes resolve from RunLedger evidence. Placeholder `$run_id` (`-` / `unknown` / missing) returns `selection=required` with empty rows and does not query Prometheus. Prometheus current recording rules are used only when the health server has no RunLedger port. Every `Inspect`/`Review Processed Records` table displays `parameter`, right-aligned `value`, and right-aligned canonical `percentage`. Zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
+| `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules. Every `Inspect`/`Review Processed Records` table displays `parameter`, right-aligned `value`, and right-aligned canonical `percentage`. Zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
 | `Identity Data Unavailable` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
 | `Record Counts Unavailable` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
@@ -1056,14 +1056,9 @@ composite identity, lineage, and artifact refs; none of those values may be
 added as Prometheus labels.
 
 The local health server resolves `/ops/observability/processed-records` from
-RunLedger when an exact `run_id` is provided. Without an exact `run_id`
-(`-`, `unknown`, missing, or a non-UUID token) the endpoint returns HTTP 200
-with `selection=required` and empty `rows`; it does not query Prometheus.
-Grafana Processed Records tables therefore stay empty until the operator
-selects a concrete run. When the health server has no RunLedger port, an
-exact `run_id` falls back to Prometheus current recording rules via
-`BIOETL_PROMETHEUS_URL` when set. Without an explicit setting it tries
-`http://localhost:9090`, then the Docker-local fallbacks
+RunLedger when an exact `run_id` is provided. Without exact `run_id`, it falls
+back to Prometheus via `BIOETL_PROMETHEUS_URL` when set. Without an explicit
+setting it tries `http://localhost:9090`, then the Docker-local fallbacks
 `http://prometheus:9090` and `http://host.docker.internal:9090`.
 For detached dashboard audits this is a backend reachability contract, not a
 Grafana datasource contract: set `BIOETL_PROMETHEUS_URL` to the Prometheus URL
@@ -1241,7 +1236,7 @@ ______________________________________________________________________
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
 | 215 | Review First Action           | Table      | `topk(4, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or NO_ROUTE label_replace(vector(0)…))` | Up to four urgency-ordered routes; columns Action (primary color-text CTA, short labels, row link via `action_dashboard_uid`) → Priority (short badge `RUNTIME`/`CP`/… with color-background) → Why → Pipeline. Missing scope → `NR`/`NO_ROUTE`. Ladder: Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Secondary panel links: Runtime / Control Plane / DQ / Provider (provider fail-closes `provider=unknown` + `pipeline_context`). |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |
-| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Exact `run_id` scopes read RunLedger artifact/metrics evidence. Placeholder `$run_id` returns `selection=required` with empty rows. Prometheus current recording rules apply only when RunLedger is not wired. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus canonical formatted `percentage`; internal `row_status` is hidden, and reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
+| 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Exact `run_id` scopes read RunLedger artifact/metrics evidence; aggregate scopes use recording rules. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus canonical formatted `percentage`; internal `row_status` is hidden, and reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
 | 9002 | Review Domain Status          | Table      | `topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"}))`                     | First-screen deviation-first summary: four worst current domain statuses. UNKNOWN remains incomplete evidence, not OK. Complete six-domain matrix is panel `9031`.            |
 | 9031 | Review All Domain Status      | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Full current domain matrix under collapsed Domain Status Tracks. Companion to the first-screen four-row cap on panel `9002`.                                                  |
 | 9003 | Runtime                       | Table      | `max by (pipeline) (bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                         | Compact current runtime blocker summary: worst current status per pipeline across the selected run-type scope.                                                                  |
