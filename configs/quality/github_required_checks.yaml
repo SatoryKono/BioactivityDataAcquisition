@@ -9,6 +9,88 @@ policy:
   allow_cancelled_as_success: false
   require_sha_binding: true
   not_applicable_requires_reason: true
+canonical_checks:
+  - id: ruff
+    owner_workflow: .github/workflows/import-linter.yml
+    owner_jobs: [lint]
+    selectors: [ruff check, ruff format --check]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: mypy
+    owner_workflow: .github/workflows/type-checking.yml
+    owner_jobs: [type-check]
+    selectors: [mypy --strict --no-incremental src/bioetl]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [type-checking-reports-on-failure]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: dependency-lock
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [dependency-preflight]
+    selectors: [uv lock --check]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [dependency-preflight-on-failure]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: architecture
+    owner_workflow: .github/workflows/import-linter.yml
+    owner_jobs: [arch-tests]
+    selectors: [pytest tests/architecture -m not-slow-not-benchmark-not-memory]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [architecture-telemetry]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: integration
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [test-matrix]
+    selectors: [integration test-matrix shard]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: [coverage-shards, test-telemetry]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: dq-consistency
+    owner_workflow: .github/workflows/tests.yml
+    owner_jobs: [dq-consistency-gate]
+    selectors: [python -m scripts.engineering.qa validate-dq-consistency]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: root-hygiene
+    owner_workflow: .github/workflows/root-hygiene.yml
+    owner_jobs: [root-hygiene]
+    selectors: [python -m scripts.engineering.repo.check_root_hygiene]
+    events: [pull_request, default_branch_push, workflow_call, workflow_dispatch]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: compiled-artifacts
+    owner_workflow: .github/workflows/compiled-artifacts-block.yml
+    owner_jobs: [no-pyc-check]
+    selectors: [tracked compiled Python artifact scan]
+    events: [pull_request, default_branch_push, workflow_call]
+    artifacts: []
+    status: blocking
+    duplicate_policy: forbidden
+  - id: security-scans
+    owner_workflow: .github/workflows/security.yml
+    owner_jobs: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
+    selectors: [detect-secrets, pip-audit, bandit, gitleaks, osv-scanner]
+    events: [pull_request, default_branch_push, workflow_call]
+    artifacts: [security-reports]
+    status: blocking
+    duplicate_policy: forbidden
+  - id: canonical-manifest-hashes
+    owner_workflow: .github/workflows/consolidation-gates.yml
+    owner_jobs: [canonical-manifest-hashes]
+    selectors: [sha256sum tests tree, sha256sum src tree]
+    events: [workflow_dispatch]
+    artifacts: [canonical-manifest-hashes]
+    status: advisory_evidence
+    duplicate_policy: forbidden
+
 gates:
   - id: lint-arch
     display_name: Lint and Architecture Gates

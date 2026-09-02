@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** as of `2026-09-02` (`checks-complete`, `root-hygiene` still listed but not enforced). Shadow aggregator `pr-gate-complete` materializes on every PR — see §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** as of `2026-09-02` (`checks-complete`, `root-hygiene` still listed but not enforced). The `pr-gate-complete` draft is manual-only pending the #9974 → #9975 cutover — see §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -208,11 +208,32 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main` (legacy required set). Since `2026-09-02` the **shadow** single required context `pr-gate-complete` (workflow `.github/workflows/pr-required.yml`) materializes on every PR via the aggregator defined in `configs/quality/github_required_checks.yaml` (#9975). It aggregates Tests, Architecture/lint/C901, Type Checking, Security, CodeQL, Docker, Duplication, Root Hygiene and generated-artifact checks (fail-closed, SHA-bound). Enforcement of `pr-gate-complete` is **not yet active** — this is repo-side shadow evidence for #9979; live enforcement remains `disabled` until 5 green shadow runs. The repository ruleset
-`root-hygiene-required-check` is defined with exactly this always-on set,
-and enforcement is **active**. Direct push/merge to `main` is blocked when these
-contexts are missing or failing. Further ruleset mutations remain external operations that require
-explicit maintainer confirmation and API re-verification.
+Both checks materialize on every PR targeting `main` (legacy required set).
+The `pr-gate-complete` coordinator draft is temporarily **manual-only** while
+#9974 restores single ownership. Its automatic `pull_request` trigger must be
+enabled only in the atomic #9975 cutover that removes the corresponding direct
+leaf PR triggers. Therefore no successful shadow evidence exists yet for #9979.
+Live ruleset enforcement remains `disabled`; any ruleset mutation is an external
+admin operation requiring separate owner approval and fresh API verification.
+
+### Canonical CI owner map (#9974)
+
+`configs/quality/github_required_checks.yaml` is the machine-readable source of
+truth. A duplicate selector is forbidden unless that catalog records a distinct
+purpose; the current catalog contains no allowed duplicate.
+
+| Gate | Canonical workflow / job | Selector | Events | Artifacts | Status |
+| --- | --- | --- | --- | --- | --- |
+| Ruff | `import-linter.yml / lint` | `ruff check`, `ruff format --check` | PR, main push, call, manual | none | blocking |
+| mypy | `type-checking.yml / type-check` | strict `mypy` | PR, main push, call, manual | failure report | blocking |
+| dependency lock | `tests.yml / dependency-preflight` | `uv lock --check` | PR, main push, call, manual | failure report | blocking |
+| architecture | `import-linter.yml / arch-tests` | non-slow architecture pytest lane | PR, main push, call, manual | architecture telemetry | blocking |
+| integration | `tests.yml / test-matrix` | integration shard | PR, main push, call, manual | coverage/test telemetry | blocking |
+| DQ consistency | `tests.yml / dq-consistency-gate` | `validate-dq-consistency` | PR, main push, call, manual | none | blocking |
+| root hygiene | `root-hygiene.yml / root-hygiene` | root policy scan | PR, main push, call, manual | none | blocking |
+| compiled artifacts | `compiled-artifacts-block.yml / no-pyc-check` | tracked bytecode scan | PR, main push, call | none | blocking |
+| security | `security.yml` scanner jobs | secrets/dependency/SAST scanners | PR, main push, call | security reports | blocking |
+| canonical manifest hashes | `consolidation-gates.yml / canonical-manifest-hashes` | source/test SHA-256 manifests | manual | hash manifests | advisory evidence |
 
 ### Path-scoped core checks
 
@@ -322,7 +343,7 @@ Live GitHub enforcement state (as of `2026-09-02`, `main@1b8f4edabb`):
 - Enforcement: `disabled` (was `active` until `2026-09-02T09:41:27+03:00`).
 - Companion ruleset `main` (13643213) targets `refs/heads/main`.
 - Enforcement: `disabled` (was `active` until `2026-09-02T09:24:27+03:00`).
-- Shadow aggregator `pr-gate-complete` materializes on every PR via `.github/workflows/pr-required.yml` (see `configs/quality/github_required_checks.yaml`); not yet enforced as required status check (tracked in #9975, activation in #9979).
+- `pr-gate-complete` is manual-only pending the atomic #9975 cutover; it has no valid shadow evidence yet and is not a required status check.
 - Legacy required contexts still listed in disabled rulesets: `checks-complete`, `root-hygiene`.
 - Direct updates to main are blocked by this ruleset when required checks are missing or failing.
 - Defined status checks: exactly `checks-complete` and `root-hygiene`
@@ -691,7 +712,7 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
     {"id": 15730586, "name": "root-hygiene-required-check", "enforcement": "disabled", "updated_at": "2026-09-02T09:41:27.708+03:00"}
   ],
   "required_status_checks": ["checks-complete", "root-hygiene"],
-  "shadow_aggregator": {"context": "pr-gate-complete", "workflow": ".github/workflows/pr-required.yml", "materializes_on": "every PR", "enforcement": "shadow (not yet required)", "catalog": "configs/quality/github_required_checks.yaml"}
+  "aggregator_draft": {"context": "pr-gate-complete", "workflow": ".github/workflows/pr-required.yml", "materializes_on": "workflow_dispatch only", "enforcement": "not shadow-validated", "catalog": "configs/quality/github_required_checks.yaml"}
 }
 ```
 
