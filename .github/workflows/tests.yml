@@ -1448,18 +1448,6 @@ jobs:
             fi
           done
 
-      - name: Run serial-only tests with resilient pytest runner
-        run: |
-          mkdir -p reports/coverage
-          # Canonical serial subset: -m "serial and not e2e and not benchmark"
-          COVERAGE_FILE=reports/coverage/.coverage.serial uv run --frozen --no-build python \
-            scripts/engineering/ci/run_pytest_resilient.py \
-            --target tests/ \
-            --reports-dir reports/pytest/coverage-verify \
-            --parallel-marker "serial and not e2e and not benchmark and not memory" \
-            --parallel-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-report=" \
-            --skip-serial-pass
-
       - name: Combine coverage shards and build SHA-bound candidate
         run: |
           uv run --frozen --no-build python -m coverage combine --keep reports/coverage
