@@ -282,6 +282,72 @@ def _fail_closed_provider_handoffs(value: object, *, provider_declared: bool) ->
         _rewrite_list_provider_handoffs(value)
 
 
+def _panel_grid(panel: object) -> dict[str, object] | None:
+    if not isinstance(panel, dict):
+        return None
+    grid = panel.get("gridPos")
+    return grid if isinstance(grid, dict) else None
+
+
+def _first_window_overflow(panels: list[object]) -> int:
+    overflow = 0
+    for panel in _walk_panels(panels):
+        if panel.get("type") == "row":
+            continue
+        grid = _panel_grid(panel)
+        if grid is None:
+            continue
+        y = grid.get("y")
+        height = grid.get("h")
+        if not isinstance(y, int) or not isinstance(height, int):
+            continue
+        if 0 <= y < VIEWPORT_ROWS:
+            overflow = max(overflow, y + height - VIEWPORT_ROWS)
+    return overflow
+
+
+def _reclaim_first_window_overflow(
+    nav: dict[str, object], panels: list[object]
+) -> None:
+    """Shrink the lowest first-window text rail so nav h=4 still fits the fold."""
+    overflow = _first_window_overflow(panels)
+    if overflow <= 0:
+        return
+    slack: dict[str, object] | None = None
+    slack_y = -1
+    for panel in _walk_panels(panels):
+        if panel is nav or panel.get("type") != "text" or panel.get("id") == 1000:
+            continue
+        grid = _panel_grid(panel)
+        if grid is None:
+            continue
+        y = grid.get("y")
+        height = grid.get("h")
+        if not isinstance(y, int) or not isinstance(height, int):
+            continue
+        if y < VIEWPORT_ROWS and height - overflow >= 2 and y >= slack_y:
+            slack = panel
+            slack_y = y
+    if slack is None:
+        raise SystemExit(
+            "navigation height expansion would overflow the first window and "
+            "no text rail can reclaim the extra row"
+        )
+    slack_grid = _panel_grid(slack)
+    if slack_grid is None:
+        raise SystemExit("slack text rail is missing gridPos")
+    old_bottom = int(slack_grid["y"]) + int(slack_grid["h"])
+    slack_grid["h"] = int(slack_grid["h"]) - overflow
+    for panel in _walk_panels(panels):
+        if panel is slack or panel is nav:
+            continue
+        grid = _panel_grid(panel)
+        if grid is None or not isinstance(grid.get("y"), int):
+            continue
+        if grid["y"] >= old_bottom:
+            grid["y"] = int(grid["y"]) - overflow
+
+
 def _expand_nav_height(
     nav: dict[str, object], panels: list[object], *, new_height: int
 ) -> None:
@@ -335,6 +401,7 @@ def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> 
         raise SystemExit("navigation panel gridPos must be an object")
     grid_pos["h"] = NAV_HEIGHT
     grid_pos.update({"w": 24, "x": 0, "y": 0})
+    _reclaim_first_window_overflow(nav, panels)
     nav["options"] = {
         "mode": "html",
         "bioetlDisplayTitle": NAV_DISPLAY_TITLE,
