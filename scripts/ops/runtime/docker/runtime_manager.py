@@ -1825,8 +1825,8 @@ def _grafana_expected_runtime_source_id(runner: Runner, *, timeout: float) -> st
     if result.returncode != 0:
         return ""
     value = (result.stdout or "").strip().splitlines()
-    token = value[0].strip() if value else ""
-    if len(token) == 64 and not any(ch not in "0123456789abcdef" for ch in token):
+    token = value[0].strip().lower() if value else ""
+    if len(token) == 64 and all(ch in "0123456789abcdef" for ch in token):
         return token
     return ""
 
