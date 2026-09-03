@@ -1018,6 +1018,16 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
                 ), dockerfile
 
 
+def test_retired_ci_helper_cannot_replace_canonical_docker_workflow() -> None:
+    helper = (
+        ROOT / "scripts/engineering/ci/apply_ci_fixes.py"
+    ).read_text(encoding="utf-8")
+
+    assert '"ci-03"' not in helper
+    assert "DOCKER_YML_FIXED" not in helper
+    assert "apply_ci03" not in helper
+
+
 def test_readiness_and_build_tools_fail_closed() -> None:
     main = _load_yaml(ROOT / "docker-compose.yml")
     monitoring = _load_yaml(ROOT / "docker-compose.monitoring.yml")
