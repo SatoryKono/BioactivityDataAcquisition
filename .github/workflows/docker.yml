@@ -408,13 +408,25 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: ghcr-publish
     concurrency:
-      group: docker-ghcr-push-${{ github.ref }}
+      group: docker-ghcr-push-${{ github.run_id }}
       cancel-in-progress: false
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Guard publish target is current main HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
+          echo "source_sha=${SOURCE_SHA}"
+          echo "current_main_sha=${current_sha}"
+          test "${current_sha}" = "${SOURCE_SHA}"
+
       - name: Download exact scanned image
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:

@@ -617,6 +617,10 @@ permissions:
 It does not publish `:latest`. The live `ghcr-publish` environment requires
 review by `@SatoryKono` and accepts only the `main` branch.
 Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
+The publish job uses run-scoped concurrency so a stale protected publish request
+cannot block a newer validation run. Before writing GHCR tags, it queries the
+current `main` branch SHA and fails closed if the approved run no longer matches
+`main`, preventing stale `:${{ github.ref_name }}` publication.
 | `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
 
