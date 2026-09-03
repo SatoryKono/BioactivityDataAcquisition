@@ -99,3 +99,21 @@ def test_memory_graph_main_dispatches_sync(monkeypatch) -> None:
 
 def test_memory_graph_main_rejects_unknown_command() -> None:
     assert graph_main.main(["unknown"]) == 2
+
+def test_analysis_node_batch_size_keeps_complexity_serial_without_collapsing_others() -> None:
+    """complexity_candidate stays batch=1; other analysis labels keep their own cap."""
+    from memory.graph.sync_pkg._core import _analysis_node_batch_size
+
+    only_complexity = {"complexity_candidate": [{"statement": "x"}]}
+    assert _analysis_node_batch_size(only_complexity, 20) == 1
+
+    mixed = {
+        "complexity_candidate": [{"statement": "x"}],
+        "retirement_candidate": [{"statement": "y"}],
+    }
+    # retirement_candidate is high-priority, cap 5 — not forced to 1 by complexity.
+    assert _analysis_node_batch_size(mixed, 20) == 5
+
+    other = {"other_analysis": [{"statement": "z"}]}
+    assert _analysis_node_batch_size(other, 20) == 10
+

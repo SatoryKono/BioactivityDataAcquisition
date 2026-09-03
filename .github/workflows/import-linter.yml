@@ -208,8 +208,14 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
                 with:
-                    # Full history required for telemetry/audit ancestor and commit-existence gates.
-                    fetch-depth: 0
+                    # Current ref only. fetch-depth: 0 also fetches every remote
+                    # branch and blows the architecture 210s budget.
+                    fetch-depth: 1
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: |
+                    set -euo pipefail
+                    git fetch --unshallow --filter=blob:none --no-tags
 
             -   name: Fetch Git LFS objects for architecture governance
                 if: ${{ matrix.requires_lfs }}
@@ -274,7 +280,12 @@ jobs:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
                 with:
-                    fetch-depth: 0
+                    fetch-depth: 1
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: |
+                    set -euo pipefail
+                    git fetch --unshallow --filter=blob:none --no-tags
 
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
