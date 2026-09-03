@@ -1,6 +1,9 @@
 # Note: Previously had a duplicate in project-automation.yml (removed)
 name: Tests
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
   push:
@@ -10,8 +13,7 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-# Job permissions are explicit below.
-# No workflow-wide token scope is granted.
+# Workflow-level token is read-only; jobs may only narrow this further.
 
 concurrency:
   group: tests-${{ github.event.pull_request.number || github.sha }}

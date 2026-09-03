@@ -1035,3 +1035,20 @@ def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
                 f"{path.name}: PR concurrency must cancel superseded runs"
             )
     assert violations == []
+
+
+def test_scorecard_token_permissions_define_workflow_readonly_defaults() -> None:
+    """Scorecard Token-Permissions requires an explicit read-only workflow default."""
+    for rel in (
+        ".github/workflows/tests.yml",
+        ".github/workflows/e2e-matrix-health.yml",
+        ".github/workflows/pr-required.yml",
+        ".github/workflows/release.yml",
+    ):
+        workflow = _load_yaml(ROOT / rel)
+        permissions = workflow.get("permissions")
+        assert isinstance(permissions, dict), rel
+        assert permissions.get("contents") == "read", rel
+        assert "write-all" not in {
+            str(value).lower() for value in permissions.values()
+        }, rel
