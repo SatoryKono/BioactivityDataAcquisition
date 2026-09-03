@@ -375,19 +375,19 @@
                   {
                     "type": "value",
                     "options": {
-                      "true": {
-                        "text": "●",
-                        "color": "blue"
+                      "0": {
+                        "text": "",
+                        "color": "transparent"
                       },
                       "1": {
                         "text": "●",
                         "color": "blue"
                       },
-                      "false": {
-                        "text": "",
-                        "color": "transparent"
+                      "true": {
+                        "text": "●",
+                        "color": "blue"
                       },
-                      "0": {
+                      "false": {
                         "text": "",
                         "color": "transparent"
                       }
@@ -1495,6 +1495,52 @@
                           "success": {
                             "text": "success",
                             "color": "green"
+                          },
+                          "failed": {
+                            "text": "failed",
+                            "color": "red"
+                          },
+                          "partial": {
+                            "text": "partial",
+                            "color": "orange"
+                          },
+                          "shutdown": {
+                            "text": "shutdown",
+                            "color": "orange"
+                          },
+                          "dry_run": {
+                            "text": "dry_run",
+                            "color": "blue"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": ".+",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
                           }
                         }
                       }
