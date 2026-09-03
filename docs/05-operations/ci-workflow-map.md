@@ -39,9 +39,9 @@ the human index.
 | `dashboard-first-window-noscroll.yml` | Dashboard first-window no-scroll | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `dashboard-render-host.yml` | Dashboard render release evidence | Host-only Grafana render evidence on self-hosted `[self-hosted, bioetl-observability]`; `workflow_dispatch` only — see isolation notes in `docs/04-reference/github-actions-workflows.md` |
 | `dependency-review.yml` | Dependency review | PR-time HIGH/CRITICAL lockfile/manifest review |
-| `diagram-nightly.yml` | Diagram Nightly Regression | Nightly diagram regression / PNG compat |
+| `diagram-nightly.yml` | Diagram Nightly Regression | Mermaid canary; full-corpus render/regression job disabled |
 | `docker.yml` | Docker Build & Compose Validation | Optional Docker contract (ADR-010 adjunct), reproducible Trivy/SBOM baseline, blocking CRITICAL+HIGH+MEDIUM image gate, and no-rebuild promotion of the scanned image |
-| `docs.yml` | Docs & Diagrams | MkDocs, links, mermaid lint, render, drift |
+| `docs.yml` | Docs & Diagrams | MkDocs, links, Mermaid lint, targeted ChEMBL render, drift; full-corpus render job disabled |
 | `docs-kpi-weekly.yml` | Docs KPI Weekly | Documentation navigation KPI plus calendar freshness/runtime-mirror drift |
 | `duplication-complexity.yml` | Duplication and Complexity Checks | Dup/complexity quality gates |
 | `e2e-matrix-health.yml` | E2E Matrix Health | End-to-end matrix health |
@@ -79,7 +79,7 @@ For documentation PRs, start with **`docs.yml`**:
 | Job (typical) | Role |
 | --- | --- |
 | docs-governance / validate-mkdocs | Strict MkDocs + excludes |
-| validate-mermaid / render-diagrams | ADR-040 render |
+| validate-mermaid | Mermaid syntax and changed-source lint |
 | check-diagram-drift | Source vs SVG on diagram PRs |
 | link checks | `scripts.docs check-links` |
 

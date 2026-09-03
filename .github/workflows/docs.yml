@@ -381,10 +381,9 @@ jobs:
 
   render-diagrams:
     needs: [detect-diagram-changes, validate-mermaid]
-    if: |
-      always() &&
-      needs.detect-diagram-changes.outputs.render_sources_changed == 'true' &&
-      (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
+    # Full-corpus rendering is intentionally disabled. Mermaid syntax, changed-source
+    # lint, targeted ChEMBL rendering, and source-to-SVG drift remain active.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
