@@ -17,6 +17,9 @@ recording_rule_metrics:
   - bioetl_dq_first_window_reason
   - bioetl_dq_monitor_disabled_current
   - bioetl_gold_terminal_records_15m
+  - bioetl_incident_ranked_dq
+  - bioetl_incident_ranked_provider
+  - bioetl_incident_ranked_runtime
   - bioetl_l0_input_status
   - bioetl_l0_input_status_selected
   - bioetl_l0_next_action

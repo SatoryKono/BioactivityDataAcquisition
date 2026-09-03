@@ -195,7 +195,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     # Includes bioetl_l0_next_action_no_route (#6574 First Action diet fallback)
     # and the 2026-08-25 promql-diet additions (fail-severity, first-window,
     # runtime alert counts, trust replay blockers).
-    assert len(report["recording_rule_outputs"]) == 118
+    assert len(report["recording_rule_outputs"]) == 121
     assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []

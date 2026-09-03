@@ -2904,14 +2904,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"failing\"}\n            ) * 2\n            or\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"runtime\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_runtime_pipeline_run_type_universe) * 0),\n      \"domain\", \"runtime\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "formula": "bioetl_incident_ranked_runtime",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"failing\"}\n            ) * 2\n            or\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"runtime\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_runtime_pipeline_run_type_universe) * 0),\n      \"domain\", \"runtime\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "query": "bioetl_incident_ranked_runtime",
       "query_tokens": [
-        "bioetl_runtime_current_blocker_reason",
-        "bioetl_runtime_pipeline_run_type_universe"
+        "bioetl_incident_ranked_runtime"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2942,14 +2941,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"failing\"}\n            ) * 2\n            or\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"provider\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"cause\", \"(.*)\"\n      ),\n      \"action\", \"provider\", \"\", \"\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_provider_health_check_provider_universe_15m) * 0),\n      \"domain\", \"provider\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "formula": "bioetl_incident_ranked_provider",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"failing\"}\n            ) * 2\n            or\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"provider\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"cause\", \"(.*)\"\n      ),\n      \"action\", \"provider\", \"\", \"\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_provider_health_check_provider_universe_15m) * 0),\n      \"domain\", \"provider\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "query": "bioetl_incident_ranked_provider",
       "query_tokens": [
-        "bioetl_provider_current_cause",
-        "bioetl_provider_health_check_provider_universe_15m"
+        "bioetl_incident_ranked_provider"
       ],
       "ref_id": "B",
       "runbook_urls": [],
@@ -2980,14 +2978,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"crit\"}\n            ) * 2\n            or\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"warn\"}\n            )\n          ),\n          \"domain\", \"dq\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_overview_pipeline_universe) * 0),\n      \"domain\", \"dq\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "formula": "bioetl_incident_ranked_dq",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"crit\"}\n            ) * 2\n            or\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"warn\"}\n            )\n          ),\n          \"domain\", \"dq\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_overview_pipeline_universe) * 0),\n      \"domain\", \"dq\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
+      "query": "bioetl_incident_ranked_dq",
       "query_tokens": [
-        "bioetl_dq_current_reason",
-        "bioetl_overview_pipeline_universe"
+        "bioetl_incident_ranked_dq"
       ],
       "ref_id": "C",
       "runbook_urls": [],
