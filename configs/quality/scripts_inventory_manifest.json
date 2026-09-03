@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T17:57:20.759062+00:00",
+  "generated_at": "2026-09-03T18:13:27.059113+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -9660,13 +9660,13 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 252,
+          "line": 258,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 297,
+          "line": 308,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
@@ -9692,7 +9692,7 @@
           "path": ".github/workflows/tests.yml",
           "line": 605,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
+          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50"
         },
         {
           "path": "Makefile",
@@ -9807,7 +9807,7 @@
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         },
         {
-          "path": "tests/unit/scripts/ci/test_compatibility_telemetry.py",
+          "path": "tests/unit/scripts/ci/test_ci_telemetry_snapshot.py",
           "line": 21,
           "source_group": "tests",
           "text": "from scripts.engineering.ci._compatibility_telemetry import ("
@@ -9904,13 +9904,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 91,
+          "line": 93,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 197,
+          "line": 199,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -9949,7 +9949,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 100,
+          "line": 102,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -10084,7 +10084,7 @@
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         },
         {
-          "path": "tests/unit/scripts/ci/test_compatibility_telemetry.py",
+          "path": "tests/unit/scripts/ci/test_ci_telemetry_snapshot.py",
           "line": 25,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.quality_integral_gate import _resolve_architecture_stats"
@@ -11360,7 +11360,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 238,
+          "line": 244,
           "source_group": "ci",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
@@ -17959,7 +17959,7 @@
         },
         {
           "path": "scripts/engineering/ci/report_pr_gate_timing.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.github_settings_review import ("
         },
