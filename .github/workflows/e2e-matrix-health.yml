@@ -3,6 +3,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Job permissions are explicit below.
+# No workflow-wide token scope is granted.
+
 on:
   push:
     branches: [main, master, develop]
@@ -32,12 +35,10 @@ jobs:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    permissions:
-      contents: read
     env:
       BIOETL_TEST_MODE: "true"
       BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
-
+    permissions: { contents: read }
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
@@ -139,12 +140,10 @@ jobs:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_live == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    permissions:
-      contents: read
     env:
       BIOETL_TEST_MODE: "false"
       BIOETL_PIPELINE__HEALTH_CHECK_MODE: "strict"
-
+    permissions: { contents: read }
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
@@ -213,16 +212,14 @@ jobs:
             reports/e2e/pytest_exit_code_live.txt
           if-no-files-found: warn
           retention-days: 14
-
   e2e-nightly-full-replay:
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    permissions:
-      contents: read
     env:
       BIOETL_TEST_MODE: "true"
       BIOETL_PIPELINE__HEALTH_CHECK_MODE: "probe"
+    permissions: { contents: read }
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
@@ -265,9 +262,7 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: read
-
+    permissions: { contents: read }
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
@@ -294,7 +289,6 @@ jobs:
           path: reports/e2e/prompt-tests-nightly.xml
           if-no-files-found: error
           retention-days: 14
-
   e2e-nightly-complete:
     if: always()
     runs-on: ubuntu-latest
