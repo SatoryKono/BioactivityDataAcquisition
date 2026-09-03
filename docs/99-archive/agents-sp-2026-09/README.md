@@ -13,7 +13,7 @@ Archive location: `docs/99-archive/agents-sp-2026-09/`
   - `sp-debugger` -> `py-debug-bot`
   - `sp-test-automator` -> `py-test-bot`
   - `sp-data-engineer`, `sp-database-optimizer`, `sp-api-designer`, etc. -> covered by `py-*` + skills
-- Domain irrelevant or duplicate per `AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` Wave 6 criteria, re-validated Wave 7
+- Domain irrelevant or duplicate per `AGENT_GOVERNANCE.md` Wave 6 criteria, re-validated Wave 7
 
 ## Archived files (12)
 
@@ -41,7 +41,7 @@ Archive location: `docs/99-archive/agents-sp-2026-09/`
 
 ## References
 
-- Matrix: `docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` Wave 7
+- Matrix: `docs/00-project/ai/agents/policy/AGENT_GOVERNANCE.md` Wave 7
 - Mirror parity: `scripts/ai/junie/check_junie_mirror.sh --check` (still PASS)
 - Checker: `docs/00-project/ai/agents/policy/check_agent_consolidation.py` now 0 files / 0 findings
 - Issues: #10068 (RF-003), #10066 (RF-001 baseline)
