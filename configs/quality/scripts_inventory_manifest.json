@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T16:07:11.102619+00:00",
+  "generated_at": "2026-09-03T16:55:47.794399+00:00",
   "summary": {
     "total_scripts": 612,
     "status_counts": {
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1930,
+          "line": 1928,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -9678,7 +9678,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 606,
+          "line": 605,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -10170,7 +10170,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1357,
+          "line": 1355,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10907,7 +10907,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1999,
+          "line": 1997,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -14097,7 +14097,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 658,
+          "line": 657,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
