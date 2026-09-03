@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T16:49:06.626308+00:00",
+  "generated_at": "2026-09-03T17:04:07.930931+00:00",
+
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -7257,7 +7258,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 801,
+          "line": 768,
           "source_group": "docs",
           "text": "| `scripts/diagrams/render.ps1` | Diagram render helper |"
         },
@@ -11090,7 +11091,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 640,
+          "line": 607,
           "source_group": "docs",
           "text": ".\\run_mypy.ps1"
         },
@@ -11155,7 +11156,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 650,
+          "line": 617,
           "source_group": "docs",
           "text": "./run_mypy.sh"
         }
@@ -11599,7 +11600,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 636,
+          "line": 603,
           "source_group": "docs",
           "text": ".\\setup_env_windows.ps1"
         }
@@ -11650,7 +11651,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 646,
+          "line": 613,
           "source_group": "docs",
           "text": "./setup_env_wsl.sh"
         },
@@ -18668,19 +18669,19 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 621,
+          "line": 588,
           "source_group": "docs",
           "text": "python -m scripts.ops.data checksums                     # Checksums"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 622,
+          "line": 589,
           "source_group": "docs",
           "text": "python -m scripts.ops.data delta                         # Delta operations"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 623,
+          "line": 590,
           "source_group": "docs",
           "text": "python -m scripts.ops.data data_dir                      # Data directory operations"
         },
@@ -18942,13 +18943,13 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 779,
+          "line": 746,
           "source_group": "docs",
           "text": "| `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 800,
+          "line": 767,
           "source_group": "docs",
           "text": "| `scripts/ops/docker-setup.ps1` | Docker stack helpers (when Docker work is explicitly required) |"
         },
