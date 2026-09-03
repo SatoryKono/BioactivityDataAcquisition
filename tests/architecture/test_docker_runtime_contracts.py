@@ -1386,6 +1386,7 @@ def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> No
     steps = workflow["jobs"]["docker-build"]["steps"]
     build = next(step for step in steps if step.get("name") == "Build Docker image")
 
+    assert build["id"] == "build"
     assert build["with"]["cache-from"] == "type=gha"
     cache_to = str(build["with"]["cache-to"])
     assert "github.event_name == 'push'" in cache_to
@@ -1574,6 +1575,37 @@ def test_docker_security_baseline_is_uploaded_with_bounded_retention() -> None:
     assert step_names.index(
         "Enforce canonical Trivy Critical High Medium zero policy"
     ) < step_names.index("Export exact scanned image for publication")
+
+
+def test_docker_build_metadata_is_part_of_reproducible_security_baseline() -> None:
+    workflow = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    steps = workflow["jobs"]["docker-build"]["steps"]
+    metadata = next(
+        step
+        for step in steps
+        if step.get("name") == "Capture Docker build action metadata"
+    )
+    validate = next(
+        step
+        for step in steps
+        if step.get("name") == "Validate complete security baseline"
+    )
+    upload = next(
+        step
+        for step in steps
+        if step.get("name") == "Upload reproducible security baseline"
+    )
+
+    assert metadata["env"]["BUILD_IMAGE_ID"] == "${{ steps.build.outputs.imageid }}"
+    assert metadata["env"]["BUILD_DIGEST"] == "${{ steps.build.outputs.digest }}"
+    assert metadata["env"]["BUILD_METADATA"] == "${{ steps.build.outputs.metadata }}"
+    rendered = metadata["run"]
+    assert "docker-build-action-metadata-v1" in rendered
+    assert '"from": "type=gha"' in rendered
+    assert '"to_policy": "main push only: type=gha,mode=max"' in rendered
+    assert "docker build action did not emit imageid" in rendered
+    assert "reports/security/docker-build-metadata.json" in validate["run"]
+    assert "reports/security/docker-build-metadata.json" in upload["with"]["path"]
 
 
 def test_docker_security_gate_covers_dependency_build_inputs() -> None:

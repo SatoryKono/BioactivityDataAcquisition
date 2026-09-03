@@ -128,6 +128,7 @@ jobs:
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       - name: Build Docker image
+        id: build
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
@@ -142,6 +143,46 @@ jobs:
 
       - name: Prepare security reports directory
         run: mkdir -p reports/security
+
+      - name: Capture Docker build action metadata
+        env:
+          BUILD_DIGEST: ${{ steps.build.outputs.digest }}
+          BUILD_IMAGE_ID: ${{ steps.build.outputs.imageid }}
+          BUILD_METADATA: ${{ steps.build.outputs.metadata }}
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          metadata_raw = os.environ.get("BUILD_METADATA") or "{}"
+          try:
+              metadata = json.loads(metadata_raw)
+          except json.JSONDecodeError as exc:
+              raise SystemExit(f"invalid build metadata JSON: {exc}") from exc
+
+          payload = {
+              "schema_version": "docker-build-action-metadata-v1",
+              "source_sha": os.environ["GITHUB_SHA"],
+              "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+              "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+              "image_ref": os.environ["IMAGE_REF"],
+              "image_id": os.environ.get("BUILD_IMAGE_ID", ""),
+              "digest": os.environ.get("BUILD_DIGEST", ""),
+              "metadata": metadata,
+              "cache": {
+                  "from": "type=gha",
+                  "to_policy": "main push only: type=gha,mode=max",
+              },
+          }
+          if not payload["image_id"]:
+              raise SystemExit("docker build action did not emit imageid")
+          Path("reports/security/docker-build-metadata.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Capture image and runtime provenance
         env:
@@ -264,6 +305,7 @@ jobs:
             reports/security/bioetl-image-provenance.txt
             reports/security/bioetl-pip-freeze.txt
             reports/security/bioetl.spdx.json
+            reports/security/docker-build-metadata.json
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
@@ -287,6 +329,7 @@ jobs:
             reports/security/bioetl-image-provenance.txt
             reports/security/bioetl-pip-freeze.txt
             reports/security/bioetl.spdx.json
+            reports/security/docker-build-metadata.json
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json

@@ -146,7 +146,7 @@ def _parse_timestamp(value: object) -> datetime | None:
 def _elapsed_seconds(start: datetime | None, end: datetime | None) -> int | None:
     if start is None or end is None or end < start:
         return None
-    return int(round((end - start).total_seconds()))
+    return round((end - start).total_seconds())
 
 
 def _nearest_rank(values: Sequence[int], percentile: int) -> int | None:
