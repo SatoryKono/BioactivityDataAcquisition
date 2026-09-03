@@ -1,11 +1,11 @@
 {
-  "source_branch": "ci/tests-telemetry-9973",
-  "source_commit": "a2f65ce19a981646ac2ce268c41995d4f08311d5",
-  "source_run_id": "33750914601",
+  "source_branch": "fix/sonar-issues-20260903",
+  "source_commit": "83b4ff23b94f42d52760789a8bafa61b0e3e2fb1",
+  "source_run_id": "33754829478",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33750914601",
-  "source_tree_sha256": "69b49aba18af9c35549cb53db443072150b48ba8bcea1ad77896efcc97d0fba0",
-  "refreshed_at_utc": "2026-09-03T11:58:48.315621+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33754829478",
+  "source_tree_sha256": "67757486a9ba0c3bf5056275d27dfec5d2715c93dd5c351ad954a36f8de7f259",
+  "refreshed_at_utc": "2026-09-03T12:45:22.655904+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.7,
   "coverage": {
