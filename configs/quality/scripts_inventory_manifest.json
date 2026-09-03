@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T15:52:09.154957+00:00",
+  "generated_at": "2026-09-03T16:03:24.846695+00:00",
   "summary": {
     "total_scripts": 612,
     "status_counts": {
-      "active": 339,
-      "supporting": 273
+      "active": 338,
+      "supporting": 274
     },
     "reference_group_coverage": {
       "agents": 8,
@@ -10100,7 +10100,7 @@
     {
       "path": "scripts/engineering/ci/report_docker_actions_timing.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -10118,11 +10118,15 @@
         },
         {
           "path": "tests/unit/scripts/ci/test_report_docker_actions_timing.py",
-          "line": 7,
+          "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.report_docker_actions_timing import ("
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci docker-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script."
     },
     {
       "path": "scripts/engineering/ci/report_quality_debt_weekly.py",
