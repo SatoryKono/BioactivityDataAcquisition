@@ -257,21 +257,21 @@
           "legendFormat": "runtime",
           "instant": true,
           "format": "table",
-          "expr": "topk(5,max by(pipeline,run_type,reason,action_target)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")"
+          "expr": "topk(5,max by(pipeline,reason)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_runtime_pipeline_run_type_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")"
         },
         {
           "refId": "B",
           "legendFormat": "provider",
           "instant": true,
           "format": "table",
-          "expr": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(vector(0),\"cause\",\"telemetry_gap\",\"\",\"\")"
+          "expr": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_provider_health_check_provider_universe_15m)*0,\"cause\",\"telemetry_gap\",\"\",\"\")"
         },
         {
           "refId": "C",
           "legendFormat": "dq",
           "instant": true,
           "format": "table",
-          "expr": "topk(5,max by(pipeline,reason,action_target)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")"
+          "expr": "topk(5,max by(pipeline,reason)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(absent(bioetl_overview_pipeline_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")"
         }
       ],
       "transformations": [

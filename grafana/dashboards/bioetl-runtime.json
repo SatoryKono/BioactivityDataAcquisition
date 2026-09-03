@@ -356,9 +356,9 @@
               "targetBlank": false,
               "includeVars": false
             },
-              {
-                "title": "Open scoped Data Quality evidence",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&var-run_id=$run_id&${__url_time_range}",
+            {
+              "title": "Open Data Quality",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=${__data.fields.workflow}&var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-stage=$__all&var-run_id=$run_id&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             },
