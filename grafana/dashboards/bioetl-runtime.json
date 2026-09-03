@@ -529,10 +529,6 @@
                     "includeVars": false
                   }
                 ]
-              },
-              {
-                "id": "custom.width",
-                "value": 70
               }
             ]
           }
