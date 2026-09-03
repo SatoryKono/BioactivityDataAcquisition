@@ -578,25 +578,32 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Cache Neo4j image
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+        with:
+          path: /tmp/neo4j-community.tar
+          key: neo4j-5.15-community-d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a
+
+      - name: Load or pull pinned Neo4j image
+        run: |
+          set -euo pipefail
+          image='neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a'
+          if [[ -f /tmp/neo4j-community.tar ]]; then
+            docker load -i /tmp/neo4j-community.tar
+          else
+            docker pull "${image}"
+            docker save -o /tmp/neo4j-community.tar "${image}"
+          fi
+
       - name: Start local Neo4j for live audit
         env:
           NEO4J_USERNAME: neo4j
           # CI-only placeholder; live audit talks to the local compose stack.
           NEO4J_PASSWORD: ci-neo4j-live-audit
         run: |
+          set -euo pipefail
           docker network create bioetl-runtime >/dev/null 2>&1 || true
-          docker compose -f docker-compose.neo4j.yml up -d neo4j
-
-      - name: Wait for Neo4j HTTP health
-        run: |
-          for attempt in $(seq 1 90); do
-            if curl -fsS http://localhost:7474/browser/ >/dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "Neo4j HTTP endpoint did not become ready in time" >&2
-          exit 1
+          docker compose -f docker-compose.neo4j.yml -f .github/compose/neo4j-ci-overlay.yml up -d --wait --wait-timeout 120 neo4j
 
       - name: Apply sync and validate live Neo4j audit
         env:
