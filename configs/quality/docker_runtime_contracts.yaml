@@ -1,4 +1,6 @@
 schema_version: docker-runtime-contract-v1
+# This contract file is part of the Docker workflow path filter; changes here
+# must keep Docker optional/local-only while exercising the guarded main lane.
 policy:
   adr: ADR-010
   status: optional_local_only_adjunct
