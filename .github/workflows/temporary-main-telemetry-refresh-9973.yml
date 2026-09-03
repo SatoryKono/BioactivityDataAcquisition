@@ -44,7 +44,7 @@ jobs:
           name: coverage-report
           path: reports
           repository: SatoryKono/BioactivityDataAcquisition
-          run-id: "33754030203"
+          run-id: "33762851848"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download exact-main duration telemetry
@@ -53,7 +53,7 @@ jobs:
           name: test-duration-telemetry
           path: reports/test-telemetry
           repository: SatoryKono/BioactivityDataAcquisition
-          run-id: "33754030203"
+          run-id: "33762851848"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run canonical generators against clean target tree
@@ -65,10 +65,10 @@ jobs:
             --coverage-xml reports/coverage/coverage.xml \
             --slowest-json reports/test-telemetry/slowest-tests.json \
             --source-branch main \
-            --source-commit be750f09bc6a79afc33b737f43087cc5c99bcbd7 \
-            --source-run-id 33754030203 \
+            --source-commit bd19ef69eb3999572c8b83568ae55318209f3232 \
+            --source-run-id 33762851848 \
             --source-event push \
-            --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33754030203
+            --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33762851848
           uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
             --json-out reports/quality/test-governance-current.json \
             --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json

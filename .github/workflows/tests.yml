@@ -10,8 +10,8 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-permissions:
-  contents: read
+# Job permissions are explicit below.
+# No workflow-wide token scope is granted.
 
 concurrency:
   group: tests-${{ github.event.pull_request.number || github.sha }}
@@ -1527,10 +1527,10 @@ jobs:
             exit 1
           fi
           echo "All blocking Tests lanes completed successfully."
-
   duration-telemetry:
     if: always()
     runs-on: ubuntu-latest
+    permissions: { contents: read }
     needs:
       - contract-confidence
       - flaky-telemetry
