@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "d52d427e57854b1d6a7b12899d91bf4623f0bed6e9828571b14cfba056c353fd",
+  "coverage_xml_sha256": "434698004853d23ba9fdab33c1380e013d02c32a7da0626b54a9da0b7c57fa7e",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -49349,7 +49349,7 @@
     }
   ],
   "schema_version": 1,
-  "snapshot_date": "2026-09-02",
+  "snapshot_date": "2026-09-03",
   "source_tree_sha256": "f1a1bc88b94cccf0522df217c196fc97def99f68003c2dcb0465d5686a1343b3",
   "summary": {
     "coverage_xml_present": true,

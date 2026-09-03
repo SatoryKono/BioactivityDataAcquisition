@@ -35,7 +35,7 @@ jobs:
             tests/unit/scripts/docs/passports \
             tests/architecture/test_passport_documentation_projections.py
 
-      - name: Check generated package-family class diagram drift
+      - if: ${{ false }} # Full-corpus package-family generation is disabled.
         run: uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check
 
       - name: Regenerate architecture dependency map

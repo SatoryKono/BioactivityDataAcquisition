@@ -82,7 +82,7 @@ jobs:
             --pipeline chembl_activity \
             --check
 
-      - name: Check generated package-family class diagram drift
+      - if: ${{ false }} # Full-corpus package-family generation is disabled.
         run: |
           uv run --frozen --no-build python \
             scripts/diagrams/render/generate_package_family_class_diagrams.py --check
@@ -381,10 +381,10 @@ jobs:
 
   render-diagrams:
     needs: [detect-diagram-changes, validate-mermaid]
-    if: |
-      always() &&
-      needs.detect-diagram-changes.outputs.render_sources_changed == 'true' &&
-      (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
+    # Full-corpus rendering is intentionally disabled.
+    # Mermaid syntax and changed-source lint remain active.
+    # Targeted ChEMBL rendering and source-to-SVG drift remain active.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

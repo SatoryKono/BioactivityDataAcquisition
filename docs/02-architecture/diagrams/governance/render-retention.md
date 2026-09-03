@@ -22,7 +22,7 @@ Implements DOC-GOV-02 / #6875. Complements
 | `docs/02-architecture/diagrams/views/**/*.mermaid` | Decomposed views | **Tracked** (required) |
 | Sibling `**/svg/*.svg` | Rendered vector baselines for source-vs-render drift | **Tracked** (required for PR drift gate) |
 | Sibling `**/png/*.png` | Raster previews (300 DPI) | **Not tracked** — generate locally or via CI artifacts |
-| CI artifacts (`diagrams-png`, quality reports) | Operator/review evidence | Ephemeral workflow artifacts |
+| Targeted CI render artifacts | Operator/review evidence | Ephemeral workflow artifacts |
 
 ## Rules
 
@@ -32,7 +32,7 @@ Implements DOC-GOV-02 / #6875. Complements
    when sources change on PRs (see `.github/workflows/docs.yml`).
 3. **PNG is render-only.** Contributors regenerate PNG via
    `bash docs/02-architecture/diagrams/tooling/render.sh` when needed for local
-   review. CI `render-diagrams` uploads PNG as workflow artifacts.
+   review. CI full-corpus rendering is disabled; targeted render jobs may upload artifacts.
 4. **Do not re-commit bulk PNG baselines** under
    `docs/02-architecture/diagrams/**/png/` (gitignored after DOC-GOV-02).
 5. **MkDocs** may link SVG; missing local PNG must not block `mkdocs build`
