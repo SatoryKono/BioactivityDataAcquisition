@@ -415,7 +415,14 @@
           },
           "unit": "short",
           "noValue": "No active reason rows. Valid only when Current DQ Status is OK; otherwise reason evidence is unavailable.",
-          "links": []
+          "links": [
+            {
+              "title": "Open Data Quality evidence",
+              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&var-run_id=$run_id&${__url_time_range}",
+              "targetBlank": false,
+              "includeVars": false
+            }
+          ]
         },
         "overrides": [
           {
@@ -591,7 +598,7 @@
                 "value": [
                   {
                     "title": "Open Data Quality evidence",
-                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=${__data.fields.pipeline}&var-run_type=$run_type&var-stage=$__all&${__url_time_range}",
+                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$__all&var-run_id=$run_id&${__url_time_range}",
                     "targetBlank": false,
                     "includeVars": false
                   },
