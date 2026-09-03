@@ -79,7 +79,7 @@ For documentation PRs, start with **`docs.yml`**:
 | Job (typical) | Role |
 | --- | --- |
 | docs-governance / validate-mkdocs | Strict MkDocs + excludes |
-| validate-mermaid | Mermaid syntax and changed-source lint |
+| validate-mermaid | ADR-040 Mermaid syntax and changed-source lint |
 | check-diagram-drift | Source vs SVG on diagram PRs |
 | link checks | `scripts.docs check-links` |
 
