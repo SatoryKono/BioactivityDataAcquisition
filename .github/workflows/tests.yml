@@ -751,7 +751,8 @@ jobs:
             QUALITY_EXEMPTIONS_REGISTRY="${QUALITY_EXEMPTIONS_REGISTRY}" \
             QUALITY_EXEMPTIONS_SCORECARD="${QUALITY_EXEMPTIONS_SCORECARD}" \
             QUALITY_REPORT_OUTPUT="reports/quality/ci-quality-metrics.json" \
-            QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"
+            QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY" \
+            QUALITY_ARCHITECTURE_OWNER="lint-architecture-workflow"
 
       - name: Review observability runtime cardinality evidence (static)
         run: |

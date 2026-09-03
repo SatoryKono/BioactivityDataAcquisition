@@ -65,6 +65,7 @@ def test_tests_workflow_runs_ci_quality_integral_gate() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "quality-metrics-gate" in workflow
     assert "make qa-debt" in workflow
+    assert 'QUALITY_ARCHITECTURE_OWNER="lint-architecture-workflow"' in workflow
     assert "reports/quality/ci-quality-metrics.json" in workflow
     assert 'QUALITY_SUMMARY_OUT="$GITHUB_STEP_SUMMARY"' in workflow
 
