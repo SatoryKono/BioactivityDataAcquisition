@@ -58,27 +58,9 @@ documentation-only agent entry in active orchestration docs; use the
 `py-doc-bot` / `py-doc-bot` skill surfaces for that
 workflow.
 
-## Docs-only generic utilities (non-runtime)
+## Docs-only generic utilities (archived 2026-09-04 - Wave 7)
 
-The following `sp-*` profiles live only under
-`docs/00-project/ai/agents/agents/sp-*.md`. They are **not** Codex runtime
-agents: there is no `.codex/agents/sp-*.md` profile and they **MUST NOT** be
-spawned as if they were part of `ORCHESTRATION.md`.
-
-| Agent                                 | Model  | Role                               | Runtime status |
-| ------------------------------------- | ------ | ---------------------------------- | -------------- |
-| `sp-code-reviewer`                    | sonnet | General-purpose code review        | docs-only      |
-| `sp-debugger`                         | sonnet | Bug diagnosis, root cause analysis | docs-only      |
-| `sp-refactoring-specialist`           | sonnet | Code refactoring                   | docs-only      |
-| `sp-architect-reviewer`               | sonnet | Architecture evaluation            | docs-only      |
-| `sp-test-automator`                   | sonnet | Test framework automation          | docs-only      |
-| `sp-api-designer`                     | sonnet | API design, OpenAPI specs          | docs-only      |
-| `sp-data-engineer`                    | sonnet | Data pipelines, ETL patterns       | docs-only      |
-| `sp-database-optimizer`               | sonnet | Query optimization, indexing       | docs-only      |
-| `sp-dependency-manager`               | sonnet | CVE audit, version conflicts       | docs-only      |
-| `sp-git-workflow-manager`             | sonnet | Git branching strategies           | docs-only      |
-| `sp-prompt-engineer`                  | sonnet | LLM prompt design and testing      | docs-only      |
-| `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) | docs-only      |
+> **Archived:** 12 sp-* profiles moved to docs/99-archive/agents-sp-2026-09/ on 2026-09-04 (zero invocations via subagent_type/spawn_agent, >70% overlap with py-*, checker missing frontmatter findings=12). Use the minimal sufficient set of 6 py-* runtime agents for BioETL tasks: py-audit-bot (audit/review), py-debug-bot (RCA), py-test-bot (tests), py-config-bot, py-doc-bot, py-plan-bot. See Wave 7 in docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md.
 
 ## Orchestration Workflow
 
