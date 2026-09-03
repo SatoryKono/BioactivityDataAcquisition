@@ -27,11 +27,11 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `ci/tests-telemetry-9973`
-- Source commit: `a2f65ce19a981646ac2ce268c41995d4f08311d5`
-- Source run id: `33750914601`
+- Source branch: `refactor/docker-dependency-cache-9977`
+- Source commit: `12090b55aa79243499d0164a4a03c64ffc3c122a`
+- Source run id: `33760241114`
 - Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33750914601`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33760241114`
 - Source tree sha256: `2dd755e126de85c2b4c803b8f1b8d3890924dbf2205734e36408d4793acfce21`
 - Refresh status: `captured`
 - Refreshed at (UTC): `2026-09-03T11:58:48.315621+00:00`

@@ -1,13 +1,13 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: ci/tests-telemetry-9973
+source_branch: refactor/docker-dependency-cache-9977
 refreshed_at_utc: '2026-09-03T11:58:48.315621+00:00'
 refresh_status: captured
-source_commit: a2f65ce19a981646ac2ce268c41995d4f08311d5
-source_run_id: '33750914601'
+source_commit: 12090b55aa79243499d0164a4a03c64ffc3c122a
+source_run_id: '33760241114'
 source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33750914601
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33760241114
 source_tree_sha256: 2dd755e126de85c2b4c803b8f1b8d3890924dbf2205734e36408d4793acfce21
 freshness_guard:
   timestamp_field: refreshed_at_utc
