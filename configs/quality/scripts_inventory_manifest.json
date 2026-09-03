@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T16:03:24.846695+00:00",
+  "generated_at": "2026-09-03T16:07:11.102619+00:00",
   "summary": {
     "total_scripts": 612,
     "status_counts": {
@@ -17528,7 +17528,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 458,
+          "line": 467,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -19463,7 +19463,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 378,
+          "line": 387,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }
