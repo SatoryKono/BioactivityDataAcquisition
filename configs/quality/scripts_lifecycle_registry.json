@@ -751,6 +751,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/engineering/ci/report_pr_gate_timing.py": {
+      "decision": "shared_helper_module",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci pr-gate-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
     "scripts/engineering/ci/pr_gate.py": {
       "decision": "shared_helper_module",
       "next_step": "Retain as the fail-closed classifier and aggregator implementation behind the canonical `python -m scripts.engineering.ci pr-gate` router command; keep direct CI and contributor usage routed through that public command.",
