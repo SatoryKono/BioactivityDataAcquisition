@@ -773,14 +773,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.json_out:
         json_out = _prepare_output_path(args.json_out, root=repo_root)
         json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(payload + "\n", encoding="utf-8", newline="\n")
+        json_out.write_text(  # NOSONAR - path confined by _prepare_output_path
+            payload + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
     else:
         print(payload)
 
     if args.markdown_out:
         markdown_out = _prepare_output_path(args.markdown_out, root=repo_root)
         markdown_out.parent.mkdir(parents=True, exist_ok=True)
-        markdown_out.write_text(
+        markdown_out.write_text(  # NOSONAR - path confined by _prepare_output_path
             render_markdown(report),
             encoding="utf-8",
             newline="\n",
