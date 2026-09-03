@@ -1019,9 +1019,9 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
 
 
 def test_retired_ci_helper_cannot_replace_canonical_docker_workflow() -> None:
-    helper = (
-        ROOT / "scripts/engineering/ci/apply_ci_fixes.py"
-    ).read_text(encoding="utf-8")
+    helper = (ROOT / "scripts/engineering/ci/apply_ci_fixes.py").read_text(
+        encoding="utf-8"
+    )
 
     assert '"ci-03"' not in helper
     assert "DOCKER_YML_FIXED" not in helper
