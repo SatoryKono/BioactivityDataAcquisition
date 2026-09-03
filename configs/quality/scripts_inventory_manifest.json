@@ -1,7 +1,6 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-09-03T17:39:05.220762+00:00",
-
   "summary": {
     "total_scripts": 614,
     "status_counts": {
@@ -10089,7 +10088,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10102,6 +10101,12 @@
           "line": 34,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
         {
           "path": "tests/architecture/test_environment_limited_green_policy.py",
