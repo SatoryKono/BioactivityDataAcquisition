@@ -22,11 +22,11 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "7d9fdc21041537245ac0e7a85726e5a17566080773ce3242d3fe53d90f304647",
     "bioetl-dq-v2": "e914fbe3b9bc366dd9179728c6fdc6e8ff37b0c77cb24d5282b231ff1ac051ad",
-    "bioetl-incident-v1": "340b01313c82ddd67b9c5e39d490cbf59a5ba594d1d3d953a586f8a23e64551c",
+    "bioetl-incident-v1": "b7d277abe071a59f0d8ed9da436f9d52b916c695f77c9740e5124c74987386fd",
     "bioetl-overview-v2": "b7e8d1dbaf0eae6833df963fc1286c4fb3ae07aac196b60abdaad713726d22c0",
     "bioetl-provider-health-v2": "abb4e1b0e7fd1f2ae349b78509d9e5e8c2ca8d875c5f1fb3f68fb808fbc3f15f",
     "bioetl-run-explorer-v1": "4db242919ba40afe4b564e25c6f28d79004f40864a15e0cc7a23897e254d2004",
-    "bioetl-runtime": "9ae3a9e9f98394c82fc51b19e05a08732a4229c20ea30ef1c3adba8f5a768957"
+    "bioetl-runtime": "4d8c12ab370c08d00feb34c78677699cca105c76b059fd8618f89ce911ffe2ab"
   },
   "panels": [
     {
@@ -1830,9 +1830,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"failing\"}\n            ) * 2\n            or\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"runtime\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_runtime_pipeline_run_type_universe) * 0),\n      \"domain\", \"runtime\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
-          "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"failing\"}\n            ) * 2\n            or\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"provider\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"cause\", \"(.*)\"\n      ),\n      \"action\", \"provider\", \"\", \"\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_provider_health_check_provider_universe_15m) * 0),\n      \"domain\", \"provider\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)",
-          "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"crit\"}\n            ) * 2\n            or\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"warn\"}\n            )\n          ),\n          \"domain\", \"dq\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_overview_pipeline_universe) * 0),\n      \"domain\", \"dq\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)"
+          "bioetl_incident_ranked_runtime",
+          "bioetl_incident_ranked_provider",
+          "bioetl_incident_ranked_dq"
         ],
         "target_count": 3
       }
