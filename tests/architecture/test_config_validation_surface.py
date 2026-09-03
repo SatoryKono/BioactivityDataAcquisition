@@ -169,11 +169,7 @@ def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
     )
     assert not live_wrapper.exists()
     wrapper = (
-        ROOT
-        / "docs"
-        / "99-archive"
-        / "agents-scripts-2026-09"
-        / "py-config-bot-2.py"
+        ROOT / "docs" / "99-archive" / "agents-scripts-2026-09" / "py-config-bot-2.py"
     ).read_text(encoding="utf-8")
 
     assert (
@@ -189,11 +185,7 @@ def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
     """Legacy entity composite stubs must not be re-audited as standard configs."""
     monkeypatch.chdir(ROOT)
     module = _load_module(
-        ROOT
-        / "docs"
-        / "99-archive"
-        / "agents-scripts-2026-09"
-        / "py-config-bot-1.py",
+        ROOT / "docs" / "99-archive" / "agents-scripts-2026-09" / "py-config-bot-1.py",
         "py_config_bot_1_runtime",
     )
 
