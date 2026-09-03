@@ -160,15 +160,21 @@ class FakeGitHubClient:
             if "page=1" not in endpoint:
                 return {"workflow_runs": []}
             return {"workflow_runs": self.runs}
-        if "/actions/runs/" in endpoint and endpoint.endswith("/jobs?per_page=100&page=1"):
+        if "/actions/runs/" in endpoint and endpoint.endswith(
+            "/jobs?per_page=100&page=1"
+        ):
             run_id = int(endpoint.split("/actions/runs/", 1)[1].split("/", 1)[0])
             return {"jobs": self.jobs_by_run_id[run_id]}
-        if "/actions/runs/" in endpoint and endpoint.endswith("/jobs?per_page=100&page=2"):
+        if "/actions/runs/" in endpoint and endpoint.endswith(
+            "/jobs?per_page=100&page=2"
+        ):
             return {"jobs": []}
         raise AssertionError(endpoint)
 
 
-def test_report_separates_docker_validation_path_from_publish_wait(tmp_path: Path) -> None:
+def test_report_separates_docker_validation_path_from_publish_wait(
+    tmp_path: Path,
+) -> None:
     created = datetime(2026, 9, 3, tzinfo=UTC)
     run = _run(33766018515, created, created + timedelta(minutes=72))
     client = FakeGitHubClient(
@@ -208,10 +214,16 @@ def test_report_separates_docker_validation_path_from_publish_wait(tmp_path: Pat
     assert report["runs"][0]["docker_publish"]["conclusion"] == "cancelled"
 
 
-def test_report_marks_acceptance_only_after_full_measured_sample(tmp_path: Path) -> None:
+def test_report_marks_acceptance_only_after_full_measured_sample(
+    tmp_path: Path,
+) -> None:
     base = datetime(2026, 9, 3, tzinfo=UTC)
     runs = [
-        _run(index, base + timedelta(minutes=index), base + timedelta(minutes=index, seconds=190))
+        _run(
+            index,
+            base + timedelta(minutes=index),
+            base + timedelta(minutes=index, seconds=190),
+        )
         for index in range(1, 6)
     ]
     jobs_by_run_id = {
