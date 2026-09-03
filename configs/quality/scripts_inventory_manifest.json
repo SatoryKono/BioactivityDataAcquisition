@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T18:41:18.511717+00:00",
+  "generated_at": "2026-09-03T19:08:11.700017+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -16623,7 +16623,7 @@
       "references": [
         {
           "path": ".github/workflows/docker.yml",
-          "line": 20,
+          "line": 22,
           "source_group": "ci",
           "text": "- \"scripts/engineering/qa/run_docker_stability_campaign.py\""
         },
