@@ -1046,6 +1046,14 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
     assert "PYTHONPATH=/app/src" not in dockerfile
     assert "COPY --chown=root:root src/ ./src/" not in dockerfile
+    dependency_sync = "uv sync --no-dev --frozen --no-build --no-install-project"
+    source_copy = "COPY src/ ./src/"
+    project_build = "uv build --wheel"
+    assert dockerfile.count(dependency_sync) == 1
+    assert dockerfile.count(source_copy) == 1
+    assert dockerfile.count(project_build) == 1
+    assert dockerfile.index(dependency_sync) < dockerfile.index(source_copy)
+    assert dockerfile.index(source_copy) < dockerfile.index(project_build)
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(
         encoding="utf-8"
     )
