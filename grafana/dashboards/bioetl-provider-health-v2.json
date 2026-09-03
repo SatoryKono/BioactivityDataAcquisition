@@ -723,14 +723,10 @@
                 "value": "Provider"
               },
               {
-                "id": "custom.width",
-                "value": 150
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "auto",
-                  "wrapText": true
+                  "wrapText": false
                 }
               }
             ]
@@ -744,10 +740,6 @@
               {
                 "id": "displayName",
                 "value": "Source state"
-              },
-              {
-                "id": "custom.width",
-                "value": 105
               },
               {
                 "id": "custom.cellOptions",
