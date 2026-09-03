@@ -414,7 +414,8 @@
             ]
           },
           "unit": "short",
-          "noValue": "No active reason rows. Valid only when Current DQ Status is OK; otherwise reason evidence is unavailable."
+          "noValue": "No active reason rows. Valid only when Current DQ Status is OK; otherwise reason evidence is unavailable.",
+          "links": []
         },
         "overrides": [
           {
@@ -531,15 +532,80 @@
             },
             "properties": [
               {
-                "id": "custom.width",
-                "value": 90
+                "id": "displayName",
+                "value": "Action"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "data_quality": {
+                        "text": "Data Quality",
+                        "color": "orange"
+                      },
+                      "verify_dq_reason_rules": {
+                        "text": "Verify DQ rules",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "color-text",
+                  "mode": "basic"
                 }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Data Quality evidence",
+                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=${__data.fields.pipeline}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  },
+                  {
+                    "title": "Open DQ reason-rules runbook",
+                    "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+                    "targetBlank": true,
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           }
