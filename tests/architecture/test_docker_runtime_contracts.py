@@ -1377,8 +1377,13 @@ def test_main_docker_validation_only_decouples_main_push_from_publish_approval()
 
     publish = workflow["jobs"]["docker-push"]
     assert publish["environment"] == "ghcr-publish"
-    assert publish["concurrency"]["group"] == "docker-ghcr-push-${{ github.ref }}"
+    assert publish["concurrency"]["group"] == "docker-ghcr-push-${{ github.run_id }}"
     assert publish["concurrency"]["cancel-in-progress"] is False
+    rendered = json.dumps(publish)
+    assert "Guard publish target is current main HEAD" in rendered
+    assert "/branches/main" in rendered
+    assert "current_sha" in rendered
+    assert "SOURCE_SHA" in rendered
 
 
 def test_docker_pr_build_reads_main_cache_without_exporting_branch_cache() -> None:
