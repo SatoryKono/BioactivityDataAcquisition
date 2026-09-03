@@ -17195,7 +17195,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 84,
+      "reference_count": 82,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -17664,7 +17664,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/temporary-governance-log-9977.yml",
