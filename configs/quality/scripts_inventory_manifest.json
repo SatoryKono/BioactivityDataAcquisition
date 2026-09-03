@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T17:36:42.051755+00:00",
+  "generated_at": "2026-09-03T17:39:05.220762+00:00",
+
   "summary": {
     "total_scripts": 614,
     "status_counts": {
@@ -9917,8 +9918,8 @@
       ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
-      "review_by": "2026-09-30",
-      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci architecture-junit-skips; keep CI and contributor execution routed through the unified CI dispatcher and do not count it as a separate active script."
+      "review_by": "2026-12-01",
+      "next_step": "Retain as the fail-closed architecture JUnit skip guard implementation behind the canonical `python -m scripts.engineering.ci architecture-junit-skips` router command; keep direct CI usage routed through that public command and do not count it as a separate active script."
     },
     {
       "path": "scripts/engineering/ci/check_e2e_matrix_skip_rate.py",
