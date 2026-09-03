@@ -87,3 +87,16 @@ def test_full_nightly_replay_prompt_and_live_owners_are_fail_closed() -> None:
     assert "Manual nightly requires blocking smoke" in complete_runs
     assert "pull_request" not in str(full["if"])
     assert "pull_request" not in str(prompt["if"])
+
+def test_e2e_nightly_dispatch_is_not_cancelled_by_main_push() -> None:
+    """Main merge-train push must not cancel schedule/manual nightly (#9976)."""
+    workflow = Path(".github/workflows/e2e-matrix-health.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "format('dispatch-{0}', github.run_id)" in workflow
+    assert "github.event_name == 'schedule' && 'schedule'" in workflow
+    assert (
+        "cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}"
+        in workflow
+    )
+

@@ -1,7 +1,9 @@
 name: E2E Matrix Health
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Push/PR on the same ref still cancel each other. Schedule and manual
+  # nightly must not be cancelled by the main merge train.
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && 'schedule' || github.event_name == 'workflow_dispatch' && format('dispatch-{0}', github.run_id) || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
 
 # Job permissions are explicit below.
 # No workflow-wide token scope is granted.
