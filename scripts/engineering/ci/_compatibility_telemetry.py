@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import yaml
 
@@ -36,6 +38,8 @@ DEFAULT_INVENTORY_DOC = (
 DEFAULT_RUNTIME_UUID_SEAMS_PATH = (
     _REPO_ROOT / "configs" / "quality" / "runtime_uuid_seams.yaml"
 )
+
+GovernanceArtifactSource = Literal["live", "committed"]
 
 
 @dataclass(frozen=True)
@@ -206,6 +210,86 @@ def collect_compatibility_surface_snapshot(
     )
 
 
+def _load_json_mapping(path: Path) -> dict[str, Any]:
+    """Load a committed JSON object or fail closed."""
+    if not path.is_file():
+        raise FileNotFoundError(f"missing committed governance artifact: {path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path}: expected JSON object")
+    return cast(dict[str, Any], payload)
+
+
+def _require_int_field(mapping: Mapping[str, Any], key: str) -> int:
+    """Return a required integer field or fail closed."""
+    if key not in mapping:
+        raise ValueError(f"missing required integer field {key!r}")
+    value = mapping[key]
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise TypeError(f"{key} must be int, got {type(value)!r}")
+    return value
+
+
+def _retirement_from_summary(summary: object) -> RetirementGovernanceSnapshot:
+    """Map a dead-code inventory summary into the compact CI snapshot."""
+    if not isinstance(summary, dict):
+        raise ValueError("Dead-code inventory summary must be a mapping")
+    return RetirementGovernanceSnapshot(
+        triaged_entry_count=_require_int_field(summary, "triaged_entry_count"),
+        repo_wide_zero_import_candidate_count=_require_int_field(
+            summary, "repo_wide_zero_import_candidate_count"
+        ),
+        repo_wide_classified_zero_import_candidate_count=_require_int_field(
+            summary, "repo_wide_classified_zero_import_candidate_count"
+        ),
+        repo_wide_untriaged_zero_import_candidate_count=_require_int_field(
+            summary, "repo_wide_untriaged_zero_import_candidate_count"
+        ),
+        repo_wide_owner_test_anchored_candidate_count=_require_int_field(
+            summary, "repo_wide_owner_test_anchored_candidate_count"
+        ),
+        repo_wide_candidates_without_owner_tests_count=_require_int_field(
+            summary, "repo_wide_candidates_without_owner_tests_count"
+        ),
+        repo_wide_non_static_reachability_candidate_count=_require_int_field(
+            summary, "repo_wide_non_static_reachability_candidate_count"
+        ),
+        triaged_retained_owner_test_anchored_count=_require_int_field(
+            summary, "triaged_retained_owner_test_anchored_count"
+        ),
+        triaged_retained_without_owner_tests_count=_require_int_field(
+            summary, "triaged_retained_without_owner_tests_count"
+        ),
+    )
+
+
+def _test_governance_from_report(report: object) -> TestGovernanceDebtSnapshot:
+    """Map a test-governance report object into the compact CI snapshot."""
+    if not isinstance(report, dict):
+        raise ValueError("Test-governance report must be a mapping")
+    return TestGovernanceDebtSnapshot(
+        compatibility_test_files=_require_int_field(report, "compatibility_test_files"),
+        refined_assertless_tests=_require_int_field(report, "refined_assertless_tests"),
+        markerless_test_functions=_require_int_field(
+            report, "markerless_test_functions"
+        ),
+        duplicate_test_names=_require_int_field(report, "duplicate_test_names"),
+        duplicate_test_name_occurrences=_require_int_field(
+            report, "duplicate_test_name_occurrences"
+        ),
+        uuid4_call_sites=_require_int_field(report, "uuid4_call_sites"),
+        date_today_call_sites=_require_int_field(report, "date_today_call_sites"),
+    )
+
+
+def _validate_artifact_source(artifact_source: str) -> GovernanceArtifactSource:
+    if artifact_source in {"live", "committed"}:
+        return artifact_source
+    raise ValueError(
+        f"artifact_source must be 'live' or 'committed', got {artifact_source!r}"
+    )
+
+
 def collect_runtime_uuid_governance_snapshot(
     *,
     inventory_path: Path = DEFAULT_RUNTIME_UUID_SEAMS_PATH,
@@ -227,57 +311,45 @@ def collect_runtime_uuid_governance_snapshot(
 def collect_retirement_governance_snapshot(
     *,
     repo_root: Path = _REPO_ROOT,
+    artifact_source: str = "live",
 ) -> RetirementGovernanceSnapshot:
-    """Collect retirement/dead-code governance counters from the live inventory."""
+    """Collect retirement/dead-code governance counters.
+
+    ``live`` rebuilds the inventory. ``committed`` reads
+    ``reports/quality/dead-code-inventory.json`` and fails closed when the
+    artifact is missing or incomplete. Architecture tests remain the live
+    drift owner for that file.
+    """
+    source = _validate_artifact_source(artifact_source)
+    if source == "committed":
+        payload = _load_json_mapping(
+            repo_root / "reports" / "quality" / "dead-code-inventory.json"
+        )
+        return _retirement_from_summary(payload.get("summary"))
     inventory = build_dead_code_inventory(repo_root)
-    summary = inventory.get("summary", {})
-    if not isinstance(summary, dict):
-        raise ValueError("Dead-code inventory summary must be a mapping")
-    return RetirementGovernanceSnapshot(
-        triaged_entry_count=int(summary["triaged_entry_count"]),
-        repo_wide_zero_import_candidate_count=int(
-            summary["repo_wide_zero_import_candidate_count"]
-        ),
-        repo_wide_classified_zero_import_candidate_count=int(
-            summary["repo_wide_classified_zero_import_candidate_count"]
-        ),
-        repo_wide_untriaged_zero_import_candidate_count=int(
-            summary["repo_wide_untriaged_zero_import_candidate_count"]
-        ),
-        repo_wide_owner_test_anchored_candidate_count=int(
-            summary["repo_wide_owner_test_anchored_candidate_count"]
-        ),
-        repo_wide_candidates_without_owner_tests_count=int(
-            summary["repo_wide_candidates_without_owner_tests_count"]
-        ),
-        repo_wide_non_static_reachability_candidate_count=int(
-            summary["repo_wide_non_static_reachability_candidate_count"]
-        ),
-        triaged_retained_owner_test_anchored_count=int(
-            summary["triaged_retained_owner_test_anchored_count"]
-        ),
-        triaged_retained_without_owner_tests_count=int(
-            summary["triaged_retained_without_owner_tests_count"]
-        ),
-    )
+    return _retirement_from_summary(inventory.get("summary"))
 
 
 def collect_test_governance_snapshot(
     *,
     repo_root: Path = _REPO_ROOT,
+    artifact_source: str = "live",
 ) -> TestGovernanceDebtSnapshot:
-    """Collect static test-governance counters from the cached governance scanner."""
+    """Collect static test-governance counters.
+
+    ``live`` uses the governance scanner (which may reuse a fresh committed
+    artifact after hashing the source tree). ``committed`` reads
+    ``reports/quality/test-governance-current.json`` without a live rescan
+    and fails closed when the artifact is missing or incomplete.
+    """
+    source = _validate_artifact_source(artifact_source)
+    if source == "committed":
+        payload = _load_json_mapping(
+            repo_root / "reports" / "quality" / "test-governance-current.json"
+        )
+        return _test_governance_from_report(payload.get("report"))
     payload = collect_test_governance_report(repo_root)
-    report = payload["report"]
-    return TestGovernanceDebtSnapshot(
-        compatibility_test_files=int(report["compatibility_test_files"]),
-        refined_assertless_tests=int(report["refined_assertless_tests"]),
-        markerless_test_functions=int(report["markerless_test_functions"]),
-        duplicate_test_names=int(report["duplicate_test_names"]),
-        duplicate_test_name_occurrences=int(report["duplicate_test_name_occurrences"]),
-        uuid4_call_sites=int(report["uuid4_call_sites"]),
-        date_today_call_sites=int(report["date_today_call_sites"]),
-    )
+    return _test_governance_from_report(payload["report"])
 
 
 def collect_debt_governance_snapshot(
@@ -285,8 +357,10 @@ def collect_debt_governance_snapshot(
     registry_path: Path = DEFAULT_REGISTRY_PATH,
     runtime_uuid_inventory_path: Path = DEFAULT_RUNTIME_UUID_SEAMS_PATH,
     repo_root: Path = _REPO_ROOT,
+    artifact_source: str = "live",
 ) -> DebtGovernanceSnapshot:
     """Collect the unified debt-governance snapshot used by CI reports."""
+    source = _validate_artifact_source(artifact_source)
     compatibility_surface = collect_compatibility_surface_snapshot(
         registry_path=registry_path
     )
@@ -295,8 +369,12 @@ def collect_debt_governance_snapshot(
         runtime_uuid=collect_runtime_uuid_governance_snapshot(
             inventory_path=runtime_uuid_inventory_path
         ),
-        retirement=collect_retirement_governance_snapshot(repo_root=repo_root),
-        test_governance=collect_test_governance_snapshot(repo_root=repo_root),
+        retirement=collect_retirement_governance_snapshot(
+            repo_root=repo_root, artifact_source=source
+        ),
+        test_governance=collect_test_governance_snapshot(
+            repo_root=repo_root, artifact_source=source
+        ),
     )
 
 
