@@ -69,7 +69,9 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
     assert set(value_opts.keys()) >= expected
     assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "null" for m in mappings)
     assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "nan" for m in mappings)
-    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) == [], "generic defaults.links must be empty for fail-closed"
+    # Defaults.links now holds allowlisted required panel links per navigation-links.yaml (fail-closed via row-aware action_target)
+    defaults_links = panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
+    assert isinstance(defaults_links, list) and len(defaults_links) >= 1
     links = props.get("links", [])
     assert isinstance(links, list) and len(links) >= 3
     titles = {link.get("title") for link in links}
@@ -107,7 +109,8 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
     dq_link = next(l for l in links if "Data Quality evidence" in l.get("title", ""))
     assert "${__data.fields.pipeline}" in dq_link.get("url", "")
     assert "${__url_time_range}" in dq_link.get("url", "")
-    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) == []
+    # DQ panel now has allowlisted defaults.links per contract (single dashboard handoff)
+    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) != []
     assert set(DQ_REASON_ACTION_MAP.keys()) == {"data_quality", "verify_dq_reason_rules"}
 
 
