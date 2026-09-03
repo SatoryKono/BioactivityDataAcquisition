@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3739 |
-| Tracked doc-like files | 3739 |
+| Doc-like files | 3740 |
+| Tracked doc-like files | 3740 |
 | Ignored local docs/reports files | 0 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3739 |
+| tracked | 3740 |
 
 ## Lifecycle Counts
 
@@ -59,10 +59,10 @@
 | Status | Count |
 | --- | --- |
 | Active | 751 |
-| Archived | 170 |
+| Archived | 183 |
 | Canonical | 73 |
 | Deprecated | 51 |
-| Generated | 1268 |
+| Generated | 1256 |
 | Working | 1426 |
 
 ## Surface Families
@@ -70,10 +70,10 @@
 | Surface | Count |
 | --- | --- |
 | active | 751 |
-| archive | 170 |
+| archive | 183 |
 | canonical | 73 |
 | duplicate | 51 |
-| generated | 1268 |
+| generated | 1256 |
 | working | 1426 |
 
 ## Recommended Actions
@@ -82,8 +82,8 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 929 |
-| generate-automatically | 1268 |
-| keep | 1147 |
+| generate-automatically | 1256 |
+| keep | 1160 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 51 |
 
@@ -184,18 +184,6 @@
 | `docs/00-project/ai/agents/agents/py-doc-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-plan-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/agents/py-test-bot.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-api-designer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-architect-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-code-reviewer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-data-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-database-optimizer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-debugger.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-dependency-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-git-workflow-manager.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-prompt-engineer.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-refactoring-specialist.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-scientific-literature-researcher.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
-| `docs/00-project/ai/agents/agents/sp-test-automator.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/orchestration/ORCHESTRATION.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/orchestration/py-team-orchestration.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
 | `docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md` | ai-runtime-governance-mirrors |  |  | scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py |
@@ -256,6 +244,18 @@
 | `docs/00-project/ai/prompts/archive/mirrors/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/01-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/02-configs.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/03-tests.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/04-tech-debt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/05-docs.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/06-agents-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/07-telemetry.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/08-dashboards.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/09-diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/10-coderabbit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/archive/retired-project-new/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 
