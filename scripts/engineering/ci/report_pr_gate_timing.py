@@ -421,6 +421,11 @@ def _summarize_run(
         "codeql_execution_seconds": codeql.get("execution_seconds") if codeql else None,
         "peak_runner_jobs": _peak_runner_jobs(job_records),
         "key_jobs": key_jobs,
+        "queue_seconds_samples": [
+            job.get("queue_seconds")
+            for job in job_records
+            if _is_first_wave_queue_job(job)
+        ],
         "first_wave_job_count": sum(
             1 for job in job_records if _is_first_wave_queue_job(job)
         ),
@@ -481,13 +486,12 @@ def _is_first_wave_queue_job(job: dict[str, Any]) -> bool:
 def _queue_values(runs: Sequence[dict[str, Any]]) -> list[int | None]:
     values: list[int | None] = []
     for run in runs:
-        jobs = run.get("jobs")
-        if not isinstance(jobs, list):
+        samples = run.get("queue_seconds_samples")
+        if not isinstance(samples, list):
             continue
-        for job in jobs:
-            if not isinstance(job, dict) or not _is_first_wave_queue_job(job):
-                continue
-            values.append(job.get("queue_seconds"))
+        for sample in samples:
+            if sample is None or isinstance(sample, int):
+                values.append(sample)
     return values
 
 
