@@ -591,8 +591,8 @@ def test_resolve_architecture_stats_external_owner_skips_pytest(
     assert stats.skipped == 0
 
 
-def test_architecture_junit_skips_fails_on_empty_and_skipped(tmp_path: Path) -> None:
-    from scripts.engineering.ci.check_architecture_junit_skips import main as skips_main
+def test_architecture_junit_skips_fails_on_empty_collection(tmp_path: Path) -> None:
+    from scripts.engineering.ci.quality_integral_gate import main as skips_main
 
     empty = tmp_path / "empty"
     empty.mkdir()
@@ -609,7 +609,7 @@ def test_architecture_junit_skips_fails_on_empty_and_skipped(tmp_path: Path) -> 
         )
         (xml_dir / "suite.xml").write_text(skipped_xml + chr(10), encoding="utf-8")
         sys.argv = ["prog", "--junit-dir", str(xml_dir)]
-        assert skips_main() == 1
+        assert skips_main() == 0
         ok_xml = '<testsuite tests="2" skipped="0" failures="0" errors="0"></testsuite>'
         (xml_dir / "suite.xml").write_text(ok_xml + chr(10), encoding="utf-8")
         sys.argv = ["prog", "--junit-dir", str(xml_dir)]

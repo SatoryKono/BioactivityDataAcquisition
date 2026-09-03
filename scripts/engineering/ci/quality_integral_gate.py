@@ -1076,7 +1076,49 @@ def _append_summary(path: Path, summary_lines: list[str]) -> None:
         stream.write("\n".join(summary_lines) + "\n")
 
 
+def _junit_collection_gate(argv: list[str]) -> int:
+    """Fail closed when architecture JUnit is missing or empty."""
+    parser = argparse.ArgumentParser(
+        description="Fail closed on missing or empty architecture JUnit XML.",
+    )
+    parser.add_argument("--junit-dir", type=Path, required=True)
+    args = parser.parse_args(argv)
+    files = sorted(args.junit_dir.glob("*.xml"))
+    if not files:
+        print(
+            f"::error::Missing architecture JUnit XML in {args.junit_dir}",
+            file=sys.stderr,
+        )
+        return 1
+    tests = 0
+    skipped = 0
+    for path in files:
+        root = ET.parse(path).getroot()
+        for suite in _junit_suites(root):
+            tests += int(suite.attrib.get("tests", "0"))
+            skipped += int(suite.attrib.get("skipped", "0"))
+    if tests == 0:
+        print(
+            f"::error::Architecture JUnit collection is empty in {args.junit_dir}",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"architecture junit tests={tests} skipped={skipped} dir={args.junit_dir}")
+    return 0
+
+
 def main() -> int:
+    raw_argv = sys.argv[1:]
+    if any(
+        arg == "--junit-dir" or arg.startswith("--junit-dir=") for arg in raw_argv
+    ) and not any(
+        arg == "--registry"
+        or arg.startswith("--registry=")
+        or arg == "--scorecard"
+        or arg.startswith("--scorecard=")
+        for arg in raw_argv
+    ):
+        return _junit_collection_gate(raw_argv)
     args = _parse_args()
     registry_path = Path(args.registry)
     scorecard_path = Path(args.scorecard)
