@@ -286,8 +286,7 @@ def _validate_artifact_source(artifact_source: str) -> GovernanceArtifactSource:
     if artifact_source in {"live", "committed"}:
         return artifact_source
     raise ValueError(
-        "artifact_source must be 'live' or 'committed', "
-        f"got {artifact_source!r}"
+        f"artifact_source must be 'live' or 'committed', got {artifact_source!r}"
     )
 
 

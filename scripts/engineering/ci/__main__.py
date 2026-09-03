@@ -15,6 +15,7 @@ Commands:
     neo4j-memory    Check deterministic Neo4j memory ontology invariants
     neo4j-memory-live  Apply deterministic sync and validate live Neo4j drift
     docker-timing   Report Docker workflow timing and capacity evidence
+    pr-gate-timing  Report PR Gate Complete timing and capacity evidence
     debt-report     Generate weekly quality debt report
     apply-ci-fixes  Apply one-off hosted GitHub workflow fixes
 """
@@ -38,6 +39,7 @@ COMMANDS = {
     "neo4j-memory": "check_neo4j_memory_ontology.py",
     "neo4j-memory-live": "check_neo4j_memory_live_audit.py",
     "docker-timing": "report_docker_actions_timing.py",
+    "pr-gate-timing": "report_pr_gate_timing.py",
     "debt-report": "report_quality_debt_weekly.py",
     "apply-ci-fixes": "apply_ci_fixes.py",
 }
