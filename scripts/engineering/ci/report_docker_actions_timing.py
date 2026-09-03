@@ -59,9 +59,7 @@ class JsonGitHubClient(Protocol):
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=(
-            "Collect Docker Actions timing/capacity evidence for #9977/#9978."
-        )
+        description=("Collect Docker Actions timing/capacity evidence for #9977/#9978.")
     )
     parser.add_argument(
         "--repo-root",
@@ -203,8 +201,7 @@ def _workflow_runs_endpoint(
         params["event"] = event
     workflow_id = quote(workflow, safe="")
     return (
-        f"repos/{repository}/actions/workflows/{workflow_id}/runs?"
-        f"{urlencode(params)}"
+        f"repos/{repository}/actions/workflows/{workflow_id}/runs?{urlencode(params)}"
     )
 
 
@@ -350,7 +347,9 @@ def _peak_runner_jobs(job_records: Sequence[dict[str, Any]]) -> int:
     return peak
 
 
-def _summarize_run(run: dict[str, Any], jobs: Sequence[dict[str, Any]]) -> dict[str, Any]:
+def _summarize_run(
+    run: dict[str, Any], jobs: Sequence[dict[str, Any]]
+) -> dict[str, Any]:
     run_created_at = _parse_timestamp(run.get("created_at"))
     run_updated_at = _parse_timestamp(run.get("updated_at"))
     job_records = [_job_record(job) for job in jobs]
@@ -374,9 +373,7 @@ def _summarize_run(run: dict[str, Any], jobs: Sequence[dict[str, Any]]) -> dict[
     )
 
     step_metrics: dict[str, int | None] = {}
-    for step in (
-        docker_build.get("steps", []) if isinstance(docker_build, dict) else []
-    ):
+    for step in docker_build.get("steps", []) if isinstance(docker_build, dict) else []:
         metric_name = STEP_METRIC_NAMES.get(str(step.get("name")))
         if metric_name:
             step_metrics[metric_name] = step.get("duration_seconds")
@@ -583,7 +580,9 @@ def build_report(
         "publish_gate_elapsed_seconds": _stats(
             [run.get("publish_gate_elapsed_seconds") for run in summarized_runs]
         ),
-        "peak_runner_jobs": _stats([run.get("peak_runner_jobs") for run in summarized_runs]),
+        "peak_runner_jobs": _stats(
+            [run.get("peak_runner_jobs") for run in summarized_runs]
+        ),
     }
     for metric_name in STEP_METRIC_NAMES.values():
         metrics[metric_name] = _stats(_step_metric_values(summarized_runs, metric_name))
@@ -677,7 +676,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         ]
     )
     for run in report["runs"]:
-        build = run.get("docker_build") if isinstance(run.get("docker_build"), dict) else {}
+        build = (
+            run.get("docker_build") if isinstance(run.get("docker_build"), dict) else {}
+        )
         publish = (
             run.get("docker_publish")
             if isinstance(run.get("docker_publish"), dict)
