@@ -319,57 +319,8 @@
             },
             "properties": [
               {
-                "id": "displayName",
-                "value": "Freshness"
-              },
-              {
-                "id": "custom.width",
-                "value": 84
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text",
-                  "wrapText": false
-                }
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "type": "value",
-                    "options": {
-                      "observed": {
-                        "text": "OBSERVED",
-                        "color": "green"
-                      },
-                      "unknown": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "regex",
-                    "options": {
-                      "pattern": ".+",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  },
-                  {
-                    "type": "special",
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "UNKNOWN",
-                        "color": "gray"
-                      }
-                    }
-                  }
-                ]
+                "id": "custom.hidden",
+                "value": true
               }
             ]
           },
@@ -463,17 +414,17 @@
           "id": "organize",
           "options": {
             "excludeByName": {
+              "Time": true,
               "reasons": true,
               "reasons_truncated": true,
               "scope_kind": true,
-              "Time": true
+              "evidence_freshness": true
             },
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "evidence_freshness": 2,
-              "reasons_text": 3,
-              "evidence_observed_at": 4
+              "reasons_text": 2,
+              "evidence_observed_at": 3
             },
             "renameByName": {}
           }

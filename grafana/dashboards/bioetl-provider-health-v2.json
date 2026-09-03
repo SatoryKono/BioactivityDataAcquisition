@@ -721,6 +721,13 @@
               {
                 "id": "displayName",
                 "value": "Provider"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           },
