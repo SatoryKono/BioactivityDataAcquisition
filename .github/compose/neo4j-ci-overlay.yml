@@ -1,0 +1,16 @@
+# CI-only Neo4j healthcheck overlay for neo4j-memory-live-audit.
+# Does not change the desktop compose contract: tighter probes only, same image/auth.
+name: bioetl-neo4j
+
+services:
+  neo4j:
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/var/lib/neo4j/bin/cypher-shell -u \"$${BIOETL_NEO4J_USERNAME}\" -p \"$${BIOETL_NEO4J_PASSWORD}\" 'RETURN 1' > /dev/null 2>&1",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 15s
