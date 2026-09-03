@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 
 from scripts.engineering.ci.report_pr_gate_timing import (
+    ReportRequest,
     build_report,
     render_markdown,
 )
@@ -191,21 +192,23 @@ def test_report_records_owner_paths_and_wall_clock(tmp_path: Path) -> None:
 
     report = build_report(
         client,
-        repo_root=tmp_path,
-        repository=None,
-        workflow="pr-required.yml",
-        branch=None,
-        event="pull_request",
-        limit=20,
-        run_ids=[],
-        include_incomplete=False,
-        wall_budget_seconds=300,
-        queue_budget_seconds=20,
-        tests_budget_seconds=245,
-        architecture_budget_seconds=210,
-        docker_budget_seconds=240,
-        codeql_budget_seconds=240,
-        generated_at=created,
+        ReportRequest(
+            repo_root=tmp_path,
+            repository=None,
+            workflow="pr-required.yml",
+            branch=None,
+            event="pull_request",
+            limit=20,
+            run_ids=[],
+            include_incomplete=False,
+            wall_budget_seconds=300,
+            queue_budget_seconds=20,
+            tests_budget_seconds=245,
+            architecture_budget_seconds=210,
+            docker_budget_seconds=240,
+            codeql_budget_seconds=240,
+            generated_at=created,
+        ),
     )
 
     assert report["metrics"]["pr_gate_wall_seconds"]["p95"] == 1649
@@ -220,7 +223,7 @@ def test_report_records_owner_paths_and_wall_clock(tmp_path: Path) -> None:
 
 
 @pytest.mark.unit
-def test_report_marks_acceptance_only_after_full_measured_sample(
+def test_pr_gate_report_marks_acceptance_only_after_full_measured_sample(
     tmp_path: Path,
 ) -> None:
     base = datetime(2026, 9, 3, tzinfo=UTC)
@@ -249,21 +252,23 @@ def test_report_marks_acceptance_only_after_full_measured_sample(
 
     report = build_report(
         client,
-        repo_root=tmp_path,
-        repository=None,
-        workflow="pr-required.yml",
-        branch=None,
-        event="pull_request",
-        limit=20,
-        run_ids=[],
-        include_incomplete=False,
-        wall_budget_seconds=300,
-        queue_budget_seconds=20,
-        tests_budget_seconds=245,
-        architecture_budget_seconds=210,
-        docker_budget_seconds=240,
-        codeql_budget_seconds=240,
-        generated_at=base,
+        ReportRequest(
+            repo_root=tmp_path,
+            repository=None,
+            workflow="pr-required.yml",
+            branch=None,
+            event="pull_request",
+            limit=20,
+            run_ids=[],
+            include_incomplete=False,
+            wall_budget_seconds=300,
+            queue_budget_seconds=20,
+            tests_budget_seconds=245,
+            architecture_budget_seconds=210,
+            docker_budget_seconds=240,
+            codeql_budget_seconds=240,
+            generated_at=base,
+        ),
     )
 
     assert report["acceptance"]["pr_gate_wall_p95_le_budget"] is True
