@@ -251,7 +251,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows evidence freshness plus top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -319,8 +319,57 @@
             },
             "properties": [
               {
-                "id": "custom.hidden",
-                "value": true
+                "id": "displayName",
+                "value": "Freshness"
+              },
+              {
+                "id": "custom.width",
+                "value": 84
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "observed": {
+                        "text": "OBSERVED",
+                        "color": "green"
+                      },
+                      "unknown": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": ".+",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -417,14 +466,14 @@
               "reasons": true,
               "reasons_truncated": true,
               "scope_kind": true,
-              "evidence_freshness": true,
               "Time": true
             },
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "reasons_text": 2,
-              "evidence_observed_at": 3
+              "evidence_freshness": 2,
+              "reasons_text": 3,
+              "evidence_observed_at": 4
             },
             "renameByName": {}
           }
@@ -2187,7 +2236,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -2269,7 +2318,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3347,7 +3396,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3892,7 +3941,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3973,7 +4022,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
