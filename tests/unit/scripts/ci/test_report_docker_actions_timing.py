@@ -268,6 +268,7 @@ def test_docker_report_marks_acceptance_only_after_full_measured_sample(
     assert "docker_owner_elapsed_seconds" in render_markdown(report)
 
 
+@pytest.mark.unit
 def test_write_text_refuses_path_escape(tmp_path: Path) -> None:
     from scripts.engineering.ci.report_docker_actions_timing import _write_text
 
@@ -278,6 +279,7 @@ def test_write_text_refuses_path_escape(tmp_path: Path) -> None:
         _write_text(str(outside), "{}\n", root=root)
 
 
+@pytest.mark.unit
 def test_write_text_confines_relative_output(tmp_path: Path) -> None:
     from scripts.engineering.ci.report_docker_actions_timing import _write_text
 
