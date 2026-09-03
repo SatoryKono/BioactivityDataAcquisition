@@ -1,8 +1,8 @@
 %% BioETL — Port Contracts: Services and Controls
 %% Control-plane, checkpoint, and DQ service ports with their current consumers and adapters.
 
-%% @version 1.0.0
-%% @date    2026-03-28
+%% @version 1.1.0
+%% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
 %% @view    services
@@ -43,7 +43,7 @@ graph LR
 
     subgraph Infrastructure["Infrastructure Layer"]
         ML["MemoryLock"]:::size-sm
-        LC["LocalCheckpoint"]:::size-sm
+        LC["LocalCheckpointAdapter"]:::size-sm
         UQ["UnifiedQuarantine"]:::size-sm
         FA["FileAuditAdapter"]:::size-sm
         SPH["Sha256PiiHasher"]:::size-sm

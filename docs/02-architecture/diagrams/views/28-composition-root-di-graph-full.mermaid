@@ -1,21 +1,21 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/28-composition-root-di-graph.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-07-08
+%% Synced: 2026-09-03
 
 %% Title: Composition Root Wiring — Public APIs and Assembly
 %% Covers: RULES.md §1.1 (Composition Layer), ADR-005, RF-011
 %% Rank: 3 (Score 9.00) — Current composition seams and retained facade policy
-%% Updated: 2026-03-28
+%% Updated: 2026-09-03
 
-%% @version 1.4.0
-%% @date    2026-03-28
+%% @version 1.5.0
+%% @date    2026-09-03
 %% @type    flowchart
 %% @level   Mixed (System / Component / Module)
 %% @nodes   23
 %% keep-orphan: ENTRY
 %% @uniform-group interfaces nodes=CLI
-%% @uniform-group public     nodes=EXEC,CTRL,HEALTH,MAINT,RES,CAPI,ENTRY
+%% @uniform-group public     nodes=EXEC,CTRL,HEALTH,MAINT,RES,REGAPI,ENTRY
 %% @uniform-group assembly   nodes=BPR,BSRV,GPF,FMH,CSUP,CWIR,DSF,STF,REG,PRI,CPB,LCOL
 %% @uniform-group runtime    nodes=PRS,PRUN,PS,ADP,STOR,ISVC,CPART
 %% @uniform-width group
@@ -26,13 +26,13 @@ flowchart TB
     end
 
     subgraph PublicAPIs["Public composition APIs"]
-        EXEC["execution_api<br/>runner creation + metrics flush"]
-        CTRL["control_plane_api<br/>inspection + admin accessors"]
-        HEALTH["health_api<br/>health + quarantine accessors"]
-        MAINT["maintenance_api<br/>maintenance accessors"]
-        RES["resources_api<br/>cleanup / checkpoint / archive helpers"]
-        CAPI["creation_api<br/>compat shim → creation_support"]
-        ENTRY["entrypoints.py<br/>retained broad facade"]
+        EXEC["execution_api<br/>external compatibility shim"]
+        CTRL["control_plane_service_access<br/>first-party inspection + admin"]
+        HEALTH["health_service_access<br/>first-party health + quarantine"]
+        MAINT["maintenance_api<br/>external compatibility shim"]
+        RES["resources_runtime<br/>first-party checkpoint + lifecycle"]
+        REGAPI["registry_api<br/>typed PipelineRegistry seam"]
+        ENTRY["entrypoints.py<br/>first-party broad facade"]
     end
 
     subgraph Assembly["Composition assembly"]
@@ -60,24 +60,19 @@ flowchart TB
         STOR["Bronze / Silver / Gold writers"]
     end
 
+    CLI --> ENTRY
     CLI --> CTRL
     CLI --> HEALTH
-    CLI --> MAINT
-    CLI --> EXEC
+    CLI --> REGAPI
     CLI -. cleanup and lifecycle commands .-> RES
 
-    ENTRY -. retained public re-export .-> EXEC
-    ENTRY -. retained public re-export .-> CTRL
-    ENTRY -. retained public re-export .-> HEALTH
-    ENTRY -. retained public re-export .-> MAINT
-    ENTRY -. retained public re-export .-> RES
-    ENTRY -. retained public re-export .-> CAPI
-
-    EXEC ==> BPR
+    EXEC -. external compatibility .-> BPR
+    MAINT -. external compatibility .-> BSRV
+    ENTRY ==> BPR
+    ENTRY ==> BSRV
     CTRL ==> BSRV
     HEALTH ==> BSRV
-    MAINT ==> BSRV
-    CAPI --> CSUP
+    REGAPI --> GPF
     RES --> STF
 
     BPR --> GPF

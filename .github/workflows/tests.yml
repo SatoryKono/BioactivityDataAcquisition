@@ -10,8 +10,8 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-permissions:
-  contents: read
+# Job permissions are explicit below.
+# No workflow-wide token scope is granted.
 
 concurrency:
   group: tests-${{ github.event.pull_request.number || github.sha }}
@@ -563,7 +563,7 @@ jobs:
   neo4j-memory-live-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: governance-preflight
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -730,7 +730,7 @@ jobs:
   quality-metrics-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: governance-preflight
+    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -1527,10 +1527,10 @@ jobs:
             exit 1
           fi
           echo "All blocking Tests lanes completed successfully."
-
   duration-telemetry:
     if: always()
     runs-on: ubuntu-latest
+    permissions: { contents: read }
     needs:
       - contract-confidence
       - flaky-telemetry
@@ -1541,8 +1541,8 @@ jobs:
       - unit-subprocess-backed
       - test-matrix
       - memory-tests
+      - repo-backed-unit
     timeout-minutes: 10
-
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6

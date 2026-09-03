@@ -1,15 +1,15 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/01-full-system-component.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-07-08
+%% Synced: 2026-09-03
 
 %% Title: Full System Component Diagram
 %% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core
-%% Updated: 2026-03-28
-%% Components: CLI command families, execution/control-plane/health/maintenance/resources APIs, control-plane builders, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, inspection/control-plane services, provider adapters, medallion + control-plane storage
+%% Updated: 2026-09-03
+%% Components: CLI command families, first-party composition owner seams, compatibility APIs, control-plane builders, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, inspection/control-plane services, provider adapters, medallion + control-plane storage
 
-%% @version 1.3.0
-%% @date    2026-03-28
+%% @version 1.4.0
+%% @date    2026-09-03
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 %% @nodes   35
@@ -35,11 +35,11 @@ flowchart TB
 
     subgraph Composition["Composition Layer"]
         direction TB
-        ExecAPI["execution_api"]
-        ControlPlaneAPI["control_plane_api"]
-        HealthAPI["health_api"]
-        MaintenanceAPI["maintenance_api"]
-        ResourcesAPI["resources_api"]
+        ExecAPI["entrypoints / composite_catalog"]
+        ControlPlaneAPI["control_plane_service_access"]
+        HealthAPI["health_service_access / observability_runtime"]
+        MaintenanceAPI["entrypoints / maintenance_api"]
+        ResourcesAPI["resources_runtime"]
         BuildRunner["build_pipeline_runner"]
         Registry["PipelineRegistry"]
         PipelineFactory["GenericPipelineFactory"]

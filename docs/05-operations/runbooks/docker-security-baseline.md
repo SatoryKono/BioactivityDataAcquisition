@@ -56,7 +56,7 @@ docker image inspect "bioetl:$baselineSha" --format '{{.Id}} {{json .RepoDigests
 ```
 
 The Dockerfile pins one immutable Wolfi base digest for its builder and runtime
-root stages. Direct Wolfi packages pin Python `3.13.15-r2` and `uv 0.11.26-r0`;
+root stages. Direct Wolfi packages pin Python `3.13.15-r5` and `uv 0.11.26-r0`;
 the final scratch stage copies the audited runtime root and locked environment.
 
 ### Runtime versions
