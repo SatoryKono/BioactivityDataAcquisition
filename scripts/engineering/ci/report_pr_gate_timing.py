@@ -421,7 +421,10 @@ def _summarize_run(
         "codeql_execution_seconds": codeql.get("execution_seconds") if codeql else None,
         "peak_runner_jobs": _peak_runner_jobs(job_records),
         "key_jobs": key_jobs,
-        "jobs": job_records,
+        "first_wave_job_count": sum(
+            1 for job in job_records if _is_first_wave_queue_job(job)
+        ),
+        "job_count": len(job_records),
     }
 
 
