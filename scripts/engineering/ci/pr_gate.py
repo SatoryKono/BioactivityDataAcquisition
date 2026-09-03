@@ -315,10 +315,7 @@ def _not_applicable_result_failures(
 ) -> list[str]:
     failures: list[str] = []
     allowed = set(cast(list[str], gate.get("allowed_results", [])))
-    if (
-        gate.get("not_applicable_allowed") is not True
-        or NOT_APPLICABLE not in allowed
-    ):
+    if gate.get("not_applicable_allowed") is not True or NOT_APPLICABLE not in allowed:
         failures.append(f"{gate_id}: N/A is not allowed")
     if not isinstance(reason, str) or not reason:
         failures.append(f"{gate_id}: N/A reason is missing")
