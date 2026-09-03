@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T18:36:29.139780+00:00",
+  "generated_at": "2026-09-03T18:41:18.511717+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1929,
+          "line": 1936,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -9690,7 +9690,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 605,
+          "line": 612,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50"
         },
@@ -10207,7 +10207,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1356,
+          "line": 1363,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10944,7 +10944,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1998,
+          "line": 2005,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -14134,7 +14134,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 657,
+          "line": 664,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -19902,7 +19902,7 @@
         },
         {
           "path": "tests/integration/test_grafana_action_target_coverage.py",
-          "line": 115,
+          "line": 118,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana.action_target_routes import dashboard_uid_for_target"
         },

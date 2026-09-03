@@ -739,13 +739,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _write_text(raw_path: str, content: str, *, root: Path) -> None:
-    safe_path = ensure_path_within_root(
-        resolve_cli_path(raw_path, root=root),
-        root,
-    )
-    safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(content, encoding="utf-8", newline="\n")
+def _prepare_output_path(raw_path: str, *, root: Path) -> Path:
+    return ensure_path_within_root(resolve_cli_path(raw_path, root=root), root)
 
 
 def _has_acceptance_gap(report: dict[str, Any]) -> bool:
@@ -776,19 +771,19 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
     if args.json_out:
-        _write_text(
-            args.json_out,
-            payload + "\n",
-            root=repo_root,
-        )
+        json_out = _prepare_output_path(args.json_out, root=repo_root)
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(payload + "\n", encoding="utf-8", newline="\n")
     else:
         print(payload)
 
     if args.markdown_out:
-        _write_text(
-            args.markdown_out,
+        markdown_out = _prepare_output_path(args.markdown_out, root=repo_root)
+        markdown_out.parent.mkdir(parents=True, exist_ok=True)
+        markdown_out.write_text(
             render_markdown(report),
-            root=repo_root,
+            encoding="utf-8",
+            newline="\n",
         )
 
     if args.fail_on_acceptance_gap and _has_acceptance_gap(report):
