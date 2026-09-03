@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T15:41:55.211730+00:00",
+  "generated_at": "2026-09-03T15:52:09.154957+00:00",
   "summary": {
     "total_scripts": 612,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 511,
       "skills": 12,
-      "tests": 421
+      "tests": 422
     }
   },
   "scripts": [
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1898,
+          "line": 1930,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -9678,7 +9678,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 603,
+          "line": 606,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -10102,7 +10102,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10115,6 +10115,12 @@
           "line": 38,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_report_docker_actions_timing.py",
+          "line": 7,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.report_docker_actions_timing import ("
         }
       ]
     },
@@ -10160,7 +10166,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1351,
+          "line": 1357,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10897,7 +10903,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1967,
+          "line": 1999,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -12401,7 +12407,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 395,
+      "reference_count": 396,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -14087,7 +14093,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 655,
+          "line": 658,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
