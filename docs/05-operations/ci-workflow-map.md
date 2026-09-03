@@ -26,7 +26,7 @@ the human index.
 | Workflow file | Display name | Purpose (summary) |
 | --- | --- | --- |
 | `architecture.yml` | Architecture Metrics | Architecture debt gates, scorecard, hotspots |
-| `architecture-docs-nightly.yml` | Architecture Docs Nightly | Nightly architecture/doc sync checks |
+| `architecture-docs-nightly.yml` | Architecture Docs Nightly | Nightly architecture/doc sync; package-family full-corpus gate disabled |
 | `branch-hygiene.yml` | Branch Hygiene | PR branch-name policy and periodic branch-cleanup inventory |
 | `chembl-baseline-smoke.yml` | ChemblBaseline Smoke | ChEMBL baseline smoke lane |
 | `coderabbit.yml` | CodeRabbit | Automated review integration |
