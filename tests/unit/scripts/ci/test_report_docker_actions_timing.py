@@ -218,7 +218,7 @@ def test_report_separates_docker_validation_path_from_publish_wait(
 
 
 @pytest.mark.unit
-def test_report_marks_acceptance_only_after_full_measured_sample(
+def test_docker_report_marks_acceptance_only_after_full_measured_sample(
     tmp_path: Path,
 ) -> None:
     base = datetime(2026, 9, 3, tzinfo=UTC)
