@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 6.1.4
+Version: 6.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-08-27'
+  Last verified: '2026-09-03'
 
 ______________________________________________________________________
 
@@ -16,8 +16,8 @@ ______________________________________________________________________
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.4
-**Дата обновления:** 2026-08-27
+**Версия:** 6.1.0 (`bioetl --version`)
+**Дата обновления:** 2026-09-03
 **Статус покрытия:** published command and operator surface
 
 > **Boundary:** this page is the CLI command reference (what commands exist and their options).
@@ -69,7 +69,9 @@ bioetl workflow status <NAME> [OPTIONS]
 | `run` | Последовательно выполняет declarative workflow через workflow manifest / ledger / execution-state control plane |
 | `status` | Показывает durable workflow status when persisted state exists, otherwise falls back to bounded topology |
 
-**`workflow run` опции:**
+#### `workflow run` — Выполнить declarative workflow
+
+**Опции:**
 
 | Опция | Описание |
 | --- | --- |
@@ -107,7 +109,9 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--ensure-observability-backend/--no-ensure-observability-backend` | **Default off.** Opt-in auto-start of detached **BioETL Ops HTTP** backend (`bioetl health server`) for Grafana ID/detail panels. Does not start Quarantine Explorer / `:8081`. Prefer a long-lived `bioetl health server --port 8000`. |
 | `--observability-backend-port` | Port for the opt-in detached Ops HTTP / health server backend (**default 8000**) |
 
-**`workflow status` опции:**
+#### `workflow status` — Показать workflow status
+
+**Опции:**
 
 | Опция | Описание |
 | --- | --- |
@@ -223,9 +227,14 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-after-run`                     | flag   | None          | Запустить VACUUM после успешного выполнения                                               |
 | `--vacuum-retention-days`                | int    | None          | Retention для VACUUM (дней, override YAML config)                                         |
 | `--debug`                                | flag   | False         | Включить DEBUG логирование                                                                |
-| `--checkpoint-compatibility`             | choice | None          | Политика совместимости checkpoint (`observe`, `soft_fail`, `hard_fail`) |
+| `--tracing/--no-tracing`                 | flag   | None          | Override distributed tracing for this run                                                 |
+| `--debug-export/--no-debug-export`       | flag   | False         | Persist a per-run debug audit pack with Bronze/Silver/Gold traces                         |
+| `--debug-export-format`                  | choice | `csv,xlsx`    | Repeatable debug-export formats (`csv`, `xlsx`)                                           |
+| `--debug-export-dir`                     | path   | None          | Override the debug-export root directory                                                  |
 | `--health-server/--no-health-server`     | flag   | True          | Включить HTTP health server                                                               |
 | `--health-port`                          | int    | 8000          | Порт для health/metrics server (Docker main default)                                      |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | **Default off.** Opt-in auto-start of detached BioETL Ops HTTP backend (`bioetl health server`) |
+| `--observability-backend-port`           | int    | 8000          | Port for the opt-in detached Ops HTTP / health server backend                             |
 | `--use-cached-bronze/--no-cached-bronze` | flag   | False         | Читать Bronze cache вместо API                                                            |
 | `--cached-bronze-date`                   | str    | None          | Фильтровать Bronze cache по дате `YYYY-MM-DD`                                             |
 | `--cached-bronze-path`                   | path   | None          | Явный путь к каталогу Bronze cache                                                        |
@@ -239,9 +248,6 @@ bioetl run --pipeline <NAME> [OPTIONS]
 ```bash
 # Инкрементальный запуск (по умолчанию)
 bioetl run --pipeline chembl_activity
-
-# Запуск с политикой совместимости checkpoint
-bioetl run --pipeline chembl_activity --checkpoint-compatibility observe
 
 # С ограничением записей (для тестирования)
 bioetl run --pipeline chembl_activity --limit 100
@@ -299,6 +305,10 @@ bioetl run --pipeline chembl_activity \
 | `replay_mode=rebuild` in inspection                  | Ordinary rebuild/rerun path outside strict exact replay                                                      | Snapshot-backed same-data-state recovery    |
 
 **Checkpoint resume policy (runtime setting):**
+
+Migration: CLI flag `--checkpoint-compatibility` was removed. Operators set
+`settings.pipeline.control_plane.checkpoint_compatibility_policy` in config
+(`observe`, `soft_fail`, `hard_fail`). Do not revive the retired flag.
 
 - `settings.pipeline.control_plane.checkpoint_compatibility_policy=observe`
   Degraded operator mode: продолжить можно только при несовместимостях вне
@@ -382,6 +392,8 @@ bioetl run-all --source <PROVIDER> [OPTIONS]
 | `--debug`                            | flag   | False         | DEBUG логирование                               |
 | `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                     |
 | `--health-port`                      | int    | 8000          | Порт для health/metrics server                  |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False | Opt-in detached BioETL Ops HTTP backend         |
+| `--observability-backend-port`       | int    | 8000          | Port for the opt-in Ops HTTP backend            |
 
 **Примеры:**
 
@@ -430,6 +442,8 @@ bioetl run-composite --composite <NAME> [OPTIONS]
 | `--debug`                                                      | flag | False        | DEBUG логирование                                    |
 | `--health-server/--no-health-server`                           | flag | True         | Включить HTTP health server                          |
 | `--health-port`                                                | int  | 8000         | Порт для health/metrics server                       |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | flag | False    | Opt-in detached BioETL Ops HTTP backend              |
+| `--observability-backend-port`                                 | int  | 8000         | Port for the opt-in Ops HTTP backend                 |
 
 **Примеры:**
 
@@ -667,6 +681,48 @@ exact-replay claim допустим только когда этот gate име
 Используй оба `--require-*` флага для fail-closed release/operator gates,
 когда нужна строгая проверка wording уровня "любой historical run".
 
+#### `run-manifest verify` — Replay evidence across stores
+
+```bash
+bioetl run-manifest verify <left> <right> [--format text|json|yaml]
+```
+
+Сравнивает replay evidence двух identifier-ов across manifest и
+effective-config stores.
+
+#### `run-manifest forensic-diff` — Forensic cross-surface diff
+
+```bash
+bioetl run-manifest forensic-diff <left> <right> [--format text|json|yaml]
+```
+
+#### `run-manifest inventory` — Certified historical tranche inventory
+
+```bash
+bioetl run-manifest inventory [--format text|json|yaml]
+```
+
+#### `run-manifest replay-bundle` — Replay-bundle descriptor
+
+```bash
+bioetl run-manifest replay-bundle <identifier> [--format text|json|yaml]
+```
+
+#### `run-manifest closure-report` — Retained-corpus closure
+
+```bash
+bioetl run-manifest closure-report [--dispositions FILE] [--write] [--format text|json|yaml]
+```
+
+`--write` сохраняет artifact в
+`data/output/control/historical_replay_closure`.
+
+#### `run-manifest certify-historical-bulk` — Bulk certification plan
+
+```bash
+bioetl run-manifest certify-historical-bulk <PLAN_PATH> [--format text|json|yaml]
+```
+
 See also:
 
 - [Run Manifest and Run Ledger Contract](contracts/run-manifest-ledger.md)
@@ -783,6 +839,11 @@ bioetl export [TABLE] [OPTIONS]
 | `--output`, `-o`  | path   | `data/exports` | Директория для экспорта              |
 | `--limit`         | int    | None           | Максимальное количество строк        |
 | `--columns`, `-c` | str    | None           | Колонки для экспорта (через запятую) |
+| `--requester`     | str    | None           | Requester identity for governed export audit metadata |
+| `--role`          | choice | `viewer`       | `viewer`, `investigator`, `exporter`, `admin` |
+| `--filters-hash`  | str    | None           | Stable SHA/hash of query filters for parity auditing |
+| `--expires-at`    | str    | None           | ISO-8601 expiry timestamp for governed export download semantics |
+| `--redaction-profile` | choice | `default`  | `default` or `none` (`none` requires a privileged role) |
 
 Успешный export создает не только data-файл, но и sidecar manifests:
 
@@ -840,26 +901,23 @@ bioetl debug --pipeline <NAME> [OPTIONS]
 
 **Опции:**
 
-| Опция                 | Тип    | По умолчанию | Описание                                                           |
-| --------------------- | ------ | ------------ | ------------------------------------------------------------------ |
-| `--breakpoint <STEP>` | choice | None         | Точка останова: `preflight`, `bronze`, `silver`, `gold`, `postrun` |
-| `--step-into`         | flag   | False        | Пошаговое выполнение внутри этапа                                  |
-| `--inspect-state`     | flag   | False        | Показать полное состояние перед каждым шагом                       |
-| `--debugger-port`     | int    | 5678         | Порт для удалённого отладчика                                      |
-| `--limit`             | int    | 100          | Максимальное количество записей для отладки                        |
-| `--dry-run`           | flag   | True         | Не записывать данные (только чтение)                               |
+| Опция            | Тип    | По умолчанию  | Описание |
+| ---------------- | ------ | ------------- | -------- |
+| `--breakpoints`  | str    | all stages    | Comma-separated: `after_preflight`, `after_bronze`, `after_silver`, `after_gold`, `after_dq`, `on_error`, `on_quarantine` |
+| `--limit`        | int    | 10            | Максимальное количество записей |
+| `--mode`         | choice | `interactive` | `interactive` (CLI prompts) или `log` (auto-continue) |
+| `--run-type`     | choice | `incremental` | `incremental`, `backfill`, `rebuild` |
+
+Migration: `--breakpoint` (singular), `--step-into`, `--inspect-state`,
+`--debugger-port` и `--dry-run` **удалены**. Не восстанавливать remote
+debugger port как canonical debug surface.
 
 **Примеры:**
 
 ```bash
-# Отладка с точкой останова на этапе Silver
-bioetl debug --pipeline chembl_activity --breakpoint silver
-
-# Пошаговое выполнение с инспекцией состояния
-bioetl debug --pipeline chembl_activity --step-into --inspect-state
-
-# Отладка с удалённым отладчиком
-bioetl debug --pipeline chembl_activity --debugger-port 5678
+bioetl debug --pipeline chembl_activity --breakpoints after_silver
+bioetl debug --pipeline chembl_activity --mode log --limit 10
+bioetl debug --pipeline chembl_activity --run-type incremental
 ```
 
 **См. также:**
@@ -871,46 +929,106 @@ ______________________________________________________________________
 
 ### `diagnostics` — Диагностика системы
 
-Унифицированные диагностические инструменты для операторов. Объединяет метрики, health checks, checkpoints, manifests и quarantine в единый отчёт.
+Click **group** (не набор root flags). `bioetl diagnostics --help` показывает
+подкоманды. Root flags `--metrics` / `--health` / `--checkpoints` /
+`--manifests` / `--quarantine` / `--since` / `--output` **удалены**; не
+восстанавливать их как canonical surface.
 
 **Синтаксис:**
 
 ```bash
-bioetl diagnostics [OPTIONS]
+bioetl diagnostics [COMMAND] [OPTIONS]
 ```
 
-**Опции:**
+**Подкоманды:**
 
-| Опция            | Тип  | По умолчанию | Описание                                        |
-| ---------------- | ---- | ------------ | ----------------------------------------------- |
-| `--metrics`      | flag | True         | Включить метрики производительности             |
-| `--health`       | flag | True         | Включить health checks провайдеров              |
-| `--checkpoints`  | flag | True         | Включить информацию о checkpoints               |
-| `--manifests`    | flag | True         | Включить данные о manifests и ledgers           |
-| `--quarantine`   | flag | True         | Включить статистику quarantine                  |
-| `--json`         | flag | False        | Вывод в формате JSON                            |
-| `--output`, `-o` | path | None         | Сохранить отчёт в файл                          |
-| `--since`        | str  | `1h`         | Период для метрик (например, `1h`, `24h`, `7d`) |
-| `--pipeline`     | str  | None         | Фильтр по конкретному пайплайну                 |
+| Подкоманда | Назначение |
+| --- | --- |
+| `guide` | Canonical diagnostics discovery / routing guide |
+| `health` | Provider health diagnostics (`--provider`, `--json`) |
+| `metrics` | Metrics/admin observability workflow summary (`--json`) |
+| `run` | One-run forensic dossier by `--run-id` |
+| `dossier` | One-run dossier by `--run-id` **или** `--manifest-id` |
+| `contract-checks` | Public observability contract checks (`--json`) |
+| `checkpoint` | Checkpoint state + correlated audit/manifest context |
+| `manifest` | Inspect one run manifest / ledger |
+| `forensic-diff` | Compare two runs or manifests |
+| `quarantine` | Quarantine statistics (same options as `quarantine stats`) |
 
 **Примеры:**
 
 ```bash
-# Быстрая диагностика (все включено)
-bioetl diagnostics
-
-# Только метрики и health checks
-bioetl diagnostics --checkpoints=false --manifests=false --quarantine=false
-
-# Сохранить отчёт в JSON
-bioetl diagnostics --json --output system-diagnostics.json
-
-# Диагностика за последние 24 часа
-bioetl diagnostics --since 24h
+bioetl diagnostics guide
+bioetl diagnostics health --provider chembl --json
+bioetl diagnostics metrics --json
+bioetl diagnostics contract-checks
+bioetl diagnostics dossier --run-id <RUN_ID>
+bioetl diagnostics dossier --manifest-id <MANIFEST_ID>
 ```
 
-Подкоманда `bioetl diagnostics dossier` собирает one-run dossier. Она принимает
-ровно один идентификатор: `--run-id <RUN_ID>` или `--manifest-id <MANIFEST_ID>`.
+#### `diagnostics guide`
+
+```bash
+bioetl diagnostics guide
+```
+
+#### `diagnostics health`
+
+```bash
+bioetl diagnostics health [--provider chembl] [--json]
+```
+
+#### `diagnostics metrics`
+
+```bash
+bioetl diagnostics metrics [--json]
+```
+
+#### `diagnostics run`
+
+```bash
+bioetl diagnostics run --run-id <RUN_ID> [--limit 100] [--format text|json|yaml]
+```
+
+#### `diagnostics dossier`
+
+```bash
+bioetl diagnostics dossier --run-id <RUN_ID>
+bioetl diagnostics dossier --manifest-id <MANIFEST_ID>
+```
+
+#### `diagnostics contract-checks`
+
+```bash
+bioetl diagnostics contract-checks [--json]
+```
+
+#### `diagnostics checkpoint`
+
+```bash
+bioetl diagnostics checkpoint --pipeline <NAME> [--run-id <UUID>] [--manifest-id <ID>] [--audit-limit 100] [--format text|json|yaml]
+```
+
+#### `diagnostics manifest`
+
+```bash
+bioetl diagnostics manifest <run-id|manifest-id> [--format text|json|yaml]
+```
+
+#### `diagnostics forensic-diff`
+
+```bash
+bioetl diagnostics forensic-diff <left> <right> [--format text|json|yaml]
+```
+
+#### `diagnostics quarantine`
+
+```bash
+bioetl diagnostics quarantine --pipeline <NAME> [--json] [--error-code CODE] [--run-id UUID] [--silver-filter-only] [--group-by reason-code] [--top 10]
+```
+
+`bioetl diagnostics dossier` принимает ровно один идентификатор:
+`--run-id <RUN_ID>` или `--manifest-id <MANIFEST_ID>`.
 Manifest-rooted lookup сначала разрешает canonical `run_id` из manifest store,
 затем собирает audit, checkpoint и run-manifest diagnostics. В replay/forensic
 решениях учитывайте `artifact_publication_closure`: только `closed` является
@@ -935,32 +1053,49 @@ bioetl dq [COMMAND] [OPTIONS]
 
 **Команды:**
 
+| Команда | Назначение |
+| --- | --- |
+| `show <PIPELINE>` | Показать DQ configuration (`--format json\|yaml`) |
+| `show-effective <PIPELINE>` | Effective config artifact (`--format`, repeatable `--override key=value`) |
+| `validate <PIPELINE>` | Валидация DQ configuration (`--config-file PATH` optional) |
+| `check-compatibility <A> <B>` | Совместимость двух configuration artifacts |
+
+Migration: `bioetl dq validate --entity <PROVIDER.ENTITY>` **удалён**.
+Canonical: `bioetl dq validate <PIPELINE>` (например `chembl_activity`).
+Flags `--strict` / `--show-rules` / `--test-data` больше не существуют.
+
+#### `dq show` — Показать DQ configuration
+
+```bash
+bioetl dq show <PIPELINE> [--format yaml|json]
+```
+
+#### `dq show-effective` — Effective configuration artifact
+
+```bash
+bioetl dq show-effective <PIPELINE> [--format yaml|json] [--override key=value]
+```
+
+#### `dq check-compatibility` — Совместимость двух artifacts
+
+```bash
+bioetl dq check-compatibility <ARTIFACT1> <ARTIFACT2>
+```
+
 #### `dq validate` — Валидация DQ конфигурации
 
 ```bash
-bioetl dq validate --entity <PROVIDER.ENTITY> [OPTIONS]
+bioetl dq validate <PIPELINE> [--config-file PATH]
 ```
-
-**Опции:**
-
-| Опция                        | Тип  | По умолчанию | Описание                                |
-| ---------------------------- | ---- | ------------ | --------------------------------------- |
-| `--entity <PROVIDER.ENTITY>` | str  | None         | Сущность в формате `provider.entity`    |
-| `--strict`                   | flag | False        | Strict validation (fail на warnings)    |
-| `--show-rules`               | flag | False        | Показать все DQ правила                 |
-| `--test-data`                | path | None         | Тестировать с пользовательскими данными |
 
 **Примеры:**
 
 ```bash
-# Валидация DQ конфигурации для сущности
-bioetl dq validate --entity chembl.activity
-
-# Показать все DQ правила
-bioetl dq validate --entity chembl.activity --show-rules
-
-# Strict validation
-bioetl dq validate --entity chembl.activity --strict
+bioetl dq validate chembl_activity
+bioetl dq validate chembl_activity --config-file custom_dq_config.yaml
+bioetl dq show chembl_activity --format json
+bioetl dq show-effective chembl_activity --override batch_size=100
+bioetl dq check-compatibility artifact1.json artifact2.json
 ```
 
 **См. также:**
@@ -982,37 +1117,42 @@ bioetl lineage [COMMAND] [OPTIONS]
 
 **Команды:**
 
-#### `lineage show` — Показать lineage для записи
+Migration: `bioetl lineage show --entity --record-id` **удалён**
+(`No such command 'show'`). Canonical surface:
+
+| Подкоманда | Назначение |
+| --- | --- |
+| `explain` | Lineage graph одного run/manifest (`--run-id` **или** `--manifest-id`) |
+| `trace` | Immediate upstream/downstream для `--dataset-ref` |
+| `show-fragment` | Один fragment по `FRAGMENT_ID` (`--semantic` для semantic lookup) |
+
+`--format` для всех трёх: `text`, `json`, `yaml` (не `dot`).
+
+#### `lineage explain` — Lineage одного run или manifest
 
 ```bash
-bioetl lineage show --entity <PROVIDER.ENTITY> --record-id <ID> [OPTIONS]
+bioetl lineage explain --run-id <RUN_ID> [--format text|json|yaml]
+bioetl lineage explain --manifest-id <MANIFEST_ID> [--format text|json|yaml]
 ```
 
-**Опции:**
+#### `lineage trace` — Upstream/downstream для dataset ref
 
-| Опция                        | Тип    | По умолчанию | Описание                             |
-| ---------------------------- | ------ | ------------ | ------------------------------------ |
-| `--entity <PROVIDER.ENTITY>` | str    | None         | Сущность в формате `provider.entity` |
-| `--record-id <ID>`           | str    | None         | Идентификатор записи                 |
-| `--format`, `-f`             | choice | `text`       | Формат вывода: `text`, `json`, `dot` |
-| `--depth`, `-d`              | int    | 3            | Глубина lineage графа                |
-| `--include-fields`           | flag   | False        | Включить field-level lineage         |
-| `--output`, `-o`             | path   | None         | Сохранить в файл                     |
+```bash
+bioetl lineage trace --dataset-ref silver:chembl.activity@12 [--format text|json|yaml]
+```
+
+#### `lineage show-fragment` — Один lineage fragment
+
+```bash
+bioetl lineage show-fragment <FRAGMENT_ID> [--semantic] [--format text|json|yaml]
+```
 
 **Примеры:**
 
 ```bash
-# Показать lineage для записи
-bioetl lineage show --entity chembl.activity --record-id ACT12345
-
-# Вывод в формате JSON
-bioetl lineage show --entity chembl.activity --record-id ACT12345 --format json
-
-# Визуализация в формате DOT (для Graphviz)
-bioetl lineage show --entity chembl.activity --record-id ACT12345 --format dot --output lineage.dot
-
-# Полный lineage с field-level деталями
-bioetl lineage show --entity chembl.activity --record-id ACT12345 --depth 5 --include-fields
+bioetl lineage explain --run-id 7f26d7b2-2c25-4aef-bf4c-030e4f8a4f87
+bioetl lineage trace --dataset-ref silver:chembl.activity@12 --format json
+bioetl lineage show-fragment fragment-001 --semantic
 ```
 
 **См. также:**
@@ -1144,6 +1284,16 @@ bioetl quarantine resolve --pipeline <NAME> --payload-hash <HASH> [--status IGNO
 
 Допустимые значения `--status`: `IGNORED`, `REPROCESSED`.
 
+#### `quarantine serve` — Legacy HTTP helper (not canonical Ops HTTP)
+
+```bash
+bioetl quarantine serve [--host 127.0.0.1] [--port 8000] [--data-root PATH]
+```
+
+Retired Grafana Explorer path. Shipping Grafana identity panels use
+`bioetl health server` / BioETL Ops HTTP on `:8000`. Do not treat
+`quarantine serve` as the canonical HTTP surface.
+
 ______________________________________________________________________
 
 ### `checkpoint` — Управление checkpoint
@@ -1196,13 +1346,14 @@ bioetl checkpoint audit-run --run-id <UUID> [--limit 100] [--format text|json|ya
 #### `checkpoint inspect` — Checkpoint state with correlated audit and manifest context
 
 ```bash
-bioetl checkpoint inspect --pipeline <NAME> [--run-id <UUID>] [--audit-limit 100] [--format text|json|yaml]
+bioetl checkpoint inspect --pipeline <NAME> [--run-id <UUID>] [--manifest-id <ID>] [--audit-limit 100] [--format text|json|yaml]
 ```
 
 | Опция           | Тип    | По умолчанию | Описание                          |
 | --------------- | ------ | ------------ | --------------------------------- |
 | `--pipeline`    | str    | Required     | Имя пайплайна                     |
 | `--run-id`      | str    | None         | Опциональный `RUN_ID`             |
+| `--manifest-id` | str    | None         | Опциональный `MANIFEST_ID` для immutable checkpoint lookup |
 | `--audit-limit` | int    | `100`        | Максимум correlated audit entries |
 | `--format`      | choice | `text`       | `text`, `json`, `yaml`            |
 
@@ -1235,7 +1386,10 @@ Quarantine Explorer / `:8081`). Control-plane helpers live under
 - `GET /health/live` — Kubernetes liveness probe
 - `GET /health/ready` — Kubernetes readiness probe
 - `GET /health/providers` — детальный статус провайдеров
-- `GET /ops/control-plane/*` — identity / filter-options for Grafana Ops HTTP
+- `GET /metrics` — Prometheus text exposition (`bioetl_health_server_scrape_up` plus injected metrics)
+- `GET /ops/control-plane/*` — identity / filter-options / validation evidence for Grafana Ops HTTP
+- `GET /ops/observability/*` — processed-records and pipeline/workflow run-report helpers
+- `GET /ops/quarantine/*` — read-only Silver reject explorer (`filtered-records`, `filtered-stats`, `filter-options`)
 
 #### `health check` — Проверка провайдеров
 
@@ -1366,6 +1520,7 @@ bioetl maintenance control-plane-lifecycle [OPTIONS]
 | `--protected-effective-config-artifact-id` | repeat | None         | Effective-config artifact ID для защиты     |
 | `--protected-lineage-fragment-id`          | repeat | None         | Lineage fragment ID для защиты              |
 | `--protected-snapshot-id`                  | repeat | None         | Content-addressed snapshot ID для защиты    |
+| `--allow-profile-floor-violation`          | flag   | False        | Allow deletion of stale artifacts required by replay_ready/forensic_grade floors |
 
 **Примеры:**
 

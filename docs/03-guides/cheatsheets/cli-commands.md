@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-28'
+  Last verified: '2026-09-03'
 
 ______________________________________________________________________
 
@@ -16,7 +16,7 @@ ______________________________________________________________________
 Краткий справочник по командам BioETL CLI для быстрого поиска.
 
 **Версия:** 1.1.0
-**Дата обновления:** 2026-07-28 (#6535)
+**Дата обновления:** 2026-09-03 (#10045)
 
 **Оглавление:**
 - [Core Make / setup](#core-make-setup) — install, test, lint, architecture
@@ -198,30 +198,13 @@ bioetl run-manifest universe-report [--external-pack path/to/archive-pack.json .
 
 ### `diagnostics` — Диагностика системы
 
-```bash
-bioetl diagnostics [OPTIONS]
-```
+Click group. Root flags `--metrics` / `--health` / `--since` удалены.
 
-**Опции:**
-- `--metrics` — включить метрики (по умолчанию True)
-- `--health` — включить health checks (по умолчанию True)
-- `--checkpoints` — включить информацию о checkpoints (по умолчанию True)
-- `--manifests` — включить данные о manifests (по умолчанию True)
-- `--quarantine` — включить статистику quarantine (по умолчанию True)
-- `--json` — вывод в JSON
-- `--output <PATH>` — сохранить отчёт в файл
-- `--since <PERIOD>` — период для метрик (`1h`, `24h`, `7d`)
-- `--pipeline <NAME>` — фильтр по пайплайну
-
-**Примеры:**
 ```bash
-bioetl diagnostics
-bioetl diagnostics --json --output system-diagnostics.json
-bioetl diagnostics --since 24h
-```
-
-**Подкоманда `dossier`:**
-```bash
+bioetl diagnostics guide
+bioetl diagnostics health [--provider chembl] [--json]
+bioetl diagnostics metrics [--json]
+bioetl diagnostics contract-checks [--json]
 bioetl diagnostics dossier --run-id <RUN_ID>
 bioetl diagnostics dossier --manifest-id <MANIFEST_ID>
 ```
@@ -259,20 +242,10 @@ bioetl checkpoint inspect --pipeline <NAME> [--run-id <UUID>] [--audit-limit 100
 ### `lineage` — Инспекция lineage
 
 ```bash
-bioetl lineage show --entity <PROVIDER.ENTITY> --record-id <ID> [OPTIONS]
-```
-
-**Опции:**
-- `--format` — `text`, `json`, `dot`
-- `--depth` — глубина lineage графа (по умолчанию 3)
-- `--include-fields` — включить field-level lineage
-- `--output <PATH>` — сохранить в файл
-
-**Примеры:**
-```bash
-bioetl lineage show --entity chembl.activity --record-id ACT12345
-bioetl lineage show --entity chembl.activity --record-id ACT12345 --format json
-bioetl lineage show --entity chembl.activity --record-id ACT12345 --format dot --output lineage.dot
+bioetl lineage explain --run-id <RUN_ID> [--format text|json|yaml]
+bioetl lineage explain --manifest-id <MANIFEST_ID> [--format text|json|yaml]
+bioetl lineage trace --dataset-ref silver:chembl.activity@12 [--format text|json|yaml]
+bioetl lineage show-fragment <FRAGMENT_ID> [--semantic] [--format text|json|yaml]
 ```
 
 ______________________________________________________________________
@@ -306,19 +279,16 @@ bioetl config list-pipelines
 ### `dq` — Конфигурация Data Quality
 
 ```bash
-bioetl dq validate --entity <PROVIDER.ENTITY> [OPTIONS]
+bioetl dq validate <PIPELINE> [--config-file PATH]
+bioetl dq show <PIPELINE> [--format yaml|json]
+bioetl dq show-effective <PIPELINE> [--override key=value] [--format yaml|json]
+bioetl dq check-compatibility <ARTIFACT1> <ARTIFACT2>
 ```
-
-**Опции:**
-- `--strict` — strict validation (fail на warnings)
-- `--show-rules` — показать все DQ правила
-- `--test-data <PATH>` — тестировать с пользовательскими данными
 
 **Примеры:**
 ```bash
-bioetl dq validate --entity chembl.activity
-bioetl dq validate --entity chembl.activity --show-rules
-bioetl dq validate --entity chembl.activity --strict
+bioetl dq validate chembl_activity
+bioetl dq show chembl_activity --format json
 ```
 
 ### `adr` — Работа с ADR
@@ -487,22 +457,19 @@ ______________________________________________________________________
 ### `debug` — Отладка пайплайнов
 
 ```bash
-bioetl debug --pipeline <NAME> [OPTIONS]
+bioetl debug --pipeline <NAME> [--breakpoints after_silver] [--mode interactive|log] [--limit 10] [--run-type incremental]
 ```
 
 **Опции:**
-- `--breakpoint <STEP>` — точка останова: `preflight`, `bronze`, `silver`, `gold`, `postrun`
-- `--step-into` — пошаговое выполнение внутри этапа
-- `--inspect-state` — показать полное состояние перед каждым шагом
-- `--debugger-port` — порт для удалённого отладчика (по умолчанию 5678)
-- `--limit` — максимальное количество записей (по умолчанию 100)
-- `--dry-run` — не записывать данные (по умолчанию True)
+- `--breakpoints` — comma-separated: `after_preflight`, `after_bronze`, `after_silver`, `after_gold`, `after_dq`, `on_error`, `on_quarantine`
+- `--limit` — максимальное количество записей (по умолчанию 10)
+- `--mode` — `interactive` или `log`
+- `--run-type` — `incremental`, `backfill`, `rebuild`
 
 **Примеры:**
 ```bash
-bioetl debug --pipeline chembl_activity --breakpoint silver
-bioetl debug --pipeline chembl_activity --step-into --inspect-state
-bioetl debug --pipeline chembl_activity --debugger-port 5678
+bioetl debug --pipeline chembl_activity --breakpoints after_silver
+bioetl debug --pipeline chembl_activity --mode log --limit 10
 ```
 
 ______________________________________________________________________
