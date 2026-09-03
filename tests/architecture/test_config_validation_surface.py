@@ -158,13 +158,21 @@ def test_validate_configs_reports_validation_depth_summary() -> None:
 
 
 def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
-    wrapper = (
+    live_wrapper = (
         ROOT
         / "docs"
         / "00-project"
         / "ai"
         / "agents"
         / "scripts"
+        / "py-config-bot-2.py"
+    )
+    assert not live_wrapper.exists()
+    wrapper = (
+        ROOT
+        / "docs"
+        / "99-archive"
+        / "agents-scripts-2026-09"
         / "py-config-bot-2.py"
     ).read_text(encoding="utf-8")
 
@@ -183,10 +191,8 @@ def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
     module = _load_module(
         ROOT
         / "docs"
-        / "00-project"
-        / "ai"
-        / "agents"
-        / "scripts"
+        / "99-archive"
+        / "agents-scripts-2026-09"
         / "py-config-bot-1.py",
         "py_config_bot_1_runtime",
     )
