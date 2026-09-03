@@ -34,6 +34,13 @@
   "assertless_candidates": [
     {
       "category": "architecture_helper_guard",
+      "line": "144",
+      "path": "tests/architecture/test_pr_gate_complete.py",
+      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+      "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
+    },
+    {
+      "category": "architecture_helper_guard",
       "line": "1127",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
@@ -643,13 +650,14 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 1,
+    "architecture_helper_guard": 2,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 86,
     "weak_no_value": 0
   },
   "assertless_examples": [
+    "tests/architecture/test_pr_gate_complete.py:144",
     "tests/architecture/test_quality_debt_scorecard.py:1127",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
     "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -673,10 +681,15 @@
     "tests/unit/domain/ports/test_noop_audit.py:90",
     "tests/unit/domain/ports/test_protocol_stubs.py:235",
     "tests/unit/domain/schemas/chembl/test_schemas.py:263",
-    "tests/unit/domain/schemas/chembl/test_schemas.py:280",
-    "tests/unit/domain/schemas/chembl/test_schemas.py:296"
+    "tests/unit/domain/schemas/chembl/test_schemas.py:280"
   ],
   "assertless_families": {
+    "tests/architecture/test_pr_gate_complete.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
     "tests/architecture/test_quality_debt_scorecard.py": {
       "assertless_tests": 1,
       "categories": {
@@ -948,7 +961,7 @@
       }
     }
   },
-  "assertless_total_candidates": 87,
+  "assertless_total_candidates": 88,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1170,6 +1183,13 @@
     },
     "assertion_branch_reachability_percent": 100.0,
     "assertless_candidates": [
+      {
+        "category": "architecture_helper_guard",
+        "line": "144",
+        "path": "tests/architecture/test_pr_gate_complete.py",
+        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+        "test_name": "test_called_owner_workflows_reject_duplicate_yaml_keys"
+      },
       {
         "category": "architecture_helper_guard",
         "line": "1127",
@@ -1781,13 +1801,14 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 1,
+      "architecture_helper_guard": 2,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 86,
       "weak_no_value": 0
     },
     "assertless_examples": [
+      "tests/architecture/test_pr_gate_complete.py:144",
       "tests/architecture/test_quality_debt_scorecard.py:1127",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:84",
       "tests/integration/infrastructure/storage/test_delta_reader.py:586",
@@ -1811,10 +1832,9 @@
       "tests/unit/domain/ports/test_noop_audit.py:90",
       "tests/unit/domain/ports/test_protocol_stubs.py:235",
       "tests/unit/domain/schemas/chembl/test_schemas.py:263",
-      "tests/unit/domain/schemas/chembl/test_schemas.py:280",
-      "tests/unit/domain/schemas/chembl/test_schemas.py:296"
+      "tests/unit/domain/schemas/chembl/test_schemas.py:280"
     ],
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 88,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2049,15 +2069,15 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2409,
-    "total_test_functions": 25358,
+    "total_test_functions": 25359,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a3ab27a4f2369b5c0637d229895b4643cecb873167970f0435f0d1014591d832",
+  "source_tree_sha256": "c2b6cb9d508a684731790bb2b9ee1fd2410c84bb224c8f04c11595e994e8c109",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
-    "assertless_total_candidates": 87,
+    "assertless_total_candidates": 88,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2117,7 +2137,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2409,
-  "total_test_functions": 25358,
+  "total_test_functions": 25359,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }
