@@ -25,17 +25,22 @@ RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Copy package metadata and source required by setuptools/uv build resolution.
+# Install locked third-party wheels before copying source. This keeps the
+# dependency environment cacheable across source-only changes while preserving
+# pyproject.toml and uv.lock as the application dependency authority.
 COPY pyproject.toml uv.lock ./
+RUN printf '# BioETL\n' > README.md \
+    && UV_NO_BUILD=1 UV_HTTP_TIMEOUT=300 uv sync --no-dev --frozen --no-build --no-install-project \
+        --python /usr/bin/python3.13 --directory /app
+
+# Copy project source only after the dependency environment is materialized.
+# Source-only changes therefore invalidate the small project-wheel layer, not
+# the complete third-party environment.
 COPY src/ ./src/
 
-# Install locked third-party wheels without build scripts. Build the local
-# wheel in an isolated environment whose backend is constrained Docker-locally;
-# pyproject.toml and uv.lock remain the application dependency authority.
-RUN printf '# BioETL\n' > README.md \
-    && printf 'setuptools==83.0.0\n' > /tmp/build-constraints.txt \
-    && UV_NO_BUILD=1 UV_HTTP_TIMEOUT=300 uv sync --no-dev --frozen --no-build --no-install-project \
-        --python /usr/bin/python3.13 --directory /app \
+# Build the local wheel in an isolated environment whose backend is constrained
+# Docker-locally, then install only that wheel into the locked environment.
+RUN printf 'setuptools==83.0.0\n' > /tmp/build-constraints.txt \
     && UV_HTTP_TIMEOUT=300 uv build --wheel \
         --build-constraint /tmp/build-constraints.txt \
         --out-dir /tmp/bioetl-wheels --directory /app \
