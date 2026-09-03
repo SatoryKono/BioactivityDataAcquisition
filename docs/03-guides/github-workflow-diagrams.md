@@ -51,7 +51,7 @@ graph TB
     SMOKE --> MEMORY[memory-tests]
     SMOKE --> PERF[performance-budgets]
     
-    GOV --> QM[quality-metrics-gate]
+    DEP --> QM[quality-metrics-gate]
     GOV --> DQ[dq-consistency-gate]
     
     FAST --> COV[coverage-verify]
