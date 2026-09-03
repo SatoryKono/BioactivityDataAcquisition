@@ -1,7 +1,7 @@
 %% BioETL — CLI: Routing to Composition Boundary
 %% Shows how command families route through registry helpers and narrow composition APIs, while entrypoints remains a retained broad seam.
 
-%% @version 1.3.0
+%% @version 1.4.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
@@ -30,12 +30,12 @@ graph TB
     end
 
     subgraph Composition["composition boundary"]
-        EXEC["execution_api"]:::size-sm
-        CTRL["control_plane_api"]:::size-sm
-        HEALTH["health_api / maintenance_api"]:::size-sm
-        RES["resources_api"]:::size-sm
+        EXEC["entrypoints / composite_catalog"]:::size-sm
+        CTRL["control_plane_service_access"]:::size-sm
+        HEALTH["health_service_access / observability_runtime"]:::size-sm
+        RES["resources_runtime"]:::size-sm
         ENTRY["entrypoints<br/>retained broad seam"]:::size-sm
-        PIPE["PipelineRegistry"]:::size-sm
+        PIPE["registry_api / PipelineRegistry"]:::size-sm
     end
 
     subgraph Runtime["Runtime services"]

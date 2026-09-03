@@ -3,11 +3,11 @@
 %% Rank: 23 (Score 7.31) — FSM governs all composite pipeline execution
 %% Updated: 2026-09-03
 
-%% @version 1.1.0
+%% @version 1.2.0
 %% @date    2026-09-03
 %% @type    stateDiagram
 %% @level   Mixed (System / Component / Class)
-%% @nodes   10
+%% @nodes   12
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 stateDiagram-v2
     [*] --> NOT_STARTED
@@ -30,8 +30,13 @@ stateDiagram-v2
 
     ENRICHMENT_COMPLETED --> MERGING : start merge
 
-    MERGING --> COMPLETED : merge success
+    MERGING --> CROSS_VALIDATION_RUNNING : cross-validation configured
+    MERGING --> COMPLETED : no cross-validation
     MERGING --> FAILED : merge error
+
+    CROSS_VALIDATION_RUNNING --> CROSS_VALIDATION_COMPLETED : validation complete
+    CROSS_VALIDATION_RUNNING --> FAILED : validation error
+    CROSS_VALIDATION_COMPLETED --> COMPLETED : finalize result
 
     COMPLETED --> [*]
     FAILED --> [*]
@@ -52,14 +57,14 @@ stateDiagram-v2
 
     state SEED_COMPLETED {
         [*] --> keys_extracted
-        keys_extracted : KeyExtractorService.extract_keys()
+        keys_extracted : KeyExtractorService.extract()
         keys_extracted : Join keys (DOI, PMID, etc.) available
         keys_extracted : is_resumable = True
     }
 
     state DEPENDENCIES_RUNNING {
         [*] --> running_deps
-        running_deps : DependencyCoordinator.run()
+        running_deps : DependencyCoordinatorService.run_dependencies()
         running_deps : Sequential execution of dependency pipelines
         running_deps : is_active = True
         running_deps : is_resumable = True
@@ -73,7 +78,7 @@ stateDiagram-v2
 
     state ENRICHING {
         [*] --> fan_out
-        fan_out : EnrichmentCoordinator.run_enrichers()
+        fan_out : EnrichmentCoordinatorService.run_enrichers()
         fan_out : asyncio.gather() parallel execution
         fan_out : is_active = True
         fan_out : is_resumable = True
@@ -93,18 +98,33 @@ stateDiagram-v2
         merge_active : is_active = True
     }
 
+    state CROSS_VALIDATION_RUNNING {
+        [*] --> validating
+        validating : EnrichmentCrossValidator compares configured fields
+        validating : Cross-validation stats and quarantine payloads
+        validating : is_active = True
+        validating : is_resumable = True
+    }
+
+    state CROSS_VALIDATION_COMPLETED {
+        [*] --> validation_done
+        validation_done : Cross-validation result persisted
+        validation_done : is_resumable = True
+        validation_done : to_metric_value() = 9
+    }
+
     state COMPLETED {
         [*] --> success
         success : CompositeResult with all phase results
         success : is_terminal = True
-        success : to_metric_value() = 8
+        success : to_metric_value() = 10
     }
 
     state FAILED {
         [*] ==> error
         error : is_terminal = True
         error : is_resumable = True (retry allowed)
-        error : to_metric_value() = 9
+        error : to_metric_value() = 11
     }
 
     note right of SEED_COMPLETED
