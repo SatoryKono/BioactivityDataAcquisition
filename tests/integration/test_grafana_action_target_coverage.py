@@ -67,8 +67,14 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
         if m.get("type") == "value":
             value_opts = m.get("options", {}) or {}
     assert set(value_opts.keys()) >= expected
-    assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "null" for m in mappings)
-    assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "nan" for m in mappings)
+    assert any(
+        m.get("type") == "special" and m.get("options", {}).get("match") == "null"
+        for m in mappings
+    )
+    assert any(
+        m.get("type") == "special" and m.get("options", {}).get("match") == "nan"
+        for m in mappings
+    )
     # Defaults.links now holds allowlisted required panel links per navigation-links.yaml (fail-closed via row-aware action_target)
     defaults_links = panel.get("fieldConfig", {}).get("defaults", {}).get("links", [])
     assert isinstance(defaults_links, list) and len(defaults_links) >= 1
@@ -87,7 +93,10 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
 
 
 def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
-    assert set(DQ_REASON_ACTION_MAP.keys()) == {"data_quality", "verify_dq_reason_rules"}
+    assert set(DQ_REASON_ACTION_MAP.keys()) == {
+        "data_quality",
+        "verify_dq_reason_rules",
+    }
     dashboard = _load_dashboard(DQ_DASH)
     panel = _panel(dashboard, 9102)
     props = _action_target_override(panel)
@@ -98,7 +107,10 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
             value_opts = m.get("options", {}) or {}
     assert "data_quality" in value_opts
     assert "verify_dq_reason_rules" in value_opts
-    assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "null" for m in mappings)
+    assert any(
+        m.get("type") == "special" and m.get("options", {}).get("match") == "null"
+        for m in mappings
+    )
     links = props.get("links", [])
     assert len(links) == 2
     titles = {link.get("title") for link in links}
@@ -111,11 +123,16 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
     assert "${__url_time_range}" in dq_link.get("url", "")
     # DQ panel now has allowlisted defaults.links per contract (single dashboard handoff)
     assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) != []
-    assert set(DQ_REASON_ACTION_MAP.keys()) == {"data_quality", "verify_dq_reason_rules"}
+    assert set(DQ_REASON_ACTION_MAP.keys()) == {
+        "data_quality",
+        "verify_dq_reason_rules",
+    }
 
 
 def test_unknown_action_target_is_fail_closed() -> None:
-    from scripts.ops.observability.grafana.action_target_routes import dashboard_uid_for_target
+    from scripts.ops.observability.grafana.action_target_routes import (
+        dashboard_uid_for_target,
+    )
 
     assert dashboard_uid_for_target("future_runtime_target_xyz") is None
     assert dashboard_uid_for_target("verify_dq_reason_rules") is None
@@ -129,5 +146,7 @@ def test_unknown_action_target_is_fail_closed() -> None:
         unknown_texts = set()
         for m in mappings:
             if m.get("type") == "special":
-                unknown_texts.add(str(m.get("options", {}).get("result", {}).get("text", "")))
+                unknown_texts.add(
+                    str(m.get("options", {}).get("result", {}).get("text", ""))
+                )
         assert "UNKNOWN" in unknown_texts
