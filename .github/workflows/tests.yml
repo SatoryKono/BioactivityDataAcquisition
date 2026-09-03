@@ -563,6 +563,9 @@ jobs:
   neo4j-memory-live-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # This live audit consumes no governance-preflight outputs; start after the
+    # shared dependency integrity check so the blocking gate runs in parallel.
+    needs: dependency-preflight
     needs: dependency-preflight
     permissions:
       contents: read
@@ -730,6 +733,9 @@ jobs:
   quality-metrics-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Quality metrics read the checked-in governance sources directly and do
+    # not consume governance-preflight outputs.
+    needs: dependency-preflight
     needs: dependency-preflight
     permissions:
       contents: read
@@ -1347,7 +1353,7 @@ jobs:
           COVERAGE_FILE: reports/coverage/.coverage.serial
         run: |
           set +e
-          mkdir -p reports/coverage reports/pytest/serial-coverage
+          mkdir -p reports/coverage reports/pytest/serial-coverage reports/test-telemetry
           uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \
             --target tests/ \
             --reports-dir reports/pytest/serial-coverage \
@@ -1359,7 +1365,22 @@ jobs:
             echo "::error::Serial coverage shard was not produced."
             exit 1
           fi
+          if [ ! -s reports/pytest/serial-coverage/junit_parallel.xml ]; then
+            echo "::error::Serial coverage JUnit telemetry was not produced."
+            exit 1
+          fi
+          cp reports/pytest/serial-coverage/junit_parallel.xml \
+            reports/test-telemetry/junit-serial-coverage.xml
           exit "$TEST_EXIT"
+
+      - name: Upload serial coverage telemetry
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: test-telemetry-serial-coverage
+          path: reports/test-telemetry/junit-serial-coverage.xml
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Upload serial coverage shard
         if: ${{ always() && !cancelled() }}
@@ -1536,6 +1557,8 @@ jobs:
       - flaky-telemetry
       - track-d-gates
       - test-fast
+      - repo-backed-unit
+      - serial-coverage
       - unit-scripts-tooling
       - unit-filesystem-contracts
       - unit-subprocess-backed
@@ -1656,6 +1679,15 @@ jobs:
               --reports-dir reports/quality/test-runs \
               --junit reports/test-telemetry/raw/junit-track-d.xml \
               --command "tests.yml track-d gates"
+          fi
+
+          if [ -f reports/test-telemetry/raw/junit-serial-coverage.xml ]; then
+            uv run --frozen --no-build python -m scripts.engineering.qa summarize-junit \
+              --suite serial-coverage \
+              --run-id "serial-coverage-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+              --reports-dir reports/quality/test-runs \
+              --junit reports/test-telemetry/raw/junit-serial-coverage.xml \
+              --command "tests.yml serial coverage producer"
           fi
 
           uv run --frozen --no-build python -m scripts.engineering.qa test-health \
