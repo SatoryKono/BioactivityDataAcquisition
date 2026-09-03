@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T16:07:11.102619+00:00",
+  "generated_at": "2026-09-03T17:04:07.930931+00:00",
   "summary": {
     "total_scripts": 612,
     "status_counts": {
@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1930,
+          "line": 1928,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -7257,7 +7257,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 801,
+          "line": 768,
           "source_group": "docs",
           "text": "| `scripts/diagrams/render.ps1` | Diagram render helper |"
         },
@@ -9678,7 +9678,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 606,
+          "line": 605,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -10170,7 +10170,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1357,
+          "line": 1355,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10907,7 +10907,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1999,
+          "line": 1997,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -11069,7 +11069,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 640,
+          "line": 607,
           "source_group": "docs",
           "text": ".\\run_mypy.ps1"
         },
@@ -11134,7 +11134,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 650,
+          "line": 617,
           "source_group": "docs",
           "text": "./run_mypy.sh"
         }
@@ -11578,7 +11578,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 636,
+          "line": 603,
           "source_group": "docs",
           "text": ".\\setup_env_windows.ps1"
         }
@@ -11629,7 +11629,7 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 646,
+          "line": 613,
           "source_group": "docs",
           "text": "./setup_env_wsl.sh"
         },
@@ -14097,7 +14097,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 658,
+          "line": 657,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -18647,19 +18647,19 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 621,
+          "line": 588,
           "source_group": "docs",
           "text": "python -m scripts.ops.data checksums                     # Checksums"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 622,
+          "line": 589,
           "source_group": "docs",
           "text": "python -m scripts.ops.data delta                         # Delta operations"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 623,
+          "line": 590,
           "source_group": "docs",
           "text": "python -m scripts.ops.data data_dir                      # Data directory operations"
         },
@@ -18921,13 +18921,13 @@
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 779,
+          "line": 746,
           "source_group": "docs",
           "text": "| `scripts.ops` | Ops helpers (docker setup, data maintenance) | `scripts/ops/docker-setup.ps1` / `.sh` |"
         },
         {
           "path": "docs/03-guides/cheatsheets/cli-commands.md",
-          "line": 800,
+          "line": 767,
           "source_group": "docs",
           "text": "| `scripts/ops/docker-setup.ps1` | Docker stack helpers (when Docker work is explicitly required) |"
         },
