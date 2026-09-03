@@ -1125,7 +1125,14 @@ def main() -> int:
         coverage_threshold_percent=args.coverage_threshold,
     )
     coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
-    debt_governance_surface = collect_debt_governance_snapshot()
+    artifact_source = (
+        "committed"
+        if args.architecture_owner == "lint-architecture-workflow"
+        else "live"
+    )
+    debt_governance_surface = collect_debt_governance_snapshot(
+        artifact_source=artifact_source
+    )
     compatibility_surface = debt_governance_surface.compatibility_surface
     architecture_quality_scorecard = build_architecture_quality_scorecard(
         repo_root=Path.cwd()
