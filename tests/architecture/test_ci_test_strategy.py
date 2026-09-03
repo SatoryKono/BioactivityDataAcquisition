@@ -282,3 +282,17 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     assert "source_sha" in block and "shard_id" in block
     assert "compute_replay_tree_sha256" in block
     assert "replay_tree_sha256" in block
+
+
+def test_neo4j_live_audit_uses_cached_image_and_compose_wait() -> None:
+    """CI Neo4j live audit must not busy-wait HTTP and must keep the desktop compose contract."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "neo4j-memory-live-audit" in workflow
+    assert "Cache Neo4j image" in workflow
+    assert ".github/compose/neo4j-ci-overlay.yml" in workflow
+    assert "up -d --wait --wait-timeout 120 neo4j" in workflow
+    assert "Wait for Neo4j HTTP health" not in workflow
+    overlay = Path(".github/compose/neo4j-ci-overlay.yml").read_text(encoding="utf-8")
+    assert "start_period: 15s" in overlay
+    desktop = Path("docker-compose.neo4j.yml").read_text(encoding="utf-8")
+    assert "start_period: 180s" in desktop
