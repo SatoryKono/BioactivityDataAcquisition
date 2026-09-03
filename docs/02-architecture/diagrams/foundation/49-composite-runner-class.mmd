@@ -1,10 +1,10 @@
 %% Title: CompositePipelineRunner — Component Diagram
 %% Covers: application/composite/ (runner facade, dependency group, checkpoint facade, coordinators)
 %% Rank: 24 (Score 7.31) — Central orchestrator for multi-source pipelines
-%% Updated: 2026-03-28
+%% Updated: 2026-09-03
 
-%% @version 1.1.0
-%% @date    2026-03-28
+%% @version 1.2.0
+%% @date    2026-09-03
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 %% @nodes   16
@@ -14,20 +14,20 @@ classDiagram
     class CompositePipelineRunner {
         -_config: CompositeConfig
         -_runtime: CompositeRuntimeConfig
-        -deps: CompositeRunnerDependencyGroup
+        +__init__(config, runtime, deps, run_id)
         -_checkpoint_manager: CompositeCheckpointService
         -_lock: LockPort
         -_logger: LoggerPort
-        -_run_id: RunID
-        -_original_run_id: str | None
+        -_run_id_str: str
+        -_final_state: CompositePipelineState | None
         -_started_at: datetime | None
         +run() CompositeResult
-        -_prepare_run_state() CompositeCheckpointState
+        -_start_run_lifecycle() None
         -_run_with_managed_lock() CompositeResult
         -_run_with_lock() CompositeResult
     }
 
-    class CompositeRunnerDependencyGroup {
+    class CompositeRunnerDependencies {
         +seed_runner_factory
         +enricher_runner_factory
         +dependencies_runner_factory
@@ -43,6 +43,11 @@ classDiagram
         +preflight_validator
         +quarantine_port
         +metrics
+        +tracer
+        +observer
+        +manifest_id
+        +run_ledger_service
+        +clock
     }
 
     class CompositeConfig {
@@ -69,6 +74,7 @@ classDiagram
         +cached_bronze_date: str | None
         +cached_bronze_enrichers: bool | None
         +cached_bronze_dependencies: bool
+        +exact_replay: bool
         +heartbeat_interval_seconds: int
         +lock_ttl_seconds: int
     }
@@ -86,31 +92,30 @@ classDiagram
     class KeyExtractorService {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
-        +extract_keys(silver_path, join_keys) DataFrame
+        +extract(silver_table, keys) DataFrame
     }
 
     class DependencyCoordinatorService {
         -_logger: LoggerPort
         -_config: CompositeConfig
-        +run(keys_df, runner_factory) list~DependencyResult~
+        +run_dependencies(keys, dependencies, completed, runner_factory)
     }
 
     class EnrichmentCoordinatorService {
         -_logger: LoggerPort
-        -_config: CompositeConfig
-        +run_enrichers(keys_df, runner_factory) list~EnrichmentResult~
-        -_filter_enrichers(enrichers) list~EnricherConfig~
+        -_dq_config: CompositeDQConfig
+        +run_enrichers(keys, enrichers, completed, runner_factory)
+        -_apply_filter(keys, enricher) DataFrame
     }
 
     class MergeService {
         -_delta_reader: DeltaReaderPort
-        -_gold_writer: GoldWriter
+        -_storage: MergedStoragePort
         -_logger: LoggerPort
         -_config: CompositeConfig
-        +merge(seed_result, enrichment_results) MergeResult
-        -_read_silver_tables() dict~str, DataFrame~
-        -_resolve_composite_join_keys() list~str~
-        -_resolve_conflicts(merged_df) DataFrame
+        +merge(seed_table, enrichers, enrichment_results, run_id) MergeResult
+        +execute_request(request) MergeResult
+        -_read_silver_table(table) DataFrame
     }
 
     class CompositeCheckpointService {
@@ -150,15 +155,15 @@ classDiagram
         +validate(config) list~str~
     }
 
-    CompositePipelineRunner --> CompositeRunnerDependencyGroup
+    CompositePipelineRunner --> CompositeRunnerDependencies
     CompositePipelineRunner --> CompositeConfig
     CompositePipelineRunner --> CompositeRuntimeConfig
     CompositePipelineRunner --> CompositeCheckpointService
-    CompositeRunnerDependencyGroup --> KeyExtractorService
-    CompositeRunnerDependencyGroup --> DependencyCoordinatorService
-    CompositeRunnerDependencyGroup --> EnrichmentCoordinatorService
-    CompositeRunnerDependencyGroup --> MergeService
-    CompositeRunnerDependencyGroup --> FSMStateHelperService
-    CompositeRunnerDependencyGroup --> CompositePreflightValidationService
+    CompositeRunnerDependencies --> KeyExtractorService
+    CompositeRunnerDependencies --> DependencyCoordinatorService
+    CompositeRunnerDependencies --> EnrichmentCoordinatorService
+    CompositeRunnerDependencies --> MergeService
+    CompositeRunnerDependencies --> FSMStateHelperService
+    CompositeRunnerDependencies --> CompositePreflightValidationService
     CompositeCheckpointService --> CompositeCheckpointLoadService
     CompositeCheckpointService --> CompositeCheckpointPersistenceService

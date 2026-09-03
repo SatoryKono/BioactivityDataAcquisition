@@ -146,9 +146,9 @@ def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
     assert "config-schema-preflight:" in workflow, (
         "tests workflow should keep config/schema checks in a dedicated preflight job"
     )
-    assert "needs: governance-preflight" in workflow, (
-        "quality-metrics-gate should depend on governance-preflight"
-    )
+    for job_name in ("quality-metrics-gate", "neo4j-memory-live-audit"):
+        job = _workflow_job_block(workflow, job_name)
+        assert "needs: dependency-preflight" in job
     assert 'pytest tests/smoke/ -m "not memory"' in workflow, (
         "smoke-check must exclude dedicated memory-marked smoke tests"
     )

@@ -1,8 +1,8 @@
 %% BioETL — Operational and Observability Ports
 %% Monitoring, logging, and operational control ports.
 
-%% @version 1.0.0
-%% @date    2026-07-31
+%% @version 1.1.0
+%% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   25
@@ -35,7 +35,7 @@ graph LR
 
     subgraph Infrastructure["Implementations"]
         ML["MemoryLock"]:::size-sm
-        LC["LocalCheckpoint"]:::size-sm
+        LC["LocalCheckpointAdapter"]:::size-sm
         UL["UnifiedLogger"]:::size-sm
         MCO["MetricsCollector"]:::size-sm
         OTT["OpenTelemetryTracer"]:::size-sm

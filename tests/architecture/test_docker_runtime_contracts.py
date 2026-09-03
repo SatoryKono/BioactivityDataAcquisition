@@ -1018,6 +1018,16 @@ def test_retained_services_use_immutable_images_and_complete_envelopes() -> None
                 ), dockerfile
 
 
+def test_retired_ci_helper_cannot_replace_canonical_docker_workflow() -> None:
+    helper = (ROOT / "scripts/engineering/ci/apply_ci_fixes.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert '"ci-03"' not in helper
+    assert "DOCKER_YML_FIXED" not in helper
+    assert "apply_ci03" not in helper
+
+
 def test_readiness_and_build_tools_fail_closed() -> None:
     main = _load_yaml(ROOT / "docker-compose.yml")
     monitoring = _load_yaml(ROOT / "docker-compose.monitoring.yml")
@@ -1046,6 +1056,14 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
     assert "PYTHONPATH=/app/src" not in dockerfile
     assert "COPY --chown=root:root src/ ./src/" not in dockerfile
+    dependency_sync = "uv sync --no-dev --frozen --no-build --no-install-project"
+    source_copy = "COPY src/ ./src/"
+    project_build = "uv build --wheel"
+    assert dockerfile.count(dependency_sync) == 1
+    assert dockerfile.count(source_copy) == 1
+    assert dockerfile.count(project_build) == 1
+    assert dockerfile.index(dependency_sync) < dockerfile.index(source_copy)
+    assert dockerfile.index(source_copy) < dockerfile.index(project_build)
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(
         encoding="utf-8"
     )
@@ -1057,7 +1075,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         )
         == 2
     )
-    assert "python-3.13=3.13.15-r2" in dockerfile
+    assert "python-3.13=3.13.15-r5" in dockerfile
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
     assert "COPY --from=runtime-root /etc /etc" in dockerfile

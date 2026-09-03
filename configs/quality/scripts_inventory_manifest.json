@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T18:58:09.608171+00:00",
+  "generated_at": "2026-09-03T12:39:38.327353+00:00",
   "summary": {
     "total_scripts": 611,
     "status_counts": {
@@ -7409,7 +7409,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7449,7 +7449,13 @@
         },
         {
           "path": "tests/architecture/test_docs_governance_workflow.py",
-          "line": 35,
+          "line": 18,
+          "source_group": "tests",
+          "text": "from scripts.diagrams.render.generate_package_family_class_diagrams import ("
+        },
+        {
+          "path": "tests/architecture/test_docs_governance_workflow.py",
+          "line": 69,
           "source_group": "tests",
           "text": "assert \"generate_package_family_class_diagrams.py --check\" in workflow"
         }
@@ -9876,10 +9882,10 @@
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
         {
-          "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 340,
+          "path": "tests/architecture/test_docker_runtime_contracts.py",
+          "line": 1022,
           "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
+          "text": "helper = (ROOT / \"scripts/engineering/ci/apply_ci_fixes.py\").read_text("
         }
       ]
     },
@@ -12374,7 +12380,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 395,
+      "reference_count": 393,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -13342,7 +13348,7 @@
         },
         {
           "path": "tests/architecture/test_docs_governance_workflow.py",
-          "line": 58,
+          "line": 92,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_xwalk_missing_backlog.py\","
         },
@@ -14027,7 +14033,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 439,
+          "line": 432,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14774,7 +14780,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 442,
+          "line": 435,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -21133,7 +21139,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1246,
+          "line": 1264,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -23251,7 +23257,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1183,
+          "line": 1201,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -23319,7 +23325,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1183,
+          "line": 1201,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },

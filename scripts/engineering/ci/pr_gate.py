@@ -30,6 +30,64 @@ def _as_dict(value: object, *, label: str) -> dict[str, Any]:
     return cast(dict[str, Any], value)
 
 
+def _validate_allowed_results(
+    gate: dict[str, Any],
+    gate_id: str,
+) -> tuple[list[object], bool]:
+    allowed = gate.get("allowed_results")
+    if not isinstance(allowed, list) or not allowed:
+        raise CatalogError(f"{gate_id}: allowed_results must be non-empty")
+    if any(item not in {SUCCESS, NOT_APPLICABLE} for item in allowed):
+        raise CatalogError(f"{gate_id}: unsupported allowed result")
+    return cast(list[object], allowed), gate.get("not_applicable_allowed") is True
+
+
+def _validate_path_scoped_gate(
+    gate: dict[str, Any],
+    gate_id: str,
+    allowed: list[object],
+    *,
+    na_allowed: bool,
+) -> None:
+    paths = _as_dict(gate.get("paths"), label=f"{gate_id}.paths")
+    include = paths.get("include")
+    if not isinstance(include, list) or not include:
+        raise CatalogError(f"{gate_id}: path_scoped gate needs include paths")
+    if not na_allowed or NOT_APPLICABLE not in allowed:
+        raise CatalogError(f"{gate_id}: path_scoped gate must allow N/A")
+    if gate.get("not_applicable_reason_required") is not True:
+        raise CatalogError(f"{gate_id}: N/A reason must be required")
+
+
+def _validate_gate(gate: dict[str, Any], *, index: int, seen: set[str]) -> None:
+    gate_id = gate.get("id")
+    if not isinstance(gate_id, str) or not gate_id:
+        raise CatalogError(f"gates[{index}].id must be a non-empty string")
+    if gate_id in seen:
+        raise CatalogError(f"duplicate gate id: {gate_id}")
+    seen.add(gate_id)
+    if not isinstance(gate.get("owner_workflow"), str):
+        raise CatalogError(f"{gate_id}: owner_workflow is required")
+    owner_jobs = gate.get("owner_jobs")
+    if not isinstance(owner_jobs, list) or not owner_jobs:
+        raise CatalogError(f"{gate_id}: owner_jobs must be non-empty")
+    decision = gate.get("decision")
+    if decision not in {"always_required", "path_scoped"}:
+        raise CatalogError(f"{gate_id}: unsupported decision {decision!r}")
+    allowed, na_allowed = _validate_allowed_results(gate, gate_id)
+    if decision == "path_scoped":
+        _validate_path_scoped_gate(
+            gate,
+            gate_id,
+            allowed,
+            na_allowed=na_allowed,
+        )
+    elif na_allowed or NOT_APPLICABLE in allowed:
+        raise CatalogError(f"{gate_id}: always_required gate cannot allow N/A")
+    if gate.get("sha_binding") is not True:
+        raise CatalogError(f"{gate_id}: sha_binding must be true")
+
+
 def load_catalog(path: Path) -> dict[str, Any]:
     """Load and validate the canonical required-check catalog."""
     data = _as_dict(yaml.safe_load(path.read_text(encoding="utf-8")), label="catalog")
@@ -47,39 +105,7 @@ def load_catalog(path: Path) -> dict[str, Any]:
     seen: set[str] = set()
     for index, raw_gate in enumerate(gates):
         gate = _as_dict(raw_gate, label=f"gates[{index}]")
-        gate_id = gate.get("id")
-        if not isinstance(gate_id, str) or not gate_id:
-            raise CatalogError(f"gates[{index}].id must be a non-empty string")
-        if gate_id in seen:
-            raise CatalogError(f"duplicate gate id: {gate_id}")
-        seen.add(gate_id)
-        if not isinstance(gate.get("owner_workflow"), str):
-            raise CatalogError(f"{gate_id}: owner_workflow is required")
-        owner_jobs = gate.get("owner_jobs")
-        if not isinstance(owner_jobs, list) or not owner_jobs:
-            raise CatalogError(f"{gate_id}: owner_jobs must be non-empty")
-        decision = gate.get("decision")
-        if decision not in {"always_required", "path_scoped"}:
-            raise CatalogError(f"{gate_id}: unsupported decision {decision!r}")
-        allowed = gate.get("allowed_results")
-        if not isinstance(allowed, list) or not allowed:
-            raise CatalogError(f"{gate_id}: allowed_results must be non-empty")
-        if any(item not in {SUCCESS, NOT_APPLICABLE} for item in allowed):
-            raise CatalogError(f"{gate_id}: unsupported allowed result")
-        na_allowed = gate.get("not_applicable_allowed") is True
-        if decision == "path_scoped":
-            paths = _as_dict(gate.get("paths"), label=f"{gate_id}.paths")
-            include = paths.get("include")
-            if not isinstance(include, list) or not include:
-                raise CatalogError(f"{gate_id}: path_scoped gate needs include paths")
-            if not na_allowed or NOT_APPLICABLE not in allowed:
-                raise CatalogError(f"{gate_id}: path_scoped gate must allow N/A")
-            if gate.get("not_applicable_reason_required") is not True:
-                raise CatalogError(f"{gate_id}: N/A reason must be required")
-        elif na_allowed or NOT_APPLICABLE in allowed:
-            raise CatalogError(f"{gate_id}: always_required gate cannot allow N/A")
-        if gate.get("sha_binding") is not True:
-            raise CatalogError(f"{gate_id}: sha_binding must be true")
+        _validate_gate(gate, index=index, seen=seen)
     return data
 
 
@@ -248,15 +274,13 @@ def collect_changed_files(
     return _parse_name_status_paths(completed.stdout)
 
 
-def evaluate_results(
+def _initial_result_failures(
     catalog: dict[str, Any],
     decision_matrix: dict[str, Any],
-    results: dict[str, Any],
     *,
     expected_head_sha: str,
     observed_head_sha: str,
 ) -> list[str]:
-    """Return all fail-closed violations for one coordinator run."""
     failures: list[str] = []
     if not expected_head_sha or expected_head_sha != observed_head_sha:
         failures.append(
@@ -267,7 +291,89 @@ def evaluate_results(
         failures.append("decision matrix head_sha mismatch")
     if decision_matrix.get("config_version") != catalog.get("version"):
         failures.append("decision matrix config_version mismatch")
+    return failures
 
+
+def _required_result_failures(gate_id: str, result: dict[str, Any]) -> list[str]:
+    failures: list[str] = []
+    required_result = result.get("required")
+    na_result = result.get("not_applicable")
+    if required_result != SUCCESS:
+        failures.append(f"{gate_id}: required result={required_result!r}")
+    if na_result != SKIPPED:
+        failures.append(f"{gate_id}: required but N/A result={na_result!r}")
+    return failures
+
+
+def _not_applicable_result_failures(
+    gate_id: str,
+    gate: dict[str, Any],
+    result: dict[str, Any],
+    *,
+    reason: object,
+    expected_head_sha: str,
+) -> list[str]:
+    failures: list[str] = []
+    allowed = set(cast(list[str], gate.get("allowed_results", [])))
+    if gate.get("not_applicable_allowed") is not True or NOT_APPLICABLE not in allowed:
+        failures.append(f"{gate_id}: N/A is not allowed")
+    if not isinstance(reason, str) or not reason:
+        failures.append(f"{gate_id}: N/A reason is missing")
+    required_result = result.get("required")
+    if required_result != SKIPPED:
+        failures.append(f"{gate_id}: N/A but required result={required_result!r}")
+    na_result = result.get("not_applicable")
+    if na_result != SUCCESS:
+        failures.append(f"{gate_id}: N/A result={na_result!r}")
+    if result.get("na_head_sha") != expected_head_sha:
+        failures.append(f"{gate_id}: N/A SHA mismatch")
+    if result.get("na_reason") != reason:
+        failures.append(f"{gate_id}: N/A reason mismatch")
+    return failures
+
+
+def _gate_result_failures(
+    gate_id: str,
+    gate: dict[str, Any],
+    raw_decision: object,
+    raw_result: object,
+    *,
+    expected_head_sha: str,
+) -> list[str]:
+    if not isinstance(raw_decision, dict):
+        return [f"{gate_id}: missing decision"]
+    if not isinstance(raw_result, dict):
+        return [f"{gate_id}: missing result"]
+
+    decision = raw_decision.get("decision")
+    if decision == REQUIRED:
+        return _required_result_failures(gate_id, raw_result)
+    if decision == NOT_APPLICABLE:
+        return _not_applicable_result_failures(
+            gate_id,
+            gate,
+            raw_result,
+            reason=raw_decision.get("reason"),
+            expected_head_sha=expected_head_sha,
+        )
+    return [f"{gate_id}: unknown decision={decision!r}"]
+
+
+def evaluate_results(
+    catalog: dict[str, Any],
+    decision_matrix: dict[str, Any],
+    results: dict[str, Any],
+    *,
+    expected_head_sha: str,
+    observed_head_sha: str,
+) -> list[str]:
+    """Return all fail-closed violations for one coordinator run."""
+    failures = _initial_result_failures(
+        catalog,
+        decision_matrix,
+        expected_head_sha=expected_head_sha,
+        observed_head_sha=observed_head_sha,
+    )
     gates = {
         cast(str, gate["id"]): cast(dict[str, Any], gate) for gate in catalog["gates"]
     }
@@ -280,44 +386,15 @@ def evaluate_results(
         failures.append("result gate set does not match catalog")
 
     for gate_id, gate in gates.items():
-        raw_decision = decisions.get(gate_id)
-        raw_result = results.get(gate_id)
-        if not isinstance(raw_decision, dict):
-            failures.append(f"{gate_id}: missing decision")
-            continue
-        if not isinstance(raw_result, dict):
-            failures.append(f"{gate_id}: missing result")
-            continue
-        decision = raw_decision.get("decision")
-        reason = raw_decision.get("reason")
-        required_result = raw_result.get("required")
-        na_result = raw_result.get("not_applicable")
-        if decision == REQUIRED:
-            if required_result != SUCCESS:
-                failures.append(f"{gate_id}: required result={required_result!r}")
-            if na_result != SKIPPED:
-                failures.append(f"{gate_id}: required but N/A result={na_result!r}")
-        elif decision == NOT_APPLICABLE:
-            allowed = set(cast(list[str], gate.get("allowed_results", [])))
-            if (
-                gate.get("not_applicable_allowed") is not True
-                or NOT_APPLICABLE not in allowed
-            ):
-                failures.append(f"{gate_id}: N/A is not allowed")
-            if not isinstance(reason, str) or not reason:
-                failures.append(f"{gate_id}: N/A reason is missing")
-            if required_result != SKIPPED:
-                failures.append(
-                    f"{gate_id}: N/A but required result={required_result!r}"
-                )
-            if na_result != SUCCESS:
-                failures.append(f"{gate_id}: N/A result={na_result!r}")
-            if raw_result.get("na_head_sha") != expected_head_sha:
-                failures.append(f"{gate_id}: N/A SHA mismatch")
-            if raw_result.get("na_reason") != reason:
-                failures.append(f"{gate_id}: N/A reason mismatch")
-        else:
-            failures.append(f"{gate_id}: unknown decision={decision!r}")
+        failures.extend(
+            _gate_result_failures(
+                gate_id,
+                gate,
+                decisions.get(gate_id),
+                results.get(gate_id),
+                expected_head_sha=expected_head_sha,
+            )
+        )
     return failures
 
 
