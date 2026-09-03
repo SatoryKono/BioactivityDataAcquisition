@@ -5,9 +5,11 @@ CI Fixes script for SatoryKono/BioactivityDataAcquisition.
 Wave 1 (bugs):
   CI-01 — Replace actions/checkout@v6 → @v4 across all workflows
   CI-02 — Add Python 3.13 to test-matrix in tests.yml
-  CI-03 — Fix docker-push to reuse image from docker-build (no double build)
   CI-07 — Fix performance gate exit code (heredoc instead of $())
   CI-12 — Include .github/workflows/** in security scans
+
+Docker workflow replacement is intentionally unsupported: the canonical
+Docker workflow must be edited and reviewed in place.
 
 Wave 2 (cleanup):
   CI-04 — Delete deprecated reusable workflow files
@@ -45,7 +47,6 @@ type JsonObject = dict[str, Any]
 BRANCHES = {
     "ci-01": "fix/ci-checkout-v4",
     "ci-02": "feat/ci-python-313-matrix",
-    "ci-03": "refactor/ci-docker-single-build",
     "ci-04": "chore/ci-delete-deprecated-workflows",
     "ci-06": "fix/ci-docker-paths-conflict",
     "ci-07": "fix/ci-perf-gate-exitcode",
@@ -115,22 +116,6 @@ includes `3.13` and `AGENTS.md` recommends Python 3.13.
 
 ### Risk
 Low. `release.yml` already confirms Python 3.13 compatibility.
-
-Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
-""",
-    "ci-03": """## CI-03: Fix docker-push — reuse image built in docker-build
-
-`docker-push` was rebuilding the image from scratch on a separate runner
-that cannot access the image loaded by `docker-build` (`load: true`).
-
-### Changes
-- `docker-build`: login to GHCR on main-push; push temp tag `:sha-<SHA>`
-- `docker-push`: use `docker buildx imagetools create` to retag — no rebuild
-- `docker-build`: also upgrades `build-push-action` v5 → v6, `codeql/upload-sarif` v2 → v3
-- `docker-push` timeout reduced 10 min → 5 min (retag is ~30 s)
-
-### Risk
-Medium — test by triggering a push to main after merging.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 """,
@@ -665,227 +650,6 @@ def _apply_ci02_fix(
         ),
         branch=branch,
     )
-
-
-# ── CI-03 ────────────────────────────────────────────────────────────────────
-
-DOCKER_YML_FIXED = """\
-name: Docker Build & Compose Validation
-
-permissions:
-  contents: read
-
-on:
-  push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'ai/claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
-    branches: [ main, master, develop ]
-    paths:
-      - 'Dockerfile.bioetl'
-      - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/compose/*.yml'
-      - '.dockerignore'
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - 'ai/claude/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
-    branches: [ main, master, develop ]
-    paths:
-      - 'Dockerfile.bioetl'
-      - 'docker-compose*.yml'
-      - 'scripts/ops/runtime/docker/compose/*.yml'
-      - '.dockerignore'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  docker-lint:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dockerfile:
-          - Dockerfile.bioetl
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Hadolint (Dockerfile linting)
-        uses: hadolint/hadolint-action@v3
-        with:
-          dockerfile: ${{ matrix.dockerfile }}
-
-  docker-compose-validate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Validate docker-compose.yml syntax
-        run: docker compose config > /dev/null
-
-      - name: Validate docker-compose.monitoring.yml syntax
-        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
-
-  docker-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: docker-lint
-    permissions:
-      contents: read
-      security-events: write
-      packages: write
-    outputs:
-      image-ref: ${{ steps.set-ref.outputs.image-ref }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      # Login to GHCR so we can push a temporary SHA tag on main pushes.
-      # This allows docker-push to retag without rebuilding the image.
-      - name: Login to GHCR (temp tag on main push)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image
-        id: build
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.bioetl
-          # On main push: push temp SHA tag to GHCR so docker-push can retag.
-          # On PR/other: load locally for Trivy scan only.
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-          load: ${{ !(github.ref == 'refs/heads/main' && github.event_name == 'push') }}
-          tags: |
-            bioetl:${{ github.sha }}
-            ${{ (github.ref == 'refs/heads/main' && github.event_name == 'push')
-              && format('ghcr.io/{0}:sha-{1}', github.repository, github.sha) || '' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Set image-ref output
-        id: set-ref
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ] && [ "${{ github.event_name }}" = "push" ]; then
-            echo "image-ref=ghcr.io/${{ github.repository }}:sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "image-ref=bioetl:${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Prepare security reports directory
-        run: mkdir -p reports/security
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          image-ref: ${{ steps.set-ref.outputs.image-ref }}
-          format: 'sarif'
-          output: 'reports/security/trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'reports/security/trivy-results.sarif'
-
-      - name: Run Trivy on debian:bookworm-slim base image
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          image-ref: 'debian:bookworm-slim'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-
-  docker-push:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: docker-build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Retag the already-built and pushed SHA image — no rebuild needed.
-      - name: Tag and push final image tags
-        run: |
-          SOURCE="ghcr.io/${{ github.repository }}:sha-${{ github.sha }}"
-          docker buildx imagetools create \\
-            --tag "ghcr.io/${{ github.repository }}:latest" \\
-            --tag "ghcr.io/${{ github.repository }}:${{ github.sha }}" \\
-            --tag "ghcr.io/${{ github.repository }}:${{ github.ref_name }}" \\
-            "${SOURCE}"
-          echo "✅ Final tags pushed (no rebuild)"
-"""
-
-
-def apply_ci03(api: GitHubAPI) -> None:
-    print("\n=== CI-03: Fix docker-push double build ===")
-    branch = BRANCHES["ci-03"]
-    sha = api.get_sha()
-
-    if api.branch_exists(branch):
-        print(f"  Branch {branch} already exists — skipping branch creation")
-    else:
-        api.create_branch(branch, sha)
-
-    path = DOCKER_WORKFLOW_PATH
-    read_branch = BASE_BRANCH if api.dry_run else branch
-    _, file_sha = api.get_file(path, read_branch)
-
-    print(f"  Replacing {path} with fixed version")
-    api.update_file(
-        path=path,
-        content=DOCKER_YML_FIXED,
-        sha=file_sha,
-        message=(
-            "refactor(ci): fix docker-push to retag instead of rebuild\n\n"
-            "- docker-build: push temp :sha-<SHA> tag on main pushes\n"
-            "- docker-push: use imagetools create to retag (no rebuild, ~30s)\n"
-            "- upgrade build-push-action v5→v6, codeql/upload-sarif v2→v3\n"
-            "- timeout docker-push 10→5 min\n\n"
-            "Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
-        ),
-        branch=branch,
-    )
-
-    if not api.dry_run:
-        pr_url = api.create_pr(
-            title="refactor(ci): fix docker-push to retag instead of rebuild",
-            branch=branch,
-            body=PR_BODIES["ci-03"],
-        )
-        print(f"  PR created: {pr_url}")
 
 
 # ── CI-04 ────────────────────────────────────────────────────────────────────
@@ -1877,7 +1641,6 @@ def main() -> None:
         choices=[
             "ci-01",
             "ci-02",
-            "ci-03",
             "ci-04",
             "ci-06",
             "ci-07",
@@ -1906,7 +1669,6 @@ def main() -> None:
     operations = {
         "ci-01": apply_ci01,
         "ci-02": apply_ci02,
-        "ci-03": apply_ci03,
         "ci-04": apply_ci04,
         "ci-06": apply_ci06,
         "ci-07": apply_ci07,
