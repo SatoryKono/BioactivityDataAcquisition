@@ -1075,7 +1075,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         )
         == 2
     )
-    assert "python-3.13=3.13.15-r2" in dockerfile
+    assert "python-3.13=3.13.15-r5" in dockerfile
     assert "python-3.14" not in dockerfile
     assert "FROM scratch" in dockerfile
     assert "COPY --from=runtime-root /etc /etc" in dockerfile
