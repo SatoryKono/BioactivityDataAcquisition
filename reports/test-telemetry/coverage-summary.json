@@ -1,11 +1,11 @@
 {
-  "source_branch": "codex/fix-main-actions-20260903-v4",
-  "source_commit": "6e08e31c6ee5e1e74499ebcd39bd694700575b4a",
-  "source_run_id": "33765564345",
-  "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33765564345",
-  "source_tree_sha256": "50c06bba6709e848b44f715dfcc539cf822d8c4436f7de8045825afe14c4cf27",
-  "refreshed_at_utc": "2026-09-03T14:24:29.281845+00:00",
+  "source_branch": "main",
+  "source_commit": "bd19ef69eb3999572c8b83568ae55318209f3232",
+  "source_run_id": "33762851848",
+  "source_event": "push",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33762851848",
+  "source_tree_sha256": "91cd3d68014bf52bcb2f075385eb190d15654bb9bca301a5ae67e53d7b0c0aa9",
+  "refreshed_at_utc": "2026-09-03T13:50:12+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.7,
   "coverage": {
