@@ -27,14 +27,14 @@ trend evidence only.
 
 ## Baseline Snapshot
 
-- Source branch: `fix/sonar-issues-20260903`
-- Source commit: `83b4ff23b94f42d52760789a8bafa61b0e3e2fb1`
-- Source run id: `33754829478`
-- Source event: `pull_request`
-- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33754829478`
-- Source tree sha256: `67757486a9ba0c3bf5056275d27dfec5d2715c93dd5c351ad954a36f8de7f259`
+- Source branch: `main`
+- Source commit: `bd19ef69eb3999572c8b83568ae55318209f3232`
+- Source run id: `33762851848`
+- Source event: `push`
+- Source run URL: `https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33762851848`
+- Source tree sha256: `91cd3d68014bf52bcb2f075385eb190d15654bb9bca301a5ae67e53d7b0c0aa9`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-09-03T12:45:22.655904+00:00`
+- Refreshed at (UTC): `2026-09-03T13:50:12+00:00`
 
 ## Branch-accurate provenance (#5729)
 
