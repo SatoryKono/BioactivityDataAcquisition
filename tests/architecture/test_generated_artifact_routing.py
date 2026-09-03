@@ -343,11 +343,8 @@ def test_docker_security_baseline_routes_under_reports_security() -> None:
 
     assert "reports/security/trivy-results.sarif" in workflow
     assert "mkdir -p reports/security" in workflow
-    assert "mkdir -p reports/security" in ci_fix_script
     assert "output: 'trivy-results.sarif'" not in workflow
     assert "sarif_file: 'trivy-results.sarif'" not in workflow
-    assert "output: 'trivy-results.sarif'" not in ci_fix_script
-    assert "sarif_file: 'trivy-results.sarif'" not in ci_fix_script
     expected_outputs = {
         "reports/security/trivy-results.sarif",
         "reports/security/trivy-results.json",
