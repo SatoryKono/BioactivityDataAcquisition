@@ -5,6 +5,8 @@ permissions:
 
 on:
   workflow_call:
+  # Manual runs validate the Docker lane only. Publishing remains guarded below
+  # by push-to-main plus the protected ghcr-publish environment.
   workflow_dispatch:
   push:
     branches: [main, master, develop]
