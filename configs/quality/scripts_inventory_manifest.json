@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-02T18:58:09.608171+00:00",
+  "generated_at": "2026-09-03T04:39:22.013926+00:00",
   "summary": {
     "total_scripts": 611,
     "status_counts": {
@@ -7409,7 +7409,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -7449,7 +7449,13 @@
         },
         {
           "path": "tests/architecture/test_docs_governance_workflow.py",
-          "line": 35,
+          "line": 18,
+          "source_group": "tests",
+          "text": "from scripts.diagrams.render.generate_package_family_class_diagrams import ("
+        },
+        {
+          "path": "tests/architecture/test_docs_governance_workflow.py",
+          "line": 69,
           "source_group": "tests",
           "text": "assert \"generate_package_family_class_diagrams.py --check\" in workflow"
         }
@@ -13342,7 +13348,7 @@
         },
         {
           "path": "tests/architecture/test_docs_governance_workflow.py",
-          "line": 58,
+          "line": 92,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/check_xwalk_missing_backlog.py\","
         },

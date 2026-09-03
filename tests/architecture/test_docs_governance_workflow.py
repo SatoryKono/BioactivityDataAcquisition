@@ -12,12 +12,46 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
+
+import pytest
+from scripts.diagrams.render.generate_package_family_class_diagrams import (
+    _preserve_existing_generation_date,
+)
 
 
 pytestmark = pytest.mark.architecture
+
+
+def test_package_diagram_dates_change_only_with_diagram_content() -> None:
+    previous = "%% @date    2026-09-02\nclassDiagram\n    class Stable\n"
+    new_date = previous.replace("2026-09-02", "2026-09-03")
+    changed = new_date.replace("class Stable", "class Changed")
+
+    assert _preserve_existing_generation_date(previous, new_date) == previous, (
+        "An unchanged diagram must retain its previously reviewed date"
+    )
+    assert _preserve_existing_generation_date(previous, changed) == changed, (
+        "A changed diagram body must use the newly generated date"
+    )
+
+    malformed_format = previous.replace("2026-09-02", "not-a-date")
+    malformed_calendar = previous.replace("2026-09-02", "2026-02-30")
+    missing = "classDiagram\n    class Stable\n"
+    future = previous.replace("2026-09-02", "2026-09-04")
+
+    assert _preserve_existing_generation_date(malformed_format, new_date) == new_date, (
+        "A malformed date must use the newly generated output"
+    )
+    assert (
+        _preserve_existing_generation_date(malformed_calendar, new_date) == new_date
+    ), "An invalid calendar date must use the newly generated output"
+    assert _preserve_existing_generation_date(missing, new_date) == new_date, (
+        "A missing date must use the newly generated output"
+    )
+    assert _preserve_existing_generation_date(future, new_date) == new_date, (
+        "A future review date must not be preserved"
+    )
 
 
 def test_tests_workflow_keeps_docs_only_changes_out_of_heavy_matrix() -> None:
