@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T04:39:22.013926+00:00",
+  "generated_at": "2026-09-03T12:39:38.327353+00:00",
   "summary": {
     "total_scripts": 611,
     "status_counts": {
@@ -9882,10 +9882,10 @@
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
         {
-          "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 340,
+          "path": "tests/architecture/test_docker_runtime_contracts.py",
+          "line": 1022,
           "source_group": "tests",
-          "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
+          "text": "helper = (ROOT / \"scripts/engineering/ci/apply_ci_fixes.py\").read_text("
         }
       ]
     },
@@ -14033,7 +14033,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 439,
+          "line": 432,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         },
@@ -14780,7 +14780,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 442,
+          "line": 435,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         },
@@ -21139,7 +21139,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1246,
+          "line": 1264,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         },
@@ -23257,7 +23257,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1183,
+          "line": 1201,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
@@ -23325,7 +23325,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 1183,
+          "line": 1201,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
