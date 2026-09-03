@@ -1,0 +1,52 @@
+name: TEMP exact Trivy artifact diagnosis
+
+on:
+  push:
+    branches:
+      - codex/fix-main-actions-20260903-v3
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect exact Trivy evidence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact security baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/artifacts/9896296764/zip
+        run: |
+          set -euo pipefail
+          artifact_dir="${RUNNER_TEMP}/bioetl-security-baseline"
+          mkdir -p "${artifact_dir}"
+          curl --fail --location --silent --show-error \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -o "${artifact_dir}/baseline.zip" \
+            "${ARTIFACT_URL}"
+          unzip -q "${artifact_dir}/baseline.zip" -d "${artifact_dir}/files"
+          test -s "${artifact_dir}/files/trivy-results.json"
+          echo "ARTIFACT_DIR=${artifact_dir}/files" >> "${GITHUB_ENV}"
+
+      - name: Report blocking findings
+        run: |
+          set -euo pipefail
+          jq -r '
+            .Results[]? as $result
+            | $result.Vulnerabilities[]?
+            | select(.Severity == "CRITICAL" or .Severity == "HIGH" or .Severity == "MEDIUM")
+            | [
+                .VulnerabilityID,
+                .PkgName,
+                .InstalledVersion,
+                (.FixedVersion // ""),
+                .Severity,
+                (.Status // ""),
+                (.Title // ""),
+                ($result.Target // "")
+              ]
+            | @tsv
+          ' "${ARTIFACT_DIR}/trivy-results.json"
