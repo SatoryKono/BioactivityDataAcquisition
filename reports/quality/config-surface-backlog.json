@@ -261,5 +261,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-09-02"
+  "snapshot_date": "2026-09-03"
 }

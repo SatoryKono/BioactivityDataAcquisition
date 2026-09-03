@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import re
 import sys
 from collections import defaultdict
 from collections.abc import Iterable
@@ -31,6 +32,8 @@ CLASS_DIAGRAM_DIR = DIAGRAM_ROOT / "class-diagrams"
 GENERATED_PREFIX = "90-pkg-"
 MIN_FAMILY_CLASSES = 4
 MAX_SLICE_NODES = 30
+_DATE_LINE_PREFIX = "%% @date    "
+_DATE_LINE_PLACEHOLDER = f"{_DATE_LINE_PREFIX}<generated>"
 
 # Curated high-level families already covered by the handcrafted class diagrams.
 CURATED_FAMILY_PATHS = frozenset(
@@ -317,11 +320,49 @@ def build_diagram_text(slice_: FamilySlice) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _generation_date_line(text: str) -> str | None:
+    for line in text.splitlines():
+        if not line.startswith(_DATE_LINE_PREFIX):
+            continue
+        value = line.removeprefix(_DATE_LINE_PREFIX)
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value) is None:
+            continue
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            continue
+        return line
+    return None
+
+
+def _preserve_existing_generation_date(existing: str, generated: str) -> str:
+    """Keep the prior date when the diagram body is otherwise unchanged."""
+    existing_date = _generation_date_line(existing)
+    generated_date = _generation_date_line(generated)
+    if existing_date is None or generated_date is None:
+        return generated
+    existing_value = date.fromisoformat(existing_date.removeprefix(_DATE_LINE_PREFIX))
+    generated_value = date.fromisoformat(generated_date.removeprefix(_DATE_LINE_PREFIX))
+    if existing_value > generated_value:
+        return generated
+    existing_body = existing.replace(existing_date, _DATE_LINE_PLACEHOLDER, 1)
+    generated_body = generated.replace(generated_date, _DATE_LINE_PLACEHOLDER, 1)
+    if existing_body != generated_body:
+        return generated
+    return generated.replace(generated_date, existing_date, 1)
+
+
 def build_expected_outputs(slices: Iterable[FamilySlice]) -> dict[Path, str]:
-    return {
-        CLASS_DIAGRAM_DIR / _slice_file_name(slice_): build_diagram_text(slice_)
-        for slice_ in slices
-    }
+    outputs: dict[Path, str] = {}
+    for slice_ in slices:
+        path = CLASS_DIAGRAM_DIR / _slice_file_name(slice_)
+        content = build_diagram_text(slice_)
+        if path.exists():
+            content = _preserve_existing_generation_date(
+                path.read_text(encoding="utf-8"), content
+            )
+        outputs[path] = content
+    return outputs
 
 
 def write_outputs(expected_outputs: dict[Path, str]) -> tuple[int, int]:
