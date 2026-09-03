@@ -123,6 +123,40 @@ Reduce duplicate specialist profiles by keeping one canonical profile per functi
 1. No broken references in ORCHESTRATION.md, rules, or skills.
 1. README.md in both locations updated to reflect new inventory.
 
+
+## Wave 7 Applied (2026-09-04) — Minimal Sufficient Set
+
+| Area | Change | Status |
+| --- | --- | --- |
+| Docs-only specialists | Archived 12 sp-* profiles (sp-api-designer, sp-architect-reviewer, sp-code-reviewer, sp-data-engineer, sp-database-optimizer, sp-debugger, sp-dependency-manager, sp-git-workflow-manager, sp-prompt-engineer, sp-refactoring-specialist, sp-scientific-literature-researcher, sp-test-automator) from docs/00-project/ai/agents/agents/ to docs/99-archive/agents-sp-2026-09/ | done |
+| Checker evidence | check_agent_consolidation.py findings=12 (missing frontmatter) on all 12 sp-* — proved zero valid frontmatter and zero subagent_type invocations | done |
+| Mirror sync | docs/00-project/ai/agents/agents/README.md updated to archived notice, 12 table rows removed | done |
+| Governance | Wave 7 recorded, minimal set 6 py-* confirmed per AGENTS.md and ORCHESTRATION.md | done |
+
+### Wave 7 Deletion Criteria (same as Wave 6, re-validated 2026-09-04)
+
+- Agent never referenced in subagent_type/spawn_agent calls (rg 0 hits)
+- Checker fails missing frontmatter on all 12 (not canonical)
+- Generic domain overlap >70% with py-* core (e.g., sp-code-reviewer/sp-architect-reviewer -> py-audit-bot; sp-debugger -> py-debug-bot; sp-test-automator -> py-test-bot)
+- Retained only 6 py-* runtime agents as minimal sufficient set
+
+### Final Inventory After Wave 7
+
+| Category | Count |
+| --- | --- |
+| BioETL core (py-*) | 6 |
+| Generic utility (sp-*) | 0 (12 archived to docs/99-archive/agents-sp-2026-09/) |
+| Service files (ORCHESTRATION.md, README.md) | 2 |
+| **Total in docs/00-project/ai/agents/agents/** | **8** |
+
+## Exit Criteria For Wave 7
+
+1. docs/00-project/ai/agents/agents/sp-*.md = 0, docs/99-archive/agents-sp-2026-09/sp-*.md = 12
+2. docs/00-project/ai/agents/agents/README.md archived notice present, no sp-* table
+3. check_agent_consolidation.py after archive = 0 findings (or 0 files) and --strict PASS
+4. check-links and check-drift PASS, no broken sp-* links
+5. junie-mirror parity --check still PASS (no runtime change)
+
 ## Env File Guardrail
 
 - Любой `.env` файл (`.env`, `.env.*`) считается secret-bearing или machine-local surface.
