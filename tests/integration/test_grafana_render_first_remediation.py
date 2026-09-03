@@ -834,7 +834,9 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     assert "sortBy" in transform_ids
     assert "limit" in transform_ids
     assert transform_ids.index("sortBy") < transform_ids.index("limit")
-    sort = next(transform for transform in transforms if transform.get("id") == "sortBy")
+    sort = next(
+        transform for transform in transforms if transform.get("id") == "sortBy"
+    )
     sort_field = (sort.get("options") or {}).get("sort", [{}])[0].get("field")
     assert sort_field == "Value"
     assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
@@ -849,11 +851,7 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     assert rename.get("Value") == "Priority"
     assert rename.get("action") == "Action"
     assert rename.get("signal") == "Signal"
-    assert not {
-        value
-        for value in rename.values()
-        if str(value).startswith("Series ")
-    }
+    assert not {value for value in rename.values() if str(value).startswith("Series ")}
 
 
 def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:

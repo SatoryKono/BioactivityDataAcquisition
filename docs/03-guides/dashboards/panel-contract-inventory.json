@@ -397,7 +397,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -432,7 +432,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -467,7 +467,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -502,7 +502,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -537,7 +537,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -572,7 +572,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -651,7 +651,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -686,7 +686,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -721,7 +721,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -756,7 +756,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -791,7 +791,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -826,7 +826,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -861,7 +861,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -896,7 +896,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -931,7 +931,7 @@
         },
         {
           "color": "red",
-          "value": 1.0
+          "value": 1
         }
       ],
       "unit": "s"
@@ -2609,7 +2609,9 @@
         "bioetl_dq_first_window_reason"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+      ],
       "thresholds": [
         {
           "color": "gray",
@@ -2902,11 +2904,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "formula": "topk(5,max by(pipeline,run_type,reason,action_target)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query": "topk(5,max by(pipeline,run_type,reason,action_target)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")",
       "query_tokens": [
         "bioetl_runtime_current_blocker_reason"
       ],
@@ -2939,11 +2941,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "formula": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(vector(0),\"cause\",\"telemetry_gap\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
+      "query": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(vector(0),\"cause\",\"telemetry_gap\",\"\",\"\")",
       "query_tokens": [
         "bioetl_provider_current_cause"
       ],
@@ -2976,11 +2978,11 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "formula": "topk(5,max by(pipeline,reason,action_target)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
+      "query": "topk(5,max by(pipeline,reason,action_target)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(vector(0),\"reason\",\"telemetry_gap\",\"\",\"\")",
       "query_tokens": [
         "bioetl_dq_current_reason"
       ],
