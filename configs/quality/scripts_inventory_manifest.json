@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T17:04:07.930931+00:00",
-
+  "generated_at": "2026-09-03T17:36:42.051755+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 614,
     "status_counts": {
       "active": 339,
-      "supporting": 274
+      "supporting": 275
     },
     "reference_group_coverage": {
       "agents": 8,
@@ -14,9 +13,9 @@
       "ci": 83,
       "docs": 253,
       "other": 74,
-      "scripts": 512,
+      "scripts": 513,
       "skills": 12,
-      "tests": 423
+      "tests": 424
     }
   },
   "scripts": [
@@ -9718,19 +9717,19 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
         },
         {
           "path": "scripts/engineering/ci/_compatibility_telemetry.py",
-          "line": 23,
+          "line": 25,
           "source_group": "scripts",
           "text": "from scripts.engineering.ci._compatibility_registry import (  # type: ignore[import-not-found]"
         },
         {
           "path": "scripts/engineering/ci/_compatibility_telemetry.py",
-          "line": 28,
+          "line": 30,
           "source_group": "scripts",
           "text": "from ._compatibility_registry import ("
         },
@@ -9763,11 +9762,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 8,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
         },
@@ -9806,6 +9805,12 @@
           "line": 47,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_compatibility_telemetry.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci._compatibility_telemetry import ("
         }
       ],
       "owner": "@bioetl-platform",
@@ -9822,7 +9827,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations-fixed.ps1` | Fixed variant of CI optimization                                              |"
         },
@@ -9847,7 +9852,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/apply-ci-optimizations.ps1`       | PowerShell CI optimization script                                             |"
         },
@@ -9872,13 +9877,13 @@
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -9899,7 +9904,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"check_architecture_junit_skips.py\","
         },
@@ -9938,7 +9943,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -9977,7 +9982,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -10010,7 +10015,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -10025,7 +10030,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -10046,7 +10051,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"pr-gate\": \"pr_gate.py\","
         },
@@ -10067,7 +10072,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10077,7 +10082,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
@@ -10092,6 +10097,12 @@
           "line": 222,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_compatibility_telemetry.py",
+          "line": 25,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.quality_integral_gate import _resolve_architecture_stats"
         },
         {
           "path": "tests/unit/scripts/ci/test_quality_integral_gate.py",
@@ -10110,12 +10121,6 @@
           "line": 23,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.quality_integral_gate import ("
-        },
-        {
-          "path": "tests/unit/scripts/ci/test_quality_integral_gate.py",
-          "line": 26,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.quality_integral_gate import _build_test_health_payload"
         }
       ]
     },
@@ -10134,7 +10139,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10151,6 +10156,37 @@
       "next_step": "Retain as the implementation behind python -m scripts.engineering.ci docker-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script."
     },
     {
+      "path": "scripts/engineering/ci/report_pr_gate_timing.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/README.md",
+          "line": 22,
+          "source_group": "scripts",
+          "text": "| `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |"
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 42,
+          "source_group": "scripts",
+          "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_report_pr_gate_timing.py",
+          "line": 9,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.report_pr_gate_timing import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci pr-gate-timing; keep contributor execution routed through the unified CI dispatcher and do not count it as a separate active script."
+    },
+    {
       "path": "scripts/engineering/ci/report_quality_debt_weekly.py",
       "type": "py",
       "status": "active",
@@ -10165,13 +10201,13 @@
         },
         {
           "path": "scripts/engineering/ci/README.md",
-          "line": 22,
+          "line": 23,
           "source_group": "scripts",
           "text": "| `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |"
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10216,7 +10252,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 32,
+          "line": 33,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -10483,7 +10519,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },
@@ -10592,7 +10628,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 260,
+      "reference_count": 261,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/py-config-bot-1.py",
@@ -15573,7 +15609,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/_compatibility_telemetry.py",
-          "line": 16,
+          "line": 18,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory"
         },
@@ -16390,7 +16426,7 @@
         },
         {
           "path": "scripts/engineering/ci/_compatibility_telemetry.py",
-          "line": 17,
+          "line": 19,
           "source_group": "scripts",
           "text": "from scripts.engineering.qa.report_test_governance_audit import ("
         },
@@ -17934,10 +17970,16 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from scripts.engineering.repo.github_settings_review import ("
+        },
+        {
+          "path": "scripts/engineering/ci/report_pr_gate_timing.py",
           "line": 27,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.github_settings_review import ("
