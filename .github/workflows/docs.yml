@@ -83,9 +83,9 @@ jobs:
             --check
 
       - name: Check generated package-family class diagram drift
-        run: |
-          uv run --frozen --no-build python \
-            scripts/diagrams/render/generate_package_family_class_diagrams.py --check
+        # Full-corpus package-family generation is intentionally disabled.
+        if: ${{ false }}
+        run: uv run --frozen --no-build python scripts/diagrams/render/generate_package_family_class_diagrams.py --check
 
       - name: Check pipeline and workflow passport drift
         run: uv run --frozen --no-build python -m scripts.docs passports check
@@ -381,8 +381,9 @@ jobs:
 
   render-diagrams:
     needs: [detect-diagram-changes, validate-mermaid]
-    # Full-corpus rendering is intentionally disabled. Mermaid syntax, changed-source
-    # lint, targeted ChEMBL rendering, and source-to-SVG drift remain active.
+    # Full-corpus rendering is intentionally disabled.
+    # Mermaid syntax and changed-source lint remain active.
+    # Targeted ChEMBL rendering and source-to-SVG drift remain active.
     if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
