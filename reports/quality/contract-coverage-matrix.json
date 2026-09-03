@@ -988,6 +988,7 @@
         "tests/e2e/test_chembl_target_e2e.py",
         "tests/integration/chembl/test_target_extraction_params.py",
         "tests/integration/pipelines/test_chembl_target_component.py",
+        "tests/integration/test_grafana_action_target_coverage.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
         "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
@@ -1697,6 +1698,7 @@
         "tests/e2e/test_chembl_target_e2e.py",
         "tests/integration/chembl/test_target_extraction_params.py",
         "tests/integration/pipelines/test_chembl_target_component.py",
+        "tests/integration/test_grafana_action_target_coverage.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
         "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
@@ -2579,5 +2581,5 @@
     "gold_enabled": "Effective runtime state of pipeline.sink.gold.enabled after hierarchical config resolution; omitted enabled defaults to true. Never infer this from contract/Pandera availability or from unrelated flags such as filters.input_filter.enabled.",
     "missing_gold_enabled_count": "Runtime-enabled Gold rows whose contract parity_status is not covered."
   },
-  "snapshot_date": "2026-09-02"
+  "snapshot_date": "2026-09-03"
 }

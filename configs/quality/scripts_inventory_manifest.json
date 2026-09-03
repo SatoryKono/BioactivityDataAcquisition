@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T19:08:11.700017+00:00",
+  "generated_at": "2026-09-03T20:33:55.085650+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -19902,9 +19902,9 @@
         },
         {
           "path": "tests/integration/test_grafana_action_target_coverage.py",
-          "line": 118,
+          "line": 133,
           "source_group": "tests",
-          "text": "from scripts.ops.observability.grafana.action_target_routes import dashboard_uid_for_target"
+          "text": "from scripts.ops.observability.grafana.action_target_routes import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_action_target_routes.py",
