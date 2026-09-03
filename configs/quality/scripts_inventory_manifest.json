@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-03T17:04:07.930931+00:00",
-
+  "generated_at": "2026-09-03T17:25:52.663749+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 612,
     "status_counts": {
-      "active": 339,
+      "active": 338,
       "supporting": 274
     },
     "reference_group_coverage": {
@@ -14,9 +13,9 @@
       "ci": 83,
       "docs": 253,
       "other": 74,
-      "scripts": 512,
+      "scripts": 511,
       "skills": 12,
-      "tests": 423
+      "tests": 422
     }
   },
   "scripts": [
@@ -9891,27 +9890,6 @@
       ]
     },
     {
-      "path": "scripts/engineering/ci/check_architecture_junit_skips.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 2,
-      "references": [
-        {
-          "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
-          "source_group": "scripts",
-          "text": "\"architecture-junit-skips\": \"check_architecture_junit_skips.py\","
-        },
-        {
-          "path": "tests/unit/scripts/ci/test_quality_integral_gate.py",
-          "line": 595,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.check_architecture_junit_skips import main as skips_main"
-        }
-      ]
-    },
-    {
       "path": "scripts/engineering/ci/check_e2e_matrix_skip_rate.py",
       "type": "py",
       "status": "active",
@@ -10067,7 +10045,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 14,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10080,6 +10058,12 @@
           "line": 33,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
+        },
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
         {
           "path": "tests/architecture/test_environment_limited_green_policy.py",
@@ -10110,12 +10094,6 @@
           "line": 23,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.quality_integral_gate import ("
-        },
-        {
-          "path": "tests/unit/scripts/ci/test_quality_integral_gate.py",
-          "line": 26,
-          "source_group": "tests",
-          "text": "from scripts.engineering.ci.quality_integral_gate import _build_test_health_payload"
         }
       ]
     },
