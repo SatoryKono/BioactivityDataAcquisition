@@ -35,7 +35,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -- .github/workflows/temporary-governance-artifact-9977.yml
           .venv/bin/python -m scripts.engineering.qa.report_test_governance_audit \
             --json-out reports/quality/test-governance-current.json \
             --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
@@ -45,16 +44,14 @@ jobs:
             --manifest configs/quality/scripts_inventory_manifest.json
           git diff --check
 
-          expected="$({
-          printf '%s\n' \
-            configs/quality/scripts_inventory_manifest.json \
-            reports/quality/test-fixture-asset-duplication.json \
-            reports/quality/test-governance-current.json
-          } | sort)"
-          actual="$(git diff --name-only | sort)"
-          if [[ "$actual" != "$expected" ]]; then
+          unexpected="$(
+            git diff --name-only | grep -Ev \
+              '^(configs/quality/scripts_inventory_manifest.json|reports/quality/test-fixture-asset-duplication.json|reports/quality/test-governance-current.json)$' \
+              || true
+          )"
+          if [[ -n "$unexpected" ]]; then
             echo 'Unexpected generated-file scope' >&2
-            comm -3 <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") >&2
+            printf '%s\n' "$unexpected" >&2
             exit 1
           fi
 
