@@ -2075,6 +2075,7 @@
   },
   "root": ".",
   "source_tree_sha256": "95113426f41e5162b0ff052a951f0c9a2f39fd267071718f555888ffa08fdae9",
+
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
