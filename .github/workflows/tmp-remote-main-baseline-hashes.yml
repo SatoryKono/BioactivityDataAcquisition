@@ -29,7 +29,7 @@ jobs:
           git fetch --no-tags --depth=1 https://github.com/SatoryKono/BioactivityDataAcquisition.git main:refs/remotes/origin/main
           echo "before"
           sha256sum reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
-          python scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py --update
+          python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
           echo "after"
           sha256sum reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
           git status --short -- reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
