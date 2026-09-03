@@ -747,9 +747,9 @@
     },
     "scripts/engineering/ci/check_architecture_junit_skips.py": {
       "decision": "shared_helper_module",
-      "next_step": "Retain as the implementation behind python -m scripts.engineering.ci architecture-junit-skips; keep CI and contributor execution routed through the unified CI dispatcher and do not count it as a separate active script.",
+      "next_step": "Retain as the fail-closed architecture JUnit skip guard implementation behind the canonical `python -m scripts.engineering.ci architecture-junit-skips` router command; keep direct CI usage routed through that public command and do not count it as a separate active script.",
       "owner": "@bioetl-platform",
-      "review_by": "2026-09-30"
+      "review_by": "2026-12-01"
     },
     "scripts/engineering/ci/report_docker_actions_timing.py": {
       "decision": "shared_helper_module",
