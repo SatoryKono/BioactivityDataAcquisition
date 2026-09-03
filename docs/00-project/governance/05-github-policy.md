@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.10
+Version: 1.2.11
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-02'
+  Last verified: '2026-09-03'
 
 ______________________________________________________________________
 
@@ -194,9 +194,15 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` **are currently NOT blocked** by repository ruleset `root-hygiene-required-check` (enforcement **disabled** as of `2026-09-02T09:24:27+03:00` for `main` (13643213) and `2026-09-02T09:41:27+03:00` for `root-hygiene-required-check` (15730586); see live evidence below). Direct
-push and merge to `main` require the always-on contexts `checks-complete` and `root-hygiene`. There are no bypass actors (`current_user_can_bypass: never`). The following checks are the
-GitHub-required quality gate for pull requests and for the `main` ref.
+Updates to `main` **are currently NOT blocked** by repository rulesets
+`main` (13643213) and `root-hygiene-required-check` (15730586). Both have
+`enforcement: disabled` as of `2026-09-02T09:24:27+03:00` (`main`) and
+`2026-09-02T09:41:27+03:00` (`root-hygiene-required-check`). Live
+`GET .../rules/branches/main` returns an empty applied-rules list. Stored
+required-check contexts remain `checks-complete` and `root-hygiene`, but they
+are not GitHub-enforced while the rulesets stay disabled. There are no bypass
+actors (`current_user_can_bypass: never`). The repo-side shadow coordinator
+`pr-gate-complete` is the intended future required context (#9979).
 
 ### Final always-on required-check set
 
@@ -336,14 +342,15 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges and direct pushes to `main` **are** blocked by repository
-ruleset `root-hygiene-required-check` while enforcement is active. Repo-side evidence is the live
+PR merges and direct pushes to `main` **are not** blocked by repository
+rulesets while enforcement is `disabled`. Repo-side evidence is the live
 repository ruleset state plus the workflows that materialize
+`pr-gate-complete` (shadow aggregator) and the leaf jobs that still emit
 `checks-complete` and `root-hygiene` on pull requests.
 
 Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection.
 
-Live GitHub enforcement state (as of `2026-09-02`, `main@1b8f4edabb`):
+Live GitHub enforcement state (as of `2026-09-03`, GET-verified):
 
 - Repository ruleset `root-hygiene-required-check` (15730586) targets
   `refs/heads/main`.
@@ -352,26 +359,28 @@ Live GitHub enforcement state (as of `2026-09-02`, `main@1b8f4edabb`):
 - Enforcement: `disabled` (was `active` until `2026-09-02T09:24:27+03:00`).
 - `pr-gate-complete` runs on every PR targeting `main` as shadow evidence after the atomic #9975 cutover; it is not yet a required status check.
 - Legacy required contexts still listed in disabled rulesets: `checks-complete`, `root-hygiene`.
-- Direct updates to main are blocked by this ruleset when required checks are missing or failing.
-- Defined status checks: exactly `checks-complete` and `root-hygiene`
+- Direct updates to `main` are **not** blocked while both rulesets remain `disabled`.
+- Defined (stored, not enforced) status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: true`).
-- The ruleset has no bypass actors (`current_user_can_bypass: never`).
+- Both rulesets have no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rules on `main`: required status checks from ruleset `15730586`;
-  deletion and non-fast-forward protection from ruleset `13643213`.
-- Tracking references: `#3380`, `#8619`, `#9800`, Scorecard `#1272`.
+- Applied rules on `main`: none (`GET .../rules/branches/main` returns `[]`)
+  because both rulesets are `disabled`.
+- Tracking references: `#3380`, `#8619`, `#9800`, `#9975`, `#9979`, Scorecard `#1272`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
 
 The companion repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-targets `refs/heads/main`, is **active**, and has exactly the `deletion` and
-`non_fast_forward` rules with no bypass actors. It intentionally omits required
-signatures and pull-request approvals: the repository currently has one direct
-collaborator, so an independent-approval requirement would create a governance
-deadlock. Scorecard CodeReview alert `#1295` therefore remains open.
+targets `refs/heads/main` and is currently **disabled**. Its stored rules are
+`deletion`, `non_fast_forward`, `pull_request` (`required_approving_review_count: 1`,
+dismiss stale reviews, required thread resolution), and `required_status_checks`
+(`checks-complete`, `root-hygiene`). None of those stored rules are applied while
+`enforcement: disabled`. Required signatures remain omitted. Scorecard CodeReview
+alert `#1295` therefore remains open: an independent-approval rule would deadlock
+a one-collaborator repository if it were enforced without a second reviewer.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -829,3 +838,12 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
   evidence, and fail-closed aggregation. Rulesets remain unchanged and disabled;
   #9979 still requires five-class shadow evidence, 20 unambiguous runs, timing
   confirmation from streams 1 and 3, and separate owner approval.
+
+### Migration notes (1.2.11)
+
+- Live GET on `2026-09-03` reconfirmed both rulesets `disabled` and an empty
+  applied-rules list for `refs/heads/main`. Policy text no longer claims the
+  companion `main` ruleset is active or that it stores only `deletion` and
+  `non_fast_forward`.
+- `pr-gate-complete` remains shadow evidence for #9975. #9979 must not mutate
+  rulesets until the aggregator is proven on a fresh exact SHA.
