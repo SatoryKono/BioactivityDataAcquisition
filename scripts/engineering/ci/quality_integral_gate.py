@@ -63,6 +63,7 @@ class ArchitectureTestStats:
     errors: int
     skipped: int
     returncode: int
+    owner: str = "pytest"
 
 
 @dataclass(frozen=True)
@@ -167,6 +168,16 @@ def _parse_args() -> argparse.Namespace:
         "--architecture-tests",
         default="tests/architecture",
         help="Architecture tests path passed to pytest.",
+    )
+    parser.add_argument(
+        "--architecture-owner",
+        choices=("pytest", "lint-architecture-workflow"),
+        default="pytest",
+        help=(
+            "Where architecture pytest is executed. "
+            "'pytest' runs tests/architecture in-process. "
+            "'lint-architecture-workflow' reuses Lint and Architecture Gates."
+        ),
     )
     parser.add_argument(
         "--vcr-root",
@@ -289,6 +300,28 @@ def _junit_suites(root: ET.Element) -> list[ET.Element]:
     if root.tag == "testsuites":
         return [elem for elem in root if elem.tag == "testsuite"]
     return []
+
+
+def _resolve_architecture_stats(args: argparse.Namespace) -> ArchitectureTestStats:
+    """Run architecture pytest or reuse the Lint and Architecture Gates owner."""
+    if args.architecture_owner == "lint-architecture-workflow":
+        return ArchitectureTestStats(
+            tests=0,
+            failures=0,
+            errors=0,
+            skipped=0,
+            returncode=0,
+            owner="lint-architecture-workflow",
+        )
+    stats = _run_architecture_tests(args.architecture_tests)
+    return ArchitectureTestStats(
+        tests=stats.tests,
+        failures=stats.failures,
+        errors=stats.errors,
+        skipped=stats.skipped,
+        returncode=stats.returncode,
+        owner="pytest",
+    )
 
 
 def _run_architecture_tests(pytest_path: str) -> ArchitectureTestStats:
@@ -1053,7 +1086,7 @@ def main() -> int:
     test_matrix_path = Path(args.test_matrix)
     test_health_taxonomy_path = Path(args.test_health_taxonomy)
 
-    architecture_stats = _run_architecture_tests(args.architecture_tests)
+    architecture_stats = _resolve_architecture_stats(args)
     arch_failures = architecture_stats.failures + architecture_stats.errors
 
     scorecard = load_debt_scorecard(scorecard_path)

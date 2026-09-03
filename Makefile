@@ -357,12 +357,15 @@ clean-all:
 	$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs
 	$(RUN) python -m scripts.engineering.repo preflight-cleanup
 
+QUALITY_ARCHITECTURE_OWNER ?= pytest
+
 qa-debt:
 	$(RUN) python -m scripts.engineering.ci quality-gate \
 		--registry "$(QUALITY_EXEMPTIONS_REGISTRY)" \
 		--scorecard "$(QUALITY_EXEMPTIONS_SCORECARD)" \
 		--output "$(QUALITY_REPORT_OUTPUT)" \
-		--summary-out "$(QUALITY_SUMMARY_OUT)"
+		--summary-out "$(QUALITY_SUMMARY_OUT)" \
+		--architecture-owner "$(QUALITY_ARCHITECTURE_OWNER)"
 
 qa-arch-fast:
 	BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m "architecture and not slow and not benchmark and not memory"
