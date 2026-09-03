@@ -9660,13 +9660,13 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 252,
+          "line": 258,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 297,
+          "line": 308,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci"
         },
@@ -9692,7 +9692,7 @@
           "path": ".github/workflows/tests.yml",
           "line": 605,
           "source_group": "ci",
-          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live"
+          "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50"
         },
         {
           "path": "Makefile",
@@ -9904,13 +9904,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 91,
+          "line": 93,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 197,
+          "line": 199,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -9949,7 +9949,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 100,
+          "line": 102,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -11360,7 +11360,7 @@
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
-          "line": 238,
+          "line": 244,
           "source_group": "ci",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
