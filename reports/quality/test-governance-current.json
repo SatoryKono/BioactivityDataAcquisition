@@ -2122,23 +2122,14 @@
       "top_level_directory_count": 16,
       "top_level_directory_count_including_pycache": 16
     },
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/scripts/ci/test_report_docker_actions_timing.py:221",
-          "tests/unit/scripts/ci/test_report_pr_gate_timing.py:223"
-        ],
-        "name": "test_report_marks_acceptance_only_after_full_measured_sample"
-      }
-    ],
+    "top_duplicate_test_names": [],
     "total_test_files": 2411,
-    "total_test_functions": 25376,
+    "total_test_functions": 25374,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5baef34ee62cf4601b446f109edb07c963e202c27faa053600b4f01bccb7e464",
+  "source_tree_sha256": "db64edfc72bdb8bed071ac7fbc8a3fafab852dac8421d9324065713efc20f424",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2199,18 +2190,9 @@
     "top_level_directory_count": 16,
     "top_level_directory_count_including_pycache": 16
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/scripts/ci/test_report_docker_actions_timing.py:221",
-        "tests/unit/scripts/ci/test_report_pr_gate_timing.py:223"
-      ],
-      "name": "test_report_marks_acceptance_only_after_full_measured_sample"
-    }
-  ],
+  "top_duplicate_test_names": [],
   "total_test_files": 2411,
-  "total_test_functions": 25376,
+  "total_test_functions": 25374,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

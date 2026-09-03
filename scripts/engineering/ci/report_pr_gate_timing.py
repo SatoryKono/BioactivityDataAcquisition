@@ -14,6 +14,7 @@ import math
 import subprocess
 import sys
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
@@ -23,7 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.common.repo_paths import resolve_cli_path, resolve_output_path
+from scripts.engineering.common.repo_paths import ensure_path_within_root, resolve_cli_path
 from scripts.engineering.repo.github_settings_review import (
     GitHubReviewError,
     ReadOnlyGitHubClient,
@@ -38,6 +39,25 @@ NEO4J_JOB = "tests / neo4j-memory-live-audit"
 ARCH_COMPLETE_JOB = "lint-arch / checks-complete"
 DOCKER_COMPLETE_JOB = "docker / docker-complete"
 CODEQL_JOB = "codeql / Analyze Python"
+
+
+@dataclass(frozen=True)
+class ReportRequest:
+    repo_root: Path
+    repository: str | None
+    workflow: str
+    branch: str | None
+    event: str | None
+    limit: int
+    run_ids: Sequence[str]
+    include_incomplete: bool
+    wall_budget_seconds: int
+    queue_budget_seconds: int
+    tests_budget_seconds: int
+    architecture_budget_seconds: int
+    docker_budget_seconds: int
+    codeql_budget_seconds: int
+    generated_at: datetime | None = None
 
 
 class JsonGitHubClient(Protocol):
@@ -244,14 +264,55 @@ def _collect_runs(
     run_ids: Sequence[str],
     include_incomplete: bool,
 ) -> list[dict[str, Any]]:
-    runs: list[dict[str, Any]] = []
     if run_ids:
-        for run_id in run_ids:
-            run = client.json(["api", _run_endpoint(repository, run_id)])
-            if include_incomplete or run.get("status") == "completed":
-                runs.append(run)
-        return runs
+        return _collect_runs_by_id(
+            client,
+            repository,
+            run_ids=run_ids,
+            include_incomplete=include_incomplete,
+        )
 
+    return _collect_workflow_runs(
+        client,
+        repository,
+        workflow=workflow,
+        branch=branch,
+        event=event,
+        limit=limit,
+        include_incomplete=include_incomplete,
+    )
+
+
+def _is_selected_run(run: dict[str, Any], *, include_incomplete: bool) -> bool:
+    return include_incomplete or run.get("status") == "completed"
+
+
+def _collect_runs_by_id(
+    client: JsonGitHubClient,
+    repository: str,
+    *,
+    run_ids: Sequence[str],
+    include_incomplete: bool,
+) -> list[dict[str, Any]]:
+    runs: list[dict[str, Any]] = []
+    for run_id in run_ids:
+        run = client.json(["api", _run_endpoint(repository, run_id)])
+        if _is_selected_run(run, include_incomplete=include_incomplete):
+            runs.append(run)
+    return runs
+
+
+def _collect_workflow_runs(
+    client: JsonGitHubClient,
+    repository: str,
+    *,
+    workflow: str,
+    branch: str | None,
+    event: str | None,
+    limit: int,
+    include_incomplete: bool,
+) -> list[dict[str, Any]]:
+    runs: list[dict[str, Any]] = []
     page_size = min(max(limit, 1), 100)
     for page in range(1, 101):
         payload = client.json(
@@ -271,7 +332,7 @@ def _collect_runs(
         if not page_runs:
             break
         for run in page_runs:
-            if include_incomplete or run.get("status") == "completed":
+            if _is_selected_run(run, include_incomplete=include_incomplete):
                 runs.append(run)
             if len(runs) >= limit:
                 return runs
@@ -421,6 +482,7 @@ def _summarize_run(
         "codeql_execution_seconds": codeql.get("execution_seconds") if codeql else None,
         "peak_runner_jobs": _peak_runner_jobs(job_records),
         "key_jobs": key_jobs,
+        "jobs": job_records,
         "queue_seconds_samples": [
             job.get("queue_seconds")
             for job in job_records
@@ -562,35 +624,17 @@ def _acceptance(
     }
 
 
-def build_report(
-    client: JsonGitHubClient,
-    *,
-    repo_root: Path,
-    repository: str | None,
-    workflow: str,
-    branch: str | None,
-    event: str | None,
-    limit: int,
-    run_ids: Sequence[str],
-    include_incomplete: bool,
-    wall_budget_seconds: int,
-    queue_budget_seconds: int,
-    tests_budget_seconds: int,
-    architecture_budget_seconds: int,
-    docker_budget_seconds: int,
-    codeql_budget_seconds: int,
-    generated_at: datetime | None = None,
-) -> dict[str, Any]:
-    resolved_repository = _repository_name(client, repository)
+def build_report(client: JsonGitHubClient, request: ReportRequest) -> dict[str, Any]:
+    resolved_repository = _repository_name(client, request.repository)
     collected_runs = _collect_runs(
         client,
         resolved_repository,
-        workflow=workflow,
-        branch=branch,
-        event=event,
-        limit=limit,
-        run_ids=run_ids,
-        include_incomplete=include_incomplete,
+        workflow=request.workflow,
+        branch=request.branch,
+        event=request.event,
+        limit=request.limit,
+        run_ids=request.run_ids,
+        include_incomplete=request.include_incomplete,
     )
     summarized_runs = [
         _summarize_run(
@@ -635,27 +679,27 @@ def build_report(
     }
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": _iso(generated_at or datetime.now(UTC)),
+        "generated_at": _iso(request.generated_at or datetime.now(UTC)),
         "repository": resolved_repository,
-        "workflow": workflow,
-        "branch": branch,
-        "event": event,
-        "source_git_head": _git_head(repo_root),
+        "workflow": request.workflow,
+        "branch": request.branch,
+        "event": request.event,
+        "source_git_head": _git_head(request.repo_root),
         "collection": {
-            "requested_limit": limit,
-            "run_ids": list(run_ids),
-            "include_incomplete": include_incomplete,
+            "requested_limit": request.limit,
+            "run_ids": list(request.run_ids),
+            "include_incomplete": request.include_incomplete,
         },
         "metrics": metrics,
         "acceptance": _acceptance(
             summarized_runs,
             metrics,
-            wall_budget_seconds=wall_budget_seconds,
-            queue_budget_seconds=queue_budget_seconds,
-            tests_budget_seconds=tests_budget_seconds,
-            architecture_budget_seconds=architecture_budget_seconds,
-            docker_budget_seconds=docker_budget_seconds,
-            codeql_budget_seconds=codeql_budget_seconds,
+            wall_budget_seconds=request.wall_budget_seconds,
+            queue_budget_seconds=request.queue_budget_seconds,
+            tests_budget_seconds=request.tests_budget_seconds,
+            architecture_budget_seconds=request.architecture_budget_seconds,
+            docker_budget_seconds=request.docker_budget_seconds,
+            codeql_budget_seconds=request.codeql_budget_seconds,
         ),
         "runs": summarized_runs,
     }
@@ -730,9 +774,13 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")
+def _write_text(raw_path: str, content: str, *, root: Path) -> None:
+    safe_path = ensure_path_within_root(
+        resolve_cli_path(raw_path, root=root),
+        root,
+    )
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def _has_acceptance_gap(report: dict[str, Any]) -> bool:
@@ -746,20 +794,22 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = build_report(
             client,
-            repo_root=repo_root,
-            repository=args.repository,
-            workflow=args.workflow,
-            branch=args.branch,
-            event=args.event,
-            limit=args.limit,
-            run_ids=args.run_ids,
-            include_incomplete=args.include_incomplete,
-            wall_budget_seconds=args.wall_budget_seconds,
-            queue_budget_seconds=args.queue_budget_seconds,
-            tests_budget_seconds=args.tests_budget_seconds,
-            architecture_budget_seconds=args.architecture_budget_seconds,
-            docker_budget_seconds=args.docker_budget_seconds,
-            codeql_budget_seconds=args.codeql_budget_seconds,
+            ReportRequest(
+                repo_root=repo_root,
+                repository=args.repository,
+                workflow=args.workflow,
+                branch=args.branch,
+                event=args.event,
+                limit=args.limit,
+                run_ids=args.run_ids,
+                include_incomplete=args.include_incomplete,
+                wall_budget_seconds=args.wall_budget_seconds,
+                queue_budget_seconds=args.queue_budget_seconds,
+                tests_budget_seconds=args.tests_budget_seconds,
+                architecture_budget_seconds=args.architecture_budget_seconds,
+                docker_budget_seconds=args.docker_budget_seconds,
+                codeql_budget_seconds=args.codeql_budget_seconds,
+            ),
         )
     except (GitHubReviewError, OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -767,14 +817,19 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
     if args.json_out:
-        _write_text(resolve_output_path(args.json_out, root=repo_root), payload + "\n")
+        _write_text(
+            args.json_out,
+            payload + "\n",
+            root=repo_root,
+        )
     else:
         print(payload)
 
     if args.markdown_out:
         _write_text(
-            resolve_output_path(args.markdown_out, root=repo_root),
+            args.markdown_out,
             render_markdown(report),
+            root=repo_root,
         )
 
     if args.fail_on_acceptance_gap and _has_acceptance_gap(report):
