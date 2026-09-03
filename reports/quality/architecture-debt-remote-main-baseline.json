@@ -11,7 +11,7 @@
         "available": true,
         "integral_score": 9.14,
         "schema_version": 2,
-        "weights_sum": 1
+        "weights_sum": 1.0
       }
     },
     {
@@ -82,7 +82,7 @@
       }
     }
   ],
-  "baseline_artifact_fingerprint": "e1925d9d28e7f3524b506fe09481a9ec775d0fa9292c89b567b6f5180b73b6ec",
+  "baseline_artifact_fingerprint": "185e21f21bfae8b06d712f582e0c4b9ca76ee1de02ed5ce83e5a4b29bbbc8638",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
