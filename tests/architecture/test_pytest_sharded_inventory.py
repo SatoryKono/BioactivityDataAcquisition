@@ -142,7 +142,8 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S5-infra-adapters",
         "S6-crosscutting-unit",
         "S7-crosscutting-architecture-c",
-        "S7-crosscutting-architecture-guardrails",
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
         "S8-crosscutting-governance",
         "S7-crosscutting-architecture-d",
     ]
@@ -163,7 +164,12 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S7-crosscutting-architecture-d",
     ]
     assert aliases["S7-architecture-slow-governance"]["expands_to"] == [
-        "S7-crosscutting-architecture-guardrails",
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
+    ]
+    assert aliases["S7-crosscutting-architecture-guardrails"]["expands_to"] == [
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
     ]
 
 
@@ -320,8 +326,16 @@ def test_architecture_shard_rebalance_manifest_matches_slow_test_telemetry() -> 
     assert generated_paths == rebalance["generated_architecture_hotspot_paths"]
 
     shards = _shard_map(inventory)
-    slow_shard = shards[str(rebalance["slow_governance_shard"])]
-    slow_paths = {str(path) for path in slow_shard["paths"]}
+    aliases = inventory["aliases"]
+    assert isinstance(aliases, dict)
+    slow_name = str(rebalance["slow_governance_shard"])
+    if slow_name in aliases:
+        slow_members = aliases[slow_name]["expands_to"]
+        assert isinstance(slow_members, list)
+        slow_names = [str(name) for name in slow_members]
+    else:
+        slow_names = [slow_name]
+    slow_paths = {str(path) for name in slow_names for path in shards[name]["paths"]}
     assert set(generated_paths) <= slow_paths
 
 
@@ -374,3 +388,27 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
         f".coverage.{shard_name}" in line
         for shard_name, line in zip(expected_shards, dry_run_lines, strict=True)
     )
+
+
+@pytest.mark.architecture
+def test_architecture_ci_owns_slow_nodes_and_skip_budget() -> None:
+    """Slow architecture nodes stay on the PR wall via a dedicated owner job."""
+    workflow = yaml.safe_load(ARCHITECTURE_WORKFLOW_PATH.read_text(encoding="utf-8"))
+    slow_job = workflow["jobs"]["arch-tests-slow"]
+    complete = workflow["jobs"]["checks-complete"]
+    arch_job = workflow["jobs"]["arch-tests"]
+    slow_runs = chr(10).join(
+        str(step.get("run") or "")
+        for step in slow_job["steps"]
+        if isinstance(step, dict)
+    )
+    arch_runs = chr(10).join(
+        str(step.get("run") or "")
+        for step in arch_job["steps"]
+        if isinstance(step, dict)
+    )
+    assert "arch-tests-slow" in complete["needs"]
+    assert "slow and not benchmark and not memory" in slow_runs
+    assert "architecture-junit-skips" in slow_runs
+    assert "architecture-junit-skips" in arch_runs
+    assert complete["if"] == "${{ always() }}"
