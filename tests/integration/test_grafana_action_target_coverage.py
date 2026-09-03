@@ -69,7 +69,7 @@ def test_runtime_blocker_action_target_is_allowlisted_and_complete() -> None:
     assert set(value_opts.keys()) >= expected
     assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "null" for m in mappings)
     assert any(m.get("type") == "special" and m.get("options", {}).get("match") == "nan" for m in mappings)
-    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) != [], "generic defaults.links must exist for required panel link"
+    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) == [], "generic defaults.links must be empty for fail-closed"
     links = props.get("links", [])
     assert isinstance(links, list) and len(links) >= 3
     titles = {link.get("title") for link in links}
@@ -107,13 +107,16 @@ def test_dq_reason_action_target_is_allowlisted_and_complete() -> None:
     dq_link = next(l for l in links if "Data Quality evidence" in l.get("title", ""))
     assert "${__data.fields.pipeline}" in dq_link.get("url", "")
     assert "${__url_time_range}" in dq_link.get("url", "")
+    assert panel.get("fieldConfig", {}).get("defaults", {}).get("links", []) == []
     assert set(DQ_REASON_ACTION_MAP.keys()) == {"data_quality", "verify_dq_reason_rules"}
 
 
 def test_unknown_action_target_is_fail_closed() -> None:
     from scripts.ops.observability.grafana.action_target_routes import dashboard_uid_for_target
+
     assert dashboard_uid_for_target("future_runtime_target_xyz") is None
     assert dashboard_uid_for_target("verify_dq_reason_rules") is None
+
     for path in (RUNTIME_DASH, DQ_DASH):
         dash = _load_dashboard(path)
         pid = 9101 if "runtime" in path.name else 9102
