@@ -124,9 +124,13 @@ def test_run_audit_allows_cataloged_archived_agents_scripts_zone(
     ]
     catalog_path.write_text(yaml.safe_dump(catalog, sort_keys=False), encoding="utf-8")
     _write_minimal_repo_tree(tmp_path)
-    archive_dir = tmp_path / "docs" / "99-archive" / "agents-scripts-2026-09" / "diagrams"
+    archive_dir = (
+        tmp_path / "docs" / "99-archive" / "agents-scripts-2026-09" / "diagrams"
+    )
     archive_dir.mkdir(parents=True, exist_ok=True)
-    (archive_dir / "legacy_helper.py").write_text("print('archived')\n", encoding="utf-8")
+    (archive_dir / "legacy_helper.py").write_text(
+        "print('archived')\n", encoding="utf-8"
+    )
     (
         tmp_path / "docs" / "99-archive" / "agents-scripts-2026-09" / "legacy_tool.py"
     ).write_text("print('archived')\n", encoding="utf-8")
