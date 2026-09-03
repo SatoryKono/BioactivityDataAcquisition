@@ -60,7 +60,7 @@ workflow.
 
 ## Docs-only generic utilities (archived 2026-09-04 - Wave 7)
 
-> **Archived:** 12 sp-* profiles moved to docs/99-archive/agents-sp-2026-09/ on 2026-09-04 (zero invocations via subagent_type/spawn_agent, >70% overlap with py-*, checker missing frontmatter findings=12). Use the minimal sufficient set of 6 py-* runtime agents for BioETL tasks: py-audit-bot (audit/review), py-debug-bot (RCA), py-test-bot (tests), py-config-bot, py-doc-bot, py-plan-bot. See Wave 7 in docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md.
+> **Archived:** 12 sp-* profiles moved to docs/99-archive/agents-sp-2026-09/ on 2026-09-04 (zero invocations via subagent_type/spawn_agent, >70% overlap with py-*, checker missing frontmatter findings=12). Use the minimal sufficient set of 6 py-* runtime agents for BioETL tasks: py-audit-bot (audit/review), py-debug-bot (RCA), py-test-bot (tests), py-config-bot, py-doc-bot, py-plan-bot. See Wave 7 in docs/00-project/ai/agents/policy/AGENT_GOVERNANCE.md.
 
 ## Orchestration Workflow
 

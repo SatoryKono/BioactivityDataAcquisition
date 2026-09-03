@@ -10869,8 +10869,8 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": "tracked_mirror_surface",
-      "declared_class": null,
-      "declared_status": null,
+      "declared_class": "internal-published",
+      "declared_status": "active",
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
@@ -10885,35 +10885,7 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
-      "path": "docs/00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md",
-      "recommended_action": "generate-automatically",
-      "root_doc_kind": null,
-      "section": "00-project",
-      "status": "Generated",
-      "surface_family": "generated",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": "tracked_mirror_surface",
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "ai-runtime-governance-mirrors",
-      "generated_route_exception": null,
-      "generator": "scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py",
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md",
+      "path": "docs/00-project/ai/agents/policy/AGENT_GOVERNANCE.md",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "00-project",
@@ -10942,34 +10914,6 @@
       "outbound_links": 7,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-      "recommended_action": "generate-automatically",
-      "root_doc_kind": null,
-      "section": "00-project",
-      "status": "Generated",
-      "surface_family": "generated",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": "tracked_mirror_surface",
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "ai-runtime-governance-mirrors",
-      "generated_route_exception": null,
-      "generator": "scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py",
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md",
       "recommended_action": "generate-automatically",
       "root_doc_kind": null,
       "section": "00-project",
@@ -11065,34 +11009,6 @@
       "canonical_successor": null,
       "catalog_lifecycle": null,
       "commit_policy": "tracked_mirror_surface",
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "regenerate",
-      "generated_route": "ai-runtime-governance-mirrors",
-      "generated_route_exception": null,
-      "generator": "scripts/ai/sync/governance.py and scripts/docs/checks/check_drift.py",
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 0,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md",
-      "recommended_action": "generate-automatically",
-      "root_doc_kind": null,
-      "section": "00-project",
-      "status": "Generated",
-      "surface_family": "generated",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": "tracked_mirror_surface",
       "declared_class": "internal-published",
       "declared_status": "active",
       "diagram_kind": null,
@@ -11166,6 +11082,34 @@
       "outbound_links": 3,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/agents/runtime/orchestration/py-team-orchestration.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "00-project",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/00-project/ai/agents/scripts/README.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "00-project",
@@ -67962,6 +67906,178 @@
       "catalog_lifecycle": null,
       "commit_policy": null,
       "declared_class": null,
+<<<<<<< HEAD
+||||||| 1641f6b878
+=======
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-policy-2026-09/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-policy-2026-09/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-policy-2026-09/CONSOLIDATION_VALIDATION.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": "archived",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-policy-2026-09/README.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-policy-2026-09/SPECIALIST_PROFILE_TEMPLATE.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": "archived",
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "historical",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/99-archive/agents-scripts-2026-09/README.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "99-archive",
+      "status": "Archived",
+      "surface_family": "archive",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "declared_status": "archived",
       "diagram_kind": null,
       "duplicate_group": null,
@@ -105538,14 +105654,28 @@
     "by_recommended_action": {
       "archive-after-github-state-check": 336,
       "archive-after-migration": 929,
+<<<<<<< HEAD
       "generate-automatically": 1256,
       "keep": 1160,
+||||||| 1641f6b878
+      "generate-automatically": 1268,
+      "keep": 1147,
+=======
+      "generate-automatically": 1253,
+      "keep": 1167,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "reconcile-with-github-state": 8,
       "replace-with-link": 51
     },
     "by_section": {
       ".github": 352,
+<<<<<<< HEAD
       "00-project": 528,
+||||||| 1641f6b878
+      "00-project": 540,
+=======
+      "00-project": 526,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "01-requirements": 4,
       "02-architecture": 991,
       "03-data-model": 2,
@@ -105553,7 +105683,13 @@
       "04-reference": 330,
       "05-engineering": 2,
       "05-operations": 89,
+<<<<<<< HEAD
       "99-archive": 183,
+||||||| 1641f6b878
+      "99-archive": 170,
+=======
+      "99-archive": 189,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "AGENTS.md": 1,
       "CHANGELOG.md": 1,
       "CONTRIBUTING.md": 1,
@@ -105574,23 +105710,57 @@
       "security": 2
     },
     "by_status": {
+<<<<<<< HEAD
       "Active": 751,
       "Archived": 183,
+||||||| 1641f6b878
+      "Active": 751,
+      "Archived": 170,
+=======
+      "Active": 752,
+      "Archived": 189,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "Canonical": 73,
       "Deprecated": 51,
+<<<<<<< HEAD
       "Generated": 1256,
+||||||| 1641f6b878
+      "Generated": 1268,
+=======
+      "Generated": 1253,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "Working": 1426
     },
     "by_surface_family": {
+<<<<<<< HEAD
       "active": 751,
       "archive": 183,
+||||||| 1641f6b878
+      "active": 751,
+      "archive": 170,
+=======
+      "active": 752,
+      "archive": 189,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "canonical": 73,
       "duplicate": 51,
+<<<<<<< HEAD
       "generated": 1256,
+||||||| 1641f6b878
+      "generated": 1268,
+=======
+      "generated": 1253,
+>>>>>>> refactor/agents-minimal-2026-09-04
       "working": 1426
     },
     "by_tracking_state": {
+<<<<<<< HEAD
       "tracked": 3740
+||||||| 1641f6b878
+      "tracked": 3739
+=======
+      "tracked": 3744
+>>>>>>> refactor/agents-minimal-2026-09-04
     },
     "docs_reports_local_count": 35,
     "duplicate_group_count": 2,
@@ -105606,8 +105776,20 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
+<<<<<<< HEAD
     "total_doc_like": 3740,
+||||||| 1641f6b878
+    "total_doc_like": 3739,
+=======
+    "total_doc_like": 3744,
+>>>>>>> refactor/agents-minimal-2026-09-04
     "total_doc_like_ignored_local": 0,
+<<<<<<< HEAD
     "total_doc_like_tracked": 3740
+||||||| 1641f6b878
+    "total_doc_like_tracked": 3739
+=======
+    "total_doc_like_tracked": 3744
+>>>>>>> refactor/agents-minimal-2026-09-04
   }
 }

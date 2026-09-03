@@ -239,7 +239,7 @@ Wave-10 ratification (2026-04-04):
 8\. `docs/00-project/ai/README.md`, `docs/00-project/ai/agents/CLAUDE.md`,
 `docs/00-project/ai/agents/orchestration/**`,
 `docs/00-project/ai/agents/runtime/orchestration/**`,
-`docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md`,
+`docs/00-project/ai/agents/policy/AGENT_GOVERNANCE.md`,
 `docs/00-project/ai/memory/README.md`, `docs/00-project/ai/memory/memory-*.md`,
 `docs/00-project/ai/skills/SKILLS-CATALOG.md`, and
 `docs/00-project/ai/skills/global/.system/**` remain non-nav by default as

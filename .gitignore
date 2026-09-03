@@ -677,3 +677,9 @@ _fail_*.txt
 
 # Local envrc for Grok/direnv MCP key load (machine-local)
 .envrc
+!/docs/99-archive/agents-sp-2026-09/
+!/docs/99-archive/agents-sp-2026-09/**
+!/docs/99-archive/agents-scripts-2026-09/
+!/docs/99-archive/agents-scripts-2026-09/**
+!/docs/99-archive/agents-policy-2026-09/
+!/docs/99-archive/agents-policy-2026-09/**
