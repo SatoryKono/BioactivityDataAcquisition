@@ -2732,7 +2732,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1936,
+          "line": 1938,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
@@ -5985,7 +5985,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 467,
+          "line": 469,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         },
@@ -9684,13 +9684,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 430,
+          "line": 432,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 612,
+          "line": 614,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.ci neo4j-memory-live --batch-size 50"
         },
@@ -9904,13 +9904,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 93,
+          "line": 96,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 199,
+          "line": 202,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -9949,7 +9949,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 102,
+          "line": 105,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -10108,7 +10108,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
@@ -10127,6 +10127,18 @@
           "line": 9,
           "source_group": "tests",
           "text": "from scripts.engineering.ci.report_docker_actions_timing import ("
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_report_docker_actions_timing.py",
+          "line": 272,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.report_docker_actions_timing import _write_text"
+        },
+        {
+          "path": "tests/unit/scripts/ci/test_report_docker_actions_timing.py",
+          "line": 282,
+          "source_group": "tests",
+          "text": "from scripts.engineering.ci.report_docker_actions_timing import _write_text"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10207,7 +10219,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 1363,
+          "line": 1365,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -10944,7 +10956,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 2005,
+          "line": 2007,
           "source_group": "ci",
           "text": "\"bash scripts/engineering/dev/pretest_guardrails.sh\" \\"
         },
@@ -12962,7 +12974,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 473,
+          "line": 475,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -13349,7 +13361,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 414,
+          "line": 416,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/check_test_audit_preflight.py --strict"
         },
@@ -14134,7 +14146,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 664,
+          "line": 666,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -16983,19 +16995,19 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 170,
+          "line": 172,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 173,
+          "line": 175,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 179,
+          "line": 181,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -17081,7 +17093,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 170,
+          "line": 172,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -17132,7 +17144,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 173,
+          "line": 175,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-naming"
         },
@@ -17189,7 +17201,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 179,
+          "line": 181,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
@@ -17679,7 +17691,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 411,
+          "line": 413,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -17736,7 +17748,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 403,
+          "line": 405,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.repo check-inventory \\"
         },
@@ -17953,7 +17965,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/report_docker_actions_timing.py",
-          "line": 27,
+          "line": 30,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.github_settings_review import ("
         },
@@ -19577,7 +19589,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 176,
+          "line": 178,
           "source_group": "ci",
           "text": "run: uv run --frozen --no-build python scripts/ops/migrations/active/backfill_vcr_metadata_sidecars.py --check"
         },
