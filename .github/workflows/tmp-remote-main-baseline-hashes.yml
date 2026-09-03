@@ -31,6 +31,6 @@ jobs:
           sha256sum reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
           python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update
           echo "after"
-          python -c "import json; print(json.load(open(\'reports/quality/architecture-debt-remote-main-baseline.json\', encoding=\'utf-8\'))[\'baseline_artifact_fingerprint\'])"
+          python -c "import json; print(json.load(open('reports/quality/architecture-debt-remote-main-baseline.json', encoding='utf-8'))['baseline_artifact_fingerprint'])"
           sha256sum reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
           git status --short -- reports/quality/architecture-debt-remote-main-baseline.json reports/quality/architecture-debt-remote-main-baseline.md
