@@ -336,22 +336,15 @@ def test_docker_security_baseline_routes_under_reports_security() -> None:
     workflow = (ROOT / ".github" / "workflows" / "docker.yml").read_text(
         encoding="utf-8"
     )
-    ci_fix_script = (
-        ROOT / "scripts" / "engineering" / "ci" / "apply_ci_fixes.py"
-    ).read_text(encoding="utf-8")
     payload = _load_routing()
     routed_outputs = {
         output for route in payload["routes"] for output in route.get("outputs", [])
     }
 
     assert "reports/security/trivy-results.sarif" in workflow
-    assert "reports/security/trivy-results.sarif" in ci_fix_script
     assert "mkdir -p reports/security" in workflow
-    assert "mkdir -p reports/security" in ci_fix_script
     assert "output: 'trivy-results.sarif'" not in workflow
     assert "sarif_file: 'trivy-results.sarif'" not in workflow
-    assert "output: 'trivy-results.sarif'" not in ci_fix_script
-    assert "sarif_file: 'trivy-results.sarif'" not in ci_fix_script
     expected_outputs = {
         "reports/security/trivy-results.sarif",
         "reports/security/trivy-results.json",

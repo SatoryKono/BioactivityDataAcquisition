@@ -290,6 +290,21 @@ def write_fixability_audit(*, trivy_json: Path, output: Path) -> dict[str, objec
     return audit
 
 
+def _render_strict_blocking_findings(
+    findings: Sequence[Mapping[str, Any]],
+) -> str:
+    """Render actionable public vulnerability identities for CI diagnostics."""
+    return "\n".join(
+        "  - "
+        f"{_text(finding.get('vulnerability_id'))} "
+        f"package={_text(finding.get('package'))} "
+        f"installed={_text(finding.get('installed_version'))} "
+        f"fixed={_text(finding.get('fixed_version')) or '<none>'} "
+        f"status={_text(finding.get('status'))}"
+        for finding in findings
+    )
+
+
 def parse_fixability_gate_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Разобрать аргументы CLI fixability-aware merge gate."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -321,13 +336,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     assert isinstance(fixable_blocking, int)
     all_findings = audit["all_findings"]
     assert isinstance(all_findings, list)
-    strict_blocking = sum(
-        1
+    strict_findings = [
+        finding
         for finding in all_findings
         if isinstance(finding, Mapping) and is_strict_blocking_finding(finding)
-    )
+    ]
+    strict_blocking = len(strict_findings)
     if args.fail_on_blocking and strict_blocking:
-        print(f"Critical/High/Medium Trivy findings: {strict_blocking}")
+        details = _render_strict_blocking_findings(strict_findings)
+        print(f"Critical/High/Medium Trivy findings: {strict_blocking}\n{details}")
         return 1
     if args.fail_on_fixable and fixable_blocking:
         print(f"Fixable Critical/High/Medium Trivy findings: {fixable_blocking}")
