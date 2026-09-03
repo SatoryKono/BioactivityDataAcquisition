@@ -1,7 +1,7 @@
 %% BioETL — Locking, Checkpoint, and Graceful Shutdown
 %% Distinguishes general pipeline lifecycle from the newer composite checkpoint facade and resume semantics.
 
-%% @version 1.2.0
+%% @version 1.3.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
@@ -54,8 +54,8 @@ graph TB
         ML["MemoryLock<br/>in-memory lock store<br/>acquire/release/heartbeat<br/>validate owner + token"]:::size-lg
     end
 
-    subgraph InfraCheckpoint["Infrastructure: LocalCheckpoint"]
-        LCP["LocalCheckpoint<br/>base_path + atomic save/load<br/>exists + delete"]:::size-lg
+    subgraph InfraCheckpoint["Infrastructure: LocalCheckpointAdapter"]
+        LCP["LocalCheckpointAdapter<br/>base_path + atomic save/load<br/>exists + delete"]:::size-lg
     end
 
     subgraph SafetyGuard["Safety Guard Pattern"]

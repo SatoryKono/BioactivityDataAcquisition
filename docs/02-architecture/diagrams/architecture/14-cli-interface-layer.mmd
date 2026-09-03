@@ -1,7 +1,7 @@
 %% BioETL — CLI / Interface Layer
 %% Shows current CLI routing through registry helpers, narrow composition APIs, and inspection/admin services.
 
-%% @version 1.3.0
+%% @version 1.4.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
@@ -33,12 +33,12 @@ graph LR
     end
 
     subgraph Composition["composition boundary"]
-        EXEC["execution_api<br/>run / composite runtime"]:::size-md
-        CTRL["control_plane_api<br/>inspection + admin services"]:::size-md
-        HEALTH["health_api / maintenance_api<br/>health + service maintenance"]:::size-md
-        RES["resources_api<br/>cleanup / quarantine / lifecycle"]:::size-md
+        EXEC["entrypoints + composite_catalog<br/>run / composite runtime"]:::size-md
+        CTRL["control_plane_service_access<br/>inspection + admin services"]:::size-md
+        HEALTH["health_service_access / observability_runtime<br/>health + operational diagnostics"]:::size-md
+        RES["resources_runtime + entrypoints<br/>cleanup / archive / lifecycle"]:::size-md
         ENTRY["entrypoints<br/>retained broad public seam"]:::size-md
-        PIPE["PipelineRegistry"]:::size-md
+        PIPE["registry_api<br/>PipelineRegistry"]:::size-md
     end
 
     subgraph Runtime["Created runtime services"]
@@ -74,7 +74,7 @@ graph LR
     OPS -.->|"server mode"| HSRV
     HEALTH -.->|"health deps"| HSRV
 
-    NOTE["CLI prefers narrow APIs.<br/>Use execution_api, control_plane_api,<br/>health_api, maintenance_api,<br/>and resources_api for command paths.<br/>entrypoints kept for broad callers/tests."]:::size-md
+    NOTE["CLI uses first-party owner seams.<br/>Use registry_api, control_plane_service_access,<br/>health_service_access, observability_runtime,<br/>resources_runtime, and entrypoints.<br/>Compatibility *_api shims stay external-only."]:::size-md
     ENTRY -.-> NOTE
     REG -.-> NOTE
 

@@ -1,7 +1,7 @@
 %% BioETL — Bootstrap: Runtime, Control-Plane, and Admin Wiring
 %% Covers how current entrypoints/bootstrap seams expose runtime, control-plane, and admin assembly outputs.
 
-%% @version 1.4.0
+%% @version 1.5.0
 %% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
@@ -24,7 +24,7 @@
 graph TB
     subgraph Public["Public composition APIs"]
         ENTRY["composition.entrypoints"]:::size-sm
-        APIS["execution_api / control_plane_api / health_api<br/>maintenance_api / resources_api"]:::size-sm
+        APIS["execution_api / health_api / maintenance_api / registry_api<br/>plus first-party owner access modules"]:::size-sm
         BOOT["composition.bootstrap<br/>lower-level seam"]:::size-sm
     end
 

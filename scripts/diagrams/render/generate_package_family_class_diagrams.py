@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import ast
 import re
+import subprocess
 import sys
 from collections import defaultdict
 from collections.abc import Iterable
@@ -25,6 +26,30 @@ if str(REPO_ROOT_IMPORT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT_IMPORT))
 
 from scripts.diagrams.core.diagram_paths import DIAGRAM_ROOT, REPO_ROOT
+
+
+def _source_date() -> str:
+    """Return the latest BioETL source change date without wall-clock entropy."""
+    result = subprocess.run(
+        [
+            "git",
+            "log",
+            "--no-merges",
+            "-1",
+            "--format=%cs",
+            "HEAD",
+            "--",
+            "src/bioetl",
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    source_date = result.stdout.strip()
+    if not source_date:
+        raise RuntimeError("Unable to resolve package-family source date from Git")
+    return source_date
 
 
 SRC_ROOT = REPO_ROOT / "src" / "bioetl"
@@ -277,7 +302,7 @@ def build_diagram_text(slice_: FamilySlice) -> str:
         "%% Components: top-level classes grouped by source module.",
         "%% @version 1.0.0",
         "%% @type    classDiagram",
-        f"%% @date    {date.today().isoformat()}",
+        f"%% @date    {_source_date()}",
         "%% @level   Package Family / Inventory Slice",
         f"%% @nodes   {len(slice_.classes)}",
         f"%% @reference {_slice_reference(slice_)}",
