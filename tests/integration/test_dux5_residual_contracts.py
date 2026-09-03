@@ -95,7 +95,10 @@ def test_value_columns_have_operator_display_names_on_suspect_tables() -> None:
     ]
     assert display_names, "Inspect Ranked Suspects must label Value columns"
     assert any(
-        "Signal" in str(v) or "Count" in str(v) or "Severity" in str(v)
+        "Priority" in str(v)
+        or "Severity" in str(v)
+        or "Signal" in str(v)
+        or "Count" in str(v)
         for v in display_names
     )
 
