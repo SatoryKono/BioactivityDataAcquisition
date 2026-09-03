@@ -34,10 +34,14 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 
 ### 5. Inspect Ranked Suspects
 - **Type:** Table (primary first-screen localization)
-- **Purpose:** Cross-domain ranked suspects (Runtime / Provider / DQ) with domain label and scoped handoff links.
+- **Purpose:** Cross-domain ranked suspects (Runtime / Provider / DQ) with
+  shipped severity priority, domain/signal basis, next action, and scoped handoff links.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`, `bioetl_provider_current_cause`, `bioetl_dq_current_reason` (merged instant tables)
-- **Visible columns:** Domain, Pipeline, Reason, and Signal. Merge bookkeeping
-  fields (`Time`, `Value`, and Grafana series aliases) are hidden.
+- **Ranking:** shipped `severity` labels (`failing`/`crit`=2, `degraded`/`warn`=1).
+  Priority 0 is `telemetry_gap` / UNKNOWN. Boolean `> 0` activation is not the rank.
+- **Visible columns:** Domain, Signal, Priority, Action, Pipeline, Provider.
+  Merge bookkeeping fields (`Time`, `reason`, `cause`) stay hidden; `Value` remains
+  as Priority so global top-5 can sort before `limit`.
 - **Empty:** `VALID_EMPTY — no active suspects across domains`
 
 ### 5b. Domain Suspect Details (collapsed row)

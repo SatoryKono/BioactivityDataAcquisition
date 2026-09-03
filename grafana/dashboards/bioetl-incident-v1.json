@@ -240,7 +240,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking capped at five active suspects. Domain and signal labels identify source; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking uses shipped severity labels (failing/crit=2, degraded/warn=1), not boolean activation. Priority 0 is telemetry_gap/UNKNOWN for a domain with no recording-rule or universe series. Global sort by Priority then cap five rows. Domain, signal, priority, and action identify source and next handoff; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -254,30 +254,42 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "topk(5, label_replace(label_replace(max by (pipeline, run_type, reason) (bioetl_runtime_current_blocker_reason) > 0, \"domain\", \"runtime\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
           "legendFormat": "runtime",
           "instant": true,
-          "format": "table"
+          "format": "table",
+          "expr": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"failing\"}\n            ) * 2\n            or\n            max by (pipeline, run_type, reason, severity, action_target) (\n              bioetl_runtime_current_blocker_reason{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"runtime\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_runtime_pipeline_run_type_universe) * 0),\n      \"domain\", \"runtime\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)"
         },
         {
           "refId": "B",
-          "expr": "topk(5, label_replace(label_replace(max by (provider, cause) (bioetl_provider_current_cause) > 0, \"domain\", \"provider\", \"\", \"\"), \"signal\", \"$1\", \"cause\", \"(.*)\"))",
           "legendFormat": "provider",
           "instant": true,
-          "format": "table"
+          "format": "table",
+          "expr": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"failing\"}\n            ) * 2\n            or\n            max by (provider, cause, severity) (\n              bioetl_provider_current_cause{severity=\"degraded\"}\n            )\n          ),\n          \"domain\", \"provider\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"cause\", \"(.*)\"\n      ),\n      \"action\", \"provider\", \"\", \"\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_provider_health_check_provider_universe_15m) * 0),\n      \"domain\", \"provider\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)"
         },
         {
           "refId": "C",
-          "expr": "topk(5, label_replace(label_replace(max by (pipeline, reason) (bioetl_dq_current_reason) > 0, \"domain\", \"dq\", \"\", \"\"), \"signal\", \"$1\", \"reason\", \"(.*)\"))",
           "legendFormat": "dq",
           "instant": true,
-          "format": "table"
+          "format": "table",
+          "expr": "(\n  topk(5,\n    label_replace(\n      label_replace(\n        label_replace(\n          (\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"crit\"}\n            ) * 2\n            or\n            max by (pipeline, reason, severity, action_target) (\n              bioetl_dq_current_reason{severity=\"warn\"}\n            )\n          ),\n          \"domain\", \"dq\", \"\", \"\"\n        ),\n        \"signal\", \"$1\", \"reason\", \"(.*)\"\n      ),\n      \"action\", \"$1\", \"action_target\", \"(.*)\"\n    )\n  )\n)\nor\nlabel_replace(\n  label_replace(\n    label_replace(\n      (absent(bioetl_overview_pipeline_universe) * 0),\n      \"domain\", \"dq\", \"\", \"\"\n    ),\n    \"signal\", \"telemetry_gap\", \"\", \"\"\n  ),\n  \"action\", \"UNKNOWN\", \"\", \"\"\n)"
         }
       ],
       "transformations": [
         {
           "id": "merge",
           "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Value",
+                "desc": true
+              }
+            ]
+          }
         },
         {
           "id": "limit",
@@ -292,25 +304,27 @@
               "Time": true,
               "Time 1": true,
               "Time 2": true,
-              "Value": true,
-              "Value #A": true,
-              "Value #B": true,
-              "Value #C": true,
               "reason": true,
               "cause": true,
-              "run_type": true
+              "run_type": true,
+              "severity": true,
+              "action_target": true
             },
             "indexByName": {
               "domain": 0,
-              "pipeline": 1,
-              "provider": 2,
-              "signal": 3
+              "signal": 1,
+              "Value": 2,
+              "action": 3,
+              "pipeline": 4,
+              "provider": 5
             },
             "renameByName": {
               "domain": "Domain",
+              "signal": "Signal",
+              "Value": "Priority",
+              "action": "Action",
               "pipeline": "Pipeline",
-              "provider": "Provider",
-              "signal": "Signal"
+              "provider": "Provider"
             }
           }
         }
@@ -387,21 +401,46 @@
                   "index": 0
                 }
               }
+            },
+            {
+              "type": "value",
+              "options": {
+                "2": {
+                  "text": "CRIT",
+                  "color": "red",
+                  "index": 1
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange",
+                  "index": 2
+                },
+                "0": {
+                  "text": "UNKNOWN",
+                  "color": "gray",
+                  "index": 3
+                }
+              }
             }
           ]
         },
         "overrides": [
           {
             "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value)$"
+              "id": "byName",
+              "options": "Value"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Priority"
+              },
               {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-background",
-                  "mode": "basic"
+                  "mode": "basic",
+                  "wrapText": false
                 }
               },
               {
@@ -420,7 +459,7 @@
                       "value": null
                     },
                     {
-                      "color": "green",
+                      "color": "gray",
                       "value": 0
                     },
                     {
@@ -435,8 +474,8 @@
                 }
               },
               {
-                "id": "displayName",
-                "value": "Signal"
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -455,6 +494,44 @@
                 "value": {
                   "type": "auto",
                   "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "signal"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 210
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "action"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
                 }
               }
             ]
@@ -482,26 +559,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 140
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "signal"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 250
+                "value": 110
               },
               {
                 "id": "custom.cellOptions",
@@ -527,7 +585,7 @@
         },
         "sortBy": [
           {
-            "displayName": "Value",
+            "displayName": "Priority",
             "desc": true
           }
         ]
