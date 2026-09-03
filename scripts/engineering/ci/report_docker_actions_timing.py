@@ -23,7 +23,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.common.repo_paths import resolve_cli_path, resolve_output_path
+from scripts.engineering.common.repo_paths import ensure_path_within_root, resolve_cli_path
 from scripts.engineering.repo.github_settings_review import (
     GitHubReviewError,
     ReadOnlyGitHubClient,
@@ -227,14 +227,55 @@ def _collect_runs(
     run_ids: Sequence[str],
     include_incomplete: bool,
 ) -> list[dict[str, Any]]:
-    runs: list[dict[str, Any]] = []
     if run_ids:
-        for run_id in run_ids:
-            run = client.json(["api", _run_endpoint(repository, run_id)])
-            if include_incomplete or run.get("status") == "completed":
-                runs.append(run)
-        return runs
+        return _collect_runs_by_id(
+            client,
+            repository,
+            run_ids=run_ids,
+            include_incomplete=include_incomplete,
+        )
 
+    return _collect_workflow_runs(
+        client,
+        repository,
+        workflow=workflow,
+        branch=branch,
+        event=event,
+        limit=limit,
+        include_incomplete=include_incomplete,
+    )
+
+
+def _is_selected_run(run: dict[str, Any], *, include_incomplete: bool) -> bool:
+    return include_incomplete or run.get("status") == "completed"
+
+
+def _collect_runs_by_id(
+    client: JsonGitHubClient,
+    repository: str,
+    *,
+    run_ids: Sequence[str],
+    include_incomplete: bool,
+) -> list[dict[str, Any]]:
+    runs: list[dict[str, Any]] = []
+    for run_id in run_ids:
+        run = client.json(["api", _run_endpoint(repository, run_id)])
+        if _is_selected_run(run, include_incomplete=include_incomplete):
+            runs.append(run)
+    return runs
+
+
+def _collect_workflow_runs(
+    client: JsonGitHubClient,
+    repository: str,
+    *,
+    workflow: str,
+    branch: str,
+    event: str | None,
+    limit: int,
+    include_incomplete: bool,
+) -> list[dict[str, Any]]:
+    runs: list[dict[str, Any]] = []
     page_size = min(max(limit, 1), 100)
     for page in range(1, 101):
         payload = client.json(
@@ -254,7 +295,7 @@ def _collect_runs(
         if not page_runs:
             break
         for run in page_runs:
-            if include_incomplete or run.get("status") == "completed":
+            if _is_selected_run(run, include_incomplete=include_incomplete):
                 runs.append(run)
             if len(runs) >= limit:
                 return runs
@@ -698,9 +739,13 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _write_text(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8", newline="\n")
+def _write_text(raw_path: str, content: str, *, root: Path) -> None:
+    safe_path = ensure_path_within_root(
+        resolve_cli_path(raw_path, root=root),
+        root,
+    )
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def _has_acceptance_gap(report: dict[str, Any]) -> bool:
@@ -731,14 +776,19 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
     if args.json_out:
-        _write_text(resolve_output_path(args.json_out, root=repo_root), payload + "\n")
+        _write_text(
+            args.json_out,
+            payload + "\n",
+            root=repo_root,
+        )
     else:
         print(payload)
 
     if args.markdown_out:
         _write_text(
-            resolve_output_path(args.markdown_out, root=repo_root),
+            args.markdown_out,
             render_markdown(report),
+            root=repo_root,
         )
 
     if args.fail_on_acceptance_gap and _has_acceptance_gap(report):
