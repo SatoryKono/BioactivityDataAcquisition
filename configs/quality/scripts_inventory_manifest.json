@@ -17667,12 +17667,6 @@
       "reference_count": 22,
       "references": [
         {
-          "path": ".github/workflows/temporary-governance-log-9977.yml",
-          "line": 43,
-          "source_group": "ci",
-          "text": ".venv/bin/python -m scripts.engineering.repo check-inventory --check \\"
-        },
-        {
           "path": ".github/workflows/tests.yml",
           "line": 403,
           "source_group": "ci",
@@ -17713,6 +17707,12 @@
           "line": 585,
           "source_group": "scripts",
           "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-inventory \\"
+        },
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "| `check-inventory`       | `check_scripts_inventory.py`     | Check scripts inventory drift against manifest                        |"
         }
       ]
     },
