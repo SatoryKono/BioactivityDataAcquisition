@@ -23,7 +23,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.common.repo_paths import ensure_path_within_root, resolve_cli_path
+from scripts.engineering.common.repo_paths import (
+    ensure_path_within_root,
+    resolve_cli_path,
+)
 from scripts.engineering.repo.github_settings_review import (
     GitHubReviewError,
     ReadOnlyGitHubClient,
@@ -739,8 +742,18 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _prepare_output_path(raw_path: str, *, root: Path) -> Path:
-    return ensure_path_within_root(resolve_cli_path(raw_path, root=root), root)
+def _write_text(raw_path: str, content: str, *, root: Path) -> None:
+    """Write content only after confining raw_path under root."""
+    safe_path = ensure_path_within_root(
+        resolve_cli_path(raw_path, root=root),
+        root,
+    )
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(  # NOSONAR pythonsecurity:S8707 - confined by resolve_cli_path
+        content,
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def _has_acceptance_gap(report: dict[str, Any]) -> bool:
@@ -771,20 +784,12 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
     if args.json_out:
-        json_out = _prepare_output_path(args.json_out, root=repo_root)
-        json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(payload + "\n", encoding="utf-8", newline="\n")
+        _write_text(args.json_out, payload + "\n", root=repo_root)
     else:
         print(payload)
 
     if args.markdown_out:
-        markdown_out = _prepare_output_path(args.markdown_out, root=repo_root)
-        markdown_out.parent.mkdir(parents=True, exist_ok=True)
-        markdown_out.write_text(
-            render_markdown(report),
-            encoding="utf-8",
-            newline="\n",
-        )
+        _write_text(args.markdown_out, render_markdown(report), root=repo_root)
 
     if args.fail_on_acceptance_gap and _has_acceptance_gap(report):
         return 1

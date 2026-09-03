@@ -266,3 +266,21 @@ def test_docker_report_marks_acceptance_only_after_full_measured_sample(
     assert report["acceptance"]["publish_digest_proof_available"] is True
     assert report["acceptance"]["published_digest_run_ids"] == [5]
     assert "docker_owner_elapsed_seconds" in render_markdown(report)
+
+
+def test_write_text_refuses_path_escape(tmp_path: Path) -> None:
+    from scripts.engineering.ci.report_docker_actions_timing import _write_text
+
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside.json"
+    with pytest.raises(ValueError, match="refusing path"):
+        _write_text(str(outside), "{}\n", root=root)
+
+
+def test_write_text_confines_relative_output(tmp_path: Path) -> None:
+    from scripts.engineering.ci.report_docker_actions_timing import _write_text
+
+    _write_text("out/report.json", "{}\n", root=tmp_path)
+    written = tmp_path / "out" / "report.json"
+    assert written.read_text(encoding="utf-8") == "{}\n"
