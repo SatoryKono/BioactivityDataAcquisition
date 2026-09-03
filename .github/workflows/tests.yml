@@ -10,9 +10,6 @@ on:
       - "*.md"
       - ".ai/**"
       - "LICENSE"
-permissions:
-  contents: read
-
 concurrency:
   group: tests-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -1531,6 +1528,8 @@ jobs:
   duration-telemetry:
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - contract-confidence
       - flaky-telemetry
