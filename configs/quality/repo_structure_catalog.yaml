@@ -28,8 +28,8 @@ docs_code_zones:
   approved_roots:
     - path: docs/00-project/ai/agents/policy
       role: approved_repo_only_agent_policy_automation
-    - path: docs/00-project/ai/agents/scripts
-      role: approved_repo_only_agent_script_mirror
+    - path: docs/99-archive/agents-scripts-2026-09
+      role: archived_repo_only_agent_script_history
 
 root_tooling_roots:
   approved_roots:
