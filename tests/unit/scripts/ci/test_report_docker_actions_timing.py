@@ -4,6 +4,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from scripts.engineering.ci.report_docker_actions_timing import (
     build_report,
     render_markdown,
@@ -172,6 +174,7 @@ class FakeGitHubClient:
         raise AssertionError(endpoint)
 
 
+@pytest.mark.unit
 def test_report_separates_docker_validation_path_from_publish_wait(
     tmp_path: Path,
 ) -> None:
@@ -214,6 +217,7 @@ def test_report_separates_docker_validation_path_from_publish_wait(
     assert report["runs"][0]["docker_publish"]["conclusion"] == "cancelled"
 
 
+@pytest.mark.unit
 def test_report_marks_acceptance_only_after_full_measured_sample(
     tmp_path: Path,
 ) -> None:
