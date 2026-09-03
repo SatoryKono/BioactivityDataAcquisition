@@ -196,7 +196,9 @@ jobs:
                       requires_lfs: false
                     - shard: S7-crosscutting-architecture-d
                       requires_lfs: true
-                    - shard: S7-crosscutting-architecture-guardrails
+                    - shard: S7-crosscutting-architecture-guardrails-a
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-guardrails-b
                       requires_lfs: false
         env:
             BIOETL_PYTEST_SHARDED_TEST_HEALTH: '0'
@@ -242,6 +244,14 @@ jobs:
                       --no-cov \
                       -m "not slow and not benchmark and not memory"
 
+            -   name: Fail closed on empty collection or architecture skips
+                if: ${{ always() && !cancelled() }}
+                env:
+                    JUNIT_DIR: reports/quality/test-runs/junit/architecture/${{ matrix.shard }}
+                run: >
+                    uv run --frozen --no-build python -m scripts.engineering.ci
+                    architecture-junit-skips --junit-dir "${JUNIT_DIR}"
+
             -   name: Upload architecture JUnit artifact
                 if: ${{ always() && !cancelled() }}
                 uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
@@ -251,12 +261,58 @@ jobs:
                     if-no-files-found: error
                     retention-days: 14
 
+    arch-tests-slow:
+        name: Architecture (slow)
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        permissions:
+            contents: read
+        env:
+            BIOETL_PYTEST_SHARDED_TEST_HEALTH: "0"
+            BIOETL_REQUIRE_TEST_CAPABILITIES: "1"
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                with:
+                    fetch-depth: 0
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+
+            -   name: Run slow architecture nodes
+                shell: bash
+                run: |
+                    mkdir -p reports/quality/test-runs/junit/architecture/slow
+                    uv run --frozen --no-build python -m pytest tests/architecture \
+                      --timeout=300 \
+                      --no-cov \
+                      -m "slow and not benchmark and not memory" \
+                      --junitxml=reports/quality/test-runs/junit/architecture/slow/junit.xml
+
+            -   name: Fail closed on empty collection or architecture skips
+                if: ${{ always() && !cancelled() }}
+                env:
+                    JUNIT_DIR: reports/quality/test-runs/junit/architecture/slow
+                run: >
+                    uv run --frozen --no-build python -m scripts.engineering.ci
+                    architecture-junit-skips --junit-dir "${JUNIT_DIR}"
+
+            -   name: Upload slow architecture JUnit artifact
+                if: ${{ always() && !cancelled() }}
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: architecture-junit-slow-${{ github.sha }}
+                    path: reports/quality/test-runs/junit/architecture/slow/*.xml
+                    if-no-files-found: error
+                    retention-days: 14
+
     checks-complete:
         needs:
             - lint
             - c901-governance
             - import-contracts
             - arch-tests
+            - arch-tests-slow
         runs-on: ubuntu-latest
         timeout-minutes: 5
         if: ${{ always() }}
@@ -269,11 +325,13 @@ jobs:
                     C901_RESULT: ${{ needs['c901-governance'].result }}
                     IMPORT_CONTRACTS_RESULT: ${{ needs['import-contracts'].result }}
                     ARCH_RESULT: ${{ needs['arch-tests'].result }}
+                    ARCH_SLOW_RESULT: ${{ needs['arch-tests-slow'].result }}
                 run: |
                     if [[ "$LINT_RESULT" != "success" || \
                           "$C901_RESULT" != "success" || \
                           "$IMPORT_CONTRACTS_RESULT" != "success" || \
-                          "$ARCH_RESULT" != "success" ]]; then
+                          "$ARCH_RESULT" != "success" || \
+                          "$ARCH_SLOW_RESULT" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1
                     fi
