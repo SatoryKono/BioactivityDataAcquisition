@@ -715,7 +715,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 1
+      count: 2
       decision: retained
       rationale:
         Architecture policy tests delegate assertions to shared guard helpers or pytest.fail
