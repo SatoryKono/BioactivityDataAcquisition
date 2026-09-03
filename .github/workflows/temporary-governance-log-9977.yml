@@ -1,0 +1,68 @@
+name: Temporary governance log 9977
+
+on:
+  pull_request:
+    types: [synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-governance-artifacts:
+    name: Refresh canonical governance artifacts for 9977
+    if: >-
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref == 'refactor/docker-dependency-cache-9977'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact pull request head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python and locked dependencies
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: '3.12'
+          uv-extras: dev
+          uv-sync-args: --frozen
+
+      - name: Generate, verify, and emit bounded artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          .venv/bin/python -m scripts.engineering.qa.report_test_governance_audit \
+            --json-out reports/quality/test-governance-current.json \
+            --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
+          .venv/bin/python -m scripts.engineering.repo sync-inventory
+          .venv/bin/python -m scripts.engineering.qa.report_test_governance_audit --check
+          .venv/bin/python -m scripts.engineering.repo check-inventory --check \
+            --manifest configs/quality/scripts_inventory_manifest.json
+          git diff --check
+
+          unexpected="$(
+            git diff --name-only | grep -Ev \
+              '^(configs/quality/scripts_inventory_manifest.json|reports/quality/test-fixture-asset-duplication.json|reports/quality/test-governance-current.json)$' \
+              || true
+          )"
+          if [[ -n "$unexpected" ]]; then
+            echo 'Unexpected generated-file scope' >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+          for path in \
+            configs/quality/scripts_inventory_manifest.json \
+            reports/quality/test-fixture-asset-duplication.json \
+            reports/quality/test-governance-current.json
+          do
+            test -s "$path"
+            digest="$(sha256sum "$path" | awk '{print $1}')"
+            printf 'BIOETL_FILE_BEGIN:%s:%s\n' "$path" "$digest"
+            base64 -w 60000 "$path"
+            printf '\nBIOETL_FILE_END:%s\n' "$path"
+          done
