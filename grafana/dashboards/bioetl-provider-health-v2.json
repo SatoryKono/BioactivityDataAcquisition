@@ -635,18 +635,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "provider"
-            },
-            "properties": [
-              {
-                "id": "custom.hidden",
-                "value": true
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Value"
             },
             "properties": [
@@ -727,12 +715,46 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "provider"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Provider"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "source_state"
             },
             "properties": [
               {
-                "id": "custom.hidden",
-                "value": true
+                "id": "displayName",
+                "value": "Source state"
+              },
+              {
+                "id": "custom.width",
+                "value": 105
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -782,19 +804,20 @@
             "excludeByName": {
               "Time": true,
               "__name__": true,
-              "source_state": true,
               "job": true,
               "instance": true,
-              "endpoint": true,
-              "provider": true
+              "endpoint": true
             },
             "indexByName": {
+              "provider": 0,
               "reason": 1,
-              "Value": 2
+              "source_state": 2,
+              "Value": 3
             },
             "renameByName": {
               "Value": "Status",
-              "source_state": "source_state"
+              "source_state": "Source state",
+              "provider": "Provider"
             }
           }
         }
