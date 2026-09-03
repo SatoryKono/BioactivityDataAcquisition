@@ -343,20 +343,7 @@
           },
           "unit": "short",
           "noValue": "None observed",
-          "links": [
-            {
-              "title": "Open Run Explorer",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            },
-            {
-              "title": "Inspect DQ",
-              "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
-              "targetBlank": false,
-              "includeVars": false
-            }
-          ]
+          "links": []
         },
         "overrides": [
           {
@@ -427,11 +414,94 @@
             },
             "properties": [
               {
+                "id": "displayName",
+                "value": "Action"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "runtime": {
+                        "text": "Runtime",
+                        "color": "red"
+                      },
+                      "control_plane": {
+                        "text": "Control Plane",
+                        "color": "red"
+                      },
+                      "data_quality": {
+                        "text": "Data Quality",
+                        "color": "orange"
+                      },
+                      "workflow": {
+                        "text": "Workflow",
+                        "color": "orange"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "nan",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "auto",
-                  "wrapText": false
+                  "type": "color-text",
+                  "mode": "basic"
                 }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open Runtime",
+                    "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  },
+                  {
+                    "title": "Open Trust",
+                    "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  },
+                  {
+                    "title": "Open Data Quality",
+                    "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-stage=$__all&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           }
