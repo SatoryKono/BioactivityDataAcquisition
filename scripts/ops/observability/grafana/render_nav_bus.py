@@ -361,12 +361,12 @@ def _slack_candidate(
 ) -> tuple[int, dict[str, object]] | None:
     """
     Identify a text panel that can provide vertical space for navigation layout.
-    
+
     Parameters:
         panel (dict[str, object]): Panel to evaluate.
         nav (dict[str, object]): Canonical navigation panel to exclude.
         overflow (int): Number of rows that must be reclaimed.
-    
+
     Returns:
         tuple[int, dict[str, object]] | None: The panel's vertical position and panel when eligible; otherwise, `None`.
     """
@@ -388,12 +388,12 @@ def _shift_root_panels_up(
 ) -> None:
     """
     Shift eligible root panels upward by a fixed vertical distance.
-    
+
     Parameters:
-    	panels (list[object]): Panels whose root-level geometry may be adjusted.
-    	excluded_ids (frozenset[int]): Object IDs of panels that must remain unchanged.
-    	from_y (int): Minimum vertical position for panels to shift.
-    	delta (int): Number of vertical units to subtract from each eligible panel's position.
+        panels (list[object]): Panels whose root-level geometry may be adjusted.
+        excluded_ids (frozenset[int]): Object IDs of panels that must remain unchanged.
+        from_y (int): Minimum vertical position for panels to shift.
+        delta (int): Number of vertical units to subtract from each eligible panel's position.
     """
     for panel in _root_panels(panels):
         geometry = _panel_geometry(panel)
@@ -412,7 +412,7 @@ def _shift_root_panels_down(
     delta: int,
 ) -> None:
     """Shift eligible root panels downward by the specified amount.
-    
+
     Parameters:
         panels (list[object]): Panel tree to update.
         excluded_ids (frozenset[int]): Panel object IDs to leave unchanged.
@@ -432,13 +432,13 @@ def _restore_minimum_first_window_heights(
     panels: list[object], *, current_uid: str
 ) -> None:
     """Restore configured minimum heights for protected first-window panels.
-    
+
     Parameters:
-    	panels (list[object]): Dashboard panels whose layout may be adjusted.
-    	current_uid (str): UID of the dashboard whose protected panel heights apply.
-    
+        panels (list[object]): Dashboard panels whose layout may be adjusted.
+        current_uid (str): UID of the dashboard whose protected panel heights apply.
+
     Raises:
-    	SystemExit: If a configured protected panel is missing or has invalid geometry.
+        SystemExit: If a configured protected panel is missing or has invalid geometry.
     """
     minimums = _MINIMUM_FIRST_WINDOW_HEIGHTS.get(current_uid, {})
     by_id = {panel.get("id"): panel for panel in _root_panels(panels)}
@@ -472,15 +472,15 @@ def _compact_shared_band(
 ) -> None:
     """
     Compact root panels sharing the navigation rail's first-window band and shift lower panels upward.
-    
+
     Parameters:
-    	slack (dict[str, object]): The navigation rail panel defining the shared band.
-    	panels (list[object]): The dashboard panels to compact and reposition.
-    	nav (dict[str, object]): The navigation panel excluded from compaction.
-    	overflow (int): The number of vertical grid units to reclaim.
-    
+        slack (dict[str, object]): The navigation rail panel defining the shared band.
+        panels (list[object]): The dashboard panels to compact and reposition.
+        nav (dict[str, object]): The navigation panel excluded from compaction.
+        overflow (int): The number of vertical grid units to reclaim.
+
     Raises:
-    	SystemExit: If the navigation rail or compactable band lacks geometry, or compaction would reduce a panel below three grid units in height.
+        SystemExit: If the navigation rail or compactable band lacks geometry, or compaction would reduce a panel below three grid units in height.
     """
     geometry = _panel_geometry(slack)
     if geometry is None:  # pragma: no cover - candidates require geometry
@@ -521,12 +521,12 @@ def _compact_fallback_panel(
     panels: list[object], *, current_uid: str, overflow: int
 ) -> bool:
     """Reduce the height of an eligible overflowing root panel while preserving its configured minimum height.
-    
+
     Parameters:
         panels (list[object]): Dashboard panels to inspect and adjust.
         current_uid (str): UID of the dashboard whose fallback height rules apply.
         overflow (int): Number of rows to reclaim from the overflowing panel.
-    
+
     Returns:
         bool: `true` if a panel was compacted, `false` otherwise.
     """
@@ -557,7 +557,7 @@ def _compact_fallback_panel(
 def _normalize_collapsed_row_children(panels: list[object]) -> None:
     """
     Normalize descendant panel positions within collapsed rows.
-    
+
     Parameters:
         panels (list[object]): Dashboard panels containing collapsed rows to normalize.
     """
@@ -586,10 +586,10 @@ def _normalize_collapsed_row_children(panels: list[object]) -> None:
 
 def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
     """Shift a panel and its descendants vertically by the specified offset.
-    
+
     Parameters:
-    	panel (dict[str, object]): Root panel whose panel tree should be shifted.
-    	delta (int): Vertical offset to add to each panel's grid position.
+        panel (dict[str, object]): Root panel whose panel tree should be shifted.
+        delta (int): Vertical offset to add to each panel's grid position.
     """
     for descendant in _walk_panels([panel]):
         grid = _panel_grid(descendant)
@@ -600,12 +600,12 @@ def _shift_panel_tree(panel: dict[str, object], *, delta: int) -> None:
 def _layout_control_plane_first_window(panels: list[object]) -> None:
     """
     Normalize the Trust dashboard's first-window panel layout for the canonical navigation.
-    
+
     Parameters:
-    	panels (list[object]): Dashboard panels to reposition and resize.
-    
+        panels (list[object]): Dashboard panels to reposition and resize.
+
     Raises:
-    	SystemExit: If required panels, collapsed detail rows, or panel geometry are missing.
+        SystemExit: If required panels, collapsed detail rows, or panel geometry are missing.
     """
     root = _root_panels(panels)
     by_id = {panel.get("id"): panel for panel in root}
@@ -656,12 +656,12 @@ def _reclaim_first_window_overflow(
 ) -> None:
     """
     Compact eligible first-window layout space so the navigation remains within the viewport.
-    
+
     Parameters:
         nav (dict[str, object]): Navigation panel configuration used to identify eligible layout bands.
         panels (list[object]): Dashboard panels whose first-window layout may be compacted.
         current_uid (str | None): Current dashboard UID used to select a fallback panel when no eligible shared band exists.
-    
+
     Raises:
         SystemExit: If first-window overflow cannot be reclaimed from an eligible layout band.
     """
@@ -692,7 +692,7 @@ def _expand_nav_height(
 ) -> None:
     """
     Expand the navigation panel's height and shift panels below it downward.
-    
+
     Parameters:
         nav (dict[str, object]): The navigation panel to resize.
         panels (list[object]): Dashboard panels whose root-level positions may be shifted.
@@ -718,15 +718,15 @@ def _expand_nav_height(
 def apply_to_dashboard(path: Path, *, current_uid: str, check: bool = False) -> bool:
     """
     Apply canonical navigation and layout normalization to a dashboard file.
-    
+
     Parameters:
         path (Path): Dashboard JSON file to normalize.
         current_uid (str): UID of the dashboard being processed.
         check (bool): If true, report whether the file already matches without writing changes.
-    
+
     Returns:
         bool: True if normalization succeeds or the file matches in check mode, false if check mode detects drift.
-    
+
     Raises:
         SystemExit: If the file is outside the dashboard directory or required dashboard structure is missing.
     """
