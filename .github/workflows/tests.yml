@@ -566,7 +566,6 @@ jobs:
     # This live audit consumes no governance-preflight outputs; start after the
     # shared dependency integrity check so the blocking gate runs in parallel.
     needs: dependency-preflight
-    needs: dependency-preflight
     permissions:
       contents: read
 
@@ -735,7 +734,6 @@ jobs:
     timeout-minutes: 20
     # Quality metrics read the checked-in governance sources directly and do
     # not consume governance-preflight outputs.
-    needs: dependency-preflight
     needs: dependency-preflight
     permissions:
       contents: read

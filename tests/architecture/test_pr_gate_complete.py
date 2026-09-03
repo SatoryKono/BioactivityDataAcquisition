@@ -139,3 +139,41 @@ def test_policy_doc_mentions_shadow_aggregator() -> None:
 def test_aggregator_does_not_use_continue_on_error() -> None:
     text = COORDINATOR.read_text(encoding="utf-8")
     assert "continue-on-error" not in text
+
+
+def test_called_owner_workflows_reject_duplicate_yaml_keys() -> None:
+    """GitHub fails pr-required.yml at startup when a reusable owner is invalid YAML."""
+
+    class _UniqueKeyLoader(yaml.SafeLoader):
+        pass
+
+    def _construct_mapping(
+        loader: yaml.SafeLoader, node: yaml.nodes.MappingNode, deep: bool = False
+    ) -> dict[str, Any]:
+        mapping: dict[str, Any] = {}
+        duplicates: list[object] = []
+        for key_node, value_node in node.value:
+            key = loader.construct_object(key_node, deep=deep)
+            if key in mapping:
+                duplicates.append(key)
+            mapping[key] = loader.construct_object(value_node, deep=deep)
+        if duplicates:
+            mark = node.start_mark
+            raise yaml.constructor.ConstructorError(
+                None,
+                None,
+                f"duplicate keys {duplicates} at line {mark.line + 1}",
+                mark,
+            )
+        return mapping
+
+    _UniqueKeyLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        _construct_mapping,
+    )
+    catalog = _load_yaml(CATALOG)
+    owners = {gate["owner_workflow"] for gate in catalog["gates"]}
+    owners.add(".github/workflows/pr-required.yml")
+    for relative in sorted(owners):
+        path = ROOT / relative
+        yaml.load(path.read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
