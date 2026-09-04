@@ -56,6 +56,7 @@
     "bioetl_prometheus_rule_evaluation_failures_10m",
     "bioetl_prometheus_rule_iterations_missed_10m",
     "bioetl_prometheus_rule_partial_error_active_10m",
+    "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
     "bioetl_provider_health_check_degraded_12h",
     "bioetl_provider_health_check_degraded_15m",
@@ -248,6 +249,9 @@
     "bioetl_http_request_errors_total",
     "bioetl_http_retries_total",
     "bioetl_http_retry_budget_exhausted_total",
+    "bioetl_incident_ranked_dq",
+    "bioetl_incident_ranked_provider",
+    "bioetl_incident_ranked_runtime",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
     "bioetl_l0_input_status_selected",
@@ -276,7 +280,6 @@
     "bioetl_observability_runtime_status",
     "bioetl_output_artifact_publication_events_total",
     "bioetl_overview_pipeline_run_type_universe",
-    "bioetl_overview_pipeline_universe",
     "bioetl_phase_duration_seconds",
     "bioetl_pipeline_duration_seconds",
     "bioetl_pipeline_health_check_passed",
@@ -596,6 +599,9 @@
     "bioetl_http_request_errors_total",
     "bioetl_http_retries_total",
     "bioetl_http_retry_budget_exhausted_total",
+    "bioetl_incident_ranked_dq",
+    "bioetl_incident_ranked_provider",
+    "bioetl_incident_ranked_runtime",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
     "bioetl_l0_input_status_selected",
@@ -1660,6 +1666,18 @@
     "bioetl_http_retry_budget_exhausted_total": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_incident_ranked_dq": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "grafana/dashboards/bioetl-incident-v1.json"
+    ],
+    "bioetl_incident_ranked_provider": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "grafana/dashboards/bioetl-incident-v1.json"
+    ],
+    "bioetl_incident_ranked_runtime": [
+      "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "grafana/dashboards/bioetl-incident-v1.json"
+    ],
     "bioetl_infrastructure_validated": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1833,10 +1851,6 @@
       "grafana/dashboards/bioetl-overview-v2.json",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
-    "bioetl_overview_pipeline_universe": [
-      "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "grafana/dashboards/bioetl-incident-v1.json"
-    ],
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
@@ -1989,7 +2003,6 @@
     "bioetl_provider_health_check_provider_universe_15m": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
     "bioetl_provider_health_observed_timestamp_seconds": [
@@ -2230,7 +2243,6 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-incident-v1.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_pipeline_run_type_universe_scoped": [
@@ -3151,6 +3163,9 @@
     "bioetl_http_request_errors_total",
     "bioetl_http_retries_total",
     "bioetl_http_retry_budget_exhausted_total",
+    "bioetl_incident_ranked_dq",
+    "bioetl_incident_ranked_provider",
+    "bioetl_incident_ranked_runtime",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
     "bioetl_l0_input_status_selected",
@@ -3526,6 +3541,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_prometheus_rule_partial_error_active_10m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_current_cause": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_provider_current_status": [

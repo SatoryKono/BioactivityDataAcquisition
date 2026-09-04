@@ -12,15 +12,13 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from types import ModuleType
-
 import pytest
 
 from pathlib import Path
 
 import yaml
+
+from scripts.schema.analysis import config_gap_analysis, generate_config_matrix
 
 
 pytestmark = pytest.mark.architecture
@@ -44,15 +42,6 @@ def _load_inventory() -> dict[str, object]:
     payload = yaml.safe_load(INVENTORY_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict), "config validation inventory must be a mapping"
     return payload
-
-
-def _load_module(path: Path, module_name: str) -> ModuleType:
-    spec = importlib.util.spec_from_file_location(module_name, str(path.resolve()))
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
 
 
 def _tracked_config_files() -> list[str]:
@@ -157,7 +146,7 @@ def test_validate_configs_reports_validation_depth_summary() -> None:
     assert "Config validation surface family depths" in script
 
 
-def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
+def test_ai_docs_validate_configs_legacy_wrappers_stay_retired() -> None:
     live_wrapper = (
         ROOT
         / "docs"
@@ -168,15 +157,15 @@ def test_ai_docs_validate_configs_script_is_wrapper_only() -> None:
         / "py-config-bot-2.py"
     )
     assert not live_wrapper.exists()
-    wrapper = (
+    archived_wrapper = (
         ROOT / "docs" / "99-archive" / "agents-scripts-2026-09" / "py-config-bot-2.py"
-    ).read_text(encoding="utf-8")
-
-    assert (
-        'import_module("scripts.schema.validation.validate_pipeline_configs")'
-        in wrapper
     )
-    assert "def validate_config_tree" not in wrapper
+    assert not archived_wrapper.exists()
+
+    canonical_validator = (
+        ROOT / "scripts" / "schema" / "validation" / "validate_pipeline_configs.py"
+    )
+    assert canonical_validator.is_file()
 
 
 def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
@@ -184,14 +173,21 @@ def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
 ) -> None:
     """Legacy entity composite stubs must not be re-audited as standard configs."""
     monkeypatch.chdir(ROOT)
-    module = _load_module(
-        ROOT / "docs" / "99-archive" / "agents-scripts-2026-09" / "py-config-bot-1.py",
-        "py_config_bot_1_runtime",
-    )
+
+    config_names = set(generate_config_matrix._collect_configs())
+
+    assert "composite/molecule" in config_names
+    assert not any(name.startswith("entity/composite/") for name in config_names)
+
+
+def test_config_gap_analysis_uses_canonical_composite_runtime_configs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The maintained gap analyzer must not scan retired entity composite stubs."""
+    monkeypatch.chdir(ROOT)
 
     config_paths = {
-        path.as_posix()
-        for path in module._iter_config_files()  # type: ignore[attr-defined]
+        path.as_posix() for path in config_gap_analysis._iter_config_files()
     }
 
     assert "configs/composites/molecule.yaml" in config_paths

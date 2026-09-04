@@ -51,8 +51,8 @@ ______________________________________________________________________
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python docs/99-archive/agents-scripts-2026-09/py-config-bot-2.py`, `python docs/99-archive/agents-scripts-2026-09/py-config-bot-1.py`.
-- **Терминология**: `python docs/99-archive/agents-scripts-2026-09/py-team-orchestration.py`.
+- **Конфиги**: `python -m scripts.schema validate-configs`, `python -m scripts.schema analyze-gaps`.
+- **Терминология**: `python -m scripts.engineering.qa check-terminology`.
 
 ______________________________________________________________________
 
