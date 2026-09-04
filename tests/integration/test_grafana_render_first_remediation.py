@@ -820,16 +820,14 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     exclude = organize.get("options", {}).get("excludeByName", {})
     rename = organize.get("options", {}).get("renameByName", {})
 
-    assert len(suspects.get("targets", [])) == 3
-    assert all(
-        'severity="failing"' in str(target.get("expr") or "")
-        or 'severity="crit"' in str(target.get("expr") or "")
-        for target in suspects.get("targets", [])
-    )
-    assert all(
-        "telemetry_gap" in str(target.get("expr") or "")
-        for target in suspects.get("targets", [])
-    )
+    exprs = [
+        str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
+    ]
+    assert exprs == [
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    ]
     assert "merge" in transform_ids
     assert "sortBy" in transform_ids
     assert "limit" in transform_ids
@@ -866,9 +864,29 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
     )
     exclude = organize.get("options", {}).get("excludeByName", {})
     assert exclude.get("Value") is not True
-    exprs = [str(target.get("expr") or "") for target in suspects.get("targets", [])]
-    assert any("* 2" in expr for expr in exprs)
-    assert all(" > 0" not in expr.split("topk", 1)[0] for expr in exprs)
+    exprs = [
+        str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
+    ]
+    assert exprs == [
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    ]
+    rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
+    recorded = {
+        str(rule.get("record")): str(rule.get("expr") or "")
+        for group in rules.get("groups", [])
+        for rule in group.get("rules", [])
+        if rule.get("record") in set(exprs)
+    }
+    assert set(recorded) == set(exprs)
+    assert any("* 2" in expr for expr in recorded.values())
+    assert all(
+        'severity="failing"' in expr or 'severity="crit"' in expr
+        for expr in recorded.values()
+    )
+    assert all("telemetry_gap" in expr for expr in recorded.values())
+    assert all(" > 0" not in expr.split("topk", 1)[0] for expr in recorded.values())
 
 
 def test_incident_alert_history_has_readable_full_width_layout() -> None:

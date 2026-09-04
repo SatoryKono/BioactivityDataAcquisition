@@ -51,6 +51,9 @@ metric_coverage_classes:
   bioetl_health_check_latency_seconds_bucket: event_optional
   bioetl_health_check_success_total: event_optional
   bioetl_http_request_errors_total: event_optional
+  bioetl_incident_ranked_dq: required_current
+  bioetl_incident_ranked_provider: required_current
+  bioetl_incident_ranked_runtime: required_current
   bioetl_l0_input_status_selected: required_when_active
   bioetl_l0_next_action_no_route: required_when_active
   bioetl_l0_next_action_route: required_when_active

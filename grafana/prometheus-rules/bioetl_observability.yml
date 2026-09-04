@@ -1120,6 +1120,113 @@ groups:
             )
           )
 
+
+      - record: bioetl_incident_ranked_runtime
+        expr: |-
+          (
+            topk(5,
+              label_replace(
+                label_replace(
+                  label_replace(
+                    (
+                      max by (pipeline, run_type, reason, severity, action_target) (
+                        bioetl_runtime_current_blocker_reason{severity="failing"}
+                      ) * 2
+                      or
+                      max by (pipeline, run_type, reason, severity, action_target) (
+                        bioetl_runtime_current_blocker_reason{severity="degraded"}
+                      )
+                    ),
+                    "domain", "runtime", "", ""
+                  ),
+                  "signal", "$1", "reason", "(.*)"
+                ),
+                "action", "$1", "action_target", "(.*)"
+              )
+            )
+          )
+          or
+          label_replace(
+            label_replace(
+              label_replace(
+                (absent(bioetl_runtime_pipeline_run_type_universe) * 0),
+                "domain", "runtime", "", ""
+              ),
+              "signal", "telemetry_gap", "", ""
+            ),
+            "action", "UNKNOWN", "", ""
+          )
+      - record: bioetl_incident_ranked_provider
+        expr: |-
+          (
+            topk(5,
+              label_replace(
+                label_replace(
+                  label_replace(
+                    (
+                      max by (provider, cause, severity) (
+                        bioetl_provider_current_cause{severity="failing"}
+                      ) * 2
+                      or
+                      max by (provider, cause, severity) (
+                        bioetl_provider_current_cause{severity="degraded"}
+                      )
+                    ),
+                    "domain", "provider", "", ""
+                  ),
+                  "signal", "$1", "cause", "(.*)"
+                ),
+                "action", "provider", "", ""
+              )
+            )
+          )
+          or
+          label_replace(
+            label_replace(
+              label_replace(
+                (absent(bioetl_provider_health_check_provider_universe_15m) * 0),
+                "domain", "provider", "", ""
+              ),
+              "signal", "telemetry_gap", "", ""
+            ),
+            "action", "UNKNOWN", "", ""
+          )
+      - record: bioetl_incident_ranked_dq
+        expr: |-
+          (
+            topk(5,
+              label_replace(
+                label_replace(
+                  label_replace(
+                    (
+                      max by (pipeline, reason, severity, action_target) (
+                        bioetl_dq_current_reason{severity="crit"}
+                      ) * 2
+                      or
+                      max by (pipeline, reason, severity, action_target) (
+                        bioetl_dq_current_reason{severity="warn"}
+                      )
+                    ),
+                    "domain", "dq", "", ""
+                  ),
+                  "signal", "$1", "reason", "(.*)"
+                ),
+                "action", "$1", "action_target", "(.*)"
+              )
+            )
+          )
+          or
+          label_replace(
+            label_replace(
+              label_replace(
+                (absent(bioetl_overview_pipeline_universe) * 0),
+                "domain", "dq", "", ""
+              ),
+              "signal", "telemetry_gap", "", ""
+            ),
+            "action", "UNKNOWN", "", ""
+          )
+
   - name: bioetl_monitoring_stack_observability
     interval: 30s
     rules:
