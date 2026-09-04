@@ -1,14 +1,14 @@
 version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
-source_branch: fix/main-codeql-ci-20260904
-refreshed_at_utc: '2026-09-04T14:06:47.139359+00:00'
+source_branch: main
+refreshed_at_utc: '2026-09-04T16:59:22.631315+00:00'
 refresh_status: captured
-source_commit: 8600a9198032846581e0b2b944bdab69ffee024f
-source_run_id: '33880985766'
-source_event: pull_request
-source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33880985766
-source_tree_sha256: f8569e512668fa9f5055f13a04bd341ed67ee27dc5867f09f8ffd86aa1a5f7ee
+source_commit: 39a2ae0ed7af7e5eaa7e1da59b82de5fc61c97c9
+source_run_id: '33896245948'
+source_event: push
+source_run_url: https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33896245948
+source_tree_sha256: 9cc22cc881545193a985510c186d702cd9a7757b9ca5473dc7e89109a2177434
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
