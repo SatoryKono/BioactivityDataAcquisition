@@ -2189,7 +2189,6 @@
         "docs/00-project/RULES.md",
         "docs/00-project/ai/prompts/README.md",
         "docs/00-project/ai/prompts/domains.yaml",
-        "docs/00-project/consolidation-20260901-12h.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
       ],
