@@ -683,3 +683,5 @@ _fail_*.txt
 !/docs/99-archive/agents-scripts-2026-09/**
 !/docs/99-archive/agents-policy-2026-09/
 !/docs/99-archive/agents-policy-2026-09/**
+!/docs/99-archive/skills-2026-09/
+!/docs/99-archive/skills-2026-09/**
