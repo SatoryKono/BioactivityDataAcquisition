@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-04T05:58:41.486742+00:00",
+  "generated_at": "2026-09-04T06:07:46.939749+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -140,14 +140,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 36,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |"
-        },
         {
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 135,
@@ -167,7 +161,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 13,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -7997,7 +7991,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 224,
+      "reference_count": 223,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -10604,13 +10598,13 @@
       "reference_count": 260,
       "references": [
         {
-          "path": "docs/00-project/ai/skills/global/gh-fix-ci/scripts/inspect_pr_checks.py",
+          "path": "docs/00-project/ai/skills/local/gh-fix-ci/scripts/inspect_pr_checks.py",
           "line": 60,
           "source_group": "docs",
           "text": "from scripts.engineering.common.repo_paths import ensure_safe_cli_argv"
         },
         {
-          "path": "docs/00-project/ai/skills/global/gh-fix-ci/scripts/inspect_pr_checks.py",
+          "path": "docs/00-project/ai/skills/local/gh-fix-ci/scripts/inspect_pr_checks.py",
           "line": 72,
           "source_group": "docs",
           "text": "from scripts.engineering.common.repo_paths import ensure_safe_cli_argv"
