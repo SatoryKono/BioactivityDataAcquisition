@@ -401,7 +401,6 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
         overlay_count = 0
         for name, data in sorted(domains.items()):
             overlay_count += 1
-            path = DOMAINS_PATH
             label = DOMAINS_PATH.as_posix() + f"#{name}"
             if not isinstance(data, dict):
                 report.add_error("overlay_parse", "overlay must be a mapping", label)
