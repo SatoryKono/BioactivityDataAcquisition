@@ -235,13 +235,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -416,17 +416,15 @@
     },
     {
       "current": {
-        "artifacts": [
-          "adr_enforcement_matrix"
-        ],
-        "count": 1
+        "artifacts": [],
+        "count": 0
       },
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
-      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: adr_enforcement_matrix",
+      "remediation": "Regenerate stale quality artifacts with their canonical QA commands: none",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -451,7 +449,7 @@
   ],
   "schema_version": 1,
   "stale_artifacts": {
-    "adr_enforcement_matrix": true,
+    "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
@@ -469,7 +467,7 @@
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 1,
     "failing_gates": [
-      "generated_artifact_drift"
+      "supporting_scripts_zero_reference_count"
     ],
     "gate_count": 45,
     "pass_count": 44,
