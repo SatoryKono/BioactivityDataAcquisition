@@ -240,9 +240,7 @@ def cmd_project_full_links(args: argparse.Namespace) -> int:
 
 def cmd_catalog(args: argparse.Namespace) -> int:
     text = generate_catalog_markdown()
-    out = (
-        Path(args.output) if args.output else PROMPTS_ROOT / "CATALOG.md"
-    )
+    out = Path(args.output) if args.output else PROMPTS_ROOT / "CATALOG.md"
     if not out.is_absolute():
         out = REPO_ROOT / out if str(out).startswith("reports") else out
         if not out.is_absolute():

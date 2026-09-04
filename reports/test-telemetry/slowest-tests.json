@@ -1,68 +1,83 @@
 {
-  "source_branch": "main",
-  "source_commit": "9fb876a82503087dd4c63ca60f1990a50fcb2e3e",
-  "source_run_id": "33885545073",
-  "source_event": "push",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33885545073",
+  "source_branch": "fix/main-codeql-ci-20260904",
+  "source_commit": "8600a9198032846581e0b2b944bdab69ffee024f",
+  "source_run_id": "33880985766",
+  "source_event": "pull_request",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33880985766",
   "source_tree_sha256": "f8569e512668fa9f5055f13a04bd341ed67ee27dc5867f09f8ffd86aa1a5f7ee",
-  "refreshed_at_utc": "2026-09-04T16:02:28.549264+00:00",
+  "refreshed_at_utc": "2026-09-04T14:06:47.139359+00:00",
   "refresh_status": "captured",
   "total_cases": 49636,
   "top_slowest": [
     {
-      "duration_s": 16.331,
+      "duration_s": 18.072,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing"
     },
     {
-      "duration_s": 10.759,
+      "duration_s": 10.991,
       "source": "junit-repo-backed-unit.ops.xml",
       "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation"
     },
     {
-      "duration_s": 9.71,
+      "duration_s": 10.549,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
     },
     {
-      "duration_s": 9.703,
+      "duration_s": 10.505,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact"
     },
     {
-      "duration_s": 9.177,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
-    },
-    {
-      "duration_s": 7.639,
+      "duration_s": 10.095,
       "source": "junit-unit-scripts-tooling.other.xml",
       "test": "tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors"
     },
     {
-      "duration_s": 7.36,
-      "source": "junit.unit-other.xml",
-      "test": "tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines"
+      "duration_s": 9.279,
+      "source": "junit-contract-confidence.xml",
+      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
     },
     {
-      "duration_s": 7.347,
+      "duration_s": 8.072,
+      "source": "junit-repo-backed-unit.ops.xml",
+      "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report"
+    },
+    {
+      "duration_s": 7.527,
       "source": "junit.unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness"
     },
     {
-      "duration_s": 7.298,
+      "duration_s": 7.331,
+      "source": "junit.unit-other.xml",
+      "test": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction::test_matches_registry_list"
+    },
+    {
+      "duration_s": 7.296,
       "source": "junit-repo-backed-unit.product.xml",
       "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories"
     },
     {
-      "duration_s": 7.171,
+      "duration_s": 6.943,
       "source": "junit-unit-scripts-tooling.other.xml",
       "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry"
     },
     {
-      "duration_s": 6.767,
+      "duration_s": 6.702,
+      "source": "junit-track-d.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
+    },
+    {
+      "duration_s": 6.469,
       "source": "junit-unit-scripts-tooling.passport.xml",
       "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified"
+    },
+    {
+      "duration_s": 6.119,
+      "source": "junit.integration.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
     },
     {
       "duration_s": 6.004,
@@ -70,126 +85,126 @@
       "test": "tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover"
     },
     {
-      "duration_s": 5.954,
-      "source": "junit.integration.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
-    },
-    {
-      "duration_s": 5.944,
-      "source": "junit-repo-backed-unit.ops.xml",
-      "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report"
-    },
-    {
-      "duration_s": 5.883,
-      "source": "junit-track-d.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
-    },
-    {
-      "duration_s": 4.914,
+      "duration_s": 4.826,
       "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+      "test": "tests.unit.scripts.ops.observability.test_grafana_panel_containment::test_select_first_window_panels_skips_rows_and_below_fold"
     },
     {
-      "duration_s": 4.747,
+      "duration_s": 4.814,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming"
     },
     {
-      "duration_s": 4.052,
+      "duration_s": 4.642,
+      "source": "junit-unit-scripts-tooling.other.xml",
+      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+    },
+    {
+      "duration_s": 4.391,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name 'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set for test MCP]"
+    },
+    {
+      "duration_s": 4.066,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible"
     },
     {
-      "duration_s": 4.016,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.test_normalization_governance_cli_smoke::test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke"
-    },
-    {
-      "duration_s": 3.999,
+      "duration_s": 4.043,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_exposes_shared_chembl_policy_surfaces"
     },
     {
-      "duration_s": 3.981,
+      "duration_s": 4.033,
+      "source": "junit-unit-scripts-tooling.debt-governance.xml",
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_release_review_freshness_gate_passes_for_recent_live_review"
+    },
+    {
+      "duration_s": 4.003,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope"
     },
     {
-      "duration_s": 3.976,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_accepts_current_fallback_business_budget"
+      "duration_s": 3.916,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213"
     },
     {
-      "duration_s": 3.945,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_writes_deterministic_artifacts"
-    },
-    {
-      "duration_s": 3.94,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_returns_non_zero_when_fallback_business_budget_is_exceeded"
-    },
-    {
-      "duration_s": 3.839,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_chembl_case_and_ontology_consistency::test_chembl_ontology_identifier_families_are_profile_and_matrix_aligned[profile0-chembl_assay-bao_format-bao:0000190-BAO_0000190]"
+      "duration_s": 3.906,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_pipeline_normalization_field_matrix_1223__c8b0b2c2"
     }
   ],
   "top_slowest_tests": [
     {
-      "duration_s": 16.331,
+      "duration_s": 18.072,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload__missing_flaky_review__fails_gate_without_crashing"
     },
     {
-      "duration_s": 10.759,
+      "duration_s": 10.991,
       "source": "junit-repo-backed-unit.ops.xml",
       "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_last_resort_requires_switch_and_should_process_confirmation"
     },
     {
-      "duration_s": 9.71,
+      "duration_s": 10.549,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale"
     },
     {
-      "duration_s": 9.703,
+      "duration_s": 10.505,
       "source": "junit-unit-scripts-tooling.debt-governance.xml",
       "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact"
     },
     {
-      "duration_s": 9.177,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
-    },
-    {
-      "duration_s": 7.639,
+      "duration_s": 10.095,
       "source": "junit-unit-scripts-tooling.other.xml",
       "test": "tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv::test_script_runs_without_errors"
     },
     {
-      "duration_s": 7.36,
-      "source": "junit.unit-other.xml",
-      "test": "tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration::test_bootstrapped_service_can_list_pipelines"
+      "duration_s": 9.279,
+      "source": "junit-contract-confidence.xml",
+      "test": "tests.contract.test_provider_contract_drift_replay::test_provider_contract_replay_cases_do_not_break[openalex:works_search_endpoint]"
     },
     {
-      "duration_s": 7.347,
+      "duration_s": 8.072,
+      "source": "junit-repo-backed-unit.ops.xml",
+      "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report"
+    },
+    {
+      "duration_s": 7.527,
       "source": "junit.unit-other.xml",
       "test": "tests.unit.composition.factories.pipeline.test_registry::test_registry_completeness"
     },
     {
-      "duration_s": 7.298,
+      "duration_s": 7.331,
+      "source": "junit.unit-other.xml",
+      "test": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction::test_matches_registry_list"
+    },
+    {
+      "duration_s": 7.296,
       "source": "junit-repo-backed-unit.product.xml",
       "test": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures::test_cached_populated_isolated_registry_contains_pipeline_factories"
     },
     {
-      "duration_s": 7.171,
+      "duration_s": 6.943,
       "source": "junit-unit-scripts-tooling.other.xml",
       "test": "tests.unit.scripts.qa.test_check_quality_exemptions::test_check_quality_exemptions_passes_current_zero_budget_registry"
     },
     {
-      "duration_s": 6.767,
+      "duration_s": 6.702,
+      "source": "junit-track-d.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
+    },
+    {
+      "duration_s": 6.469,
       "source": "junit-unit-scripts-tooling.passport.xml",
       "test": "tests.unit.scripts.docs.passports.test_passport_projector::test_workflow_operations_are_classified"
+    },
+    {
+      "duration_s": 6.119,
+      "source": "junit.integration.xml",
+      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
     },
     {
       "duration_s": 6.004,
@@ -197,131 +212,116 @@
       "test": "tests.unit.scripts.ops.test_recover_renderer::test_check_only_suggests_recover"
     },
     {
-      "duration_s": 5.954,
-      "source": "junit.integration.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
-    },
-    {
-      "duration_s": 5.944,
-      "source": "junit-repo-backed-unit.ops.xml",
-      "test": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery::test_cli_unavailable_fails_closed_with_redacted_report"
-    },
-    {
-      "duration_s": 5.883,
-      "source": "junit-track-d.xml",
-      "test": "tests.integration.ci.test_track_d_fixture_control_plane_linkage::test_tracked_fixture_run_persists_linked_control_plane_artifacts"
-    },
-    {
-      "duration_s": 4.914,
+      "duration_s": 4.826,
       "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+      "test": "tests.unit.scripts.ops.observability.test_grafana_panel_containment::test_select_first_window_panels_skips_rows_and_below_fold"
     },
     {
-      "duration_s": 4.747,
+      "duration_s": 4.814,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_gold_pk_consistency.TestGoldPkConsistency::test_pipeline_configs_use_new_pk_naming"
     },
     {
-      "duration_s": 4.052,
+      "duration_s": 4.642,
+      "source": "junit-unit-scripts-tooling.other.xml",
+      "test": "tests.unit.scripts.qa.test_generate_semantic_pipeline_audit::test_build_current_member_facts_exposes_composite_inherited_field_types"
+    },
+    {
+      "duration_s": 4.391,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.ai.mcp.test_mcp_wrapper_contracts::test_powershell_token_warnings_stay_on_stderr[Remove-Item Env:OPTIONAL_TOKEN -ErrorAction SilentlyContinue; Test-McpOptionalToken -Name 'OPTIONAL_TOKEN' -MinLength 8 -Purpose 'test MCP'-OPTIONAL_TOKEN is not set for test MCP]"
+    },
+    {
+      "duration_s": 4.066,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_chembl_publication_prefixed_identifiers_and_raw_type_are_schema_visible"
     },
     {
-      "duration_s": 4.016,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.test_normalization_governance_cli_smoke::test_docs_cli_generate_pipeline_normalization_matrix_execution_smoke"
-    },
-    {
-      "duration_s": 3.999,
+      "duration_s": 4.043,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_exposes_shared_chembl_policy_surfaces"
     },
     {
-      "duration_s": 3.981,
+      "duration_s": 4.033,
+      "source": "junit-unit-scripts-tooling.debt-governance.xml",
+      "test": "tests.unit.scripts.qa.test_report_debt_governance_gates::test_release_review_freshness_gate_passes_for_recent_live_review"
+    },
+    {
+      "duration_s": 4.003,
       "source": "junit-contract-confidence.xml",
       "test": "tests.contract.test_normalization_cross_layer_contracts::test_profile_matrix_distinguishes_provider_universe_from_project_policy_scope"
     },
     {
-      "duration_s": 3.976,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_accepts_current_fallback_business_budget"
+      "duration_s": 3.916,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_check_artifacts_detects_drift__unit_scripts_test_generate_pipeline_normalization_field_matrix_1213"
     },
     {
-      "duration_s": 3.945,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_writes_deterministic_artifacts"
-    },
-    {
-      "duration_s": 3.94,
-      "source": "junit-unit-scripts-tooling.other.xml",
-      "test": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory::test_main_returns_non_zero_when_fallback_business_budget_is_exceeded"
-    },
-    {
-      "duration_s": 3.839,
-      "source": "junit-contract-confidence.xml",
-      "test": "tests.contract.test_chembl_case_and_ontology_consistency::test_chembl_ontology_identifier_families_are_profile_and_matrix_aligned[profile0-chembl_assay-bao_format-bao:0000190-BAO_0000190]"
+      "duration_s": 3.906,
+      "source": "junit-repo-backed-unit.tooling.xml",
+      "test": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix::test_pipeline_normalization_field_matrix_1223__c8b0b2c2"
     }
   ],
   "top_slowest_zones": [
     {
       "zone": "tests.unit.scripts.qa.test_report_debt_governance_gates",
-      "test_count": 3,
-      "total_duration_s": 35.744,
-      "max_duration_s": 16.331
+      "test_count": 4,
+      "total_duration_s": 43.159,
+      "max_duration_s": 18.072
     },
     {
       "zone": "tests.unit.repo_backed.scripts.ops.docker.test_restart_docker_recovery",
       "test_count": 2,
-      "total_duration_s": 16.703,
-      "max_duration_s": 10.759
-    },
-    {
-      "zone": "tests.contract.test_normalization_cross_layer_contracts",
-      "test_count": 3,
-      "total_duration_s": 12.032,
-      "max_duration_s": 4.052
-    },
-    {
-      "zone": "tests.unit.scripts.qa.test_report_normalization_fallback_inventory",
-      "test_count": 3,
-      "total_duration_s": 11.861,
-      "max_duration_s": 3.976
+      "total_duration_s": 19.063,
+      "max_duration_s": 10.991
     },
     {
       "zone": "tests.integration.ci.test_track_d_fixture_control_plane_linkage",
       "test_count": 2,
-      "total_duration_s": 11.837,
-      "max_duration_s": 5.954
+      "total_duration_s": 12.821,
+      "max_duration_s": 6.702
     },
     {
-      "zone": "tests.contract.test_provider_contract_drift_replay",
-      "test_count": 1,
-      "total_duration_s": 9.177,
-      "max_duration_s": 9.177
+      "zone": "tests.contract.test_normalization_cross_layer_contracts",
+      "test_count": 3,
+      "total_duration_s": 12.112,
+      "max_duration_s": 4.066
     },
     {
       "zone": "tests.unit.scripts.ai.mcp.test_export_mcp_env_from_dotenv.TestExportMcpEnvFromDotenv",
       "test_count": 1,
-      "total_duration_s": 7.639,
-      "max_duration_s": 7.639
+      "total_duration_s": 10.095,
+      "max_duration_s": 10.095
     },
     {
-      "zone": "tests.unit.composition.bootstrap.test_runner_bootstrap.TestBootstrapPipelineRunnerServiceIntegration",
+      "zone": "tests.contract.test_provider_contract_drift_replay",
       "test_count": 1,
-      "total_duration_s": 7.36,
-      "max_duration_s": 7.36
+      "total_duration_s": 9.279,
+      "max_duration_s": 9.279
+    },
+    {
+      "zone": "tests.unit.repo_backed.scripts.test_generate_pipeline_normalization_field_matrix",
+      "test_count": 2,
+      "total_duration_s": 7.822,
+      "max_duration_s": 3.916
     },
     {
       "zone": "tests.unit.composition.factories.pipeline.test_registry",
       "test_count": 1,
-      "total_duration_s": 7.347,
-      "max_duration_s": 7.347
+      "total_duration_s": 7.527,
+      "max_duration_s": 7.527
+    },
+    {
+      "zone": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestListAvailablePipelinesFunction",
+      "test_count": 1,
+      "total_duration_s": 7.331,
+      "max_duration_s": 7.331
     },
     {
       "zone": "tests.unit.repo_backed.composition.test_bootstrap_cache_fixtures",
       "test_count": 1,
-      "total_duration_s": 7.298,
-      "max_duration_s": 7.298
+      "total_duration_s": 7.296,
+      "max_duration_s": 7.296
     }
   ],
   "execution_context": {
@@ -366,52 +366,52 @@
       "junit.unit-other.xml"
     ],
     "junit_testcase_duration_sum_s": {
-      "junit-contract-confidence.xml": 79.543,
-      "junit-fast.unit-application.xml": 21.603,
-      "junit-fast.unit-domain.xml": 70.129,
-      "junit-fast.unit-infrastructure.xml": 11.176,
-      "junit-fast.unit-other.xml": 26.699,
-      "junit-memory.xml": 3.071,
-      "junit-repo-backed-unit.ops.xml": 36.081,
-      "junit-repo-backed-unit.product.xml": 19.599,
-      "junit-repo-backed-unit.tooling.xml": 87.426,
-      "junit-serial-coverage.xml": 0.118,
-      "junit-track-d.xml": 7.245,
-      "junit-unit-filesystem-contracts.xml": 2.591,
-      "junit-unit-scripts-tooling.debt-governance.xml": 41.57,
-      "junit-unit-scripts-tooling.other.xml": 92.053,
-      "junit-unit-scripts-tooling.passport.xml": 16.096,
-      "junit-unit-subprocess-backed.xml": 0.223,
-      "junit.integration.xml": 99.862,
-      "junit.security.xml": 12.361,
-      "junit.unit-application.xml": 37.986,
-      "junit.unit-domain.xml": 153.981,
-      "junit.unit-infrastructure.xml": 40.387,
-      "junit.unit-other.xml": 70.302
+      "junit-contract-confidence.xml": 80.523,
+      "junit-fast.unit-application.xml": 22.509,
+      "junit-fast.unit-domain.xml": 69.959,
+      "junit-fast.unit-infrastructure.xml": 16.958,
+      "junit-fast.unit-other.xml": 19.692,
+      "junit-memory.xml": 3.658,
+      "junit-repo-backed-unit.ops.xml": 37.673,
+      "junit-repo-backed-unit.product.xml": 19.762,
+      "junit-repo-backed-unit.tooling.xml": 115.504,
+      "junit-serial-coverage.xml": 0.092,
+      "junit-track-d.xml": 8.226,
+      "junit-unit-filesystem-contracts.xml": 2.285,
+      "junit-unit-scripts-tooling.debt-governance.xml": 45.503,
+      "junit-unit-scripts-tooling.other.xml": 95.047,
+      "junit-unit-scripts-tooling.passport.xml": 15.687,
+      "junit-unit-subprocess-backed.xml": 0.162,
+      "junit.integration.xml": 104.37,
+      "junit.security.xml": 11.849,
+      "junit.unit-application.xml": 36.419,
+      "junit.unit-domain.xml": 132.61,
+      "junit.unit-infrastructure.xml": 42.667,
+      "junit.unit-other.xml": 70.263
     },
     "lane_wall_time_s": {
-      "junit-contract-confidence.xml": 89.639,
-      "junit-fast.unit-application.xml": 47.738,
-      "junit-fast.unit-domain.xml": 93.2,
-      "junit-fast.unit-infrastructure.xml": 24.744,
-      "junit-fast.unit-other.xml": 46.736,
-      "junit-memory.xml": 3.154,
-      "junit-repo-backed-unit.ops.xml": 39.27,
-      "junit-repo-backed-unit.product.xml": 31.354,
-      "junit-repo-backed-unit.tooling.xml": 93.628,
-      "junit-serial-coverage.xml": 151.38,
-      "junit-track-d.xml": 11.125,
-      "junit-unit-filesystem-contracts.xml": 111.125,
-      "junit-unit-scripts-tooling.debt-governance.xml": 43.195,
-      "junit-unit-scripts-tooling.other.xml": 108.38,
-      "junit-unit-scripts-tooling.passport.xml": 18.464,
-      "junit-unit-subprocess-backed.xml": 94.86,
-      "junit.integration.xml": 118.735,
-      "junit.security.xml": 12.431,
-      "junit.unit-application.xml": 51.698,
-      "junit.unit-domain.xml": 117.706,
-      "junit.unit-infrastructure.xml": 54.98,
-      "junit.unit-other.xml": 67.615
+      "junit-contract-confidence.xml": 90.464,
+      "junit-fast.unit-application.xml": 48.148,
+      "junit-fast.unit-domain.xml": 93.501,
+      "junit-fast.unit-infrastructure.xml": 38.309,
+      "junit-fast.unit-other.xml": 35.79,
+      "junit-memory.xml": 3.777,
+      "junit-repo-backed-unit.ops.xml": 41.864,
+      "junit-repo-backed-unit.product.xml": 31.716,
+      "junit-repo-backed-unit.tooling.xml": 123.864,
+      "junit-serial-coverage.xml": 148.691,
+      "junit-track-d.xml": 12.596,
+      "junit-unit-filesystem-contracts.xml": 78.737,
+      "junit-unit-scripts-tooling.debt-governance.xml": 47.299,
+      "junit-unit-scripts-tooling.other.xml": 111.046,
+      "junit-unit-scripts-tooling.passport.xml": 18.138,
+      "junit-unit-subprocess-backed.xml": 74.988,
+      "junit.integration.xml": 124.018,
+      "junit.security.xml": 12.036,
+      "junit.unit-application.xml": 45.929,
+      "junit.unit-domain.xml": 104.682,
+      "junit.unit-infrastructure.xml": 55.503,
+      "junit.unit-other.xml": 68.08
     },
     "lane_wall_time_source": "junit_testsuite_time",
     "worker_mode": "mixed: xdist unit/integration; serial contracts/repo-backed/memory"

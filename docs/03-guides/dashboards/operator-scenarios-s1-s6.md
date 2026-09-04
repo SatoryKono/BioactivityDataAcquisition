@@ -29,7 +29,7 @@ when exact-run accounting is required.
 | --- | --- | --- | --- |
 | **S1** | What needs attention? | Overview | Status + First Action on first paint; no need to open L1 |
 | **S2** | Pipeline / stage blocked? | Overview → Pipeline Diagnostics | Runtime Blockers / Error Rate ≤2 hops |
-| **S3** | Which provider / why? | Overview → Provider Health (or PD → Provider) | Severity matrix + top causes on first paint |
+| **S3** | Which provider / why? | Overview → Provider Health (or PD → Provider) | First paint: `9101` Monitor Fleet Severity + `9107` Inspect Status Reason; `9103` Inspect Top Provider Causes is 1-hop expand of row `9106` |
 | **S4** | DQ / rejects / contracts? | Overview → Data Quality | Status + threshold on first paint; expand **Selected Range · Impact & Freshness** for reasons; rows via `bioetl quarantine inspect` |
 | **S5** | Safe to replay / resume? | Overview → Trust | Replay Safety, Manifest/Ledger Integrity, Telemetry Missing on first paint; identity in collapsed row |
 | **S6** | What is firing? | Overview → expand **Alert/SLO Triage** | ≤1 hop from Overview (no separate Alerts UID) |
@@ -40,7 +40,7 @@ when exact-run accounting is required.
 | --- | --- | --- |
 | S1 | 0 | Status + First Action present on `bioetl-overview-v2` first screen |
 | S2 | 1 | Nav → Pipeline Diagnostics; Status + Runtime Blockers + Error Rate first paint |
-| S3 | 1 | Nav not required if coming from PD; Provider first paint has matrix/causes |
+| S3 | 1 | Nav not required if coming from PD; first paint is `9101`+`9107`; `9103` via expand `9106` |
 | S4 | 1 | DQ Status + Threshold first paint; reasons under collapsed Selected Range row |
 | S5 | 1 | Trust safety cards first paint; Identity evidence collapsed |
 | S6 | 1 | Expand Overview Alert/SLO Triage row |

@@ -53,7 +53,9 @@ KERNEL_PATH: Path = PROMPTS_ROOT / "fragments" / "cyclic-kernel-v3.md"
 OVERLAYS_DIR: Path = PROMPTS_ROOT / "overlays"  # retired; overlays live in domains.yaml
 DOMAINS_PATH: Path = PROMPTS_ROOT / "domains.yaml"
 PROFILES_DIR: Path = PROMPTS_ROOT / "profiles"
-GENERATED_ROOT: Path = PROMPTS_ROOT / "generated"  # optional local compile output, not tracked
+GENERATED_ROOT: Path = (
+    PROMPTS_ROOT / "generated"
+)  # optional local compile output, not tracked
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 

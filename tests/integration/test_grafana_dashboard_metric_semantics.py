@@ -1065,7 +1065,7 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
     expected_panels = {
         "Monitor Pipeline Status",
         "Monitor Metrics Coverage",
-        "Monitor Runtime Blockers",
+        "Monitor Active Blocker Count",
         "Monitor Runtime Error Rate",
         "Monitor Worst Stage Lag",
         "Monitor Memory Pressure Active",
@@ -1137,7 +1137,7 @@ def test_runtime_domain_thresholds_match_alert_rule_policy() -> None:
             {"color": "orange", "value": 300},
             {"color": "red", "value": 900},
         ],
-        "Monitor Runtime Blockers": [
+        "Monitor Active Blocker Count": [
             {"color": "green", "value": None},
             {"color": "red", "value": 1},
         ],
