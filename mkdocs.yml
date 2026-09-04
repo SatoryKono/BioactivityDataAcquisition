@@ -1107,6 +1107,7 @@ nav:
               - "Skill verify-architecture": 00-project/ai/skills/global/verify-architecture/SKILL.md
           - "Local Skills":
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
+      - "Combined Skills Index (Unified)": 00-project/ai/skills/COMBINED-CATALOG.md
               - "Skill agent-debugging": 00-project/ai/skills/local/agent-debugging/SKILL.md
               - "Skill new-pipeline": 00-project/ai/skills/local/new-pipeline/SKILL.md
               - "Skill observability-dashboard": 00-project/ai/skills/local/observability-dashboard/SKILL.md
