@@ -2904,14 +2904,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5,max by(pipeline,reason)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_runtime_pipeline_run_type_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")",
+      "formula": "bioetl_incident_ranked_runtime",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5,max by(pipeline,reason)(bioetl_runtime_current_blocker_reason{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_runtime_pipeline_run_type_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")",
+      "query": "bioetl_incident_ranked_runtime",
       "query_tokens": [
-        "bioetl_runtime_current_blocker_reason",
-        "bioetl_runtime_pipeline_run_type_universe"
+        "bioetl_incident_ranked_runtime"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2942,14 +2941,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_provider_health_check_provider_universe_15m)*0,\"cause\",\"telemetry_gap\",\"\",\"\")",
+      "formula": "bioetl_incident_ranked_provider",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5,max by(provider,cause)(bioetl_provider_current_cause{severity=\"failing\"}) * 2) or label_replace(absent(bioetl_provider_health_check_provider_universe_15m)*0,\"cause\",\"telemetry_gap\",\"\",\"\")",
+      "query": "bioetl_incident_ranked_provider",
       "query_tokens": [
-        "bioetl_provider_current_cause",
-        "bioetl_provider_health_check_provider_universe_15m"
+        "bioetl_incident_ranked_provider"
       ],
       "ref_id": "B",
       "runbook_urls": [],
@@ -2980,14 +2978,13 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5,max by(pipeline,reason)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(absent(bioetl_overview_pipeline_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")",
+      "formula": "bioetl_incident_ranked_dq",
       "kind": "promql",
       "panel_id": 2010,
       "panel_title": "Inspect Ranked Suspects",
-      "query": "topk(5,max by(pipeline,reason)(bioetl_dq_current_reason{severity=\"crit\"}) * 2) or label_replace(absent(bioetl_overview_pipeline_universe)*0,\"reason\",\"telemetry_gap\",\"\",\"\")",
+      "query": "bioetl_incident_ranked_dq",
       "query_tokens": [
-        "bioetl_dq_current_reason",
-        "bioetl_overview_pipeline_universe"
+        "bioetl_incident_ranked_dq"
       ],
       "ref_id": "C",
       "runbook_urls": [],
