@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-04T05:57:13.097018+00:00",
+  "generated_at": "2026-09-04T05:58:41.486742+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 74,
       "scripts": 512,
       "skills": 12,
-      "tests": 424
+      "tests": 425
     }
   },
   "scripts": [
@@ -10601,7 +10601,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 259,
+      "reference_count": 260,
       "references": [
         {
           "path": "docs/00-project/ai/skills/global/gh-fix-ci/scripts/inspect_pr_checks.py",
@@ -12442,7 +12442,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 397,
+      "reference_count": 398,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -22599,7 +22599,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 72,
+      "reference_count": 76,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
@@ -22656,7 +22656,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "docs/00-project/TOOLS.md",
@@ -22681,6 +22681,12 @@
           "line": 53,
           "source_group": "scripts",
           "text": "\"analyze-gaps\": \"scripts.schema.analysis.config_gap_analysis\","
+        },
+        {
+          "path": "tests/architecture/test_config_validation_surface.py",
+          "line": 21,
+          "source_group": "tests",
+          "text": "from scripts.schema.analysis import config_gap_analysis, generate_config_matrix"
         }
       ]
     },
@@ -22689,7 +22695,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "scripts/engineering/qa/report_config_surface_backlog.py",
@@ -23256,12 +23262,6 @@
         },
         {
           "path": "scripts/schema/README.md",
-          "line": 32,
-          "source_group": "scripts",
-          "text": "- `docs/00-project/ai/agents/scripts/py-config-bot-2.py` is a compatibility wrapper only; runtime behavior must be updated in `scripts/schema/validation/validate_pipeline_configs.py` first."
-        },
-        {
-          "path": "scripts/schema/README.md",
           "line": 52,
           "source_group": "scripts",
           "text": "| `validate-configs`           | `scripts/schema/validation/validate_pipeline_configs.py`                          | Validate unified pipeline YAML configs against JSON Schema                         "
@@ -23271,6 +23271,12 @@
           "line": 51,
           "source_group": "scripts",
           "text": "\"validate-configs\": \"scripts.schema.validation.validate_pipeline_configs\","
+        },
+        {
+          "path": "tests/architecture/test_config_ci_invariants.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "from scripts.schema.validation.validate_pipeline_configs import _canonical_script"
         }
       ]
     },
