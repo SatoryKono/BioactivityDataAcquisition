@@ -138,6 +138,17 @@ alert ownership.
 | Alert triage cadence | Weekly on Monday, together with OpenSSF Scorecard |
 | Duplicate scans | Forbidden. Default setup stays off. |
 
+Do not merge GitHub's CodeQL starter matrix with `c-cpp` / `build-mode: autobuild`.
+BioETL has no C/C++ sources; the root `Makefile` is Python DX, not a C++ build.
+`cpp/tools/autobuild.sh` exit 1 is expected for that template and is not a product
+defect.
+
+GitHub may still list `dynamic/github-code-scanning/codeql` as an Actions
+workflow. The Actions API cannot disable that hosted workflow (HTTP 422). Keep
+default setup `not-configured` and keep advanced Python CodeQL as the only
+analysis. Do not enable default setup to clear the ghost workflow: that
+duplicates Python scans.
+
 Actionable CodeQL alerts get a follow-up issue the same triage week. Alerts are
 closed only with SARIF/workflow proof, not by silent dismiss.
 
