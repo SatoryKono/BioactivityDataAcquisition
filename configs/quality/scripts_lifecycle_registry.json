@@ -151,6 +151,12 @@
       "owner": "@bioetl-platform",
       "review_by": "2026-09-30"
     },
+    "scripts/ai/generate_project_domain_audit_workflow.py": {
+      "decision": "legacy_manual_utility",
+      "next_step": "Retain only as the documented generator for the bounded Grok project-domain audit workflow; keep the tracked prompt library authoritative and remove the generator if the workflow is retired.",
+      "owner": "@bioetl-platform",
+      "review_by": "2026-09-30"
+    },
     "scripts/ai/grok/install_skills.ps1": {
       "decision": "compatibility_wrapper",
       "next_step": "Retain as an optional personal/project installer for the tracked Grok skill sources; keep the docs tree authoritative and do not treat this machine-local copy helper as an active runtime surface.",
