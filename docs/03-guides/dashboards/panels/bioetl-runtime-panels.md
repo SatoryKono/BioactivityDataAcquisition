@@ -59,9 +59,9 @@ used.
 - **Purpose:** Show active runtime blockers with details.
 - **Data sources:** `bioetl_runtime_current_blocker_reason_scoped`
 
-### 9. Monitor Runtime Blockers
+### 9. Monitor Active Blocker Count
 - **Type:** Stat
-- **Purpose:** Count active runtime blockers as neutral evidence when the count is `0`; non-zero values remain escalation signals.
+- **Purpose:** CURRENT 15-minute count chip supporting Review Runtime Blockers (`9101`); not a second summary table. Neutral evidence when the count is `0`; non-zero values remain escalation signals.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`
 
 ### 10. Monitor Failed Runs
