@@ -35,7 +35,8 @@ except Exception:
         Path(__file__).resolve().parents[3] / "docs" / "00-project" / "ai" / "prompts"
     )
 
-OVERLAYS_DIR = PROMPTS_ROOT / "overlays"
+OVERLAYS_DIR = PROMPTS_ROOT / "overlays"  # retired
+DOMAINS_PATH = PROMPTS_ROOT / "domains.yaml"
 PROFILES_DIR = PROMPTS_ROOT / "profiles"
 SCHEMA_DIR = PROMPTS_ROOT / "_schema"
 
@@ -378,33 +379,41 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
     report = LintReport()
     check_kernel_schema(report)
 
-    if not OVERLAYS_DIR.is_dir():
+    if not DOMAINS_PATH.is_file():
         report.add_warning(
-            "overlays_missing", f"overlays dir not found: {OVERLAYS_DIR}"
+            "overlays_missing", f"domains catalog not found: {DOMAINS_PATH}"
         )
+        overlay_count = 0
     else:
-        for path in sorted(OVERLAYS_DIR.glob(_YAML_GLOB)):
-            try:
-                raw = path.read_text(encoding="utf-8")
-                data = yaml.safe_load(raw) or {}
-            except Exception as exc:
-                report.add_error("overlay_parse", str(exc), path.as_posix())
-                continue
+        try:
+            payload = yaml.safe_load(DOMAINS_PATH.read_text(encoding="utf-8")) or {}
+            domains = payload.get("domains") or {}
+        except Exception as exc:
+            report.add_error("overlay_parse", str(exc), DOMAINS_PATH.as_posix())
+            domains = {}
+        if not isinstance(domains, dict):
+            report.add_error(
+                "overlay_parse", "domains.yaml domains must be a mapping",
+                DOMAINS_PATH.as_posix(),
+            )
+            domains = {}
+        overlay_count = 0
+        for name, data in sorted(domains.items()):
+            overlay_count += 1
+            path = DOMAINS_PATH
+            label = DOMAINS_PATH.as_posix() + f"#{name}"
             if not isinstance(data, dict):
-                report.add_error(
-                    "overlay_parse", "overlay must be a mapping", path.as_posix()
-                )
+                report.add_error("overlay_parse", "overlay must be a mapping", label)
                 continue
-            check_overlay(report, path, data, raw)
+            raw = yaml.safe_dump(data, sort_keys=True, allow_unicode=True)
+            check_overlay(report, Path(label), data, raw)
 
     check_profiles(report)
 
     report.stats = {
         "errors": len(report.errors),
         "warnings": len(report.warnings),
-        "overlays": len(list(OVERLAYS_DIR.glob(_YAML_GLOB)))
-        if OVERLAYS_DIR.is_dir()
-        else 0,
+        "overlays": overlay_count,
         "profiles": len(list(PROFILES_DIR.glob(_YAML_GLOB)))
         if PROFILES_DIR.is_dir()
         else 0,

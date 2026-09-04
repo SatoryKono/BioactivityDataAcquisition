@@ -13,12 +13,19 @@ pytestmark = pytest.mark.unit
 PROMPTS_ROOT = (
     Path(__file__).resolve().parents[2] / "docs" / "00-project" / "ai" / "prompts"
 )
-OVERLAYS_DIR = PROMPTS_ROOT / "overlays"
+DOMAINS_PATH = PROMPTS_ROOT / "domains.yaml"
 SCHEMA_PATH = PROMPTS_ROOT / "_schema" / "domain-overlay.schema.json"
 
 
 def _load_schema() -> dict:
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+
+def _domains() -> dict:
+    payload = yaml.safe_load(DOMAINS_PATH.read_text(encoding="utf-8")) or {}
+    domains = payload.get("domains") or {}
+    assert isinstance(domains, dict)
+    return domains
 
 
 def _validate(data: dict) -> list[str]:
@@ -36,16 +43,15 @@ def _validate(data: dict) -> list[str]:
 def test_all_24_overlays_validate() -> None:
     schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
     assert schema_text  # schema exists
-    overlays = sorted(OVERLAYS_DIR.glob("*.yaml"))
-    assert len(overlays) == 24, f"expected 24 overlays, got {len(overlays)}"
-    for path in overlays:
-        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    domains = _domains()
+    assert len(domains) == 24, f"expected 24 domains, got {len(domains)}"
+    for name, data in sorted(domains.items()):
         errs = _validate(data)
-        assert not errs, f"{path.name} schema errors: {errs}"
+        assert not errs, f"{name} schema errors: {errs}"
 
 
 def test_overlay_with_allow_issue_write_must_fail_schema() -> None:
-    valid = yaml.safe_load((OVERLAYS_DIR / "docs.yaml").read_text(encoding="utf-8"))
+    valid = dict(_domains()["docs"])
     bad = dict(valid)
     bad["ALLOW_ISSUE_WRITE"] = True
     errs = _validate(bad)
@@ -56,7 +62,7 @@ def test_overlay_with_allow_issue_write_must_fail_schema() -> None:
 
 
 def test_missing_required_field_must_fail() -> None:
-    valid = yaml.safe_load((OVERLAYS_DIR / "docs.yaml").read_text(encoding="utf-8"))
+    valid = dict(_domains()["docs"])
     bad = dict(valid)
     bad.pop("OBJECT", None)
     errs = _validate(bad)

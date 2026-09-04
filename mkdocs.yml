@@ -576,7 +576,7 @@ nav:
           - "Grok Session Skill": 00-project/ai/grok/skills/bioetl-session/SKILL.md
           - "Grok Post-Change Skill": 00-project/ai/grok/skills/bioetl-post-change/SKILL.md
           - "Grok Closeout Skill": 00-project/ai/grok/skills/bioetl-closeout/SKILL.md
-          - "Grok Bootstrap Prompt": 00-project/ai/prompts/library/session/grok-bootstrap.md
+          - "Grok Bootstrap Prompt": 00-project/ai/prompts/library/session/bootstrap.md
       - "Project Architecture Index": 00-project/architecture-index.md
       - "Legacy Documentation Index": INDEX.md
       - "Architecture Extras":
@@ -1002,88 +1002,34 @@ nav:
       - "Prompts":
           - "Documentation Agent Profile": 00-project/ai/agents/agents/py-doc-bot.md
           - "Audit Library":
+              - "Audit Cycle": 00-project/ai/prompts/library/audit/cycle.md
               - "Agents Runtime Audit": 00-project/ai/prompts/library/audit/agents-runtime.md
-              - "Architecture Cycle": 00-project/ai/prompts/library/architecture/architecture-cycle.md
+              - "Architecture Cycle": 00-project/ai/prompts/library/audit/architecture.md
               - "Diagram Audit": 00-project/ai/prompts/library/audit/diagrams.md
-              - "Documentation Content Audit": 00-project/ai/prompts/library/audit/docs-content.md
-              - "Documentation Pipeline Audit": 00-project/ai/prompts/library/audit/docs-pipeline.md
               - "GitHub Actions Audit": 00-project/ai/prompts/library/audit/github-actions.md
               - "Audit Orchestrator": 00-project/ai/prompts/library/audit/orchestrator.md
               - "Repository Tree Audit": 00-project/ai/prompts/library/audit/repo-tree.md
               - "Technical Debt Audit": 00-project/ai/prompts/library/audit/tech-debt.md
-              - "Test System Audit": 00-project/ai/prompts/library/audit/tests-system.md
-              - "CodeRabbit Project Cycle": 00-project/ai/prompts/library/audit/coderabbit-project-cycle.md
-              - "Cyclic Pack": 00-project/ai/prompts/library/audit/cyclic-pack.md
-              - "Legacy Docs Cycle": 00-project/ai/prompts/library/audit/docs-cycle.md
-              - "Dual Agent Cycle": 00-project/ai/prompts/library/audit/dual-agent-cycle.md
-              - "Generic Nine Overview": 00-project/ai/prompts/library/audit/generic-nine/README.md
-              - "Generic Nine Pack": 00-project/ai/prompts/library/audit/generic-nine/pack.md
-              - "Repository Tree Cycle": 00-project/ai/prompts/library/audit/repo-tree-cycle.md
-              - "Auditor Role": 00-project/ai/prompts/library/audit/role-auditor.md
-              - "Planner Role": 00-project/ai/prompts/library/audit/role-planner.md
-              - "Legacy Tech Debt Cycle": 00-project/ai/prompts/library/audit/tech-debt-cycle.md
-              - "Legacy Tests Cycle": 00-project/ai/prompts/library/audit/tests-cycle.md
-              - "Canonical Audit Cycle":
-                  - "Overview": 00-project/ai/prompts/library/audit/cycle/README.md
-                  - "01 Docs": 00-project/ai/prompts/library/audit/cycle/docs.md
-                  - "02 Diagrams": 00-project/ai/prompts/library/audit/cycle/diagrams.md
-                  - "03 Agents and Memory": 00-project/ai/prompts/library/audit/cycle/agents-memory.md
-                  - "04 Configs": 00-project/ai/prompts/library/audit/cycle/configs.md
-                  - "05 Tests": 00-project/ai/prompts/library/audit/cycle/tests.md
-                  - "06 Tech Debt": 00-project/ai/prompts/library/audit/cycle/tech-debt.md
-                  - "07 Architecture": 00-project/ai/prompts/library/audit/cycle/architecture.md
-                  - "08 Telemetry": 00-project/ai/prompts/library/audit/cycle/telemetry.md
-                  - "09 Dashboards": 00-project/ai/prompts/library/audit/cycle/dashboards.md
-                  - "10 CodeRabbit": 00-project/ai/prompts/library/audit/cycle/coderabbit.md
-              - "Rendered Audit Cycle Cards":
-                  - "Docs": 00-project/ai/prompts/library/audit/cycle/run/docs.md
-                  - "Diagrams": 00-project/ai/prompts/library/audit/cycle/run/diagrams.md
-                  - "Agents and Memory": 00-project/ai/prompts/library/audit/cycle/run/agents-memory.md
-                  - "Configs": 00-project/ai/prompts/library/audit/cycle/run/configs.md
-                  - "Tests": 00-project/ai/prompts/library/audit/cycle/run/tests.md
-                  - "Tech Debt": 00-project/ai/prompts/library/audit/cycle/run/tech-debt.md
-                  - "Dashboards": 00-project/ai/prompts/library/audit/cycle/run/dashboards.md
-          - "Observability Library":
-              - "Overview": 00-project/ai/prompts/library/observability/README.md
-              - "BI Dashboard Acceptance": 00-project/ai/prompts/library/observability/bi-dashboard-acceptance.md
-              - "Dashboard Audit Cycle": 00-project/ai/prompts/library/observability/dashboard-audit-cycle.md
-              - "Sequential Run": 00-project/ai/prompts/library/observability/sequential-run.md
-              - "Grafana Audit":
-                  - "Overview": 00-project/ai/prompts/library/observability/grafana-audit/README.md
-                  - "Master": 00-project/ai/prompts/library/observability/grafana-audit/master.md
-                  - "Visual": 00-project/ai/prompts/library/observability/grafana-audit/visual.md
-                  - "Layout": 00-project/ai/prompts/library/observability/grafana-audit/layout.md
-                  - "Data Integrity": 00-project/ai/prompts/library/observability/grafana-audit/data-integrity.md
-                  - "Regression": 00-project/ai/prompts/library/observability/grafana-audit/regression.md
-              - "Grafana Six":
-                  - "Overview": 00-project/ai/prompts/library/observability/grafana-six/README.md
-                  - "Pack": 00-project/ai/prompts/library/observability/grafana-six/pack.md
-                  - "Evidence": 00-project/ai/prompts/library/observability/grafana-six/evidence.md
-                  - "Visual": 00-project/ai/prompts/library/observability/grafana-six/visual.md
-                  - "Layout": 00-project/ai/prompts/library/observability/grafana-six/layout.md
-                  - "Data": 00-project/ai/prompts/library/observability/grafana-six/data.md
-                  - "Consolidate": 00-project/ai/prompts/library/observability/grafana-six/consolidate.md
-                  - "Reverify": 00-project/ai/prompts/library/observability/grafana-six/reverify.md
-          - "Test Library":
-              - "Test Cycle": 00-project/ai/prompts/library/tests/test-cycle.md
+              - "Sequential Run": 00-project/ai/prompts/library/audit/sequential-run.md
+              - "Dashboard Audit Cycle": 00-project/ai/prompts/library/audit/dashboard.md
+          - "Plan / Test / Config / Doc":
+              - "Scoped Plan": 00-project/ai/prompts/library/plan/scoped.md
+              - "Test Cycle": 00-project/ai/prompts/library/test/cycle.md
+              - "Config Validate": 00-project/ai/prompts/library/config/validate.md
+              - "Documentation Audit": 00-project/ai/prompts/library/doc/audit.md
           - "Prompt Fragments":
               - "Audit Scale": 00-project/ai/prompts/fragments/audit-scale.md
-              - "BI Check Schema": 00-project/ai/prompts/fragments/bi-check-schema.md
-              - "CodeRabbit Dual Pass": 00-project/ai/prompts/fragments/coderabbit-dual-pass.md
-              - "Dual Agent Handoff": 00-project/ai/prompts/fragments/dual-agent-handoff.md
+              - "Cyclic Kernel v3": 00-project/ai/prompts/fragments/cyclic-kernel-v3.md
+              - "Debt Budget Ban": 00-project/ai/prompts/fragments/debt-budget-ban.md
+              - "Env Guardrail": 00-project/ai/prompts/fragments/env-guardrail.md
+              - "Evidence Contract v3": 00-project/ai/prompts/fragments/evidence-contract-v3.md
               - "Finding Schema": 00-project/ai/prompts/fragments/finding-schema.md
-              - "Generic Nine Contract": 00-project/ai/prompts/fragments/generic-nine-contract.md
-              - "Grafana Audit Contract": 00-project/ai/prompts/fragments/grafana-audit-contract.md
-              - "Grafana Six Contract": 00-project/ai/prompts/fragments/grafana-six-contract.md
+              - "Git Safety": 00-project/ai/prompts/fragments/git-safety.md
+              - "Issue State Machine v3": 00-project/ai/prompts/fragments/issue-state-machine-v3.md
+              - "Language RU": 00-project/ai/prompts/fragments/language-ru.md
               - "Orchestrator Guards": 00-project/ai/prompts/fragments/orchestrator-guards.md
               - "Peer Review Gate": 00-project/ai/prompts/fragments/peer-review-gate.md
-              - "Reports Output": 00-project/ai/prompts/fragments/reports-output.md
-              - "Shell Portability": 00-project/ai/prompts/fragments/shell-portability.md
-              - "Unknown Parameters": 00-project/ai/prompts/fragments/unknown-params.md
-          - "Prompt Archive (opt-in)":
-              - "Overview": 00-project/ai/prompts/archive/README.md
-              - "BI Dashboard Audit Kit (2026-08-11)": 00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md
-              - "Project Audit Orchestrator Kit (2026-08-11)": 00-project/ai/prompts/archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md
+              - "Project Requirements Audit": 00-project/ai/prompts/fragments/project-requirements-audit.md
       - "AI Rules":
           - "Overview": 00-project/ai/rules/README.md
           - "Unified Rules": 00-project/ai/rules/bioetl-ai-rules.md

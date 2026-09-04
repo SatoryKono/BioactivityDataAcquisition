@@ -64,21 +64,20 @@ Prefer short library cards (render, do not hand-expand RULES/ADR):
 
 | Id | Card | When |
 | --- | --- | --- |
-| `prompt.session.grok-bootstrap` | [library/session/grok-bootstrap.md](../../prompts/library/session/grok-bootstrap.md) | Daily work start |
-| `prompt.audit.grok-cycle` | [library/audit/grok-audit-cycle.md](../../prompts/library/audit/grok-audit-cycle.md) | One audit cycle |
+| `prompt.session.grok-bootstrap` | [library/session/bootstrap.md](../../prompts/library/session/bootstrap.md) | Daily work start |
+| `prompt.audit.cycle` | [library/audit/cycle.md](../../prompts/library/audit/cycle.md) | One audit cycle |
 | `prompt.closeout.grok` | [library/closeout/grok-closeout.md](../../prompts/library/closeout/grok-closeout.md) | Issue/PR closeout |
 
 ```powershell
 .\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.session.grok-bootstrap `
   --param TASK="..." --param MODE=implement --param SCOPE="src/bioetl/domain"
-.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.audit.grok-cycle `
-  --param SCOPE="src/bioetl/domain"
+.\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.audit.cycle `
+  --param SCOPE="src/bioetl/domain" --param DOMAIN=docs
 .\.venv-win\Scripts\python.exe -m scripts.ai.prompts render prompt.closeout.grok `
   --param SCOPE="issues: #NNNN"
 ```
 
-Redirect stubs (bookmarks): [grok-closeout.md](../../prompts/grok-closeout.md),
-[grok-audit-cycle.md](../../prompts/grok-audit-cycle.md).
+Redirect stubs remain as deprecated cards: `prompt.audit.grok-cycle` → `prompt.audit.cycle`.
 
 ### Project skills (machine-local)
 

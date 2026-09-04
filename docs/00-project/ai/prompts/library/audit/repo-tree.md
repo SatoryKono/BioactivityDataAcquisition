@@ -4,35 +4,40 @@ version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
-params: [SCOPE, MODE, LANGUAGE, AUDIT_MODE, REQUIRE_GH_TRACKING]
+runtimes:
+- any
+params:
+- SCOPE
+- MODE
+- LANGUAGE
+- AUDIT_MODE
+- REQUIRE_GH_TRACKING
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/generic-nine-contract.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
 related_ssot:
-  - AGENTS.md
-  - .github/root-allowlist.txt
-  - docs/00-project/governance/03-file-policy.md
-  - docs/00-project/governance/root-local-clutter-cleanup.md
+- AGENTS.md
+- .github/root-allowlist.txt
+- docs/00-project/governance/03-file-policy.md
+- docs/00-project/governance/root-local-clutter-cleanup.md
 anti_patterns:
-  - Mass directory moves without migration plan
-  - git clean without -n in audit mode
-  - Ignoring root-allowlist SSOT
-tags: [audit, repo, hygiene, root, operator]
+- Mass directory moves without migration plan
+- git clean without -n in audit mode
+- Ignoring root-allowlist SSOT
+tags:
+- audit
+- repo
+- hygiene
+- root
+- operator
 summary: Repository tree and root hygiene audit against allowlist
 max_body_lines: 140
 ---
-
 # Repo tree / root hygiene audit
 
 **Kit:** prompt 4 of `prompt.audit.generic-nine.pack`.

@@ -18,6 +18,7 @@ from scripts.ai.prompts.registry import (
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 PARAM_TABLE_KEY_RE = re.compile(r"`([A-Z][A-Z0-9_]*)`")
+FRAGMENT_INCLUDE_RE = re.compile(r"\{\{>\s*([a-z0-9-]+)\s*\}\}")
 
 
 def _parameter_table_cells(line: str) -> tuple[str, str] | None:
@@ -59,6 +60,16 @@ def substitute_params(text: str, params: dict[str, str]) -> str:
     return PARAM_TOKEN_RE.sub(repl, text)
 
 
+def expand_fragment_includes(text: str) -> str:
+    """Expand `{{> fragment-name}}` tokens to fragment bodies."""
+
+    def repl(match: re.Match[str]) -> str:
+        name = match.group(1)
+        return fragment_body(resolve_include(f"fragments/{name}.md")).rstrip()
+
+    return FRAGMENT_INCLUDE_RE.sub(repl, text)
+
+
 def render_card(
     card: PromptCard,
     *,
@@ -76,7 +87,7 @@ def render_card(
             parts.append(fragment_body(frag_path))
             parts.append("\n")
 
-    body = card.body
+    body = expand_fragment_includes(card.body)
     defaults = extract_defaults_from_body(body)
     merged = {**defaults, **(params or {})}
 
