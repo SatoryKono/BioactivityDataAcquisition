@@ -357,7 +357,7 @@
               "includeVars": false
             },
             {
-              "title": "Inspect DQ for this blocker",
+              "title": "Open Data Quality",
               "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=${__data.fields.workflow}&var-pipeline=${__data.fields.pipeline}&var-run_type=${__data.fields.run_type}&var-stage=$__all&var-run_id=$run_id&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
@@ -529,8 +529,6 @@
                     "includeVars": false
                   }
                 ]
-              }
-            ]
           }
         ]
       }
