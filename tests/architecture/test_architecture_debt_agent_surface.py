@@ -24,9 +24,8 @@ CODEX_SKILL = ROOT / ".codex" / "skills" / "py-audit-bot" / "SKILL.md"
 HISTORICAL_PROMPT_FILES = (
     ROOT
     / "docs"
-    / "00-project"
-    / "ai"
-    / "prompts"
+    / "99-archive"
+    / "prompts-2026-09"
     / "archive"
     / "campaigns"
     / "architecture_metric_exemptions_tasks_json_prompt.md",
