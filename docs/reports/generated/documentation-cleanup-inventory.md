@@ -10,7 +10,7 @@
 | Doc-like files | 3744 |
 | Tracked doc-like files | 3744 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 2 |
+| Duplicate groups | 9 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
 
@@ -32,8 +32,7 @@
 | docs_reports_curated_or_historical_report | 5 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
-| generated_skill_license_mirror | 5 |
-| generated_skill_reference_mirror | 8 |
+| generated_skill_license_mirror | 2 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
@@ -58,8 +57,8 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 746 |
-| Archived | 195 |
+| Active | 727 |
+| Archived | 214 |
 | Canonical | 73 |
 | Deprecated | 51 |
 | Generated | 1253 |
@@ -69,8 +68,8 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 746 |
-| archive | 195 |
+| active | 727 |
+| archive | 214 |
 | canonical | 73 |
 | duplicate | 51 |
 | generated | 1253 |
