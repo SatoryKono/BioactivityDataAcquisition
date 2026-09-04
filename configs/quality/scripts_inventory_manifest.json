@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-04T06:07:46.939749+00:00",
+  "generated_at": "2026-09-04T06:27:56.936639+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -17553,7 +17553,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 467,
+          "line": 478,
           "source_group": "docs",
           "text": "- `scripts/engineering/repo/check_github_actions_runtime_policy.py` enforces the"
         },
@@ -17965,13 +17965,13 @@
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 174,
+          "line": 199,
           "source_group": "tests",
           "text": "assert \"python scripts/engineering/repo/github_settings_review.py\" not in workflow"
         },
         {
           "path": "tests/architecture/test_github_governance_review.py",
-          "line": 175,
+          "line": 200,
           "source_group": "tests",
           "text": "assert \".github/tooling/github_settings_review.py\" not in workflow"
         }
@@ -19494,7 +19494,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/05-github-policy.md",
-          "line": 387,
+          "line": 398,
           "source_group": "docs",
           "text": "`bash scripts/ops/maintenance/github/remove_required_status_check.sh --dry-run`."
         }

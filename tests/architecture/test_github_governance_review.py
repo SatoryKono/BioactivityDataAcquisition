@@ -163,7 +163,11 @@ def test_passing_snapshot_is_conformant_and_default_setup_drift_is_detected() ->
     now = datetime(2026, 8, 30, tzinfo=UTC)
     passing = TOOL.evaluate_snapshot(_passing_snapshot(), _policy(), now=now)
     assert passing["overall"] == "conformant"
-    assert {item["id"] for item in passing["controls"] if item["id"].startswith("GH-CODEQL-")} == {
+    assert {
+        item["id"]
+        for item in passing["controls"]
+        if item["id"].startswith("GH-CODEQL-")
+    } == {
         "GH-CODEQL-001",
         "GH-CODEQL-002",
     }
