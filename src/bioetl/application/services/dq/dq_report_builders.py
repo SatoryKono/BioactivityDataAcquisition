@@ -76,11 +76,7 @@ class _HasDQStatus(Protocol):
     status: DQCheckStatus
 
 
-def run_serialized_checks[
-    TCheckType,
-    TCheckResult: _HasDQStatus,
-    TSerializedResult,
-](
+def run_serialized_checks[TCheckType, TCheckResult: _HasDQStatus, TSerializedResult](
     *,
     enabled_checks: Set[TCheckType],
     dispatch: Sequence[tuple[TCheckType, str, Callable[[], TCheckResult]]],

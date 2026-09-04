@@ -198,21 +198,15 @@ def _attach_optional_composite_sections(
     )
 
 
-def composite_from_dict[
-    CompositeConfigT,
-    SeedConfigT,
-    DependencyConfigT,
-    EnricherConfigT,
-    MergeConfigT,
-](
+def composite_from_dict[CompositeT, SeedT, DependencyT, EnricherT, MergeT](
     data: dict[str, object],
     *,
-    composite_cls: Callable[..., CompositeConfigT],
-    seed_cls: Callable[..., SeedConfigT],
-    dependency_cls: Callable[..., DependencyConfigT],
-    enricher_cls: Callable[..., EnricherConfigT],
-    merge_cls: Callable[..., MergeConfigT],
-) -> CompositeConfigT:
+    composite_cls: Callable[..., CompositeT],
+    seed_cls: Callable[..., SeedT],
+    dependency_cls: Callable[..., DependencyT],
+    enricher_cls: Callable[..., EnricherT],
+    merge_cls: Callable[..., MergeT],
+) -> CompositeT:
     """Reconstruct a composite config from a serialized mapping."""
     seed_data = require_object_dict(data.get("seed"), "seed")
     dependency_data = require_object_dict_sequence(
