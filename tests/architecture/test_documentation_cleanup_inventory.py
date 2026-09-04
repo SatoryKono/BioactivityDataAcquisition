@@ -289,12 +289,9 @@ def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None
     # )
     # assert draft["recommended_action"] == "keep"
 
-    license_mirror = rows[
-        "docs/00-project/ai/skills/global/.system/skill-creator/license.txt"
-    ]
+    license_mirror = rows["docs/00-project/ai/skills/local/openai-docs/LICENSE.txt"]
     assert license_mirror["status"] == "Generated"
-    assert license_mirror["lifecycle"] == "generated_skill_license_mirror"
-    assert license_mirror["generated_route"] == "ai-skill-license-mirrors"
+    assert license_mirror["generated_route"] == "ai-local-generated-docs-helpers"
 
 
 def test_documentation_cleanup_inventory_check_passes() -> None:
