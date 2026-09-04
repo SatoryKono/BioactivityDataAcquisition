@@ -222,7 +222,7 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
         },
         "bioetl-provider-health-v2.json": {
             "Monitor Fleet Severity": "bioetl_provider_current_status",
-            "Inspect Top Provider Causes": "bioetl_provider_current_cause",
+            "Inspect Status Reason": "bioetl_provider_current_status_info",
         },
         "bioetl-dq-v2.json": {
             "Monitor Current DQ Status": "bioetl_dq_current_status",
@@ -277,6 +277,23 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     )
     assert dq_reason_row.get("collapsed") is True
     assert all(panel.get("id") != 9102 for panel in dq_reason_row.get("panels", []))
+
+    provider_dashboard = load_dashboard(
+        Path("grafana/dashboards") / "bioetl-provider-health-v2.json"
+    )
+    provider_causes_row = next(
+        panel
+        for panel in provider_dashboard.get("panels", [])
+        if panel.get("id") == 9106
+    )
+    assert provider_causes_row.get("collapsed") is True
+    provider_causes = next(
+        panel
+        for panel in (provider_causes_row.get("panels") or [])
+        if panel.get("id") == 9103
+    )
+    assert provider_causes.get("title") == "Inspect Top Provider Causes"
+    assert int((provider_causes.get("gridPos") or {}).get("y", 0)) >= 18
 
 
 def test_dual_status_twins_are_removed_from_runtime_and_dq() -> None:
@@ -461,8 +478,6 @@ def test_dashboard_top_level_grid_positions_do_not_leave_root_gaps() -> None:
             if isinstance(panel, dict) and isinstance(panel.get("gridPos"), dict)
         ]
         gaps = _root_empty_segments(panels)
-        if dashboard_path.name == "bioetl-runtime.json" and gaps == [(29, 34)]:
-            continue
         assert not gaps, (
             f"{dashboard_path.name} has unexplained empty root row gaps: {gaps}"
         )

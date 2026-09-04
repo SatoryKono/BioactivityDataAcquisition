@@ -70,11 +70,10 @@ entries:
     reason: First-window CURRENT blocker table for this pipeline.
   - dashboard: bioetl-runtime.json
     id: 16
-    disposition: collapse
-    collapse_into: bioetl-runtime.json:9101
+    disposition: keep
     owner: "@bioetl-observability"
     freshness_slo: 60s
-    reason: Below-fold Monitor Runtime Blockers duplicates 9101.
+    reason: Below-fold Monitor Active Blocker Count is a CURRENT 15m count chip supporting 9101, not a second summary table.
   - dashboard: bioetl-provider-health-v2.json
     id: 9401
     disposition: keep
