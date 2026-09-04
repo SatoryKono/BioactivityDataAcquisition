@@ -128,25 +128,11 @@ Skills listed in tables above but without a docs mirror live only in the Codex r
 - [vcr-record](local/vcr-record/SKILL.md)
 - [verify-architecture](local/verify-architecture/SKILL.md)
 
-### Global curated snapshot
+### Remaining global curated snapshot
 
-- [gh-address-comments](global/gh-address-comments/SKILL.md)
-- [gh-fix-ci](global/gh-fix-ci/SKILL.md)
-- [new-pipeline](global/new-pipeline/SKILL.md)
-- [openai-docs](global/openai-docs/SKILL.md)
-- [public/architecture-guardian](global/public/architecture-guardian/SKILL.md)
-- [py-audit-bot](global/py-audit-bot/SKILL.md)
-- [py-code-bot](global/py-code-bot/SKILL.md)
-- [py-config-bot](global/py-config-bot/SKILL.md)
-- [py-debug-bot](global/py-debug-bot/SKILL.md)
-- [py-doc-bot](global/py-doc-bot/SKILL.md)
 - [py-plan-bot](global/py-plan-bot/SKILL.md)
-- [py-test-bot](global/py-test-bot/SKILL.md)
-- [vcr-record](global/vcr-record/SKILL.md)
-- [verify-architecture](global/verify-architecture/SKILL.md)
 
 ## Примечания
 
-- `py-code-bot` is a deprecated compatibility marker, not a preferred orchestration step.
 - On conflict between runtime trees and docs mirrors, prefer runtime (`.codex/skills/`).
 - Missing mirrors are intentional until skill-mirror sync is run; do not invent empty SKILL.md stubs in docs/.
