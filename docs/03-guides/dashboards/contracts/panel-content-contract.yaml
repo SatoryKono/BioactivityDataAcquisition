@@ -4421,7 +4421,7 @@ dashboards:
         - backend_error
         render_profiles: *id001
       '16':
-        title: Monitor Runtime Blockers
+        title: Monitor Active Blocker Count
         role: indicator
         tier: 3
         scope: time_range
