@@ -6110,7 +6110,7 @@
       "kind": "http",
       "panel_id": 9402,
       "panel_title": "Inspect Pipeline Identity",
-      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=$run_id",
+      "query": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
       "query_tokens": [
         "/ops/control-plane/identity-table",
         "pipeline",
@@ -6133,7 +6133,7 @@
       "kind": "http",
       "panel_id": 9403,
       "panel_title": "Inspect Processed Records",
-      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=$run_id",
+      "query": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
       "query_tokens": [
         "/ops/observability/processed-records",
         "pipeline",
@@ -6222,7 +6222,7 @@
       "kind": "http",
       "panel_id": 9998,
       "panel_title": "Review Selected Run Summary",
-      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=$run_id&view=summary&from=${__from}&to=${__to}",
+      "query": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
       "query_tokens": [
         "/ops/observability/pipeline-run-report",
         "pipeline",
