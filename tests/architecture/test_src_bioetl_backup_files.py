@@ -27,10 +27,16 @@ def _tracked_src_bioetl_paths() -> list[str]:
     completed = subprocess.run(
         ["git", "ls-files", "-z", "--", "src/bioetl"],
         cwd=_REPO_ROOT,
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    if completed.returncode != 0:
+        return sorted(
+            path.relative_to(_REPO_ROOT).as_posix()
+            for path in (_REPO_ROOT / "src" / "bioetl").rglob("*")
+            if path.is_file()
+        )
     return [path for path in completed.stdout.split("\0") if path]
 
 
