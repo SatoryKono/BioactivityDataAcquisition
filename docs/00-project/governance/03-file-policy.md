@@ -271,7 +271,9 @@ Machine-readable каталог для structure hygiene хранится в
   `configs/quality/repo_structure_catalog.yaml`.
 - Текущие ratified zones:
   - `docs/00-project/ai/agents/policy/`
-  - `docs/00-project/ai/agents/scripts/`
+  - `docs/99-archive/agents-scripts-2026-09/` (historical archive of former
+    `docs/00-project/ai/agents/scripts/`; retain for traceability, do not add
+    new Python here)
 - Эти зоны считаются repo-only documentation/governance tooling surfaces и не
   дают blanket permission на размещение нового Python-кода в других частях
   `docs/**`.
