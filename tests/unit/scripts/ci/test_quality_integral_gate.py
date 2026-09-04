@@ -12,6 +12,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from types import SimpleNamespace
@@ -559,3 +561,58 @@ def test_summary_lines_include_debt_governance_surface() -> None:
     assert "- triaged_entry_count: `18`" in rendered
     assert "- repo_wide_owner_test_anchored_candidate_count: `2`" in rendered
     assert "- compatibility_test_files: `32`" in rendered
+
+
+def test_resolve_architecture_stats_external_owner_skips_pytest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from argparse import Namespace
+
+    from scripts.engineering.ci.quality_integral_gate import (
+        _resolve_architecture_stats,
+    )
+
+    def _fail(_path: str) -> None:
+        raise AssertionError("architecture pytest must not run for workflow owner")
+
+    monkeypatch.setattr(
+        "scripts.engineering.ci.quality_integral_gate._run_architecture_tests",
+        _fail,
+    )
+    stats = _resolve_architecture_stats(
+        Namespace(
+            architecture_owner="lint-architecture-workflow",
+            architecture_tests="tests/architecture",
+        )
+    )
+    assert stats.owner == "lint-architecture-workflow"
+    assert stats.tests == 0
+    assert stats.failures == 0
+    assert stats.skipped == 0
+
+
+def test_architecture_junit_skips_fails_on_empty_collection(tmp_path: Path) -> None:
+    from scripts.engineering.ci.quality_integral_gate import main as skips_main
+
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    import sys
+
+    old = sys.argv
+    sys.argv = ["prog", "--junit-dir", str(empty)]
+    try:
+        assert skips_main() == 1
+        xml_dir = tmp_path / "junit"
+        xml_dir.mkdir()
+        skipped_xml = (
+            '<testsuite tests="2" skipped="1" failures="0" errors="0"></testsuite>'
+        )
+        (xml_dir / "suite.xml").write_text(skipped_xml + chr(10), encoding="utf-8")
+        sys.argv = ["prog", "--junit-dir", str(xml_dir)]
+        assert skips_main() == 0
+        ok_xml = '<testsuite tests="2" skipped="0" failures="0" errors="0"></testsuite>'
+        (xml_dir / "suite.xml").write_text(ok_xml + chr(10), encoding="utf-8")
+        sys.argv = ["prog", "--junit-dir", str(xml_dir)]
+        assert skips_main() == 0
+    finally:
+        sys.argv = old

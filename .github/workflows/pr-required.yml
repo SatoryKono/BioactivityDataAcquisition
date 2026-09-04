@@ -1,0 +1,355 @@
+name: PR Gate Complete
+# Repo-side #9975 coordinator. GitHub rulesets are deliberately out of scope.
+# Each pull request has one owner invocation per gate and one fail-closed result.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  classify-changes:
+    name: Classify changes (decision matrix)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.decide.outputs.head_sha }}
+      config_version: ${{ steps.decide.outputs.config_version }}
+      decision_matrix: ${{ steps.decide.outputs.decision_matrix }}
+      lint-arch: ${{ steps.decide.outputs['lint-arch'] }}
+      lint-arch-reason: ${{ steps.decide.outputs['lint-arch-reason'] }}
+      tests: ${{ steps.decide.outputs['tests'] }}
+      tests-reason: ${{ steps.decide.outputs['tests-reason'] }}
+      type-checking: ${{ steps.decide.outputs['type-checking'] }}
+      type-checking-reason: ${{ steps.decide.outputs['type-checking-reason'] }}
+      security: ${{ steps.decide.outputs['security'] }}
+      security-reason: ${{ steps.decide.outputs['security-reason'] }}
+      codeql: ${{ steps.decide.outputs['codeql'] }}
+      codeql-reason: ${{ steps.decide.outputs['codeql-reason'] }}
+      docker: ${{ steps.decide.outputs['docker'] }}
+      docker-reason: ${{ steps.decide.outputs['docker-reason'] }}
+      duplication: ${{ steps.decide.outputs['duplication'] }}
+      duplication-reason: ${{ steps.decide.outputs['duplication-reason'] }}
+      root-hygiene: ${{ steps.decide.outputs['root-hygiene'] }}
+      root-hygiene-reason: ${{ steps.decide.outputs['root-hygiene-reason'] }}
+      generated-artifacts: ${{ steps.decide.outputs['generated-artifacts'] }}
+      generated-artifacts-reason: ${{ steps.decide.outputs['generated-artifacts-reason'] }}
+      compiled-artifacts: ${{ steps.decide.outputs['compiled-artifacts'] }}
+      compiled-artifacts-reason: ${{ steps.decide.outputs['compiled-artifacts-reason'] }}
+      commit-governance: ${{ steps.decide.outputs['commit-governance'] }}
+      commit-governance-reason: ${{ steps.decide.outputs['commit-governance-reason'] }}
+      docs-governance: ${{ steps.decide.outputs['docs-governance'] }}
+      docs-governance-reason: ${{ steps.decide.outputs['docs-governance-reason'] }}
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+
+      - name: Decide required / not_applicable per gate
+        id: decide
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          BEFORE_SHA: ${{ github.event.before || '' }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          base_sha="${BASE_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            git fetch --no-tags origin main
+            base_sha="$(git merge-base origin/main "${HEAD_SHA}")"
+          fi
+          classify_args=(
+            --catalog configs/quality/github_required_checks.yaml
+            --event-name "${EVENT_NAME}"
+            --base-sha "${base_sha}"
+            --head-sha "${HEAD_SHA}"
+            --artifact reports/quality/pr-gate-decisions.json
+          )
+          if [[ -n "${BEFORE_SHA}" ]]; then
+            classify_args+=(--before-sha "${BEFORE_SHA}")
+          fi
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
+
+      - name: Upload decision matrix
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: pr-gate-decisions-${{ github.event.pull_request.head.sha || github.sha }}
+          path: reports/quality/pr-gate-decisions.json
+          if-no-files-found: error
+          retention-days: 7
+
+  lint-arch:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['lint-arch'] == 'required' }}
+    uses: ./.github/workflows/import-linter.yml
+    permissions:
+      contents: read
+
+  tests:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['tests'] == 'required' }}
+    uses: ./.github/workflows/tests.yml
+    permissions:
+      contents: read
+
+  type-checking:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['type-checking'] == 'required' }}
+    uses: ./.github/workflows/type-checking.yml
+    permissions:
+      contents: read
+
+  security:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['security'] == 'required' }}
+    uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
+
+  codeql:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['codeql'] == 'required' }}
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      contents: read
+      security-events: write
+
+  docker:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['docker'] == 'required' }}
+    uses: ./.github/workflows/docker.yml
+    # The reusable workflow declares a main-push-only GHCR job. The PR path
+    # never schedules it, and every executable PR job narrows its own token.
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+  docker-not-applicable:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['docker'] == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.na.outputs.head_sha }}
+      reason: ${{ steps.na.outputs.reason }}
+    steps:
+      - name: Materialize docker N/A decision
+        id: na
+        env:
+          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          REASON: ${{ needs['classify-changes'].outputs['docker-reason'] }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${REASON}"
+          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
+          echo "docker=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+
+  duplication:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['duplication'] == 'required' }}
+    uses: ./.github/workflows/duplication-complexity.yml
+    permissions:
+      contents: read
+
+  root-hygiene:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['root-hygiene'] == 'required' }}
+    uses: ./.github/workflows/root-hygiene.yml
+    permissions:
+      contents: read
+
+  generated-artifacts:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['generated-artifacts'] == 'required' }}
+    uses: ./.github/workflows/schema-governance.yml
+    permissions:
+      contents: read
+
+  generated-artifacts-not-applicable:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['generated-artifacts'] == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.na.outputs.head_sha }}
+      reason: ${{ steps.na.outputs.reason }}
+    steps:
+      - name: Materialize generated-artifacts N/A decision
+        id: na
+        env:
+          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          REASON: ${{ needs['classify-changes'].outputs['generated-artifacts-reason'] }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${REASON}"
+          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
+          echo "generated-artifacts=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+
+  compiled-artifacts:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['compiled-artifacts'] == 'required' }}
+    uses: ./.github/workflows/compiled-artifacts-block.yml
+    permissions:
+      contents: read
+
+  commit-governance:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['commit-governance'] == 'required' }}
+    uses: ./.github/workflows/commit-lint.yml
+    permissions:
+      contents: read
+
+  commit-governance-not-applicable:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['commit-governance'] == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.na.outputs.head_sha }}
+      reason: ${{ steps.na.outputs.reason }}
+    steps:
+      - name: Materialize commit-governance N/A decision
+        id: na
+        env:
+          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          REASON: ${{ needs['classify-changes'].outputs['commit-governance-reason'] }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${REASON}"
+          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
+          echo "commit-governance=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+
+  docs-governance:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['docs-governance'] == 'required' }}
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+
+  docs-governance-not-applicable:
+    needs: classify-changes
+    if: ${{ needs['classify-changes'].outputs['docs-governance'] == 'not_applicable' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    outputs:
+      head_sha: ${{ steps.na.outputs.head_sha }}
+      reason: ${{ steps.na.outputs.reason }}
+    steps:
+      - name: Materialize docs-governance N/A decision
+        id: na
+        env:
+          HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          REASON: ${{ needs['classify-changes'].outputs['docs-governance-reason'] }}
+        run: |
+          set -euo pipefail
+          test -n "${HEAD_SHA}"
+          test -n "${REASON}"
+          echo "head_sha=${HEAD_SHA}" >> "${GITHUB_OUTPUT}"
+          echo "reason=${REASON}" >> "${GITHUB_OUTPUT}"
+          echo "docs-governance=not_applicable reason=${REASON} head_sha=${HEAD_SHA}"
+
+  pr-gate-complete:
+    name: pr-gate-complete
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ always() }}
+    needs:
+      - classify-changes
+      - lint-arch
+      - tests
+      - type-checking
+      - security
+      - codeql
+      - docker
+      - docker-not-applicable
+      - duplication
+      - root-hygiene
+      - generated-artifacts
+      - generated-artifacts-not-applicable
+      - compiled-artifacts
+      - commit-governance
+      - commit-governance-not-applicable
+      - docs-governance
+      - docs-governance-not-applicable
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+          uv-extras: "dev"
+
+      - name: Validate aggregator (fail-closed)
+        env:
+          DECISION_MATRIX: "${{ needs['classify-changes'].outputs.decision_matrix }}"
+          AGGREGATE_RESULTS: >-
+            {
+            "lint-arch": {"required": "${{ needs['lint-arch'].result }}", "not_applicable": "skipped"},
+            "tests": {"required": "${{ needs['tests'].result }}", "not_applicable": "skipped"},
+            "type-checking": {"required": "${{ needs['type-checking'].result }}", "not_applicable": "skipped"},
+            "security": {"required": "${{ needs['security'].result }}", "not_applicable": "skipped"},
+            "codeql": {"required": "${{ needs['codeql'].result }}", "not_applicable": "skipped"},
+            "docker": {"required": "${{ needs['docker'].result }}", "not_applicable": "${{ needs['docker-not-applicable'].result }}", "na_head_sha": "${{ needs['docker-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['docker-not-applicable'].outputs.reason }}"},
+            "duplication": {"required": "${{ needs['duplication'].result }}", "not_applicable": "skipped"},
+            "root-hygiene": {"required": "${{ needs['root-hygiene'].result }}", "not_applicable": "skipped"},
+            "generated-artifacts": {"required": "${{ needs['generated-artifacts'].result }}", "not_applicable": "${{ needs['generated-artifacts-not-applicable'].result }}", "na_head_sha": "${{ needs['generated-artifacts-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['generated-artifacts-not-applicable'].outputs.reason }}"},
+            "compiled-artifacts": {"required": "${{ needs['compiled-artifacts'].result }}", "not_applicable": "skipped"},
+            "commit-governance": {"required": "${{ needs['commit-governance'].result }}", "not_applicable": "${{ needs['commit-governance-not-applicable'].result }}", "na_head_sha": "${{ needs['commit-governance-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['commit-governance-not-applicable'].outputs.reason }}"},
+            "docs-governance": {"required": "${{ needs['docs-governance'].result }}", "not_applicable": "${{ needs['docs-governance-not-applicable'].result }}", "na_head_sha": "${{ needs['docs-governance-not-applicable'].outputs.head_sha }}", "na_reason": "${{ needs['docs-governance-not-applicable'].outputs.reason }}"}
+            }
+          EXPECTED_HEAD_SHA: ${{ needs['classify-changes'].outputs.head_sha }}
+          OBSERVED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          test "${{ needs['classify-changes'].result }}" = "success"
+          uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \
+            --catalog configs/quality/github_required_checks.yaml \
+            --decision-matrix-env DECISION_MATRIX \
+            --results-env AGGREGATE_RESULTS \
+            --expected-head-sha "${EXPECTED_HEAD_SHA}" \
+            --observed-head-sha "${OBSERVED_HEAD_SHA}" \
+            --run-url "${RUN_URL}"

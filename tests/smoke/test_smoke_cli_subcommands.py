@@ -12,19 +12,24 @@ from click.testing import CliRunner
 from bioetl.interfaces.cli.main import cli
 
 _SUBCOMMANDS = [
-    "run",
-    "run-manifest",
-    "run-all",
-    "run-composite",
-    "health",
-    "config",
-    "export",
+    "adr",
     "checkpoint",
+    "config",
     "debug",
+    "diagnostics",
+    "dq",
+    "export",
+    "health",
+    "lineage",
     "lock",
     "maintenance",
     "quarantine",
-    "adr",
+    "report",
+    "run",
+    "run-all",
+    "run-composite",
+    "run-manifest",
+    "workflow",
 ]
 
 

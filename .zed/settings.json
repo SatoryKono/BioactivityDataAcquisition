@@ -210,7 +210,7 @@
   },
   "git": {
     "inline_blame": {
-      "enabled": true,
+      "enabled": false,
       "show_commit_summary": true
     },
     "git_gutter": "tracked_files"

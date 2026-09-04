@@ -12,12 +12,46 @@
 
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
+
+import pytest
+from scripts.diagrams.render.generate_package_family_class_diagrams import (
+    _preserve_existing_generation_date,
+)
 
 
 pytestmark = pytest.mark.architecture
+
+
+def test_package_diagram_dates_change_only_with_diagram_content() -> None:
+    previous = "%% @date    2026-09-02\nclassDiagram\n    class Stable\n"
+    new_date = previous.replace("2026-09-02", "2026-09-03")
+    changed = new_date.replace("class Stable", "class Changed")
+
+    assert _preserve_existing_generation_date(previous, new_date) == previous, (
+        "An unchanged diagram must retain its previously reviewed date"
+    )
+    assert _preserve_existing_generation_date(previous, changed) == changed, (
+        "A changed diagram body must use the newly generated date"
+    )
+
+    malformed_format = previous.replace("2026-09-02", "not-a-date")
+    malformed_calendar = previous.replace("2026-09-02", "2026-02-30")
+    missing = "classDiagram\n    class Stable\n"
+    future = previous.replace("2026-09-02", "2026-09-04")
+
+    assert _preserve_existing_generation_date(malformed_format, new_date) == new_date, (
+        "A malformed date must use the newly generated output"
+    )
+    assert (
+        _preserve_existing_generation_date(malformed_calendar, new_date) == new_date
+    ), "An invalid calendar date must use the newly generated output"
+    assert _preserve_existing_generation_date(missing, new_date) == new_date, (
+        "A missing date must use the newly generated output"
+    )
+    assert _preserve_existing_generation_date(future, new_date) == new_date, (
+        "A future review date must not be preserved"
+    )
 
 
 def test_tests_workflow_keeps_docs_only_changes_out_of_heavy_matrix() -> None:
@@ -41,14 +75,46 @@ def test_docs_workflow_runs_lightweight_docs_governance_profile() -> None:
 
 
 def test_docs_workflow_path_filters_include_github_workflows_glob() -> None:
-    """Workflow YAML changes must trigger inventory parity (#9266)."""
+    """The leaf is reusable; the coordinator owns PR path decisions (#9975)."""
     workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
-    push_block, rest = workflow.split("pull_request:", maxsplit=1)
-    pr_block = rest.split("jobs:", maxsplit=1)[0]
-    for block_name, block in (("push", push_block), ("pull_request", pr_block)):
-        assert "'.github/workflows/**'" in block, (
-            f"{block_name} path filters must include .github/workflows/**"
-        )
+    trigger_block = workflow.split("jobs:", maxsplit=1)[0]
+
+    assert "workflow_call:" in trigger_block
+    assert "pull_request:" not in trigger_block
+    assert "'.github/workflows/**'" in trigger_block
+
+    catalog = Path("configs/quality/github_required_checks.yaml").read_text(
+        encoding="utf-8"
+    )
+    docs_gate = catalog.rsplit("- id: docs-governance", maxsplit=1)[1]
+    former_trigger_paths = (
+        ".github/actions/setup-python-uv/**",
+        "scripts/engineering/qa/check_xwalk_missing_backlog.py",
+        "src/bioetl/application/pipelines/chembl/activity_transformer.py",
+        "src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py",
+        "tests/architecture/test_ai_runtime_governance_links.py",
+        "tests/architecture/test_check_doc_links_guardrails.py",
+        "tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py",
+        "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
+    )
+    assert ".github/workflows/**" in docs_gate
+    for path in former_trigger_paths:
+        assert path in trigger_block
+        assert path in docs_gate
+
+
+def test_docs_workflow_scopes_pr_diagram_lint_to_changed_sources() -> None:
+    """Unchanged full-corpus freshness remains owned by diagram-nightly."""
+    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+
+    assert "EVENT_NAME: ${{ github.event_name }}" in workflow
+    assert '"${BASE_REF}" != "main" && "${BASE_REF}" != "develop"' in workflow
+    assert "git diff --diff-filter=ACMRTUXB --name-only" in workflow
+    assert "\"origin/${BASE_REF}\"...HEAD -- '*.mmd' '*.mermaid'" in workflow
+    assert 'mapfile -t lint_targets < "${changed_targets}"' in workflow
+    assert "scripts/diagrams .github/actions/setup-mermaid" in workflow
+    assert "'*.mmd' '*.mermaid'" in workflow
+    assert '"${lint_targets[@]}" --json' in workflow
 
 
 def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:

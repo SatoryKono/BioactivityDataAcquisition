@@ -352,7 +352,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         ]
         assert len(containers) == 1, path.name
         container_style = containers[0].get("style", "")
-        for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
+        for token in ("display:flex", "flex-wrap:nowrap", "overflow:visible"):
             assert token in container_style, (path.name, token)
 
         anchors = [attrs for tag, attrs in parser.elements if tag == "a"]
@@ -378,7 +378,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         for attrs in handoff_links:
             style = attrs.get("style", "")
             for token in (
-                "flex:1 1 120px",
+                "flex:1 1 0",
                 "text-align:center",
                 "color:#f8fafc",
                 "background:#334155",
@@ -388,7 +388,7 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             assert attrs.get("href"), path.name
         current_style = current[0].get("style", "")
         for token in (
-            "flex:1 1 120px",
+            "flex:1 1 0",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):
@@ -812,38 +812,81 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
 def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     incident = _load("bioetl-incident-v1.json")
     suspects = _panel(incident, 2010)
+    transforms = suspects.get("transformations", [])
+    transform_ids = [transform.get("id") for transform in transforms]
     organize = next(
-        transform
-        for transform in suspects.get("transformations", [])
-        if transform.get("id") == "organize"
+        transform for transform in transforms if transform.get("id") == "organize"
     )
     exclude = organize.get("options", {}).get("excludeByName", {})
+    rename = organize.get("options", {}).get("renameByName", {})
 
-    assert len(suspects.get("targets", [])) == 3
-    assert all(
-        "topk(5," in str(target.get("expr") or "")
-        for target in suspects.get("targets", [])
+    exprs = [
+        str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
+    ]
+    assert exprs == [
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    ]
+    assert "merge" in transform_ids
+    assert "sortBy" in transform_ids
+    assert "limit" in transform_ids
+    assert transform_ids.index("sortBy") < transform_ids.index("limit")
+    sort = next(
+        transform for transform in transforms if transform.get("id") == "sortBy"
     )
+    sort_field = (sort.get("options") or {}).get("sort", [{}])[0].get("field")
+    assert sort_field == "Value"
+    assert (sort.get("options") or {}).get("sort", [{}])[0].get("desc") is True
     assert any(
         transform.get("id") == "limit"
         and (transform.get("options") or {}).get("limitField") == 5
-        for transform in suspects.get("transformations", [])
+        for transform in transforms
     )
-    for field in (
-        "Time",
-        "Time 1",
-        "Time 2",
-        "Value",
-        "Value #A",
-        "Value #B",
-        "Value #C",
-    ):
+    for field in ("Time", "Time 1", "Time 2"):
         assert exclude.get(field) is True
-    assert not {
-        value
-        for value in organize.get("options", {}).get("renameByName", {}).values()
-        if str(value).startswith("Series ")
+    assert exclude.get("Value") is not True
+    assert rename.get("Value") == "Priority"
+    assert rename.get("action") == "Action"
+    assert rename.get("signal") == "Signal"
+    assert not {value for value in rename.values() if str(value).startswith("Series ")}
+
+
+def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
+    """#9960: merged top-5 must sort by shipped severity rank, not merge order."""
+    incident = _load("bioetl-incident-v1.json")
+    suspects = _panel(incident, 2010)
+    transforms = suspects.get("transformations", [])
+    ids = [transform.get("id") for transform in transforms]
+    assert ids.index("merge") < ids.index("sortBy") < ids.index("limit")
+    organize = next(
+        transform for transform in transforms if transform.get("id") == "organize"
+    )
+    exclude = organize.get("options", {}).get("excludeByName", {})
+    assert exclude.get("Value") is not True
+    exprs = [
+        str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
+    ]
+    assert exprs == [
+        "bioetl_incident_ranked_runtime",
+        "bioetl_incident_ranked_provider",
+        "bioetl_incident_ranked_dq",
+    ]
+    rules = yaml.safe_load(OBSERVABILITY_RULES.read_text(encoding="utf-8"))
+    recorded = {
+        str(rule.get("record")): str(rule.get("expr") or "")
+        for group in rules.get("groups", [])
+        for rule in group.get("rules", [])
+        if rule.get("record") in set(exprs)
     }
+    assert set(recorded) == set(exprs)
+    assert any("* 2" in expr for expr in recorded.values())
+    assert all(
+        'severity="failing"' in expr or 'severity="crit"' in expr
+        for expr in recorded.values()
+    )
+    assert all("telemetry_gap" in expr for expr in recorded.values())
+    assert all(" > 0" not in expr.split("topk", 1)[0] for expr in recorded.values())
 
 
 def test_incident_alert_history_has_readable_full_width_layout() -> None:
@@ -1164,7 +1207,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
-    assert int(grid.get("h") or 0) == 12
+    assert int(grid.get("h") or 0) == 11
     assert recent.get("options", {}).get("cellHeight") == "sm"
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"

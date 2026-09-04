@@ -74,6 +74,89 @@ def test_cli_reference_documents_every_root_command() -> None:
     assert not missing, f"cli.md missing root command headings: {missing}"
 
 
+def test_cli_reference_subcommand_headings_exist_in_click() -> None:
+    """Documented #### `group sub` headings must resolve on the live Click tree."""
+    import re
+
+    import click
+
+    from bioetl.interfaces.cli.main import cli
+
+    text = CLI_DOC.read_text(encoding="utf-8")
+    headings = re.findall(r"^#### `([a-z0-9-]+(?: [a-z0-9-]+)*)`", text, flags=re.M)
+    ctx = click.Context(cli)
+    missing: list[str] = []
+    for heading in headings:
+        parts = heading.split()
+        current: click.Command | None = cli
+        for part in parts:
+            if not isinstance(current, click.Group):
+                current = None
+                break
+            current = current.get_command(ctx, part)
+            if current is None:
+                break
+        if current is None:
+            missing.append(heading)
+    assert not missing, f"cli.md documents missing Click paths: {missing}"
+
+
+def test_cli_reference_and_cheatsheet_omit_removed_operator_examples() -> None:
+    """Stale operator examples must not appear in executable bash fences."""
+    import re
+
+    cheatsheet = PROJECT_ROOT / "docs/03-guides/cheatsheets/cli-commands.md"
+    stale_in_bash = (
+        "bioetl lineage show --entity",
+        "bioetl dq validate --entity",
+        "bioetl diagnostics --metrics",
+        "bioetl diagnostics --since",
+        "--checkpoint-compatibility observe",
+        "--debugger-port",
+        "--step-into",
+        "--inspect-state",
+        "--breakpoint silver",
+    )
+    fence_re = re.compile(r"```bash\n(.*?)```", re.S)
+    for path in (CLI_DOC, cheatsheet):
+        text = path.read_text(encoding="utf-8")
+        bash_blocks = "\n".join(fence_re.findall(text))
+        hits = [token for token in stale_in_bash if token in bash_blocks]
+        assert not hits, f"{path.relative_to(PROJECT_ROOT)} stale bash examples: {hits}"
+
+
+def test_cli_reference_documents_health_http_families() -> None:
+    """Health server section must name the live HTTP route families."""
+    text = CLI_DOC.read_text(encoding="utf-8")
+    required = (
+        "GET /health",
+        "GET /healthz",
+        "GET /health/live",
+        "GET /health/ready",
+        "GET /health/providers",
+        "GET /metrics",
+        "/ops/control-plane/*",
+        "/ops/observability/*",
+        "/ops/quarantine/*",
+    )
+    missing = [token for token in required if token not in text]
+    assert not missing, f"cli.md missing health HTTP families: {missing}"
+
+
+def test_cli_reference_version_matches_package() -> None:
+    """CLI reference version header must match bioetl.__version__."""
+    import re
+
+    from bioetl import __version__ as bioetl_version
+
+    text = CLI_DOC.read_text(encoding="utf-8")
+    header = re.search(r"^Version:\s*([0-9.]+)", text, flags=re.M)
+    body = re.search(r"\*\*Версия:\*\*\s*([0-9.]+)", text)
+    assert header is not None and body is not None
+    assert header.group(1) == bioetl_version
+    assert body.group(1) == bioetl_version
+
+
 def test_qa_readme_documents_ci_wired_qa_commands() -> None:
     """Every unified QA command invoked from tests.yml appears in the QA README."""
     import re

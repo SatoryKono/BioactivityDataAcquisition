@@ -36,8 +36,7 @@ Silver использует профиль `chembl.target` и проверяет
 ## Gold
 
 - Contract: `chembl.target v3.0.0`; strict validation: `True`.
-- Write mode: `scd2`.
-- SCD2: current_flag_col=_is_current; valid_from_col=_valid_from; valid_to_col=_valid_to; version_col=_version.
+- Write mode: `configured`.
 - Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`.
 
 ## Операторские команды
@@ -63,7 +62,7 @@ flowchart LR
     Bronze["Bronze append-only snapshot"]
     Silver["Silver profile: chembl.target + DQ"]
     Quarantine["Quarantine / exclusion evidence"]
-    Gold["Gold: chembl.target (scd2)"]
+    Gold["Gold: chembl.target (configured)"]
     Source --> Filters --> Bronze --> Silver
     Silver -->|valid| Gold
     Silver -->|invalid| Quarantine

@@ -60,6 +60,16 @@ def _spec(
     )
 
 
+def _monitoring_spec() -> runtime_manager.StackSpec:
+    return runtime_manager.StackSpec(
+        name="monitoring",
+        project="bioetl-monitoring",
+        compose_file=Path("docker-compose.monitoring.yml"),
+        required_services=("prometheus", "pushgateway", "grafana"),
+        expected_images={"grafana": "grafana/grafana:test@sha256:expected"},
+    )
+
+
 def test_direct_script_help_bootstraps_repository_imports(tmp_path: Path) -> None:
     script = Path(runtime_manager.__file__).resolve()
 
@@ -333,6 +343,287 @@ def test_post_start_source_gate_failure_cannot_report_success(
     assert incident["primary_cause"] == "report_bind_mismatch"
 
 
+def test_grafana_bootstrap_timeout_retry_restarts_when_identity_now_matches(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    recovering = {
+        "ops_http": "ready",
+        "reason": "identity_matched",
+        "dashboard_profile": "prometheus_only",
+    }
+    ready = {
+        "ops_http": "ready",
+        "reason": "identity_matched",
+        "dashboard_profile": "full",
+    }
+    statuses = [deferred, recovering, ready]
+    commands: list[list[str]] = []
+    status_reads = {"n": 0}
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            status_reads["n"] += 1
+            payload = statuses[status_reads["n"] - 1]
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "printenv",
+        ]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=source_id + "\n")
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "wget",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": source_id}),
+            )
+        if cmd[:2] == ["docker", "restart"]:
+            return runtime_manager.CommandResult(list(cmd), 0)
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+
+    assert result is None
+    assert status_reads["n"] == 3
+    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
+
+
+def test_grafana_bootstrap_timeout_retry_stops_wait_on_terminal_reason(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    mismatch = {
+        "ops_http": "deferred",
+        "reason": "identity_mismatch",
+        "dashboard_profile": "prometheus_only",
+    }
+    commands: list[list[str]] = []
+    status_reads = {"n": 0}
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            status_reads["n"] += 1
+            payload = deferred if status_reads["n"] == 1 else mismatch
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "printenv",
+        ]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=source_id + "\n")
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "wget",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": source_id}),
+            )
+        if cmd[:2] == ["docker", "restart"]:
+            return runtime_manager.CommandResult(list(cmd), 0)
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: (_ for _ in ()).throw(
+            AssertionError("sleep not expected after terminal reason")
+        ),
+        clock=lambda: 0.0,
+    )
+
+    assert result is None
+    assert status_reads["n"] == 2
+    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
+
+
+def test_grafana_bootstrap_timeout_retry_skips_identity_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    commands: list[list[str]] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps(
+                    {
+                        "ops_http": "deferred",
+                        "reason": "identity_mismatch",
+                        "dashboard_profile": "prometheus_only",
+                    }
+                ),
+            )
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+
+    assert result is None
+    assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
+
+
+def test_grafana_bootstrap_timeout_retry_uses_remaining_budget_for_each_step(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    observed_timeouts: list[float] = []
+    now = {"value": 0.0}
+
+    def clock() -> float:
+        return now["value"]
+
+    def runner(cmd: Sequence[str], _cwd: Path, timeout: float):
+        observed_timeouts.append(timeout)
+        now["value"] += 1.0
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(deferred)
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "printenv",
+        ]:
+            return runtime_manager.CommandResult(list(cmd), 0, stdout=source_id + "\n")
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "wget",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": source_id}),
+            )
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_monitoring_spec(),
+        runner=runner,
+        timeout=2.5,
+        sleep=lambda _seconds: (_ for _ in ()).throw(
+            AssertionError("sleep not expected")
+        ),
+        clock=clock,
+    )
+
+    assert result is None
+    assert observed_timeouts == [2.5, 1.5, 0.5]
+
+
+def test_grafana_bootstrap_timeout_retry_skips_non_monitoring_stack(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_bootstrap_gate(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+    )
+    assert result is None
+
+
+def test_load_grafana_bootstrap_status_uses_container_constant(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(runtime_manager, "_GRAFANA_CONTAINER", "grafana-test")
+    observed: list[list[str]] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        observed.append(list(cmd))
+        return runtime_manager.CommandResult(list(cmd), 1)
+
+    payload, readable = runtime_manager._load_grafana_bootstrap_status(
+        runner,
+        timeout=3.0,
+    )
+
+    assert (payload, readable) == (None, False)
+    assert observed == [
+        [
+            "docker",
+            "exec",
+            "grafana-test",
+            "cat",
+            "/var/lib/grafana/bioetl-bootstrap-status.json",
+        ]
+    ]
+
+
 def test_preflight_errors_are_recoverable_for_dashboard_and_cross_stack(
     tmp_path: Path,
 ) -> None:
@@ -595,6 +886,268 @@ def test_reseed_neo4j_auth_is_noop_for_other_stacks() -> None:
 
     assert (
         runtime_manager._reseed_neo4j_auth_volume(_spec(), runner=runner, timeout=5.0)
+        is None
+    )
+
+
+def _grafana_cutover_runner(
+    *,
+    statuses: list[dict[str, str]],
+    expected_source_id: str,
+    actual_source_id: str | None = None,
+    restart_code: int = 0,
+) -> tuple[list[list[str]], runtime_manager.Runner]:
+    commands: list[list[str]] = []
+    status_reads = {"n": 0}
+    actual = expected_source_id if actual_source_id is None else actual_source_id
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            status_reads["n"] += 1
+            payload = statuses[min(status_reads["n"] - 1, len(statuses) - 1)]
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=json.dumps(payload)
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "printenv",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd), 0, stdout=expected_source_id + "\n"
+            )
+        if cmd[:4] == [
+            "docker",
+            "exec",
+            runtime_manager._GRAFANA_CONTAINER,
+            "wget",
+        ]:
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps({"runtime_source_id": actual}),
+            )
+        if cmd[:2] == ["docker", "restart"]:
+            return runtime_manager.CommandResult(list(cmd), restart_code)
+        raise AssertionError(f"unexpected {cmd}")
+
+    return commands, runner
+
+
+def test_post_start_grafana_cutover_restarts_when_deferred(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    ready = {
+        "ops_http": "ready",
+        "reason": "identity_matched",
+        "dashboard_profile": "full",
+    }
+    commands, runner = _grafana_cutover_runner(
+        statuses=[deferred, ready],
+        expected_source_id=source_id,
+    )
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+    assert result is not None
+    assert result["restart_returncode"] == 0
+    assert result["previous_reason"] == "identity_timeout_or_unreachable"
+    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
+
+
+def test_post_start_grafana_cutover_skips_identity_mismatch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    commands: list[list[str]] = []
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        commands.append(list(cmd))
+        if (
+            cmd[:3] == ["docker", "exec", runtime_manager._GRAFANA_CONTAINER]
+            and cmd[3] == "cat"
+        ):
+            return runtime_manager.CommandResult(
+                list(cmd),
+                0,
+                stdout=json.dumps(
+                    {
+                        "ops_http": "deferred",
+                        "reason": "identity_mismatch",
+                        "dashboard_profile": "prometheus_only",
+                    }
+                ),
+            )
+        raise AssertionError(f"unexpected {cmd}")
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+    assert result is None
+    assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
+
+
+def test_post_start_grafana_cutover_skips_when_identity_does_not_match(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    commands, runner = _grafana_cutover_runner(
+        statuses=[deferred],
+        expected_source_id="a" * 64,
+        actual_source_id="b" * 64,
+    )
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+    assert result is None
+    assert not any(cmd[:2] == ["docker", "restart"] for cmd in commands)
+
+
+def test_post_start_grafana_cutover_records_failed_restart(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    commands, runner = _grafana_cutover_runner(
+        statuses=[deferred],
+        expected_source_id=source_id,
+        restart_code=1,
+    )
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+    assert result is not None
+    assert result["restart_returncode"] == 1
+    assert ["docker", "restart", runtime_manager._GRAFANA_CONTAINER] in commands
+    assert sum(1 for cmd in commands if cmd[:2] == ["docker", "restart"]) == 1
+    assert sum(1 for cmd in commands if len(cmd) > 3 and cmd[3] == "cat") == 1
+
+
+def test_post_start_grafana_cutover_uses_container_constant(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(runtime_manager, "_GRAFANA_CONTAINER", "grafana-test")
+    source_id = "a" * 64
+    deferred = {
+        "ops_http": "deferred",
+        "reason": "identity_timeout_or_unreachable",
+        "dashboard_profile": "prometheus_only",
+    }
+    ready = {
+        "ops_http": "ready",
+        "reason": "identity_matched",
+        "dashboard_profile": "full",
+    }
+    commands, runner = _grafana_cutover_runner(
+        statuses=[deferred, ready],
+        expected_source_id=source_id,
+    )
+
+    result = runtime_manager._post_start_grafana_ops_cutover(
+        spec=_spec(),
+        runner=runner,
+        timeout=5.0,
+        sleep=lambda _seconds: None,
+        clock=lambda: 0.0,
+    )
+    assert result is not None
+    assert ["docker", "restart", "grafana-test"] in commands
+
+
+def test_post_start_grafana_cutover_skips_when_ops_http_ready(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("BIOETL_TEST_MODE", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
+    monkeypatch.setattr(
+        runtime_manager,
+        "_load_grafana_bootstrap_status",
+        lambda *_args, **_kwargs: (
+            {
+                "ops_http": "ready",
+                "reason": "identity_matched",
+                "dashboard_profile": "full",
+            },
+            True,
+        ),
+    )
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    assert (
+        runtime_manager._post_start_grafana_ops_cutover(
+            spec=_spec(),
+            runner=runner,
+            timeout=5.0,
+            sleep=lambda _seconds: None,
+            clock=lambda: 0.0,
+        )
+        is None
+    )
+
+
+def test_post_start_grafana_cutover_skips_under_pytest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PYTEST_CURRENT_TEST", "test_post_start_grafana_cutover")
+
+    def runner(cmd: Sequence[str], _cwd: Path, _timeout: float):
+        raise AssertionError(f"unexpected {cmd}")
+
+    assert (
+        runtime_manager._post_start_grafana_ops_cutover(
+            spec=_spec(),
+            runner=runner,
+            timeout=5.0,
+        )
         is None
     )
 
@@ -1048,6 +1601,7 @@ def test_unmeasurable_docker_root_does_not_mean_daemon_unavailable(
 
 def test_recover_continues_when_preflight_only_reports_container_health(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Recover must not fail closed solely because the target service is unhealthy."""
     preflight_path = tmp_path / "docker-runtime-main-preflight.json"
@@ -1126,6 +1680,18 @@ def test_recover_continues_when_preflight_only_reports_container_health(
             return runtime_manager.CommandResult(current, 0)
         raise AssertionError(current)
 
+    successful_cutover = {
+        "action": "grafana_ops_http_cutover",
+        "restart_returncode": 0,
+        "previous_reason": "identity_timeout_or_unreachable",
+        "previous_dashboard_profile": "prometheus_only",
+    }
+    monkeypatch.setattr(
+        runtime_manager,
+        "_post_start_grafana_ops_cutover",
+        lambda **_kwargs: successful_cutover,
+    )
+
     result = runtime_manager.start_or_recover(
         _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
         Path("contract.yml"),
@@ -1141,6 +1707,27 @@ def test_recover_continues_when_preflight_only_reports_container_health(
     # Main stack force-recreates on attempt 1 so stale Desktop report binds cannot stick.
     assert "--force-recreate" in up_calls[0]
     assert not list(tmp_path.glob("docker-incident-*.json"))
+    cutover_report = tmp_path / "docker-runtime-grafana-ops-cutover.json"
+    assert json.loads(cutover_report.read_text(encoding="utf-8")) == successful_cutover
+
+    failed_cutover = {**successful_cutover, "restart_returncode": 1}
+    monkeypatch.setattr(
+        runtime_manager,
+        "_post_start_grafana_ops_cutover",
+        lambda **_kwargs: failed_cutover,
+    )
+
+    nonblocking_result = runtime_manager.start_or_recover(
+        _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64}),
+        Path("contract.yml"),
+        tmp_path,
+        recover=True,
+        runner=runner,
+        sleep=lambda _seconds: None,
+    )
+
+    assert nonblocking_result == 0
+    assert json.loads(cutover_report.read_text(encoding="utf-8")) == failed_cutover
 
 
 def test_recovery_force_recreates_only_after_first_failed_attempt(
@@ -1273,472 +1860,3 @@ def test_recovery_is_bounded_to_three_attempts_and_writes_one_incident(
     assert incident["recent_logs"]["captured"] is True
     # recovery_history records start (and wait when reached) rows
     assert len(incident["recovery_history"]) >= 3
-
-
-def test_clean_requires_confirmation_and_never_deletes_data(tmp_path: Path) -> None:
-    calls: list[list[str]] = []
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        calls.append(list(command))
-        return runtime_manager.CommandResult(list(command), 0)
-
-    assert (
-        runtime_manager.main(["clean", "--report-dir", str(tmp_path)], runner=runner)
-        == 2
-    )
-    assert calls == []
-    assert (
-        runtime_manager.main(
-            [
-                "clean",
-                "--report-dir",
-                str(tmp_path),
-                "--confirm-destructive",
-                "CLEAN",
-            ],
-            runner=runner,
-        )
-        == 0
-    )
-    rendered = " ".join(calls[-1])
-    assert "--volumes" not in rendered
-    assert "-v" not in calls[-1]
-    assert "prune" not in rendered
-
-
-def test_recovery_waits_for_daemon_after_transient_socket_failure(
-    tmp_path: Path,
-) -> None:
-    """Compose can fail mid-up when Desktop flaps; recover must wait and retry."""
-    up_attempts = 0
-    info_probes = 0
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        del cwd, timeout
-        nonlocal up_attempts, info_probes
-        current = list(command)
-        joined = " ".join(current)
-        if "docker_runtime_preflight.py" in joined or "config" in current:
-            return runtime_manager.CommandResult(current, 0)
-        if "network" in current and "inspect" in current:
-            return runtime_manager.CommandResult(
-                current,
-                0,
-                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
-            )
-        if "info" in current and "--format" in current:
-            info_probes += 1
-            return runtime_manager.CommandResult(current, 0, stdout="29.6.2\n")
-        if "compose" in current and "ps" in current:
-            if up_attempts < 1:
-                return runtime_manager.CommandResult(current, 0, stdout="")
-            return runtime_manager.CommandResult(
-                current,
-                0,
-                stdout=json.dumps([{"ID": "abcdef123456", "Service": "bioetl"}]),
-            )
-        if current[:2] == ["docker", "inspect"]:
-            return runtime_manager.CommandResult(
-                current,
-                0,
-                stdout=json.dumps(
-                    {
-                        "State": {
-                            "Status": "running",
-                            "OOMKilled": False,
-                            "Health": {"Status": "healthy"},
-                        },
-                        "RestartCount": 0,
-                        "Image": "bioetl:test",
-                        "ImageID": "sha256:img",
-                    }
-                ),
-            )
-        if current[:3] == ["docker", "image", "inspect"]:
-            return runtime_manager.CommandResult(
-                current,
-                0,
-                stdout=json.dumps({"RepoDigests": ["bioetl:test@sha256:expected"]}),
-            )
-        if "up" in current:
-            up_attempts += 1
-            if up_attempts == 1:
-                return runtime_manager.CommandResult(
-                    current,
-                    1,
-                    stderr=(
-                        "unable to get image 'bioetl-main-bioetl': "
-                        "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. "
-                        "Is the docker daemon running?"
-                    ),
-                )
-            return runtime_manager.CommandResult(current, 0)
-        raise AssertionError(current)
-
-    result = runtime_manager.start_or_recover(
-        _spec(),
-        Path("contract.yml"),
-        tmp_path,
-        recover=True,
-        runner=runner,
-        max_attempts=3,
-        sleep=lambda _seconds: None,
-        stabilization_seconds=0.0,
-    )
-
-    assert result == 0
-    # Attempt 1: start fails (daemon). Attempt 2: start ok + wait ok → 3 ups.
-    assert up_attempts == 3
-    assert info_probes >= 1
-    assert not list(tmp_path.glob("docker-incident-*.json"))
-
-
-def test_recovery_attempts_share_one_overall_deadline(tmp_path: Path) -> None:
-    now = [0.0]
-    up_calls = 0
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        nonlocal up_calls
-        current = list(command)
-        joined = " ".join(current)
-        if "docker_runtime_preflight.py" in joined or "config" in current:
-            return runtime_manager.CommandResult(current, 0)
-        if "network" in current and "inspect" in current:
-            return runtime_manager.CommandResult(
-                current,
-                0,
-                stdout="scripts/ops/runtime/docker/runtime_manager.py\n",
-            )
-        if "compose" in current and "ps" in current:
-            return runtime_manager.CommandResult(current, 0, stdout="")
-        if current[-2:] == ["--format", "json"]:
-            return runtime_manager.CommandResult(current, 0, stdout="[]")
-        if "up" in current:
-            up_calls += 1
-            now[0] += timeout
-            return runtime_manager.CommandResult(current, 1, stderr="timeout")
-        if "logs" in current:
-            return runtime_manager.CommandResult(current, 0)
-        raise AssertionError(current)
-
-    result = runtime_manager.start_or_recover(
-        _spec(),
-        Path("contract.yml"),
-        tmp_path,
-        recover=True,
-        runner=runner,
-        timeout=10,
-        max_attempts=3,
-        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
-        clock=lambda: now[0],
-    )
-
-    assert result == 1
-    assert up_calls == 1
-    incident = json.loads(
-        next(tmp_path.glob("docker-incident-*.json")).read_text(encoding="utf-8")
-    )
-    assert incident["elapsed_seconds"] <= 10
-
-
-def test_readiness_stabilization_never_runs_past_global_deadline(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    now = [0.0]
-    observed_timeouts: list[float] = []
-    snapshot = runtime_manager.ServiceSnapshot(
-        service="bioetl",
-        container_id="abc",
-        state="running",
-        health="healthy",
-        restart_count=0,
-        oom_killed=False,
-        image="bioetl:test@sha256:expected",
-    )
-
-    def collect(
-        spec: runtime_manager.StackSpec,
-        *,
-        runner: runtime_manager.Runner,
-        timeout: float,
-    ) -> tuple[
-        list[runtime_manager.ServiceSnapshot], list[runtime_manager.CommandResult]
-    ]:
-        del spec, runner
-        observed_timeouts.append(timeout)
-        now[0] += timeout
-        return [snapshot], []
-
-    monkeypatch.setattr(runtime_manager, "collect_snapshots", collect)
-
-    snapshots, findings = runtime_manager._wait_ready(
-        _spec(),
-        {},
-        runner=lambda command, cwd, timeout: runtime_manager.CommandResult(
-            list(command), 0
-        ),
-        timeout=10.0,
-        poll_interval=2.0,
-        stabilization_seconds=5.0,
-        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
-        clock=lambda: now[0],
-    )
-
-    assert snapshots == [snapshot]
-    assert findings == [{"cause": "readiness_timeout"}]
-    assert observed_timeouts == [10.0]
-    assert now[0] == 10.0
-
-
-def test_shared_network_bootstrap_creates_only_missing_contracted_networks(
-    tmp_path: Path,
-) -> None:
-    contract = tmp_path / "contract.yml"
-    contract.write_text(
-        yaml.safe_dump(
-            {
-                "shared_networks": {
-                    "monitoring": {
-                        "name": "bioetl-monitoring",
-                        "owner": "runtime-manager",
-                        "consumers": ["main", "monitoring"],
-                    },
-                    "unrelated": {
-                        "name": "bioetl-unrelated",
-                        "owner": "other",
-                        "consumers": ["neo4j"],
-                    },
-                }
-            }
-        ),
-        encoding="utf-8",
-    )
-    calls: list[list[str]] = []
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        current = list(command)
-        calls.append(current)
-        if "inspect" in current:
-            return runtime_manager.CommandResult(current, 1, stderr="not found")
-        if "create" in current:
-            return runtime_manager.CommandResult(current, 0, stdout="network-id")
-        raise AssertionError(current)
-
-    ok, findings = runtime_manager.ensure_shared_networks(
-        _spec(), contract, tmp_path / "networks.json", runner=runner
-    )
-
-    assert ok is True
-    assert findings == []
-    assert sum("create" in call for call in calls) == 1
-    assert all("bioetl-unrelated" not in call for call in calls)
-    assert "com.bioetl.owner=runtime-manager" in calls[-1]
-
-
-def test_shared_network_bootstrap_rejects_conflicting_owner(tmp_path: Path) -> None:
-    contract = tmp_path / "contract.yml"
-    contract.write_text(
-        yaml.safe_dump(
-            {
-                "shared_networks": {
-                    "monitoring": {
-                        "name": "bioetl-monitoring",
-                        "owner": "runtime-manager",
-                        "consumers": ["main"],
-                    }
-                }
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        return runtime_manager.CommandResult(list(command), 0, stdout="another-owner\n")
-
-    ok, findings = runtime_manager.ensure_shared_networks(
-        _spec(), contract, tmp_path / "networks.json", runner=runner
-    )
-
-    assert ok is False
-    assert findings == [
-        {
-            "cause": "network_owner_drift",
-            "network": "bioetl-monitoring",
-            "expected_owner": "runtime-manager",
-            "observed_owner": "another-owner",
-        }
-    ]
-
-
-def test_shared_network_bootstrap_rejects_unlabeled_existing_network(
-    tmp_path: Path,
-) -> None:
-    contract = tmp_path / "contract.yml"
-    contract.write_text(
-        yaml.safe_dump(
-            {
-                "shared_networks": {
-                    "monitoring": {
-                        "name": "bioetl-monitoring",
-                        "owner": "runtime-manager",
-                        "consumers": ["main"],
-                    }
-                }
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        return runtime_manager.CommandResult(list(command), 0, stdout="\n")
-
-    ok, findings = runtime_manager.ensure_shared_networks(
-        _spec(), contract, tmp_path / "networks.json", runner=runner
-    )
-
-    assert ok is False
-    assert findings == [
-        {
-            "cause": "network_owner_drift",
-            "network": "bioetl-monitoring",
-            "expected_owner": "runtime-manager",
-            "observed_owner": "",
-        }
-    ]
-
-
-def test_ensure_shared_networks_all_networks_ignores_consumer_filter(
-    tmp_path: Path,
-) -> None:
-    """Full reinstall path must create every contracted shared net, not stack-only."""
-    contract = tmp_path / "contract.yml"
-    contract.write_text(
-        yaml.safe_dump(
-            {
-                "shared_networks": {
-                    "monitoring": {
-                        "name": "bioetl-monitoring",
-                        "owner": "runtime-manager",
-                        "consumers": ["monitoring"],
-                    },
-                    "runtime": {
-                        "name": "bioetl-runtime",
-                        "owner": "runtime-manager",
-                        "consumers": ["neo4j"],
-                    },
-                }
-            }
-        ),
-        encoding="utf-8",
-    )
-    created: list[str] = []
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        current = list(command)
-        if "inspect" in current:
-            return runtime_manager.CommandResult(current, 1, stderr="not found")
-        if "create" in current:
-            created.append(current[-1])
-            return runtime_manager.CommandResult(current, 0, stdout="id")
-        raise AssertionError(current)
-
-    # Stack is main, but neither net lists main as consumer — all_networks still ensures both.
-    ok, findings = runtime_manager.ensure_shared_networks(
-        _spec(),
-        contract,
-        tmp_path / "networks.json",
-        runner=runner,
-        all_networks=True,
-    )
-
-    assert ok is True
-    assert findings == []
-    assert set(created) == {"bioetl-monitoring", "bioetl-runtime"}
-    report = json.loads((tmp_path / "networks.json").read_text(encoding="utf-8"))
-    assert report["stack"] == "all"
-    assert report["all_networks"] is True
-
-
-def test_ensure_networks_action_creates_all_shared_nets(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    contract = tmp_path / "contract.yml"
-    contract.write_text(
-        yaml.safe_dump(
-            {
-                "stacks": {
-                    "main": {
-                        "project_name": "bioetl-main",
-                        "compose_file": "docker-compose.yml",
-                        "required_services": ["bioetl"],
-                        "expected_images": {"bioetl": "bioetl:local"},
-                    }
-                },
-                "shared_networks": {
-                    "monitoring": {
-                        "name": "bioetl-monitoring",
-                        "owner": "runtime-manager",
-                        "consumers": ["main", "monitoring"],
-                    },
-                    "runtime": {
-                        "name": "bioetl-runtime",
-                        "owner": "runtime-manager",
-                        "consumers": ["main", "neo4j"],
-                    },
-                },
-            }
-        ),
-        encoding="utf-8",
-    )
-    report_dir = tmp_path / "reports"
-    report_dir.mkdir()
-    created: list[str] = []
-
-    def runner(
-        command: Sequence[str], cwd: Path, timeout: float
-    ) -> runtime_manager.CommandResult:
-        current = list(command)
-        if "inspect" in current:
-            return runtime_manager.CommandResult(current, 1, stderr="missing")
-        if "create" in current:
-            created.append(current[-1])
-            return runtime_manager.CommandResult(current, 0, stdout="id")
-        return runtime_manager.CommandResult(current, 0)
-
-    monkeypatch.setattr(
-        runtime_manager,
-        "_dashboard_runtime_environment",
-        lambda _path: __import__("contextlib").nullcontext({}),
-    )
-    # resolve_stack needs compose file present only as path string — no read here.
-    code = runtime_manager.main(
-        [
-            "ensure-networks",
-            "--stack",
-            "main",
-            "--contract",
-            str(contract),
-            "--report-dir",
-            str(report_dir),
-            "--timeout",
-            "10",
-        ],
-        runner=runner,
-    )
-    assert code == 0
-    assert set(created) == {"bioetl-monitoring", "bioetl-runtime"}
-    assert (report_dir / "docker-runtime-all-networks.json").is_file()

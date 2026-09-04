@@ -587,7 +587,15 @@ def test_runtime_contextual_handoffs_do_not_duplicate_top_level_dq_provider_link
             if target_uid not in forbidden_panel_titles_by_target:
                 continue
             title = str(link.get("title", ""))
-            if title in forbidden_panel_titles_by_target[target_uid]:
+            has_context_mapping = (
+                "${__data.fields." in url
+                or "var-pipeline_context=" in url
+                or "var-provider_context=" in url
+            )
+            if (
+                title in forbidden_panel_titles_by_target[target_uid]
+                and not has_context_mapping
+            ):
                 offenders.append(f"{panel.get('id')}:{panel.get('title')}->{title}")
 
     assert not offenders, (

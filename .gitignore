@@ -125,6 +125,7 @@ log_test.txt
 /final_chunk*.xml
 /extra_chunk*.xml
 /tmp_sub_*.txt
+/tmp_*.txt
 /temp_closeout.json
 /.tmp_test_run.log
 /.mcp-server-context.md
@@ -676,3 +677,9 @@ _fail_*.txt
 
 # Local envrc for Grok/direnv MCP key load (machine-local)
 .envrc
+!/docs/99-archive/agents-sp-2026-09/
+!/docs/99-archive/agents-sp-2026-09/**
+!/docs/99-archive/agents-scripts-2026-09/
+!/docs/99-archive/agents-scripts-2026-09/**
+!/docs/99-archive/agents-policy-2026-09/
+!/docs/99-archive/agents-policy-2026-09/**

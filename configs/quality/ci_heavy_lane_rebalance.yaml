@@ -15,7 +15,9 @@ success_metrics:
       retained_heavy_scenarios:
         - tests/integration/ci/test_track_d_fixture_control_plane_linkage.py
   coverage_verify_scope:
-    target: "Coverage verification combines shards and runs only the serial subset."
+    target: "Coverage verification combines independently produced shards, including serial coverage, without rerunning pytest."
+    serial_producer_job: serial-coverage
+    serial_shard: reports/coverage/.coverage.serial
     serial_marker: "serial and not e2e and not benchmark and not memory"
     known_exclusions:
       - tests/e2e

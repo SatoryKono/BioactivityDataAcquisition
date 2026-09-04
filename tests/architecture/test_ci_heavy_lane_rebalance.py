@@ -107,17 +107,38 @@ class TestCiHeavyLaneRebalance:
             assert scenario["path"] not in block
             assert scenario["new_lane"] == "test-fast"
 
-    def test_coverage_verify_remains_serial_subset_not_full_suite_rerun(self) -> None:
+    def test_coverage_verify_consumes_dedicated_serial_subset_without_pytest_rerun(
+        self,
+    ) -> None:
         policy = _load_policy()
         workflow = _read_workflow(policy)
-        block = _job_block(workflow, "coverage-verify")
+        serial_block = _job_block(workflow, "serial-coverage")
+        verify_block = _job_block(workflow, "coverage-verify")
         metric = policy["success_metrics"]["coverage_verify_scope"]  # type: ignore[index]
 
-        assert f'--parallel-marker "{metric["serial_marker"]}"' in block
-        for excluded_path in metric["known_exclusions"]:
-            assert f"--ignore={excluded_path}" in block
-        assert "--skip-serial-pass" in block
-        assert "coverage combine --keep reports/coverage" in block
+        producer_job = str(metric["serial_producer_job"])
+        serial_shard = str(metric["serial_shard"])
+        download_pattern = "pattern: coverage-data-*"
+        combine_command = "coverage combine --keep reports/coverage"
+
+        assert producer_job == "serial-coverage"
+        assert f"      - {producer_job}" in verify_block
+        assert (
+            '--parallel-marker "serial and not e2e and not benchmark and not memory"'
+            in serial_block
+        )
+        assert "--ignore=tests/e2e" in serial_block
+        assert "--ignore=tests/contract" in serial_block
+        assert "--skip-serial-pass" in serial_block
+        assert "coverage-data-serial" in serial_block
+        assert download_pattern in verify_block
+        assert serial_shard in verify_block
+        assert combine_command in verify_block
+        assert verify_block.index(download_pattern) < verify_block.index(
+            combine_command
+        )
+        assert verify_block.index(serial_shard) < verify_block.index(combine_command)
+        assert "run_pytest_resilient.py" not in verify_block
 
     def test_memory_and_performance_lanes_stay_isolated(self) -> None:
         policy = _load_policy()

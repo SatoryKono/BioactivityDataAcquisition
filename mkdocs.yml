@@ -13,7 +13,7 @@ exclude_docs: |
   00-project/ai/agents/agents/py-*.md
   00-project/ai/agents/agents/sp-*.md
   00-project/ai/agents/orchestration/**
-  00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+  00-project/ai/agents/policy/AGENT_GOVERNANCE.md
   00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
   00-project/ai/agents/runtime/orchestration/**
   00-project/ai/memory/README.md
@@ -22,6 +22,7 @@ exclude_docs: |
   00-project/ai/prompts/README.md
   00-project/ai/prompts/collected/**
   00-project/ai/prompts/archive/campaigns/**
+  00-project/ai/prompts/library/audit/project/materialized-v3/**
   00-project/ai/skills/SKILLS-CATALOG.md
   02-architecture/adr-registry/README.md
   99-archive/**
@@ -41,7 +42,7 @@ not_in_nav: |
   00-project/ai/agents/agents/py-*.md
   00-project/ai/agents/agents/sp-*.md
   00-project/ai/agents/orchestration/**
-  00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+  00-project/ai/agents/policy/AGENT_GOVERNANCE.md
   00-project/ai/agents/policy/MCP_SHARED_RUNTIME.md
   00-project/ai/agents/runtime/orchestration/**
   00-project/ai/memory/README.md
@@ -565,9 +566,7 @@ nav:
           - "Basedpyright Project Diagnostics": 00-project/ai/agents/guides/BASEDPRIGHT_PROJECT_DIAGNOSTICS.md
           - "Profiles Catalog": 00-project/ai/agents/agents/README.md
           - "Agent Orchestration Rules": 00-project/ai/agents/policy/agent-orchestration-rules.md
-          - "Agent Naming Policy and Rename Plan (2026-03-08)": 00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md
-          - "Consolidation Validation": 00-project/ai/agents/policy/CONSOLIDATION_VALIDATION.md
-          - "Agent Consolidation Matrix (2026-03-08)": 00-project/ai/agents/policy/AGENT_CONSOLIDATION_MATRIX_2026-03-08.md
+          - "Agent Governance (Consolidated)": 00-project/ai/agents/policy/AGENT_GOVERNANCE.md
           - "Prompts Surface": 00-project/ai/prompts/README.md
           - "Shared Agent Memory": 00-project/ai/memory/agent-memory.md
           - "Runtime Agent Memory Alias": 00-project/ai/agents/runtime/agent-memory.md

@@ -1,8 +1,8 @@
 %% BioETL — Bootstrap / DI Container (Composition Root)
 %% Shows current public composition seams, runtime assembly, and control-plane artifact wiring.
 
-%% @version 1.4.0
-%% @date    2026-03-28
+%% @version 1.5.0
+%% @date    2026-09-03
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   25
@@ -25,7 +25,7 @@ graph TB
 
     subgraph Public["Public composition seams"]
         ENTRY["composition.entrypoints<br/>broad public facade"]:::size-md
-        APIS["execution_api / control_plane_api / health_api<br/>maintenance_api / resources_api"]:::size-md
+        APIS["execution_api / health_api / maintenance_api / registry_api<br/>plus first-party owner access modules"]:::size-md
         BOOT["composition.bootstrap<br/>lower-level runtime / cli seam"]:::size-md
     end
 

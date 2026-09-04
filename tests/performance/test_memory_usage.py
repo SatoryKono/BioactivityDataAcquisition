@@ -11,10 +11,11 @@ Requirements:
 from __future__ import annotations
 
 import gc
+import subprocess
+import sys
 import tracemalloc
 
 import pytest
-import psutil
 import polars as pl
 
 pytestmark = [pytest.mark.benchmark, pytest.mark.performance, pytest.mark.serial]
@@ -87,7 +88,7 @@ def test_memory_usage_no_leak_in_repeated_operations() -> None:
         initial_current, initial_peak = tracemalloc.get_traced_memory()
 
         # Perform operation 100 times
-        for i in range(100):
+        for _ in range(100):
             data = {
                 "id": list(range(100)),
                 "value": [float(j) for j in range(100)],
@@ -98,8 +99,8 @@ def test_memory_usage_no_leak_in_repeated_operations() -> None:
             result = df.filter(pl.col("value") > 50)
 
             del df, result
-            gc.collect()
 
+        gc.collect()
         final_current, final_peak = tracemalloc.get_traced_memory()
         tracemalloc.stop()
     finally:
@@ -119,14 +120,20 @@ def test_memory_usage_no_leak_in_repeated_operations() -> None:
 
 def test_process_memory_limits() -> None:
     """Test that process memory usage is within reasonable limits."""
-    process = psutil.Process()
-
-    # Get memory info
-    memory_info = process.memory_info()
-    rss_mb = memory_info.rss / 1024 / 1024  # Resident Set Size in MB
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import polars, psutil; print(psutil.Process().memory_info().rss)",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    rss_mb = int(completed.stdout.strip()) / 1024 / 1024
 
     # Process should use less than 2GB for idle state
-    # This is a sanity check - adjust based on actual requirements
     assert rss_mb < 2048, f"Process using too much memory: {rss_mb:.2f} MB"
 
 

@@ -4,6 +4,9 @@ permissions:
   contents: read
 
 on:
+  workflow_call:
+  # Manual runs validate the Docker lane only. Publishing remains guarded below
+  # by push-to-main plus the protected ghcr-publish environment.
   workflow_dispatch:
   push:
     branches: [main, master, develop]
@@ -24,29 +27,10 @@ on:
       - ".dockerignore"
       - ".github/workflows/docker.yml"
       - ".github/actions/setup-python-uv/**"
-  pull_request:
-    branches: [main, master, develop]
-    paths:
-      - "Dockerfile.bioetl"
-      - "pyproject.toml"
-      - "uv.lock"
-      - "src/**"
-      - "configs/**"
-      - "docker-compose*.yml"
-      - "scripts/ops/runtime/docker/**"
-      - "scripts/engineering/qa/docker_stability_campaign/**"
-      - "scripts/engineering/qa/run_docker_stability_campaign.py"
-      - "configs/quality/docker_runtime_contracts.yaml"
-      - "tests/architecture/test_docker_runtime_contracts.py"
-      - "tests/unit/repo_backed/scripts/ops/docker/**"
-      - "tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py"
-      - ".dockerignore"
-      - ".github/workflows/docker.yml"
-      - ".github/actions/setup-python-uv/**"
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  # Do not cancel in-flight GHCR publishes on main; PRs may still cancel.
+  # Only main push validation is run-scoped so protected publish approval cannot
+  # block newer main SHA checks. PR and non-main pushes remain ref-scoped.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.run_id || github.ref }}
   cancel-in-progress: "${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}"
 
 jobs:
@@ -77,6 +61,7 @@ jobs:
           uv run --frozen --no-build pytest -q --tb=line \
             tests/architecture/test_docker_runtime_contracts.py \
             tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py \
+            tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager_recovery_networks.py \
             tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py \
             tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
 
@@ -129,10 +114,6 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs:
-      - docker-runtime-contracts
-      - docker-lint
-      - docker-compose-validate
     permissions:
       contents: read
       security-events: write
@@ -149,6 +130,7 @@ jobs:
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       - name: Build Docker image
+        id: build
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: .
@@ -157,10 +139,52 @@ jobs:
           load: true
           tags: "bioetl:${{ github.sha }}"
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # PRs consume the trusted default-branch cache but do not spend the
+          # critical path exporting a branch-local max cache. Main refreshes it.
+          cache-to: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'type=gha,mode=max' || '' }}
 
       - name: Prepare security reports directory
         run: mkdir -p reports/security
+
+      - name: Capture Docker build action metadata
+        env:
+          BUILD_DIGEST: ${{ steps.build.outputs.digest }}
+          BUILD_IMAGE_ID: ${{ steps.build.outputs.imageid }}
+          BUILD_METADATA: ${{ steps.build.outputs.metadata }}
+          IMAGE_REF: bioetl:${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          metadata_raw = os.environ.get("BUILD_METADATA") or "{}"
+          try:
+              metadata = json.loads(metadata_raw)
+          except json.JSONDecodeError as exc:
+              raise SystemExit(f"invalid build metadata JSON: {exc}") from exc
+
+          payload = {
+              "schema_version": "docker-build-action-metadata-v1",
+              "source_sha": os.environ["GITHUB_SHA"],
+              "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+              "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+              "image_ref": os.environ["IMAGE_REF"],
+              "image_id": os.environ.get("BUILD_IMAGE_ID", ""),
+              "digest": os.environ.get("BUILD_DIGEST", ""),
+              "metadata": metadata,
+              "cache": {
+                  "from": "type=gha",
+                  "to_policy": "main push only: type=gha,mode=max",
+              },
+          }
+          if not payload["image_id"]:
+              raise SystemExit("docker build action did not emit imageid")
+          Path("reports/security/docker-build-metadata.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
 
       - name: Capture image and runtime provenance
         env:
@@ -170,7 +194,7 @@ jobs:
           {
             echo "source_sha=${GITHUB_SHA}"
             echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-            echo "runtime_python=python-3.13=3.13.15-r2"
+            echo "runtime_python=python-3.13=3.13.15-r5"
             echo "builder_uv=uv=0.11.26-r0"
             echo "setuptools_build_constraint=setuptools==83.0.0"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
@@ -220,16 +244,11 @@ jobs:
           ignore-unfixed: false
           version: "v0.70.0"
 
-      - name: Run full Trivy SARIF evidence scan
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "sarif"
-          output: "reports/security/trivy-results.sarif"
-          severity: "CRITICAL,HIGH,MEDIUM,UNKNOWN"
-          exit-code: "0"
-          ignore-unfixed: false
-          version: "v0.70.0"
+      - name: Convert canonical Trivy JSON evidence
+        run: |
+          set -euo pipefail
+          trivy convert --format sarif --output reports/security/trivy-results.sarif reports/security/trivy-results.json
+          test -s reports/security/trivy-results.sarif
 
       - name: Upload Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
@@ -288,6 +307,7 @@ jobs:
             reports/security/bioetl-image-provenance.txt
             reports/security/bioetl-pip-freeze.txt
             reports/security/bioetl.spdx.json
+            reports/security/docker-build-metadata.json
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
@@ -311,6 +331,7 @@ jobs:
             reports/security/bioetl-image-provenance.txt
             reports/security/bioetl-pip-freeze.txt
             reports/security/bioetl.spdx.json
+            reports/security/docker-build-metadata.json
             reports/security/github-trivy-alerts.json
             reports/security/trivy-alerts.csv
             reports/security/trivy-base-results.json
@@ -322,32 +343,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Enforce Trivy Critical High Medium policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
-          ignore-unfixed: true
-          version: "v0.70.0"
-
-      - name: Enforce full Trivy Critical High Medium zero policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: "bioetl:${{ github.sha }}"
-          format: "table"
-          severity: "CRITICAL,HIGH,MEDIUM"
-          exit-code: "1"
-          ignore-unfixed: false
-          version: "v0.70.0"
-
-      - name: Enforce fixable Trivy Critical High Medium policy
+      - name: Enforce canonical Trivy Critical High Medium zero policy
         run: |
           python3 -m scripts.engineering.qa.docker_stability_campaign.trivy_baseline \
             --trivy-json reports/security/trivy-results.json \
             --output reports/security/trivy-fixability-audit.json \
-            --fail-on-fixable
+            --fail-on-blocking
 
       - name: Export exact scanned image for publication
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -366,20 +367,68 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  docker-complete:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - docker-runtime-contracts
+      - docker-lint
+      - docker-compose-validate
+      - docker-build
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Aggregate Docker checks (fail-closed)
+        env:
+          DOCKER_RUNTIME_CONTRACTS_RESULT: ${{ needs.docker-runtime-contracts.result }}
+          DOCKER_LINT_RESULT: ${{ needs.docker-lint.result }}
+          DOCKER_COMPOSE_VALIDATE_RESULT: ${{ needs.docker-compose-validate.result }}
+          DOCKER_BUILD_RESULT: ${{ needs.docker-build.result }}
+        run: |
+          set -euo pipefail
+          failures=0
+          for result in \
+            "docker-runtime-contracts=${DOCKER_RUNTIME_CONTRACTS_RESULT}" \
+            "docker-lint=${DOCKER_LINT_RESULT}" \
+            "docker-compose-validate=${DOCKER_COMPOSE_VALIDATE_RESULT}" \
+            "docker-build=${DOCKER_BUILD_RESULT}"; do
+            echo "${result}"
+            case "${result}" in
+              *=success) ;;
+              *) echo "::error::${result}"; failures=1 ;;
+            esac
+          done
+          test "${failures}" -eq 0
+
   docker-push:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: docker-build
+    needs:
+      - docker-build
+      - docker-complete
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: ghcr-publish
     concurrency:
-      group: docker-ghcr-push-${{ github.ref }}
+      group: docker-ghcr-push-${{ github.run_id }}
       cancel-in-progress: false
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Guard publish target is current main HEAD
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          current_sha="$(gh api "/repos/${REPOSITORY}/branches/main" --jq '.commit.sha')"
+          echo "source_sha=${SOURCE_SHA}"
+          echo "current_main_sha=${current_sha}"
+          test "${current_sha}" = "${SOURCE_SHA}"
+
       - name: Download exact scanned image
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:

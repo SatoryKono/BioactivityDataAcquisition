@@ -1,19 +1,19 @@
 name: Lint and Architecture Gates
 
 on:
+    workflow_call:
     push:
         branches:
             - main
             - master
             - develop
-    pull_request:
     workflow_dispatch:
 
 permissions:
     contents: read
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+    group: lint-architecture-${{ github.event.pull_request.number || github.sha }}
     cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -159,22 +159,66 @@ jobs:
                       --baseline-file scripts/engineering/baselines/c901_baseline.json \
                       --mode "${mode}"
 
+    import-contracts:
+        name: Import contracts
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        permissions:
+            contents: read
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+
+            -   name: Run import-linter architecture contracts
+                run: uv run --frozen --no-build lint-imports --config .importlinter
+
     arch-tests:
+        name: Architecture (${{ matrix.shard }})
         runs-on: ubuntu-latest
         timeout-minutes: 30
         permissions:
             contents: read
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - shard: S7-crosscutting-architecture-a
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-a3
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-b
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-c
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-d
+                      requires_lfs: true
+                    - shard: S7-crosscutting-architecture-guardrails-a
+                      requires_lfs: false
+                    - shard: S7-crosscutting-architecture-guardrails-b
+                      requires_lfs: false
         env:
+            BIOETL_PYTEST_SHARDED_TEST_HEALTH: '0'
             BIOETL_REQUIRE_TEST_CAPABILITIES: "1"
 
         steps:
             -   name: Checkout
                 uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
                 with:
-                    # Full history required for telemetry/audit ancestor and commit-existence gates.
-                    fetch-depth: 0
+                    # Current ref only. fetch-depth: 0 also fetches every remote
+                    # branch and blows the architecture 210s budget.
+                    fetch-depth: 1
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: |
+                    set -euo pipefail
+                    git fetch --unshallow --filter=blob:none --no-tags
 
             -   name: Fetch Git LFS objects for architecture governance
+                if: ${{ matrix.requires_lfs }}
                 run: |
                     set -euo pipefail
                     # Test-governance source identity includes VCR fixture payloads.
@@ -194,17 +238,92 @@ jobs:
             -   name: Setup Python + uv
                 uses: ./.github/actions/setup-python-uv
 
-            -   name: Run import-linter architecture contracts
-                run: uv run --frozen --no-build lint-imports --config .importlinter
+            -   name: Run canonical architecture shard
+                shell: bash
+                run: |
+                    bash scripts/engineering/dev/run_pytest_sharded.sh \
+                      --shard "${{ matrix.shard }}" \
+                      --stream \
+                      --skip-preflight \
+                      --junit-dir "reports/quality/test-runs/junit/architecture/${{ matrix.shard }}" \
+                      -- \
+                      --no-cov \
+                      -m "not slow and not benchmark and not memory"
 
-            -   name: Run canonical full architecture gate
-                run: uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"
+            -   name: Fail closed on empty collection or architecture skips
+                if: ${{ always() && !cancelled() }}
+                env:
+                    JUNIT_DIR: reports/quality/test-runs/junit/architecture/${{ matrix.shard }}
+                run: >
+                    uv run --frozen --no-build python -m scripts.engineering.ci
+                    architecture-junit-skips --junit-dir "${JUNIT_DIR}"
+
+            -   name: Upload architecture JUnit artifact
+                if: ${{ always() && !cancelled() }}
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: architecture-junit-${{ matrix.shard }}-${{ github.sha }}
+                    path: reports/quality/test-runs/junit/architecture/${{ matrix.shard }}/*.xml
+                    if-no-files-found: error
+                    retention-days: 14
+
+    arch-tests-slow:
+        name: Architecture (slow)
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        permissions:
+            contents: read
+        env:
+            BIOETL_PYTEST_SHARDED_TEST_HEALTH: "0"
+            BIOETL_REQUIRE_TEST_CAPABILITIES: "1"
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+                with:
+                    fetch-depth: 1
+
+            -   name: Unshallow current-ref history for ancestor gates
+                run: |
+                    set -euo pipefail
+                    git fetch --unshallow --filter=blob:none --no-tags
+
+            -   name: Setup Python + uv
+                uses: ./.github/actions/setup-python-uv
+
+            -   name: Run slow architecture nodes
+                shell: bash
+                run: |
+                    mkdir -p reports/quality/test-runs/junit/architecture/slow
+                    uv run --frozen --no-build python -m pytest tests/architecture \
+                      --timeout=300 \
+                      --no-cov \
+                      -m "slow and not benchmark and not memory" \
+                      --junitxml=reports/quality/test-runs/junit/architecture/slow/junit.xml
+
+            -   name: Fail closed on empty collection or architecture skips
+                if: ${{ always() && !cancelled() }}
+                env:
+                    JUNIT_DIR: reports/quality/test-runs/junit/architecture/slow
+                run: >
+                    uv run --frozen --no-build python -m scripts.engineering.ci
+                    architecture-junit-skips --junit-dir "${JUNIT_DIR}"
+
+            -   name: Upload slow architecture JUnit artifact
+                if: ${{ always() && !cancelled() }}
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: architecture-junit-slow-${{ github.sha }}
+                    path: reports/quality/test-runs/junit/architecture/slow/*.xml
+                    if-no-files-found: error
+                    retention-days: 14
 
     checks-complete:
         needs:
             - lint
             - c901-governance
+            - import-contracts
             - arch-tests
+            - arch-tests-slow
         runs-on: ubuntu-latest
         timeout-minutes: 5
         if: ${{ always() }}
@@ -215,11 +334,15 @@ jobs:
                 env:
                     LINT_RESULT: ${{ needs.lint.result }}
                     C901_RESULT: ${{ needs['c901-governance'].result }}
+                    IMPORT_CONTRACTS_RESULT: ${{ needs['import-contracts'].result }}
                     ARCH_RESULT: ${{ needs['arch-tests'].result }}
+                    ARCH_SLOW_RESULT: ${{ needs['arch-tests-slow'].result }}
                 run: |
                     if [[ "$LINT_RESULT" != "success" || \
                           "$C901_RESULT" != "success" || \
-                          "$ARCH_RESULT" != "success" ]]; then
+                          "$IMPORT_CONTRACTS_RESULT" != "success" || \
+                          "$ARCH_RESULT" != "success" || \
+                          "$ARCH_SLOW_RESULT" != "success" ]]; then
                       echo "One or more checks failed"
                       exit 1
                     fi

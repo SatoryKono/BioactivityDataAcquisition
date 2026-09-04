@@ -2548,6 +2548,7 @@ dashboards:
         empty_state_class: telemetry_missing
         state_model:
         - VALID_EMPTY
+        - UNKNOWN
         - ERROR
         required_copy:
         - evidence_scope
@@ -2556,6 +2557,7 @@ dashboards:
         fixture_cases:
         - populated
         - valid_empty
+        - telemetry_absent
         - backend_error
         render_profiles:
         - first_window_dark

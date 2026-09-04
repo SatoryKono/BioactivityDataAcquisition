@@ -97,9 +97,16 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     workflow = _read_workflow(".github/workflows/tests.yml")
     test_fast = _workflow_job_block(workflow, "test-fast")
     unit_fast = load_matrix()["test_lanes"]["lanes"]["unit-fast"]
-    assert "pytest tests/unit/ \\" in test_fast, (
-        "test-fast job must run only the canonical unit-fast test path"
+    assert "pytest ${{ matrix.test-group.path }} \\" in test_fast, (
+        "test-fast job must run the canonical partition selected by its matrix"
     )
+    for unit_path in (
+        "tests/unit/domain/",
+        "tests/unit/application/",
+        "tests/unit/infrastructure/",
+        "tests/unit/ --ignore=tests/unit/domain/",
+    ):
+        assert unit_path in test_fast
     assert "tests/architecture/" not in test_fast, (
         "test-fast must not absorb the architecture-fast-boundary lane"
     )
@@ -121,9 +128,10 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     assert "--max-worker-restart=0" in workflow, (
         "parallel CI jobs must fail fast on worker restart loops"
     )
-    assert "--junitxml=reports/test-telemetry/junit-fast.xml" in workflow, (
-        "test-fast job should emit JUnit telemetry for slow-test duration analysis"
-    )
+    assert (
+        "--junitxml=reports/test-telemetry/junit-fast.${{ matrix.test-group.name }}.xml"
+        in workflow
+    ), "test-fast job should emit JUnit telemetry for slow-test duration analysis"
     assert "pattern: test-telemetry-*" in workflow, (
         "duration telemetry job must download JUnit telemetry artifacts"
     )
@@ -138,9 +146,9 @@ def test_tests_workflow_splits_heavy_preflight_from_dependency_smoke() -> None:
     assert "config-schema-preflight:" in workflow, (
         "tests workflow should keep config/schema checks in a dedicated preflight job"
     )
-    assert "needs: governance-preflight" in workflow, (
-        "quality-metrics-gate should depend on governance-preflight"
-    )
+    for job_name in ("quality-metrics-gate", "neo4j-memory-live-audit"):
+        job = _workflow_job_block(workflow, job_name)
+        assert "needs: dependency-preflight" in job
     assert 'pytest tests/smoke/ -m "not memory"' in workflow, (
         "smoke-check must exclude dedicated memory-marked smoke tests"
     )
@@ -274,3 +282,17 @@ def test_tests_workflow_publishes_empirical_flaky_telemetry() -> None:
     assert "source_sha" in block and "shard_id" in block
     assert "compute_replay_tree_sha256" in block
     assert "replay_tree_sha256" in block
+
+
+def test_neo4j_live_audit_uses_cached_image_and_compose_wait() -> None:
+    """CI Neo4j live audit must not busy-wait HTTP and must keep the desktop compose contract."""
+    workflow = _read_workflow(".github/workflows/tests.yml")
+    assert "neo4j-memory-live-audit" in workflow
+    assert "Cache Neo4j image" in workflow
+    assert ".github/compose/neo4j-ci-overlay.yml" in workflow
+    assert "up -d --wait --wait-timeout 120 neo4j" in workflow
+    assert "Wait for Neo4j HTTP health" not in workflow
+    overlay = Path(".github/compose/neo4j-ci-overlay.yml").read_text(encoding="utf-8")
+    assert "start_period: 15s" in overlay
+    desktop = Path("docker-compose.neo4j.yml").read_text(encoding="utf-8")
+    assert "start_period: 180s" in desktop

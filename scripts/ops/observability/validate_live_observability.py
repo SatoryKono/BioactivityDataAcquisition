@@ -6,6 +6,7 @@ Addresses OBS-003: Live Grafana/Prometheus Validation Gap
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, UTC
@@ -15,13 +16,52 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 import base64
 
+from dotenv import load_dotenv
+
 # Configuration
 DEFAULT_PROMETHEUS_URL = "http://localhost:9090"
 DEFAULT_GRAFANA_URL = "http://localhost:3000"
 DEFAULT_GRAFANA_USERNAME = "admin"
-DEFAULT_GRAFANA_PASSWORD = "changeme"
+# No committed Grafana password. Resolve from process env at parse time.
+DEFAULT_GRAFANA_PASSWORD = ""
 DEFAULT_OUTPUT_DIR = Path("reports/observability/live-validation")
 DEFAULT_TIMEOUT = 5.0
+EXPECTED_OPS_HTTP_DATASOURCE_UID = "bioetl-ops-http"
+EXPECTED_OPS_HTTP_DATASOURCE_NAME = "BioETL Ops HTTP"
+REPO_ENV_PATH = Path(__file__).resolve().parents[3] / ".env"
+
+
+def _load_repo_environment() -> None:
+    """Load the machine-local repository environment without overriding process env."""
+    load_dotenv(dotenv_path=REPO_ENV_PATH, override=False)
+
+
+def _env_first(*names: str, default: str = "") -> str:
+    """Return the first non-empty process env value from *names*."""
+    for name in names:
+        value = os.getenv(name, "").strip()
+        if value:
+            return value
+    return default
+
+
+def resolve_grafana_username() -> str:
+    """Resolve Grafana username from runtime env, then the Grafana default user."""
+    return _env_first(
+        "GRAFANA_USERNAME",
+        "GF_SECURITY_ADMIN_USER",
+        default=DEFAULT_GRAFANA_USERNAME,
+    )
+
+
+def resolve_grafana_password() -> str:
+    """Resolve Grafana password from runtime env only (no committed default)."""
+    return _env_first(
+        "GRAFANA_PASSWORD",
+        "GF_SECURITY_ADMIN_PASSWORD",
+        "GRAFANA_ADMIN_PASSWORD",
+    )
+
 
 EXPECTED_BIOETL_DASHBOARD_UIDS = frozenset(
     {
@@ -288,6 +328,17 @@ def check_grafana_datasources(
     grafana_url: str, username: str, password: str, timeout: float
 ) -> ValidationResult:
     """Check Grafana datasources."""
+    if not password.strip():
+        return ValidationResult(
+            check_name="grafana_datasources",
+            status="fail",
+            message=(
+                "Grafana password is missing; set GRAFANA_PASSWORD "
+                "(or GF_SECURITY_ADMIN_PASSWORD / GRAFANA_ADMIN_PASSWORD). "
+                "No committed default password is used."
+            ),
+            details={"error": "missing_grafana_password"},
+        )
     try:
         datasources_url = f"{grafana_url}/api/datasources"
         headers = {"Authorization": _auth_header(username, password)}
@@ -302,16 +353,32 @@ def check_grafana_datasources(
             )
 
         datasource_names = [ds.get("name", "unknown") for ds in data]
+        datasource_uids = [str(ds.get("uid") or "") for ds in data]
         prometheus_ds = any("prometheus" in name.lower() for name in datasource_names)
+        ops_http_ds = any(
+            uid == EXPECTED_OPS_HTTP_DATASOURCE_UID
+            and name == EXPECTED_OPS_HTTP_DATASOURCE_NAME
+            for uid, name in zip(datasource_uids, datasource_names, strict=True)
+        )
+        if prometheus_ds and ops_http_ds:
+            status: Literal["pass", "fail", "partial"] = "pass"
+        elif prometheus_ds:
+            status = "partial"
+        else:
+            status = "fail"
 
         return ValidationResult(
             check_name="grafana_datasources",
-            status="pass" if prometheus_ds else "fail",
-            message=f"Grafana has {len(datasource_names)} datasources, Prometheus: {prometheus_ds}",
+            status=status,
+            message=(
+                f"Grafana has {len(datasource_names)} datasources, "
+                f"Prometheus: {prometheus_ds}, Ops HTTP: {ops_http_ds}"
+            ),
             details={
                 "total_datasources": len(datasource_names),
                 "datasource_names": datasource_names,
                 "has_prometheus": prometheus_ds,
+                "has_ops_http": ops_http_ds,
             },
         )
     except HTTPError as e:
@@ -341,6 +408,17 @@ def check_grafana_dashboards(
     grafana_url: str, username: str, password: str, timeout: float
 ) -> ValidationResult:
     """Check Grafana dashboards."""
+    if not password.strip():
+        return ValidationResult(
+            check_name="grafana_dashboards",
+            status="fail",
+            message=(
+                "Grafana password is missing; set GRAFANA_PASSWORD "
+                "(or GF_SECURITY_ADMIN_PASSWORD / GRAFANA_ADMIN_PASSWORD). "
+                "No committed default password is used."
+            ),
+            details={"error": "missing_grafana_password"},
+        )
     try:
         dashboards_url = f"{grafana_url}/api/search?query=&type=dash-db"
         headers = {"Authorization": _auth_header(username, password)}
@@ -495,6 +573,7 @@ def run_validation(
 
 
 def main():
+    _load_repo_environment()
     parser = argparse.ArgumentParser(
         description="Validate live BioETL observability stack (OBS-003)"
     )
@@ -505,10 +584,18 @@ def main():
         "--grafana-url", default=DEFAULT_GRAFANA_URL, help="Grafana base URL"
     )
     parser.add_argument(
-        "--grafana-username", default=DEFAULT_GRAFANA_USERNAME, help="Grafana username"
+        "--grafana-username",
+        default=resolve_grafana_username(),
+        help="Grafana username (default: GRAFANA_USERNAME / GF_SECURITY_ADMIN_USER)",
     )
     parser.add_argument(
-        "--grafana-password", default=DEFAULT_GRAFANA_PASSWORD, help="Grafana password"
+        "--grafana-password",
+        default=resolve_grafana_password(),
+        help=(
+            "Grafana password (default: GRAFANA_PASSWORD / "
+            "GF_SECURITY_ADMIN_PASSWORD / GRAFANA_ADMIN_PASSWORD). "
+            "No committed default password is used."
+        ),
     )
     parser.add_argument(
         "--timeout",

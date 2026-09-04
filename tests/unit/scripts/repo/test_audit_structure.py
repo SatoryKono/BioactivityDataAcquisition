@@ -113,6 +113,53 @@ def test_run_audit_allows_cataloged_docs_code_zone_and_tolerated_hidden_roots(
     assert not result.should_violations
 
 
+def test_run_audit_allows_cataloged_archived_agents_scripts_zone(
+    tmp_path: Path,
+) -> None:
+    _write_governance_files(tmp_path)
+    catalog_path = tmp_path / "configs" / "quality" / "repo_structure_catalog.yaml"
+    catalog = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    catalog["docs_code_zones"]["approved_roots"] = [
+        {"path": "docs/99-archive/agents-scripts-2026-09"},
+    ]
+    catalog_path.write_text(yaml.safe_dump(catalog, sort_keys=False), encoding="utf-8")
+    _write_minimal_repo_tree(tmp_path)
+    archive_dir = (
+        tmp_path / "docs" / "99-archive" / "agents-scripts-2026-09" / "diagrams"
+    )
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    (archive_dir / "legacy_helper.py").write_text(
+        "print('archived')\n", encoding="utf-8"
+    )
+    (
+        tmp_path / "docs" / "99-archive" / "agents-scripts-2026-09" / "legacy_tool.py"
+    ).write_text("print('archived')\n", encoding="utf-8")
+
+    result = module.run_audit(tmp_path)
+
+    assert not result.must_violations
+    assert not result.should_violations
+
+
+def test_live_catalog_ratifies_archived_agents_scripts_docs_code_zone() -> None:
+    catalog = yaml.safe_load(
+        (
+            Path(__file__).resolve().parents[4]
+            / "configs"
+            / "quality"
+            / "repo_structure_catalog.yaml"
+        ).read_text(encoding="utf-8")
+    )
+    roots = [
+        entry["path"]
+        for entry in catalog["docs_code_zones"]["approved_roots"]
+        if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+    ]
+    assert "docs/99-archive/agents-scripts-2026-09" in roots
+    assert "docs/00-project/ai/agents/policy" in roots
+    assert "docs/00-project/ai/agents/scripts" not in roots
+
+
 def test_run_audit_allows_cataloged_visible_local_root_dirs(tmp_path: Path) -> None:
     _write_governance_files(tmp_path)
     _write_minimal_repo_tree(tmp_path)
