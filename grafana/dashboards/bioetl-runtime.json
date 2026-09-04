@@ -3347,7 +3347,7 @@
               "root_selector": "rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=$run_id",
+              "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3620,7 +3620,7 @@
               "root_selector": "rows",
               "source": "url",
               "type": "json",
-              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=$run_id",
+              "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
               "url_options": {
                 "data": "",
                 "method": "GET"
@@ -3817,7 +3817,7 @@
               "root_selector": "summary",
               "source": "url",
               "type": "json",
-              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=$run_id&view=summary&from=${__from}&to=${__to}",
+              "url": "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}&view=summary&from=${__from}&to=${__to}",
               "url_options": {
                 "data": "",
                 "method": "GET"
