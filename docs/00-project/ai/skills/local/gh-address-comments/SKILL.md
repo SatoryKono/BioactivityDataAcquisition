@@ -6,6 +6,14 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
+## Repository governance
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions/`
+
 Guide to find the open PR for the current branch and address its comments with gh CLI. Run all `gh` commands with elevated network access.
 
 Prereq: ensure `gh` is authenticated (for example, run `gh auth login` once), then run `gh auth status` with escalated permissions (include workflow/repo scopes) so `gh` commands succeed. If sandboxing blocks `gh auth status`, rerun it with `sandbox-permissions=require-escalated`.
