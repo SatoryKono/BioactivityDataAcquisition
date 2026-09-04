@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -438,9 +438,7 @@ reports/quality/architecture_debt_execution_plan_*.json
 reports/quality/tasks_architecture_metric_exemptions_*.json
 # Re-include closeout evidence required by architecture freezes (CI-C1-004 / #7518).
 # Negations must follow the broader ignores above (last match wins).
-!/reports/quality/architecture_debt_execution_plan_2026-06-26-15-51.json
 !/reports/quality/architecture_debt_execution_plan_2026-07-12-12-34.json
-!/reports/quality/tasks_architecture_metric_exemptions_2026-07-12-12-33.json
 reports/quality/test-runs/
 reports/security/
 
@@ -645,10 +643,8 @@ _a.txt
 /_arch_results.xml
 
 /_unit_results.xml
-/_arch_results.xml
 _fail_batch1.txt
 _fail_*.txt
-/bash.exe.stackdump
 
 !/docs/reports/evidence/technical-debt/
 /docs/reports/evidence/technical-debt/*
@@ -672,7 +668,6 @@ _fail_*.txt
 # Local agent workspace (untracked). Do not re-add a trailing `.agents/`
 # blanket: last-match would override the SKILL.md un-ignore above.
 /data/debug_exports
-/data/debug_exports
 /chrome-headless-shell
 
 # Local envrc for Grok/direnv MCP key load (machine-local)
@@ -685,3 +680,4 @@ _fail_*.txt
 !/docs/99-archive/agents-policy-2026-09/**
 !/docs/99-archive/skills-2026-09/
 !/docs/99-archive/skills-2026-09/**
+
