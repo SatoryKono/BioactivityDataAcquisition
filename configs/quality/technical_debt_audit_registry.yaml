@@ -4,8 +4,8 @@ audits:
   - id: total-tech-debt-main-2026-08-20-r1
     status: current
     report_path: reports/quality/total-tech-debt-audit-main-current.md
-    audited_commit_sha: f8001644eed4d66786ce68284d89218019bbc4bf
-    evidence_surface_sha256: 884cdb6ba071aeebb83f153963d93855762ca229ce01290d797032e73d343f7e
+    audited_commit_sha: 09ab9ac286bacb7eee3324e950603539a5c62ee6
+    evidence_surface_sha256: e309a4893232c7e7c38775fdf2159b493980f612790ec5ec963fbfe0891244e2
 
 
     evidence_paths:
@@ -19,8 +19,8 @@ audits:
   - id: total-tech-debt-main-2026-07-27
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-27.md
-    audited_commit_sha: f8001644eed4d66786ce68284d89218019bbc4bf
-    evidence_surface_sha256: 884cdb6ba071aeebb83f153963d93855762ca229ce01290d797032e73d343f7e
+    audited_commit_sha: feab571a144d06137ca968ff1d6c49e9b77d3fab
+    evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
     evidence_paths:
       - configs/quality/compatibility_facade_inventory.yaml
       - configs/quality/debt_scorecard.yaml
@@ -37,8 +37,8 @@ audits:
   - id: total-tech-debt-main-2026-07-23
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-23.md
-    audited_commit_sha: f8001644eed4d66786ce68284d89218019bbc4bf
-    evidence_surface_sha256: 884cdb6ba071aeebb83f153963d93855762ca229ce01290d797032e73d343f7e
+    audited_commit_sha: 0b45de173fb869e1295abdffe9688c5c46ec544f
+    evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
     evidence_paths:
       - configs/quality/compatibility_facade_inventory.yaml
       - configs/quality/debt_scorecard.yaml
@@ -55,15 +55,15 @@ audits:
   - id: total-tech-debt-main-2026-07-19
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-19.md
-    audited_commit_sha: f8001644eed4d66786ce68284d89218019bbc4bf
-    evidence_surface_sha256: 884cdb6ba071aeebb83f153963d93855762ca229ce01290d797032e73d343f7e
+    audited_commit_sha: 2d46c3a69e75bf9a79094c071ec84a758f9e0289
+    evidence_surface_sha256: 08b2f682d95481b77e4c14e80f80f33569910a892764b794e82907029acd9d76
     superseded_by: total-tech-debt-main-2026-07-23
     superseded_on: "2026-07-23"
     linked_issue: "#6355"
   - id: total-tech-debt-main-2026-07-01
     status: superseded
     report_path: docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-01.md
-    audited_commit_sha: f8001644eed4d66786ce68284d89218019bbc4bf
+    audited_commit_sha: 5ddb9f8f3f95c82d9bccc9d6d011c7b39ca3ae1a
     superseded_by: total-tech-debt-main-2026-07-19
     superseded_on: "2026-07-19"
     linked_issue: "#6355"
