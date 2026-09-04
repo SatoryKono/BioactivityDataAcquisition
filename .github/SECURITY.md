@@ -118,7 +118,7 @@ make security-check
 - **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning. `PYSEC-2026-3721` / `CVE-2026-3219` is remediated at `pip==26.2.1`; do not restore `--ignore-vuln` for that advisory. Residual mermaid/Grafana GHSA remain timeboxed to **2026-11-30** (#9853/#9859). Not a Scorecard dismiss.
 - **OSV-Scanner**: Primary lockfile scanner in CI (`.github/workflows/security.yml`) against `uv.lock`; job fails on HIGH/CRITICAL (and unknown severity), not Medium/Low. Do **not** add `osv-scanner.toml`. Residual mermaid-cli/Grafana GHSA: `05-github-policy.md` §2.3.2, re-triage #9859. Scorecard Vulnerabilities (**#1294**) stays open.
 - **Bandit**: Python anti-pattern scan in `.github/workflows/security.yml`
-- **CodeQL**: advanced setup only (`.github/workflows/codeql.yml`). GitHub default setup stays `not-configured`; do not enable both. Python SAST uploads to Code scanning. Alert triage: BioETL Team, weekly Monday with Scorecard.
+- **CodeQL**: advanced setup only (`.github/workflows/codeql.yml`, Python, `build-mode: none`). GitHub default setup stays `not-configured`; do not enable both and do not add `c-cpp` / `build-mode: autobuild`. Python SAST uploads to Code scanning. Alert triage: BioETL Team, weekly Monday with Scorecard.
 - **OpenSSF Scorecard**: Weekly non-blocking baseline (`.github/workflows/scorecard.yml`)
 - **Syft SBOM**: SPDX artifact on GitHub Release (`release.yml`) and GHCR push (`docker.yml`)
 - **zizmor**: High-confidence GitHub Actions YAML audit on workflow/action changes (`.github/workflows/zizmor.yml`)

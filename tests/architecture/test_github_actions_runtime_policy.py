@@ -515,9 +515,24 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
         "security-events": "write",
     }
     assert init_step["with"]["languages"] == "python"
+    assert init_step["with"]["build-mode"] == "none"
     assert "matrix" not in jobs["analyze"]
     assert any(f"github/codeql-action/init@{sha}" in uses for sha in allowed_init)
     assert any(f"github/codeql-action/analyze@{sha}" in uses for sha in allowed_analyze)
+
+    forbidden = (
+        "c-cpp",
+        "language: cpp",
+        "codeql-action/autobuild",
+        "build-mode: autobuild",
+    )
+    for path in sorted((ROOT / ".github/workflows").glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        for fragment in forbidden:
+            if fragment in text:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT).as_posix()} must not contain {fragment!r}"
+                )
 
 
 def test_codeql_ownership_and_triage_are_documented() -> None:
@@ -529,6 +544,8 @@ def test_codeql_ownership_and_triage_are_documented() -> None:
     assert "advanced CodeQL setup" in policy_doc
     assert "not-configured" in policy_doc
     assert "default setup MUST remain" in policy_doc
+    assert "build-mode: autobuild" in policy_doc
+    assert "dynamic/github-code-scanning/codeql" in policy_doc
     assert "Alert triage owner" in policy_doc
     assert "Weekly on Monday" in policy_doc
     assert "advanced setup only" in security_md

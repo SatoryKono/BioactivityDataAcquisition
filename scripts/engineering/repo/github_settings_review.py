@@ -37,6 +37,7 @@ MUTATING_GH_ARGUMENTS = frozenset(
 )
 READ_ONLY_GH_COMMANDS = frozenset({("api",), ("repo", "view")})
 _GITHUB_DIRNAME = ".github"
+_CODEQL_HOSTED_WORKFLOW_PATH = "dynamic/github-code-scanning/codeql"
 ControlResult = tuple[bool | None, str]
 _CAPTURED_TEXT = {
     "capture_output": True,
@@ -259,6 +260,37 @@ def _workflow_health(runs: Iterable[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _hosted_codeql_workflows(
+    client: ReadOnlyGitHubClient, repository: str
+) -> list[dict[str, Any]]:
+    hosted: list[dict[str, Any]] = []
+    for page in range(1, 11):
+        payload = client.json(
+            [
+                "api",
+                f"repos/{repository}/actions/workflows?per_page=100&page={page}",
+            ]
+        )
+        if not isinstance(payload, dict):
+            raise GitHubReviewError("expected object payload from actions/workflows")
+        items = payload.get("workflows") or []
+        if not isinstance(items, list):
+            raise GitHubReviewError("expected workflows list from actions/workflows")
+        hosted.extend(
+            {
+                "id": item.get("id"),
+                "name": item.get("name"),
+                "path": item.get("path"),
+                "state": item.get("state"),
+            }
+            for item in items
+            if str(item.get("path") or "") == _CODEQL_HOSTED_WORKFLOW_PATH
+        )
+        if len(items) < 100:
+            break
+    return hosted
+
+
 def collect_snapshot(
     client: ReadOnlyGitHubClient,
     repo_root: Path,
@@ -386,6 +418,7 @@ def collect_snapshot(
             "default_setup": client.api_optional(
                 f"repos/{repository}/code-scanning/default-setup"
             ),
+            "hosted_default_workflows": _hosted_codeql_workflows(client, repository),
         },
         "codeowners": {
             "exists": codeowners_path is not None,
@@ -474,6 +507,22 @@ def _control_advanced_codeql(
     return exists, f"{_GITHUB_DIRNAME}/workflows/codeql.yml exists={exists}"
 
 
+def _control_codeql_default_setup_off(
+    snapshot: dict[str, Any], _policy: dict[str, Any]
+) -> ControlResult:
+    container = snapshot.get("codeql", {}).get("default_setup") or {}
+    if not container.get("available"):
+        return None, f"default_setup unavailable: {container.get('reason')}"
+    payload = container.get("payload")
+    if not isinstance(payload, dict):
+        return None, "default_setup payload missing"
+    state = payload.get("state")
+    hosted = snapshot.get("codeql", {}).get("hosted_default_workflows") or []
+    hosted_states = [item.get("state") for item in hosted]
+    evidence = f"state={state}; hosted={hosted_states or 'none'}"
+    return state == "not-configured", evidence
+
+
 def _control_secret_scanning(
     snapshot: dict[str, Any], _policy: dict[str, Any]
 ) -> ControlResult:
@@ -546,6 +595,7 @@ _CONTROL_CHECKS: dict[
     "protected_environments": _control_protected_environments,
     "dependabot_security_updates": _control_dependabot_security_updates,
     "advanced_codeql": _control_advanced_codeql,
+    "codeql_default_setup_off": _control_codeql_default_setup_off,
     "secret_scanning": _control_secret_scanning,
     "codeowners": _control_codeowners,
     "squash_only": _control_squash_only,

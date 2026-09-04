@@ -51,6 +51,7 @@ below.
 - `print()` for runtime logging (use logger ports/structlog adapters).
 - Blocking I/O inside async code.
 - Replacing strict typing with broad `Any` to silence type errors.
+- CodeQL `c-cpp` / `build-mode: autobuild` (Python-only advanced setup, `build-mode: none`).
 
 ## Hallucination Prevention (MUST)
 
