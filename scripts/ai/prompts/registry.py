@@ -155,6 +155,27 @@ def load_card(path: Path) -> PromptCard:
     )
 
 
+def load_scenarios(path: Path | None = None) -> list[dict[str, Any]]:
+    """Load the 15 operator scenarios from REGISTRY.yaml."""
+    reg_path = path or REGISTRY_PATH
+    data = yaml.safe_load(reg_path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"REGISTRY must be a mapping: {reg_path}")
+    raw = data.get("scenarios")
+    if not isinstance(raw, list):
+        raise ValueError(f"REGISTRY.scenarios must be a list: {reg_path}")
+    scenarios: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            raise ValueError(f"scenario must be a mapping: {item!r}")
+        required = ("id", "scenario", "role", "prompt", "schema")
+        missing = [key for key in required if not item.get(key)]
+        if missing:
+            raise ValueError(f"scenario missing {missing}: {item!r}")
+        scenarios.append(item)
+    return scenarios
+
+
 def find_entry(entries: list[RegistryEntry], prompt_id: str) -> RegistryEntry:
     for entry in entries:
         if entry.id == prompt_id:

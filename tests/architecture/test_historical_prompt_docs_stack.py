@@ -21,10 +21,10 @@ pytestmark = pytest.mark.architecture
 
 HISTORICAL_PROMPT_FILES = (
     Path(
-        "docs/00-project/ai/prompts/archive/campaigns/documentation_diagrams_audit.md"
+        "docs/99-archive/prompts-2026-09/archive/campaigns/documentation_diagrams_audit.md"
     ),
     Path(
-        "docs/00-project/ai/prompts/archive/campaigns/refactor_orchestration_prompt.md"
+        "docs/99-archive/prompts-2026-09/archive/campaigns/refactor_orchestration_prompt.md"
     ),
 )
 

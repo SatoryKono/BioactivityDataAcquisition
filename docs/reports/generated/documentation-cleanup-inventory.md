@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3742 |
-| Tracked doc-like files | 3742 |
+| Doc-like files | 3546 |
+| Tracked doc-like files | 3546 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 8 |
+| Duplicate groups | 7 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
 
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3742 |
+| tracked | 3546 |
 
 ## Lifecycle Counts
 
@@ -32,7 +32,6 @@
 | docs_reports_curated_or_historical_report | 5 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
-| generated_skill_license_mirror | 2 |
 | generated_skill_reference_mirror | 2 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
@@ -40,7 +39,7 @@
 | issue_pack | 58 |
 | live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
-| published_skill_reference_redirect | 15 |
+| published_skill_reference_redirect | 21 |
 | reports_workspace_entrypoint | 1 |
 | working_report | 922 |
 
@@ -58,22 +57,22 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 734 |
-| Archived | 202 |
+| Active | 733 |
+| Archived | 289 |
 | Canonical | 73 |
-| Deprecated | 51 |
-| Generated | 1256 |
+| Deprecated | 2 |
+| Generated | 1023 |
 | Working | 1426 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 734 |
-| archive | 202 |
+| active | 733 |
+| archive | 289 |
 | canonical | 73 |
-| duplicate | 51 |
-| generated | 1256 |
+| duplicate | 2 |
+| generated | 1023 |
 | working | 1426 |
 
 ## Recommended Actions
@@ -82,66 +81,17 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 929 |
-| generate-automatically | 1256 |
-| keep | 1162 |
+| generate-automatically | 1023 |
+| keep | 1248 |
 | reconcile-with-github-state | 8 |
-| replace-with-link | 51 |
+| replace-with-link | 2 |
 
 ## Cleanup Candidates
 
 | Path | Status | Inbound | Action |
 | --- | --- | --- | --- |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.agents-memory.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.architecture.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.coderabbit.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.configs.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.dashboards.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.diagrams.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.docs.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tech-debt.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.telemetry.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.cycle.tests.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.cli-compat.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.control-plane.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.dq-contracts.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.github-actions.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.http-clients.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.medallion.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.normalization.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.ops-runbooks.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.providers.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.qa-gates.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.requirements-trace.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.scripts-inventory.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.security-secrets.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/compatibility/prompt.audit.project.new2.vcr-http.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/fragments/grafana-six-contract.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/README.md` | Deprecated | 6 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/agents-memory.md` | Deprecated | 2 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/architecture.md` | Deprecated | 2 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/coderabbit.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/configs.md` | Deprecated | 2 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/dashboards.md` | Deprecated | 2 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/diagrams.md` | Deprecated | 3 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/docs.md` | Deprecated | 3 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/agents-memory.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/configs.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/dashboards.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/diagrams.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/docs.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/tech-debt.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/run/tests.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/tech-debt.md` | Deprecated | 3 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/telemetry.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/cycle/tests.md` | Deprecated | 3 | replace-with-link |
-| `docs/00-project/ai/prompts/library/audit/project/gh-actions-cyclic-audit-1000.md` | Deprecated | 0 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/consolidate.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/data.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/evidence.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/layout.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/pack.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/reverify.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/prompts/library/observability/grafana-six/visual.md` | Deprecated | 1 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/cyclic-pack.md` | Deprecated | 0 | replace-with-link |
+| `docs/00-project/ai/prompts/library/audit/grok-audit-cycle.md` | Deprecated | 0 | replace-with-link |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 1 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 5 | archive-after-migration |
@@ -171,6 +121,55 @@
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/requirement-graph.json` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/untraced-tests.csv` | Working | 0 | archive-after-migration |
 | `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/final-summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/delta.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-1/validation.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/delta.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/iteration-2/validation.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/run.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/source-of-truth-map.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T112947Z-audit-seq-8ab59e2395/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/run.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/docs-kpi.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/link-report.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/preflight.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-01-prompt.audit.cycle.docs/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/blocked-evidence.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-budget.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-lint.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality-after.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/diagram-quality.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/preflight.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260814T171455Z-audit-seq-dd076a79f5/step-02-prompt.audit.cycle.diagrams/visual-smoke.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/final-summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/audit.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-1/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/audit.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/findings.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/plan.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/report.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-10/summary.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/20260819T075955Z-tests-cycle-16f309688177/iteration-2/audit.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -206,9 +205,6 @@
 | `docs/00-project/ai/memory/memory-py-test-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/memory/neo4j-project-memory-seed.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/COLLECTED_PROMPTS_INDEX.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/INVENTORY.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/REGISTRY.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/domain-overlay.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
@@ -217,45 +213,48 @@
 | `docs/00-project/ai/prompts/_schema/kernel.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/ledger-event.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 | `docs/00-project/ai/prompts/_schema/prompt.schema.json` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/architecture_metric_exemptions_tasks_json_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11-SOURCES.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/bi-dashboard-audit-kit-2026-08-11.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/documentation_diagrams_audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/generic-nine-audit-kit-2026-08-SOURCES.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/generic-nine-audit-kit-2026-08.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/project-audit-orchestrator-kit-2026-08-11-SOURCES.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/project-audit-orchestrator-kit-2026-08-11.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/refactor_orchestration_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/scripts_inventory_consolidation_cleanup_prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-1-scripts-inventory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/campaigns/specialized-prompts-2-coderabbit-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/memory-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-1-py-audit-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/role-specific-agents-2-py-debug-bot.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-1-CODEX-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/runtime-agentry-2-JUNIE-RUNTIME.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-1-devin-setup-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/setup-prompts-2-optimization-prompt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/skills-1-research-workflow.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/skills-2-verify-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/workflows-1-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/mirrors/workflows-2-post-change.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/01-architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/02-configs.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/03-tests.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/04-tech-debt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/05-docs.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/06-agents-memory.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/07-telemetry.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/08-dashboards.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/09-diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/10-coderabbit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new/README.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new2/01-medallion.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new2/02-dq-contracts.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
-| `docs/00-project/ai/prompts/archive/retired-project-new2/03-control-plane.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/domains.yaml` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/audit-scale.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/cyclic-kernel-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/debt-budget-ban.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/env-guardrail.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/evidence-contract-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/finding-schema.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/git-safety.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/issue-state-machine-v3.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/language-ru.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/orchestrator-guards.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/peer-review-gate.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/fragments/project-requirements-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/agents-runtime.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/architecture-review.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/architecture.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/dashboard.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/debug.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/diagrams.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/github-actions.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-data.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-layout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-master.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-regression.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/grafana-visual.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/observability-sequential.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/orchestrator.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/repo-tree.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/sequential-run.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/audit/tech-debt.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/closeout/grok-closeout.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/config/validate.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/doc/audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/doc/pipeline.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/doc/planning.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/plan/scoped.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/session/bootstrap.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/test/cycle.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/test/fix-retest.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/test/speed-optimization.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
+| `docs/00-project/ai/prompts/library/test/system-audit.md` | ai-local-generated-docs-helpers |  |  | AI runtime memory, prompts, and local skill generators |
 
 ## GitHub Issue Evidence Examples
 

@@ -4,34 +4,39 @@ version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
-params: [SCOPE, MODE, LANGUAGE, AUDIT_MODE, REQUIRE_GH_TRACKING]
+runtimes:
+- any
+params:
+- SCOPE
+- MODE
+- LANGUAGE
+- AUDIT_MODE
+- REQUIRE_GH_TRACKING
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/generic-nine-contract.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
 related_ssot:
-  - AGENTS.md
-  - docs/00-project/NORMATIVE_SOURCES.md
-  - docs/02-architecture
+- AGENTS.md
+- docs/00-project/NORMATIVE_SOURCES.md
+- docs/02-architecture
 anti_patterns:
-  - Preferring pretty PNG over accurate text-as-code
-  - Unpinned npx -y in production CI
-  - Huge code-level diagrams of entire monorepo
-tags: [audit, diagrams, mermaid, architecture, operator]
+- Preferring pretty PNG over accurate text-as-code
+- Unpinned npx -y in production CI
+- Huge code-level diagrams of entire monorepo
+tags:
+- audit
+- diagrams
+- mermaid
+- architecture
+- operator
 summary: Audit version-controlled diagrams and render scripts
 max_body_lines: 140
 ---
-
 # Diagrams audit
 
 **Kit:** prompt 7 of `prompt.audit.generic-nine.pack`.

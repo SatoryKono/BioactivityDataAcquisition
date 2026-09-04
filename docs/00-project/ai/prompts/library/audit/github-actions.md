@@ -4,34 +4,40 @@ version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
-params: [SCOPE, MODE, LANGUAGE, AUDIT_MODE, REQUIRE_GH_TRACKING]
+runtimes:
+- any
+params:
+- SCOPE
+- MODE
+- LANGUAGE
+- AUDIT_MODE
+- REQUIRE_GH_TRACKING
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/generic-nine-contract.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
+- fragments/peer-review-gate.md
 related_ssot:
-  - AGENTS.md
-  - .github/workflows
-  - docs/00-project/NORMATIVE_SOURCES.md
+- AGENTS.md
+- .github/workflows
+- docs/00-project/NORMATIVE_SOURCES.md
 anti_patterns:
-  - Optimizing CI cost before fixing trust boundaries
-  - Broad write permissions “for convenience”
-  - Treating untrusted PR code as safe under privileged triggers
-tags: [audit, ci, github-actions, security, operator]
+- Optimizing CI cost before fixing trust boundaries
+- Broad write permissions “for convenience”
+- Treating untrusted PR code as safe under privileged triggers
+tags:
+- audit
+- ci
+- github-actions
+- security
+- operator
 summary: GitHub Actions supply-chain and correctness audit
 max_body_lines: 140
 ---
-
 # GitHub Actions audit
 
 **Kit:** prompt 5 of `prompt.audit.generic-nine.pack`.

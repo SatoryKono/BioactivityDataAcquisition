@@ -15,12 +15,12 @@ ______________________________________________________________________
 **Linked issues:** #9807
 **Related:** ADR-041, ADR-043, ADR-044, ADR-046
 **Source:** `BIOETL-PROMPT-ARCH-KERNEL-V3-003` (`bioetl_prompt_system_kernel_v3_full_portfolio_formatted_v2.1.docx`) @ `main@3aba8559a58038cd9ff9a90621f19ea39b930a2f`
-**Materialization:** `docs/00-project/ai/prompts/library/audit/project/materialized-v3/` frozen 2026-08-28
+**Materialization:** `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/` frozen 2026-08-28
 
 ## Context
 
 The audit prompt library contains 24 full operator-paste prompts materialized at
-`docs/00-project/ai/prompts/library/audit/project/materialized-v3/`:
+`docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/`:
 
 - 10 `cycle/` cards (`01-docs` … `10-coderabbit` — `prompt.audit.cycle.*`)
 - 14 `project/new2/` cards (`11-medallion` … `24-scripts-inventory` — `prompt.audit.project.new2.*`)
@@ -208,7 +208,7 @@ Automated checks from `_plan-v3.md` §4.3 / `MIGRATION-PLAN.md` §5 (must be CI-
 
 ### 7. Migration window
 
-- `docs/00-project/ai/prompts/library/audit/project/materialized-v3/` is a **frozen snapshot**
+- `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/` is a **frozen snapshot**
   dated 2026-08-28 — not SSOT. It contains 24× `NN-*__prompt.*.md` + `master-orchestrator-v1`
   + `README.md` + 4 `_*.md` = 30 files. Do not hand-edit; it is evidence.
 - SSOT after P0 is `fragments/` + `overlays/*.yaml` + `profiles/*.yaml` + `_schema/*.json` +
@@ -276,14 +276,14 @@ Additional costs: P0–P1 compiler + 15 CI checks + golden snapshots; one-time m
 - Source DOCX: `bioetl_prompt_system_kernel_v3_full_portfolio_formatted_v2.1.docx`
   — `BIOETL-PROMPT-ARCH-KERNEL-V3-003` @ `3aba8559`
 - Frozen materialization (do not edit):
-  `docs/00-project/ai/prompts/library/audit/project/materialized-v3/README.md`
-- Kernel extraction source: `docs/00-project/ai/prompts/library/audit/project/materialized-v3/_kernel-v3.md` (§3.1)
-- Plan and target structure: `docs/00-project/ai/prompts/library/audit/project/materialized-v3/_plan-v3.md` (§4.1–4.3)
-- Migration plan (P0–P3, 24 prompts + master): `docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md`
-- Methodology and scoring: `docs/00-project/ai/prompts/library/audit/project/materialized-v3/_methodology-v3.md`
-- Annex Tables 0–11 (scores, priorities, risks): `docs/00-project/ai/prompts/library/audit/project/materialized-v3/_annex-tables-v3.md`
-- 24 domain prompts (01–24): `docs/00-project/ai/prompts/library/audit/project/materialized-v3/01-docs__prompt.audit.cycle.docs.md` … `24-scripts-inventory__prompt.audit.project.new2.scripts-inventory.md`
-- Master orchestrator (sequential 01→24 + POST_AUDIT): `docs/00-project/ai/prompts/library/audit/project/materialized-v3/master-orchestrator-v1__full-project-audit.md`
+  `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/README.md`
+- Kernel extraction source: `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/_kernel-v3.md` (§3.1)
+- Plan and target structure: `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/_plan-v3.md` (§4.1–4.3)
+- Migration plan (P0–P3, 24 prompts + master): `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/MIGRATION-PLAN.md`
+- Methodology and scoring: `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/_methodology-v3.md`
+- Annex Tables 0–11 (scores, priorities, risks): `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/_annex-tables-v3.md`
+- 24 domain prompts (01–24): `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/01-docs__prompt.audit.cycle.docs.md` … `24-scripts-inventory__prompt.audit.project.new2.scripts-inventory.md`
+- Master orchestrator (sequential 01→24 + POST_AUDIT): `docs/99-archive/prompts-2026-09/project-materialized/materialized-v3/master-orchestrator-v1__full-project-audit.md`
 - Normative stack: `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `AGENTS.md`
 
 ## Related ADRs
@@ -301,13 +301,19 @@ docs/00-project/ai/prompts/
   fragments/cyclic-kernel-v3.md
   fragments/evidence-contract-v3.md
   fragments/issue-state-machine-v3.md
-  overlays/<domain>.yaml            # 24 files
+  domains.yaml                      # 24 overlays, epic #10081
   profiles/audit-readonly.yaml
   profiles/full-write.yaml
   profiles/differential.yaml
   _schema/*.json
-  generated/<domain>/<profile>.md
-  compatibility/<legacy-prompt-id>.md
 scripts/ai/prompts/compile.py lint.py verify.py diff.py
-tests/prompts/unit/ contract/ golden/ integration/
+tests/prompts/
 ```
+
+## 9. 2026-09-04 update (epic #10081)
+
+Tracked `generated/`, `compatibility/`, and `overlays/*.yaml` were retired from
+the live tree. Overlay semantics are unchanged: `domains.yaml` holds the 24
+domain mappings; `compile.py` renders them on demand. Frozen materialized-v3
+and campaign megaprompts live under `docs/99-archive/prompts-2026-09/`.
+The 15 operator scenarios are listed in `REGISTRY.yaml`.

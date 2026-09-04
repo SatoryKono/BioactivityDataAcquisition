@@ -24,7 +24,7 @@ This directory stores published documentation for BioETL AI skills across suppor
   authored in runtime trees such as `.codex/skills/`.
 - **Published mirror**: `docs/00-project/ai/skills/local/` and related indexes
   exist for discoverability and documentation stability.
-- **Snapshot**: `global/` stores curated copies of selected non-local skills.
+- **Snapshot**: `global/` may still hold curated copies of selected non-local skills (not the prompts library).
 - **Reference mirror**: `_references/` stores read-only mirrored reference
   bundles used by skills consistency tooling.
 
