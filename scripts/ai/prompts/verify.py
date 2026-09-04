@@ -270,6 +270,37 @@ def _check_one_generated_file(report: VerifyReport, path: Path) -> None:
     )
 
 
+def _verify_single_compiled(
+    report: VerifyReport, result: dict[str, object], label: str
+) -> bool:
+    if result.get("error"):
+        report.add_error("compile", str(result["error"]), label)
+        return False
+    text = result.get("rendered_text")
+    if not isinstance(text, str):
+        report.add_error("compile", "no rendered_text", label)
+        return False
+    provenance = _parse_provenance_header(text)
+    if provenance is None or _PROMPT_SHA8 not in provenance:
+        report.add_error(
+            "generated_provenance",
+            "missing provenance header with prompt_sha8",
+            label,
+        )
+        return False
+    expected_sha8 = _sha8(_body_after_params_header(text).encode("utf-8"))
+    if provenance.get(_PROMPT_SHA8) != expected_sha8:
+        report.add_error(
+            _CODE_DETERMINISTIC,
+            (
+                f"prompt_sha8 mismatch: header {provenance.get(_PROMPT_SHA8)} "
+                f"!= body {expected_sha8}"
+            ),
+            label,
+        )
+    return True
+
+
 def check_generated_catalog(report: VerifyReport) -> int:
     """Compile every domain×profile in memory and check provenance headers."""
     try:
@@ -294,32 +325,8 @@ def check_generated_catalog(report: VerifyReport) -> int:
         for profile in profiles:
             result = compile_one(domain, profile)
             label = f"{domain}/{profile}"
-            if result.get("error"):
-                report.add_error("compile", str(result["error"]), label)
-                continue
-            text = result.get("rendered_text")
-            if not isinstance(text, str):
-                report.add_error("compile", "no rendered_text", label)
-                continue
-            provenance = _parse_provenance_header(text)
-            if provenance is None or _PROMPT_SHA8 not in provenance:
-                report.add_error(
-                    "generated_provenance",
-                    "missing provenance header with prompt_sha8",
-                    label,
-                )
-                continue
-            expected_sha8 = _sha8(_body_after_params_header(text).encode("utf-8"))
-            if provenance.get(_PROMPT_SHA8) != expected_sha8:
-                report.add_error(
-                    _CODE_DETERMINISTIC,
-                    (
-                        f"prompt_sha8 mismatch: header {provenance.get(_PROMPT_SHA8)} "
-                        f"!= body {expected_sha8}"
-                    ),
-                    label,
-                )
-            compiled += 1
+            if _verify_single_compiled(report, result, label):
+                compiled += 1
     return compiled
 
 
