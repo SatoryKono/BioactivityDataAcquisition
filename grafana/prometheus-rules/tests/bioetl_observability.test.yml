@@ -896,7 +896,7 @@ tests:
       - expr: bioetl_dq_current_reason{pipeline="chembl_assay",reason="gold_contract_exclusions",severity="warn"}
         eval_time: 19m
         exp_samples:
-          - labels: '{__name__="bioetl_dq_current_reason",action_target="data_quality",pipeline="chembl_assay",reason="gold_contract_exclusions",severity="warn"}'
+          - labels: '{__name__="bioetl_dq_current_reason",action_dashboard_uid="bioetl-dq-v2",action_target="data_quality",pipeline="chembl_assay",reason="gold_contract_exclusions",severity="warn"}'
             value: 1
       - expr: bioetl_dq_current_status{pipeline="chembl_assay"}
         eval_time: 19m
