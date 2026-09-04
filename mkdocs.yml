@@ -65,10 +65,7 @@ not_in_nav: |
   00-project/ai/skills/local/observability-prometheus/SKILL.md
   00-project/ai/skills/local/deep-research/SKILL.md
   00-project/ai/skills/local/documentation-audit/SKILL.md
-  00-project/ai/skills/local/gh-address-comments/SKILL.md
-  00-project/ai/skills/local/gh-fix-ci/SKILL.md
   00-project/ai/skills/local/new-pipeline/SKILL.md
-  00-project/ai/skills/local/openai-docs/SKILL.md
   00-project/ai/skills/local/py-audit-bot/SKILL.md
   00-project/ai/skills/local/py-config-bot/SKILL.md
   00-project/ai/skills/local/py-debug-bot/SKILL.md
