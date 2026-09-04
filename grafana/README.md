@@ -1451,7 +1451,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | `First Action` | text CTA | n/a | n/a |
 | `Runtime Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`; a trust gap forces INCOMPLETE before dashboard filtering |
 | `Metrics Evidence` (telemetry confidence) | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
-| `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
+| `Monitor Active Blocker Count` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
 | `Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
 Range and localization evidence (`Failed Runs`,
@@ -1467,7 +1467,7 @@ without becoming a second green health verdict.
 `Inspect Active Runtime Blocker Detail` is a collapsed `Detect` drilldown, not
 first-screen guidance. This evidence supports investigation but does not replace
 the canonical current status recording rule. `Runtime Error Rate`,
-`Monitor Runtime Blockers`, `Worst Stage Lag`, and
+`Monitor Active Blocker Count`, `Worst Stage Lag`, and
 `Monitor Memory Pressure Active` preserve `UNKNOWN` when telemetry is absent
 instead of coercing missing metrics to `0`.
 `Monitor Failed Runs` and `Monitor No-Records Runs` show `0` only when

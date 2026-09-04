@@ -216,7 +216,7 @@ def test_pipeline_runtime_data_panel_titles_are_action_first() -> None:
 
 def test_pipeline_runtime_count_panels_have_window_in_title_or_description() -> None:
     titles = {
-        "Monitor Runtime Blockers",
+        "Monitor Active Blocker Count",
         "Monitor Monitor Failed Runs",
         "Monitor No-Records Runs",
         "Monitor Monitor Runtime Error Rate",
@@ -380,8 +380,8 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
     saw output backlog but Runtime Blockers filtered it out via stage=~"$stage".
     """
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Monitor Runtime Blockers")
-    assert blockers_panel is not None, "Monitor Runtime Blockers panel is missing"
+    blockers_panel = panels.get("Monitor Active Blocker Count")
+    assert blockers_panel is not None, "Monitor Active Blocker Count panel is missing"
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_current_blocker_reason" in expr
     assert 'stage=~"$stage"' not in expr, (
@@ -393,7 +393,7 @@ def test_runtime_blockers_panel_does_not_filter_by_stage() -> None:
 def test_runtime_blockers_includes_gold_write_missing() -> None:
     """Runtime Blockers must consume canonical runtime blocker reasons."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Monitor Runtime Blockers")
+    blockers_panel = panels.get("Monitor Active Blocker Count")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "bioetl_runtime_current_blocker_reason" in expr, (
@@ -404,7 +404,7 @@ def test_runtime_blockers_includes_gold_write_missing() -> None:
 def test_runtime_blockers_preserves_unknown_without_inline_conditions() -> None:
     """Runtime Blockers must not turn missing current telemetry into false OK."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    blockers_panel = panels.get("Monitor Runtime Blockers")
+    blockers_panel = panels.get("Monitor Active Blocker Count")
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "or vector(0)" not in expr
@@ -423,7 +423,7 @@ def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases(
     expected_rules = {
         "Monitor Pipeline Status": ("bioetl_runtime_current_status_trusted",),
         "Review Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
-        "Monitor Runtime Blockers": (
+        "Monitor Active Blocker Count": (
             "bioetl_runtime_current_blocker_reason_scoped",
             "bioetl_runtime_current_status_trusted",
         ),

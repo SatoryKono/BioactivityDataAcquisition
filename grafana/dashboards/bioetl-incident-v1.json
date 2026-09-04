@@ -234,7 +234,14 @@
         "bioetlDisplayTitle": "Start Incident Triage",
         "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: open the top Ranked Suspect.</div>"
       },
-      "links": []
+      "links": [
+        {
+          "title": "Inspect ranked suspects",
+          "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&viewPanel=2010&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ]
     },
     {
       "id": 2010,
