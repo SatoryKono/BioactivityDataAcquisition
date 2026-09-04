@@ -480,7 +480,7 @@ def test_range_aware_summary_panels_use_selected_time_range(
     [
         ("Review Runtime Blockers", ["bioetl_runtime_current_blocker_reason"]),
         (
-            "Monitor Runtime Blockers",
+            "Monitor Active Blocker Count",
             [
                 "bioetl_runtime_current_blocker_reason",
                 "bioetl_runtime_current_status",

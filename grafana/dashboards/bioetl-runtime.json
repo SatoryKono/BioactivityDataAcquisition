@@ -529,9 +529,9 @@
                     "includeVars": false
                   }
                 ]
+              }
+            ]
           }
-        ]
-      }
         ]
       },
       "gridPos": {
@@ -3049,7 +3049,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · SELECTED RUN · Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. This is a count: 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect blocker detail for the owning condition",
+          "description": "CURRENT · 15m count chip supporting Review Runtime Blockers (9101). This is not a second summary table. Counts active canonical runtime blockers over the last 15 minutes for Pipeline and Run Type. 0=OK only with healthy status and coverage, >=1=CRIT, null=UNKNOWN. Inspect 9101 for owning conditions. TELEMETRY MISSING is not a zero.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3131,7 +3131,7 @@
               "refId": "A"
             }
           ],
-          "title": "Monitor Runtime Blockers",
+          "title": "Monitor Active Blocker Count",
           "type": "stat"
         },
         {

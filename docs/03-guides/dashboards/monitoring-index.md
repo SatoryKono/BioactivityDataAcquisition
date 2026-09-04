@@ -93,7 +93,7 @@ Current canonical Overview baseline:
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
 | "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `First Action` |
-| Runtime failures / lag / blocker drift | `bioetl-runtime` | trust-gated `Runtime Status`, `Metrics Evidence`, `Monitor Runtime Blockers`, `Runtime Blockers`; `INCOMPLETE` means repair scrape/rules first |
+| Runtime failures / lag / blocker drift | `bioetl-runtime` | trust-gated `Runtime Status`, `Metrics Evidence`, `Monitor Active Blocker Count`, `Runtime Blockers`; `INCOMPLETE` means repair scrape/rules first |
 | Provider degradation, retry exhaustion, or provider telemetry gap | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness` |
 | DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Now · DQ Threshold State`, `Now · DQ Current Reasons`, then TIME RANGE freshness in hours (SLA 24h/72h) |
 | Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | evidence-aware `Status`; `INCOMPLETE` blocks replay/resume approval, then inspect the four trust cards |
