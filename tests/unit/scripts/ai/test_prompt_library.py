@@ -14,7 +14,11 @@ from scripts.ai.prompts.registry import (
     load_registry,
     parse_frontmatter,
 )
-from scripts.ai.prompts.render import render_by_id, substitute_params, expand_fragment_includes
+from scripts.ai.prompts.render import (
+    render_by_id,
+    substitute_params,
+    expand_fragment_includes,
+)
 from scripts.ai.prompts.__main__ import main as prompts_main
 
 pytestmark = pytest.mark.unit
