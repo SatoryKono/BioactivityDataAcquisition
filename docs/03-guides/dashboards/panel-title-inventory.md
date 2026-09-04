@@ -242,7 +242,7 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-runtime.json | 210 | Track Global Shutdown Completions |
 | bioetl-runtime.json | 9992 | Inspect Secondary Runtime Indicators |
 | bioetl-runtime.json | 237 | Monitor Worst Stage Lag |
-| bioetl-runtime.json | 16 | Monitor Runtime Blockers |
+| bioetl-runtime.json | 16 | Monitor Active Blocker Count |
 | bioetl-runtime.json | 205 | Monitor Failed Runs |
 | bioetl-runtime.json | 9993 | Inspect Run Context |
 | bioetl-runtime.json | 9402 | Inspect Pipeline Identity |

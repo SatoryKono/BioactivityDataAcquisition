@@ -236,7 +236,7 @@ Explorer health probe and monitoring setup docs for that reason.
    health forces both verdict panels to `INCOMPLETE`; UNKNOWN also blocks zero
    counters from being treated as conclusive.
    Compact evidence row содержит `Worst Stage Lag`,
-   `Monitor Runtime Blockers`, `Runtime Error Rate`,
+   `Monitor Active Blocker Count`, `Runtime Error Rate`,
    `Metrics Evidence` и `Failed Runs`; selected-range risk
    markers не определяют current status and render neutral zero evidence
    instead of green OK cards. Non-zero/UNKNOWN telemetry gap делает zero-count
@@ -693,7 +693,7 @@ Variable handoff policy for dashboard links remains strict and bounded:
   denominator = Bronze input in the same window. Sustained growth = filter /
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `bioetl quarantine inspect` (CLI).
-- `runtime.id=16 (Monitor Runtime Blockers)`: non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
+- `runtime.id=16 (Monitor Active Blocker Count)`: CURRENT 15m count chip supporting `9101`; non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
 - `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
 - `runtime.id=205/id=236 (Failed Runs / Monitor No-Records Runs)`: `0` is valid only when `bioetl_runtime_pipeline_run_type_universe` confirms the selected scope; missing selected scope remains `UNKNOWN`.
 - `runtime.id=220 (Runtime Error Rate)`: elevated ratio with meaningful 30m Bronze denominator (`>=20`) = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%, and lower/missing denominator stays `UNKNOWN`. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.

@@ -5010,7 +5010,7 @@
       "formula": "sum((bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or ((max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) == 0) * 0))",
       "kind": "promql",
       "panel_id": 16,
-      "panel_title": "Monitor Runtime Blockers",
+      "panel_title": "Monitor Active Blocker Count",
       "query": "sum((bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or ((max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) == 0) * 0))",
       "query_tokens": [
         "bioetl_runtime_current_blocker_reason_scoped",
