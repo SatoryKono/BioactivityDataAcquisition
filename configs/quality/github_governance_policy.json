@@ -175,6 +175,15 @@
       "due_days": 14
     },
     {
+      "id": "GH-CODEQL-002",
+      "title": "GitHub CodeQL default setup stays not-configured",
+      "check": "codeql_default_setup_off",
+      "owner": "Security lane",
+      "risk": "high",
+      "known_issue": null,
+      "due_days": 14
+    },
+    {
       "id": "GH-SECRET-001",
       "title": "Secret scanning is enabled",
       "check": "secret_scanning",
