@@ -77,7 +77,3 @@ python -m scripts.ai.prompts check
 
 Overlays live in `domains.yaml` (not `overlays/*.yaml`). Generated markdown is
 on-demand, not tracked.
-
-## Related Generators
-
-- Grok project-domain audit workflow: scripts/ai/generate_project_domain_audit_workflow.py -- generates .grok/workflows/project-domain-audit.rhai
