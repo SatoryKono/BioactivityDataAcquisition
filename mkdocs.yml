@@ -1090,20 +1090,9 @@ nav:
       - "Skills":
           - "Overview": 00-project/ai/skills/README.md
           - "Practical Index": 00-project/ai/skills/SKILLS-PRACTICAL-INDEX.md
-          - "Global Skills":
-              - "Skill gh-address-comments": 00-project/ai/skills/local/gh-address-comments/SKILL.md
-              - "Skill gh-fix-ci": 00-project/ai/skills/local/gh-fix-ci/SKILL.md
-              - "Skill new-pipeline": 00-project/ai/skills/local/new-pipeline/SKILL.md
-              - "Skill openai-docs": 00-project/ai/skills/local/openai-docs/SKILL.md
-              - "Architecture Guardian": 00-project/ai/skills/local/public/architecture-guardian/SKILL.md
-              - "Skill py-audit-bot": 00-project/ai/skills/local/py-audit-bot/SKILL.md
-              - "Skill py-config-bot": 00-project/ai/skills/local/py-config-bot/SKILL.md
-              - "Skill py-debug-bot": 00-project/ai/skills/local/py-debug-bot/SKILL.md
-              - "Skill py-doc-bot": 00-project/ai/skills/local/py-doc-bot/SKILL.md
-              - "Skill py-plan-bot": 00-project/ai/skills/global/py-plan-bot/SKILL.md
-              - "Skill py-test-bot": 00-project/ai/skills/local/py-test-bot/SKILL.md
-              - "Skill vcr-record": 00-project/ai/skills/local/vcr-record/SKILL.md
-              - "Skill verify-architecture": 00-project/ai/skills/local/verify-architecture/SKILL.md
+          - "Local Skills":
+              - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
+              - "Combined Skills Index (Unified)": 00-project/ai/skills/COMBINED-CATALOG.md
           - "Local Skills":
               - "Skills Catalog": 00-project/ai/skills/local/SKILLS-CATALOG.md
               - "Combined Skills Index (Unified)": 00-project/ai/skills/COMBINED-CATALOG.md
@@ -1121,3 +1110,4 @@ nav:
               - "Skill technical-designer-mermaid": 00-project/ai/skills/local/technical-designer-mermaid/SKILL.md
               - "Skill vcr-record": 00-project/ai/skills/local/vcr-record/SKILL.md
               - "Skill verify-architecture": 00-project/ai/skills/local/verify-architecture/SKILL.md
+          - "Combined Skills Index (Unified)": 00-project/ai/skills/COMBINED-CATALOG.md
