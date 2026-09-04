@@ -1,8 +1,0 @@
-# License text (thin mirror)
-#
-# Exact-duplicate Apache-2.0 license text for this global skill snapshot
-# is stored once under docs/00-project/ai/skills/global/_licenses/.
-# Full text: _licenses/apache-2.0-text-1.txt
-# Relative from this file: ../_licenses/apache-2.0-text-1.txt
-#
-# This is a documentation snapshot only; runtime skills live outside this tree.
