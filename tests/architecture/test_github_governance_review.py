@@ -70,7 +70,14 @@ def _passing_snapshot() -> dict:
             "alerts": {"enabled": True},
             "security_updates": {"enabled": True},
         },
-        "codeql": {"advanced_workflow_exists": True},
+        "codeql": {
+            "advanced_workflow_exists": True,
+            "default_setup": {
+                "available": True,
+                "payload": {"state": "not-configured"},
+            },
+            "hosted_default_workflows": [],
+        },
         "codeowners": {"exists": True, "path": ".github/CODEOWNERS"},
         "issue_intake": {
             "forms": sorted(
@@ -150,6 +157,24 @@ def test_evaluation_maps_drift_to_existing_issues() -> None:
     assert by_id["GH-WIKI-001"]["status"] == "drift"
     assert by_id["GH-LABELS-001"]["known_issue"] == 9787
     assert result["automation_mutated_github"] is False
+
+
+def test_passing_snapshot_is_conformant_and_default_setup_drift_is_detected() -> None:
+    now = datetime(2026, 8, 30, tzinfo=UTC)
+    passing = TOOL.evaluate_snapshot(_passing_snapshot(), _policy(), now=now)
+    assert passing["overall"] == "conformant"
+    assert {item["id"] for item in passing["controls"] if item["id"].startswith("GH-CODEQL-")} == {
+        "GH-CODEQL-001",
+        "GH-CODEQL-002",
+    }
+
+    snapshot = _passing_snapshot()
+    snapshot["codeql"]["default_setup"]["payload"]["state"] = "configured"
+    drifted = TOOL.evaluate_snapshot(snapshot, _policy(), now=now)
+    by_id = {item["id"]: item for item in drifted["controls"]}
+    assert drifted["overall"] == "drift"
+    assert by_id["GH-CODEQL-002"]["status"] == "drift"
+    assert "state=configured" in by_id["GH-CODEQL-002"]["evidence"]
 
 
 def test_policy_and_workflow_preserve_read_only_contract() -> None:
