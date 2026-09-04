@@ -4,50 +4,50 @@ version: 1.0.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
+runtimes:
+- any
 params:
-  - N
-  - SCOPE
-  - AUDIT_PROMPT_SOURCE
-  - MODE
-  - LANGUAGE
-  - ALLOW_ISSUE_WRITE
-  - ALLOW_PUSH
-  - ALLOW_MERGE
-  - ALLOW_CLOSE
-  - MAX_ISSUES_PER_ITERATION
-  - BASE_BRANCH
-  - REPO
+- N
+- SCOPE
+- AUDIT_PROMPT_SOURCE
+- MODE
+- LANGUAGE
+- ALLOW_ISSUE_WRITE
+- ALLOW_PUSH
+- ALLOW_MERGE
+- ALLOW_CLOSE
+- MAX_ISSUES_PER_ITERATION
+- BASE_BRANCH
+- REPO
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/orchestrator-guards.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
+- fragments/orchestrator-guards.md
 related_ssot:
-  - AGENTS.md
-  - docs/00-project/NORMATIVE_SOURCES.md
-  - docs/00-project/ai/prompts/README.md
-  - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
+- AGENTS.md
+- docs/00-project/NORMATIVE_SOURCES.md
+- docs/00-project/ai/prompts/README.md
+- docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
-  - N greater than 1 without operator request
-  - Merge/close while ALLOW_MERGE/ALLOW_CLOSE false
-  - Empty form cycles
-  - Local tests as substitute for required CI checks
-  - Root .audit-runs/ or audit/ directories
-  - Raising debt budgets
-tags: [audit, orchestrator, github, operator]
+- N greater than 1 without operator request
+- Merge/close while ALLOW_MERGE/ALLOW_CLOSE false
+- Empty form cycles
+- Local tests as substitute for required CI checks
+- Root .audit-runs/ or audit/ directories
+- Raising debt budgets
+tags:
+- audit
+- orchestrator
+- github
+- operator
 summary: Fail-closed N-iteration audit → issues → fix → CI → post-audit loop
 max_body_lines: 160
 ---
-
 # Audit orchestrator (N iterations, fail-closed)
 
 Run: audit → plan → GitHub issues → implement → test/CI → (optional merge/close)

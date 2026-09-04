@@ -88,25 +88,18 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 - [grok/README.md](grok/README.md) — skills sources + install
 - [agents/guides/grok-operator-runbook.md](agents/guides/grok-operator-runbook.md)
 - [agents/guides/grok-tui-config-checklist.md](agents/guides/grok-tui-config-checklist.md)
-- [prompts/library/session/grok-bootstrap.md](prompts/library/session/grok-bootstrap.md)
+- [prompts/library/session/bootstrap.md](prompts/library/session/bootstrap.md)
   (`prompt.session.grok-bootstrap`)
 - [prompts/library/closeout/grok-closeout.md](prompts/library/closeout/grok-closeout.md)
-  (`prompt.closeout.grok`, v2.2)
-- [prompts/library/audit/grok-audit-cycle.md](prompts/library/audit/grok-audit-cycle.md)
-  (`prompt.audit.grok-cycle`, v2.2)
-- Domain audits: `prompt.audit.docs-content`, `tests-system`, `tech-debt`,
-  `repo-tree`, `github-actions`, `agents-runtime`, `diagrams`, `docs-pipeline`
-- Ten-domain cyclic pack: `prompt.audit.cycle.*` in
-  [prompts/library/audit/cycle/](prompts/library/audit/cycle/README.md)
-- Full project-audit pastes: `prompt.audit.project.pack`
-  ([prompts/library/audit/project/](prompts/library/audit/project/README.md))
+  (`prompt.closeout.grok`)
+- [prompts/library/audit/cycle.md](prompts/library/audit/cycle.md)
+  (`prompt.audit.cycle`)
+- Domain audits: `prompt.docs.audit`, `prompt.tests.cycle`, `prompt.audit.tech-debt`,
+  `prompt.audit.github-actions`, `prompt.audit.agents-runtime`
+- Ten-domain compile: `python -m scripts.ai.prompts compile --domain docs --profile audit-readonly`
+- Sequential run: `prompt.audit.sequential-run`
 - Orchestrated loop: `prompt.audit.orchestrator`
-- BI acceptance: `prompt.observability.bi-dashboard-acceptance`
-- Cyclic dashboards: `prompt.audit.cycle.dashboards` (alias:
-  `prompt.observability.dashboard-audit-cycle`)
-- V5 residuals: `prompt.observability.dashboard-v5.pack` (implement /
-  closeout / R-F audit)
-- Operator playbook: `prompt.observability.dashboard-operator-playbook`
+- Dashboards: `prompt.observability.dashboard-audit-cycle`
 - Cyclic testing: `prompt.tests.cycle` (see
   [prompts/README.md](prompts/README.md))
 - Install skills: `.\scripts\ai\grok\install_skills.ps1`

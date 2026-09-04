@@ -4,37 +4,43 @@ version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
-params: [SCOPE, MODE, LANGUAGE, AUDIT_MODE, REQUIRE_GH_TRACKING]
+runtimes:
+- any
+params:
+- SCOPE
+- MODE
+- LANGUAGE
+- AUDIT_MODE
+- REQUIRE_GH_TRACKING
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/generic-nine-contract.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
+- fragments/peer-review-gate.md
 related_ssot:
-  - AGENTS.md
-  - docs/00-project/NORMATIVE_SOURCES.md
-  - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
-  - docs/00-project/ai/prompts/README.md
-  - .codex/agents
-  - .junie/agents
+- AGENTS.md
+- docs/00-project/NORMATIVE_SOURCES.md
+- docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
+- docs/00-project/ai/prompts/README.md
+- .codex/agents
+- .junie/agents
 anti_patterns:
-  - Treating prompts as runtime SSOT
-  - Ignoring .codex/.junie/.devin discovery
-  - Auto-running destructive agent scripts
-tags: [audit, agents, runtime, scripts, operator]
+- Treating prompts as runtime SSOT
+- Ignoring .codex/.junie/.devin discovery
+- Auto-running destructive agent scripts
+tags:
+- audit
+- agents
+- runtime
+- scripts
+- operator
 summary: Audit AI agent instructions, skills, and agent-related scripts
 max_body_lines: 150
 ---
-
 # Agents / runtime instructions audit
 
 **Kit:** prompt 6 of `prompt.audit.generic-nine.pack`.

@@ -4,40 +4,46 @@ version: 1.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [any]
-params: [SCOPE, MODE, LANGUAGE, AUDIT_MODE, REQUIRE_GH_TRACKING]
+runtimes:
+- any
+params:
+- SCOPE
+- MODE
+- LANGUAGE
+- AUDIT_MODE
+- REQUIRE_GH_TRACKING
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
-  - fragments/audit-scale.md
-  - fragments/finding-schema.md
-  - fragments/unknown-params.md
-  - fragments/reports-output.md
-  - fragments/shell-portability.md
-  - fragments/generic-nine-contract.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/audit-scale.md
+- fragments/finding-schema.md
+- fragments/project-requirements-audit.md
 related_ssot:
-  - AGENTS.md
-  - docs/00-project/RULES.md
-  - docs/00-project/governance/08-debt-ownership-playbook.md
-  - docs/00-project/NORMATIVE_SOURCES.md
+- AGENTS.md
+- docs/00-project/RULES.md
+- docs/00-project/governance/08-debt-ownership-playbook.md
+- docs/00-project/NORMATIVE_SOURCES.md
 anti_patterns:
-  - Raising debt/quality budgets or exemptions to “pass”
-  - Calling every style nit technical debt
-  - Priority by TODO count instead of blast radius
-tags: [audit, debt, quality, operator]
+- Raising debt/quality budgets or exemptions to “pass”
+- Calling every style nit technical debt
+- Priority by TODO count instead of blast radius
+tags:
+- audit
+- debt
+- quality
+- operator
 summary: Evidence-based technical debt register with risk-ordered paydown
 max_body_lines: 140
 ---
-
 # Technical debt audit
 
-**Kit:** prompt 3 of `prompt.audit.generic-nine.pack`.
-Build an evidence-backed debt register: concrete code/config signals → risk →
-change cost → paydown order. Separate deliberate tradeoffs, historical
+Build an evidence-backed debt register bound to `_schema/finding-v3.schema.json`.
+Never increase debt/quality budgets. Prioritize by probability × blast radius.
+
+**Machine outputs:** `report.md` + `findings.json` under `reports/audit/tech-debt/`.
 constraints, maintainability debt, obsolete deps, test debt, and architecture
 drift. **Never increase** debt/quality budgets (see debt-budget-ban).
 Prioritize by probability × blast radius, not TODO count.

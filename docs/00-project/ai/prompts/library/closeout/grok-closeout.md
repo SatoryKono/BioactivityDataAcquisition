@@ -4,32 +4,44 @@ version: 2.2.0
 status: active
 class: operator-paste
 owner: BioETL Team
-runtimes: [grok, codex, any]
-params: [REPO, BASE, WORK_BRANCH, SCOPE, MODE, CYCLE_COUNT, LANGUAGE]
+runtimes:
+- grok
+- codex
+- any
+params:
+- REPO
+- BASE
+- WORK_BRANCH
+- SCOPE
+- MODE
+- CYCLE_COUNT
+- LANGUAGE
 includes:
-  - fragments/read-order.md
-  - fragments/git-safety.md
-  - fragments/debt-budget-ban.md
-  - fragments/env-guardrail.md
-  - fragments/evidence-contract.md
-  - fragments/language-ru.md
+- fragments/git-safety.md
+- fragments/debt-budget-ban.md
+- fragments/env-guardrail.md
+- fragments/evidence-contract-v3.md
+- fragments/language-ru.md
+- fragments/issue-state-machine-v3.md
 related_ssot:
-  - AGENTS.md
-  - docs/00-project/NORMATIVE_SOURCES.md
-  - docs/00-project/ai/agents/guides/MEMORY_USAGE.md
-  - docs/00-project/ai/agents/guides/grok-operator-runbook.md
-  - docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
+- AGENTS.md
+- docs/00-project/NORMATIVE_SOURCES.md
+- docs/00-project/ai/agents/guides/MEMORY_USAGE.md
+- docs/00-project/ai/agents/guides/grok-operator-runbook.md
+- docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 anti_patterns:
-  - Full RULES/ADR dump in the paste
-  - Multi-cycle megaprompts (45–70 KB)
-  - Committing to main
-  - Closing without verification against origin/main
-  - Leaving ship profile as long-term default
-tags: [closeout, grok, operator]
+- Full RULES/ADR dump in the paste
+- Multi-cycle megaprompts (45–70 KB)
+- Committing to main
+- Closing without verification against origin/main
+- Leaving ship profile as long-term default
+tags:
+- closeout
+- grok
+- operator
 summary: Issue/PR closeout paste with verdicts, evidence, ship-profile note
 max_body_lines: 120
 ---
-
 # BioETL closeout
 
 Use instead of 45–70 KB multi-cycle megaprompts. Canonical rules stay in

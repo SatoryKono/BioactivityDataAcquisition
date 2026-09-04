@@ -50,9 +50,10 @@ PROMPTS_ROOT: Path = _PROMPTS_ROOT
 REPO_ROOT: Path = _REPO_ROOT
 
 KERNEL_PATH: Path = PROMPTS_ROOT / "fragments" / "cyclic-kernel-v3.md"
-OVERLAYS_DIR: Path = PROMPTS_ROOT / "overlays"
+OVERLAYS_DIR: Path = PROMPTS_ROOT / "overlays"  # retired; overlays live in domains.yaml
+DOMAINS_PATH: Path = PROMPTS_ROOT / "domains.yaml"
 PROFILES_DIR: Path = PROMPTS_ROOT / "profiles"
-GENERATED_ROOT: Path = PROMPTS_ROOT / "generated"
+GENERATED_ROOT: Path = PROMPTS_ROOT / "generated"  # optional local compile output, not tracked
 
 PARAM_TOKEN_RE = re.compile(r"\{\{([A-Z][A-Z0-9_]*)\}\}")
 
@@ -126,14 +127,26 @@ def kernel_body() -> str:
 # ---------------------------------------------------------------------------
 
 
+def _load_domains_catalog() -> dict[str, Any]:
+    if not DOMAINS_PATH.is_file():
+        raise FileNotFoundError(f"domains catalog not found: {DOMAINS_PATH}")
+    payload = yaml.safe_load(DOMAINS_PATH.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise ValueError("domains.yaml must be a mapping")
+    domains = payload.get("domains") or {}
+    if not isinstance(domains, dict):
+        raise ValueError("domains.yaml domains must be a mapping")
+    return domains
+
+
 def load_overlay(domain: str) -> tuple[dict[str, Any], bytes]:
-    path = OVERLAYS_DIR / f"{domain}.yaml"
-    if not path.is_file():
-        raise FileNotFoundError(f"overlay not found: {path}")
-    raw = path.read_bytes()
-    data = yaml.safe_load(raw.decode("utf-8")) or {}
+    domains = _load_domains_catalog()
+    if domain not in domains:
+        raise FileNotFoundError(f"overlay not found: {domain}")
+    data = domains[domain]
     if not isinstance(data, dict):
         raise ValueError(f"overlay {domain} must be a mapping")
+    raw = yaml.safe_dump(data, sort_keys=True, allow_unicode=True).encode("utf-8")
     return data, raw
 
 
@@ -149,9 +162,9 @@ def load_profile(profile: str) -> tuple[dict[str, Any], bytes]:
 
 
 def discover_overlays() -> list[str]:
-    if not OVERLAYS_DIR.is_dir():
+    if not DOMAINS_PATH.is_file():
         return []
-    return sorted(p.stem for p in OVERLAYS_DIR.glob("*.yaml"))
+    return sorted(_load_domains_catalog().keys())
 
 
 def discover_profiles() -> list[str]:
@@ -330,6 +343,7 @@ def compile_one(
     profile: str,
     *,
     check: bool = False,
+    write: bool = False,
 ) -> dict[str, Any]:
     """Compile a single domain+profile.
 
@@ -390,18 +404,10 @@ def compile_one(
         result["output_path"] = output_path
 
         if check:
-            if not output_path.is_file():
-                result["drift"] = True
-                result["error"] = f"missing generated file: {output_path}"
-            else:
-                existing = output_path.read_text(encoding="utf-8").replace("\r\n", "\n")
-                if existing != final:
-                    result["drift"] = True
-                    # compute diff sha for logging
-                    existing_sha8 = sha8(existing.encode("utf-8"))
-                    result["error"] = (
-                        f"drift: existing sha8 {existing_sha8} != expected {prompt_sha8}"
-                    )
+            # In-memory compile is the contract after #10081 (generated/ is not tracked).
+            return result
+
+        if not write:
             return result
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -421,13 +427,14 @@ def compile_many(
     profiles: list[str] | None = None,
     *,
     check: bool = False,
+    write: bool = False,
 ) -> list[dict[str, Any]]:
     domains = domains if domains is not None else discover_overlays()
     profiles = profiles if profiles is not None else discover_profiles()
     results: list[dict[str, Any]] = []
     for d in sorted(domains):
         for p in sorted(profiles):
-            results.append(compile_one(d, p, check=check))
+            results.append(compile_one(d, p, check=check, write=write))
     return results
 
 
@@ -453,7 +460,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Do not write; exit 1 if generated files would change or are missing",
+        help="Compile in memory only; exit 1 on compile errors",
+    )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Write optional local generated/<domain>/<profile>.md (untracked)",
     )
     return parser
 
@@ -503,15 +515,24 @@ def main(argv: list[str] | None = None) -> int:
     if args.all:
         domains = discover_overlays()
         if not domains:
-            return _fail_missing("overlays", OVERLAYS_DIR)
+            return _fail_missing("overlays", DOMAINS_PATH)
         profiles = discover_profiles()
         if not profiles:
             return _fail_missing("profiles", PROFILES_DIR)
-        results = compile_many(domains, profiles, check=args.check)
+        results = compile_many(
+            domains, profiles, check=args.check, write=args.write and not args.check
+        )
     else:
         if not args.domain or not args.profile:
             parser.error("--domain and --profile are required unless --all is set")
-        results = [compile_one(args.domain, args.profile, check=args.check)]
+        results = [
+            compile_one(
+                args.domain,
+                args.profile,
+                check=args.check,
+                write=args.write and not args.check,
+            )
+        ]
 
     _emit_compile_results(results)
     return _compile_exit_code(args.check, results)
