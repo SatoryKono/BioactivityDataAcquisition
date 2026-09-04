@@ -7,10 +7,10 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3777 |
-| Tracked doc-like files | 3777 |
+| Doc-like files | 3715 |
+| Tracked doc-like files | 3715 |
 | Ignored local docs/reports files | 0 |
-| Duplicate groups | 29 |
+| Duplicate groups | 6 |
 | Generated without route or exception | 0 |
 | Generated routes | 71 |
 
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| tracked | 3777 |
+| tracked | 3715 |
 
 ## Lifecycle Counts
 
@@ -32,8 +32,7 @@
 | docs_reports_curated_or_historical_report | 5 |
 | docs_reports_generated_or_route_owned | 7 |
 | docs_reports_retention_sensitive_evidence | 21 |
-| generated_skill_license_mirror | 5 |
-| generated_skill_reference_mirror | 2 |
+| generated_skill_reference_mirror | 1 |
 | generated_test_run_evidence | 4 |
 | guide | 4 |
 | index | 4 |
@@ -58,23 +57,22 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 730 |
-| Archived | 234 |
+| Active | 727 |
+| Archived | 202 |
 | Canonical | 73 |
 | Deprecated | 51 |
-| Duplicate | 16 |
-| Generated | 1247 |
+| Generated | 1236 |
 | Working | 1426 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 730 |
-| archive | 234 |
+| active | 727 |
+| archive | 202 |
 | canonical | 73 |
-| duplicate | 67 |
-| generated | 1247 |
+| duplicate | 51 |
+| generated | 1236 |
 | working | 1426 |
 
 ## Recommended Actions
@@ -83,9 +81,8 @@
 | --- | --- |
 | archive-after-github-state-check | 336 |
 | archive-after-migration | 929 |
-| generate-automatically | 1247 |
-| keep | 1190 |
-| merge | 16 |
+| generate-automatically | 1236 |
+| keep | 1155 |
 | reconcile-with-github-state | 8 |
 | replace-with-link | 51 |
 
@@ -144,22 +141,6 @@
 | `docs/00-project/ai/prompts/library/observability/grafana-six/pack.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/reverify.md` | Deprecated | 1 | replace-with-link |
 | `docs/00-project/ai/prompts/library/observability/grafana-six/visual.md` | Deprecated | 1 | replace-with-link |
-| `docs/00-project/ai/skills/global/_licenses/apache-2.0-text-1.txt` | Duplicate | 0 | merge |
-| `docs/00-project/ai/skills/global/_licenses/apache-2.0-text-2.txt` | Duplicate | 0 | merge |
-| `docs/00-project/ai/skills/global/gh-address-comments/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/gh-fix-ci/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/new-pipeline/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/openai-docs/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/public/architecture-guardian/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-audit-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-code-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-config-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-debug-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-doc-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-plan-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/py-test-bot/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/vcr-record/SKILL.md` | Duplicate | 1 | merge |
-| `docs/00-project/ai/skills/global/verify-architecture/SKILL.md` | Duplicate | 1 | merge |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-audit-selection-notes.md` | Working | 1 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-first-screen-inventory.json` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/archive/audit-protocols/dux3-residual-contracts.md` | Working | 5 | archive-after-migration |
@@ -173,6 +154,22 @@
 | `docs/03-guides/dashboards/archive/audit-protocols/dux6-residual-readability.md` | Working | 2 | archive-after-migration |
 | `docs/03-guides/dashboards/migration-map-v2.md` | Working | 3 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-08-05.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-08-11.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-08-16.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/2026-08-17.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
+| `reports/ai/agent-tools/RF005-CLOSEOUT-2026-08-09.md` | Working | 0 | archive-after-migration |
+| `reports/ai/agent-tools/compatibility/rf005-platform-matrix-2026-08-09.json` | Working | 0 | archive-after-migration |
+| `reports/ai/agent-tools/evaluation/rf005-utility-pilot-2026-08-09.json` | Working | 0 | archive-after-migration |
+| `reports/ai/issue-7340-specialized-subsystem-analysis-20260731.md` | Working | 0 | archive-after-migration |
+| `reports/ai/issue-7348-comprehensive-skills-analysis-20260731.md` | Working | 0 | archive-after-migration |
+| `reports/ai/memory-audit-20260804/FINAL-REPORT.md` | Working | 0 | archive-after-migration |
+| `reports/ai/memory-audit-20260804/execution-ledger.md` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/crosswalk-delta.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/orphan-req.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/requirement-graph.json` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/domain-extras/untraced-tests.csv` | Working | 0 | archive-after-migration |
+| `reports/audit-runs/2026-08-28T0634Z-req-new2-61fa446/final-summary.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
