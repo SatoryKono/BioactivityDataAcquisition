@@ -166,7 +166,7 @@ def _git_list_files(*args: str) -> tuple[str, ...] | None:
 
 def _git_grep_token(token: str, *pathspecs: str) -> tuple[Path, ...] | None:
     result = subprocess.run(
-        ["git", "grep", "--no-color", "-l", "-F", "--", token, *pathspecs],
+        ["git", "grep", "--no-color", "-l", "-F", token, "--", *pathspecs],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -267,7 +267,11 @@ def test_historical_auto_promote_mode_is_alias_only_in_source() -> None:
         (ROOT / "src" / "bioetl").relative_to(ROOT).as_posix(),
     )
     if matches is None:
-        matches = tuple(sorted((ROOT / "src" / "bioetl").rglob("*.py")))
+        matches = tuple(
+            path
+            for path in sorted((ROOT / "src" / "bioetl").rglob("*.py"))
+            if HISTORICAL_AUTO_PROMOTE_MODE_TOKEN in path.read_text(encoding="utf-8")
+        )
 
     violations = [
         path.relative_to(ROOT).as_posix()
