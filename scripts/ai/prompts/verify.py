@@ -270,25 +270,55 @@ def _check_one_generated_file(report: VerifyReport, path: Path) -> None:
     )
 
 
-def check_generated_catalog(report: VerifyReport) -> None:
-    if not GENERATED_ROOT.is_dir():
-        report.add_error(
-            "generated_exists", f"generated dir not found: {GENERATED_ROOT}"
+def check_generated_catalog(report: VerifyReport) -> int:
+    """Compile every domain×profile in memory and check provenance headers."""
+    try:
+        from scripts.ai.prompts.compile import (
+            compile_one,
+            discover_overlays,
+            discover_profiles,
         )
-        return
-    domain_files = _iter_generated_domain_files()
-    if not domain_files:
-        report.add_error(
-            "generated_exists",
-            f"no generated domain/profile files under {GENERATED_ROOT}",
-        )
-    catalog = GENERATED_ROOT / _CATALOG_FILENAME
-    if not catalog.is_file():
-        report.add_warning(
-            "generated_catalog_missing", f"CATALOG.md not found: {catalog}"
-        )
-    for path in domain_files:
-        _check_one_generated_file(report, path)
+    except ImportError as exc:
+        report.add_error("compile_import", f"could not import compile: {exc}")
+        return 0
+
+    overlays = discover_overlays()
+    profiles = discover_profiles()
+    if not overlays:
+        report.add_error("generated_exists", f"no domains in {PROMPTS_ROOT / 'domains.yaml'}")
+        return 0
+    compiled = 0
+    for domain in overlays:
+        for profile in profiles:
+            result = compile_one(domain, profile)
+            label = f"{domain}/{profile}"
+            if result.get("error"):
+                report.add_error("compile", str(result["error"]), label)
+                continue
+            text = result.get("rendered_text")
+            if not isinstance(text, str):
+                report.add_error("compile", "no rendered_text", label)
+                continue
+            provenance = _parse_provenance_header(text)
+            if provenance is None or _PROMPT_SHA8 not in provenance:
+                report.add_error(
+                    "generated_provenance",
+                    "missing provenance header with prompt_sha8",
+                    label,
+                )
+                continue
+            expected_sha8 = _sha8(_body_after_params_header(text).encode("utf-8"))
+            if provenance.get(_PROMPT_SHA8) != expected_sha8:
+                report.add_error(
+                    _CODE_DETERMINISTIC,
+                    (
+                        f"prompt_sha8 mismatch: header {provenance.get(_PROMPT_SHA8)} "
+                        f"!= body {expected_sha8}"
+                    ),
+                    label,
+                )
+            compiled += 1
+    return compiled
 
 
 def _check_recompile_pair(
@@ -332,7 +362,7 @@ def _check_recompile_pair(
 
 
 def check_deterministic_recompile(report: VerifyReport) -> None:
-    """Recompile overlays×profiles and compare to files on disk."""
+    """Recompile overlays×profiles twice and require byte-identical output."""
     try:
         from scripts.ai.prompts.compile import (
             compile_one,
@@ -351,7 +381,22 @@ def check_deterministic_recompile(report: VerifyReport) -> None:
 
     for domain in sorted(overlays):
         for profile in sorted(profiles):
-            _check_recompile_pair(report, domain, profile, compile_one)
+            first = compile_one(domain, profile)
+            second = compile_one(domain, profile)
+            label = f"{domain}/{profile}"
+            if first.get("error") or second.get("error"):
+                report.add_error(
+                    _CODE_DETERMINISTIC,
+                    f"compile failed: {first.get('error') or second.get('error')}",
+                    label,
+                )
+                continue
+            if first.get("rendered_text") != second.get("rendered_text"):
+                report.add_error(
+                    _CODE_DETERMINISTIC,
+                    "recompile mismatch: two in-memory compiles differ",
+                    label,
+                )
 
 
 def _load_profile_mapping(profile_path: Path) -> dict[str, Any] | None:
@@ -437,16 +482,46 @@ def _check_one_generated_profile(report: VerifyReport, path: Path) -> None:
 
 
 def check_profile_precedence(report: VerifyReport) -> None:
-    """Ensure generated params respect profile precedence."""
+    """Ensure compiled params respect profile precedence."""
     if importlib.util.find_spec("yaml") is None:
         report.add_warning(_CODE_PRECEDENCE, "yaml not available for precedence check")
         return
-
-    files = _iter_generated_domain_files()
-    if not files:
+    try:
+        from scripts.ai.prompts.compile import (
+            compile_one,
+            discover_overlays,
+            discover_profiles,
+        )
+    except ImportError as exc:
+        report.add_warning("compile_import", f"could not import compile: {exc}")
         return
-    for path in files:
-        _check_one_generated_profile(report, path)
+
+    overlays = discover_overlays()
+    profiles = discover_profiles()
+    for domain in overlays:
+        for profile in profiles:
+            result = compile_one(domain, profile)
+            text = result.get("rendered_text")
+            if result.get("error") or not isinstance(text, str):
+                continue
+            parsed = _parse_params_header(text)
+            if parsed is None:
+                continue
+            profile_path = PROFILES_DIR / f"{profile}.yaml"
+            prof = _load_profile_mapping(profile_path)
+            if prof is None:
+                report.add_error(
+                    _CODE_PRECEDENCE,
+                    f"unreadable or invalid profile yaml: {profile_path}",
+                    f"{domain}/{profile}",
+                )
+                continue
+            _check_scalar_profile_params(
+                report, domain, profile, parsed, prof, profile_path
+            )
+            _check_allow_profile_params(
+                report, domain, profile, parsed, prof, profile_path
+            )
 
 
 def check_golden(report: VerifyReport) -> None:
@@ -484,7 +559,7 @@ def check_golden(report: VerifyReport) -> None:
 
 def verify_all(*, golden: bool = False) -> VerifyReport:
     report = VerifyReport()
-    check_generated_catalog(report)
+    compiled = check_generated_catalog(report)
     check_deterministic_recompile(report)
     check_profile_precedence(report)
     check_fingerprint_stability(report)
@@ -494,7 +569,7 @@ def verify_all(*, golden: bool = False) -> VerifyReport:
     report.stats = {
         "errors": len(report.errors),
         "warnings": len(report.warnings),
-        "generated_files": len(_iter_generated_domain_files()),
+        "generated_files": compiled,
     }
     return report
 

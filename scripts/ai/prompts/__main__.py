@@ -241,7 +241,7 @@ def cmd_project_full_links(args: argparse.Namespace) -> int:
 def cmd_catalog(args: argparse.Namespace) -> int:
     text = generate_catalog_markdown()
     out = (
-        Path(args.output) if args.output else PROMPTS_ROOT / "generated" / "CATALOG.md"
+        Path(args.output) if args.output else PROMPTS_ROOT / "CATALOG.md"
     )
     if not out.is_absolute():
         out = REPO_ROOT / out if str(out).startswith("reports") else out
@@ -407,7 +407,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_cat.add_argument(
         "--output",
         default=None,
-        help="Output path (default: docs/.../prompts/generated/CATALOG.md)",
+        help="Output path (default: docs/.../prompts/CATALOG.md)",
     )
     p_cat.add_argument("--stdout", action="store_true")
     p_cat.set_defaults(func=cmd_catalog)

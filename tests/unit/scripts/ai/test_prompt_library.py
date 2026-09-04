@@ -14,7 +14,7 @@ from scripts.ai.prompts.registry import (
     load_registry,
     parse_frontmatter,
 )
-from scripts.ai.prompts.render import render_by_id, substitute_params
+from scripts.ai.prompts.render import render_by_id, substitute_params, expand_fragment_includes
 from scripts.ai.prompts.__main__ import main as prompts_main
 
 pytestmark = pytest.mark.unit
@@ -213,4 +213,20 @@ def test_prompts_root_layout() -> None:
     assert (PROMPTS_ROOT / "REGISTRY.yaml").is_file()
     assert (PROMPTS_ROOT / "fragments" / "git-safety.md").is_file()
     assert (PROMPTS_ROOT / "library" / "closeout" / "grok-closeout.md").is_file()
-    assert (PROMPTS_ROOT / "archive" / "mirrors").is_dir()
+    assert (PROMPTS_ROOT / "library" / "audit" / "cycle.md").is_file()
+    assert (PROMPTS_ROOT / "domains.yaml").is_file()
+    assert not (PROMPTS_ROOT / "archive").exists()
+    assert not (PROMPTS_ROOT / "generated").exists()
+    assert not (PROMPTS_ROOT / "overlays").exists()
+    live = [
+        path
+        for path in PROMPTS_ROOT.rglob("*")
+        if path.is_file() and "generated" not in path.parts
+    ]
+    assert 55 <= len(live) <= 65, f"live prompt tree size {len(live)} not in 55..65"
+
+
+def test_fragment_include_token_expands() -> None:
+    text = expand_fragment_includes("head {{> debt-budget-ban}} tail")
+    assert "ЗАПРЕЩЕНО" in text
+    assert "{{>" not in text

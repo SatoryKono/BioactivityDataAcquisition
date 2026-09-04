@@ -1,0 +1,762 @@
+version: 1.0.0
+schema: _schema/domain-overlay.schema.json
+note: 'Consolidated from overlays/*.yaml for epic #10081. Compiler reads domains.<name>;
+  ADR-060 overlay semantics unchanged.'
+domains:
+  agents-memory:
+    domain: agents-memory
+    id: prompt.audit.cycle.agents-memory
+    OBJECT: AI runtime, agent scripts, instruction scope graph, and durable memory
+      governance
+    SCOPE:
+    - AGENTS.md
+    - .codex/
+    - .junie/
+    - .devin/
+    - docs/00-project/ai/
+    - scripts/ai/
+    - src/memory/
+    - scripts/memory/
+    SSOT:
+    - AGENTS.md
+    - docs/00-project/ai/agents/guides/MEMORY_USAGE.md
+    - docs/00-project/ai/AI_RUNTIME_MIRROR_OWNERSHIP.md
+    AUDIT_CONTOURS:
+    - instruction scope graph root-profile-skill-scripts-CI and conflict detection
+    - script idempotency, dry-run, fail-closed exit, quoting, and secret-on-stdout
+      guard
+    - catalog-schema parity and promote-only knowledge with provenance
+    - mirror parity and durable memory transcript/secret checks
+    MANDATORY_EVIDENCE:
+    - instruction-graph.md and instruction-conflicts.csv
+    - tool-permissions.csv
+    - memory-schema-delta.json and memory smoke evidence
+    VALIDATION:
+    - mirror parity check after runtime changes
+    - memory smoke and schema validation on touched families
+    DOMAIN_STOP:
+    - destructive or secret-leaking script without guard
+    - secret or full transcript persisted in memory
+    OUTPUT_EXTRAS:
+    - instruction-graph.md
+    - memory-schema-delta.json
+  architecture:
+    domain: architecture
+    id: prompt.audit.cycle.architecture
+    OBJECT: Architecture audit via 10-category scorecard, layers, composition, and
+      ADR drift
+    SCOPE:
+    - src/bioetl/
+    - tests/architecture/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/02-architecture/decisions/ADR-005.md
+    - docs/02-architecture/decisions/ADR-048.md
+    - configs/quality/architecture-quality-scorecard.json
+    AUDIT_CONTOURS:
+    - exactly 10 canonical category scoring with baseline and live evidence
+    - import direction, cycles, injection, and runtime minimum scenarios
+    - ADR and diagram drift vs actual paths and differential comparison
+    - debt-safe wave planning with debt-neutral effect
+    MANDATORY_EVIDENCE:
+    - scorecard.json with integral and surface scores per category
+    - architecture-map.md and dependency-notes.md
+    - category-delta.csv and re-score evidence on touched categories
+    VALIDATION:
+    - import-linter and architecture subset rerun
+    - re-score touched categories and required CI checks
+    DOMAIN_STOP:
+    - invented category score without evidence
+    - mass layer move without migration plan
+    OUTPUT_EXTRAS:
+    - scorecard.json
+    - category-delta.csv
+  cli-compat:
+    domain: cli-compat
+    id: prompt.audit.project.new2.cli-compat
+    OBJECT: CLI and HTTP public interface compatibility, flags, exit codes, and health
+      endpoints
+    SCOPE:
+    - src/bioetl/interfaces/
+    - docs/04-reference/cli.md
+    SSOT:
+    - src/bioetl/interfaces/cli/main.py
+    - docs/04-reference/cli.md
+    - configs/config_compatibility_registry.yaml
+    - docs/00-project/RULES.md
+    AUDIT_CONTOURS:
+    - public command, flag, argument, exit code, and HTTP endpoint inventory vs docs
+    - removed/renamed surface detection without migration or version bump
+    - compatibility registry sunset and expiry vs live code alignment
+    - thin interface delegation to application use cases
+    MANDATORY_EVIDENCE:
+    - public-surface.json and cli-doc-drift.csv
+    - exit-code-matrix.csv and migration-gaps.json
+    - CLI help and output snapshot evidence
+    VALIDATION:
+    - CLI help/output snapshot tests and HTTP contract tests
+    - compatibility alias and shim lifecycle verification
+    DOMAIN_STOP:
+    - silent breaking change without migration/version
+    - revived retired shim returned as canonical surface
+    OUTPUT_EXTRAS:
+    - public-surface.json
+    - cli-doc-drift.csv
+  coderabbit:
+    domain: coderabbit
+    id: prompt.audit.cycle.coderabbit
+    OBJECT: CodeRabbit dual-pass project audit with independent PROVEN confirmation
+      and re-review
+    SCOPE:
+    - src/bioetl/
+    - docs/
+    - configs/
+    - tests/
+    - grafana/
+    - scripts/
+    - .github/
+    SSOT:
+    - docs/00-project/RULES.md
+    - .coderabbit.yaml
+    - docs/02-architecture/decisions/
+    AUDIT_CONTOURS:
+    - leaf scope expansion with file cap and domain matrix coverage
+    - CodeRabbit CLI and App review per leaf with log capture
+    - agent re-check confirming or rejecting CR claims with independent evidence
+    - cross-gate validation import-linter, architecture, debt, and domain gates
+    MANDATORY_EVIDENCE:
+    - scope-matrix.md with file counts per leaf scope
+    - coderabbit logs per scope with pipefail capture
+    - review-disposition.csv and plan/issues mapping
+    VALIDATION:
+    - fixed scopes re-reviewed via required checks plus CR App pass
+    - agent disposition evidence and resolved/regressed/new delta
+    DOMAIN_STOP:
+    - CR required but unavailable without explicit override
+    - issue created from CR-only text without independent PROVEN
+    OUTPUT_EXTRAS:
+    - scope-matrix.md
+    - review-disposition.csv
+  configs:
+    domain: configs
+    id: prompt.audit.cycle.configs
+    OBJECT: Project config hierarchy, JSON schemas, compatibility registry, and secrets/env
+      handling
+    SCOPE:
+    - configs/
+    - pyproject.toml
+    - mkdocs.yml
+    - .importlinter
+    - package.json
+    - docker-compose.yml
+    - Dockerfile.bioetl
+    - .coderabbit.yaml
+    SSOT:
+    - configs/_schema/
+    - docs/00-project/RULES.md
+    - docs/01-requirements/REQUIREMENTS.md
+    AUDIT_CONTOURS:
+    - config-to-schema-to-generator-to-test mapping and hierarchy integrity
+    - schema and retired alias compatibility with negative-case rejection
+    - secret literal and interpolation checks against tracked provider YAML
+    - budget/threshold/exemption non-growth verification
+    MANDATORY_EVIDENCE:
+    - config-map.csv covering configs, schemas, generators, and tests
+    - negative-cases.json proving rejected retired aliases
+    - budget-delta.json and effective-config-delta.json
+    VALIDATION:
+    - focused config/schema tests and effective-config delta
+    - debt effect check for threshold/exemption changes
+    DOMAIN_STOP:
+    - schema weakening to accept invalid data
+    - budget or exemption increase without approval
+    OUTPUT_EXTRAS:
+    - config-map.csv
+    - budget-delta.json
+  control-plane:
+    domain: control-plane
+    id: prompt.audit.project.new2.control-plane
+    OBJECT: Control plane, RunManifest, RunLedger, replay, resume, fencing, and operator
+      inspection
+    SCOPE:
+    - src/bioetl/application/services/control_plane/
+    - src/bioetl/composition/control_plane_runtime.py
+    SSOT:
+    - docs/02-architecture/decisions/ADR-044.md
+    - docs/02-architecture/decisions/ADR-046.md
+    - docs/02-architecture/decisions/ADR-047.md
+    - docs/03-guides/workflows.md
+    AUDIT_CONTOURS:
+    - manifest, ledger, inspection, replay/resume, and force/repair verb surfaces
+    - checkpoint vs ledger contract, fencing/lock invariants, and persistence guarantees
+    - docs/runbooks/CLI claims vs code and store drift
+    - failure and restart scenario coverage
+    MANDATORY_EVIDENCE:
+    - control-plane-surface-map.csv mapping all control surfaces
+    - resume-contract-matrix.csv and failure-scenarios.json
+    - store-delta.json proving persistence not silently skipped
+    VALIDATION:
+    - focused control-plane tests including failure/restart/resume paths
+    - fencing evidence check for repair/force operations
+    DOMAIN_STOP:
+    - resume ignoring ledger or checkpoint contract
+    - admin force without fencing evidence
+    OUTPUT_EXTRAS:
+    - control-plane-surface-map.csv
+    - resume-contract-matrix.csv
+  dashboards:
+    domain: dashboards
+    id: prompt.audit.cycle.dashboards
+    OBJECT: Grafana presentation-plane render, density, fill, fit, reflow, and shipped
+      dashboard quality
+    SCOPE:
+    - grafana/dashboards/
+    SSOT:
+    - grafana/DASHBOARD_REQUIREMENTS.md
+    - grafana/design-system.md
+    - grafana/verdict-ontology.md
+    - grafana/layout-budgets.yaml
+    AUDIT_CONTOURS:
+    - render and density area/scalar with viewport 1366x768 and theme variants
+    - fill, fit, reflow, visual, layout, data, copy, and safety contours
+    - shipped JSON as sole panel ID source with query/HTTP evidence for data status
+    - pipeline verification for dashboard JSON generation
+    MANDATORY_EVIDENCE:
+    - panel-matrix.csv with uid, panel_id, y, band, type, datasource
+    - checks.json and density-results.csv
+    - render-evidence directory and per-panel status artifacts
+    VALIDATION:
+    - static gates and affected panel renders rerun
+    - required CI checks and dark/light with 100/200 percent zoom
+    DOMAIN_STOP:
+    - invented panel or DASH identifier
+    - data failure claimed only from screenshot without query evidence
+    OUTPUT_EXTRAS:
+    - panel-matrix.csv
+    - density-results.csv
+  diagrams:
+    domain: diagrams
+    id: prompt.audit.cycle.diagrams
+    OBJECT: Version-controlled text-as-code diagrams, renderer reproducibility, and
+      code/ADR alignment
+    SCOPE:
+    - docs/02-architecture/diagrams/
+    - scripts/diagrams/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/02-architecture/decisions/ADR-040.md
+    - docs/00-project/DOC-GOV-02.md
+    AUDIT_CONTOURS:
+    - text source existence and VCS tracking for .mmd/.mermaid and embedded Mermaid
+    - renderer pinning and lint/budget gates
+    - render smoke with pinned tooling and hash comparison
+    - node/edge accuracy vs code/ADR/config claims
+    MANDATORY_EVIDENCE:
+    - diagram-inventory.csv classifying type, owner, and source
+    - render-hashes.json and render-failures.txt
+    - diagram-code-drift.csv mapping claims to live paths
+    VALIDATION:
+    - lint and artifact visual checks on touched set
+    - pinned renderer smoke and hash delta per policy
+    DOMAIN_STOP:
+    - secret or internal endpoint published in diagram
+    - whole-repo code-level diagram without approval
+    OUTPUT_EXTRAS:
+    - diagram-inventory.csv
+    - diagram-code-drift.csv
+  docs:
+    domain: docs
+    id: prompt.audit.cycle.docs
+    OBJECT: Documentation content and pipeline generate-validate-artifact-publish
+    SCOPE:
+    - README.md
+    - docs/
+    - mkdocs.yml
+    - scripts/docs/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/01-requirements/REQUIREMENTS.md
+    - docs/00-project/00-map.md
+    - docs/00-project/NORMATIVE_SOURCES.md
+    AUDIT_CONTOURS:
+    - content freshness and audience/owner accuracy
+    - relative link resolution and command verification
+    - pipeline source-generator-validation-artifact chain
+    - mirror vs runtime ownership separation
+    MANDATORY_EVIDENCE:
+    - docs-inventory.csv with README/docs/runbooks/ADR coverage
+    - command-matrix.csv proving commands and links re-checked
+    - broken-links.csv and content-vs-pipeline delta
+    VALIDATION:
+    - rerun changed claims and link checks
+    - docs build gate via canonical python -m scripts.docs
+    DOMAIN_STOP:
+    - secret leaked in docs or generated output
+    - invented SLA/coverage/commands without SSOT
+    OUTPUT_EXTRAS:
+    - docs-inventory.csv
+    - content-vs-pipeline-delta.md
+  dq-contracts:
+    domain: dq-contracts
+    id: prompt.audit.project.new2.dq-contracts
+    OBJECT: DQ, Pandera, and Gold contract schemas, column order, and runtime validators
+    SCOPE:
+    - src/bioetl/domain/schemas/
+    - src/bioetl/infrastructure/validation/
+    - docs/04-reference/contracts/
+    SSOT:
+    - docs/02-architecture/decisions/ADR-027.md
+    - docs/02-architecture/decisions/ADR-045.md
+    - docs/02-architecture/decisions/ADR-018.md
+    - docs/04-reference/contracts/dq-contracts.md
+    AUDIT_CONTOURS:
+    - schema vs published Gold JSON vs docs drift with missing PK and fields
+    - Pandera runtime validator wiring and fail-closed on type and column_order
+    - QC sidecars, meta checksums, and deterministic export order
+    - NA/NULL and identifier format policy alignment
+    MANDATORY_EVIDENCE:
+    - schema-gold-drift.csv comparing schemas to published artifacts
+    - negative-contract-cases.json proving rejection of invalid data
+    - contract-hashes.json and qc-sidecar-audit.csv
+    VALIDATION:
+    - schema and contract positive plus negative tests
+    - published artifact hash and column order determinism checks
+    DOMAIN_STOP:
+    - Pandera weakened to pass invalid data
+    - schema drift hidden as warning instead of error
+    OUTPUT_EXTRAS:
+    - schema-gold-drift.csv
+    - negative-contract-cases.json
+  github-actions:
+    domain: github-actions
+    id: prompt.audit.project.new2.github-actions
+    OBJECT: GitHub Actions trust model, permissions, pins, shell safety, caches, and
+      required checks
+    SCOPE:
+    - .github/workflows/
+    - .github/actions/
+    - .github/dependabot.yml
+    SSOT:
+    - docs/00-project/RULES.md
+    - .github/workflows/
+    - docs/02-architecture/decisions/
+    AUDIT_CONTOURS:
+    - trust events, pull_request_target, tokens, runners, environments, and fork paths
+    - action SHA pinning, local action ownership, and Dependabot coverage
+    - workflow catalog, required checks, concurrency, caches/artifacts, and shell
+      fail-closed
+    - secret exposure and untrusted code isolation
+    MANDATORY_EVIDENCE:
+    - trust-matrix.csv and action-pin-inventory.csv
+    - required-checks.csv mapping catalog to branch protection
+    - workflow-validation.json with YAML and schema lint results
+    VALIDATION:
+    - YAML and schema lint plus local action tests
+    - catalog and required-check mapping verification
+    DOMAIN_STOP:
+    - privileged untrusted code execution
+    - unpinned high-risk third-party action
+    OUTPUT_EXTRAS:
+    - trust-matrix.csv
+    - action-pin-inventory.csv
+  http-clients:
+    domain: http-clients
+    id: prompt.audit.project.new2.http-clients
+    OBJECT: HTTP clients, UnifiedHTTPClient, retry/backoff, rate limiting, and pagination
+    SCOPE:
+    - src/bioetl/infrastructure/adapters/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/02-architecture/decisions/ADR-032.md
+    - src/bioetl/infrastructure/adapters/http/client.py
+    AUDIT_CONTOURS:
+    - shared HTTP stack vs provider-specific duplicate inventory
+    - timeout, retry/backoff, QPS, User-Agent, circuit breaker, and 4xx/5xx classification
+    - pagination completeness, offsets/tokens, and partial failure handling
+    - secret policy and direct requests bypass detection
+    MANDATORY_EVIDENCE:
+    - http-stack-inventory.csv and adapter-parity.csv
+    - retry-matrix.csv with bounded and classified retry evidence
+    - pagination-cases.json proving pages not silently dropped
+    VALIDATION:
+    - unit, contract, and VCR tests with bounded simulated failures
+    - pagination completeness and idempotency/correlation checks
+    DOMAIN_STOP:
+    - unbounded retry or missing timeout and User-Agent
+    - silent page loss or direct requests bypassing unified client
+    OUTPUT_EXTRAS:
+    - http-stack-inventory.csv
+    - retry-matrix.csv
+  medallion:
+    domain: medallion
+    id: prompt.audit.project.new2.medallion
+    OBJECT: Medallion Bronze/Silver/Gold write-path, quarantine, atomicity, and replay
+      clocks
+    SCOPE:
+    - src/bioetl/domain/medallion.py
+    - src/bioetl/infrastructure/storage/
+    SSOT:
+    - docs/02-architecture/decisions/ADR-002.md
+    - docs/02-architecture/decisions/ADR-014.md
+    - docs/02-architecture/decisions/ADR-018.md
+    - src/bioetl/domain/medallion.py
+    AUDIT_CONTOURS:
+    - write mode vs policy mapping and silent overwrite detection
+    - Bronze/Silver/Gold writer layers, quarantine, and Delta time-travel claims
+    - atomicity via temp then os.replace and deterministic write order
+    - replay clocks, PK/business uniqueness, and wall-clock default checks
+    MANDATORY_EVIDENCE:
+    - write-path-matrix.csv mapping modes to policy and ADR
+    - atomicity-evidence.json proving temp-replace usage
+    - replay-clock-audit.csv and layer-delta.json
+    VALIDATION:
+    - focused storage and architecture tests on touched writers
+    - replay determinism check and overwrite fail-closed verification
+    DOMAIN_STOP:
+    - non-atomic critical write path
+    - Gold validation weakened or wall-clock replay default
+    OUTPUT_EXTRAS:
+    - write-path-matrix.csv
+    - replay-clock-audit.csv
+  normalization:
+    domain: normalization
+    id: prompt.audit.project.new2.normalization
+    OBJECT: Normalization policies and identifier families DOI, ChEMBL, UniProt, PubChem
+      CID, SMILES, InChI
+    SCOPE:
+    - src/bioetl/domain/normalization/
+    - docs/04-reference/normalization/
+    SSOT:
+    - docs/04-reference/normalization/reference-identifiers.md
+    - src/bioetl/domain/ports/data_normalization.py
+    - docs/01-requirements/REQUIREMENTS.md
+    AUDIT_CONTOURS:
+    - documented identifier families to normalizer modules and profile mapping
+    - regex, trim, case, and NA policy enforcement with undocumented heuristic detection
+    - docs-without-code and code-without-policy drift across providers
+    - deterministic hash input canonicalization and locale/decimal handling
+    MANDATORY_EVIDENCE:
+    - identifier-family-matrix.csv mapping families to modules
+    - normalization-cases.json with before/after examples
+    - policy-code-drift.csv and hash-impact.md
+    VALIDATION:
+    - normalization unit and property tests
+    - before/after example verification and hash stability checks
+    DOMAIN_STOP:
+    - undocumented identifier mutation in normalizer
+    - non-deterministic locale or time-dependent behavior
+    OUTPUT_EXTRAS:
+    - identifier-family-matrix.csv
+    - normalization-cases.json
+  ops-runbooks:
+    domain: ops-runbooks
+    id: prompt.audit.project.new2.ops-runbooks
+    OBJECT: Operations runbooks covering DR, rollback, shutdown, triage, resume/repair,
+      and Game Day
+    SCOPE:
+    - docs/05-operations/
+    - docs/03-guides/workflows.md
+    SSOT:
+    - docs/05-operations/runbooks/index.md
+    - docs/03-guides/workflows.md
+    - docs/00-project/RULES.md
+    - docs/02-architecture/decisions/ADR-010.md
+    AUDIT_CONTOURS:
+    - runbook inventory DR, rollback, shutdown, Game Day, and control-plane triage
+    - procedure step vs CLI/script/help existence with preconditions and rollback
+    - local-only default preservation and hidden Docker/Redis/external orchestration
+      detection
+    - monitoring-gated actions and no live production mutation guard
+    MANDATORY_EVIDENCE:
+    - runbook-command-matrix.csv mapping steps to actual CLI/script/help
+    - tabletop-results.md and rollback-gaps.json
+    - precondition-map.csv with decision points and safety checks
+    VALIDATION:
+    - command parse and help output verification plus link checks
+    - tabletop scenario walkthrough with evidence
+    DOMAIN_STOP:
+    - live production mutation during audit
+    - dangerous nonexistent command in runbook
+    OUTPUT_EXTRAS:
+    - runbook-command-matrix.csv
+    - tabletop-results.md
+  providers:
+    domain: providers
+    id: prompt.audit.project.new2.providers
+    OBJECT: Providers, entity catalog, adapter packages, and pipeline registration
+    SCOPE:
+    - configs/providers/
+    - configs/entities/
+    - src/bioetl/infrastructure/adapters/
+    SSOT:
+    - docs/00-project/RULES.md
+    - docs/03-guides/extending-bioetl.md
+    - configs/_schema/
+    AUDIT_CONTOURS:
+    - YAML providers vs adapters vs entity files vs registry parity
+    - orphan YAML and missing adapter detection with composite dependencies
+    - env indirection only and no interpolation in tracked provider YAML
+    - provider_entity pipeline id convention and registration coverage
+    MANDATORY_EVIDENCE:
+    - provider-matrix.csv mapping YAML, adapter, entity, and registry
+    - orphan-surfaces.json listing orphan configs and adapters
+    - registration-delta.csv and provider-validation.json
+    VALIDATION:
+    - config, adapter, and registration tests for touched providers
+    - unified HTTP client reuse check deferred to HTTP card
+    DOMAIN_STOP:
+    - config without implementation adapter
+    - secret literal or interpolation in tracked YAML
+    OUTPUT_EXTRAS:
+    - provider-matrix.csv
+    - orphan-surfaces.json
+  qa-gates:
+    domain: qa-gates
+    id: prompt.audit.project.new2.qa-gates
+    OBJECT: QA gates, canonical generators, committed scorecards, and freshness with
+      non-growth budgets
+    SCOPE:
+    - scripts/engineering/qa/
+    - reports/quality/
+    SSOT:
+    - scripts/engineering/qa/README.md
+    - configs/quality/architecture-quality-scorecard.json
+    - configs/quality/debt-governance-gates.json
+    AUDIT_CONTOURS:
+    - QA entrypoint vs README vs CI wiring inventory
+    - committed JSON freshness vs canonical generators and source-tree hashes
+    - cap/threshold/exemption non-growth verification with baseline comparison
+    - generator ownership and hand-edit detection
+    MANDATORY_EVIDENCE:
+    - generator-map.csv mapping entrypoints to README and CI
+    - freshness-delta.json with source-tree hash comparison
+    - budget-delta.json and semantic-json-diff.json
+    VALIDATION:
+    - canonical owner command regeneration and semantic JSON delta
+    - architecture-quick and documented QA checks rerun
+    DOMAIN_STOP:
+    - budget or cap increase vs baseline
+    - hand-edited generated JSON accepted as fresh
+    OUTPUT_EXTRAS:
+    - freshness-delta.json
+    - budget-delta.json
+  requirements-trace:
+    domain: requirements-trace
+    id: prompt.audit.project.new2.requirements-trace
+    OBJECT: REQ traceability from catalog through crosswalk to implementation, tests,
+      and evidence
+    SCOPE:
+    - docs/01-requirements/
+    - tests/
+    - src/bioetl/
+    SSOT:
+    - docs/01-requirements/REQUIREMENTS.md
+    - docs/01-requirements/traceability.csv
+    - docs/00-project/RULES.md
+    AUDIT_CONTOURS:
+    - REQ ID catalog vs CSV inventory with duplicate/missing/status drift
+    - bidirectional requirement to code/test/evidence mapping
+    - invented or retired ID citation detection in tests and docs
+    - orphan REQ and untraced test classification
+    MANDATORY_EVIDENCE:
+    - requirement-graph.json with bidirectional edges
+    - orphan-req.csv and untraced-tests.csv
+    - crosswalk-delta.csv and schema check results
+    VALIDATION:
+    - re-read of catalog and CSV with schema checks
+    - sampled executable path and test evidence verification
+    DOMAIN_STOP:
+    - invented REQ identifier used as coverage claim
+    - covered status based only on file count without executable evidence
+    OUTPUT_EXTRAS:
+    - requirement-graph.json
+    - orphan-req.csv
+  scripts-inventory:
+    domain: scripts-inventory
+    id: prompt.audit.project.new2.scripts-inventory
+    OBJECT: Scripts inventory, lifecycle registry, canonical roots, and no-growth
+      active count
+    SCOPE:
+    - scripts/
+    - configs/quality/scripts_inventory_manifest.json
+    - configs/quality/scripts_lifecycle_registry.json
+    SSOT:
+    - scripts/engineering/repo/catalog.yaml
+    - configs/quality/scripts_inventory_manifest.json
+    - configs/quality/scripts_lifecycle_registry.json
+    AUDIT_CONTOURS:
+    - tracked scripts vs manifest vs lifecycle registry with owner and reference mapping
+    - active count vs active_script_count_max cap with flat/down enforcement
+    - root clutter, _tmp_ files, device-name paths, and noncanonical entrypoint detection
+    - deprecated script replacement and sunset linkage
+    MANDATORY_EVIDENCE:
+    - scripts-delta.csv and orphan-scripts.json
+    - lifecycle-transitions.json and invocation-smoke.json
+    - cap comparison and root allowlist evidence
+    VALIDATION:
+    - repo inventory checks and invocation smoke for touched scripts
+    - lifecycle and manifest owner command verification
+    DOMAIN_STOP:
+    - active count cap increase
+    - new ad-hoc root script outside allowlist
+    OUTPUT_EXTRAS:
+    - scripts-delta.csv
+    - orphan-scripts.json
+  security-secrets:
+    domain: security-secrets
+    id: prompt.audit.project.new2.security-secrets
+    OBJECT: Security controls, tracked secret leak prevention, env policy, and supply-chain
+      scanning
+    SCOPE:
+    - .github/
+    - src/bioetl/
+    - scripts/
+    - configs/
+    SSOT:
+    - docs/00-project/RULES.md
+    - AGENTS.md
+    - docs/00-project/ai/agents/policy/
+    AUDIT_CONTOURS:
+    - secret policy vs actual tracked surfaces comparison
+    - high-entropy and key pattern scan with redacted locator-only findings
+    - CI scanner, trigger, permission, and Dependabot coverage
+    - env read-only discipline and rotation ownership
+    MANDATORY_EVIDENCE:
+    - redacted-findings.json with only locator and hash, no values
+    - scanner-coverage.md and permissions-delta.csv
+    - rotation-actions.md with operator-owned rotation instructions
+    VALIDATION:
+    - re-scan on touched paths and permission delta check
+    - scanner active-on-trigger verification
+    DOMAIN_STOP:
+    - confirmed live secret in tracked file
+    - scanner disabled to pass audit or broad write permission granted
+    OUTPUT_EXTRAS:
+    - redacted-findings.json
+    - scanner-coverage.md
+  tech-debt:
+    domain: tech-debt
+    id: prompt.audit.cycle.tech-debt
+    OBJECT: Technical debt register, blast-radius ordering, paydown, and residual
+      re-check
+    SCOPE:
+    - src/bioetl/
+    - configs/quality/
+    SSOT:
+    - configs/quality/debt_scorecard.yaml
+    - configs/quality/debt-governance-gates.json
+    - docs/00-project/RULES.md
+    AUDIT_CONTOURS:
+    - TODO/FIXME/HACK, suppression, shim, and disabled-gate inventory
+    - blast-radius ordering with owner, protecting tests, and paydown step
+    - residual trend analysis flat/down with architecture gate coupling
+    - rejected budget-raise ideas without debt-limit growth
+    MANDATORY_EVIDENCE:
+    - debt-register.json collecting all debt signals with path and evidence
+    - blast-radius-table.csv sorted by blast radius
+    - residual-delta.json and rejected-policy.json
+    VALIDATION:
+    - debt and residual architecture gates rerun
+    - before/after comparison on touched families
+    DOMAIN_STOP:
+    - any budget or exemption raise
+    - residual pin removal without canonical regeneration
+    OUTPUT_EXTRAS:
+    - debt-register.json
+    - blast-radius-table.csv
+  telemetry:
+    domain: telemetry
+    id: prompt.audit.cycle.telemetry
+    OBJECT: Observability instrumentation from scrape/export through recording rules
+      to queryable series
+    SCOPE:
+    - src/bioetl/infrastructure/observability/
+    - src/bioetl/observability/
+    - grafana/prometheus-rules/
+    - grafana/prometheus.yml
+    - grafana/provisioning/
+    - docs/04-reference/observability/
+    - reports/observability/
+    SSOT:
+    - docs/02-architecture/decisions/ADR-017.md
+    - docs/02-architecture/decisions/ADR-019.md
+    - docs/02-architecture/decisions/ADR-022.md
+    - docs/04-reference/observability/metrics-catalog.md
+    AUDIT_CONTOURS:
+    - metric name registry vs catalog/rules/dashboard queries
+    - coverage matrix panel/query/metric/rule/labels/ready/blocker
+    - instrumentation semantics ports/adapters/NoOp tracing and cardinality
+    - recording rule tests via promtool and expected empty vs missing handling
+    MANDATORY_EVIDENCE:
+    - metric-inventory.json and coverage-matrix.csv
+    - cardinality-delta.json and rule-test-results.json
+    - readiness evidence for first-screen panels
+    VALIDATION:
+    - inventory and rule test rerun with evidence
+    - cardinality evidence attached and run_id label absence verified
+    DOMAIN_STOP:
+    - invented metric series without catalog or rule
+    - secret or token leaked into labels or rules
+    OUTPUT_EXTRAS:
+    - coverage-matrix.csv
+    - cardinality-delta.json
+  tests:
+    domain: tests
+    id: prompt.audit.cycle.tests
+    OBJECT: Test system lanes, gates, markers, and regression-detection coverage
+    SCOPE:
+    - tests/
+    - configs/quality/
+    - pyproject.toml
+    SSOT:
+    - docs/00-project/RULES.md
+    - configs/quality/test_matrix.yaml
+    - docs/00-project/TEST_LANE_MENTAL_MODEL.md
+    AUDIT_CONTOURS:
+    - pytest and CI lane inventory, markers, quarantine, and isolation
+    - critical-path to positive/negative/contract test mapping
+    - flaky and disabled test evidence with rerun outcomes and owner linkage
+    - required-check to lane mapping and debt/skip budget trends
+    MANDATORY_EVIDENCE:
+    - test-inventory.csv and lane-gate-map.csv
+    - critical-path-matrix.csv mapping critical paths to tests
+    - flaky-reruns.json with N rerun outcomes for claimed flaky tests
+    VALIDATION:
+    - same LANE/SCOPE rerun and delta resolved/regressed/new
+    - required CI validation on pushed changes
+    DOMAIN_STOP:
+    - unbounded full suite run without explicit budget
+    - secret material committed in fixtures
+    OUTPUT_EXTRAS:
+    - test-inventory.csv
+    - lane-gate-map.csv
+  vcr-http:
+    domain: vcr-http
+    id: prompt.audit.project.new2.vcr-http
+    OBJECT: VCR cassettes, HTTP fixture sanitization, deterministic replay, and offline
+      isolation
+    SCOPE:
+    - tests/fixtures/vcr/
+    - configs/quality/integration_vcr_policy.yaml
+    SSOT:
+    - configs/quality/integration_vcr_policy.yaml
+    - docs/00-project/RULES.md
+    - docs/00-project/ai/agents/skills/vcr-record/
+    AUDIT_CONTOURS:
+    - cassette tree vs policy parity with orphan/missing meta and owner detection
+    - secret header and body redaction without value echo
+    - determinism timestamp, unordered JSON, host leakage, and matcher stability
+    - offline replay capability and provider compatibility
+    MANDATORY_EVIDENCE:
+    - cassette-inventory.csv and policy-tree-delta.csv
+    - sanitization-results.json proving redaction without secret echo
+    - replay-hashes.json with two-run hash comparison
+    VALIDATION:
+    - targeted offline replay and two-run hash stability check
+    - redacted scan on touched cassettes
+    DOMAIN_STOP:
+    - secret material committed in cassette body or header
+    - non-deterministic replay accepted as pass
+    OUTPUT_EXTRAS:
+    - cassette-inventory.csv
+    - replay-hashes.json
