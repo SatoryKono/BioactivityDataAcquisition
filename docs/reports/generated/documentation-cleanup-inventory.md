@@ -40,7 +40,7 @@
 | issue_pack | 58 |
 | live_issue_mirror | 8 |
 | plans_governance_entrypoint | 1 |
-| published_skill_reference_redirect | 21 |
+| published_skill_reference_redirect | 15 |
 | reports_workspace_entrypoint | 1 |
 | working_report | 922 |
 
@@ -58,8 +58,8 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 752 |
-| Archived | 189 |
+| Active | 746 |
+| Archived | 195 |
 | Canonical | 73 |
 | Deprecated | 51 |
 | Generated | 1253 |
@@ -69,8 +69,8 @@
 
 | Surface | Count |
 | --- | --- |
-| active | 752 |
-| archive | 189 |
+| active | 746 |
+| archive | 195 |
 | canonical | 73 |
 | duplicate | 51 |
 | generated | 1253 |
