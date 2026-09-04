@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-09-04T16:21:39.977256+00:00",
+
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -5091,7 +5092,7 @@
         },
         {
           "path": "scripts/ai/prompts/__main__.py",
-          "line": 436,
+          "line": 434,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts import compile as routed_command"
         },
@@ -5103,7 +5104,7 @@
         },
         {
           "path": "scripts/ai/prompts/verify.py",
-          "line": 367,
+          "line": 369,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts.compile import ("
         }
@@ -5171,7 +5172,7 @@
         },
         {
           "path": "scripts/ai/prompts/__main__.py",
-          "line": 438,
+          "line": 436,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts import lint as routed_command"
         },
@@ -5301,7 +5302,7 @@
       "references": [
         {
           "path": "scripts/ai/prompts/__main__.py",
-          "line": 440,
+          "line": 438,
           "source_group": "scripts",
           "text": "from scripts.ai.prompts import verify as routed_command"
         },
@@ -17887,7 +17888,7 @@
         },
         {
           "path": "scripts/engineering/ci/report_pr_gate_timing.py",
-          "line": 28,
+          "line": 31,
           "source_group": "scripts",
           "text": "from scripts.engineering.repo.github_settings_review import ("
         },

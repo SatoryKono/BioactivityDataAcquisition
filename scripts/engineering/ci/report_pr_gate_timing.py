@@ -24,7 +24,10 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if __package__ in {None, ""}:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.engineering.common.repo_paths import ensure_path_within_root, resolve_cli_path
+from scripts.engineering.common.repo_paths import (
+    ensure_path_within_root,
+    resolve_cli_path,
+)
 from scripts.engineering.repo.github_settings_review import (
     GitHubReviewError,
     ReadOnlyGitHubClient,
