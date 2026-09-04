@@ -393,7 +393,8 @@ def lint_all(*, strict: bool = False) -> LintReport:  # noqa: ARG001 — strict 
             domains = {}
         if not isinstance(domains, dict):
             report.add_error(
-                "overlay_parse", "domains.yaml domains must be a mapping",
+                "overlay_parse",
+                "domains.yaml domains must be a mapping",
                 DOMAINS_PATH.as_posix(),
             )
             domains = {}

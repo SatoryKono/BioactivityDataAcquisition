@@ -285,7 +285,9 @@ def check_generated_catalog(report: VerifyReport) -> int:
     overlays = discover_overlays()
     profiles = discover_profiles()
     if not overlays:
-        report.add_error("generated_exists", f"no domains in {PROMPTS_ROOT / 'domains.yaml'}")
+        report.add_error(
+            "generated_exists", f"no domains in {PROMPTS_ROOT / 'domains.yaml'}"
+        )
         return 0
     compiled = 0
     for domain in overlays:
