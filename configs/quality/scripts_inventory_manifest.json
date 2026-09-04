@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-"generated_at": "2026-09-04T06:31:55.824273+00:00",
+  "generated_at": "2026-09-04T09:23:33.281115+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -397,7 +397,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 168,
           "source_group": "scripts",
-          "text": "- `scripts/ai/codex/headless.ps1` — PowerShell transport for headless mode;"
+          "text": "- `scripts/ai/codex/headless.ps1` \u2014 PowerShell transport for headless mode;"
         }
       ]
     },
@@ -570,7 +570,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 169,
           "source_group": "scripts",
-          "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` — setup-hang diagnostics;"
+          "text": "- `scripts/ai/codex/helper/diagnose-hang.ps1` \u2014 setup-hang diagnostics;"
         },
         {
           "path": "scripts/ai/codex/helper/README.md",
@@ -929,7 +929,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 26,
           "source_group": "docs",
-          "text": "├── ../scripts/ai/codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup"
+          "text": "\u251c\u2500\u2500 ../scripts/ai/codex/helper/setup-wsl.sh          \u2b50 NEW - Installation & setup"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -989,7 +989,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 27,
           "source_group": "docs",
-          "text": "├── ../scripts/ai/codex/helper/verify-setup.sh       ⭐ NEW - Verification script"
+          "text": "\u251c\u2500\u2500 ../scripts/ai/codex/helper/verify-setup.sh       \u2b50 NEW - Verification script"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -1007,7 +1007,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 100,
           "source_group": "docs",
-          "text": "→ Run: scripts/ai/codex/helper/verify-setup.sh (automated checker)"
+          "text": "\u2192 Run: scripts/ai/codex/helper/verify-setup.sh (automated checker)"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -1502,7 +1502,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 170,
           "source_group": "scripts",
-          "text": "- `scripts/ai/codex/setup-windows-dns.ps1` — explicit Windows DNS repair;"
+          "text": "- `scripts/ai/codex/setup-windows-dns.ps1` \u2014 explicit Windows DNS repair;"
         }
       ]
     },
@@ -1517,7 +1517,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 171,
           "source_group": "scripts",
-          "text": "- `scripts/ai/codex/setup-wsl-dns.sh` — explicit WSL DNS repair;"
+          "text": "- `scripts/ai/codex/setup-wsl-dns.sh` \u2014 explicit WSL DNS repair;"
         }
       ]
     },
@@ -1605,7 +1605,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 26,
           "source_group": "scripts",
-          "text": "`setup_agents.sh` и `setup_skills.sh` больше не являются обязательным"
+          "text": "`setup_agents.sh` \u0438 `setup_skills.sh` \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u044f\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u043c"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -1723,7 +1723,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 26,
           "source_group": "scripts",
-          "text": "`setup_agents.sh` и `setup_skills.sh` больше не являются обязательным"
+          "text": "`setup_agents.sh` \u0438 `setup_skills.sh` \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u044f\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u043c"
         },
         {
           "path": "scripts/ai/codex/README.md",
@@ -1851,7 +1851,7 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 138,
           "source_group": "scripts",
-          "text": "├── gemini-interactive.ps1          # Thin compatibility launcher"
+          "text": "\u251c\u2500\u2500 gemini-interactive.ps1          # Thin compatibility launcher"
         },
         {
           "path": "scripts/ai/gemini/SETUP_COMPLETE.md",
@@ -1906,7 +1906,7 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 139,
           "source_group": "scripts",
-          "text": "├── gemini-interactive.sh           # Thin compatibility launcher"
+          "text": "\u251c\u2500\u2500 gemini-interactive.sh           # Thin compatibility launcher"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -1967,13 +1967,13 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 136,
           "source_group": "scripts",
-          "text": "├── headless.ps1                    # PowerShell transport without MCP sync"
+          "text": "\u251c\u2500\u2500 headless.ps1                    # PowerShell transport without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 16,
           "source_group": "scripts",
-          "text": "├── headless.ps1                   # PowerShell transport that skips MCP sync"
+          "text": "\u251c\u2500\u2500 headless.ps1                   # PowerShell transport that skips MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2000,7 +2000,7 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 137,
           "source_group": "scripts",
-          "text": "├── headless.sh                     # WSL launcher without MCP sync"
+          "text": "\u251c\u2500\u2500 headless.sh                     # WSL launcher without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
@@ -2012,7 +2012,7 @@
           "path": "scripts/ai/gemini/README.md",
           "line": 17,
           "source_group": "scripts",
-          "text": "├── headless.sh                    # WSL/Bash launcher without MCP sync"
+          "text": "\u251c\u2500\u2500 headless.sh                    # WSL/Bash launcher without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2089,13 +2089,13 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 146,
           "source_group": "scripts",
-          "text": "│   ├── ensure-gemini-cli.sh        # Managed CLI bootstrap"
+          "text": "\u2502   \u251c\u2500\u2500 ensure-gemini-cli.sh        # Managed CLI bootstrap"
         },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 25,
           "source_group": "scripts",
-          "text": "│   ├── ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap"
+          "text": "\u2502   \u251c\u2500\u2500 ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2181,13 +2181,13 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 143,
           "source_group": "scripts",
-          "text": "│   ├── run-gemini-impl.sh          # Runtime launcher"
+          "text": "\u2502   \u251c\u2500\u2500 run-gemini-impl.sh          # Runtime launcher"
         },
         {
           "path": "scripts/ai/gemini/README.md",
           "line": 28,
           "source_group": "scripts",
-          "text": "│   └── run-gemini-impl.sh         # Runtime launcher implementation"
+          "text": "\u2502   \u2514\u2500\u2500 run-gemini-impl.sh         # Runtime launcher implementation"
         },
         {
           "path": "scripts/ai/gemini/run-gemini.sh",
@@ -2280,7 +2280,7 @@
           "path": "scripts/ai/gemini/README.md",
           "line": 13,
           "source_group": "scripts",
-          "text": "├── launch-gemini-wsl.ps1          # Thin PowerShell alias over run-gemini.ps1"
+          "text": "\u251c\u2500\u2500 launch-gemini-wsl.ps1          # Thin PowerShell alias over run-gemini.ps1"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2412,7 +2412,7 @@
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
           "line": 134,
           "source_group": "scripts",
-          "text": "├── run-gemini.ps1                  # PowerShell delegator"
+          "text": "\u251c\u2500\u2500 run-gemini.ps1                  # PowerShell delegator"
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
@@ -2521,7 +2521,7 @@
           "path": "scripts/ai/gemini/README.md",
           "line": 12,
           "source_group": "scripts",
-          "text": "├── setup-gemini-wsl.bat           # cmd.exe WSL setup transport"
+          "text": "\u251c\u2500\u2500 setup-gemini-wsl.bat           # cmd.exe WSL setup transport"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2560,7 +2560,7 @@
           "path": "scripts/ai/gemini/README.md",
           "line": 11,
           "source_group": "scripts",
-          "text": "├── setup.ps1                      # PowerShell setup orchestrator for WSL"
+          "text": "\u251c\u2500\u2500 setup.ps1                      # PowerShell setup orchestrator for WSL"
         },
         {
           "path": "scripts/ai/gemini/README.md",
@@ -2740,13 +2740,13 @@
           "path": "docs/00-project/NORMATIVE_SOURCES.md",
           "line": 50,
           "source_group": "docs",
-          "text": "`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в"
+          "text": "`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors \u0432"
         },
         {
           "path": "docs/00-project/NORMATIVE_SOURCES.md",
           "line": 108,
           "source_group": "docs",
-          "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check"
+          "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` \u2014 `.codex/**` \u2194 `.junie/**` parity check"
         },
         {
           "path": "docs/00-project/ai/README.md",
@@ -2916,7 +2916,7 @@
           "path": "docs/05-operations/deployment/NEO4J-STARTUP-GUIDE.md",
           "line": 206,
           "source_group": "docs",
-          "text": "1. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`"
+          "text": "1. \u2705 \u0417\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u044c \u0442\u0435\u0441\u0442: `bash scripts/ai/mcp/check.sh`"
         },
         {
           "path": "scripts/ai/mcp/__main__.py",
@@ -3107,7 +3107,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 137,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -3144,7 +3144,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 137,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_adr_analysis_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_adr_analysis_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -3331,7 +3331,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 157,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3356,13 +3356,13 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 157,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_code_analyzer_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_code_analyzer_wrapper.ps1` (Windows)"
         },
         {
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 111,
           "source_group": "docs",
-          "text": "- ❌ `mcp_code_analyzer_wrapper.sh`"
+          "text": "- \u274c `mcp_code_analyzer_wrapper.sh`"
         },
         {
           "path": "docs/00-project/governance/script-naming-conventions.md",
@@ -3503,7 +3503,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 131,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3528,7 +3528,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 131,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_deja_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_deja_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -3778,7 +3778,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 163,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3803,7 +3803,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 163,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_github_actions_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_github_actions_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -4056,7 +4056,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 144,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
@@ -4087,7 +4087,7 @@
           "path": "docs/00-project/ai/mcp-governance.md",
           "line": 144,
           "source_group": "docs",
-          "text": "- **Обёртки:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
+          "text": "- **\u041e\u0431\u0451\u0440\u0442\u043a\u0438:** `scripts/ai/mcp/mcp_mutmut_wrapper.sh` (Linux/WSL), `scripts/ai/mcp/mcp_mutmut_wrapper.ps1` (Windows)"
         },
         {
           "path": "scripts/ai/.mcp.json",
@@ -4256,7 +4256,7 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-INDEX.md",
           "line": 49,
           "source_group": "docs",
-          "text": "| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`         | MCP wrapper script    | ✅ Ready      |"
+          "text": "| `scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`         | MCP wrapper script    | \u2705 Ready      |"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
@@ -5019,7 +5019,7 @@
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 140,
           "source_group": "docs",
-          "text": "python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly  # или full-write / differential"
+          "text": "python -m scripts.ai.prompts compile --domain <domain> --profile audit-readonly  # \u0438\u043b\u0438 full-write / differential"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5063,25 +5063,25 @@
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 32,
           "source_group": "docs",
-          "text": "| Рендер не проверялся (D8) | `scripts/ai/prompts/compile.py` → `generated/<domain>/<profile>.md` + `prompt_sha8 = sha8(kernel+overlay+profile+params)` + provenance header; `generated/` коммитится |"
+          "text": "| \u0420\u0435\u043d\u0434\u0435\u0440 \u043d\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u043b\u0441\u044f (D8) | `scripts/ai/prompts/compile.py` \u2192 `generated/<domain>/<profile>.md` + `prompt_sha8 = sha8(kernel+overlay+profile+params)` + provenance header; `generated/` \u043a\u043e\u043c\u043c\u0438\u0442\u0438\u0442\u0441\u044f |"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 83,
           "source_group": "docs",
-          "text": "Master-оркестратор: до миграции `materialized-v3/master-orchestrator-v1__full-project-audit.md` (01→24, `master-ledger.jsonl`); после — резолвит 24 overlay ID и компилирует с профилем `full-write` чер"
+          "text": "Master-\u043e\u0440\u043a\u0435\u0441\u0442\u0440\u0430\u0442\u043e\u0440: \u0434\u043e \u043c\u0438\u0433\u0440\u0430\u0446\u0438\u0438 `materialized-v3/master-orchestrator-v1__full-project-audit.md` (01\u219224, `master-ledger.jsonl`); \u043f\u043e\u0441\u043b\u0435 \u2014 \u0440\u0435\u0437\u043e\u043b\u0432\u0438\u0442 24 overlay ID \u0438 \u043a\u043e\u043c\u043f\u0438\u043b\u0438\u0440\u0443\u0435\u0442 \u0441 \u043f\u0440\u043e\u0444\u0438\u043b\u0435\u043c `full-write` \u0447\u0435\u0440"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 96,
           "source_group": "docs",
-          "text": "| **P1 — compiler+overlays** | `scripts/ai/prompts/compile.py` (детерминизм + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 профиля, 24 `compatibility/*.md`, `tests/prompts/` (c"
+          "text": "| **P1 \u2014 compiler+overlays** | `scripts/ai/prompts/compile.py` (\u0434\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0437\u043c + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 \u043f\u0440\u043e\u0444\u0438\u043b\u044f, 24 `compatibility/*.md`, `tests/prompts/` (c"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 178,
           "source_group": "docs",
-          "text": "`compile.py` рендерит `kernel + overlay + profile → generated/<domain>/<profile>.md` детерминированно; повторный прогон byte-identical. `N=10` итераций, caps `MAX_FILES_PER_SCOPE=300`, `MAX_ISSUES_PER"
+          "text": "`compile.py` \u0440\u0435\u043d\u0434\u0435\u0440\u0438\u0442 `kernel + overlay + profile \u2192 generated/<domain>/<profile>.md` \u0434\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e; \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u044b\u0439 \u043f\u0440\u043e\u0433\u043e\u043d byte-identical. `N=10` \u0438\u0442\u0435\u0440\u0430\u0446\u0438\u0439, caps `MAX_FILES_PER_SCOPE=300`, `MAX_ISSUES_PER"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
@@ -5093,19 +5093,19 @@
           "path": "docs/00-project/ai/prompts/generated/CATALOG.md",
           "line": 1,
           "source_group": "docs",
-          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py — do not edit by hand -->"
+          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py \u2014 do not edit by hand -->"
         },
         {
           "path": "docs/00-project/ai/prompts/generated/agents-memory/audit-readonly.md",
           "line": 1,
           "source_group": "docs",
-          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py — do not edit by hand -->"
+          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py \u2014 do not edit by hand -->"
         },
         {
           "path": "docs/00-project/ai/prompts/generated/agents-memory/differential.md",
           "line": 1,
           "source_group": "docs",
-          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py — do not edit by hand -->"
+          "text": "<!-- GENERATED by scripts/ai/prompts/compile.py \u2014 do not edit by hand -->"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5124,7 +5124,7 @@
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 96,
           "source_group": "docs",
-          "text": "| **P1 — compiler+overlays** | `scripts/ai/prompts/compile.py` (детерминизм + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 профиля, 24 `compatibility/*.md`, `tests/prompts/` (c"
+          "text": "| **P1 \u2014 compiler+overlays** | `scripts/ai/prompts/compile.py` (\u0434\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0437\u043c + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 \u043f\u0440\u043e\u0444\u0438\u043b\u044f, 24 `compatibility/*.md`, `tests/prompts/` (c"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
@@ -5136,7 +5136,7 @@
           "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
           "line": 71,
           "source_group": "docs",
-          "text": "- [x] `scripts/ai/prompts/lint.py` / `verify.py` / `diff.py`: `kernel_schema_valid`, `overlay_schema_valid`, `guard_non_weakening`, `no_controller_duplication`, `full_profile_explicit`; `verify` — `de"
+          "text": "- [x] `scripts/ai/prompts/lint.py` / `verify.py` / `diff.py`: `kernel_schema_valid`, `overlay_schema_valid`, `guard_non_weakening`, `no_controller_duplication`, `full_profile_explicit`; `verify` \u2014 `de"
         },
         {
           "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/_plan-v3.md",
@@ -5179,13 +5179,13 @@
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 95,
           "source_group": "docs",
-          "text": "| **P0 — ядро** | `fragments/cyclic-kernel-v3.md`, `evidence-contract-v3.md`, `issue-state-machine-v3.md`, `_schema/*.json` (kernel/domain-overlay/execution-profile/finding-v3/ledger-event), ADR-060. "
+          "text": "| **P0 \u2014 \u044f\u0434\u0440\u043e** | `fragments/cyclic-kernel-v3.md`, `evidence-contract-v3.md`, `issue-state-machine-v3.md`, `_schema/*.json` (kernel/domain-overlay/execution-profile/finding-v3/ledger-event), ADR-060. "
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
           "line": 96,
           "source_group": "docs",
-          "text": "| **P1 — compiler+overlays** | `scripts/ai/prompts/compile.py` (детерминизм + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 профиля, 24 `compatibility/*.md`, `tests/prompts/` (c"
+          "text": "| **P1 \u2014 compiler+overlays** | `scripts/ai/prompts/compile.py` (\u0434\u0435\u0442\u0435\u0440\u043c\u0438\u043d\u0438\u0437\u043c + `prompt_sha8`), `lint.py/verify.py/diff.py`, 24 `overlays/*.yaml`, 3 \u043f\u0440\u043e\u0444\u0438\u043b\u044f, 24 `compatibility/*.md`, `tests/prompts/` (c"
         },
         {
           "path": "docs/00-project/ai/prompts/MIGRATION-GUIDE-KERNEL-V3.md",
@@ -5209,13 +5209,13 @@
           "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
           "line": 66,
           "source_group": "docs",
-          "text": "Accept: ADR принят; линтер не находит Audit/Plan/Issue секций в `overlays/` — см. `lint.py: no_controller_duplication`."
+          "text": "Accept: ADR \u043f\u0440\u0438\u043d\u044f\u0442; \u043b\u0438\u043d\u0442\u0435\u0440 \u043d\u0435 \u043d\u0430\u0445\u043e\u0434\u0438\u0442 Audit/Plan/Issue \u0441\u0435\u043a\u0446\u0438\u0439 \u0432 `overlays/` \u2014 \u0441\u043c. `lint.py: no_controller_duplication`."
         },
         {
           "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/MIGRATION-PLAN.md",
           "line": 71,
           "source_group": "docs",
-          "text": "- [x] `scripts/ai/prompts/lint.py` / `verify.py` / `diff.py`: `kernel_schema_valid`, `overlay_schema_valid`, `guard_non_weakening`, `no_controller_duplication`, `full_profile_explicit`; `verify` — `de"
+          "text": "- [x] `scripts/ai/prompts/lint.py` / `verify.py` / `diff.py`: `kernel_schema_valid`, `overlay_schema_valid`, `guard_non_weakening`, `no_controller_duplication`, `full_profile_explicit`; `verify` \u2014 `de"
         },
         {
           "path": "docs/00-project/ai/prompts/library/audit/project/materialized-v3/_plan-v3.md",
@@ -5277,19 +5277,19 @@
           "path": "docs/02-architecture/05-composition-layer.md",
           "line": 119,
           "source_group": "docs",
-          "text": "| `pipeline/registry.py`              | Реестр фабрик                                   | Все зарегистрированные pipeline factories                      |"
+          "text": "| `pipeline/registry.py`              | \u0420\u0435\u0435\u0441\u0442\u0440 \u0444\u0430\u0431\u0440\u0438\u043a                                   | \u0412\u0441\u0435 \u0437\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0435 pipeline factories                      |"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
           "line": 231,
           "source_group": "docs",
-          "text": "### 2.4. `registry.py` — Реестр пайплайнов"
+          "text": "### 2.4. `registry.py` \u2014 \u0420\u0435\u0435\u0441\u0442\u0440 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u043e\u0432"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
           "line": 269,
           "source_group": "docs",
-          "text": "- **Декларативность:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` и `factories/pipeline/registry.py` позволяют добавлять новые пайплайны без дублирования шаблонного assembly-кода."
+          "text": "- **\u0414\u0435\u043a\u043b\u0430\u0440\u0430\u0442\u0438\u0432\u043d\u043e\u0441\u0442\u044c:** `GenericPipelineFactory`, `PIPELINE_CONFIGS` \u0438 `factories/pipeline/registry.py` \u043f\u043e\u0437\u0432\u043e\u043b\u044f\u044e\u0442 \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0442\u044c \u043d\u043e\u0432\u044b\u0435 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u044b \u0431\u0435\u0437 \u0434\u0443\u0431\u043b\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u044f \u0448\u0430\u0431\u043b\u043e\u043d\u043d\u043e\u0433\u043e assembly-\u043a\u043e\u0434\u0430."
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
@@ -5301,7 +5301,7 @@
           "path": "docs/02-architecture/decisions/ADR-024-entity-naming-unification.md",
           "line": 165,
           "source_group": "docs",
-          "text": "- `pipeline/registry.py` — imports, configs, and exports updated"
+          "text": "- `pipeline/registry.py` \u2014 imports, configs, and exports updated"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5930,7 +5930,7 @@
           "path": "docs/docs-folder-analysis.md",
           "line": 66,
           "source_group": "docs",
-          "text": "- Регенерируется через `python scripts/data_quality/inventory_silver_filters_migration.py`"
+          "text": "- \u0420\u0435\u0433\u0435\u043d\u0435\u0440\u0438\u0440\u0443\u0435\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 `python scripts/data_quality/inventory_silver_filters_migration.py`"
         },
         {
           "path": "docs/filters/inventory-baseline.json",
@@ -6093,13 +6093,13 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 459,
           "source_group": "docs",
-          "text": "1. Выполнен `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
+          "text": "1. \u0412\u044b\u043f\u043e\u043b\u043d\u0435\u043d `python scripts/diagrams/check/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 75,
           "source_group": "docs",
-          "text": "| DIAG-T033 | Class method render integrity     | Целостность сигнатур методов в classDiagram              | `scripts/diagrams/check/check_class_method_render_integrity.py` | Auto      | PR           "
+          "text": "| DIAG-T033 | Class method render integrity     | \u0426\u0435\u043b\u043e\u0441\u0442\u043d\u043e\u0441\u0442\u044c \u0441\u0438\u0433\u043d\u0430\u0442\u0443\u0440 \u043c\u0435\u0442\u043e\u0434\u043e\u0432 \u0432 classDiagram              | `scripts/diagrams/check/check_class_method_render_integrity.py` | Auto      | PR           "
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6162,25 +6162,25 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 444,
           "source_group": "docs",
-          "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "1. **\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0435 SVG-\u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u044b:** `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 445,
           "source_group": "docs",
-          "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibili"
+          "text": "\u0414\u043b\u044f \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0439 compatibility-\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 PNG \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439\u0442\u0435 curated manifest: `python scripts/diagrams/check/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibili"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 474,
           "source_group": "docs",
-          "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |"
+          "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 \u0434\u043b\u044f \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0445 SVG \u0438 DIAG-T011/T012 \u0434\u043b\u044f optional PNG compatibility |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 161,
           "source_group": "docs",
-          "text": "- запуск `check_diagram_artifacts.py` (DIAG-T010/T011/T012);"
+          "text": "- \u0437\u0430\u043f\u0443\u0441\u043a `check_diagram_artifacts.py` (DIAG-T010/T011/T012);"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6213,7 +6213,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 447,
           "source_group": "docs",
-          "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
+          "text": "1. **\u041f\u0440\u043e\u0433\u043d\u0430\u0442\u044c quality-gates:** `python scripts/diagrams/check/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -6225,25 +6225,25 @@
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 60,
           "source_group": "docs",
-          "text": "| DIAG-T018 | Link style guide compliance       | Семантика линий                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
+          "text": "| DIAG-T018 | Link style guide compliance       | \u0421\u0435\u043c\u0430\u043d\u0442\u0438\u043a\u0430 \u043b\u0438\u043d\u0438\u0439                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 61,
           "source_group": "docs",
-          "text": "| DIAG-T019 | classDef coverage                 | Типизация узлов                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
+          "text": "| DIAG-T019 | classDef coverage                 | \u0422\u0438\u043f\u0438\u0437\u0430\u0446\u0438\u044f \u0443\u0437\u043b\u043e\u0432                                          | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 62,
           "source_group": "docs",
-          "text": "| DIAG-T020 | Large diagram decomposition       | Наличие L1/L2/L3                                         | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
+          "text": "| DIAG-T020 | Large diagram decomposition       | \u041d\u0430\u043b\u0438\u0447\u0438\u0435 L1/L2/L3                                         | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 63,
           "source_group": "docs",
-          "text": "| DIAG-T021 | Legend present for large          | Пояснение семантики                                      | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
+          "text": "| DIAG-T021 | Legend present for large          | \u041f\u043e\u044f\u0441\u043d\u0435\u043d\u0438\u0435 \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u043a\u0438                                      | `scripts/diagrams/check/check_diagram_quality_gates.py`         | Auto      | PR           "
         }
       ]
     },
@@ -6374,7 +6374,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 353,
           "source_group": "docs",
-          "text": "Скрипт `scripts/diagrams/check/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
+          "text": "\u0421\u043a\u0440\u0438\u043f\u0442 `scripts/diagrams/check/check_svg_text_visibility.py` \u0432\u0430\u043b\u0438\u0434\u0438\u0440\u0443\u0435\u0442 smoke-\u043d\u0430\u0431\u043e\u0440 SVG \u043d\u0430 \u043f\u0440\u0435\u0434\u043c\u0435\u0442"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -6392,7 +6392,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 446,
           "source_group": "docs",
-          "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
+          "text": "1. **\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0432\u0438\u0434\u0438\u043c\u043e\u0441\u0442\u044c \u0442\u0435\u043a\u0441\u0442\u0430 \u0432 SVG:** `python scripts/diagrams/check/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         }
       ]
     },
@@ -6528,7 +6528,7 @@
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
           "line": 58,
           "source_group": "docs",
-          "text": "| DIAG-T016 | Fallback text applied             | Совместимость просмотрщиков                              | `add_svg_text_fallback.py` + check                        | Auto      | PR             | Ha"
+          "text": "| DIAG-T016 | Fallback text applied             | \u0421\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u043c\u043e\u0441\u0442\u044c \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u0449\u0438\u043a\u043e\u0432                              | `add_svg_text_fallback.py` + check                        | Auto      | PR             | Ha"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
@@ -6579,19 +6579,19 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 207,
           "source_group": "docs",
-          "text": "### 4.5. Автоматизация: apply_elk_layout.py"
+          "text": "### 4.5. \u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f: apply_elk_layout.py"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 209,
           "source_group": "docs",
-          "text": "Утилита `scripts/diagrams/fix/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:"
+          "text": "\u0423\u0442\u0438\u043b\u0438\u0442\u0430 `scripts/diagrams/fix/apply_elk_layout.py` \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0435\u0442 ELK init \u043a \u0434\u0438\u0430\u0433\u0440\u0430\u043c\u043c\u0430\u043c, \u043f\u0440\u0435\u0432\u044b\u0448\u0430\u044e\u0449\u0438\u043c \u043f\u043e\u0440\u043e\u0433 \u043d\u043e\u0434:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 470,
           "source_group": "docs",
-          "text": "| apply_elk_layout.py            | `scripts/diagrams/` | Добавление ELK init к flowchart с >20 нод                                           |"
+          "text": "| apply_elk_layout.py            | `scripts/diagrams/` | \u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u0438\u0435 ELK init \u043a flowchart \u0441 >20 \u043d\u043e\u0434                                           |"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6681,13 +6681,13 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 242,
           "source_group": "docs",
-          "text": "Инструмент `scripts/diagrams/fix/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
+          "text": "\u0418\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442 `scripts/diagrams/fix/differentiate_linkstyle.py` \u043a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u0446\u0438\u0440\u0443\u0435\u0442 \u0441\u0432\u044f\u0437\u0438 \u043f\u043e 6 \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u043c \u0442\u0438\u043f\u0430\u043c:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 471,
           "source_group": "docs",
-          "text": "| differentiate_linkstyle.py     | `scripts/diagrams/` | Семантическая стилизация рёбер                                                      |"
+          "text": "| differentiate_linkstyle.py     | `scripts/diagrams/` | \u0421\u0435\u043c\u0430\u043d\u0442\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0441\u0442\u0438\u043b\u0438\u0437\u0430\u0446\u0438\u044f \u0440\u0451\u0431\u0435\u0440                                                      |"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -6831,25 +6831,25 @@
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 207,
           "source_group": "docs",
-          "text": "Реализован в `scripts/diagrams/fix/prune_orphan_nodes.py`. Нода считается orphan, если:"
+          "text": "\u0420\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d \u0432 `scripts/diagrams/fix/prune_orphan_nodes.py`. \u041d\u043e\u0434\u0430 \u0441\u0447\u0438\u0442\u0430\u0435\u0442\u0441\u044f orphan, \u0435\u0441\u043b\u0438:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 222,
           "source_group": "docs",
-          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check      # аудит"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --check      # \u0430\u0443\u0434\u0438\u0442"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 223,
           "source_group": "docs",
-          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # удалить garbage orphans"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --fix         # \u0443\u0434\u0430\u043b\u0438\u0442\u044c garbage orphans"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 224,
           "source_group": "docs",
-          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption для всех текущих"
+          "text": "python scripts/diagrams/fix/prune_orphan_nodes.py --grandfather # exemption \u0434\u043b\u044f \u0432\u0441\u0435\u0445 \u0442\u0435\u043a\u0443\u0449\u0438\u0445"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -6939,7 +6939,7 @@
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 197,
           "source_group": "docs",
-          "text": "Примечание по size-normalization (`scripts/diagrams/fix/uniform_diagram_sizes.py`):"
+          "text": "\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435 \u043f\u043e size-normalization (`scripts/diagrams/fix/uniform_diagram_sizes.py`):"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -6963,7 +6963,7 @@
           "path": "docs/02-architecture/diagrams/governance/policy.md",
           "line": 140,
           "source_group": "docs",
-          "text": "`uniform_diagram_sizes.py` использовать только точечно и только после ручной проверки,"
+          "text": "`uniform_diagram_sizes.py` \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0442\u043e\u043b\u044c\u043a\u043e \u0442\u043e\u0447\u0435\u0447\u043d\u043e \u0438 \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0441\u043b\u0435 \u0440\u0443\u0447\u043d\u043e\u0439 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438,"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -7112,7 +7112,7 @@
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
           "line": 179,
           "source_group": "docs",
-          "text": "`scripts/diagrams/lint/lint_diagrams.py` проверяет оба каталога:"
+          "text": "`scripts/diagrams/lint/lint_diagrams.py` \u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442 \u043e\u0431\u0430 \u043a\u0430\u0442\u0430\u043b\u043e\u0433\u0430:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
@@ -7241,7 +7241,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 417,
           "source_group": "docs",
-          "text": "`scripts/diagrams/render.ps1`: wrapper запускает тот же Bash renderer через Git"
+          "text": "`scripts/diagrams/render.ps1`: wrapper \u0437\u0430\u043f\u0443\u0441\u043a\u0430\u0435\u0442 \u0442\u043e\u0442 \u0436\u0435 Bash renderer \u0447\u0435\u0440\u0435\u0437 Git"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -7466,7 +7466,7 @@
           "path": "docs/00-project/governance/documentation-update-plan.md",
           "line": 34,
           "source_group": "docs",
-          "text": "- Генератор: `scripts/diagrams/render/generate_pipeline_dataflows.py`"
+          "text": "- \u0413\u0435\u043d\u0435\u0440\u0430\u0442\u043e\u0440: `scripts/diagrams/render/generate_pipeline_dataflows.py`"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -7687,7 +7687,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 469,
           "source_group": "docs",
-          "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |"
+          "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | \u0415\u0434\u0438\u043d\u044b\u0439 \u0437\u0430\u043f\u0443\u0441\u043a \u043f\u0440\u043e\u0444\u0438\u043b\u0435\u0439 \u043f\u0440\u043e\u0432\u0435\u0440\u043e\u043a (`pr`/`nightly`/`quick`)                            |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
@@ -7783,7 +7783,7 @@
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
           "line": 493,
           "source_group": "docs",
-          "text": "1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
+          "text": "1. `nightly` \u2014 `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
@@ -7795,7 +7795,7 @@
           "path": "scripts/diagrams/README.md",
           "line": 16,
           "source_group": "scripts",
-          "text": "└── run_diagram_nightly_suite.py"
+          "text": "\u2514\u2500\u2500 run_diagram_nightly_suite.py"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -8265,7 +8265,7 @@
           "path": "docs/00-project/RULES.md",
           "line": 1450,
           "source_group": "docs",
-          "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
+          "text": "\u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 docs-\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 (`python -m scripts.docs check-links` \u0438"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -8401,7 +8401,7 @@
           "path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
           "line": 55,
           "source_group": "docs",
-          "text": "│  bootstrap.py (creates structlog adapter)        │"
+          "text": "\u2502  bootstrap.py (creates structlog adapter)        \u2502"
         },
         {
           "path": "scripts/docs/checks/check_docstrings.py",
@@ -9157,13 +9157,13 @@
           "path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
           "line": 38,
           "source_group": "docs",
-          "text": "├── cli/main.py   # canonical entrypoint (historical shim: cli.py)"
+          "text": "\u251c\u2500\u2500 cli/main.py   # canonical entrypoint (historical shim: cli.py)"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-005-composition-layer-separation.md",
           "line": 142,
           "source_group": "docs",
-          "text": "├── cli/main.py  # historical shim: cli.py"
+          "text": "\u251c\u2500\u2500 cli/main.py  # historical shim: cli.py"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
@@ -9175,7 +9175,7 @@
           "path": "docs/02-architecture/decisions/ADR-019-observability-port-enforcement.md",
           "line": 48,
           "source_group": "docs",
-          "text": "│  cli/main.py (historical shim: cli.py), signals.py│"
+          "text": "\u2502  cli/main.py (historical shim: cli.py), signals.py\u2502"
         },
         {
           "path": "scripts/docs/README.md",
@@ -9420,7 +9420,7 @@
           "path": "docs/02-architecture/03-infrastructure-layer.md",
           "line": 302,
           "source_group": "docs",
-          "text": "| `validation.py`                | Validation utilities     | Валидация параметров адаптеров               |"
+          "text": "| `validation.py`                | Validation utilities     | \u0412\u0430\u043b\u0438\u0434\u0430\u0446\u0438\u044f \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u043e\u0432 \u0430\u0434\u0430\u043f\u0442\u0435\u0440\u043e\u0432               |"
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
@@ -9432,7 +9432,7 @@
           "path": "docs/02-architecture/decisions/ADR-018-gold-strict-validation.md",
           "line": 394,
           "source_group": "docs",
-          "text": "| `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |"
+          "text": "| `GoldValidatorPort` \u043f\u0440\u043e\u0442\u043e\u043a\u043e\u043b           | \u2705 \u0420\u0435\u0430\u043b\u0438\u0437\u043e\u0432\u0430\u043d | `domain/ports/validation.py:41-61`                       |"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md",
@@ -9584,7 +9584,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 119,
           "source_group": "docs",
-          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
+          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.baselines dq-baseline` | \u2014            | \u041f\u0435\u0440\u0435\u0441\u0447\u0451\u0442 DQ baseline                      "
         },
         {
           "path": "scripts/engineering/README.md",
@@ -9611,13 +9611,13 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 119,
           "source_group": "docs",
-          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | Нет     | `uv run python -m scripts.engineering.baselines dq-baseline` | —            | Пересчёт DQ baseline                      "
+          "text": "| `dq_baseline_update.py`        | scripts/engineering/baselines/   | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.baselines dq-baseline` | \u2014            | \u041f\u0435\u0440\u0435\u0441\u0447\u0451\u0442 DQ baseline                      "
         },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 166,
           "source_group": "docs",
-          "text": "| RULES.md §3.4.1                                             | `dq_baseline_update.py`                                        |"
+          "text": "| RULES.md \u00a73.4.1                                             | `dq_baseline_update.py`                                        |"
         },
         {
           "path": "scripts/engineering/baselines/__main__.py",
@@ -10519,7 +10519,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 114,
           "source_group": "docs",
-          "text": "| `file_merger.py`               | scripts/engineering/common/       | Нет     | —                                                            | —            | Объединение файлов с метаданными         "
+          "text": "| `file_merger.py`               | scripts/engineering/common/       | \u041d\u0435\u0442     | \u2014                                                            | \u2014            | \u041e\u0431\u044a\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u0444\u0430\u0439\u043b\u043e\u0432 \u0441 \u043c\u0435\u0442\u0430\u0434\u0430\u043d\u043d\u044b\u043c\u0438         "
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
@@ -10683,7 +10683,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 112,
           "source_group": "docs",
-          "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | Да      | `uv run python -m scripts.engineering.dev create-pipeline`   | —            | Генерация boilerplate для новых пайплайно"
+          "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | \u0414\u0430      | `uv run python -m scripts.engineering.dev create-pipeline`   | \u2014            | \u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f boilerplate \u0434\u043b\u044f \u043d\u043e\u0432\u044b\u0445 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u043e"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -10752,7 +10752,7 @@
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 178,
           "source_group": "docs",
-          "text": "> via `~/.bashrc` → `scripts/engineering/dev/bash/.wsl_proxy_env.sh`)."
+          "text": "> via `~/.bashrc` \u2192 `scripts/engineering/dev/bash/.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -10810,7 +10810,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 112,
           "source_group": "docs",
-          "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | Да      | `uv run python -m scripts.engineering.dev create-pipeline`   | —            | Генерация boilerplate для новых пайплайно"
+          "text": "| `create_pipeline.py`           | scripts/engineering/dev/          | \u0414\u0430      | `uv run python -m scripts.engineering.dev create-pipeline`   | \u2014            | \u0413\u0435\u043d\u0435\u0440\u0430\u0446\u0438\u044f boilerplate \u0434\u043b\u044f \u043d\u043e\u0432\u044b\u0445 \u043f\u0430\u0439\u043f\u043b\u0430\u0439\u043d\u043e"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -11060,7 +11060,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 185,
           "source_group": "docs",
-          "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` в PowerShell"
+          "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` \u0432 PowerShell"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11125,7 +11125,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 186,
           "source_group": "docs",
-          "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` в WSL"
+          "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` \u0432 WSL"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11257,7 +11257,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 185,
           "source_group": "docs",
-          "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` в PowerShell"
+          "text": "- `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` \u0432 PowerShell"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11305,7 +11305,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 186,
           "source_group": "docs",
-          "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` в WSL"
+          "text": "- `bash scripts/engineering/dev/run_pytest.sh` / `bash scripts/engineering/dev/run_mypy.sh` \u0432 WSL"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11386,13 +11386,13 @@
           "path": "docs/03-guides/testing.md",
           "line": 942,
           "source_group": "docs",
-          "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
+          "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | \u0412\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0443\u0441\u043a\u043e\u0440\u0435\u043d\u043d\u044b\u0439 coverage/sharded \u043f\u0440\u043e\u0433\u043e\u043d |"
         },
         {
           "path": "docs/03-guides/testing.md",
           "line": 943,
           "source_group": "docs",
-          "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
+          "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | \u0412"
         }
       ]
     },
@@ -11407,7 +11407,7 @@
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 72,
           "source_group": "docs",
-          "text": "- ❌ `run_tests.ps1`"
+          "text": "- \u274c `run_tests.ps1`"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -11458,7 +11458,7 @@
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 37,
           "source_group": "docs",
-          "text": "- ✅ `run_tests.py`"
+          "text": "- \u2705 `run_tests.py`"
         },
         {
           "path": "docs/00-project/governance/script-testing-standards.md",
@@ -11503,7 +11503,7 @@
           "path": "docs/00-project/governance/script-naming-conventions.md",
           "line": 56,
           "source_group": "docs",
-          "text": "- ❌ `run_tests.sh`"
+          "text": "- \u274c `run_tests.sh`"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -11563,7 +11563,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 183,
           "source_group": "docs",
-          "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` → `.venv-win`"
+          "text": "- `.\\scripts\\engineering\\dev\\setup_env_windows.ps1` \u2192 `.venv-win`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11620,7 +11620,7 @@
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
           "line": 184,
           "source_group": "docs",
-          "text": "- `bash scripts/engineering/dev/setup_env_wsl.sh` → `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`"
+          "text": "- `bash scripts/engineering/dev/setup_env_wsl.sh` \u2192 `${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}`"
         },
         {
           "path": "docs/00-project/ai/agents/guides/AGENT.md",
@@ -11734,7 +11734,7 @@
           "path": "docs/03-guides/development/pycharm-baseline.md",
           "line": 122,
           "source_group": "docs",
-          "text": "- Sync в локальный `.idea/`: `bash scripts/engineering/dev/sync_pycharm_ide_templates.sh`"
+          "text": "- Sync \u0432 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0439 `.idea/`: `bash scripts/engineering/dev/sync_pycharm_ide_templates.sh`"
         },
         {
           "path": "docs/03-guides/development/pycharm-setup.md",
@@ -12183,19 +12183,19 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 115,
           "source_group": "docs",
-          "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
+          "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | \u041e\u0447\u0438\u0441\u0442\u043a\u0430 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0445 \u043a\u044d\u0448\u0435\u0439 \u0438 build-\u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u043e\u0432"
         },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 117,
           "source_group": "docs",
-          "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
+          "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.diagnostics audit-structure` | \u2014     | \u0410\u0443\u0434\u0438\u0442 \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044f File Policy             "
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
           "line": 180,
           "source_group": "docs",
-          "text": "| `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |"
+          "text": "| `make clean`                                   | Local-only cleanup \u0447\u0435\u0440\u0435\u0437 `python -m scripts.engineering.diagnostics cleanup`    |"
         },
         {
           "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
@@ -12261,7 +12261,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 117,
           "source_group": "docs",
-          "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics audit-structure` | —     | Аудит соответствия File Policy             "
+          "text": "| `audit_structure.py`           | scripts/engineering/diagnostics/ | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.diagnostics audit-structure` | \u2014     | \u0410\u0443\u0434\u0438\u0442 \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044f File Policy             "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -12294,7 +12294,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 116,
           "source_group": "docs",
-          "text": "| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | Нет     | —                                                            | —            | Консолидированный аудит очистки           "
+          "text": "| `cleanup_consolidate.py`       | scripts/engineering/diagnostics/ | \u041d\u0435\u0442     | \u2014                                                            | \u2014            | \u041a\u043e\u043d\u0441\u043e\u043b\u0438\u0434\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0439 \u0430\u0443\u0434\u0438\u0442 \u043e\u0447\u0438\u0441\u0442\u043a\u0438           "
         },
         {
           "path": "scripts/engineering/diagnostics/README.md",
@@ -12321,7 +12321,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 115,
           "source_group": "docs",
-          "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | Нет     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | Очистка локальных кэшей и build-артефактов"
+          "text": "| `cleanup_project.py`           | scripts/engineering/diagnostics/ | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.diagnostics cleanup`   | `make clean` | \u041e\u0447\u0438\u0441\u0442\u043a\u0430 \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u044b\u0445 \u043a\u044d\u0448\u0435\u0439 \u0438 build-\u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u043e\u0432"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -12345,7 +12345,7 @@
           "path": "scripts/engineering/diagnostics/cleanup_consolidate.py",
           "line": 6,
           "source_group": "scripts",
-          "text": "- поиск .pyc, __pycache__ и временных файлов (логика согласована с cleanup_project.py);"
+          "text": "- \u043f\u043e\u0438\u0441\u043a .pyc, __pycache__ \u0438 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u044b\u0445 \u0444\u0430\u0439\u043b\u043e\u0432 (\u043b\u043e\u0433\u0438\u043a\u0430 \u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u043d\u0430 \u0441 cleanup_project.py);"
         },
         {
           "path": "tests/unit/scripts/repo/test_cleanup_project.py",
@@ -13779,13 +13779,13 @@
           "path": "docs/00-project/RULES.md",
           "line": 1548,
           "source_group": "docs",
-          "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
+          "text": "| **\u0424\u0430\u0439\u043b:\u0441\u0442\u0440\u043e\u043a\u0438**      | \u0422\u043e\u0447\u043d\u0430\u044f \u0441\u0441\u044b\u043b\u043a\u0430 \u043d\u0430 \u043a\u043e\u0434 (`runner.py:116-123`)    |"
         },
         {
           "path": "docs/00-project/RULES.md",
           "line": 1560,
           "source_group": "docs",
-          "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
+          "text": "- **\u0424\u0430\u0439\u043b**: `runner.py:116-123` (175 \u0441\u0442\u0440\u043e\u043a, 9 \u043c\u0435\u0442\u043e\u0434\u043e\u0432)"
         },
         {
           "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
@@ -13797,13 +13797,13 @@
           "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
           "line": 111,
           "source_group": "docs",
-          "text": "wc -l src/bioetl/application/core/runner.py  # Проверить размер"
+          "text": "wc -l src/bioetl/application/core/runner.py  # \u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0440\u0430\u0437\u043c\u0435\u0440"
         },
         {
           "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
           "line": 112,
           "source_group": "docs",
-          "text": "grep -n \"def \" src/bioetl/application/core/runner.py  # Проверить методы"
+          "text": "grep -n \"def \" src/bioetl/application/core/runner.py  # \u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043c\u0435\u0442\u043e\u0434\u044b"
         },
         {
           "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
@@ -14489,7 +14489,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 123,
           "source_group": "docs",
-          "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-terminology`  | —            | Линтер терминологии                       "
+          "text": "| `lint_terminology.py`          | scripts/engineering/qa/          | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.qa check-terminology`  | \u2014            | \u041b\u0438\u043d\u0442\u0435\u0440 \u0442\u0435\u0440\u043c\u0438\u043d\u043e\u043b\u043e\u0433\u0438\u0438                       "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -14534,19 +14534,19 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 122,
           "source_group": "docs",
-          "text": "| `naming_audit.py`              | scripts/engineering/qa/          | Нет     | `uv run python -m scripts.engineering.qa check-naming`       | —            | Аудит naming conventions                  "
+          "text": "| `naming_audit.py`              | scripts/engineering/qa/          | \u041d\u0435\u0442     | `uv run python -m scripts.engineering.qa check-naming`       | \u2014            | \u0410\u0443\u0434\u0438\u0442 naming conventions                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 164,
           "source_group": "docs",
-          "text": "| RULES.md §2                                                 | `naming_audit.py`                                              |"
+          "text": "| RULES.md \u00a72                                                 | `naming_audit.py`                                              |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
           "line": 16,
           "source_group": "scripts",
-          "text": "| `check-naming`                   | `naming_audit.py`                                     | Naming convention audit (RULES.md §2) with `configs/naming_exceptions.yaml` as exception registry |"
+          "text": "| `check-naming`                   | `naming_audit.py`                                     | Naming convention audit (RULES.md \u00a72) with `configs/naming_exceptions.yaml` as exception registry |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
@@ -16444,7 +16444,7 @@
           "path": "docs/03-guides/testing.md",
           "line": 604,
           "source_group": "docs",
-          "text": "`python scripts/engineering/qa/report_vcr_cassette_census.py`; результат в"
+          "text": "`python scripts/engineering/qa/report_vcr_cassette_census.py`; \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442 \u0432"
         }
       ],
       "owner": "@bioetl-platform",
@@ -16488,7 +16488,7 @@
           "path": "docs/03-guides/testing.md",
           "line": 368,
           "source_group": "docs",
-          "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
+          "text": "- canonical tooling paths \u0430\u043a\u0442\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u043d\u044b \u0434\u043b\u044f enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` \u0433\u0435\u043d\u0435\u0440\u0438\u0440\u0443\u0435\u0442/\u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442 catalog, \u0430 `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
         {
           "path": "docs/05-operations/verification/vcr-test-tasks.md",
@@ -17185,7 +17185,7 @@
           "path": "docs/03-guides/testing.md",
           "line": 366,
           "source_group": "docs",
-          "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
+          "text": "- `vcr_cassette_max_age_days: 90` \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f blocking stale-age threshold: CI \u0442\u0435\u043f\u0435\u0440\u044c \u0432\u0430\u043b\u0438\u0434\u0438\u0440\u0443\u0435\u0442 managed metadata inventory \u0447\u0435\u0440\u0435\u0437 `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
@@ -18154,7 +18154,7 @@
           "path": "docs/02-architecture/04-interfaces-layer.md",
           "line": 97,
           "source_group": "docs",
-          "text": "публичные command-модули `interfaces/cli/commands/run.py`,"
+          "text": "\u043f\u0443\u0431\u043b\u0438\u0447\u043d\u044b\u0435 command-\u043c\u043e\u0434\u0443\u043b\u0438 `interfaces/cli/commands/run.py`,"
         },
         {
           "path": "docs/02-architecture/05-composition-layer.md",
@@ -18178,7 +18178,7 @@
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
           "line": 51,
           "source_group": "docs",
-          "text": "- `src/bioetl/interfaces/cli/commands/run.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: "
+          "text": "- `src/bioetl/interfaces/cli/commands/run.py` \u2014 consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: "
         },
         {
           "path": "docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd",
@@ -18281,7 +18281,7 @@
           "path": "docs/00-project/ai/memory/README.md",
           "line": 105,
           "source_group": "docs",
-          "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
+          "text": "\u0414\u043b\u044f cleanup-\u0440\u0435\u0436\u0438\u043c\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439 `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -18311,7 +18311,7 @@
           "path": "docs/00-project/ai/memory/README.md",
           "line": 113,
           "source_group": "docs",
-          "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
+          "text": "\u0414\u043b\u044f audit/report \u0440\u0435\u0436\u0438\u043c\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439 `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
@@ -18363,7 +18363,7 @@
           "path": "scripts/memory/README.md",
           "line": 14,
           "source_group": "scripts",
-          "text": "- `bash scripts/memory/run_workflow.sh …` — preferred agent entry for"
+          "text": "- `bash scripts/memory/run_workflow.sh \u2026` \u2014 preferred agent entry for"
         },
         {
           "path": "tests/architecture/test_ai_memory_program_contracts.py",
@@ -18402,7 +18402,7 @@
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
           "line": 112,
           "source_group": "docs",
-          "text": "| `scripts/memory/setup/wsl_startup.sh`        | ⭐ Start Neo4j (run first)         |"
+          "text": "| `scripts/memory/setup/wsl_startup.sh`        | \u2b50 Start Neo4j (run first)         |"
         },
         {
           "path": "docs/05-operations/deployment/WSL-NEO4J-SETUP.md",
@@ -18662,13 +18662,13 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 118,
           "source_group": "docs",
-          "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
+          "text": "| `vacuum_delta.py`              | scripts/ops/data/                | \u041d\u0435\u0442     | `uv run python -m scripts.ops.data vacuum`                   | \u2014            | VACUUM Delta Lake \u0442\u0430\u0431\u043b\u0438\u0446                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 120,
           "source_group": "docs",
-          "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
+          "text": "| `verify_checksums.py`          | scripts/ops/data/                | \u041d\u0435\u0442     | `uv run python -m scripts.ops.data checksums`                | \u2014            | \u0412\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c\u043d\u044b\u0445 \u0441\u0443\u043c\u043c              "
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -18698,7 +18698,7 @@
           "path": "docs/04-reference/templates/pipeline-review-checklist.md",
           "line": 187,
           "source_group": "docs",
-          "text": "- [ ] `uv run python -m scripts.ops.data check-data-dir` проходит без ошибок"
+          "text": "- [ ] `uv run python -m scripts.ops.data check-data-dir` \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442 \u0431\u0435\u0437 \u043e\u0448\u0438\u0431\u043e\u043a"
         }
       ]
     },
@@ -18800,7 +18800,7 @@
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
           "line": 39,
           "source_group": "docs",
-          "text": "1. ✅ **scripts/ops/data/neo4j_audit.py**"
+          "text": "1. \u2705 **scripts/ops/data/neo4j_audit.py**"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
@@ -18818,13 +18818,13 @@
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
           "line": 295,
           "source_group": "docs",
-          "text": "| scripts/ops/data/neo4j_audit.py                 | Connection helper              | ✅ Ready |"
+          "text": "| scripts/ops/data/neo4j_audit.py                 | Connection helper              | \u2705 Ready |"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-quick-start.md",
           "line": 31,
           "source_group": "docs",
-          "text": "- **scripts/ops/data/neo4j_audit.py** — Helper functions for context-aware connections"
+          "text": "- **scripts/ops/data/neo4j_audit.py** \u2014 Helper functions for context-aware connections"
         }
       ],
       "owner": "@bioetl-platform",
@@ -18843,7 +18843,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 118,
           "source_group": "docs",
-          "text": "| `vacuum_delta.py`              | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data vacuum`                   | —            | VACUUM Delta Lake таблиц                  "
+          "text": "| `vacuum_delta.py`              | scripts/ops/data/                | \u041d\u0435\u0442     | `uv run python -m scripts.ops.data vacuum`                   | \u2014            | VACUUM Delta Lake \u0442\u0430\u0431\u043b\u0438\u0446                  "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -18855,31 +18855,31 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 165,
           "source_group": "docs",
-          "text": "| RULES.md §2.1.1                                             | `vacuum_delta.py`                                              |"
+          "text": "| RULES.md \u00a72.1.1                                             | `vacuum_delta.py`                                              |"
         },
         {
           "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
           "line": 30,
           "source_group": "docs",
-          "text": "REQ-DELTA-002,MUST,2. Поток Данных и Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,Проверить наличие scheduled job для V"
+          "text": "REQ-DELTA-002,MUST,2. \u041f\u043e\u0442\u043e\u043a \u0414\u0430\u043d\u043d\u044b\u0445 \u0438 Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u043b\u0438\u0447\u0438\u0435 scheduled job \u0434\u043b\u044f V"
         },
         {
           "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
           "line": 31,
           "source_group": "docs",
-          "text": "REQ-DELTA-003,MUST,2. Поток Данных и Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,Проверить значение forensic-retention"
+          "text": "REQ-DELTA-003,MUST,2. \u041f\u043e\u0442\u043e\u043a \u0414\u0430\u043d\u043d\u044b\u0445 \u0438 Medallion Architecture > 2.4 Delta Lake Infrastructure,docs/00-project/RULES.md,5. Medallion Architecture and persisted data,,\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u0437\u043d\u0430\u0447\u0435\u043d\u0438\u0435 forensic-retention"
         },
         {
           "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
           "line": 171,
           "source_group": "docs",
-          "text": "REQ-DR-002,MUST,5. Операции > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,Провести DR drill и замерить время восстановления,docs/05-ope"
+          "text": "REQ-DR-002,MUST,5. \u041e\u043f\u0435\u0440\u0430\u0446\u0438\u0438 > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,\u041f\u0440\u043e\u0432\u0435\u0441\u0442\u0438 DR drill \u0438 \u0437\u0430\u043c\u0435\u0440\u0438\u0442\u044c \u0432\u0440\u0435\u043c\u044f \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f,docs/05-ope"
         },
         {
           "path": "docs/01-requirements/traceability/requirements-traceability-crosswalk.csv",
           "line": 172,
           "source_group": "docs",
-          "text": "REQ-DR-003,SHOULD,5. Операции > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,Проверить наличие зафиксированного restore drill или rehear"
+          "text": "REQ-DR-003,SHOULD,5. \u041e\u043f\u0435\u0440\u0430\u0446\u0438\u0438 > 5.6 DR (Disaster Recovery),docs/00-project/RULES.md,\"14. Security, PII, environments and disaster recovery\",,\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c \u043d\u0430\u043b\u0438\u0447\u0438\u0435 \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u0433\u043e restore drill \u0438\u043b\u0438 rehear"
         },
         {
           "path": "scripts/ops/data/__main__.py",
@@ -18921,7 +18921,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 120,
           "source_group": "docs",
-          "text": "| `verify_checksums.py`          | scripts/ops/data/                | Нет     | `uv run python -m scripts.ops.data checksums`                | —            | Верификация контрольных сумм              "
+          "text": "| `verify_checksums.py`          | scripts/ops/data/                | \u041d\u0435\u0442     | `uv run python -m scripts.ops.data checksums`                | \u2014            | \u0412\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c\u043d\u044b\u0445 \u0441\u0443\u043c\u043c              "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -19068,7 +19068,7 @@
           "path": "scripts/ai/codex/README.md",
           "line": 172,
           "source_group": "scripts",
-          "text": "- `scripts/ops/install-codex-cmd.bat` — optional Windows CMD installation."
+          "text": "- `scripts/ops/install-codex-cmd.bat` \u2014 optional Windows CMD installation."
         }
       ]
     },
@@ -19152,7 +19152,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 25,
           "source_group": "docs",
-          "text": "├── codex-exec.sh              ⭐ NEW - WSL auto-exec launcher"
+          "text": "\u251c\u2500\u2500 codex-exec.sh              \u2b50 NEW - WSL auto-exec launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -19182,7 +19182,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 259,
           "source_group": "docs",
-          "text": "├─ codex-exec.sh ──────├─ npm/Node.js"
+          "text": "\u251c\u2500 codex-exec.sh \u2500\u2500\u2500\u2500\u2500\u2500\u251c\u2500 npm/Node.js"
         }
       ]
     },
@@ -19203,7 +19203,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 28,
           "source_group": "docs",
-          "text": "└── codex-wsl.bat              ⭐ NEW - Modern Windows wrapper"
+          "text": "\u2514\u2500\u2500 codex-wsl.bat              \u2b50 NEW - Modern Windows wrapper"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -19233,7 +19233,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 252,
           "source_group": "docs",
-          "text": "├─ codex-wsl.bat ──────────────────────┐"
+          "text": "\u251c\u2500 codex-wsl.bat \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
@@ -19323,7 +19323,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 24,
           "source_group": "docs",
-          "text": "├── codex.sh                    ⭐ NEW - WSL bash launcher"
+          "text": "\u251c\u2500\u2500 codex.sh                    \u2b50 NEW - WSL bash launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
@@ -19380,7 +19380,7 @@
           "path": "docs/03-guides/testing.md",
           "line": 323,
           "source_group": "docs",
-          "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
+          "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` \u043f\u0435\u0440\u0435\u0434 \u0437\u0430\u043f\u0443\u0441\u043a\u043e\u043c pytest."
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -19425,7 +19425,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 11,
           "source_group": "docs",
-          "text": "├── start-codex.bat     ← Quick start wrapper"
+          "text": "\u251c\u2500\u2500 start-codex.bat     \u2190 Quick start wrapper"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md",
@@ -19534,13 +19534,13 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 121,
           "source_group": "docs",
-          "text": "| `salt_rotate.py`               | scripts/ops/                     | Нет     | —                                                            | —            | Ротация PII-соли                          "
+          "text": "| `salt_rotate.py`               | scripts/ops/                     | \u041d\u0435\u0442     | \u2014                                                            | \u2014            | \u0420\u043e\u0442\u0430\u0446\u0438\u044f PII-\u0441\u043e\u043b\u0438                          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 167,
           "source_group": "docs",
-          "text": "| RULES.md §5.4.1                                             | `salt_rotate.py`                                               |"
+          "text": "| RULES.md \u00a75.4.1                                             | `salt_rotate.py`                                               |"
         },
         {
           "path": "scripts/ops/__main__.py",
@@ -19579,7 +19579,7 @@
           "path": "docs/03-guides/testing.md",
           "line": 368,
           "source_group": "docs",
-          "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
+          "text": "- canonical tooling paths \u0430\u043a\u0442\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u043d\u044b \u0434\u043b\u044f enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` \u0433\u0435\u043d\u0435\u0440\u0438\u0440\u0443\u0435\u0442/\u043f\u0440\u043e\u0432\u0435\u0440\u044f\u0435\u0442 catalog, \u0430 `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
         {
           "path": "scripts/engineering/qa/vcr/check_vcr_metadata_age.py",
@@ -20440,7 +20440,7 @@
           "path": "docs/03-guides/dashboards/library-panels-inventory.md",
           "line": 18,
           "source_group": "docs",
-          "text": "| `nav_bus` | 1000 | text | Shared chrome; full bus `0. Trust`…`6. Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |"
+          "text": "| `nav_bus` | 1000 | text | Shared chrome; full bus `0. Trust`\u2026`6. Run Explorer` via `scripts/ops/observability/grafana/render_nav_bus.py` |"
         },
         {
           "path": "docs/03-guides/dashboards/navigation-contract.md",
@@ -20932,7 +20932,7 @@
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
           "line": 7,
           "source_group": "docs",
-          "text": "- `scripts/ops/run-coderabbit-reviews.sh` — bounded manual launcher for sequential"
+          "text": "- `scripts/ops/run-coderabbit-reviews.sh` \u2014 bounded manual launcher for sequential"
         },
         {
           "path": "docs/03-guides/development/coderabbit-local-reviews.md",
@@ -21441,7 +21441,7 @@
           "path": "docs/05-operations/runbooks/docker-stability.md",
           "line": 120,
           "source_group": "docs",
-          "text": "| Recovery path | Evidence-first `restart-docker.ps1` / `docker desktop restart` with ≤180s objective; force-kill only with two-factor last-resort confirmation |"
+          "text": "| Recovery path | Evidence-first `restart-docker.ps1` / `docker desktop restart` with \u2264180s objective; force-kill only with two-factor last-resort confirmation |"
         },
         {
           "path": "docs/05-operations/runbooks/docker-stability.md",
@@ -21471,7 +21471,7 @@
           "path": "docs/DOCKER_SETUP.md",
           "line": 178,
           "source_group": "docs",
-          "text": "`restart-docker.ps1` не выполняет `wsl --shutdown` by default; bounded WSL"
+          "text": "`restart-docker.ps1` \u043d\u0435 \u0432\u044b\u043f\u043e\u043b\u043d\u044f\u0435\u0442 `wsl --shutdown` by default; bounded WSL"
         }
       ]
     },
@@ -21567,7 +21567,7 @@
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux4-field-override-inventory.json",
           "line": 4082,
           "source_group": "docs",
-          "text": "\"noValue\": \"No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus — run the pipeline, pick a pipeline with reports, or if host has reports but this "
+          "text": "\"noValue\": \"No pipeline-run-report artifacts for this pipeline (reports/run-reports/pipeline/<name>/). Not Prometheus \u2014 run the pipeline, pick a pipeline with reports, or if host has reports but this "
         },
         {
           "path": "docs/03-guides/dashboards/panels/bioetl-run-explorer-v1-panels.md",
@@ -22116,7 +22116,7 @@
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
           "line": 137,
           "source_group": "docs",
-          "text": "- `scripts/ops/runtime/neo4j/neo4j_quick_start.sh` — Quick startup helper"
+          "text": "- `scripts/ops/runtime/neo4j/neo4j_quick_start.sh` \u2014 Quick startup helper"
         },
         {
           "path": "docs/05-operations/deployment/NEO4J-MCP-SESSION-SUMMARY.md",
@@ -22214,19 +22214,19 @@
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
           "line": 34,
           "source_group": "docs",
-          "text": "1. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.sh**"
+          "text": "1. \u2705 **scripts/ops/runtime/neo4j/start-neo4j-audit.sh**"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-implementation.md",
           "line": 294,
           "source_group": "docs",
-          "text": "| scripts/ops/runtime/neo4j/start-neo4j-audit.sh  | Start/stop script (Bash)       | ✅ Ready |"
+          "text": "| scripts/ops/runtime/neo4j/start-neo4j-audit.sh  | Start/stop script (Bash)       | \u2705 Ready |"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-quick-start.md",
           "line": 27,
           "source_group": "docs",
-          "text": "- **scripts/ops/runtime/neo4j/start-neo4j-audit.sh** — Bash: start/stop/logs (WSL)"
+          "text": "- **scripts/ops/runtime/neo4j/start-neo4j-audit.sh** \u2014 Bash: start/stop/logs (WSL)"
         },
         {
           "path": "docs/05-operations/deployment/neo4j-audit-instance-quick-start.md",
@@ -22287,7 +22287,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 12,
           "source_group": "docs",
-          "text": "├── start-wsl-proxy.bat ← Proxy launcher"
+          "text": "\u251c\u2500\u2500 start-wsl-proxy.bat \u2190 Proxy launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
@@ -22332,7 +22332,7 @@
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 40,
           "source_group": "docs",
-          "text": "│  scripts/ops/runtime/wsl/wsl_proxy.py ──► VPN ──► Internet  │"
+          "text": "\u2502  scripts/ops/runtime/wsl/wsl_proxy.py \u2500\u2500\u25ba VPN \u2500\u2500\u25ba Internet  \u2502"
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -22356,7 +22356,7 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 13,
           "source_group": "docs",
-          "text": "├── wsl_proxy.py        ← HTTP proxy bridge"
+          "text": "\u251c\u2500\u2500 wsl_proxy.py        \u2190 HTTP proxy bridge"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
@@ -22450,7 +22450,7 @@
           "path": "docs/03-guides/cleanup-policy.md",
           "line": 187,
           "source_group": "docs",
-          "text": "`scripts/ops/support/repo/cleanup_repository.py` больше не является broad"
+          "text": "`scripts/ops/support/repo/cleanup_repository.py` \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f broad"
         },
         {
           "path": "scripts/engineering/repo/check_reports_quality_ttl.py",
@@ -22656,7 +22656,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 124,
           "source_group": "docs",
-          "text": "| `config_gap_analysis.py`       | scripts/schema/                  | Нет     | `uv run python -m scripts.schema analyze-gaps`               | —            | Анализ расхождений конфигов               "
+          "text": "| `config_gap_analysis.py`       | scripts/schema/                  | \u041d\u0435\u0442     | `uv run python -m scripts.schema analyze-gaps`               | \u2014            | \u0410\u043d\u0430\u043b\u0438\u0437 \u0440\u0430\u0441\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0439 \u043a\u043e\u043d\u0444\u0438\u0433\u043e\u0432               "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -22845,7 +22845,7 @@
           "path": "scripts/schema/README.md",
           "line": 49,
           "source_group": "scripts",
-          "text": "| `generate-unified-map`       | `scripts/schema/analysis/generate_unified_schema_map.py`                        | Generate unified Bronze→Silver→Gold schema map CSV                                   "
+          "text": "| `generate-unified-map`       | `scripts/schema/analysis/generate_unified_schema_map.py`                        | Generate unified Bronze\u2192Silver\u2192Gold schema map CSV                                   "
         },
         {
           "path": "scripts/schema/__main__.py",
@@ -22896,7 +22896,7 @@
           "path": "docs/04-reference/contracts/gold-schemas.md",
           "line": 21,
           "source_group": "docs",
-          "text": "> кодовых контрактов скриптом `scripts/schema/generation/generate_contracts.py`."
+          "text": "> \u043a\u043e\u0434\u043e\u0432\u044b\u0445 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u0432 \u0441\u043a\u0440\u0438\u043f\u0442\u043e\u043c `scripts/schema/generation/generate_contracts.py`."
         },
         {
           "path": "scripts/schema/README.md",
@@ -22962,7 +22962,7 @@
           "path": "scripts/schema/README.md",
           "line": 45,
           "source_group": "scripts",
-          "text": "| `generate-protein-class`     | `scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py`      | Generate protein class L1 → target type artifacts                                "
+          "text": "| `generate-protein-class`     | `scripts/schema/generation/generate_protein_class_l1_target_type_artifacts.py`      | Generate protein class L1 \u2192 target type artifacts                                "
         },
         {
           "path": "scripts/schema/__main__.py",
@@ -23038,7 +23038,7 @@
           "path": "docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md",
           "line": 39,
           "source_group": "docs",
-          "text": "На этой основе вводится единый генератор `scripts/schema/generation/generate_schema_artifacts.py`,"
+          "text": "\u041d\u0430 \u044d\u0442\u043e\u0439 \u043e\u0441\u043d\u043e\u0432\u0435 \u0432\u0432\u043e\u0434\u0438\u0442\u0441\u044f \u0435\u0434\u0438\u043d\u044b\u0439 \u0433\u0435\u043d\u0435\u0440\u0430\u0442\u043e\u0440 `scripts/schema/generation/generate_schema_artifacts.py`,"
         },
         {
           "path": "scripts/schema/README.md",
@@ -23228,7 +23228,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 125,
           "source_group": "docs",
-          "text": "| `validate_pipeline_configs.py` | scripts/schema/                  | Нет     | `uv run python -m scripts.schema validate-configs`           | —            | Валидация configs vs JSON Schema          "
+          "text": "| `validate_pipeline_configs.py` | scripts/schema/                  | \u041d\u0435\u0442     | `uv run python -m scripts.schema validate-configs`           | \u2014            | \u0412\u0430\u043b\u0438\u0434\u0430\u0446\u0438\u044f configs vs JSON Schema          "
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -23312,7 +23312,7 @@
           "path": "docs/00-project/TOOLS.md",
           "line": 113,
           "source_group": "docs",
-          "text": "| `verify_schema_parity.py`      | scripts/schema/validation/        | Да      | `uv run python -m scripts.schema verify-schema-parity`       | —            | Верификация Silver↔Gold schema parity    "
+          "text": "| `verify_schema_parity.py`      | scripts/schema/validation/        | \u0414\u0430      | `uv run python -m scripts.schema verify-schema-parity`       | \u2014            | \u0412\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f Silver\u2194Gold schema parity    "
         },
         {
           "path": "scripts/schema/__main__.py",
