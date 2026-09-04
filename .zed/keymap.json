@@ -8,11 +8,22 @@
     "ctrl-shift-b": "pane::ActivateNextItem",
     "ctrl-t": "workspace::NewWindow",
     "ctrl-w": "pane::CloseActiveItem",
-    "ctrl-1": "pane::ActivateItemInDirection",
-    "ctrl-2": "pane::ActivateItemInDirection",
-    "ctrl-3": "pane::ActivateItemInDirection",
-    "ctrl-4": "pane::ActivateItemInDirection",
-    "ctrl-k": "command_palette::Toggle",
+    "ctrl-1": [
+      "pane::ActivatePane",
+      0
+    ],
+    "ctrl-2": [
+      "pane::ActivatePane",
+      1
+    ],
+    "ctrl-3": [
+      "pane::ActivatePane",
+      2
+    ],
+    "ctrl-4": [
+      "pane::ActivatePane",
+      3
+    ],
     "ctrl-shift-e": "project_panel::ToggleFocus",
     "ctrl-shift-o": "workspace::Open",
     "ctrl-s": "workspace::Save",
