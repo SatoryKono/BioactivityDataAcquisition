@@ -20,11 +20,12 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 
-def test_import_linter_workflow_runs_for_all_pr_and_push_changes() -> None:
-    """Import-linter gate must always materialize for PR and push events."""
+def test_import_linter_workflow_runs_as_reusable_pr_owner_and_on_push() -> None:
+    """Import-linter must be called once by the PR coordinator and run on push."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
 
-    assert "pull_request:" in workflow
+    assert "workflow_call:" in workflow
+    assert "pull_request:" not in workflow
     assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
@@ -42,16 +43,19 @@ def test_import_linter_workflow_keeps_checks_complete_as_blocking_gate() -> None
     assert "if: ${{ always() }}" in workflow
 
 
-def test_import_linter_workflow_requires_full_capabilities_for_arch_tests() -> None:
+def test_import_linter_workflow_requires_capabilities_for_sharded_arch_tests() -> None:
     """Required CI must fail fast on capability drift during architecture tests."""
     workflow = Path(".github/workflows/import-linter.yml").read_text(encoding="utf-8")
 
     assert "arch-tests:" in workflow
     assert 'BIOETL_REQUIRE_TEST_CAPABILITIES: "1"' in workflow
-    assert (
-        'uv run --frozen --no-build pytest tests/architecture/ -m "not slow and not benchmark and not memory"'
-        in workflow
-    )
+    assert "scripts/engineering/dev/run_pytest_sharded.sh" in workflow
+    assert "strategy:" in workflow
+    assert "matrix:" in workflow
+    assert "bash scripts/engineering/dev/run_pytest_sharded.sh" in workflow
+    assert '--shard "${{ matrix.shard }}"' in workflow
+    assert "--skip-preflight" in workflow
+    assert '-m "not slow and not benchmark and not memory"' in workflow
 
 
 def test_import_linter_changed_file_gate_stays_below_arg_max() -> None:

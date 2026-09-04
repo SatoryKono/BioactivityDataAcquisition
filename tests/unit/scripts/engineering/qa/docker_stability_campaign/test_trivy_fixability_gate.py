@@ -7,6 +7,7 @@ import pytest
 
 from scripts.engineering.qa.docker_stability_campaign.trivy_baseline import (
     build_fixability_audit,
+    is_strict_blocking_finding,
     main,
 )
 
@@ -117,10 +118,49 @@ def test_cli_writes_deterministic_audit_and_fails_for_fixable_finding(
     assert output.read_text(encoding="utf-8") == expected
 
 
+def test_cli_strict_gate_blocks_unfixed_medium_plus_finding(tmp_path: Path) -> None:
+    payload = _payload()
+    results = payload["Results"]
+    assert isinstance(results, list)
+    result = results[0]
+    assert isinstance(result, dict)
+    vulnerabilities = result["Vulnerabilities"]
+    assert isinstance(vulnerabilities, list)
+    result["Vulnerabilities"] = [vulnerabilities[1]]
+    trivy_json = tmp_path / "trivy-results.json"
+    output = tmp_path / "trivy-fixability-audit.json"
+    trivy_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    common = ["--trivy-json", str(trivy_json), "--output", str(output)]
+    assert main([*common, "--fail-on-fixable"]) == 0
+    assert main([*common, "--fail-on-blocking"]) == 1
+
+
+@pytest.mark.parametrize(
+    ("severity", "status", "expected"),
+    [
+        ("CRITICAL", "affected", True),
+        ("HIGH", "fixed", True),
+        ("MEDIUM", "affected", True),
+        ("MEDIUM", "not_affected", False),
+        ("LOW", "affected", False),
+        ("UNKNOWN", "affected", False),
+    ],
+)
+def test_strict_gate_matches_trivy_medium_plus_policy(
+    severity: str, status: str, expected: bool
+) -> None:
+    assert (
+        is_strict_blocking_finding({"severity": severity, "status": status}) is expected
+    )
+
+
 @pytest.mark.parametrize(
     ("payload", "message"),
     [
-        ({"Results": {}}, "Trivy JSON Results must be a list"),
+        ({}, "Trivy JSON Results must be a non-empty list"),
+        ({"Results": []}, "Trivy JSON Results must be a non-empty list"),
+        ({"Results": {}}, "Trivy JSON Results must be a non-empty list"),
         (
             {"Results": [{"Vulnerabilities": {}}]},
             "Trivy JSON Vulnerabilities must be a list",

@@ -39,6 +39,7 @@ import pytest
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
+from bioetl.interfaces.http import _processed_records_table_support as table_support
 from bioetl.interfaces.http import processed_records_table as processed_records_module
 from bioetl.interfaces.http.health_server import HealthServer
 from bioetl.interfaces.http.processed_records_table import (
@@ -104,6 +105,37 @@ class TestProcessedRecordsTable:
         finally:
             writer.close()
             await writer.wait_closed()
+
+    def test_format_percentage_rejects_non_finite_values(self) -> None:
+        """Non-finite metrics must never leak into operator-facing percentages."""
+        for non_finite in (float("nan"), float("inf"), float("-inf")):
+            assert (
+                table_support.format_percentage(
+                    value=non_finite,
+                    bronze_value=100.0,
+                    denominator="constant_100",
+                    percent_format="constant_100",
+                )
+                == "UNKNOWN"
+            )
+            assert (
+                table_support.format_percentage(
+                    value=non_finite,
+                    bronze_value=100.0,
+                    denominator="bronze",
+                    percent_format="fixed_1",
+                )
+                == "UNKNOWN"
+            )
+            assert (
+                table_support.format_percentage(
+                    value=1.0,
+                    bronze_value=non_finite,
+                    denominator="bronze",
+                    percent_format="trimmed_3",
+                )
+                == "UNKNOWN"
+            )
 
     def test_payload_formats_row_specific_percentage_precision(self) -> None:
         """Primary rows keep one decimal while zero-valued outcomes stay visible."""
@@ -271,6 +303,9 @@ class TestProcessedRecordsTable:
         assert len(payload["rows"]) == 11
         assert all("UNKNOWN" in str(row["value"]) for row in payload["rows"])
         assert all("UNKNOWN" in str(row["percentage"]) for row in payload["rows"])
+        # Empty-ledger responses carry v2 to signal the UNKNOWN-row semantic
+        # (ADR-044 §Ops-HTTP contract).  Populated-entries responses keep v1.
+        assert payload["contract"] == "processed_records_table_v2"
 
     def test_ledger_payload_uses_metrics_snapshot_when_artifacts_are_absent(
         self,
@@ -299,6 +334,8 @@ class TestProcessedRecordsTable:
                 ),
             ),
         )
+
+        assert payload["contract"] == "processed_records_table_v1"
 
         rows = {row["parameter"]: row for row in payload["rows"]}
         assert rows["01 bronze_records"]["value"] == "10"

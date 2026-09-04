@@ -15,8 +15,11 @@ python -m scripts.engineering.ci <command> [args...]
 | ---------------- | ------------------------------------------------------ | --------------------------------------------------------------------------- |
 | `run-tests`      | `scripts/engineering/ci/run_pytest_resilient.py`       | Run pytest with resilient retry logic                                       |
 | `quality-gate`   | `scripts/engineering/ci/quality_integral_gate.py`      | Integral quality gate for CI with descriptive test-health classification    |
+| `pr-gate`         | `scripts/engineering/ci/pr_gate.py`                    | Fail-closed classification and aggregation for required PR checks            |
 | `e2e-skip-rate`  | `scripts/engineering/ci/check_e2e_matrix_skip_rate.py` | Check E2E matrix skip rate against threshold                                |
 | `e2e-rerun`      | `scripts/engineering/ci/check_e2e_rerun_stability.py`  | Check E2E rerun stability                                                   |
+| `docker-timing`  | `scripts/engineering/ci/report_docker_actions_timing.py` | Collect read-only Docker Actions timing and runner-capacity evidence      |
+| `pr-gate-timing` | `scripts/engineering/ci/report_pr_gate_timing.py`        | Collect read-only PR Gate Complete wall-clock, queue, and owner-path evidence |
 | `debt-report`    | `scripts/engineering/ci/report_quality_debt_weekly.py` | Generate weekly quality debt report                                         |
 | `apply-ci-fixes` | `scripts/engineering/ci/apply_ci_fixes.py`             | One-off GitHub-hosted workflow repair helper requiring explicit token input |
 
@@ -26,6 +29,9 @@ python -m scripts.engineering.ci <command> [args...]
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `run-tests`    | Primary test execution in CI; wraps pytest with xdist parallelization and serial fallback on worker crashes                                                                                       | CI pipeline (automatic)                |
 | `quality-gate` | Pre-merge quality validation; computes integral quality score, blocks PR if below quarterly target, and emits descriptive `fully exercised` / `staged` / `environment-limited` test-health status | CI gate (`architecture.yml`, every PR) |
+| `pr-gate`       | Required-check coordinator classifier and final exact-SHA aggregator                                                                                                                             | CI gate (`pr-required.yml`, supported PR bases) |
+| `docker-timing` | Read-only #9977/#9978 evidence refresh; reports Docker owner critical path, runner queue/execution, build-step timing, and protected publish proof separately                                     | Maintainer evidence collection            |
+| `pr-gate-timing` | Read-only #9975/#9978 evidence refresh; reports `pr-gate-complete` wall-clock, job queue p95, and Tests/Architecture/Docker/CodeQL owner paths | Maintainer evidence collection            |
 
 Canonical taxonomy:
 

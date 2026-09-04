@@ -287,8 +287,11 @@ Unmanaged / non-hex identity skips the wait entirely. Status:
 managed start reports `ops_http=ready`, `reason=identity_matched`, and
 `dashboard_profile=full`. Soft fallback reports
 `dashboard_profile=prometheus_only`; it is an infrastructure state and never a
-retention/replay verdict. Re-run `runtime_manager start` or `recover` after the
-backend identity is available so bootstrap can restore the full provider.
+retention/replay verdict. Re-run `runtime_manager start` or `recover --stack monitoring`
+after the backend identity is available. Recover retries Grafana once when
+bootstrap stuck on `identity_timeout_or_unreachable` and `/ops/control-plane/ready`
+now matches `BIOETL_EXPECTED_RUNTIME_SOURCE_ID`, so the full provider is restored
+without a manual `docker restart bioetl-grafana`.
 
 A long 60s soft wait was a common restart thrash: bioetl late → bootstrap
 blocks → Grafana healthcheck fails → restart → repeat. Soft mode no longer does

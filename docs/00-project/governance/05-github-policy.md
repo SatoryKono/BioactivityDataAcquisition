@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.2.8
+Version: 1.2.11
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-09-01'
+  Last verified: '2026-09-03'
 
 ______________________________________________________________________
 
 # GitHub Interaction Policy
 
-*Synced with RULES.md and ADR-047 | Last updated: 2026-09-01*
+*Synced with RULES.md and ADR-047 | Last updated: 2026-09-02*
 
 ______________________________________________________________________
 
@@ -29,7 +29,7 @@ ______________________________________________________________________
 
 | Branch           | Purpose                         | Protection                                             |
 | ---------------- | ------------------------------- | ------------------------------------------------------ |
-| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **active** (`checks-complete`, `root-hygiene`). See §3. |
+| `main`           | Production-ready code           | Ruleset `root-hygiene-required-check` **disabled** as of `2026-09-02` (`checks-complete`, `root-hygiene` still listed but not enforced). `pr-gate-complete` is the repo-side shadow coordinator after the atomic #9975 owner cutover — see §3. |
 | `develop`        | Integration branch (optional)   | Commit lint enforced                                   |
 | Feature branches | `feat/*`, `fix/*`, `refactor/*` | None                                                   |
 
@@ -48,7 +48,7 @@ ______________________________________________________________________
 - `refactor/storage-clear-contract`
 
 Automation-owned branches MAY use a provider prefix already established by
-the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`). Human-created
+the integration (`dependabot/`, `renovate/`, `devin/`, `bolt/`, `copilot/`). Human-created
 branches MUST use one of the project types above and a lowercase kebab-case
 description. Opaque names (`a1`, `tmp`, numeric-only names), date-only names,
 and persistent `backup/*` branches are non-compliant.
@@ -86,7 +86,7 @@ ______________________________________________________________________
 
 ## 2. CI/CD Workflows
 
-BioETL uses **47 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
+BioETL uses **49 GitHub Actions workflows** (including reusable helper workflows). For the canonical file-level inventory, see [GitHub Actions Workflows](../../04-reference/github-actions-workflows.md).
 
 ### 2.1 Core Quality Workflows
 
@@ -177,7 +177,7 @@ because `uv.lock` pins `pip==26.2.1`.
 | ---------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Block Compiled Artifacts** | `compiled-artifacts-block.yml` | `no-pyc-check`                                                                                     | No `*.pyc` / `--pycache--` committed                                                                                                               |
 | **Root Hygiene**             | `root-hygiene.yml`             | `root-hygiene`                                                                                     | Repository root cleanliness audit                                                                                                                  |
-| **Docs & Diagrams**          | `docs.yml`                     | `docs-governance`, `validate-mkdocs`, `validate-mermaid`, `render-diagrams`, `check-diagram-drift` | Docs-only PR path, lightweight architecture doc-sync tests, strict MkDocs build, Mermaid syntax, diagram rendering, rendered-artifact drift checks |
+| **Docs & Diagrams**          | `docs.yml`                     | `docs-governance`, `validate-mkdocs`, `validate-mermaid`, `check-diagram-drift` (`render-diagrams` disabled) | Docs-only PR path, lightweight architecture doc-sync tests, strict MkDocs build, Mermaid syntax, targeted rendering, rendered-artifact drift checks; full-corpus rendering is disabled |
 | **Validate vendored Mermaid assets** | `validate-vendored-mermaid-assets.yml` | `check-mermaid` | Vendored Mermaid asset presence check |
 
 ### 2.5 Scheduled & On-Demand
@@ -194,9 +194,15 @@ ______________________________________________________________________
 
 ## 3. Status Checks and Ruleset Contract
 
-Updates to `main` **are** blocked by repository ruleset `root-hygiene-required-check` (enforcement **active** for `refs/heads/main`). Direct
-push and merge to `main` require the always-on contexts `checks-complete` and `root-hygiene`. There are no bypass actors (`current_user_can_bypass: never`). The following checks are the
-GitHub-required quality gate for pull requests and for the `main` ref.
+Updates to `main` **are currently NOT blocked** by repository rulesets
+`main` (13643213) and `root-hygiene-required-check` (15730586). Both have
+`enforcement: disabled` as of `2026-09-02T09:24:27+03:00` (`main`) and
+`2026-09-02T09:41:27+03:00` (`root-hygiene-required-check`). Live
+`GET .../rules/branches/main` returns an empty applied-rules list. Stored
+required-check contexts remain `checks-complete` and `root-hygiene`, but they
+are not GitHub-enforced while the rulesets stay disabled. There are no bypass
+actors (`current_user_can_bypass: never`). The repo-side shadow coordinator
+`pr-gate-complete` is the intended future required context (#9979).
 
 ### Final always-on required-check set
 
@@ -208,19 +214,46 @@ The final activation set for repository ruleset
 | `checks-complete` | import-linter.yml | Unfiltered `pull_request` trigger; aggregates lint, C901 governance, architecture, and import-linter gates |
 | `root-hygiene` | root-hygiene.yml | Unfiltered `pull_request` trigger; enforces repository-root governance |
 
-Both checks materialize on every PR targeting `main`. The repository ruleset
-`root-hygiene-required-check` is defined with exactly this always-on set,
-and enforcement is **active**. Direct push/merge to `main` is blocked when these
-contexts are missing or failing. Further ruleset mutations remain external operations that require
-explicit maintainer confirmation and API re-verification.
+The legacy contexts remain saved in the disabled ruleset, but their leaf workflows
+no longer own direct PR triggers after the atomic #9975 cutover. Every PR targeting
+`main` now materializes the repo-side shadow coordinator `pr-gate-complete`, which
+classifies the exact head SHA, invokes each reusable leaf owner once in a distinct
+owner-namespaced concurrency group, and fails
+closed on failure, cancellation, skip, missing result, invalid N/A evidence, or SHA
+mismatch. Five-class shadow validation and the 20-run ambiguity/timing sample remain
+required before #9979. Live ruleset enforcement remains `disabled`; any ruleset
+mutation is an external admin operation requiring separate owner approval and fresh
+API verification.
+
+### Canonical CI owner map (#9974)
+
+`configs/quality/github_required_checks.yaml` is the machine-readable source of
+truth. A duplicate selector is forbidden unless that catalog records a distinct
+purpose; the current catalog contains no allowed duplicate.
+
+| Gate | Canonical workflow / job | Selector | Events | Artifacts | Status |
+| --- | --- | --- | --- | --- | --- |
+| Ruff | `import-linter.yml / lint` | `ruff check`, `ruff format --check` | coordinator PR, main push, call, manual | none | blocking |
+| mypy | `type-checking.yml / type-check` | strict `mypy` | coordinator PR, main push, call, manual | failure report | blocking |
+| dependency lock | `tests.yml / dependency-preflight` | `uv lock --check` | coordinator PR, main push, call, manual | failure report | blocking |
+| architecture | `import-linter.yml / arch-tests` | non-slow architecture pytest lane | coordinator PR, main push, call, manual | architecture telemetry | blocking |
+| integration | `tests.yml / test-matrix` | integration shard | coordinator PR, main push, call, manual | coverage/test telemetry | blocking |
+| DQ consistency | `tests.yml / dq-consistency-gate` | `validate-dq-consistency` | coordinator PR, main push, call, manual | none | blocking |
+| root hygiene | `root-hygiene.yml / root-hygiene` | root policy scan | coordinator PR, main push, call, manual | none | blocking |
+| compiled artifacts | `compiled-artifacts-block.yml / no-pyc-check` | tracked bytecode scan | coordinator PR, main push, call | none | blocking |
+| security | `security.yml` scanner jobs | secrets/dependency/SAST scanners | coordinator PR, main push, call | security reports | blocking |
+| commit governance | `commit-lint.yml / commit-lint` | Conventional Commits | coordinator PR, call | none | blocking |
+| docs governance | `docs.yml` governance jobs | documentation, MkDocs, diagram drift | coordinator PR, main push, call | rendered diagrams | blocking |
+| canonical manifest hashes | `consolidation-gates.yml / canonical-manifest-hashes` | source/test SHA-256 manifests | manual | hash manifests | advisory evidence |
 
 ### Path-scoped core checks
 
-The following checks remain required by policy whenever their workflow matches
-the changed paths. They MUST NOT be configured as unconditional repository
-required-status contexts until a separate decision makes their workflows
-materialize on every PR; otherwise GitHub can leave a skipped required check
-pending and block an unrelated PR.
+The following leaf checks remain required by policy whenever the canonical
+catalog classifies their changed paths as `required`. The always-materialized
+coordinator emits an explicit, SHA-bound `not_applicable` decision otherwise;
+raw leaf contexts MUST NOT be configured as unconditional repository required
+statuses because the ruleset migration in #9979 will require only the final
+`pr-gate-complete` context.
 
 | Check Name                 | Workflow              | Purpose                                                       |
 | -------------------------- | --------------------- | ------------------------------------------------------------- |
@@ -230,17 +263,18 @@ pending and block an unrelated PR.
 | `commit-lint`              | commit-lint.yml       | Conventional Commits                                          |
 | `type-check`               | type-checking.yml     | mypy strict compliance                                        |
 
-Docs-only PRs should still go through documentation governance via `docs.yml`:
-the lightweight `docs-governance` job runs architecture doc-sync / drift tests
-without pulling the full heavy test matrix into documentation-only changesets.
+Docs-only PRs go through documentation governance via the reusable `docs.yml`
+owner. Docker and schema owners materialize lightweight SHA-bound N/A jobs when
+the catalog proves those lanes irrelevant; always-required quality/security
+owners continue to run.
 
 ### Architecture lane names (`architecture-full`)
 
 `architecture-full` is the **non-slow** architecture gate. The three operator
 surfaces below MUST stay 1:1 (same pytest marker expression). Do **not** brand
-the slow sweep as `architecture-full`. Do **not** add `test-matrix` or
-`coverage-verify` as unconditional GitHub required checks while those workflows
-use `paths-ignore` (#9738, #9723).
+the slow sweep as `architecture-full`. Do **not** add `test-matrix` or `coverage-verify` as
+independent unconditional GitHub required checks; their results are consumed by `pr-gate-complete`
+(#9738, #9723, #9975).
 
 | Surface | Name | Markers / command | GitHub required? |
 | --- | --- | --- | --- |
@@ -308,38 +342,45 @@ To remove drift between workflow-specific job names and governance language, Bio
 
 ### Branch Protection Verification
 
-PR merges and direct pushes to `main` **are** blocked by repository
-ruleset `root-hygiene-required-check` while enforcement is active. Repo-side evidence is the live
+PR merges and direct pushes to `main` **are not** blocked by repository
+rulesets while enforcement is `disabled`. Repo-side evidence is the live
 repository ruleset state plus the workflows that materialize
+`pr-gate-complete` (shadow aggregator) and the leaf jobs that still emit
 `checks-complete` and `root-hygiene` on pull requests.
 
 Activated and re-verified on `2026-08-28` with repository admin credentials via the GitHub REST API (closeout for #9782). Re-verified disabled on `2026-08-30` via the GitHub REST API (maintainer request during 72h branch consolidation). Re-activated on `2026-08-31` via the GitHub REST API (closeout for #9800; owner-approved required-check set). On `2026-09-01`, strict up-to-date enforcement was enabled and the companion `main` ruleset was activated for deletion and non-fast-forward protection.
 
-Live GitHub enforcement state:
+Live GitHub enforcement state (as of `2026-09-03`, GET-verified):
 
-- Repository ruleset `root-hygiene-required-check` targets
+- Repository ruleset `root-hygiene-required-check` (15730586) targets
   `refs/heads/main`.
-- Enforcement: `active`.
-- Direct updates to main are blocked by this ruleset when required checks are missing or failing.
-- Defined status checks: exactly `checks-complete` and `root-hygiene`
+- Enforcement: `disabled` (was `active` until `2026-09-02T09:41:27+03:00`).
+- Companion ruleset `main` (13643213) targets `refs/heads/main`.
+- Enforcement: `disabled` (was `active` until `2026-09-02T09:24:27+03:00`).
+- `pr-gate-complete` runs on every PR targeting `main` as shadow evidence after the atomic #9975 cutover; it is not yet a required status check.
+- Legacy required contexts still listed in disabled rulesets: `checks-complete`, `root-hygiene`.
+- Direct updates to `main` are **not** blocked while both rulesets remain `disabled`.
+- Defined (stored, not enforced) status checks: exactly `checks-complete` and `root-hygiene`
   (`strict_required_status_checks_policy: true`).
-- The ruleset has no bypass actors (`current_user_can_bypass: never`).
+- Both rulesets have no bypass actors (`current_user_can_bypass: never`).
 - Classic branch protection on `main` is unused (HTTP 404). Rulesets are the
   SSOT; a 404 on `GET .../branches/main/protection` is expected.
-- Applied rules on `main`: required status checks from ruleset `15730586`;
-  deletion and non-fast-forward protection from ruleset `13643213`.
-- Tracking references: `#3380`, `#8619`, `#9800`, Scorecard `#1272`.
+- Applied rules on `main`: none (`GET .../rules/branches/main` returns `[]`)
+  because both rulesets are `disabled`.
+- Tracking references: `#3380`, `#8619`, `#9800`, `#9975`, `#9979`, Scorecard `#1272`.
 - Evidence: `https://github.com/SatoryKono/BioactivityDataAcquisition/rules/15730586`
 - API: `GET /repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586`
 - Applied rules: `GET /repos/SatoryKono/BioactivityDataAcquisition/rules/branches/main`
 
 The companion repository ruleset `main`
 (`https://github.com/SatoryKono/BioactivityDataAcquisition/rules/13643213`)
-targets `refs/heads/main`, is **active**, and has exactly the `deletion` and
-`non_fast_forward` rules with no bypass actors. It intentionally omits required
-signatures and pull-request approvals: the repository currently has one direct
-collaborator, so an independent-approval requirement would create a governance
-deadlock. Scorecard CodeReview alert `#1295` therefore remains open.
+targets `refs/heads/main` and is currently **disabled**. Its stored rules are
+`deletion`, `non_fast_forward`, `pull_request` (`required_approving_review_count: 1`,
+dismiss stale reviews, required thread resolution), and `required_status_checks`
+(`checks-complete`, `root-hygiene`). None of those stored rules are applied while
+`enforcement: disabled`. Required signatures remain omitted. Scorecard CodeReview
+alert `#1295` therefore remains open: an independent-approval rule would deadlock
+a one-collaborator repository if it were enforced without a second reviewer.
 
 For a stale classic branch-protection context left after disconnecting an
 external GitHub App, preview the bounded maintenance helper with
@@ -576,6 +617,10 @@ permissions:
 It does not publish `:latest`. The live `ghcr-publish` environment requires
 review by `@SatoryKono` and accepts only the `main` branch.
 Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
+The publish job uses run-scoped concurrency so a stale protected publish request
+cannot block a newer validation run. Before writing GHCR tags, it queries the
+current `main` branch SHA and fails closed if the approved run no longer matches
+`main`, preventing stale `:${{ github.ref_name }}` publication.
 | `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
 
@@ -678,6 +723,19 @@ Verification (no token, dry-run): `pytest tests/architecture/test_github_governa
 }
 ```
 
+### Evidence (2026-09-02) — live disabled + shadow aggregator
+
+```json
+{
+  "rulesets": [
+    {"id": 13643213, "name": "main", "enforcement": "disabled", "updated_at": "2026-09-02T09:24:27.854+03:00"},
+    {"id": 15730586, "name": "root-hygiene-required-check", "enforcement": "disabled", "updated_at": "2026-09-02T09:41:27.708+03:00"}
+  ],
+  "required_status_checks": ["checks-complete", "root-hygiene"],
+  "aggregator_shadow": {"context": "pr-gate-complete", "workflow": ".github/workflows/pr-required.yml", "materializes_on": "every pull_request targeting main", "enforcement": "not shadow-validated", "catalog": "configs/quality/github_required_checks.yaml"}
+}
+```
+
 `Re-enable: gh api --method PUT repos/SatoryKono/BioactivityDataAcquisition/rulesets/15730586` with `enforcement=active`
 
 ### Evidence (2026-08-31)
@@ -771,3 +829,25 @@ Merge-block proof: `PUT /repos/SatoryKono/BioactivityDataAcquisition/pulls/9895/
   ruleset `15730586`; no bypass actors were added.
 - Scorecard #1295 stays open because the live repository has one direct
   collaborator and an independent-approval rule would deadlock maintenance.
+
+### Migration notes (1.2.9)
+
+- #9975 repo-side cutover: `pr-gate-complete` now materializes on every pull
+  request targeting `main` and owns one reusable invocation per catalog gate.
+- Direct PR triggers were removed from the twelve called leaf workflows in the
+  same change; their push, schedule, and manual triggers remain intact. Reusable
+  concurrency groups use owner-specific prefixes because `github.workflow`
+  resolves to the common caller name inside called workflows.
+- The coordinator uses exact-head classification, explicit SHA-bound N/A
+  evidence, and fail-closed aggregation. Rulesets remain unchanged and disabled;
+  #9979 still requires five-class shadow evidence, 20 unambiguous runs, timing
+  confirmation from streams 1 and 3, and separate owner approval.
+
+### Migration notes (1.2.11)
+
+- Live GET on `2026-09-03` reconfirmed both rulesets `disabled` and an empty
+  applied-rules list for `refs/heads/main`. Policy text no longer claims the
+  companion `main` ruleset is active or that it stores only `deletion` and
+  `non_fast_forward`.
+- `pr-gate-complete` remains shadow evidence for #9975. #9979 must not mutate
+  rulesets until the aggregator is proven on a fresh exact SHA.

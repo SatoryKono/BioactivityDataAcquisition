@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" aria-roledescription="classDiagram" role="graphics-document document" viewBox="0 -8 3112.125 637" style="max-width: 3112.12px; background-color: white;" width="100%" id="my-svg"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker extension classDiagram" id="my-svg_classDiagram-extensionStart"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker extension classDiagram" id="my-svg_classDiagram-extensionEnd"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker composition classDiagram" id="my-svg_classDiagram-compositionStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker composition classDiagram" id="my-svg_classDiagram-compositionEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="6" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyStart"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="13" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyEnd"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="13" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopStart"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="1" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopEnd"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><g class="root"><g class="clusters" /><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(8, 0)" class="root"><g class="clusters"><g id="protein_class_target_type" class="cluster"><rect height="605" width="539.3125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(175.1640625, 8)" class="cluster-label"><text x="102.492" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="102.492">protein_class_target_ty</tspan><tspan x="102.492" dy="16.8">pe</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(277.65625, 76.5)" id="classId-NormalizedProteinClassTopLevel-0" class="node default"><rect height="67" width="318.4375" y="-33.5" x="-159.21875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="159.21875" x1="-159.21875" class="divider" /><line y2="13.5" y1="13.5" x2="159.21875" x1="-159.21875" class="divider" /><g class="label"><text x="147.219" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -147.21875, -21.5)"><tspan x="147.219">NormalizedProteinClassTopLevel</tspan></text></g></g><g transform="translate(277.65625, 193.5)" id="classId-ProteinClassTargetTypeMappingData-1" class="node default"><rect height="67" width="356.78125" y="-33.5" x="-178.390625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="178.390625" x1="-178.390625" class="divider" /><line y2="13.5" y1="13.5" x2="178.390625" x1="-178.390625" class="divider" /><g class="label"><text x="166.391" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -166.390625, -21.5)"><tspan x="166.391">ProteinClassTargetTypeMappingData</tspan></text></g></g><g transform="translate(277.65625, 310.5)" id="classId-ProteinClassTargetTypeResult-2" class="node default"><rect height="67" width="293.515625" y="-33.5" x="-146.7578125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="146.7578125" x1="-146.7578125" class="divider" /><line y2="13.5" y1="13.5" x2="146.7578125" x1="-146.7578125" class="divider" /><g class="label"><text x="134.758" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -134.7578125, -21.5)"><tspan x="134.758">ProteinClassTargetTypeResult</tspan></text></g></g><g transform="translate(277.65625, 427.5)" id="classId-ProteinClassTopLevelMappingEntry-3" class="node default"><rect height="67" width="342.34375" y="-33.5" x="-171.171875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="171.171875" x1="-171.171875" class="divider" /><line y2="13.5" y1="13.5" x2="171.171875" x1="-171.171875" class="divider" /><g class="label"><text x="159.172" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -159.171875, -21.5)"><tspan x="159.172">ProteinClassTopLevelMappingEntry</tspan></text></g></g><g transform="translate(277.65625, 544.5)" id="classId-protein_class_target_type__NormalizedTopLevelLike-4" class="node default"><rect height="67" width="489.3125" y="-33.5" x="-244.65625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="244.65625" x1="-244.65625" class="divider" /><line y2="13.5" y1="13.5" x2="244.65625" x1="-244.65625" class="divider" /><g class="label"><text x="232.656" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -232.65625, -21.5)"><tspan x="232.656">protein_class_target_type__NormalizedTopLevelLike</tspan></text></g></g></g></g><g transform="translate(597.3125, 117)" class="root"><g class="clusters"><g id="protein_class_target_type_helpers" class="cluster"><rect height="371" width="614.765625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(179.21875, 8)" class="cluster-label"><text x="136.164" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="136.164">protein_class_target_type_help</tspan><tspan x="136.164" dy="16.8">ers</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(315.3828125, 76.5)" id="classId-_NormalizedTopLevelConstructor-5" class="node default"><rect height="67" width="319.96875" y="-33.5" x="-159.984375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="159.984375" x1="-159.984375" class="divider" /><line y2="13.5" y1="13.5" x2="159.984375" x1="-159.984375" class="divider" /><g class="label"><text x="147.984" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -147.984375, -21.5)"><tspan x="147.984">_NormalizedTopLevelConstructor</tspan></text></g></g><g transform="translate(315.3828125, 193.5)" id="classId-protein_class_target_type_helpers__NormalizedTopLevelLike-6" class="node default"><rect height="67" width="564.765625" y="-33.5" x="-282.3828125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="282.3828125" x1="-282.3828125" class="divider" /><line y2="13.5" y1="13.5" x2="282.3828125" x1="-282.3828125" class="divider" /><g class="label"><text x="270.383" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -270.3828125, -21.5)"><tspan x="270.383">protein_class_target_type_helpers__NormalizedTopLevelLike</tspan></text></g></g><g transform="translate(315.3828125, 310.5)" id="classId-_TopLevelMappingEntryLike-7" class="node default"><rect height="67" width="274.03125" y="-33.5" x="-137.015625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="137.015625" x1="-137.015625" class="divider" /><line y2="13.5" y1="13.5" x2="137.015625" x1="-137.015625" class="divider" /><g class="label"><text x="125.016" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -125.015625, -21.5)"><tspan x="125.016">_TopLevelMappingEntryLike</tspan></text></g></g></g></g><g transform="translate(1262.078125, 234)" class="root"><g class="clusters"><g id="publication_type_classification_support" class="cluster"><rect height="137" width="340.59375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(21.6640625, 8)" class="cluster-label"><text x="156.633" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="156.633">publication_type_classification_sup</tspan><tspan x="156.633" dy="16.8">port</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(178.296875, 76.5)" id="classId-PublicationTypeEntryProtocol-8" class="node default"><rect height="67" width="290.59375" y="-33.5" x="-145.296875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="145.296875" x1="-145.296875" class="divider" /><line y2="13.5" y1="13.5" x2="145.296875" x1="-145.296875" class="divider" /><g class="label"><text x="133.297" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -133.296875, -21.5)"><tspan x="133.297">PublicationTypeEntryProtocol</tspan></text></g></g></g></g><g transform="translate(1652.671875, 234)" class="root"><g class="clusters"><g id="classification_data" class="cluster"><rect height="137" width="236.734375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(52.6015625, 8)" class="cluster-label"><text x="73.766" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="73.766">classification_dat</tspan><tspan x="73.766" dy="16.8">a</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(126.3671875, 76.5)" id="classId-ClassificationData-9" class="node default"><rect height="67" width="186.734375" y="-33.5" x="-93.3671875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="93.3671875" x1="-93.3671875" class="divider" /><line y2="13.5" y1="13.5" x2="93.3671875" x1="-93.3671875" class="divider" /><g class="label"><text x="81.367" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -81.3671875, -21.5)"><tspan x="81.367">ClassificationData</tspan></text></g></g></g></g><g transform="translate(1939.40625, 234)" class="root"><g class="clusters"><g id="organism_classification" class="cluster"><rect height="137" width="338.25" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(84.1015625, 8)" class="cluster-label"><text x="93.023" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="93.023">organism_classificat</tspan><tspan x="93.023" dy="16.8">ion</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(177.125, 76.5)" id="classId-OrganismClassificationResult-10" class="node default"><rect height="67" width="288.25" y="-33.5" x="-144.125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="144.125" x1="-144.125" class="divider" /><line y2="13.5" y1="13.5" x2="144.125" x1="-144.125" class="divider" /><g class="label"><text x="132.125" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -132.125, -21.5)"><tspan x="132.125">OrganismClassificationResult</tspan></text></g></g></g></g><g transform="translate(2327.65625, 234)" class="root"><g class="clusters"><g id="publication_controlled_vocabulary" class="cluster"><rect height="137" width="445.09375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(94.0703125, 8)" class="cluster-label"><text x="136.477" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="136.477">publication_controlled_vocabul</tspan><tspan x="136.477" dy="16.8">ary</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(230.546875, 76.5)" id="classId-PublicationControlledVocabularyRegistry-11" class="node default"><rect height="67" width="395.09375" y="-33.5" x="-197.546875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="197.546875" x1="-197.546875" class="divider" /><line y2="13.5" y1="13.5" x2="197.546875" x1="-197.546875" class="divider" /><g class="label"><text x="185.547" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -185.546875, -21.5)"><tspan x="185.547">PublicationControlledVocabularyRegistry</tspan></text></g></g></g></g><g transform="translate(2822.75, 234)" class="root"><g class="clusters"><g id="publication_type_classification" class="cluster"><rect height="137" width="265.375" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(18.7734375, 8)" class="cluster-label"><text x="121.914" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="121.914">publication_type_classifica</tspan><tspan x="121.914" dy="16.8">tion</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(140.6875, 76.5)" id="classId-PublicationTypeEntry-12" class="node default"><rect height="67" width="215.375" y="-33.5" x="-107.6875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="107.6875" x1="-107.6875" class="divider" /><line y2="13.5" y1="13.5" x2="107.6875" x1="-107.6875" class="divider" /><g class="label"><text x="95.688" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -95.6875, -21.5)"><tspan x="95.688">PublicationTypeEntry</tspan></text></g></g></g></g></g></g></g><style>/*
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="classDiagram" style="max-width:2795.73px;background-color:white" viewBox="0 -8 2795.734 632"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
  * Пользовательские стили диаграмм BioETL (структурированная копия)
  * Источник: custom.css
  * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
@@ -9,7 +9,7 @@
  * ========================================================= */
 svg {
     /* Задаёт основной стек шрифтов для всего текста в SVG. */
-    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
     Oxygen, Ubuntu, sans-serif;
 }
 
@@ -331,111 +331,111 @@ marker path {
 /* =========================================================
  * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
  * ========================================================= */
-[id*="Domain"] &gt; rect,
-[id*="Domain"] &gt; path {
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
     /* Цвет фона для доменного слоя. */
     fill: #f5f3ff !important;
     /* Цвет границы для доменного слоя. */
     stroke: #7c3aed !important;
 }
 
-.cluster[id*="Domain"] &gt; rect,
-.cluster[id*="Domain"] &gt; path {
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Application"] &gt; rect,
-[id*="Application"] &gt; path {
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
     /* Цвет фона для application-слоя. */
     fill: #f0fdf4 !important;
     /* Цвет границы для application-слоя. */
     stroke: #16a34a !important;
 }
 
-.cluster[id*="Application"] &gt; rect,
-.cluster[id*="Application"] &gt; path {
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Infrastructure"] &gt; rect,
-[id*="Infrastructure"] &gt; path {
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
     /* Цвет фона для infrastructure-слоя. */
     fill: #fff1f2 !important;
     /* Цвет границы для infrastructure-слоя. */
     stroke: #dc2626 !important;
 }
 
-.cluster[id*="Infrastructure"] &gt; rect,
-.cluster[id*="Infrastructure"] &gt; path {
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Composition"] &gt; rect,
-[id*="Composition"] &gt; path {
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
     /* Цвет фона для composition-слоя. */
     fill: #fff7ed !important;
     /* Цвет границы для composition-слоя. */
     stroke: #f59e0b !important;
 }
 
-.cluster[id*="Composition"] &gt; rect,
-.cluster[id*="Composition"] &gt; path {
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Interfaces"] &gt; rect,
-[id*="Interfaces"] &gt; path {
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
     /* Цвет фона для слоя интерфейсов. */
     fill: #eff6ff !important;
     /* Цвет границы для слоя интерфейсов. */
     stroke: #2563eb !important;
 }
 
-.cluster[id*="Interfaces"] &gt; rect,
-.cluster[id*="Interfaces"] &gt; path {
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="External"] &gt; rect,
-[id*="External"] &gt; path {
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
     /* Цвет фона для внешних систем. */
     fill: #f1f5f9 !important;
     /* Цвет границы для внешних систем. */
     stroke: #64748b !important;
 }
 
-.cluster[id*="External"] &gt; rect,
-.cluster[id*="External"] &gt; path {
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
 /* Белая подложка под подписи всех архитектурных/medallion слоёв */
-g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
     background: #ffffff !important;
     padding: 0 6px !important;
     border-radius: 4px;
 }
 
 /* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
-g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
-g.cluster[id*="Application"] .cluster-label text.fo-fallback,
-g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
-g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
-g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
-g.cluster[id*="External"] .cluster-label text.fo-fallback,
-g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
-g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
-g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
-g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
     fill: #111827 !important;
     stroke: none !important;
 }
@@ -443,32 +443,32 @@ g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
 /* =========================================================
  * 15) Цветовая карта слоёв Medallion
  * ========================================================= */
-[id*="Bronze"] &gt; rect,
-[id*="Bronze"] &gt; path {
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
     /* Цвет фона Bronze-слоя. */
     fill: #fff7ed !important;
     /* Цвет границы Bronze-слоя. */
     stroke: #f59e0b !important;
 }
 
-[id*="Silver"] &gt; rect,
-[id*="Silver"] &gt; path {
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
     /* Цвет фона Silver-слоя. */
     fill: #f8fafc !important;
     /* Цвет границы Silver-слоя. */
     stroke: #475569 !important;
 }
 
-[id*="Gold"] &gt; rect,
-[id*="Gold"] &gt; path {
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
     /* Цвет фона Gold-слоя. */
     fill: #fefce8 !important;
     /* Цвет границы Gold-слоя. */
     stroke: #ca8a04 !important;
 }
 
-[id*="Quarantine"] &gt; rect,
-[id*="Quarantine"] &gt; path {
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
     /* Цвет фона для карантинных/проблемных потоков данных. */
     fill: #ffe4e6 !important;
     /* Цвет границы для карантинных/проблемных потоков данных. */
@@ -491,5 +491,4 @@ text.fo-fallback {
 
 foreignObject {
     display: none !important;
-}
-</style></svg>
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_classDiagram-aggregationStart" class="marker aggregation classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-aggregationEnd" class="marker aggregation classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionStart" class="marker extension classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionEnd" class="marker extension classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionStart" class="marker composition classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionEnd" class="marker composition classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyStart" class="marker dependency classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyEnd" class="marker dependency classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopStart" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopEnd" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="nodes"><g class="root"><g class="clusters" transform="translate(8)"><g id="protein_class_target_type" class="cluster"><path d="M8 8h477.406v600H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="91.617" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(155.086 8)"><tspan x="91.617">protein_class_target</tspan><tspan x="91.617" dy="16.8">_type</tspan></text></g></g></g><g class="nodes" transform="translate(8)"><g id="classId-NormalizedProteinClassTopLevel-0" class="node default"><path d="M108.148 43h277.11v66h-277.11z" class="outer title-state"/><path d="M108.148 73h277.11M108.148 89h277.11" class="divider"/><g class="label"><text xml:space="preserve" x="126.555" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(120.148 55)"><tspan x="126.555">NormalizedProteinClassTopLev</tspan><tspan x="126.555" dy="16.8">el</tspan></text></g></g><g id="classId-ProteinClassTargetTypeMappingData-1" class="node default"><path d="M93.64 159h306.125v66H93.64z" class="outer title-state"/><path d="M93.64 189h306.126M93.64 205h306.126" class="divider"/><g class="label"><text xml:space="preserve" x="141.062" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(105.64 171)"><tspan x="141.062">ProteinClassTargetTypeMappingDa</tspan><tspan x="141.062" dy="16.8">ta</tspan></text></g></g><g id="classId-ProteinClassTargetTypeResult-2" class="node default"><path d="M119.414 275h254.578v66H119.414z" class="outer title-state"/><path d="M119.414 305h254.578M119.414 321h254.578" class="divider"/><g class="label"><text xml:space="preserve" x="115.289" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(131.414 287)"><tspan x="115.289">ProteinClassTargetTypeRes</tspan><tspan x="115.289" dy="16.8">ult</tspan></text></g></g><g id="classId-ProteinClassTopLevelMappingEntry-3" class="node default"><path d="M97.937 391h297.531v66H97.938z" class="outer title-state"/><path d="M97.937 421H395.47M97.937 437H395.47" class="divider"/><g class="label"><text xml:space="preserve" x="136.766" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(109.938 403)"><tspan x="136.766">ProteinClassTopLevelMappingEnt</tspan><tspan x="136.766" dy="16.8">ry</tspan></text></g></g><g id="classId-protein_class_target_type__NormalizedTopLevelLike-4" class="node default"><path d="M33 507h427.406v66H33z" class="outer title-state"/><path d="M33 537h427.406M33 553h427.406" class="divider"/><g class="label"><text xml:space="preserve" x="201.703" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 519)"><tspan x="201.703">protein_class_target_type__NormalizedTopLevel</tspan><tspan x="201.703" dy="16.8">Like</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(535.406 116)"><g id="protein_class_target_type_helpers" class="cluster"><path d="M8 8h543.219v368H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="122.305" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(157.305 8)"><tspan x="122.305">protein_class_target_type_h</tspan><tspan x="122.305" dy="16.8">elpers</tspan></text></g></g></g><g class="nodes" transform="translate(535.406 116)"><g id="classId-_NormalizedTopLevelConstructor-5" class="node default"><path d="M139.734 43h279.75v66h-279.75z" class="outer title-state"/><path d="M139.734 73h279.75M139.734 89h279.75" class="divider"/><g class="label"><text xml:space="preserve" x="127.875" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(151.734 55)"><tspan x="127.875">_NormalizedTopLevelConstruct</tspan><tspan x="127.875" dy="16.8">or</tspan></text></g></g><g id="classId-protein_class_target_type_helpers__NormalizedTopLevelLike-6" class="node default"><path d="M33 159h493.22v66H33z" class="outer title-state"/><path d="M33 189h493.218M33 205h493.218" class="divider"/><g class="label"><text xml:space="preserve" x="234.609" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 171)"><tspan x="234.609">protein_class_target_type_helpers__NormalizedTopLeve</tspan><tspan x="234.609" dy="16.8">lLike</tspan></text></g></g><g id="classId-_TopLevelMappingEntryLike-7" class="node default"><path d="M159.296 275h240.625v66H159.296z" class="outer title-state"/><path d="M159.296 305h240.626M159.296 321h240.626" class="divider"/><g class="label"><text xml:space="preserve" x="108.312" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(171.297 287)"><tspan x="108.312">_TopLevelMappingEntryLik</tspan><tspan x="108.312" dy="16.8">e</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1128.625 232)"><g id="publication_type_classification_support" class="cluster"><path d="M8 8h302.172v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="138.758" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(20.328 8)"><tspan x="138.758">publication_type_classification</tspan><tspan x="138.758" dy="16.8">_support</tspan></text></g></g></g><g class="nodes" transform="translate(1128.625 232)"><g id="classId-PublicationTypeEntryProtocol-8" class="node default"><path d="M33 43h252.172v66H33z" class="outer title-state"/><path d="M33 73h252.172M33 89h252.172" class="divider"/><g class="label"><text xml:space="preserve" x="114.086" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="114.086">PublicationTypeEntryProto</tspan><tspan x="114.086" dy="16.8">col</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1480.797 232)"><g id="classification_data" class="cluster"><path d="M8 8h212.719v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="65.375" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(48.984 8)"><tspan x="65.375">classification_dat</tspan><tspan x="65.375" dy="16.8">a</tspan></text></g></g></g><g class="nodes" transform="translate(1480.797 232)"><g id="classId-ClassificationData-9" class="node default"><path d="M33 43h162.72v66H33z" class="outer title-state"/><path d="M33 73h162.718M33 89h162.718" class="divider"/><g class="label"><text xml:space="preserve" x="69.359" y="9" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="69.359">ClassificationData</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1743.516 232)"><g id="organism_classification" class="cluster"><path d="M8 8h301.625v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="82.703" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(76.11 8)"><tspan x="82.703">organism_classific</tspan><tspan x="82.703" dy="16.8">ation</tspan></text></g></g></g><g class="nodes" transform="translate(1743.516 232)"><g id="classId-OrganismClassificationResult-10" class="node default"><path d="M33 43h251.625v66H33z" class="outer title-state"/><path d="M33 73h251.626M33 89h251.626" class="divider"/><g class="label"><text xml:space="preserve" x="113.812" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="113.812">OrganismClassificationRes</tspan><tspan x="113.812" dy="16.8">ult</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(2095.14 232)"><g id="publication_controlled_vocabulary" class="cluster"><path d="M8 8h389.313v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="120.523" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(82.133 8)"><tspan x="120.523">publication_controlled_voca</tspan><tspan x="120.523" dy="16.8">bulary</tspan></text></g></g></g><g class="nodes" transform="translate(2095.14 232)"><g id="classId-PublicationControlledVocabularyRegistry-11" class="node default"><path d="M33 43h339.313v66H33z" class="outer title-state"/><path d="M33 73h339.312M33 89h339.312" class="divider"/><g class="label"><text xml:space="preserve" x="157.656" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="157.656">PublicationControlledVocabularyRegi</tspan><tspan x="157.656" dy="16.8">stry</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(2534.453 232)"><g id="publication_type_classification" class="cluster"><path d="M8 8h237.281v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="107.625" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(19.016 8)"><tspan x="107.625">publication_type_classif</tspan><tspan x="107.625" dy="16.8">ication</tspan></text></g></g></g><g class="nodes" transform="translate(2534.453 232)"><g id="classId-PublicationTypeEntry-12" class="node default"><path d="M33 43h187.28v66H33z" class="outer title-state"/><path d="M33 73h187.282M33 89h187.282" class="divider"/><g class="label"><text xml:space="preserve" x="81.641" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="81.641">PublicationTypeEnt</tspan><tspan x="81.641" dy="16.8">ry</tspan></text></g></g></g></g></g></g></svg>

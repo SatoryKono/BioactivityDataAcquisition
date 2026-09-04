@@ -20,13 +20,16 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 
-def test_root_hygiene_workflow_runs_for_all_pr_and_push_changes() -> None:
+def test_root_hygiene_workflow_is_called_once_by_pr_coordinator() -> None:
     workflow = Path(".github/workflows/root-hygiene.yml").read_text(encoding="utf-8")
+    coordinator = Path(".github/workflows/pr-required.yml").read_text(encoding="utf-8")
 
-    assert "pull_request:" in workflow
+    assert "workflow_call:" in workflow
+    assert "pull_request:" not in workflow
     assert "push:" in workflow
     assert "workflow_dispatch:" in workflow
     assert "paths-ignore:" not in workflow
+    assert "uses: ./.github/workflows/root-hygiene.yml" in coordinator
 
 
 def test_root_hygiene_workflow_uses_strict_audit_and_unit_tests() -> None:
@@ -119,9 +122,6 @@ def test_github_policy_records_root_hygiene_admin_verification_lane() -> None:
     assert "#3380" in policy
     assert "root-hygiene-required-check" in policy
     assert "/rules/15730586" in policy
-    assert "Enforcement: `active`" in policy
+    assert "Enforcement: `disabled`" in policy
     assert "`checks-complete` and `root-hygiene`" in policy
-    assert (
-        "Direct updates to main are blocked by this ruleset when required checks are missing or failing."
-        in policy
-    )
+    assert "pr-gate-complete" in policy

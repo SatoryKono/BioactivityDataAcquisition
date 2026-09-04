@@ -45,4 +45,7 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`:
 ## Response Language
 
 - Answer in Russian when the user writes in Russian
+- The GitHub review body and all inline review comments produced through
+  `gh pr review` or an equivalent GitHub API **MUST** be written in Russian,
+  regardless of the surrounding conversation language
 - Keep code, paths, identifiers, and API field names in original form

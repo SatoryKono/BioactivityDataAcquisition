@@ -25,6 +25,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs/quality/pytest_shards.yaml"
 RUNNER_PATH = ROOT / "scripts/engineering/dev/run_pytest_sharded.sh"
+ARCHITECTURE_WORKFLOW_PATH = ROOT / ".github/workflows/import-linter.yml"
 _BASH_RUNNER_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
     sys.platform.startswith("win"),
     reason="bash-based sharded runner checks are not reliable on native Windows shells",
@@ -72,6 +73,17 @@ def _is_ignored_by_args(path: str, args: list[object]) -> bool:
         if text.startswith("--ignore-glob=") and fnmatch(path, text.split("=", 1)[1]):
             return True
     return False
+
+
+def _shard_collects_path(shard: dict[str, object], path: str) -> bool:
+    declared_paths = [str(item).rstrip("/") for item in shard["paths"]]
+    if path in declared_paths:
+        return True
+    if "tests/architecture" not in declared_paths:
+        return False
+    args = shard.get("extra_pytest_args", [])
+    assert isinstance(args, list)
+    return not _is_ignored_by_args(path, args)
 
 
 def _architecture_path_from_test_id(test_id: str) -> str | None:
@@ -130,7 +142,8 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S5-infra-adapters",
         "S6-crosscutting-unit",
         "S7-crosscutting-architecture-c",
-        "S7-crosscutting-architecture-guardrails",
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
         "S8-crosscutting-governance",
         "S7-crosscutting-architecture-d",
     ]
@@ -151,8 +164,65 @@ def test_pytest_shard_inventory_declares_canonical_schema_and_aliases() -> None:
         "S7-crosscutting-architecture-d",
     ]
     assert aliases["S7-architecture-slow-governance"]["expands_to"] == [
-        "S7-crosscutting-architecture-guardrails",
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
     ]
+    assert aliases["S7-crosscutting-architecture-guardrails"]["expands_to"] == [
+        "S7-crosscutting-architecture-guardrails-a",
+        "S7-crosscutting-architecture-guardrails-b",
+    ]
+
+
+@pytest.mark.architecture
+def test_architecture_ci_matrix_matches_canonical_physical_shards() -> None:
+    inventory = _load_inventory()
+    workflow = yaml.safe_load(ARCHITECTURE_WORKFLOW_PATH.read_text(encoding="utf-8"))
+    arch_job = workflow["jobs"]["arch-tests"]
+    matrix = arch_job["strategy"]["matrix"]["include"]
+    expected = [
+        *inventory["aliases"]["S7-architecture-fast-boundary"]["expands_to"],
+        *inventory["aliases"]["S7-architecture-slow-governance"]["expands_to"],
+    ]
+
+    assert arch_job["strategy"]["fail-fast"] is False
+    assert [entry["shard"] for entry in matrix] == expected
+    assert [entry["shard"] for entry in matrix if entry["requires_lfs"]] == [
+        "S7-crosscutting-architecture-d"
+    ]
+
+    lfs_step = next(
+        step for step in arch_job["steps"] if step["name"].startswith("Fetch Git LFS")
+    )
+    assert lfs_step["if"] == "${{ matrix.requires_lfs }}"
+    assert "import-contracts" in workflow["jobs"]["checks-complete"]["needs"]
+
+
+@pytest.mark.architecture
+def test_architecture_physical_shards_form_exact_file_union() -> None:
+    inventory = _load_inventory()
+    shards = _shard_map(inventory)
+    physical_shards = [
+        *inventory["aliases"]["S7-architecture-fast-boundary"]["expands_to"],
+        *inventory["aliases"]["S7-architecture-slow-governance"]["expands_to"],
+    ]
+    test_paths = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "tests/architecture").rglob("test_*.py")
+    )
+    owners = {
+        path: [
+            shard_name
+            for shard_name in physical_shards
+            if _shard_collects_path(shards[shard_name], path)
+        ]
+        for path in test_paths
+    }
+
+    assert all(len(path_owners) == 1 for path_owners in owners.values()), {
+        path: path_owners
+        for path, path_owners in owners.items()
+        if len(path_owners) != 1
+    }
 
 
 @pytest.mark.architecture
@@ -256,8 +326,16 @@ def test_architecture_shard_rebalance_manifest_matches_slow_test_telemetry() -> 
     assert generated_paths == rebalance["generated_architecture_hotspot_paths"]
 
     shards = _shard_map(inventory)
-    slow_shard = shards[str(rebalance["slow_governance_shard"])]
-    slow_paths = {str(path) for path in slow_shard["paths"]}
+    aliases = inventory["aliases"]
+    assert isinstance(aliases, dict)
+    slow_name = str(rebalance["slow_governance_shard"])
+    if slow_name in aliases:
+        slow_members = aliases[slow_name]["expands_to"]
+        assert isinstance(slow_members, list)
+        slow_names = [str(name) for name in slow_members]
+    else:
+        slow_names = [slow_name]
+    slow_paths = {str(path) for name in slow_names for path in shards[name]["paths"]}
     assert set(generated_paths) <= slow_paths
 
 
@@ -310,3 +388,27 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
         f".coverage.{shard_name}" in line
         for shard_name, line in zip(expected_shards, dry_run_lines, strict=True)
     )
+
+
+@pytest.mark.architecture
+def test_architecture_ci_owns_slow_nodes_and_skip_budget() -> None:
+    """Slow architecture nodes stay on the PR wall via a dedicated owner job."""
+    workflow = yaml.safe_load(ARCHITECTURE_WORKFLOW_PATH.read_text(encoding="utf-8"))
+    slow_job = workflow["jobs"]["arch-tests-slow"]
+    complete = workflow["jobs"]["checks-complete"]
+    arch_job = workflow["jobs"]["arch-tests"]
+    slow_runs = chr(10).join(
+        str(step.get("run") or "")
+        for step in slow_job["steps"]
+        if isinstance(step, dict)
+    )
+    arch_runs = chr(10).join(
+        str(step.get("run") or "")
+        for step in arch_job["steps"]
+        if isinstance(step, dict)
+    )
+    assert "arch-tests-slow" in complete["needs"]
+    assert "slow and not benchmark and not memory" in slow_runs
+    assert "architecture-junit-skips" in slow_runs
+    assert "architecture-junit-skips" in arch_runs
+    assert complete["if"] == "${{ always() }}"

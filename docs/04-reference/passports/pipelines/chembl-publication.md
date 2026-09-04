@@ -36,8 +36,7 @@ Silver использует профиль `chembl.publication` и провер�
 ## Gold
 
 - Contract: `chembl.publication v1.0.0`; strict validation: `True`.
-- Write mode: `scd2`.
-- SCD2: current_flag_col=_is_current; valid_from_col=_valid_from; valid_to_col=_valid_to; version_col=_version.
+- Write mode: `configured`.
 - Technical exclusions: `_dq_*`, `_source_batch_id`, `_index`, `_lookup_method`, `_original_id`, `pmc_id`, `publication_type_unified`, `publication_subclass`, `publication_class`, `oa_status`, `affiliation_list`, `author_orcids`, `is_oa`, `issn_list`, `language`, `publication_date`.
 
 ## Операторские команды
@@ -63,7 +62,7 @@ flowchart LR
     Bronze["Bronze append-only snapshot"]
     Silver["Silver profile: chembl.publication + DQ"]
     Quarantine["Quarantine / exclusion evidence"]
-    Gold["Gold: chembl.publication (scd2)"]
+    Gold["Gold: chembl.publication (configured)"]
     Source --> Filters --> Bronze --> Silver
     Silver -->|valid| Gold
     Silver -->|invalid| Quarantine

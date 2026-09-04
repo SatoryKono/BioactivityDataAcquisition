@@ -63,6 +63,7 @@ class ArchitectureTestStats:
     errors: int
     skipped: int
     returncode: int
+    owner: str = "pytest"
 
 
 @dataclass(frozen=True)
@@ -167,6 +168,16 @@ def _parse_args() -> argparse.Namespace:
         "--architecture-tests",
         default="tests/architecture",
         help="Architecture tests path passed to pytest.",
+    )
+    parser.add_argument(
+        "--architecture-owner",
+        choices=("pytest", "lint-architecture-workflow"),
+        default="pytest",
+        help=(
+            "Where architecture pytest is executed. "
+            "'pytest' runs tests/architecture in-process. "
+            "'lint-architecture-workflow' reuses Lint and Architecture Gates."
+        ),
     )
     parser.add_argument(
         "--vcr-root",
@@ -289,6 +300,28 @@ def _junit_suites(root: ET.Element) -> list[ET.Element]:
     if root.tag == "testsuites":
         return [elem for elem in root if elem.tag == "testsuite"]
     return []
+
+
+def _resolve_architecture_stats(args: argparse.Namespace) -> ArchitectureTestStats:
+    """Run architecture pytest or reuse the Lint and Architecture Gates owner."""
+    if args.architecture_owner == "lint-architecture-workflow":
+        return ArchitectureTestStats(
+            tests=0,
+            failures=0,
+            errors=0,
+            skipped=0,
+            returncode=0,
+            owner="lint-architecture-workflow",
+        )
+    stats = _run_architecture_tests(args.architecture_tests)
+    return ArchitectureTestStats(
+        tests=stats.tests,
+        failures=stats.failures,
+        errors=stats.errors,
+        skipped=stats.skipped,
+        returncode=stats.returncode,
+        owner="pytest",
+    )
 
 
 def _run_architecture_tests(pytest_path: str) -> ArchitectureTestStats:
@@ -1043,7 +1076,49 @@ def _append_summary(path: Path, summary_lines: list[str]) -> None:
         stream.write("\n".join(summary_lines) + "\n")
 
 
+def _junit_collection_gate(argv: list[str]) -> int:
+    """Fail closed when architecture JUnit is missing or empty."""
+    parser = argparse.ArgumentParser(
+        description="Fail closed on missing or empty architecture JUnit XML.",
+    )
+    parser.add_argument("--junit-dir", type=Path, required=True)
+    args = parser.parse_args(argv)
+    files = sorted(args.junit_dir.glob("*.xml"))
+    if not files:
+        print(
+            f"::error::Missing architecture JUnit XML in {args.junit_dir}",
+            file=sys.stderr,
+        )
+        return 1
+    tests = 0
+    skipped = 0
+    for path in files:
+        root = ET.parse(path).getroot()
+        for suite in _junit_suites(root):
+            tests += int(suite.attrib.get("tests", "0"))
+            skipped += int(suite.attrib.get("skipped", "0"))
+    if tests == 0:
+        print(
+            f"::error::Architecture JUnit collection is empty in {args.junit_dir}",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"architecture junit tests={tests} skipped={skipped} dir={args.junit_dir}")
+    return 0
+
+
 def main() -> int:
+    raw_argv = sys.argv[1:]
+    if any(
+        arg == "--junit-dir" or arg.startswith("--junit-dir=") for arg in raw_argv
+    ) and not any(
+        arg == "--registry"
+        or arg.startswith("--registry=")
+        or arg == "--scorecard"
+        or arg.startswith("--scorecard=")
+        for arg in raw_argv
+    ):
+        return _junit_collection_gate(raw_argv)
     args = _parse_args()
     registry_path = Path(args.registry)
     scorecard_path = Path(args.scorecard)
@@ -1053,7 +1128,7 @@ def main() -> int:
     test_matrix_path = Path(args.test_matrix)
     test_health_taxonomy_path = Path(args.test_health_taxonomy)
 
-    architecture_stats = _run_architecture_tests(args.architecture_tests)
+    architecture_stats = _resolve_architecture_stats(args)
     arch_failures = architecture_stats.failures + architecture_stats.errors
 
     scorecard = load_debt_scorecard(scorecard_path)
@@ -1092,7 +1167,14 @@ def main() -> int:
         coverage_threshold_percent=args.coverage_threshold,
     )
     coverage_threshold = _require_float(ci_target, "coverage_threshold_percent")
-    debt_governance_surface = collect_debt_governance_snapshot()
+    artifact_source = (
+        "committed"
+        if args.architecture_owner == "lint-architecture-workflow"
+        else "live"
+    )
+    debt_governance_surface = collect_debt_governance_snapshot(
+        artifact_source=artifact_source
+    )
     compatibility_surface = debt_governance_surface.compatibility_surface
     architecture_quality_scorecard = build_architecture_quality_scorecard(
         repo_root=Path.cwd()

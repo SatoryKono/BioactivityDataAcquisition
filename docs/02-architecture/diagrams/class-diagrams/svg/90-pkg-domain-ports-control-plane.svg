@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" aria-roledescription="classDiagram" role="graphics-document document" viewBox="0 -8 3146.625 403" style="max-width: 3146.62px; background-color: white;" width="100%" id="my-svg"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker aggregation classDiagram" id="my-svg_classDiagram-aggregationEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker extension classDiagram" id="my-svg_classDiagram-extensionStart"><path d="M 1,7 L18,13 V 1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker extension classDiagram" id="my-svg_classDiagram-extensionEnd"><path d="M 1,1 V 13 L18,7 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="18" class="marker composition classDiagram" id="my-svg_classDiagram-compositionStart"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="1" class="marker composition classDiagram" id="my-svg_classDiagram-compositionEnd"><path d="M 18,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="6" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyStart"><path d="M 5,7 L9,13 L1,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="13" class="marker dependency classDiagram" id="my-svg_classDiagram-dependencyEnd"><path d="M 18,7 L9,13 L14,7 L9,1 Z" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="13" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopStart"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><defs><marker orient="auto" markerHeight="240" markerWidth="190" refY="7" refX="1" class="marker lollipop classDiagram" id="my-svg_classDiagram-lollipopEnd"><circle r="6" cy="7" cx="7" fill="transparent" stroke="black" /></marker></defs><g class="root"><g class="clusters" /><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(8, 0)" class="root"><g class="clusters"><g id="run_manifest" class="cluster"><rect height="371" width="358.015625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(134.546875, 8)" class="cluster-label"><text x="52.461" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="52.461">run_manifest</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(187.0078125, 76.5)" id="classId-RawManifestInspection-0" class="node default"><rect height="67" width="234.65625" y="-33.5" x="-117.328125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="117.328125" x1="-117.328125" class="divider" /><line y2="13.5" y1="13.5" x2="117.328125" x1="-117.328125" class="divider" /><g class="label"><text x="105.328" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -105.328125, -21.5)"><tspan x="105.328">RawManifestInspection</tspan></text></g></g><g transform="translate(187.0078125, 193.5)" id="classId-RawRunManifestInspectionPort-1" class="node default"><rect height="67" width="308.015625" y="-33.5" x="-154.0078125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="154.0078125" x1="-154.0078125" class="divider" /><line y2="13.5" y1="13.5" x2="154.0078125" x1="-154.0078125" class="divider" /><g class="label"><text x="142.008" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -142.0078125, -21.5)"><tspan x="142.008">RawRunManifestInspectionPort</tspan></text></g></g><g transform="translate(187.0078125, 310.5)" id="classId-RunManifestPort-2" class="node default"><rect height="67" width="175.9375" y="-33.5" x="-87.96875" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="87.96875" x1="-87.96875" class="divider" /><line y2="13.5" y1="13.5" x2="87.96875" x1="-87.96875" class="divider" /><g class="label"><text x="75.969" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -75.96875, -21.5)"><tspan x="75.969">RunManifestPort</tspan></text></g></g></g></g><g transform="translate(416.015625, 117)" class="root"><g class="clusters"><g id="artifact_byte_comparison" class="cluster"><rect height="137" width="328.625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(70.921875, 8)" class="cluster-label"><text x="101.391" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="101.391">artifact_byte_comparis</tspan><tspan x="101.391" dy="16.8">on</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(172.3125, 76.5)" id="classId-ArtifactByteComparisonPort-3" class="node default"><rect height="67" width="278.625" y="-33.5" x="-139.3125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="139.3125" x1="-139.3125" class="divider" /><line y2="13.5" y1="13.5" x2="139.3125" x1="-139.3125" class="divider" /><g class="label"><text x="127.312" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -127.3125, -21.5)"><tspan x="127.312">ArtifactByteComparisonPort</tspan></text></g></g></g></g><g transform="translate(794.640625, 117)" class="root"><g class="clusters"><g id="contract_evidence" class="cluster"><rect height="137" width="352.46875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(110.734375, 8)" class="cluster-label"><text x="73.5" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="73.5">contract_evidence</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(184.234375, 76.5)" id="classId-ContractEvidenceRecorderPort-4" class="node default"><rect height="67" width="302.46875" y="-33.5" x="-151.234375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="151.234375" x1="-151.234375" class="divider" /><line y2="13.5" y1="13.5" x2="151.234375" x1="-151.234375" class="divider" /><g class="label"><text x="139.234" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -139.234375, -21.5)"><tspan x="139.234">ContractEvidenceRecorderPort</tspan></text></g></g></g></g><g transform="translate(1197.109375, 117)" class="root"><g class="clusters"><g id="effective_config_artifact" class="cluster"><rect height="137" width="365.546875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(94.71875, 8)" class="cluster-label"><text x="96.055" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="96.055">effective_config_arti</tspan><tspan x="96.055" dy="16.8">fact</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(190.7734375, 76.5)" id="classId-EffectiveConfigArtifactStorePort-5" class="node default"><rect height="67" width="315.546875" y="-33.5" x="-157.7734375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="157.7734375" x1="-157.7734375" class="divider" /><line y2="13.5" y1="13.5" x2="157.7734375" x1="-157.7734375" class="divider" /><g class="label"><text x="145.773" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -145.7734375, -21.5)"><tspan x="145.773">EffectiveConfigArtifactStorePort</tspan></text></g></g></g></g><g transform="translate(1612.65625, 117)" class="root"><g class="clusters"><g id="lineage" class="cluster"><rect height="137" width="232.1875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(94.75, 8)" class="cluster-label"><text x="29.344" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="29.344">lineage</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(124.09375, 76.5)" id="classId-LineageStorePort-6" class="node default"><rect height="67" width="182.1875" y="-33.5" x="-91.09375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="91.09375" x1="-91.09375" class="divider" /><line y2="13.5" y1="13.5" x2="91.09375" x1="-91.09375" class="divider" /><g class="label"><text x="79.094" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -79.09375, -21.5)"><tspan x="79.094">LineageStorePort</tspan></text></g></g></g></g><g transform="translate(1894.84375, 117)" class="root"><g class="clusters"><g id="run_ledger" class="cluster"><rect height="137" width="210.0625" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(70.0859375, 8)" class="cluster-label"><text x="42.945" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="42.945">run_ledger</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(113.03125, 76.5)" id="classId-RunLedgerPort-7" class="node default"><rect height="67" width="160.0625" y="-33.5" x="-80.03125" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="80.03125" x1="-80.03125" class="divider" /><line y2="13.5" y1="13.5" x2="80.03125" x1="-80.03125" class="divider" /><g class="label"><text x="68.031" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -68.03125, -21.5)"><tspan x="68.031">RunLedgerPort</tspan></text></g></g></g></g><g transform="translate(2154.90625, 117)" class="root"><g class="clusters"><g id="workflow_execution_state" class="cluster"><rect height="137" width="333.453125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(71.640625, 8)" class="cluster-label"><text x="103.086" y="1.1" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="103.086">workflow_execution_stat</tspan><tspan x="103.086" dy="16.8">e</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(174.7265625, 76.5)" id="classId-WorkflowExecutionStatePort-8" class="node default"><rect height="67" width="283.453125" y="-33.5" x="-141.7265625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="141.7265625" x1="-141.7265625" class="divider" /><line y2="13.5" y1="13.5" x2="141.7265625" x1="-141.7265625" class="divider" /><g class="label"><text x="129.727" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -129.7265625, -21.5)"><tspan x="129.727">WorkflowExecutionStatePort</tspan></text></g></g></g></g><g transform="translate(2538.359375, 117)" class="root"><g class="clusters"><g id="workflow_ledger" class="cluster"><rect height="137" width="259.1875" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(72.2421875, 8)" class="cluster-label"><text x="65.352" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="65.352">workflow_ledger</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(137.59375, 76.5)" id="classId-WorkflowLedgerPort-9" class="node default"><rect height="67" width="209.1875" y="-33.5" x="-104.59375" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="104.59375" x1="-104.59375" class="divider" /><line y2="13.5" y1="13.5" x2="104.59375" x1="-104.59375" class="divider" /><g class="label"><text x="92.594" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -92.59375, -21.5)"><tspan x="92.594">WorkflowLedgerPort</tspan></text></g></g></g></g><g transform="translate(2847.546875, 117)" class="root"><g class="clusters"><g id="workflow_manifest" class="cluster"><rect height="137" width="275.078125" y="8" x="8" style="fill: none; stroke: black" /><g transform="translate(70.671875, 8)" class="cluster-label"><text x="74.867" y="9.5" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.867">workflow_manifest</tspan></text></g></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g transform="translate(145.5390625, 76.5)" id="classId-WorkflowManifestPort-10" class="node default"><rect height="67" width="225.078125" y="-33.5" x="-112.5390625" class="outer title-state" /><line y2="-2.5" y1="-2.5" x2="112.5390625" x1="-112.5390625" class="divider" /><line y2="13.5" y1="13.5" x2="112.5390625" x1="-112.5390625" class="divider" /><g class="label"><text x="100.539" y="9.5" text-anchor="middle" xml:space="preserve" class="classTitle fo-fallback" transform="translate( -100.5390625, -21.5)"><tspan x="100.539">WorkflowManifestPort</tspan></text></g></g></g></g></g></g></g><style>/*
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" aria-roledescription="classDiagram" style="max-width:2834.25px;background-color:white" viewBox="0 -8 2834.25 400"><style>#my-svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;fill:#212121;}#my-svg .error-icon{fill:#f0fdf4;}#my-svg .error-text{fill:#212121;stroke:#212121;}#my-svg .edge-thickness-normal{stroke-width:2px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:16px;}#my-svg g.classGroup text{fill:#2563eb;stroke:none;font-family:Inter,-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,Roboto,Oxygen,Ubuntu,sans-serif;font-size:10px;}#my-svg g.classGroup text .title{font-weight:bolder;}#my-svg .nodeLabel,#my-svg .edgeLabel{color:#212121;}#my-svg .edgeLabel .label rect{fill:#eff6ff;}#my-svg .label text{fill:#212121;}#my-svg .edgeLabel .label span{background:#eff6ff;}#my-svg .classTitle{font-weight:bolder;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#eff6ff;stroke:#2563eb;stroke-width:1px;}#my-svg .divider{stroke:#2563eb;stroke-width:1;}#my-svg g.clickable{cursor:pointer;}#my-svg g.classGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.classGroup line{stroke:#2563eb;stroke-width:1;}#my-svg .classLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .classLabel .label{fill:#2563eb;font-size:10px;}#my-svg .relation{stroke:#475569;stroke-width:1;fill:none;}#my-svg .dashed-line{stroke-dasharray:3;}#my-svg .dotted-line{stroke-dasharray:1 2;}#my-svg #compositionStart,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #compositionEnd,#my-svg .composition{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #dependencyStart,#my-svg .dependency{fill:#475569!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionStart,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #extensionEnd,#my-svg .extension{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationStart,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #aggregationEnd,#my-svg .aggregation{fill:transparent!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopStart,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg #lollipopEnd,#my-svg .lollipop{fill:#eff6ff!important;stroke:#475569!important;stroke-width:1;}#my-svg .edgeTerminals{font-size:11px;}#my-svg .classTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg :root{--mermaid-font-family:&quot;trebuchet ms&quot;,verdana,arial,sans-serif;}/*
  * Пользовательские стили диаграмм BioETL (структурированная копия)
  * Источник: custom.css
  * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
@@ -9,7 +9,7 @@
  * ========================================================= */
 svg {
     /* Задаёт основной стек шрифтов для всего текста в SVG. */
-    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    font-family: Inter, -apple-system, BlinkMacSystemFont, &apos;Segoe UI&apos;, Roboto,
     Oxygen, Ubuntu, sans-serif;
 }
 
@@ -331,111 +331,111 @@ marker path {
 /* =========================================================
  * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
  * ========================================================= */
-[id*="Domain"] &gt; rect,
-[id*="Domain"] &gt; path {
+[id*=&quot;Domain&quot;] &gt; rect,
+[id*=&quot;Domain&quot;] &gt; path {
     /* Цвет фона для доменного слоя. */
     fill: #f5f3ff !important;
     /* Цвет границы для доменного слоя. */
     stroke: #7c3aed !important;
 }
 
-.cluster[id*="Domain"] &gt; rect,
-.cluster[id*="Domain"] &gt; path {
+.cluster[id*=&quot;Domain&quot;] &gt; rect,
+.cluster[id*=&quot;Domain&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Application"] &gt; rect,
-[id*="Application"] &gt; path {
+[id*=&quot;Application&quot;] &gt; rect,
+[id*=&quot;Application&quot;] &gt; path {
     /* Цвет фона для application-слоя. */
     fill: #f0fdf4 !important;
     /* Цвет границы для application-слоя. */
     stroke: #16a34a !important;
 }
 
-.cluster[id*="Application"] &gt; rect,
-.cluster[id*="Application"] &gt; path {
+.cluster[id*=&quot;Application&quot;] &gt; rect,
+.cluster[id*=&quot;Application&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Infrastructure"] &gt; rect,
-[id*="Infrastructure"] &gt; path {
+[id*=&quot;Infrastructure&quot;] &gt; rect,
+[id*=&quot;Infrastructure&quot;] &gt; path {
     /* Цвет фона для infrastructure-слоя. */
     fill: #fff1f2 !important;
     /* Цвет границы для infrastructure-слоя. */
     stroke: #dc2626 !important;
 }
 
-.cluster[id*="Infrastructure"] &gt; rect,
-.cluster[id*="Infrastructure"] &gt; path {
+.cluster[id*=&quot;Infrastructure&quot;] &gt; rect,
+.cluster[id*=&quot;Infrastructure&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Composition"] &gt; rect,
-[id*="Composition"] &gt; path {
+[id*=&quot;Composition&quot;] &gt; rect,
+[id*=&quot;Composition&quot;] &gt; path {
     /* Цвет фона для composition-слоя. */
     fill: #fff7ed !important;
     /* Цвет границы для composition-слоя. */
     stroke: #f59e0b !important;
 }
 
-.cluster[id*="Composition"] &gt; rect,
-.cluster[id*="Composition"] &gt; path {
+.cluster[id*=&quot;Composition&quot;] &gt; rect,
+.cluster[id*=&quot;Composition&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="Interfaces"] &gt; rect,
-[id*="Interfaces"] &gt; path {
+[id*=&quot;Interfaces&quot;] &gt; rect,
+[id*=&quot;Interfaces&quot;] &gt; path {
     /* Цвет фона для слоя интерфейсов. */
     fill: #eff6ff !important;
     /* Цвет границы для слоя интерфейсов. */
     stroke: #2563eb !important;
 }
 
-.cluster[id*="Interfaces"] &gt; rect,
-.cluster[id*="Interfaces"] &gt; path {
+.cluster[id*=&quot;Interfaces&quot;] &gt; rect,
+.cluster[id*=&quot;Interfaces&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
-[id*="External"] &gt; rect,
-[id*="External"] &gt; path {
+[id*=&quot;External&quot;] &gt; rect,
+[id*=&quot;External&quot;] &gt; path {
     /* Цвет фона для внешних систем. */
     fill: #f1f5f9 !important;
     /* Цвет границы для внешних систем. */
     stroke: #64748b !important;
 }
 
-.cluster[id*="External"] &gt; rect,
-.cluster[id*="External"] &gt; path {
+.cluster[id*=&quot;External&quot;] &gt; rect,
+.cluster[id*=&quot;External&quot;] &gt; path {
     fill: #ffffff !important;
 }
 
 /* Белая подложка под подписи всех архитектурных/medallion слоёв */
-g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
-g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+g.cluster[id*=&quot;Domain&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Application&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;External&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label foreignObject &gt; div,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label foreignObject &gt; div {
     background: #ffffff !important;
     padding: 0 6px !important;
     border-radius: 4px;
 }
 
 /* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
-g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
-g.cluster[id*="Application"] .cluster-label text.fo-fallback,
-g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
-g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
-g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
-g.cluster[id*="External"] .cluster-label text.fo-fallback,
-g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
-g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
-g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
-g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+g.cluster[id*=&quot;Domain&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Application&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Infrastructure&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Composition&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Interfaces&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;External&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Bronze&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Silver&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Gold&quot;] .cluster-label text.fo-fallback,
+g.cluster[id*=&quot;Quarantine&quot;] .cluster-label text.fo-fallback {
     fill: #111827 !important;
     stroke: none !important;
 }
@@ -443,32 +443,32 @@ g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
 /* =========================================================
  * 15) Цветовая карта слоёв Medallion
  * ========================================================= */
-[id*="Bronze"] &gt; rect,
-[id*="Bronze"] &gt; path {
+[id*=&quot;Bronze&quot;] &gt; rect,
+[id*=&quot;Bronze&quot;] &gt; path {
     /* Цвет фона Bronze-слоя. */
     fill: #fff7ed !important;
     /* Цвет границы Bronze-слоя. */
     stroke: #f59e0b !important;
 }
 
-[id*="Silver"] &gt; rect,
-[id*="Silver"] &gt; path {
+[id*=&quot;Silver&quot;] &gt; rect,
+[id*=&quot;Silver&quot;] &gt; path {
     /* Цвет фона Silver-слоя. */
     fill: #f8fafc !important;
     /* Цвет границы Silver-слоя. */
     stroke: #475569 !important;
 }
 
-[id*="Gold"] &gt; rect,
-[id*="Gold"] &gt; path {
+[id*=&quot;Gold&quot;] &gt; rect,
+[id*=&quot;Gold&quot;] &gt; path {
     /* Цвет фона Gold-слоя. */
     fill: #fefce8 !important;
     /* Цвет границы Gold-слоя. */
     stroke: #ca8a04 !important;
 }
 
-[id*="Quarantine"] &gt; rect,
-[id*="Quarantine"] &gt; path {
+[id*=&quot;Quarantine&quot;] &gt; rect,
+[id*=&quot;Quarantine&quot;] &gt; path {
     /* Цвет фона для карантинных/проблемных потоков данных. */
     fill: #ffe4e6 !important;
     /* Цвет границы для карантинных/проблемных потоков данных. */
@@ -491,5 +491,4 @@ text.fo-fallback {
 
 foreignObject {
     display: none !important;
-}
-</style></svg>
+}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><defs><marker id="my-svg_classDiagram-aggregationStart" class="marker aggregation classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-aggregationEnd" class="marker aggregation classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionStart" class="marker extension classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m1 7 17 6V1Z"/></marker></defs><defs><marker id="my-svg_classDiagram-extensionEnd" class="marker extension classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="M1 1v12l17-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionStart" class="marker composition classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="18" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-compositionEnd" class="marker composition classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="1" refY="7"><path d="m18 7-9 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyStart" class="marker dependency classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="6" refY="7"><path d="m5 7 4 6-8-6 8-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-dependencyEnd" class="marker dependency classDiagram" markerHeight="28" markerWidth="20" orient="auto" refX="13" refY="7"><path d="m18 7-9 6 5-6-5-6Z"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopStart" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="13" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><defs><marker id="my-svg_classDiagram-lollipopEnd" class="marker lollipop classDiagram" markerHeight="240" markerWidth="190" orient="auto" refX="1" refY="7"><circle cx="7" cy="7" r="6" fill="transparent" stroke="#000"/></marker></defs><g class="root"><g class="nodes"><g class="root"><g class="clusters" transform="translate(8)"><g id="run_manifest" class="cluster"><path d="M8 8h314.906v368H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="46.25" y="9" class="fo-fallback" text-anchor="middle" transform="translate(119.203 8)"><tspan x="46.25">run_manifest</tspan></text></g></g></g><g class="nodes" transform="translate(8)"><g id="classId-RawManifestInspection-0" class="node default"><path d="M64.547 43H266.36v66H64.547z" class="outer title-state"/><path d="M64.547 73H266.36M64.547 89H266.36" class="divider"/><g class="label"><text xml:space="preserve" x="88.906" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(76.547 55)"><tspan x="88.906">RawManifestInspecti</tspan><tspan x="88.906" dy="16.8">on</tspan></text></g></g><g id="classId-RawRunManifestInspectionPort-1" class="node default"><path d="M33 159h264.906v66H33z" class="outer title-state"/><path d="M33 189h264.906M33 205h264.906" class="divider"/><g class="label"><text xml:space="preserve" x="120.453" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 171)"><tspan x="120.453">RawRunManifestInspection</tspan><tspan x="120.453" dy="16.8">Port</tspan></text></g></g><g id="classId-RunManifestPort-2" class="node default"><path d="M89.453 275h152v66h-152z" class="outer title-state"/><path d="M89.453 305h152M89.453 321h152" class="divider"/><g class="label"><text xml:space="preserve" x="64" y="9" class="classTitle fo-fallback" text-anchor="middle" transform="translate(101.453 287)"><tspan x="64">RunManifestPort</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(372.906 116)"><g id="artifact_byte_comparison" class="cluster"><path d="M8 8h290.031v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="89.383" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(63.633 8)"><tspan x="89.383">artifact_byte_compar</tspan><tspan x="89.383" dy="16.8">ison</tspan></text></g></g></g><g class="nodes" transform="translate(372.906 116)"><g id="classId-ArtifactByteComparisonPort-3" class="node default"><path d="M33 43h240.03v66H33z" class="outer title-state"/><path d="M33 73h240.032M33 89h240.032" class="divider"/><g class="label"><text xml:space="preserve" x="108.016" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="108.016">ArtifactByteComparison</tspan><tspan x="108.016" dy="16.8">Port</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(712.938 116)"><g id="contract_evidence" class="cluster"><path d="M8 8h312.297v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="64.93" y="9" class="fo-fallback" text-anchor="middle" transform="translate(99.219 8)"><tspan x="64.93">contract_evidence</tspan></text></g></g></g><g class="nodes" transform="translate(712.938 116)"><g id="classId-ContractEvidenceRecorderPort-4" class="node default"><path d="M33 43h262.297v66H33z" class="outer title-state"/><path d="M33 73h262.296M33 89h262.296" class="divider"/><g class="label"><text xml:space="preserve" x="119.148" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="119.148">ContractEvidenceRecorder</tspan><tspan x="119.148" dy="16.8">Port</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1075.234 116)"><g id="effective_config_artifact" class="cluster"><path d="M8 8h320.25v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="83.906" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(84.219 8)"><tspan x="83.906">effective_config_a</tspan><tspan x="83.906" dy="16.8">rtifact</tspan></text></g></g></g><g class="nodes" transform="translate(1075.234 116)"><g id="classId-EffectiveConfigArtifactStorePort-5" class="node default"><path d="M33 43h270.25v66H33z" class="outer title-state"/><path d="M33 73h270.25M33 89h270.25" class="divider"/><g class="label"><text xml:space="preserve" x="123.125" y="-7.8" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="123.125">EffectiveConfigArtifactStor</tspan><tspan x="123.125" dy="16.8">e</tspan><tspan x="123.125" dy="16.8">Port</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1445.484 116)"><g id="lineage" class="cluster"><path d="M8 8h207.359v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="25.805" y="9" class="fo-fallback" text-anchor="middle" transform="translate(85.875 8)"><tspan x="25.805">lineage</tspan></text></g></g></g><g class="nodes" transform="translate(1445.484 116)"><g id="classId-LineageStorePort-6" class="node default"><path d="M33 43h157.359v66H32.999z" class="outer title-state"/><path d="M33 73h157.36M33 89h157.36" class="divider"/><g class="label"><text xml:space="preserve" x="66.68" y="9" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="66.68">LineageStorePort</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1702.844 116)"><g id="run_ledger" class="cluster"><path d="M8 8h190.453v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="38.25" y="9" class="fo-fallback" text-anchor="middle" transform="translate(64.977 8)"><tspan x="38.25">run_ledger</tspan></text></g></g></g><g class="nodes" transform="translate(1702.844 116)"><g id="classId-RunLedgerPort-7" class="node default"><path d="M33 43h140.453v66H33z" class="outer title-state"/><path d="M33 73h140.454M33 89h140.454" class="divider"/><g class="label"><text xml:space="preserve" x="58.227" y="9" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="58.227">RunLedgerPort</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(1943.297 116)"><g id="workflow_execution_state" class="cluster"><path d="M8 8h293.297v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="91.609" y=".6" class="fo-fallback" text-anchor="middle" transform="translate(63.04 8)"><tspan x="91.609">workflow_execution_s</tspan><tspan x="91.609" dy="16.8">tate</tspan></text></g></g></g><g class="nodes" transform="translate(1943.297 116)"><g id="classId-WorkflowExecutionStatePort-8" class="node default"><path d="M33 43h243.297v66H33z" class="outer title-state"/><path d="M33 73h243.296M33 89h243.296" class="divider"/><g class="label"><text xml:space="preserve" x="109.648" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="109.648">WorkflowExecutionState</tspan><tspan x="109.648" dy="16.8">Port</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(2286.594 116)"><g id="workflow_ledger" class="cluster"><path d="M8 8h231.047v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="57.805" y="9" class="fo-fallback" text-anchor="middle" transform="translate(65.719 8)"><tspan x="57.805">workflow_ledger</tspan></text></g></g></g><g class="nodes" transform="translate(2286.594 116)"><g id="classId-WorkflowLedgerPort-9" class="node default"><path d="M33 43h181.047v66H33z" class="outer title-state"/><path d="M33 73h181.046M33 89h181.046" class="divider"/><g class="label"><text xml:space="preserve" x="78.523" y="9" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="78.523">WorkflowLedgerPort</tspan></text></g></g></g></g><g class="root"><g class="clusters" transform="translate(2567.64 116)"><g id="workflow_manifest" class="cluster"><path d="M8 8h242.609v136H8z" style="fill:none;stroke:black"/><g class="cluster-label"><text xml:space="preserve" x="65.805" y="9" class="fo-fallback" text-anchor="middle" transform="translate(63.5 8)"><tspan x="65.805">workflow_manifest</tspan></text></g></g></g><g class="nodes" transform="translate(2567.64 116)"><g id="classId-WorkflowManifestPort-10" class="node default"><path d="M33 43h192.609v66H32.999z" class="outer title-state"/><path d="M33 73h192.61M33 89h192.61" class="divider"/><g class="label"><text xml:space="preserve" x="84.305" y=".6" class="classTitle fo-fallback" text-anchor="middle" transform="translate(45 55)"><tspan x="84.305">WorkflowManifest</tspan><tspan x="84.305" dy="16.8">Port</tspan></text></g></g></g></g></g></g></svg>

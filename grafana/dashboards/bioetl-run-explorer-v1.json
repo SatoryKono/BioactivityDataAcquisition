@@ -13,7 +13,7 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -21,12 +21,13 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust)\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer (current)</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"0. Trust (Trust). Preserves selected scope and time range.\" href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">0. Trust</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-current\" href=\"#bioetl-run-explorer-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"6. Run Explorer (Run Explorer)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">6. Run Explorer (current)</a></div>"
       },
       "links": [
         {
           "title": "0. Trust",
           "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "0. Trust (Trust). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -38,6 +39,7 @@
         {
           "title": "1. Overview",
           "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "1. Overview (Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -49,6 +51,7 @@
         {
           "title": "2. Pipeline Diagnostics",
           "url": "/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
+          "tooltip": "2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -60,6 +63,7 @@
         {
           "title": "3. Provider Health",
           "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
+          "tooltip": "3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -71,6 +75,7 @@
         {
           "title": "4. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
+          "tooltip": "4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -82,6 +87,7 @@
         {
           "title": "5. Incident Workspace",
           "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -101,7 +107,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "options": {
         "bioetlDisplayTitle": "Understand Run Scope",
@@ -124,10 +130,10 @@
       "title": "Inspect Recent Runs (last 10)",
       "description": "SELECTED RUN · Browse mode: latest ten pipeline-run reports found on disk for the selected pipeline. The dashboard time picker does not filter this table. Started is identity.started_at. Workflow is identity.workflow_id from that pipeline report (not the workflow-run catalog and not $workflow). Workflow run is identity.workflow_run_id (parent occurrence). $pipeline is a pipeline name (chembl_assay, chembl_target, chembl_publication), not a workflow (chembl_baseline). Workflow artifacts live under reports/run-reports/workflow/<name>/ and GET /ops/observability/workflow-run-reports. Click a Run cell to set var-run_id, var-pipeline, and var-run_type from that row, stay on this dashboard, and expand Selected Run Details below (row under this table; also a panel link). The matching row is marked when $run_id is set. Pipeline and run_type are already selectors, so they are hidden here to keep the UUID readable. Older runs: pick Run ID from the control-plane catalog (newest first); first screen is last 10 by design (limit=10). An empty table is valid when no matching reports exist for this pipeline (index_state=valid_empty). A TREE_MISSING / LAYOUT_UNHEALTHY / IDENTITY_UNHEALTHY row is bind or origin failure, not a selector problem — run python scripts/ops/runtime/docker/verify_report_bind.py from the checkout you are viewing. If reports are expected and the table is empty without that row, treat backend unavailable as a distinct failure and verify BioETL Ops HTTP at /health/live. SELECT RUN / VALID EMPTY is not OK.",
       "gridPos": {
-        "h": 12,
+        "h": 11,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 7
       },
       "datasource": "BioETL Ops HTTP",
       "fieldConfig": {
@@ -369,19 +375,19 @@
                   {
                     "type": "value",
                     "options": {
-                      "true": {
-                        "text": "●",
-                        "color": "blue"
+                      "0": {
+                        "text": "",
+                        "color": "transparent"
                       },
                       "1": {
                         "text": "●",
                         "color": "blue"
                       },
-                      "false": {
-                        "text": "",
-                        "color": "transparent"
+                      "true": {
+                        "text": "●",
+                        "color": "blue"
                       },
-                      "0": {
+                      "false": {
                         "text": "",
                         "color": "transparent"
                       }
@@ -1428,7 +1434,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 51
+            "y": 52
           },
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
@@ -1489,6 +1495,52 @@
                           "success": {
                             "text": "success",
                             "color": "green"
+                          },
+                          "failed": {
+                            "text": "failed",
+                            "color": "red"
+                          },
+                          "partial": {
+                            "text": "partial",
+                            "color": "orange"
+                          },
+                          "shutdown": {
+                            "text": "shutdown",
+                            "color": "orange"
+                          },
+                          "dry_run": {
+                            "text": "dry_run",
+                            "color": "blue"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": ".+",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
                           }
                         }
                       }

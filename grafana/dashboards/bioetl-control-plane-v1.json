@@ -22,7 +22,7 @@
   "panels": [
     {
       "gridPos": {
-        "h": 3,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 0
@@ -31,7 +31,7 @@
       "options": {
         "mode": "html",
         "bioetlDisplayTitle": "Navigate Dashboards",
-        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview)\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics)\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health)\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality)\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace)\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 120px;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer)\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
+        "content": "<div class=\"bioetl-panel-title\" role=\"heading\" aria-level=\"2\" data-bioetl-panel-title=\"Navigate Dashboards\" style=\"font-size:19px;font-weight:600;line-height:1;margin:0 2px\">Navigate Dashboards</div><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\" style=\"display:flex;gap:2px;flex-wrap:nowrap;align-items:center;padding:0 2px;overflow:visible;white-space:normal;font-size:16px\"><a class=\"bioetl-nav-current\" href=\"#bioetl-control-plane-v1\" aria-disabled=\"true\" aria-current=\"page\" data-current=\"page\" tabindex=\"-1\" title=\"0. Trust (Trust)\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#ffffff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default;text-decoration:underline;pointer-events:none\">0. Trust (current)</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"1. Overview (Overview). Preserves selected scope and time range.\" href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">1. Overview</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">2. Pipeline Diagnostics</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.\" href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}\">3. Provider Health</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.\" href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;var-stage=$__all&amp;${__url_time_range}\">4. Data Quality</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.\" href=\"/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">5. Incident Workspace</a><a class=\"bioetl-nav-link\" style=\"box-sizing:border-box;flex:1 1 0;min-width:0;text-align:center;padding:0 2px;border-radius:3px;font-weight:600;line-height:1.05;overflow-wrap:anywhere;color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none\" title=\"6. Run Explorer (Run Explorer). Preserves selected scope and time range.\" href=\"/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id&amp;${__url_time_range}\">6. Run Explorer</a></div>"
       },
       "title": "",
       "description": "Sanitizer-compatible navigation bus with native keyboard focus. Primary bus 0–4: Trust / Overview / Pipeline Diagnostics / Provider Health / Data Quality. Adjunct 5–6: Incident Workspace / Run Explorer. Current workspace is a non-interactive chip (aria-disabled + data-current=page, underlined) so active state is not color-only. Handoffs open same-tab, preserve current time range, and document scope reset or context mapping on cross-scope transitions. Chip colors are theme-safe for dark and light.",
@@ -40,6 +40,7 @@
         {
           "title": "1. Overview",
           "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "1. Overview (Overview). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -51,6 +52,7 @@
         {
           "title": "2. Pipeline Diagnostics",
           "url": "/d/bioetl-runtime/bioetl-runtime?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
+          "tooltip": "2. Pipeline Diagnostics (Pipeline Diagnostics). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -62,6 +64,7 @@
         {
           "title": "3. Provider Health",
           "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}",
+          "tooltip": "3. Provider Health (Provider Health). Scope reset: provider=unknown; preserves time range, pipeline context.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -73,6 +76,7 @@
         {
           "title": "4. Data Quality",
           "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&var-stage=$__all&${__url_time_range}",
+          "tooltip": "4. Data Quality (Data Quality). Scope reset: stage=All; preserves time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -84,6 +88,7 @@
         {
           "title": "5. Incident Workspace",
           "url": "/d/bioetl-incident-v1/bioetl-incident-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "5. Incident Workspace (Incident Workspace). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -95,6 +100,7 @@
         {
           "title": "6. Run Explorer",
           "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id&${__url_time_range}",
+          "tooltip": "6. Run Explorer (Run Explorer). Preserves selected scope and time range.",
           "type": "link",
           "icon": "dashboard",
           "targetBlank": false,
@@ -110,10 +116,10 @@
       "type": "text",
       "title": "",
       "gridPos": {
-        "h": 4,
-        "w": 18,
+        "h": 3,
+        "w": 16,
         "x": 0,
-        "y": 3
+        "y": 4
       },
       "description": "processing_status is whether the pipeline finished. trust_status is whether this run's evidence is complete enough to replay. Monitor Replay Readiness (9401) is CURRENT Prometheus for pipeline x run_type; run_id never filters Prometheus. First-screen SELECTED RUN tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row and contains table 9415. UNKNOWN/INCOMPLETE is missing or contradictory evidence, never healthy. Run coverage: IN RANGE / OUT OF RANGE / UNKNOWN. Set range to run when OUT OF RANGE. Effective refresh: 60s · timezone: browser.",
       "options": {
@@ -128,10 +134,10 @@
       "type": "stat",
       "title": "Monitor Replay Readiness",
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 3
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 4
       },
       "datasource": {
         "type": "prometheus",
@@ -245,7 +251,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows evidence freshness plus top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -408,11 +414,11 @@
           "id": "organize",
           "options": {
             "excludeByName": {
+              "Time": true,
               "reasons": true,
               "reasons_truncated": true,
               "scope_kind": true,
-              "evidence_freshness": true,
-              "Time": true
+              "evidence_freshness": true
             },
             "indexByName": {
               "processing_status": 0,
@@ -694,7 +700,7 @@
         ]
       },
       "transparent": false,
-      "description": "Next-step rail (native title omitted so h=3 fits DASH-FIT-004 at 200%). Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
+      "description": "Next-step rail kept at readable h=3 on the first screen under the canonical h=4 navigation. Do not replay this run if its Trust status is INCOMPLETE or UNKNOWN. First-screen tables: Review Selected-Run Trust (9418) and Review Retention Compliance (9416). Review Lineage Validation is the first collapsed row (9419) and contains table 9415. Monitor Replay Readiness (9401) is current Prometheus for the pipeline, not this run."
     },
     {
       "datasource": {
@@ -2181,7 +2187,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -2263,7 +2269,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -2467,7 +2473,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 76,
+            "y": 77,
             "w": 24,
             "h": 6
           },
@@ -2567,7 +2573,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 82,
+            "y": 83,
             "w": 6,
             "h": 3
           },
@@ -2658,7 +2664,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 82,
+            "y": 83,
             "w": 6,
             "h": 3
           },
@@ -2721,7 +2727,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 85,
+            "y": 86,
             "w": 24,
             "h": 7
           },
@@ -2775,7 +2781,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 92,
+            "y": 93,
             "w": 24,
             "h": 7
           },
@@ -2857,7 +2863,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 82,
+            "y": 83,
             "w": 6,
             "h": 3
           },
@@ -2948,7 +2954,7 @@
           },
           "gridPos": {
             "x": 18,
-            "y": 82,
+            "y": 83,
             "w": 6,
             "h": 3
           },
@@ -3017,7 +3023,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 111,
+            "y": 112,
             "w": 24,
             "h": 6
           },
@@ -3127,7 +3133,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 121,
+            "y": 122,
             "w": 6,
             "h": 3
           },
@@ -3218,7 +3224,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 121,
+            "y": 122,
             "w": 6,
             "h": 3
           },
@@ -3281,7 +3287,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 124,
+            "y": 125,
             "w": 24,
             "h": 6
           },
@@ -3341,7 +3347,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3352,7 +3358,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 130,
+            "y": 131,
             "w": 24,
             "h": 7
           },
@@ -3461,7 +3467,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 141,
+            "y": 142,
             "w": 6,
             "h": 3
           },
@@ -3552,7 +3558,7 @@
           },
           "gridPos": {
             "x": 6,
-            "y": 141,
+            "y": 142,
             "w": 6,
             "h": 3
           },
@@ -3700,7 +3706,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 144,
+            "y": 145,
             "w": 24,
             "h": 6
           },
@@ -3772,7 +3778,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 150,
+            "y": 151,
             "w": 24,
             "h": 7
           },
@@ -3826,7 +3832,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 157,
+            "y": 158,
             "w": 24,
             "h": 7
           },
@@ -3886,7 +3892,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3897,7 +3903,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 164,
+            "y": 165,
             "w": 24,
             "h": 7
           },
@@ -3967,7 +3973,7 @@
                   },
                   {
                     "color": "red",
-                    "value": 1.0
+                    "value": 1
                   }
                 ]
               },
@@ -3978,7 +3984,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 171,
+            "y": 172,
             "w": 24,
             "h": 7
           },
@@ -4042,7 +4048,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 178,
+            "y": 179,
             "w": 12,
             "h": 6
           },
@@ -4159,7 +4165,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 206,
+            "y": 207,
             "w": 24,
             "h": 4
           },
@@ -4338,7 +4344,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 210,
+            "y": 211,
             "w": 24,
             "h": 4
           },
@@ -4393,7 +4399,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 214,
+            "y": 215,
             "w": 12,
             "h": 4
           },
@@ -4422,7 +4428,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 214,
+            "y": 215,
             "w": 12,
             "h": 4
           },
@@ -4497,7 +4503,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 218,
+            "y": 219,
             "w": 12,
             "h": 4
           },
@@ -4596,7 +4602,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 218,
+            "y": 219,
             "w": 12,
             "h": 4
           },
@@ -4695,7 +4701,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 222,
+            "y": 223,
             "w": 12,
             "h": 4
           },
@@ -4794,7 +4800,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 222,
+            "y": 223,
             "w": 12,
             "h": 4
           },
@@ -4838,7 +4844,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 226,
+            "y": 227,
             "w": 24,
             "h": 4
           },
@@ -4873,7 +4879,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 231,
+            "y": 232,
             "w": 18,
             "h": 6
           },
@@ -5024,7 +5030,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 18,
-            "y": 231,
+            "y": 232,
             "w": 6,
             "h": 6
           },
@@ -5424,7 +5430,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 237,
+            "y": 238,
             "w": 24,
             "h": 6
           },

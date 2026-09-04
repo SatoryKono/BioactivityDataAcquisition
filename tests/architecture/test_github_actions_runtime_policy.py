@@ -41,6 +41,12 @@ ALWAYS_ON_REQUIRED_CHECKS = {
 SHA_OR_PR_CONCURRENCY_GROUP = (
     "${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}"
 )
+SHA_OR_PR_CONCURRENCY_SUFFIX = "${{ github.event.pull_request.number || github.sha }}"
+REUSABLE_MAIN_CONCURRENCY_PREFIXES = {
+    TESTS_WORKFLOW: "tests-",
+    ALWAYS_ON_REQUIRED_CHECKS["checks-complete"]: "lint-architecture-",
+    ROOT / ".github" / "workflows" / "codeql.yml": "codeql-",
+}
 PR_ONLY_CANCEL_IN_PROGRESS = "${{ github.event_name == 'pull_request' }}"
 MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS = (
     ARCHITECTURE_WORKFLOW,
@@ -201,33 +207,52 @@ def test_github_policy_python_version_claims_match_workflows() -> None:
     assert "2. Test Install  → Python 3.13" in policy_doc
 
 
-def test_ruleset_required_checks_materialize_on_every_pr() -> None:
+def test_pr_gate_coordinator_materializes_on_every_pr_without_duplicate_owners() -> (
+    None
+):
     policy_doc = GITHUB_POLICY.read_text(encoding="utf-8")
-    required_section = policy_doc.split(
-        "### Final always-on required-check set", maxsplit=1
-    )[1].split("### Path-scoped core checks", maxsplit=1)[0]
+    coordinator_path = ROOT / ".github" / "workflows" / "pr-required.yml"
+    coordinator = _load_yaml(coordinator_path)
+    triggers = coordinator.get("on", coordinator.get(True))
 
-    for check_name, workflow_path in ALWAYS_ON_REQUIRED_CHECKS.items():
-        workflow = _load_yaml(workflow_path)
-        triggers = workflow.get("on", workflow.get(True))
-        assert isinstance(triggers, dict)
-        assert "pull_request" in triggers
-        pull_request = triggers["pull_request"]
-        assert pull_request is None or not {
-            "paths",
-            "paths-ignore",
-        }.intersection(pull_request)
-        assert check_name in workflow["jobs"]
-        assert f"`{check_name}`" in required_section
+    assert isinstance(triggers, dict)
+    assert set(triggers) == {"pull_request", "workflow_dispatch"}
+    pull_request = triggers["pull_request"]
+    assert isinstance(pull_request, dict)
+    assert pull_request["branches"] == ["main", "develop"]
+    assert not {"paths", "paths-ignore"}.intersection(pull_request)
+    assert "pr-gate-complete" in coordinator["jobs"]
+    assert coordinator["permissions"] == {"contents": "read"}
+    assert "continue-on-error" not in coordinator_path.read_text(encoding="utf-8")
+    assert "secrets: inherit" not in coordinator_path.read_text(encoding="utf-8")
+    catalog = _load_yaml(ROOT / "configs" / "quality" / "github_required_checks.yaml")
+    gate_ids = {gate["id"] for gate in catalog["gates"]}
+    aggregate_needs = set(coordinator["jobs"]["pr-gate-complete"]["needs"])
+    assert gate_ids <= aggregate_needs
+    assert {"commit-governance", "docs-governance"} <= gate_ids
+    assert "pr-gate-complete" in policy_doc
+    assert "configs/quality/github_required_checks.yaml" in policy_doc
 
-    for path_scoped_check in (
-        "coverage-verify",
-        "schema-governance-status",
-        "detect-secrets",
-        "commit-lint",
-        "type-check",
-    ):
-        assert f"`{path_scoped_check}`" not in required_section
+    direct_owner_names = (
+        "import-linter.yml",
+        "tests.yml",
+        "type-checking.yml",
+        "security.yml",
+        "codeql.yml",
+        "docker.yml",
+        "duplication-complexity.yml",
+        "root-hygiene.yml",
+        "schema-governance.yml",
+        "compiled-artifacts-block.yml",
+        "commit-lint.yml",
+        "docs.yml",
+    )
+    for workflow_name in direct_owner_names:
+        workflow = _load_yaml(ROOT / ".github" / "workflows" / workflow_name)
+        owner_triggers = workflow.get("on", workflow.get(True))
+        assert isinstance(owner_triggers, dict)
+        assert "workflow_call" in owner_triggers
+        assert "pull_request" not in owner_triggers
 
 
 def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
@@ -238,7 +263,14 @@ def test_main_required_push_workflows_use_sha_scoped_concurrency() -> None:
     for path in MAIN_REQUIRED_PUSH_CONCURRENCY_WORKFLOWS:
         workflow = _load_yaml(path)
         concurrency = cast(dict[str, Any], workflow["concurrency"])
-        assert concurrency["group"] == SHA_OR_PR_CONCURRENCY_GROUP, path.name
+        group = str(concurrency["group"])
+        if path in REUSABLE_MAIN_CONCURRENCY_PREFIXES:
+            assert group == (
+                REUSABLE_MAIN_CONCURRENCY_PREFIXES[path] + SHA_OR_PR_CONCURRENCY_SUFFIX
+            ), path.name
+            assert "${{ github.workflow }}" not in group, path.name
+        else:
+            assert group == SHA_OR_PR_CONCURRENCY_GROUP, path.name
         assert concurrency["cancel-in-progress"] == PR_ONLY_CANCEL_IN_PROGRESS, (
             path.name
         )
@@ -900,12 +932,13 @@ def test_architecture_full_hook_matches_ci_arch_tests_and_test_matrix() -> None:
     hook_markers = _pytest_marker_expression(hook_entry.replace("\n", " "))
 
     import_linter = _load_yaml(ALWAYS_ON_REQUIRED_CHECKS["checks-complete"])
+    arch_job = import_linter["jobs"]["arch-tests"]
     arch_runs = [
         str(step.get("run") or "")
-        for step in import_linter["jobs"]["arch-tests"]["steps"]
+        for step in arch_job["steps"]
         if isinstance(step, dict)
     ]
-    pytest_run = next(run for run in arch_runs if "pytest tests/architecture/" in run)
+    pytest_run = next(run for run in arch_runs if "run_pytest_sharded.sh" in run)
     ci_markers = _pytest_marker_expression(pytest_run)
 
     matrix = yaml.safe_load(
@@ -918,6 +951,8 @@ def test_architecture_full_hook_matches_ci_arch_tests_and_test_matrix() -> None:
     assert hook_markers == ARCHITECTURE_FULL_MARKERS
     assert ci_markers == ARCHITECTURE_FULL_MARKERS
     assert lane_markers == ARCHITECTURE_FULL_MARKERS
+    assert '--shard "${{ matrix.shard }}"' in pytest_run
+    assert "--no-cov" in pytest_run
 
     policy = GITHUB_POLICY.read_text(encoding="utf-8")
     assert "### Architecture lane names (`architecture-full`)" in policy
@@ -1000,3 +1035,20 @@ def test_all_pull_request_workflows_define_cancellation_concurrency() -> None:
                 f"{path.name}: PR concurrency must cancel superseded runs"
             )
     assert violations == []
+
+
+def test_scorecard_token_permissions_define_workflow_readonly_defaults() -> None:
+    """Scorecard Token-Permissions requires an explicit read-only workflow default."""
+    for rel in (
+        ".github/workflows/tests.yml",
+        ".github/workflows/e2e-matrix-health.yml",
+        ".github/workflows/pr-required.yml",
+        ".github/workflows/release.yml",
+    ):
+        workflow = _load_yaml(ROOT / rel)
+        permissions = workflow.get("permissions")
+        assert isinstance(permissions, dict), rel
+        assert permissions.get("contents") == "read", rel
+        assert "write-all" not in {
+            str(value).lower() for value in permissions.values()
+        }, rel

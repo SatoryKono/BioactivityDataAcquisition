@@ -15549,12 +15549,19 @@ def _analysis_node_batch_size(
     analysis_node_groups: dict[str, list[dict[str, JsonValue]]],
     batch_size: int,
 ) -> int:
-    if "complexity_candidate" in analysis_node_groups:
+    # Keep complexity_candidate on its own serial batch; do not force every
+    # analysis label down to 1 just because that group is present.
+    remaining = {
+        name: statements
+        for name, statements in analysis_node_groups.items()
+        if name != "complexity_candidate"
+    }
+    if not remaining:
         return 1
     return _analysis_batch_size(
         batch_size,
         reduced_limit=10,
-        contains_high_priority="retirement_candidate" in analysis_node_groups,
+        contains_high_priority="retirement_candidate" in remaining,
         high_priority_limit=5,
     )
 
@@ -15629,10 +15636,26 @@ def _apply_snapshot_statement_groups(
     _execute_grouped_statements(
         client, core_node_groups, options.batch_size, "core node"
     )
+    complexity_groups = {
+        name: statements
+        for name, statements in analysis_node_groups.items()
+        if name == "complexity_candidate"
+    }
+    other_analysis_groups = {
+        name: statements
+        for name, statements in analysis_node_groups.items()
+        if name != "complexity_candidate"
+    }
     _execute_grouped_statements(
         client,
-        analysis_node_groups,
-        _analysis_node_batch_size(analysis_node_groups, options.batch_size),
+        other_analysis_groups,
+        _analysis_node_batch_size(other_analysis_groups, options.batch_size),
+        "analysis node",
+    )
+    _execute_grouped_statements(
+        client,
+        complexity_groups,
+        1,
         "analysis node",
     )
     _reset_managed_relations_if_requested(client, snapshot, relation_groups, options)

@@ -52,7 +52,9 @@ class SchemaBuilderProtocol(Protocol):
     """Protocol for schema classes that can materialize a runtime schema."""
 
     @classmethod
-    def to_schema(cls) -> object: ...
+    def to_schema(cls) -> object:
+        """Build runtime schema instance from schema class definition."""
+        ...
 
 
 @runtime_checkable
@@ -86,7 +88,9 @@ class BaseServicesFactoryProtocol(Protocol):
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
         silver_validator: SilverValidatorPort | None = None,
-    ) -> PipelineService: ...
+    ) -> PipelineService:
+        """Create common pipeline services from settings and collaborators."""
+        ...
 
 
 @runtime_checkable
@@ -95,4 +99,6 @@ class PipelineRunnerProtocol(Protocol):
 
     services: object
 
-    def attach_run_ledger_service(self, service: RunLedgerService) -> None: ...
+    def attach_run_ledger_service(self, service: RunLedgerService) -> None:
+        """Attach run ledger service to pipeline runner."""
+        ...

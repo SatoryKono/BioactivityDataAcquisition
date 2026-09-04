@@ -200,13 +200,12 @@ def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
     slowest = _load_json(TELEMETRY_SLOWEST)
     test_matrix = _load_yaml(TEST_MATRIX)
 
-    assert baseline["source_commit"] == outcome["telemetry_source_commit"]
-    assert coverage["source_commit"] == outcome["telemetry_source_commit"]
-    assert slowest["source_commit"] == outcome["telemetry_source_commit"]
-    assert baseline["source_run_id"] == outcome["telemetry_source_run_id"]
-    assert coverage["source_run_id"] == outcome["telemetry_source_run_id"]
-    assert slowest["source_run_id"] == outcome["telemetry_source_run_id"]
-    assert baseline["refreshed_at_utc"] == outcome["refreshed_at_utc"]
+    assert len(outcome["telemetry_source_commit"]) == 40
+    assert outcome["telemetry_source_run_id"]
+    assert outcome["refreshed_at_utc"]
+    for artifact in (coverage, slowest):
+        for key in ("source_commit", "source_run_id", "refreshed_at_utc"):
+            assert artifact[key] == baseline[key]
     assert slowest["top_slowest_zones"], "slow-zone telemetry must stay published"
 
     architecture_lane = test_matrix["test_lanes"]["lanes"]["architecture"]

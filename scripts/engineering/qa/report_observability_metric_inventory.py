@@ -197,8 +197,25 @@ def _sync_metric_scan_compatibility_seams() -> None:
 
 def _iter_text_files(root: Path) -> list[Path]:
     """Compatibility wrapper for the historical scanner patch surface."""
-    _sync_metric_scan_compatibility_seams()
-    return _iter_text_files_impl(root)
+    previous_seams = {
+        "_iter_text_files_with_git_ls_files": (
+            _metric_scan._iter_text_files_with_git_ls_files
+        ),
+        "_run_text_discovery_command": _metric_scan._run_text_discovery_command,
+        "_module_string_bindings": _metric_scan._module_string_bindings,
+        "_DEFAULT_DECLARED_METRIC_DEFINITIONS": (
+            _metric_scan._DEFAULT_DECLARED_METRIC_DEFINITIONS
+        ),
+        "REGISTERED_PROMETHEUS_METRIC_LABELS": (
+            _metric_scan.REGISTERED_PROMETHEUS_METRIC_LABELS
+        ),
+    }
+    try:
+        _sync_metric_scan_compatibility_seams()
+        return _iter_text_files_impl(root)
+    finally:
+        for name, value in previous_seams.items():
+            setattr(_metric_scan, name, value)
 
 
 def _iter_text_files_with_git_ls_files(root: Path) -> list[Path] | None:
