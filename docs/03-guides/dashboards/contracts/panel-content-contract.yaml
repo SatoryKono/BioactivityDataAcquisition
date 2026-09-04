@@ -4424,8 +4424,8 @@ dashboards:
         title: Monitor Active Blocker Count
         role: indicator
         tier: 3
-        scope: time_range
-        scope_class: time_range
+        scope: current
+        scope_class: current
         evidence_source: prometheus
         empty_state_class: telemetry_missing
         state_model:
