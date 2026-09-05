@@ -14,14 +14,7 @@ permissions:
 
 on:
   push:
-    branches: [main, master, develop]
-    paths:
-      - 'src/bioetl/domain/ports/**'
-      - 'src/bioetl/infrastructure/**'
-      - 'tests/architecture/test_*contract*.py'
-      - '.github/workflows/port-contracts.yml'
-  pull_request:
-    branches: [main, master, develop]
+    branches: [main]
     paths:
       - 'src/bioetl/domain/ports/**'
       - 'src/bioetl/infrastructure/**'
