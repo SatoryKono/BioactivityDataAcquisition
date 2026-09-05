@@ -596,7 +596,7 @@ ______________________________________________________________________
 
 ## 9. Security Policy
 
-Full security policy: [`.github/SECURITY.md`](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md)
+Full security policy: [.github/SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/.github/SECURITY.md) (mirrored at /SECURITY.md for GitHub community profile detection)
 
 ### Key Points
 
