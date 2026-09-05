@@ -18,7 +18,7 @@ ENV UV_HTTP_TIMEOUT=300 \
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
         bash=5.3-r12 \
-        python-3.13=3.13.15-r5 \
+        python-3.13=3.13.15-r6 \
         uv=0.11.26-r0 \
     && python3.13 --version \
     && uv --version
@@ -59,7 +59,7 @@ FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440d
 USER 0
 RUN echo 'https://packages.wolfi.dev/os' > /etc/apk/repositories \
     && apk add --no-cache \
-        python-3.13=3.13.15-r5 \
+        python-3.13=3.13.15-r6 \
         tzdata=2026c-r0 \
     && python3.13 --version \
     && mkdir -p /runtime-fs/tmp \

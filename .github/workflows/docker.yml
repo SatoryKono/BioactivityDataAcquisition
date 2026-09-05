@@ -194,7 +194,7 @@ jobs:
           {
             echo "source_sha=${GITHUB_SHA}"
             echo "wolfi_base_image=chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669"
-            echo "runtime_python=python-3.13=3.13.15-r5"
+            echo "runtime_python=python-3.13=3.13.15-r6"
             echo "builder_uv=uv=0.11.26-r0"
             echo "setuptools_build_constraint=setuptools==83.0.0"
             docker image inspect "${IMAGE_REF}" --format 'image_id={{.Id}} repo_digests={{json .RepoDigests}}'
