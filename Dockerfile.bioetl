@@ -1,7 +1,7 @@
 # Multi-stage build for bioetl: locked dependencies -> shell-less runtime.
 # All non-scratch stages derive from one immutable Wolfi base image digest.
 # docker:S8431 - pin by digest only (no tag+digest).
-FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS builder
+FROM chainguard/wolfi-base@sha256:918a593b8268c222afd4e2c4f06860ac984e60719b4697e4c71d796bc8fcd042 AS builder
 
 # Builder package installation requires root; the final scratch stage is non-root.
 # hadolint ignore=DL3002
@@ -52,7 +52,7 @@ RUN printf 'setuptools==83.0.0\n' > /tmp/build-constraints.txt \
 # Prepare the supported Python 3.13 runtime filesystem. Keep the apk database
 # so Trivy can audit installed OS packages, while excluding executable package
 # manager and shell surfaces from the final scratch stage.
-FROM chainguard/wolfi-base@sha256:19f7a7b40a11c435311e3784bd134c6b6f19677462440da48f96d5c84eefd669 AS runtime-root
+FROM chainguard/wolfi-base@sha256:918a593b8268c222afd4e2c4f06860ac984e60719b4697e4c71d796bc8fcd042 AS runtime-root
 
 # Runtime-root assembles files only; the final scratch stage runs as 999:999.
 # hadolint ignore=DL3002
