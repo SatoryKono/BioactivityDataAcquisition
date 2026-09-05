@@ -220,3 +220,10 @@ legacy aliases are migration-only and MUST NOT be added to new work.
 - Metrics are available at `http://localhost:8000/metrics`.
 - Dashboards are in `grafana/dashboards/`.
 - Tracing is disabled by default. To enable: `export BIOETL_OBSERVABILITY__TRACING_ENABLED=true`.
+
+## Labels sync (per #10125)
+
+- .github/labels.yml is intentionally not tracked without an owner sync process. Do not add a dead file.
+- If sync is needed, add workflow actions/label-sync or manage manually via gh label commands and document in this file.
+- Verify consistency via gh label list --limit 100 and gh api repos/.../labels.
+- runs-on: keep chembl-baseline-smoke on ubuntu-24.04 (test_chembl_baseline_smoke_workflow.py); do not unify 114->0. Unify only with tests, P2.

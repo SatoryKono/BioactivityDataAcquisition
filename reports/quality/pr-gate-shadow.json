@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "aggregator": "pr-gate-complete",
+  "required_context": "pr-gate-complete",
+  "note": "job pr-gate-complete, not workflow name per #10123",
+  "enforcement": "disabled",
+  "ruleset_id": 13643213,
+  "five_class": [ "success", "failure", "skipped", "cancelled", "timed_out" ],
+  "target_runs": 20,
+  "collected_runs": 0,
+  "runs": [],
+  "status": "pending_collection",
+  "next_steps": "Collect 20 shadow runs on main and PRs via gh api repos/.../actions/runs?branch=main and PR headSha; populate runs[]. Do not mutate enforcement until evidence complete."
+}
