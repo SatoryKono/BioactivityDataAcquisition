@@ -3,25 +3,25 @@
 Generated: 2026-09-05
 Branch: fix/github-p1-p2-batch-10120-10125
 
-## 1. Workflows count 49 vs 30
+## 1. Workflows count 48 vs 30
 
 | Source | Count |
 |---|---|
-| local .github/workflows/*.yml (git ls-files) | 49 |
+| local .github/workflows/*.yml (git ls-files) | 48 |
 | API GET /repos/.../actions/workflows (enabled) | 30 |
-| delta (disabled + reusable) | 19 |
+| delta (disabled + reusable) | 18 |
 
-Note: API returns enabled workflows; local includes reusable and disabled (e.g., temporary-main-telemetry-refresh-9973.yml removed in this PR).
+Note: API returns enabled workflows; local includes reusable and disabled. temporary-main-telemetry-refresh-9973.yml removed in this PR, so local is 48.
 
 ## 2. Retention inventory (rg -n retention-days)
 
 | retention | count | bytes | notes |
 |---|---|---|---|
-| 1 | 8 | - | noisy sharded logs, docker 1d |
-| 3 | 12 | - | deprecated legacy, migrate to 1 or 7 |
+| 1 | 9 | - | noisy sharded logs, docker 1d |
+| 3 | 19 | - | deprecated legacy, migrate to 1 or 7 |
 | 7 | 22 | - | default |
-| 14 | 18 | - | telemetry 14d |
-| 30 | 11 | - | coverage 30d |
+| 14 | 17 | - | telemetry 14d |
+| 30 | 10 | - | coverage 30d |
 
 Policy: configs/quality/retention-policy.yaml (default 7, allowed 1/7/14/30, deprecated 3). Trivy cache type=gha verified in docker.yml:144.
 

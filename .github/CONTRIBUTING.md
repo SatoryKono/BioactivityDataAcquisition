@@ -225,5 +225,5 @@ legacy aliases are migration-only and MUST NOT be added to new work.
 
 - .github/labels.yml is intentionally not tracked without an owner sync process. Do not add a dead file.
 - If sync is needed, add workflow actions/label-sync or manage manually via gh label commands and document in this file.
-- Verify consistency via gh label list --limit 100 and gh api repos/.../labels.
+- Verify consistency via gh label list --limit 300 and gh api labels --paginate to cover all 209 labels (default limit 30/100 truncates).
 - runs-on: keep chembl-baseline-smoke on ubuntu-24.04 (test_chembl_baseline_smoke_workflow.py); do not unify 114->0. Unify only with tests, P2.
