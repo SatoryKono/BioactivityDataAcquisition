@@ -250,7 +250,11 @@
           "write_file": false
         },
         "enable_all_context_servers": false,
-        "context_servers": {}
+        "context_servers": {
+          "memory": {},
+          "fetch": {},
+          "context7": {}
+        }
       },
       "bioetl-write": {
         "name": "BioETL Write",
@@ -273,7 +277,13 @@
           "write_file": true
         },
         "enable_all_context_servers": false,
-        "context_servers": {}
+        "context_servers": {
+          "memory": {},
+          "filesystem": {},
+          "fetch": {},
+          "github": {},
+          "ast-grep": {}
+        }
       }
     },
     "tool_permissions": {
