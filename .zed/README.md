@@ -78,8 +78,8 @@ Comprehensive keymap with:
 Large directories and caches are excluded from file scanning for performance (Wave 1 extended):
 - `.git`, `.svn`, `.hg`, `.jj`, `CVS`
 - `node_modules`, `__pycache__`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`
-- `.venv*`, `venv`, `env`
-- `dist`, `build`, `coverage`, `htmlcov`, `reports/coverage`, `reports`, `reports/audit-runs` (80+ dirs), `logs`, `data`, `.codex`, `.claude`, `.junie`, `.devin`
+- `.venv*`, `venv`, `env`, `.env*`
+- `dist`, `build`, `coverage`, `htmlcov` (single entry), `reports/coverage`, `reports`, `reports/audit-runs` (80+ dirs), `logs`, `data`, `.codex`, `.claude`, `.junie`, `.devin`
 - `target`, `generated`, `data/debug_exports`
 
 ## Helper Scripts
