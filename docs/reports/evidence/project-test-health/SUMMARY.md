@@ -1,6 +1,6 @@
 ---
 status: active-non-canonical
-last_verified: "2026-08-28"
+last_verified: "2026-09-05"
 freshness_window_days: 7
 owner: quality
 canonical_sources:
@@ -36,9 +36,8 @@ must be refreshed after each full test campaign.
 
 ## Freshness note
 
-Re-verified on 2026-08-28 during the Sonar closeout campaign
-(`fix/sonar-closeout-current-main-20260827@35904a9e72`): all canonical source
-paths still exist, and the tracked test-module inventory contains 2380 files.
+Re-verified on 2026-09-05 on `fix/ci-linux-gov-artifacts`: all canonical source
+paths still exist, and the tracked test-module inventory contains 2414 files.
 Interpretation remains backlog signal only pending the complete full-pytest
 telemetry receipt. Recurrence of #7419.
 
