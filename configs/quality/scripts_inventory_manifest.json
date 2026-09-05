@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-05T20:51:51.697099+00:00",
+  "generated_at": "2026-09-05T21:35:20.588412+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 615,
     "status_counts": {
       "active": 338,
+      "orphan": 2,
       "supporting": 275
     },
     "reference_group_coverage": {
@@ -12,7 +13,7 @@
       "build": 17,
       "ci": 83,
       "docs": 252,
-      "other": 74,
+      "other": 75,
       "scripts": 512,
       "skills": 12,
       "tests": 425
@@ -2704,7 +2705,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 35,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2731,6 +2732,12 @@
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
         {
+          "path": ".zed/settings.json",
+          "line": 505,
+          "source_group": "other",
+          "text": "\"instructions\": \"Before any edit: read docs/00-project/NORMATIVE_SOURCES.md, docs/00-project/RULES.md §1-4, docs/00-project/ai/agents/guides/MEMORY_USAGE.md. Follow hexagonal architecture and Medallio"
+        },
+        {
           "path": "AGENTS.md",
           "line": 89,
           "source_group": "agents",
@@ -2747,12 +2754,6 @@
           "line": 108,
           "source_group": "docs",
           "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check"
-        },
-        {
-          "path": "docs/00-project/ai/README.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "(parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`)."
         }
       ]
     },
@@ -7949,7 +7950,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 214,
+      "reference_count": 215,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -22512,6 +22513,22 @@
           "text": "\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\""
         }
       ]
+    },
+    {
+      "path": "scripts/run_all.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/run_bash.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",
