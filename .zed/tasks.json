@@ -57,7 +57,7 @@
       "src/bioetl"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "no_focus",
     "hide": "never",
     "save": "all",
     "allow_concurrent_runs": false
@@ -291,7 +291,7 @@
       "scripts/engineering/dev/zed_lint_imports.py"
     ],
     "cwd": "$ZED_WORKTREE_ROOT",
-    "reveal": "always",
+    "reveal": "no_focus",
     "hide": "never",
     "save": "all",
     "allow_concurrent_runs": false
