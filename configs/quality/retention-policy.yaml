@@ -1,0 +1,33 @@
+schema_version: 1
+policy:
+  default_retention_days: 7
+  rationale: Default 7 days balances debuggability vs storage; 1 day for noisy sharded logs, 14/30 only for telemetry/coverage per issue 10122
+  storage_note: Do not inflate 1d to 7d without measuring GB/month; docker 1d remains 1d
+classes:
+  - name: noisy_sharded_logs
+    retention_days: 1
+    examples: [tests.yml dependency-preflight sharded logs, docker.yml build logs 1d]
+    condition: high-volume per-shard artifacts with low post-run value
+  - name: standard_ci
+    retention_days: 7
+    examples: [tests.yml 7d artifacts, port-contracts 7d, dashboard 7d]
+    condition: default for PR-gate artifacts
+  - name: telemetry_14
+    retention_days: 14
+    examples: [architecture telemetry, e2e-matrix-health 14d, branch-hygiene 14d]
+    condition: telemetry evidence retained 14d for audit
+  - name: coverage_30
+    retention_days: 30
+    examples: [contract-governance 30d, performance-nightly 30d, release 30d]
+    condition: coverage long-horizon evidence 30d
+  - name: short_lived_3
+    retention_days: 3
+    allowed: true
+    deprecation: 3d is legacy; migrate to 1 or 7 via measurement. New artifacts MUST NOT use 3d without waiver.
+    examples: [duplication 3d, root-hygiene 3d, type-checking 3d]
+allowed_retentions: [1, 7, 14, 30]
+deprecated_retentions: [3]
+trivy_cache:
+  workflow: .github/workflows/docker.yml:144
+  type: gha
+  status: verified
