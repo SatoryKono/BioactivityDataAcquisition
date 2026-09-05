@@ -24,6 +24,7 @@
     "**/.venv-wsl",
     "**/venv",
     "**/env",
+    "**/.env*",
     "**/__pycache__",
     "**/.pytest_cache",
     "**/.mypy_cache",
@@ -44,7 +45,6 @@
     "**/.claude",
     "**/.junie",
     "**/.devin",
-    "**/htmlcov",
     "**/target",
     "**/generated",
     "**/data/debug_exports"
@@ -169,8 +169,7 @@
   "terminal": {
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VCR_RECORD_MODE": "none",
-      "VIRTUAL_ENV": ".venv-win"
+      "VCR_RECORD_MODE": "none"
     },
     "detect_venv": {
       "on": {
