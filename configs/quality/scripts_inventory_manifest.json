@@ -1,11 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-05T21:35:20.588412+00:00",
+  "generated_at": "2026-09-05T22:00:55.628691+00:00",
   "summary": {
-    "total_scripts": 615,
+    "total_scripts": 613,
     "status_counts": {
       "active": 338,
-      "orphan": 2,
       "supporting": 275
     },
     "reference_group_coverage": {
@@ -22513,22 +22512,6 @@
           "text": "\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\""
         }
       ]
-    },
-    {
-      "path": "scripts/run_all.ps1",
-      "type": "ps1",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
-      "path": "scripts/run_bash.sh",
-      "type": "sh",
-      "status": "orphan",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/schema/__main__.py",
