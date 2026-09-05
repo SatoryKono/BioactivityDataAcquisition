@@ -257,7 +257,7 @@ jobs:
           sarif_file: "reports/security/trivy-results.sarif"
 
       - name: Generate SBOM for the scanned local image
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           image: "bioetl:${{ github.sha }}"
           format: spdx-json
@@ -478,7 +478,7 @@ jobs:
           test "${remote_config}" = "${expected_id}"
 
       - name: Generate GHCR image SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           image: ${{ steps.ghcr.outputs.image_base }}:${{ github.sha }}
           format: spdx-json
