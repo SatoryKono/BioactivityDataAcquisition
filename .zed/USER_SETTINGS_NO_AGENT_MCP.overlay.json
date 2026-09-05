@@ -1,5 +1,5 @@
 {
-  "_comment": "Merge into %APPDATA%/Zed/settings.json (user-level). Do not commit user secrets. Goal: Zed Agent / External Agents do not spawn stdio MCP thrash; use BioETL shared HTTP plane outside Zed. Wave 2: mermaid/mutmut/code-analyzer/code-interpreter/deja/adr-analysis are lazy (enabled:false) — enable per-host when needed. prometheus/grafana/neo4j-* stay enabled.",
+  "_comment": "Merge into %APPDATA%/Zed/settings.json (user-level). Do not commit user secrets. Goal: Zed Agent / External Agents do not spawn stdio MCP thrash; use BioETL shared HTTP plane outside Zed. Wave 2: mermaid/mutmut/code-analyzer/code-interpreter/deja/adr-analysis + prometheus/grafana/neo4j-* are lazy (enabled:false) - enable per-host when needed (monitoring/Neo4j).",
   "context_servers": {
     "mcp-server-context7": {
       "enabled": false
@@ -23,6 +23,18 @@
       "enabled": false
     },
     "mcp-server-adr-analysis": {
+      "enabled": false
+    },
+    "mcp-server-prometheus": {
+      "enabled": false
+    },
+    "mcp-server-grafana": {
+      "enabled": false
+    },
+    "mcp-server-neo4j-cypher": {
+      "enabled": false
+    },
+    "mcp-server-neo4j-memory": {
       "enabled": false
     }
   },
