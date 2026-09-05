@@ -284,7 +284,60 @@
           "github": {},
           "ast-grep": {}
         }
-      }
+},
+      "bioetl-arch": {
+        "name": "BioETL Arch",
+        "tools": {
+          "diagnostics": true,
+          "read_file": true,
+          "grep": true,
+          "find_path": true,
+          "list_directory": true,
+          "fetch": false,
+          "search_web": false,
+          "copy_path": false,
+          "create_directory": false,
+          "delete_path": false,
+          "edit_file": false,
+          "move_path": false,
+          "skill": false,
+          "spawn_agent": false,
+          "terminal": false,
+          "write_file": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {
+          "adr-analysis": {},
+          "code-analyzer": {}
+        }
+      },
+      "bioetl-debug": {
+        "name": "BioETL Debug",
+        "tools": {
+          "diagnostics": true,
+          "read_file": true,
+          "grep": true,
+          "find_path": true,
+          "list_directory": true,
+          "fetch": true,
+          "search_web": false,
+          "copy_path": false,
+          "create_directory": false,
+          "delete_path": false,
+          "edit_file": false,
+          "move_path": false,
+          "skill": false,
+          "spawn_agent": false,
+          "terminal": true,
+          "write_file": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {
+          "memory": {},
+          "fetch": {},
+          "context7": {}
+        }
+}
     },
     "tool_permissions": {
       "default": "confirm",
@@ -448,7 +501,8 @@
           "default": "confirm"
         }
       }
-    }
+    },
+    "instructions": "Before any edit: read docs/00-project/NORMATIVE_SOURCES.md, docs/00-project/RULES.md §1-4, docs/00-project/ai/agents/guides/MEMORY_USAGE.md. Follow hexagonal architecture and Medallion (Bronze append-only, Silver/Gold Delta), do not increase tech-debt budgets, do not hardcode secrets. After docs link/header changes: python -m scripts.docs generate-cleanup-inventory --update. For AI runtime mirrors use bash scripts/ai/junie/check_junie_mirror.sh --check."
   },
   "telemetry": {
     "diagnostics": false,
