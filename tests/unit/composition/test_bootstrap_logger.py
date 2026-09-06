@@ -40,18 +40,22 @@ import structlog
 class TestBootstrapLogger:
     """Tests for BootstrapLogger class."""
 
-    def test_get_bootstrap_logger_returns_bound_logger(self):
-        """Test that get_bootstrap_logger returns a structlog bound logger."""
-        from bioetl.composition.bootstrap_logger import (
-            get_bootstrap_logger,
-            reset_bootstrap_logger,
-        )
+    def test_get_bootstrap_logger_returns_bound_logger(self, monkeypatch):
+        """A cold bootstrap configures logging once before caching its bound logger."""
+        from importlib import import_module
+        from unittest.mock import Mock
 
-        reset_bootstrap_logger()  # Ensure clean state
-        logger = get_bootstrap_logger()
+        module = import_module("bioetl.composition.bootstrap_logger")
+        configure = Mock(wraps=module.configure_logging)
+        monkeypatch.setattr(module, "_bootstrap_logger", None)
+        monkeypatch.setattr(module, "is_logging_configured", lambda: False)
+        monkeypatch.setattr(module, "configure_logging", configure)
 
-        assert logger is not None
+        logger = module.get_bootstrap_logger()
+
         assert isinstance(logger, structlog.stdlib.BoundLogger)
+        assert module.get_bootstrap_logger() is logger
+        configure.assert_called_once_with(json_format=True, log_level="INFO")
 
     def test_get_bootstrap_logger_is_cached(self):
         """Test that get_bootstrap_logger returns the same instance."""

@@ -38,7 +38,7 @@
       "evidence_metrics": {
         "composition_util": 0.9833,
         "layer_violations": 0,
-        "lazy_util": 1.0206,
+        "lazy_util": 1.0,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
@@ -54,7 +54,7 @@
         "families_at_budget_count": 2,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "lazy_util": 1.0206,
+        "lazy_util": 1.0,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
@@ -177,8 +177,8 @@
     "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 97,
-    "lazy_import_observed_count": 99,
-    "lazy_util": 1.0206,
+    "lazy_import_observed_count": 97,
+    "lazy_util": 1.0,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -210,8 +210,8 @@
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "lazy_import_cap": 97,
-    "lazy_import_observed_count": 99,
-    "lazy_util": 1.0206,
+    "lazy_import_observed_count": 97,
+    "lazy_util": 1.0,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "f8453a6c863a0c3648138b665814d47b58335ec023c5e06d872663f611f4580e"
+      "source_fingerprint": "7e88c20c04cd4410c5b9b292e9ce58a8b05379ca074a3f841abe193f19bcd8e2"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -273,9 +273,9 @@
       "snapshot_date": "2026-07-27"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "295942dd2f898b644af09000c90006bb2dd859e2e798a3978b6cdef1ad7c7b18",
+      "coverage_xml_sha256": "ad66029ef79817b5a4a2408a27a9348efe3548301f91952410ea44f56a91210e",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "88fc588d06d14c0aae801eff3261b6a26213cb89895f673e80af7730778f87d1"
+      "source_tree_sha256": "8a9e255400459641f3a09f44b84c999106b336264859c292e6c468f6f3206083"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

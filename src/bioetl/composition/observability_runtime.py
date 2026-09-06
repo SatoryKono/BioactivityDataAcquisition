@@ -12,6 +12,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlunsplit
 
+from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
 from bioetl.composition.bootstrap.runtime_public_exports import (
     AuditInspectionServiceProtocol,
     CheckpointServiceProtocol,
@@ -155,11 +157,6 @@ def push_metrics_to_gateway(
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
     if workflow_name is not None:
-        from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
-        from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
-            bootstrap_logger,
-        )
-
         publication_logger = logger or bootstrap_logger(
             pipeline=pipeline_name or "unknown"
         )
@@ -168,20 +165,22 @@ def push_metrics_to_gateway(
             pipeline_names=pipeline_names,
             run_type=run_type,
         )
-        push_metrics = bootstrap_metrics_service(
-            logger=publication_logger
-        ).push_to_gateway
+        result = bootstrap_metrics_service(logger=publication_logger).push_to_gateway(
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=grouping_key,
+            metric_names=metric_names,
+        )
     else:
         metrics_service = get_metrics_service()
         if logger is not None:
             metrics_service.logger = logger
-        push_metrics = metrics_service.push_to_gateway
-    result = push_metrics(
-        gateway=gateway,
-        run_label=run_label,
-        grouping_key=grouping_key,
-        metric_names=metric_names,
-    )
+        result = metrics_service.push_to_gateway(
+            gateway=gateway,
+            run_label=run_label,
+            grouping_key=grouping_key,
+            metric_names=metric_names,
+        )
     return bool(result.success)
 
 
