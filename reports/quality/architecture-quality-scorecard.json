@@ -25,14 +25,14 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2467,
+        "source_module_count": 2468,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
-      "score": 10.0,
+      "score": 9.2,
       "weight": 0.09,
-      "weighted_score": 0.9
+      "weighted_score": 0.828
     },
     {
       "evidence_metrics": {
@@ -78,13 +78,13 @@
       "evidence_metrics": {
         "compatibility_test_file_count": 0,
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 0
+        "unmeasured_module_count": 1
       },
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
-      "score": 10.0,
+      "score": 8.5,
       "weight": 0.12,
-      "weighted_score": 1.2
+      "weighted_score": 1.02
     },
     {
       "evidence_metrics": {
@@ -186,7 +186,7 @@
     }
   },
   "generated_by": "bioetl.infrastructure.quality.architecture_quality_scorecard",
-  "integral_score": 9.14,
+  "integral_score": 8.89,
   "interpretation": "good_targeted_improvements",
   "metrics": {
     "accepted_adr_count": 58,
@@ -220,13 +220,13 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2467,
+    "source_module_count": 2468,
     "sunset_compat_count": 0,
     "total_duplicate_clusters": 0,
     "transition_compat_count": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
-    "unmeasured_module_count": 0
+    "unmeasured_module_count": 1
   },
   "schema_version": 2,
   "source_artifacts": {
@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "8d608718b061e032a4814379802e86ab451ec8ae966da7c38168244435fbc754"
+      "source_fingerprint": "0a225b469dc1320bf13dd8b9b4eeeb8a8354673f752ebf5141b9834046cbc781"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
