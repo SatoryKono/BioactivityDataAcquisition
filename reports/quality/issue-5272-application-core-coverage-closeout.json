@@ -11,7 +11,7 @@
   },
   "current_metrics": {
     "repo_uncovered_module_count": 0,
-    "repo_unmeasured_module_count": 1,
+    "repo_unmeasured_module_count": 0,
     "application_core_covered_line_percent": 97.59,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
@@ -34,5 +34,5 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Application core coverage improved significantly (49.09% -> 97.59%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules is 1 (rehydrate_models). Parent epic #5244 stays open while 62 production modules remain below the default coverage floor."
+  "notes": "Application core coverage improved significantly (49.09% -> 97.59%) and application_core uncovered/unmeasured modules remain zero. Repo-level unmeasured modules is 0; rehydrate_models is measured at 100%. Parent epic #5244 stays open while 62 production modules remain below the default coverage floor."
 }
