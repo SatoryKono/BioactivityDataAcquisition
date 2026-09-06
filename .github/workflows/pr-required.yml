@@ -89,6 +89,14 @@ jobs:
           fi
           uv run --frozen --no-build python -m scripts.engineering.ci pr-gate classify "${classify_args[@]}"
 
+      - name: Publish decision matrix summary
+        if: always()
+        run: |
+          echo "## PR Gate decision matrix" >> "$GITHUB_STEP_SUMMARY"
+          echo "| gate | result | reason |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.gates[] | "| \(.id) | \(.result) | \(.reason) |"' reports/quality/pr-gate-decisions.json >> "$GITHUB_STEP_SUMMARY" || cat reports/quality/pr-gate-decisions.json >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload decision matrix
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
