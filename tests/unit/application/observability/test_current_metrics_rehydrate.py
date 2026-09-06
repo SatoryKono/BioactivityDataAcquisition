@@ -424,3 +424,80 @@ def test_rehydrate_writes_workflow_expected_scrape_sample(
     assert aligned.status == "healthy"
     assert aligned.state == "aligned"
     assert aligned.missing_workflows == ()
+
+
+def test_reconciliation_aligns_workflow_without_child_pipeline_report(
+    tmp_path: Path,
+) -> None:
+    _write_workflow_report(
+        tmp_path,
+        workflow="workflow_only",
+        run_id="wf-only",
+        status="success",
+        attach_children=False,
+    )
+    result = reconcile_current_metrics_with_run_reports(
+        root=tmp_path,
+        exposition='bioetl_workflow_expected{workflow="workflow_only"} 1.0\n',
+    )
+    assert result.status == "healthy"
+    assert result.state == "aligned"
+    assert result.durable_success_count == 0
+    assert result.durable_workflow_success_count == 1
+    assert result.missing_workflows == ()
+    assert "workflow success reports" in result.message
+
+
+@pytest.mark.parametrize(
+    ("completed_at", "expected_unix"),
+    [("2026-01-01T00:00:00+00:00", 1767225600.0), ("invalid-date", 1700000000.0)],
+)
+def test_rehydrate_uses_completion_time_or_artifact_mtime(
+    tmp_path: Path,
+    completed_at: str,
+    expected_unix: float,
+) -> None:
+    import os
+
+    path = _write_report(
+        tmp_path,
+        pipeline="chembl_assay",
+        run_id="dated",
+        run_type="backfill",
+        status="success",
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["identity"]["completed_at"] = completed_at
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    os.utime(path, (1700000000.0, 1700000000.0))
+
+    anchors = collect_latest_terminal_anchors(root=tmp_path)
+
+    assert len(anchors) == 1
+    assert anchors[0].observed_unix == expected_unix
+
+
+def test_rehydrate_reports_metrics_failure_and_allows_retry(tmp_path: Path) -> None:
+    reset_rehydrate_seed_state()
+    _write_report(
+        tmp_path,
+        pipeline="chembl_assay",
+        run_id="retryable",
+        run_type="backfill",
+        status="success",
+    )
+    metrics = MagicMock()
+    metrics.set_gauge.side_effect = RuntimeError("metrics unavailable")
+
+    failed = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+
+    assert failed.error == "metrics unavailable"
+    assert failed.pipeline_runs_seeded == 0
+    metrics.increment_counter.assert_not_called()
+
+    metrics.set_gauge.side_effect = None
+    recovered = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+
+    assert recovered.error is None
+    assert recovered.pipeline_runs_seeded == 1
+    metrics.increment_counter.assert_called_once()
