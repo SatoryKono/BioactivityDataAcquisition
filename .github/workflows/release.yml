@@ -29,10 +29,14 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Python + uv
         uses: ./.github/actions/setup-python-uv
@@ -80,6 +84,11 @@ jobs:
           upload-artifact: true
           upload-artifact-retention: 30
           upload-release-assets: false
+
+      - name: Attest distribution provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: dist/*
 
   test-install:
     name: Test Installation

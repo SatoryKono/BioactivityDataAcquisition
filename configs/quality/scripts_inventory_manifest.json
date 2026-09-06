@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T15:34:55.901805+00:00",
+  "generated_at": "2026-09-06T18:01:26.300032+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -17237,7 +17237,7 @@
         },
         {
           "path": ".github/workflows/release.yml",
-          "line": 44,
+          "line": 48,
           "source_group": "ci",
           "text": "run: python -m scripts.engineering.repo check-versions"
         }
@@ -21436,7 +21436,7 @@
         },
         {
           "path": "docs/05-operations/01-monitoring-guide.md",
-          "line": 267,
+          "line": 274,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/runtime_manager.py status --stack main`"
         },
