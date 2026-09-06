@@ -8,7 +8,15 @@ concurrency:
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - master
+    paths:
+      - "src/bioetl/domain/**"
+      - "src/bioetl/application/**"
+      - "tests/**"
+      - ".github/workflows/mutation-testing.yml"
+  pull_request:
     paths:
       - "src/bioetl/domain/**"
       - "src/bioetl/application/**"

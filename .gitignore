@@ -682,5 +682,3 @@ _fail_*.txt
 !/docs/99-archive/skills-2026-09/**
 !/docs/99-archive/prompts-2026-09/
 !/docs/99-archive/prompts-2026-09/**
-!/reports/quality/github-inventory.md
-!/reports/quality/pr-gate-shadow.json
