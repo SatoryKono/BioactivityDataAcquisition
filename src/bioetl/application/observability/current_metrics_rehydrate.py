@@ -376,12 +376,11 @@ def _collect_pipeline_names(rows: object, seen: set[str], names: list[str]) -> N
     if not isinstance(rows, list):
         return
     for row in rows:
-        if not isinstance(row, dict):
-            continue
-        pipeline = _first_text(row.get("pipeline_name"))
-        if pipeline and pipeline not in seen:
-            seen.add(pipeline)
-            names.append(pipeline)
+        if isinstance(row, dict):
+            pipeline = _first_text(row.get("pipeline_name"))
+            if pipeline and pipeline not in seen:
+                seen.add(pipeline)
+                names.append(pipeline)
 
 
 def _pipeline_names_from_payload(payload: dict[str, object]) -> tuple[str, ...]:
