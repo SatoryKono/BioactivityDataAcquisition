@@ -3586,13 +3586,13 @@
       "source_lines": 401
     },
     {
+      "coverage_percent": 0.0,
+      "coverage_status": "unmeasured",
+      "covered_lines": 0,
+      "executable_lines": 14,
+      "missing_lines": 14,
       "module": "bioetl.application.observability.rehydrate_models",
       "path": "src/bioetl/application/observability/rehydrate_models.py",
-      "coverage_status": "unmeasured",
-      "coverage_percent": 0.0,
-      "covered_lines": 0,
-      "executable_lines": 0,
-      "missing_lines": 0,
       "source_lines": 41
     },
     {
@@ -28268,6 +28268,16 @@
       "source_lines": 401
     },
     {
+      "coverage_percent": 0.0,
+      "coverage_status": "unmeasured",
+      "covered_lines": 0,
+      "executable_lines": 0,
+      "missing_lines": 0,
+      "module": "bioetl.application.observability.rehydrate_models",
+      "path": "src/bioetl/application/observability/rehydrate_models.py",
+      "source_lines": 41
+    },
+    {
       "coverage_percent": 95.96,
       "coverage_status": "partially_covered",
       "covered_lines": 95,
@@ -49515,18 +49525,24 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2467,
+    "source_module_count": 2468,
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1605,
       "no_executable_lines": 4,
       "partially_covered": 858,
       "uncovered": 0,
-      "unmeasured": 0
+      "unmeasured": 1
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 0,
-    "unmeasured_modules": []
+    "unmeasured_module_count": 1,
+    "unmeasured_modules": [
+      {
+        "module": "bioetl.application.observability.rehydrate_models",
+        "path": "src/bioetl/application/observability/rehydrate_models.py",
+        "reason": "coverage_xml_has_no_class_entry"
+      }
+    ]
   }
 }
