@@ -700,6 +700,8 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "metric_names": (
                 "bioetl_workflow_expected",
                 "bioetl_workflow_pipeline_expected",
@@ -707,12 +709,16 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
         },
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
         },
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
         },
@@ -845,6 +851,8 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_core",
+            "pipeline_names": ("chembl_activity", "chembl_assay", "chembl_target"),
             "metric_names": (
                 "bioetl_workflow_expected",
                 "bioetl_workflow_pipeline_expected",
@@ -852,6 +860,8 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
         },
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_core",
+            "pipeline_names": ("chembl_activity", "chembl_assay", "chembl_target"),
             "pipeline_name": None,
             "run_type": None,
             "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
@@ -933,6 +943,8 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "metric_names": (
                 "bioetl_workflow_expected",
                 "bioetl_workflow_pipeline_expected",
@@ -940,12 +952,16 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
         },
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "metric_names": _EXPECTED_WORKFLOW_PUBLICATION_METRIC_NAMES,
         },
         {
             "run_label": "bioetl",
+            "workflow_name": "chembl_activity",
+            "pipeline_names": ("chembl_activity",),
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
         },
@@ -1027,3 +1043,88 @@ def test_workflow_status_json_payload_includes_explicit_limits(
     assert result.exit_code == 0
     assert '"execution_history_available": false' in result.output.lower()
     assert '"history_scope": "bounded-static-config"' in result.output
+
+
+def test_multi_pipeline_push_failure_preserves_success_and_report(
+    cli_runner: CliRunner,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """An unreachable backup gateway cannot discard a successful workflow report."""
+    import json
+    from structlog.testing import capture_logs
+    from bioetl.composition.bootstrap.assembly.metrics_service import (
+        create_metrics_service,
+    )
+    from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration import (
+        publish_metrics_safely,
+    )
+    import bioetl.interfaces.cli.commands.workflow as workflow_cmd
+
+    report = tmp_path / "workflow-report.json"
+
+    class ReportingService(_FakeWorkflowRunnerService):
+        async def run_workflow(
+            self, config: object, **kwargs: object
+        ) -> WorkflowRunExecutionResult:
+            result = await super().run_workflow(config, **kwargs)
+            report.write_text(json.dumps({"status": result.status}), encoding="utf-8")
+            return result
+
+    attempts: list[dict[str, object]] = []
+
+    def unavailable_gateway(*args: object, **kwargs: object) -> None:
+        attempts.append(kwargs)
+        raise ConnectionRefusedError("private gateway exception detail")
+
+    monkeypatch.setattr(
+        workflow_cmd,
+        "get_workflow_execution_service",
+        lambda registry=None: ReportingService(),
+    )
+    monkeypatch.setattr(workflow_cmd, "ensure_metrics_server_started", lambda: True)
+    monkeypatch.setattr(workflow_cmd, "publish_metrics_safely", publish_metrics_safely)
+    monkeypatch.setattr(
+        workflow_cmd,
+        "load_workflow_config",
+        lambda name: _limit_safe_multi_pipeline_workflow(),
+    )
+    monkeypatch.setattr(
+        "bioetl.composition.bootstrap.cli.metrics.bootstrap_metrics_service",
+        create_metrics_service,
+    )
+    monkeypatch.setattr(
+        "bioetl.infrastructure.observability.server.push_to_gateway",
+        unavailable_gateway,
+    )
+    from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
+
+    bootstrap_logger(pipeline="unknown")
+    with capture_logs() as logs:
+        result = cli_runner.invoke(
+            cli,
+            [
+                "workflow",
+                "run",
+                "chembl_core",
+                "--required-persistence-profile",
+                "degraded_observable",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(report.read_text(encoding="utf-8")) == {"status": "success"}
+    failures = [entry for entry in logs if entry["event"] == "push_failed"]
+    assert len(failures) == len(attempts) == 2, (logs, result.output)
+    for entry in failures:
+        assert entry["workflow_name"] == "chembl_core"
+        assert entry["pipeline_names"] == (
+            "chembl_activity",
+            "chembl_assay",
+            "chembl_target",
+        )
+        assert entry["run_type"] is None
+        assert entry["gateway_class"] == "http"
+        assert entry["error_type"] == "ConnectionRefusedError"
+        assert "private gateway exception detail" not in str(entry)
+    assert all(attempt["grouping_key"] == {} for attempt in attempts)

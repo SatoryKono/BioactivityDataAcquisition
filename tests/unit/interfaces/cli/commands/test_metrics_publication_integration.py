@@ -62,6 +62,8 @@ def test_publish_metrics_safely_delegates_to_observability_api() -> None:
         run_type="backfill",
         grouping_key_extra={"workflow_run_id": "run-123"},
         metric_names=("bioetl_workflow_runs",),
+        workflow_name=None,
+        pipeline_names=(),
     )
 
 

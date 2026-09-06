@@ -38,7 +38,7 @@
       "evidence_metrics": {
         "composition_util": 0.9833,
         "layer_violations": 0,
-        "lazy_util": 1.0,
+        "lazy_util": 1.0206,
         "public_entrypoint_growth_count": 0,
         "public_export_facade_conflict_count": 0,
         "public_export_facade_growth_count": 0
@@ -54,7 +54,7 @@
         "families_at_budget_count": 2,
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "lazy_util": 1.0,
+        "lazy_util": 1.0206,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
@@ -177,8 +177,8 @@
     "families_at_budget_count": 2,
     "grade_kind": "diagnostic_proxy",
     "lazy_import_cap": 97,
-    "lazy_import_observed_count": 97,
-    "lazy_util": 1.0,
+    "lazy_import_observed_count": 99,
+    "lazy_util": 1.0206,
     "program_gate_policy": "external_unchanged",
     "proxy_notes": {
       "ddd_invariants": "module coverage status proxy; not a count of DDD aggregates or invariant completeness",
@@ -210,8 +210,8 @@
     "hotspot_family_count": 5,
     "layer_violations": 0,
     "lazy_import_cap": 97,
-    "lazy_import_observed_count": 97,
-    "lazy_util": 1.0,
+    "lazy_import_observed_count": 99,
+    "lazy_util": 1.0206,
     "public_entrypoint_growth_count": 0,
     "public_export_facade_conflict_count": 0,
     "public_export_facade_growth_count": 0,
@@ -256,7 +256,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "082d8bd87b3d13153547461d6a0116a477c0c205143679c1686cf347a7ed19f2"
+      "source_fingerprint": "f8453a6c863a0c3648138b665814d47b58335ec023c5e06d872663f611f4580e"
     },
     "diagnostic_policy": {
       "lazy_import_ratchet": "configs/quality/lazy_import_ratchet.yaml",
@@ -275,7 +275,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "295942dd2f898b644af09000c90006bb2dd859e2e798a3978b6cdef1ad7c7b18",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "413215409b14d9aa7e34270c8eeffe1f5f2901235358bc96e3bb6c5a223d12dd"
+      "source_tree_sha256": "88fc588d06d14c0aae801eff3261b6a26213cb89895f673e80af7730778f87d1"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

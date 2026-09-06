@@ -408,7 +408,7 @@ class TestMetricsService:
         assert result.error == "Metrics publisher is not configured"
         mock_logger.warning.assert_called_once_with(
             "Metrics gateway publication unavailable",
-            gateway="localhost:9091",
+            gateway_class="http",
             run_label="bioetl",
             grouping_key={"pipeline": "chembl_activity"},
             error="Metrics publisher is not configured",
@@ -437,7 +437,7 @@ class TestMetricsService:
         assert result.error == "gateway refused"
         mock_logger.warning.assert_called_once_with(
             "Metrics gateway publication failed",
-            gateway="localhost:9091",
+            gateway_class="http",
             run_label="bioetl",
             grouping_key={"pipeline": "chembl_activity"},
             error="gateway refused",
@@ -467,7 +467,7 @@ class TestMetricsService:
         assert result.error == "Publisher returned unsuccessful result"
         mock_logger.warning.assert_called_once_with(
             "Metrics gateway publication failed",
-            gateway="localhost:9091",
+            gateway_class="http",
             run_label="bioetl",
             grouping_key={"pipeline": "chembl_activity"},
             error="Publisher returned unsuccessful result",

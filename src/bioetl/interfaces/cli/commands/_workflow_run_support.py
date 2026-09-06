@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Mapping
+from functools import partial
 from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import UUID
 
@@ -84,6 +85,8 @@ class _MetricsPublisher(Protocol):
         run_type: str | None = None,
         grouping_key_extra: Mapping[str, str] | None = None,
         metric_names: tuple[str, ...] | None = None,
+        workflow_name: str | None = None,
+        pipeline_names: tuple[str, ...] = (),
     ) -> object: ...
 
 
@@ -187,6 +190,11 @@ def _execute_workflow_and_publish_metrics(
     incremental: bool,
 ) -> WorkflowRunExecutionResult:
     """Execute workflow and publish metrics."""
+    publish_metrics_safely_fn = partial(
+        publish_metrics_safely_fn,
+        workflow_name=config.name,
+        pipeline_names=config.pipeline_names,
+    )
     parsed_force_steps = parse_only_steps(force_steps) or ()
     parsed_repair_steps = parse_only_steps(repair_steps) or ()
     workflow_execution_service = get_workflow_execution_service_fn(registry=registry)

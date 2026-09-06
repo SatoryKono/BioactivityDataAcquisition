@@ -175,7 +175,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             error = "Metrics publisher is not configured"
             self.logger.warning(
                 "Metrics gateway publication unavailable",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
                 error=error,
@@ -199,7 +199,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             error = str(exc)
             self.logger.warning(
                 "Metrics gateway publication failed",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
                 error=error,
@@ -216,7 +216,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         if success:
             self.logger.info(
                 "Metrics gateway publication completed",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
             )
@@ -230,7 +230,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         error = "Publisher returned unsuccessful result"
         self.logger.warning(
             "Metrics gateway publication failed",
-            gateway=gateway,
+            gateway_class="https" if gateway.startswith("https://") else "http",
             run_label=run_label,
             grouping_key=labels,
             error=error,
@@ -292,7 +292,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             error = "Metrics publisher is not configured"
             self.logger.warning(
                 "Metrics gateway cleanup unavailable",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
                 error=error,
@@ -315,7 +315,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
             error = str(exc)
             self.logger.warning(
                 "Metrics gateway cleanup failed",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
                 error=error,
@@ -332,7 +332,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         if success:
             self.logger.info(
                 "Metrics gateway cleanup completed",
-                gateway=gateway,
+                gateway_class="https" if gateway.startswith("https://") else "http",
                 run_label=run_label,
                 grouping_key=labels,
             )
@@ -346,7 +346,7 @@ class _MetricsGatewayMixin(_MetricsTracingMixin):
         error = "Publisher returned unsuccessful result"
         self.logger.warning(
             "Metrics gateway cleanup failed",
-            gateway=gateway,
+            gateway_class="https" if gateway.startswith("https://") else "http",
             run_label=run_label,
             grouping_key=labels,
             error=error,

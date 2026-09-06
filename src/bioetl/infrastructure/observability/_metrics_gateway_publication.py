@@ -83,19 +83,6 @@ def _sanitize_pushgateway_grouping_key(
     return sanitized
 
 
-def _redact_gateway_target(gateway: str) -> str:
-    """Redact credentials from gateway URLs for log emission."""
-    # Strip URL userinfo without embedding detector-triggering samples.
-    scheme_sep = "://"
-    if scheme_sep not in gateway or "@" not in gateway:
-        return gateway
-    scheme, rest = gateway.split(scheme_sep, 1)
-    if "@" not in rest:
-        return gateway
-    _userinfo, host_part = rest.rsplit("@", 1)
-    return f"{scheme}{scheme_sep}***@{host_part}"
-
-
 def _redact_grouping_for_log(grouping_key: dict[str, str]) -> dict[str, str]:
     """Return a log-safe copy of grouping labels (already bounded)."""
     return dict(grouping_key)
@@ -136,7 +123,7 @@ def publish_metrics_to_gateway(
         )
         logger.info(
             "Metrics pushed to gateway",
-            gateway=_redact_gateway_target(gateway),
+            gateway_class="https" if gateway.startswith("https://") else "http",
             run_label=effective_run_label,
             grouping_key=_redact_grouping_for_log(safe_grouping_key),
         )
@@ -155,9 +142,11 @@ def publish_metrics_to_gateway(
         TypeError,
     ) as e:
         logger.warning(
-            "Failed to push metrics to gateway",
-            gateway=_redact_gateway_target(gateway),
-            error=type(e).__name__,
+            "push_failed",
+            gateway_class="https" if gateway.startswith("https://") else "http",
+            run_label=effective_run_label,
+            grouping_key=_redact_grouping_for_log(safe_grouping_key),
+            error_type=type(e).__name__,
         )
         _emit_metrics_publication_event(
             grouping_key=safe_grouping_key,
