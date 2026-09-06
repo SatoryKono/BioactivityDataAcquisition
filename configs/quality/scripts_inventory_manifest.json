@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T18:01:26.300032+00:00",
+  "generated_at": "2026-09-06T18:23:47.487643+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -9612,7 +9612,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 357,
+          "line": 359,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
