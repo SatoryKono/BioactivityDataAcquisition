@@ -1,4 +1,7 @@
 {
+  "additive_coverage_xml_path": "reports/ci-main-20260906/rehydrate-coverage.xml",
+  "additive_coverage_xml_sha256": "faacad10f9823cd719fe2846c2304cdc13df5940c8e33dd60ec9ce1148d7991d",
+  "additive_measured_module_count": 1,
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
   "coverage_xml_sha256": "6c79cacb48a980088b9004aace5a411a9c8e758c270ac9f0d757258a45c29d51",
@@ -3586,10 +3589,10 @@
       "source_lines": 401
     },
     {
-      "coverage_percent": 0.0,
-      "coverage_status": "unmeasured",
-      "covered_lines": 0,
-      "executable_lines": 0,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 32,
+      "executable_lines": 32,
       "missing_lines": 0,
       "module": "bioetl.application.observability.rehydrate_models",
       "path": "src/bioetl/application/observability/rehydrate_models.py",
@@ -28268,10 +28271,10 @@
       "source_lines": 401
     },
     {
-      "coverage_percent": 0.0,
-      "coverage_status": "unmeasured",
-      "covered_lines": 0,
-      "executable_lines": 0,
+      "coverage_percent": 100.0,
+      "coverage_status": "fully_covered",
+      "covered_lines": 32,
+      "executable_lines": 32,
       "missing_lines": 0,
       "module": "bioetl.application.observability.rehydrate_models",
       "path": "src/bioetl/application/observability/rehydrate_models.py",
@@ -49528,21 +49531,15 @@
     "source_module_count": 2468,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1605,
+      "fully_covered": 1606,
       "no_executable_lines": 4,
       "partially_covered": 858,
       "uncovered": 0,
-      "unmeasured": 1
+      "unmeasured": 0
     },
     "uncovered_module_count": 0,
     "uncovered_modules": [],
-    "unmeasured_module_count": 1,
-    "unmeasured_modules": [
-      {
-        "module": "bioetl.application.observability.rehydrate_models",
-        "path": "src/bioetl/application/observability/rehydrate_models.py",
-        "reason": "coverage_xml_has_no_class_entry"
-      }
-    ]
+    "unmeasured_module_count": 0,
+    "unmeasured_modules": []
   }
 }

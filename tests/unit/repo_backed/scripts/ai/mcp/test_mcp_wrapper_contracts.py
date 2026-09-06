@@ -1094,7 +1094,7 @@ Invoke-BioetlUvxWithScopedBypass `
   -UvxPath {_ps_quote(_powershell_path(fake_uvx))} `
   -Package 'example-package==1.0' `
   -Command {_ps_quote(_powershell_python_path())} `
-  -CommandArguments @('-c', _ps_quote(server_script), _ps_quote(_powershell_path(server_capture)))
+  -CommandArguments @('-c', {_ps_quote(server_script)}, {_ps_quote(_powershell_path(server_capture))})
 [ordered]@{{
   https_proxy=$env:HTTPS_PROXY
   no_proxy=$env:NO_PROXY
