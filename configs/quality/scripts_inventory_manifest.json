@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T18:23:47.487643+00:00",
+  "generated_at": "2026-09-06T21:25:56.497726+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -7575,13 +7575,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 236,
+          "line": 246,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         },
         {
           "path": "tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py",
-          "line": 248,
+          "line": 258,
           "source_group": "tests",
           "text": "from scripts.diagrams.render.pipeline_dataflow_ir import _project_fields"
         }
@@ -9351,7 +9351,7 @@
       "references": [
         {
           "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "from scripts.docs.passports.source_facts import load_effective_pipeline_facts"
         },
@@ -22765,7 +22765,7 @@
         },
         {
           "path": "scripts/diagrams/render/pipeline_dataflow_ir.py",
-          "line": 21,
+          "line": 22,
           "source_group": "scripts",
           "text": "from scripts.schema.analysis.generate_unified_schema_map import build_unified_schema_row"
         },
