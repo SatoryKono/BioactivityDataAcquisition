@@ -27,7 +27,7 @@
         "schema_version": 1,
         "snapshot_date": "2026-09-05",
         "source_module_count": 2467,
-        "source_tree_sha256": "c208bd4e501584742a7ba64491e2858f4c31dd8d30f05c7f674a6d6334d625ef",
+        "source_tree_sha256": "b76ff8955a6cded50c916c4af294fb06e3ab1f6e0e3e4bf6479bd8664a9f35a3",
         "unmeasured_module_count": 0
       }
     },
