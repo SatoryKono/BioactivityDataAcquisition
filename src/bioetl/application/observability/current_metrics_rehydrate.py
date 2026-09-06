@@ -1,21 +1,4 @@
-"""Rehydrate scraped current-metrics samples from durable run reports.
-
-CLI pipeline processes increment ``bioetl_pipeline_runs_total`` in-process.
-The long-lived ``bioetl health server`` scrape registry is a different process
-and otherwise emits HELP/TYPE without samples, which trips
-``absent_over_time(bioetl_pipeline_runs_total[10m])``.
-
-Workflow CLI publishes ``bioetl_workflow_expected`` in-process the same way.
-Grafana ``$workflow`` is ``label_values(bioetl_workflow_universe, workflow)``
-over the dashboard range and stays All-only until the health-server scrape
-has a sample.
-
-This module publishes CURRENT gauges from the latest terminal pipeline-run
-and workflow-run reports. It never increments RANGE event counters by a
-positive amount and does not invent ``run_id`` labels. Presence-only ``0``
-samples of ``bioetl_pipeline_runs_total`` are allowed so scrape is not
-HELP/TYPE-only and ``increase()`` stays zero until a real in-process run.
-"""
+"""Rehydrate current-metrics from durable reports."""
 
 from __future__ import annotations
 
@@ -42,50 +25,12 @@ _SEEDED_WORKFLOW_KEYS: set[str] = set()
 _SEEDED_WORKFLOW_PIPELINE_KEYS: set[tuple[str, str, str, str]] = set()
 
 
-@dataclass(frozen=True, slots=True)
-class PipelineRunSnapshot:
-    """Latest terminal run identity used to seed current-metric samples."""
-
-    pipeline: str
-    run_type: str
-    status: str
-    provider: str | None
-    run_id: str
-    observed_unix: float
-
-
-@dataclass(frozen=True, slots=True)
-class WorkflowPipelineScope:
-    """One planned pipeline scope from a terminal workflow report."""
-
-    pipeline: str
-    run_type: str
-    provider: str
-
-
-@dataclass(frozen=True, slots=True)
-class WorkflowRunSnapshot:
-    """Latest terminal workflow identity used to seed selector gauges."""
-
-    workflow: str
-    status: str
-    provider: str
-    run_id: str
-    pipelines: tuple[WorkflowPipelineScope, ...]
-
-
-@dataclass(frozen=True, slots=True)
-class RehydrateResult:
-    """Outcome of one rehydrate pass."""
-
-    anchors: int
-    pipeline_runs_seeded: int
-    provider_universe_seeded: int
-    stage_series_seeded: int
-    workflow_anchors: int = 0
-    workflow_expected_seeded: int = 0
-    workflow_pipeline_expected_seeded: int = 0
-    error: str | None = None
+from bioetl.application.observability.rehydrate_models import (
+    PipelineRunSnapshot,
+    RehydrateResult,
+    WorkflowPipelineScopeInfo,
+    WorkflowRunSnapshot,
+)
 
 
 def reset_rehydrate_seed_state() -> None:
@@ -363,7 +308,7 @@ def _anchor_from_workflow_entry(
 
 def _workflow_provider(
     payload: dict[str, object],
-    pipelines: tuple[WorkflowPipelineScope, ...],
+    pipelines: tuple[WorkflowPipelineScopeInfo, ...],
 ) -> str:
     if pipelines:
         return pipelines[0].provider
@@ -397,8 +342,8 @@ def _pipeline_scopes_from_payload(
     payload: dict[str, object],
     *,
     root: Path | None,
-) -> tuple[WorkflowPipelineScope, ...]:
-    selected: dict[tuple[str, str, str], WorkflowPipelineScope] = {}
+) -> tuple[WorkflowPipelineScopeInfo, ...]:
+    selected: dict[tuple[str, str, str], WorkflowPipelineScopeInfo] = {}
     execution = payload.get("execution")
     if not isinstance(execution, list):
         return ()
@@ -415,7 +360,7 @@ def _pipeline_scopes_from_payload(
         key = (pipeline, run_type, provider)
         if key in selected:
             continue
-        selected[key] = WorkflowPipelineScope(
+        selected[key] = WorkflowPipelineScopeInfo(
             pipeline=pipeline,
             run_type=run_type,
             provider=provider,
