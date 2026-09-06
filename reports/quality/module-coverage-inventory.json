@@ -3589,8 +3589,8 @@
       "coverage_percent": 0.0,
       "coverage_status": "unmeasured",
       "covered_lines": 0,
-      "executable_lines": 14,
-      "missing_lines": 14,
+      "executable_lines": 0,
+      "missing_lines": 0,
       "module": "bioetl.application.observability.rehydrate_models",
       "path": "src/bioetl/application/observability/rehydrate_models.py",
       "source_lines": 41
