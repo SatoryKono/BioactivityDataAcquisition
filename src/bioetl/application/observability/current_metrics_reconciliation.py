@@ -124,7 +124,7 @@ def _reconcile_outcome(
     if missing or missing_workflows:
         return CurrentMetricsReconciliationOutcome(
             status="unhealthy",
-            state=_gap_state(missing=missing, missing_workflows=missing_workflows),
+            state=_gap_state(missing=missing),
             message=_gap_message(missing=missing, missing_workflows=missing_workflows),
             durable_success_count=len(successes),
             scrape_has_pipeline_runs_total=scrape_has_samples,
@@ -151,7 +151,7 @@ def _reconcile_outcome(
     )
 
 
-def _gap_state(*, missing: tuple[str, ...], missing_workflows: tuple[str, ...]) -> str:
+def _gap_state(*, missing: tuple[str, ...]) -> str:
     if missing:
         return "durable_success_without_scrape_samples"
     return "durable_workflow_success_without_scrape_samples"
