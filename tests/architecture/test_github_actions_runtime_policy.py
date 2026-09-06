@@ -497,7 +497,7 @@ def test_security_workflow_runs_gitleaks_and_osv_scanner() -> None:
     assert not (ROOT / "osv-scanner.toml").exists()
 
 
-def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
+def test_codeql_workflow_covers_python_and_actions_and_is_sha_pinned() -> None:
     workflow = _load_yaml(ROOT / ".github/workflows/codeql.yml")
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
     uses = _step_uses(workflow, "analyze")
@@ -514,7 +514,7 @@ def test_codeql_workflow_is_python_only_and_sha_pinned() -> None:
         "contents": "read",
         "security-events": "write",
     }
-    assert init_step["with"]["languages"] == "python"
+    assert init_step["with"]["languages"] == "python, actions"
     assert init_step["with"]["build-mode"] == "none"
     assert "matrix" not in jobs["analyze"]
     assert any(f"github/codeql-action/init@{sha}" in uses for sha in allowed_init)
