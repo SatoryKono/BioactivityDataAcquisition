@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    pass
 
 @dataclass(frozen=True, slots=True)
 class PipelineRunSnapshot:
@@ -15,11 +12,13 @@ class PipelineRunSnapshot:
     run_id: str
     observed_unix: float
 
+
 @dataclass(frozen=True, slots=True)
 class WorkflowPipelineScopeInfo:
     pipeline: str
     run_type: str
     provider: str
+
 
 @dataclass(frozen=True, slots=True)
 class WorkflowRunSnapshot:
@@ -28,6 +27,7 @@ class WorkflowRunSnapshot:
     provider: str
     run_id: str
     pipelines: tuple[WorkflowPipelineScopeInfo, ...]
+
 
 @dataclass(frozen=True, slots=True)
 class RehydrateResult:
