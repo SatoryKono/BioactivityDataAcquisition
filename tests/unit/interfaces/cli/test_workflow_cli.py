@@ -1052,6 +1052,7 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
 ) -> None:
     """An unreachable backup gateway cannot discard a successful workflow report."""
     import json
+    from importlib import import_module
     from structlog.testing import capture_logs
     from bioetl.composition.bootstrap.assembly.metrics_service import (
         create_metrics_service,
@@ -1090,11 +1091,13 @@ def test_multi_pipeline_push_failure_preserves_success_and_report(
         lambda name: _limit_safe_multi_pipeline_workflow(),
     )
     monkeypatch.setattr(
-        "bioetl.composition.bootstrap.cli.metrics.bootstrap_metrics_service",
+        import_module("bioetl.composition.observability_runtime"),
+        "bootstrap_metrics_service",
         create_metrics_service,
     )
     monkeypatch.setattr(
-        "bioetl.infrastructure.observability.server.push_to_gateway",
+        import_module("bioetl.infrastructure.observability.server"),
+        "push_to_gateway",
         unavailable_gateway,
     )
     from bioetl.composition.bootstrap.runtime.logger_bootstrap import bootstrap_logger
