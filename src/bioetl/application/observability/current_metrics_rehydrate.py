@@ -372,29 +372,25 @@ def _workflow_provider(
     return "unknown"
 
 
+def _collect_pipeline_names(rows: object, seen: set[str], names: list[str]) -> None:
+    if not isinstance(rows, list):
+        return
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        pipeline = _first_text(row.get("pipeline_name"))
+        if pipeline and pipeline not in seen:
+            seen.add(pipeline)
+            names.append(pipeline)
+
+
 def _pipeline_names_from_payload(payload: dict[str, object]) -> tuple[str, ...]:
     names: list[str] = []
     seen: set[str] = set()
-    execution = payload.get("execution")
-    if isinstance(execution, list):
-        for row in execution:
-            if not isinstance(row, dict):
-                continue
-            pipeline = _first_text(row.get("pipeline_name"))
-            if pipeline and pipeline not in seen:
-                seen.add(pipeline)
-                names.append(pipeline)
+    _collect_pipeline_names(payload.get("execution"), seen, names)
     plan = payload.get("plan")
     if isinstance(plan, dict):
-        steps = plan.get("steps")
-        if isinstance(steps, list):
-            for row in steps:
-                if not isinstance(row, dict):
-                    continue
-                pipeline = _first_text(row.get("pipeline_name"))
-                if pipeline and pipeline not in seen:
-                    seen.add(pipeline)
-                    names.append(pipeline)
+        _collect_pipeline_names(plan.get("steps"), seen, names)
     return tuple(names)
 
 
