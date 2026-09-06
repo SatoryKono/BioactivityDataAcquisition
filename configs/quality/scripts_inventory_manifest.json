@@ -12,7 +12,7 @@
       "build": 17,
       "ci": 83,
       "docs": 252,
-      "other": 74,
+      "other": 75,
       "scripts": 512,
       "skills": 12,
       "tests": 425
@@ -2704,7 +2704,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 35,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -7949,7 +7949,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 214,
+      "reference_count": 215,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
