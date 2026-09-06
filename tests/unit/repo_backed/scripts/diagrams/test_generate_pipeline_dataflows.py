@@ -54,27 +54,37 @@ pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 REPO_ROOT = Path(__file__).resolve().parents[5]
 
 
+@pytest.mark.parametrize(
+    ("timestamp", "expected_date"),
+    [
+        ("2026-09-07T00:15:00+03:00", "2026-09-06"),
+        ("2026-09-06T21:15:00+00:00", "2026-09-06"),
+        ("2026-09-06T23:15:00-03:00", "2026-09-07"),
+    ],
+)
 def test_source_date_uses_pr_head_parent_without_merge_commit_entropy(
     monkeypatch: pytest.MonkeyPatch,
+    timestamp: str,
+    expected_date: str,
 ) -> None:
     calls: list[list[str]] = []
 
     def _run(args: list[str], **_: object) -> SimpleNamespace:
         calls.append(args)
         # Production uses check=False and inspects returncode before stdout.
-        return SimpleNamespace(returncode=0, stdout="2026-07-30\n", stderr="")
+        return SimpleNamespace(returncode=0, stdout=f"{timestamp}\n", stderr="")
 
     monkeypatch.setenv("GITHUB_EVENT_NAME", "pull_request")
     monkeypatch.setattr(pipeline_dataflow_ir.subprocess, "run", _run)
 
-    assert pipeline_dataflow_ir._source_date() == "2026-07-30"
+    assert pipeline_dataflow_ir._source_date() == expected_date
     assert calls == [
         [
             "git",
             "log",
             "--no-merges",
             "-1",
-            "--format=%cs",
+            "--format=%cI",
             "HEAD^2",
             "--",
             "configs",
