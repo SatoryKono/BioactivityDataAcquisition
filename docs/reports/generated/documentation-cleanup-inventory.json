@@ -94174,6 +94174,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "active_quality_baseline",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/github-inventory.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".json",
       "freshness": "review-required",
       "generated_route": null,
@@ -94886,6 +94914,34 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "reports/quality/port-adapter-factory-coverage.md",
+      "recommended_action": "archive-after-migration",
+      "root_doc_kind": null,
+      "section": "reports",
+      "status": "Working",
+      "surface_family": "working",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".json",
+      "freshness": "review-required",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": "working_report",
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "reports/quality/pr-gate-shadow.json",
       "recommended_action": "archive-after-migration",
       "root_doc_kind": null,
       "section": "reports",
@@ -100085,7 +100141,7 @@
     "by_lifecycle": {
       "active_backlog": 1,
       "active_draft": 278,
-      "active_quality_baseline": 65,
+      "active_quality_baseline": 66,
       "closeout_evidence": 88,
       "docs_reports_curated_entrypoint": 2,
       "docs_reports_curated_or_historical_report": 5,
@@ -100100,13 +100156,13 @@
       "plans_governance_entrypoint": 1,
       "published_skill_reference_redirect": 21,
       "reports_workspace_entrypoint": 1,
-      "working_report": 922
+      "working_report": 923
     },
     "by_recommended_action": {
       "archive-after-github-state-check": 336,
-      "archive-after-migration": 929,
+      "archive-after-migration": 930,
       "generate-automatically": 1023,
-      "keep": 1248,
+      "keep": 1249,
       "reconcile-with-github-state": 8,
       "replace-with-link": 2
     },
@@ -100136,7 +100192,7 @@
       "filters": 4,
       "mkdocs.yml": 1,
       "plans": 2,
-      "reports": 1115,
+      "reports": 1117,
       "reports-migration-analysis.md": 1,
       "security": 2
     },
@@ -100146,7 +100202,7 @@
       "Canonical": 73,
       "Deprecated": 2,
       "Generated": 1023,
-      "Working": 1426
+      "Working": 1428
     },
     "by_surface_family": {
       "active": 731,
@@ -100154,10 +100210,10 @@
       "canonical": 73,
       "duplicate": 2,
       "generated": 1023,
-      "working": 1426
+      "working": 1428
     },
     "by_tracking_state": {
-      "tracked": 3546
+      "tracked": 3548
     },
     "docs_reports_local_count": 35,
     "duplicate_group_count": 7,
@@ -100173,8 +100229,8 @@
     },
     "scan_error_count": 0,
     "scan_errors": [],
-    "total_doc_like": 3546,
+    "total_doc_like": 3548,
     "total_doc_like_ignored_local": 0,
-    "total_doc_like_tracked": 3546
+    "total_doc_like_tracked": 3548
   }
 }

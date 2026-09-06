@@ -13,14 +13,7 @@ concurrency:
 
 on:
   push:
-    branches: [main, master, develop]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - ".ai/**"
-      - "LICENSE"
-  pull_request:
-    branches: [main, master, develop]
+    branches: [main]
     paths-ignore:
       - "docs/**"
       - "*.md"

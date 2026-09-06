@@ -169,7 +169,8 @@
   "terminal": {
     "env": {
       "PYTHONDONTWRITEBYTECODE": "1",
-      "VCR_RECORD_MODE": "none"
+      "VCR_RECORD_MODE": "none",
+      "VIRTUAL_ENV": ".venv-win"
     },
     "detect_venv": {
       "on": {
@@ -250,11 +251,7 @@
           "write_file": false
         },
         "enable_all_context_servers": false,
-        "context_servers": {
-          "memory": {},
-          "fetch": {},
-          "context7": {}
-        }
+        "context_servers": {}
       },
       "bioetl-write": {
         "name": "BioETL Write",
@@ -277,14 +274,8 @@
           "write_file": true
         },
         "enable_all_context_servers": false,
-        "context_servers": {
-          "memory": {},
-          "filesystem": {},
-          "fetch": {},
-          "github": {},
-          "ast-grep": {}
-        }
-},
+        "context_servers": {}
+      },
       "bioetl-arch": {
         "name": "BioETL Arch",
         "tools": {
@@ -337,7 +328,7 @@
           "fetch": {},
           "context7": {}
         }
-}
+      }
     },
     "tool_permissions": {
       "default": "confirm",
