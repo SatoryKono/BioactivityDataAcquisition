@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **48** live GitHub Actions
+This page is the canonical published inventory of the **49** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -48,13 +48,13 @@ Use it when you need to answer:
 | `compiled-artifacts-block.yml` | `Block Compiled Python Artifacts` | `workflow_call`, `push` | Blocks checked-in `.pyc` and similar compiled artifacts |
 | `consolidation-gates.yml` | `consolidation-gates` | `workflow_dispatch` | Merge-campaign quality/architecture gate |
 | `contract-governance-fast-check.yml` | `Contract Governance Fast Check` | `push`, `pull_request` | Fast contract-registry and schema governance checks |
-| `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
+| `dashboard-first-window-noscroll.yml` | `Dashboard first-window no-scroll` | `push`, `pull_request` | First-window no-scroll gate for all seven shipped dashboard UIDs (DASH-FIT-004) |
 | `docs.yml` | `Docs & Diagrams` | `workflow_call`, `push` | Docs governance, MkDocs validation, Mermaid validation, diagram drift |
 | `duplication-complexity.yml` | `Duplication and Complexity Checks` | `workflow_call`, `push` | Duplication, constructor-args, and complexity gates |
-| `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `schedule`, `workflow_dispatch` | Blocking and nightly E2E matrix smoke lanes |
+| `e2e-matrix-health.yml` | `E2E Matrix Health` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Blocking and nightly E2E matrix smoke lanes |
 | `import-linter.yml` | `Lint and Architecture Gates` | `workflow_call`, `push`, `workflow_dispatch` | Ruff/import-linter/architecture fast gates |
 | `pr-required.yml` | `PR Gate Complete` | `pull_request`, `workflow_dispatch` | Always-materialized fail-closed coordinator for the canonical reusable owners |
-| `port-contracts.yml` | `Port Contract Tests` | `push`, `workflow_dispatch` | Port-protocol and hypothesis contract tests |
+| `port-contracts.yml` | `Port Contract Tests` | `push`, `pull_request`, `workflow_dispatch` | Port-protocol and hypothesis contract tests |
 | `provider-contract-drift.yml` | `Provider Contract Drift` | `push`, `pull_request`, `workflow_dispatch` | Provider contract replay/drift gate |
 | `root-hygiene.yml` | `Root Hygiene` | `workflow_call`, `push`, `workflow_dispatch` | Root-surface cleanliness and governance checks |
 | `schema-governance.yml` | `Schema Governance` | `workflow_call`, `push` | Generated artifacts, schema parity, schema drift |
@@ -81,7 +81,7 @@ Use it when you need to answer:
 | `github-settings-quarterly-review.yml` | `Quarterly GitHub Settings Review` | `schedule`, `workflow_dispatch` | Read-only quarterly GitHub settings review |
 | `memory-freshness.yml` | `Memory freshness` | `pull_request`, `schedule`, `workflow_dispatch` | Repository memory freshness and contract checks |
 | `memory-retention.yml` | `Memory Retention Policy` | `schedule`, `pull_request`, `workflow_dispatch` | Weekly and change-triggered non-destructive episodic-memory retention policy check |
-| `mutation-testing.yml` | `Mutation Testing` | `push`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |
+| `mutation-testing.yml` | `Mutation Testing` | `push`, `pull_request`, `schedule`, `workflow_dispatch` | Mutation-testing lane with scheduled coverage |
 | `nightly-replay-parity.yml` | `nightly-replay-parity` | `schedule`, `workflow_dispatch` | Replay/determinism parity validation |
 | `performance-nightly.yml` | `Performance Nightly` | `schedule`, `workflow_dispatch` | Performance-regression gate |
 | `pr-hygiene.yml` | `PR Hygiene` | `schedule`, `workflow_dispatch` | Stale report-noise draft PR cleanup under repository hygiene policy |
@@ -98,6 +98,7 @@ Use it when you need to answer:
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
+| `temporary-main-telemetry-refresh-9973.yml` | `Temporary canonical main telemetry refresh 9973` | `pull_request` | Temporary PR-scoped canonical telemetry refresh helper for #9973 |
 
 ### Reusable / compatibility-only helpers
 

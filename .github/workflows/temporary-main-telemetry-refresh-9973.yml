@@ -1,0 +1,119 @@
+name: Temporary canonical main telemetry refresh 9973
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  refresh:
+    if: github.head_ref == 'ci/tests-telemetry-main-refresh-9973-tmp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Materialize all governance LFS fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs pull
+          while IFS= read -r sample; do
+            [ -n "$sample" ] || continue
+            if [ -f "$sample" ] && head -n 1 "$sample" | grep -q 'git-lfs.github.com/spec/v1'; then
+              echo "::error::Git LFS fixture remains a pointer: $sample"
+              exit 1
+            fi
+          done < <(git lfs ls-files -n)
+
+      - name: Setup Python and uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.12"
+
+      - name: Download exact-main coverage
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: coverage-report
+          path: reports
+          repository: SatoryKono/BioactivityDataAcquisition
+          run-id: "33762851848"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download exact-main duration telemetry
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: test-duration-telemetry
+          path: reports/test-telemetry
+          repository: SatoryKono/BioactivityDataAcquisition
+          run-id: "33762851848"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run canonical generators against clean target tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/temporary-main-telemetry-refresh-9973.yml
+          uv run --frozen --no-build python -m scripts.engineering.ci.update_test_telemetry_baseline \
+            --coverage-xml reports/coverage/coverage.xml \
+            --slowest-json reports/test-telemetry/slowest-tests.json \
+            --source-branch main \
+            --source-commit bd19ef69eb3999572c8b83568ae55318209f3232 \
+            --source-run-id 33762851848 \
+            --source-event push \
+            --source-run-url https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/33762851848
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit \
+            --json-out reports/quality/test-governance-current.json \
+            --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_flaky_test_burndown_review
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_architecture_quality_scorecard
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --update
+
+      - name: Validate refreshed contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_test_governance_audit --check
+          uv run --frozen --no-build python -m scripts.engineering.qa.report_flaky_test_burndown_review --check
+          uv run --frozen --no-build python -m scripts.engineering.qa report-debt-governance-gates --check
+          uv run --frozen --no-build pytest \
+            tests/architecture/test_ci_test_strategy.py \
+            tests/architecture/test_test_governance_audit.py::test_test_governance_artifacts_match_live_collector \
+            tests/architecture/test_test_telemetry_governance.py \
+            tests/architecture/test_tech_debt_issues_5514_5515_governance.py::test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs \
+            -q --tb=short
+
+      - name: Emit canonical outputs for clean branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=(
+            configs/quality/test_telemetry_baseline.yaml
+            docs/05-engineering/test-telemetry-baseline.md
+            reports/quality/architecture-quality-scorecard.json
+            reports/quality/debt-governance-gates.json
+            reports/quality/debt-governance-gates.md
+            reports/quality/flaky-test-burndown-review.json
+            reports/quality/test-governance-current.json
+            reports/quality/test-fixture-asset-duplication.json
+            reports/test-telemetry/coverage-summary.json
+            reports/test-telemetry/slowest-tests.json
+            reports/test-telemetry/slowest-tests.md
+          )
+          for path in "${paths[@]}"; do
+            test -s "$path"
+            sha256sum "$path" | awk -v p="$path" '{print "BIOETL_SHA256 " p " " $1}'
+            base64 -w 30000 "$path" | awk -v p="$path" '{printf "BIOETL_BASE64 %s %06d %s\\n", p, NR, $0}'
+            echo "BIOETL_BASE64_END $path"
+          done

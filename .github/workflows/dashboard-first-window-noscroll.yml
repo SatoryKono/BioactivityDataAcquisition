@@ -4,7 +4,9 @@ name: Dashboard first-window no-scroll
 
 on:
   push:
-    branches: [main]
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
 
 permissions:
   contents: read

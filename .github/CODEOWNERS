@@ -17,9 +17,3 @@ AGENTS.md @SatoryKono
 scripts/ai/ @SatoryKono
 docs/00-project/ai/ @SatoryKono
 
-# Engineering and quality governance
-scripts/engineering/ @SatoryKono
-configs/quality/ @SatoryKono
-reports/quality/ @SatoryKono
-
-# Policy reference: docs/00-project/governance/05-github-policy.md
