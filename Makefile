@@ -1,7 +1,7 @@
 # BioETL local-first Makefile
 
 .PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-confidence-local test-confidence-unit test-confidence-contract test-profile test-deps setup-plugins run-local sync-windsurf-rules devin devin-setup devin-check devin-mcp-start devin-fix-bug devin-add-feature devin-update-docs devin-audit-config devin-workflows devin-select-profile devin-mcp-start-minimal devin-mcp-start-standard devin-mcp-start-full deepwiki-backup deepwiki-update deepwiki-validate
-.PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
+.PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check docker-ensure-networks
 .PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 RUN ?= uv run
@@ -91,6 +91,7 @@ help:
 	@echo "  make docker-health          Check service health"
 	@echo "  make docker-clean           Stop containers; preserve volumes/images"
 	@echo "  make docker-compose-check   Validate docker-compose.yml"
+		@echo "  make docker-ensure-networks Ensure shared nets (bioetl-monitoring/runtime) with labels"
 	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
 	@echo ""
 	@echo "Note: Temporary diagnostic scripts are in scripts/temp/ with bounded lifecycles"
@@ -324,6 +325,10 @@ docker-compose-check: docker-check
 # Shell access
 docker-shell-bioetl: docker-check
 	docker compose exec bioetl /bin/bash
+
+# Ensure shared networks (monitoring + runtime) before first compose up
+docker-ensure-networks:
+	$(RUN) python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main
 
 # Clean up
 docker-clean: docker-check

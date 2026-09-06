@@ -46,10 +46,11 @@ only the **operator Explorer UI + Loki/Tempo stacks** were deleted.
 ## Network preconditions (MEDIUM)
 
 Shared Docker networks use a **fixed `name:`** and owner label
-(`com.bioetl.owner`). They are **not** declared as `external: true` in compose:
-`docker compose up` **creates** missing nets (or reuses existing ones). Prefer
-`ensure-networks` / `ensure-stable` after a wipe so labels are correct before
-first up.
+(`com.bioetl.owner`). They are declared as `external: true` in compose:
+`docker compose up` **requires** the networks to exist and fails with
+`network bioetl-monitoring not found` if they are missing. Create them via
+`runtime_manager ensure-networks` / `check --ensure` / `ensure-stable` before
+first up so labels are correct.
 
 Which compose file attaches to which shared network:
 
@@ -117,9 +118,10 @@ python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeou
 python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
 ```
 
-Raw `docker compose -f docker-compose.monitoring.yml up` also **creates**
-`bioetl-monitoring` if missing (named network, not external). Prefer
-`ensure-networks` or `runtime_manager start` so owner labels stay contracted.
+Raw `docker compose -f docker-compose.monitoring.yml up` **requires**
+`bioetl-monitoring` to exist (`external: true`) and fails with `network not
+found` if it was not created via `ensure-networks`. Prefer `ensure-networks`
+or `runtime_manager start` so owner labels stay contracted.
 
 ## PromQL rule syntax gate (before load)
 
