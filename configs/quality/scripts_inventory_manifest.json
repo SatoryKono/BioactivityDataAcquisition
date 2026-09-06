@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T11:45:46.938148+00:00",
+  "generated_at": "2026-09-06T11:48:31.457127+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -2704,7 +2704,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 34,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
