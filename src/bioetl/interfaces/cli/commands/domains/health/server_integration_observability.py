@@ -157,6 +157,9 @@ def _rehydrate_current_metrics(*, logger: LoggerPort | None = None) -> None:
         pipeline_runs_seeded=result.pipeline_runs_seeded,
         provider_universe_seeded=result.provider_universe_seeded,
         stage_series_seeded=result.stage_series_seeded,
+        workflow_anchors=result.workflow_anchors,
+        workflow_expected_seeded=result.workflow_expected_seeded,
+        workflow_pipeline_expected_seeded=result.workflow_pipeline_expected_seeded,
     )
 
 
