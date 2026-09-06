@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   analyze:
-    name: Analyze Python
+    name: Analyze Python and Actions
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -36,10 +36,8 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
         with:
-          languages: python
+          languages: python, actions
           build-mode: none
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
-        with:
-          category: "/language:python"

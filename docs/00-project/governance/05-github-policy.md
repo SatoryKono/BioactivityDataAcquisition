@@ -116,7 +116,7 @@ from checks that run only for matching paths.
 | ---------------------- | ------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Security Scans**     | `security.yml`           | `detect-secrets`, `pip-audit`, `bandit`, `gitleaks`, `osv-scanner`      | Credential leak prevention, lockfile CVE scanning, Bandit, Gitleaks                                     |
 | **Dependency review**  | `dependency-review.yml`  | `dependency-review`                                                     | PR-time HIGH/CRITICAL vulnerable dependency block on lockfile/manifest changes                          |
-| **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python SAST uploaded to GitHub code scanning                                                            |
+| **CodeQL**             | `codeql.yml`             | `analyze`                                                               | Python and Actions SAST uploaded to GitHub code scanning                                                            |
 | **OpenSSF Scorecard**  | `scorecard.yml`          | `analysis`                                                              | Weekly non-blocking supply-chain scorecard baseline (SARIF to Security tab)                             |
 | **zizmor**             | `zizmor.yml`             | `zizmor`                                                                | High-confidence GitHub Actions YAML audit on workflow/action changes                                    |
 | **Docker Build**       | `docker.yml`             | `docker-lint`, `docker-compose-validate`, `docker-build`, `docker-push` | Hadolint, compose syntax, full Trivy evidence (CRITICAL+HIGH+MEDIUM+UNKNOWN), blocking CRITICAL+HIGH+MEDIUM gate, complete PR SBOM/baseline artifact; the exact scanned image is promoted without rebuild to GHCR on `main` via Environment `ghcr-publish` (`:sha` and `:ref_name` only, no `:latest`) |
@@ -131,7 +131,7 @@ alert ownership.
 | Item | Contract |
 | --- | --- |
 | Configuration owner | Advanced workflow `.github/workflows/codeql.yml` |
-| Languages | Python only (`build-mode: none`) |
+| Languages | Python, Actions (`build-mode: none`) |
 | Token permissions | Workflow `contents: read`; job `security-events: write` for SARIF upload |
 | Cadence | Push/PR (docs-ignored paths excluded) plus weekly Monday `17 4 * * 1` UTC |
 | Alert triage owner | BioETL Team (security lane); CODEOWNERS fallback `@SatoryKono` |
@@ -145,7 +145,7 @@ defect.
 
 GitHub may still list `dynamic/github-code-scanning/codeql` as an Actions
 workflow. The Actions API cannot disable that hosted workflow (HTTP 422). Keep
-default setup `not-configured` and keep advanced Python CodeQL as the only
+default setup `not-configured` and keep advanced Python and Actions CodeQL as the only
 analysis. Do not enable default setup to clear the ghost workflow: that
 duplicates Python scans.
 
