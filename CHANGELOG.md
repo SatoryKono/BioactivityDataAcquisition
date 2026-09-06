@@ -301,6 +301,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Grafana `$workflow` after `chembl_baseline` (#10144, #10145, #10147):**
+  `bioetl health server` rehydrates `bioetl_workflow_expected` from durable
+  workflow-run reports, and `/health/ready` `current_metrics` diagnoses
+  durable workflow success without scrape samples. Selector stays on
+  `bioetl_workflow_universe`; `bioetl_workflow_runs_total` is not faked.
+
 - **Stale RAG chunks and memory drift (#6355):** Canonical full RAG manifests
   now publish transactionally into the rebuild-only derived lane and carry
   exact Git/source-surface identity. Retrieval and pretest reject missing
