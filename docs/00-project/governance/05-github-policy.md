@@ -570,6 +570,11 @@ ______________________________________________________________________
 
 ### Workflow: `release.yml`
 
+The build job attests `dist/*` after SBOM generation, including manual dry-run
+validation. Attestation is independent of package publication; existing PyPI
+environment reviews still govern upload. Signed-Releases acceptance must be
+checked against a subsequently published release, not inferred from YAML alone.
+
 Triggered by GitHub Release publication or manual dispatch (`workflow_dispatch` with `dry_run` default `true`).
 
 Environments: `testpypi` (`if: release || (workflow_dispatch && dry_run == 'false')`) and `pypi` (`if: release` only, `needs: publish-testpypi` chain). Both use OIDC trusted publishing (`id-token: write`, `pypa/gh-action-pypi-publish`). Configure deployment branch policy (tags/releases only for `pypi`) and a reviewer/wait-timer in GitHub Settings → Environments; repository docs do not replace the live protection rule.
@@ -625,6 +630,11 @@ permissions:
 
 `docker-push` publishes GHCR images only from `main` pushes, through Environment
 `ghcr-publish`, with tags `:${{ github.sha }}` and `:${{ github.ref_name }}`.
+The protected job signs provenance for the verified published manifest digest
+with the SHA-pinned `actions/attest-build-provenance` action and pushes the
+attestation to GHCR. It does not rebuild the image for signing.
+The reusable caller declares the same permission ceiling; executable PR jobs
+explicitly narrow their tokens and never schedule the main-push-only publisher.
 It does not publish `:latest`. The live `ghcr-publish` environment requires
 review by `@SatoryKono` and accepts only the `main` branch.
 Non-`main` branches cannot reach the job — `docker.yml: if: github.ref == 'refs/heads/main' && github.event_name == 'push'`.
@@ -632,7 +642,8 @@ The publish job uses run-scoped concurrency so a stale protected publish request
 cannot block a newer validation run. Before writing GHCR tags, it queries the
 current `main` branch SHA and fails closed if the approved run no longer matches
 `main`, preventing stale `:${{ github.ref_name }}` publication.
-| `id-token: write`        | release.yml (trusted publishing via `pypi`/`testpypi` environments; see §8) |
+| `id-token: write` | release.yml build provenance and PyPI trusted publishing; docker.yml protected `docker-push` provenance |
+| `attestations: write` | release.yml `build` for `dist/*`; docker.yml `docker-push` for the published manifest digest |
 | `issues: write`          | contract-tests.yml (auto-create issue on failure) |
 
 Live publishing/deployment environment controls (API-verified 2026-08-30):

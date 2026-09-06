@@ -1069,3 +1069,43 @@ def test_scorecard_token_permissions_define_workflow_readonly_defaults() -> None
         assert "write-all" not in {
             str(value).lower() for value in permissions.values()
         }, rel
+
+
+def test_build_provenance_binds_release_files_and_published_ghcr_digest() -> None:
+    """Provenance covers built files and the exact promoted manifest, with scoped OIDC."""
+    release = _load_yaml(RELEASE_WORKFLOW)
+    docker = _load_yaml(ROOT / ".github/workflows/docker.yml")
+    action = "actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a"
+    build = release["jobs"]["build"]
+    publish = docker["jobs"]["docker-push"]
+    for job in (build, publish):
+        assert job["permissions"]["attestations"] == "write"
+        assert job["permissions"]["id-token"] == "write"
+        assert not job.get("continue-on-error", False)
+    dist_attest = next(step for step in build["steps"] if step.get("uses") == action)
+    image_attest = next(step for step in publish["steps"] if step.get("uses") == action)
+    assert dist_attest["with"]["subject-path"] == "dist/*"
+    assert image_attest["with"] == {
+        "subject-name": "${{ steps.ghcr.outputs.image_base }}",
+        "subject-digest": "${{ steps.publish.outputs.digest }}",
+        "push-to-registry": True,
+    }
+    push_step = next(step for step in publish["steps"] if step.get("id") == "publish")
+    assert 'docker push "${sha_ref}"' in push_step["run"]
+    assert "imagetools inspect" in push_step["run"]
+    assert "{{.Manifest.Digest}}" in push_step["run"]
+    assert 'echo "digest=${digest}" >> "$GITHUB_OUTPUT"' in push_step["run"]
+    assert publish["steps"].index(push_step) < publish["steps"].index(image_attest)
+    assert publish["environment"] == "ghcr-publish"
+    assert (
+        publish["if"]
+        == "github.ref == 'refs/heads/main' && github.event_name == 'push'"
+    )
+    assert release["permissions"] == docker["permissions"] == {"contents": "read"}
+    caller = _load_yaml(ROOT / ".github/workflows/pr-required.yml")["jobs"]["docker"]
+    for permission in ("id-token", "attestations"):
+        assert caller["permissions"][permission] == publish["permissions"][permission]
+    for name, job in docker["jobs"].items():
+        if name != "docker-push":
+            assert job.get("permissions", {}).get("id-token") != "write"
+            assert job.get("permissions", {}).get("attestations") != "write"

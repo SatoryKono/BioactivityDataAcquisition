@@ -415,6 +415,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Guard publish target is current main HEAD
@@ -462,6 +464,7 @@ jobs:
           echo "image_base=ghcr.io/${owner}/bioactivitydataacquisition" >> "$GITHUB_OUTPUT"
 
       - name: Tag and push exact scanned image to GHCR
+        id: publish
         env:
           IMAGE_REF: bioetl:${{ github.sha }}
           IMAGE_BASE: ${{ steps.ghcr.outputs.image_base }}
@@ -476,6 +479,9 @@ jobs:
           docker push "${branch_ref}"
           remote_config="$(docker manifest inspect "${sha_ref}" | jq -r '.config.digest')"
           test "${remote_config}" = "${expected_id}"
+          digest="$(docker buildx imagetools inspect "${sha_ref}" --format '{{.Manifest.Digest}}')"
+          [[ "${digest}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Generate GHCR image SBOM
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
@@ -487,3 +493,10 @@ jobs:
           upload-artifact: true
           upload-artifact-retention: 30
           upload-release-assets: false
+
+      - name: Attest GHCR image provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-name: ${{ steps.ghcr.outputs.image_base }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          push-to-registry: true
