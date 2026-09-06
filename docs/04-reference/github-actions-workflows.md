@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **49** live GitHub Actions
+This page is the canonical published inventory of the **48** live GitHub Actions
 workflows shipped under `.github/workflows/`. The count is derived from the
 tracked `*.yml` files; it is not a separately maintained target.
 
@@ -98,7 +98,6 @@ Use it when you need to answer:
 | `docker.yml` | `Docker Build & Compose Validation` | `workflow_call`, `push`, `workflow_dispatch` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
 | `release.yml` | `Release` | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |
-| `temporary-main-telemetry-refresh-9973.yml` | `Temporary canonical main telemetry refresh 9973` | `pull_request` | Temporary PR-scoped canonical telemetry refresh helper for #9973 |
 
 ### Reusable / compatibility-only helpers
 

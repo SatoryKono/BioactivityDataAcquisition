@@ -59,13 +59,13 @@
         "source_module_count": 2468,
         "source_tree_sha256": "645b4cf54933deaa26e2ab0401a418d7d0fc30e0ecb42662dd6bd11bdf644317",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 1
+        "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2468,
         "source_tree_sha256": "645b4cf54933deaa26e2ab0401a418d7d0fc30e0ecb42662dd6bd11bdf644317",
         "uncovered_module_count": 0,
-        "unmeasured_module_count": 1
+        "unmeasured_module_count": 0
       },
       "metric": "module_coverage_scorecard_alignment",
       "name": "module_coverage_scorecard_coherence",
@@ -74,8 +74,8 @@
       "status": "pass"
     },
     {
-      "current": 1,
-      "limit": 1,
+      "current": 0,
+      "limit": 0,
       "metric": "unmeasured_module_count",
       "name": "module_coverage_unmeasured_modules",
       "remediation": "Keep reviewed unmeasured-module residual at or below the committed no-growth ratchet.",
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": "f50e7e89964aa2361550091241a5cfcd035aa5fef626490633ae58f885df99e7",
+      "current": "8ce6a9632148d3bac6fdbf443715f2a8f43e0da67d2c95ac465a443f6afa0b00",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -455,15 +455,15 @@
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 43,
+    "fail": 0,
+    "pass": 45,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.89,
+    "architecture_quality_scorecard_integral_score": 9.14,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],

@@ -4797,9 +4797,11 @@
       "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_expected": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_pipeline_expected": [
+      "src/bioetl/application/observability/current_metrics_rehydrate.py",
       "src/bioetl/application/services/workflow/workflow_runner_support.py"
     ],
     "bioetl_workflow_row_reconciliation_excluded_rows_total": [

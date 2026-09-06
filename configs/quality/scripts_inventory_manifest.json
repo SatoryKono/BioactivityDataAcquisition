@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T12:06:35.489096+00:00",
+  "generated_at": "2026-09-06T15:34:55.901805+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -4141,7 +4141,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_mcp_wrapper_contracts.py",
-          "line": 1355,
+          "line": 1356,
           "source_group": "tests",
           "text": "powershell_source = (MCP_DIR / \"mcp_neo4j_cypher_wrapper.ps1\").read_text("
         }
@@ -4555,7 +4555,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 94,
+          "line": 95,
           "source_group": "docs",
           "text": "current process through the shared `load_repo_env.ps1` loader, and never writes"
         },
@@ -5488,13 +5488,13 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 260,
+          "line": 261,
           "source_group": "build",
           "text": "@echo \"Or use: python scripts/ai/update_deepwiki.py --check\""
         },
         {
           "path": "Makefile",
-          "line": 264,
+          "line": 265,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 python3 scripts/ai/update_deepwiki.py --validate"
         }
@@ -7263,7 +7263,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 400,
+          "line": 405,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
         },
@@ -7625,7 +7625,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 397,
+          "line": 402,
           "source_group": "build",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
@@ -9612,7 +9612,7 @@
         },
         {
           "path": ".github/workflows/pr-required.yml",
-          "line": 349,
+          "line": 357,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python -m scripts.engineering.ci pr-gate aggregate \\"
         },
@@ -9630,7 +9630,7 @@
         },
         {
           "path": "Makefile",
-          "line": 363,
+          "line": 368,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.ci quality-gate \\"
         },
@@ -11312,7 +11312,7 @@
         },
         {
           "path": "Makefile",
-          "line": 371,
+          "line": 376,
           "source_group": "build",
           "text": "BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m \"architec"
         },
@@ -12121,19 +12121,19 @@
         },
         {
           "path": "Makefile",
-          "line": 347,
+          "line": 352,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup"
         },
         {
           "path": "Makefile",
-          "line": 350,
+          "line": 355,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup $(if $(DRY_RUN),,--apply) $(if $(PURGE_LOGS),--purge-logs,)"
         },
         {
           "path": "Makefile",
-          "line": 357,
+          "line": 362,
           "source_group": "build",
           "text": "$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs"
         },
@@ -12394,7 +12394,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 348,
+      "reference_count": 346,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -18937,49 +18937,49 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 268,
+          "line": 269,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh check main"
         },
         {
           "path": "Makefile",
-          "line": 280,
+          "line": 281,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start main"
         },
         {
           "path": "Makefile",
-          "line": 284,
+          "line": 285,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh start-full"
         },
         {
           "path": "Makefile",
-          "line": 288,
+          "line": 289,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh monitoring"
         },
         {
           "path": "Makefile",
-          "line": 291,
+          "line": 292,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop monitoring"
         },
         {
           "path": "Makefile",
-          "line": 295,
+          "line": 296,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop main"
         },
         {
           "path": "Makefile",
-          "line": 299,
+          "line": 300,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh stop-full"
         },
         {
           "path": "Makefile",
-          "line": 303,
+          "line": 304,
           "source_group": "build",
           "text": "bash scripts/ops/docker-setup.sh logs main"
         }
@@ -19300,7 +19300,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 344,
+          "line": 349,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -19710,7 +19710,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 185,
+          "line": 187,
           "source_group": "docs",
           "text": "python scripts/ops/observability/check_prometheus_rules_health.py --json"
         },
@@ -20224,7 +20224,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 433,
+          "line": 435,
           "source_group": "docs",
           "text": "# .\\scripts\\ops\\observability\\grafana\\recover_renderer.ps1"
         },
@@ -20249,13 +20249,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 429,
+          "line": 431,
           "source_group": "docs",
           "text": "python scripts/ops/observability/grafana/recover_renderer.py"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 435,
+          "line": 437,
           "source_group": "docs",
           "text": "3. Check only: `python scripts/ops/observability/grafana/recover_renderer.py --check-only`"
         },
@@ -20781,7 +20781,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 187,
+          "line": 189,
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_live_observability.py"
         },
@@ -20959,13 +20959,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 362,
+          "line": 364,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile stable -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 371,
+          "line": 373,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\apply-docker-stable-mcp.ps1 -Profile shared -TransportMode shared -WithSharedMcp -SkipEnsureStable"
         }
@@ -20984,7 +20984,7 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 79,
+          "line": 80,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/check_network_preconditions.py --stack all --ensure"
         },
@@ -21045,7 +21045,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 363,
+          "line": 365,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\cleanup-mcp-orphans.ps1 -IncludeGatewayHint"
         },
@@ -21184,19 +21184,19 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 85,
+          "line": 86,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 353,
+          "line": 355,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -WithNeo4j"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 356,
+          "line": 358,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\ensure-stable.ps1 -RestartWsl -WithNeo4j"
         },
@@ -21229,13 +21229,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 359,
+          "line": 361,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\harden-desktop-host.ps1 -RegisterWatchdog"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 378,
+          "line": 380,
           "source_group": "docs",
           "text": "`harden-desktop-host.ps1` sets Resource Saver effectively off"
         },
@@ -21280,7 +21280,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 262,
+          "line": 264,
           "source_group": "docs",
           "text": "`scripts/ops/runtime/docker/recover-neo4j.ps1`."
         },
@@ -21336,7 +21336,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 366,
+          "line": 368,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\reset-mcp-host-sessions.ps1"
         }
@@ -21385,7 +21385,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 336,
+          "line": 338,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
@@ -21408,11 +21408,17 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 94,
+      "reference_count": 95,
       "references": [
         {
           "path": "Makefile",
-          "line": 330,
+          "line": 331,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py ensure-networks --stack main"
+        },
+        {
+          "path": "Makefile",
+          "line": 335,
           "source_group": "build",
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
         },
@@ -21451,12 +21457,6 @@
           "line": 68,
           "source_group": "docs",
           "text": "| `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `runtime_manager.py` |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 69,
-          "source_group": "docs",
-          "text": "| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `runtime_manager.py` |"
         }
       ],
       "owner": "@bioetl-platform",
@@ -21517,7 +21517,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 219,
+          "line": 221,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/verify_report_bind.py --pipeline chembl_assay"
         }
@@ -21586,7 +21586,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 155,
+          "line": 156,
           "source_group": "build",
           "text": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ops/runtime/mcp/apply-shared-to-devin.py"
         },
@@ -21625,7 +21625,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 373,
+          "line": 375,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\apply-shared-to-grok.ps1 -DisableDockerGateways"
         },
@@ -21680,7 +21680,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 372,
+          "line": 374,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\health-shared.ps1"
         },
@@ -21719,25 +21719,25 @@
         },
         {
           "path": "Makefile",
-          "line": 170,
+          "line": 171,
           "source_group": "build",
           "text": "PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
         {
           "path": "Makefile",
-          "line": 236,
+          "line": 237,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh minimal"
         },
         {
           "path": "Makefile",
-          "line": 241,
+          "line": 242,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh standard"
         },
         {
           "path": "Makefile",
-          "line": 246,
+          "line": 247,
           "source_group": "build",
           "text": "@PYTHONDONTWRITEBYTECODE=1 bash scripts/ops/runtime/mcp/health-shared.sh daily"
         },
@@ -21780,7 +21780,7 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 370,
+          "line": 372,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\mcp\\start-shared.ps1"
         },
@@ -21825,25 +21825,25 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 169,
+          "line": 170,
           "source_group": "build",
           "text": "XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
         {
           "path": "Makefile",
-          "line": 235,
+          "line": 236,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --minimal"
         },
         {
           "path": "Makefile",
-          "line": 240,
+          "line": 241,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --standard"
         },
         {
           "path": "Makefile",
-          "line": 245,
+          "line": 246,
           "source_group": "build",
           "text": "@XDG_RUNTIME_DIR=/tmp bash scripts/ops/runtime/mcp/start-shared.sh --daily"
         },
