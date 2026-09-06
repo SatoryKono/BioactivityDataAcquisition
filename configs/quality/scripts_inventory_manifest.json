@@ -2731,28 +2731,28 @@
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
         },
         {
+          "path": ".zed/settings.json",
+          "line": 496,
+          "source_group": "other",
+          "text": "\"instructions\": \"Before any edit: read docs/00-project/NORMATIVE_SOURCES.md, docs/00-project/RULES.md °1-4, docs/00-project/ai/agents/guides/MEMORY_USAGE.md. Follow hexagonal architecture and Medalli"
+        },
+        {
           "path": "AGENTS.md",
           "line": 89,
           "source_group": "agents",
-          "text": "`bash scripts/ai/junie/check_junie_mirror.sh --check` and report the"
+          "text": "Junie mirror parity OK: .codex/** == .junie/** (per junie-mirror-contract.json). and report the"
         },
         {
           "path": "docs/00-project/NORMATIVE_SOURCES.md",
           "line": 50,
           "source_group": "docs",
-          "text": "`scripts/ai/junie/check_junie_mirror.sh`. Docs mirrors в"
+          "text": ". Docs mirrors в"
         },
         {
           "path": "docs/00-project/NORMATIVE_SOURCES.md",
           "line": 108,
           "source_group": "docs",
-          "text": "- `../../scripts/ai/junie/check_junie_mirror.sh` — `.codex/**` ↔ `.junie/**` parity check"
-        },
-        {
-          "path": "docs/00-project/ai/README.md",
-          "line": 37,
-          "source_group": "docs",
-          "text": "(parity: `bash scripts/ai/junie/check_junie_mirror.sh --check`)."
+          "text": "-  —  ↔  parity check"
         }
       ]
     },
