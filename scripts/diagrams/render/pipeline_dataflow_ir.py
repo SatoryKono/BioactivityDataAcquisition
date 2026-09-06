@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from enum import Enum
 from fnmatch import fnmatch
 from pathlib import Path
@@ -39,7 +40,7 @@ type _JsonObject = dict[str, Any]
 
 
 def _source_date() -> str:
-    """Return the last canonical input change date without wall-clock entropy."""
+    """Return the last canonical input change date in UTC."""
     # On pull_request checkouts the head commit is usually a non-merge tip of the
     # PR branch. Prefer HEAD^2 only when it resolves (true merge commits); always
     # fall back to HEAD so CI does not fail with exit 128 on ordinary PR SHAs.
@@ -55,7 +56,7 @@ def _source_date() -> str:
                 "log",
                 "--no-merges",
                 "-1",
-                "--format=%cs",
+                "--format=%cI",
                 start_ref,
                 "--",
                 "configs",
@@ -71,7 +72,7 @@ def _source_date() -> str:
         returncode = int(getattr(result, "returncode", 0) or 0)
         stdout = str(getattr(result, "stdout", "") or "").strip()
         if returncode == 0 and stdout:
-            return stdout
+            return datetime.fromisoformat(stdout).astimezone(UTC).date().isoformat()
         last_error = subprocess.CalledProcessError(
             returncode,
             getattr(result, "args", ["git", "log"]),
