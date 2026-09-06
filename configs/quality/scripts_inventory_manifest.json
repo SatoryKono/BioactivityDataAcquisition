@@ -1,10 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T11:16:23.894127+00:00",
+  "generated_at": "2026-09-06T11:30:33.798311+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 615,
     "status_counts": {
       "active": 338,
+      "orphan": 2,
       "supporting": 275
     },
     "reference_group_coverage": {
@@ -12,7 +13,7 @@
       "build": 17,
       "ci": 83,
       "docs": 252,
-      "other": 75,
+      "other": 74,
       "scripts": 512,
       "skills": 12,
       "tests": 425
@@ -2704,7 +2705,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 35,
+      "reference_count": 34,
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -2729,12 +2730,6 @@
           "line": 1938,
           "source_group": "ci",
           "text": "bash scripts/ai/junie/check_junie_mirror.sh --check"
-        },
-        {
-          "path": ".zed/settings.json",
-          "line": 505,
-          "source_group": "other",
-          "text": "\"instructions\": \"Before any edit: read docs/00-project/NORMATIVE_SOURCES.md, docs/00-project/RULES.md §1-4, docs/00-project/ai/agents/guides/MEMORY_USAGE.md. Follow hexagonal architecture and Medallio"
         },
         {
           "path": "AGENTS.md",
@@ -7949,7 +7944,7 @@
         "ORCHESTRATION",
         "py-doc-bot"
       ],
-      "reference_count": 215,
+      "reference_count": 214,
       "references": [
         {
           "path": ".codex/agents/ORCHESTRATION.md",
@@ -9838,13 +9833,13 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 96,
+          "line": 89,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 202,
+          "line": 195,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_matrix_skip_rate.py \\"
         },
@@ -9883,7 +9878,7 @@
       "references": [
         {
           "path": ".github/workflows/e2e-matrix-health.yml",
-          "line": 105,
+          "line": 98,
           "source_group": "ci",
           "text": "uv run --frozen --no-build python scripts/engineering/ci/check_e2e_rerun_stability.py \\"
         },
@@ -12394,7 +12389,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 348,
+      "reference_count": 346,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -23418,6 +23413,22 @@
           "text": "- test_selection_strategy.py"
         }
       ]
+    },
+    {
+      "path": "scripts/run_all.ps1",
+      "type": "ps1",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/run_bash.sh",
+      "type": "sh",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     }
   ]
 }
