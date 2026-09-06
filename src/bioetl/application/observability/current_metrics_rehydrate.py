@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.application.observability.rehydrate_models import (
+    PipelineRunSnapshot,
+    RehydrateResult,
+    WorkflowPipelineScopeInfo,
+    WorkflowRunSnapshot,
+)
 from bioetl.application.services.run_reports.query import (
     ReportIndexEntry,
     list_pipeline_reports,
@@ -23,14 +28,6 @@ _SEEDED_RUN_KEYS: set[tuple[str, str, str]] = set()
 _SEEDED_PROVIDER_KEYS: set[str] = set()
 _SEEDED_WORKFLOW_KEYS: set[str] = set()
 _SEEDED_WORKFLOW_PIPELINE_KEYS: set[tuple[str, str, str, str]] = set()
-
-
-from bioetl.application.observability.rehydrate_models import (
-    PipelineRunSnapshot,
-    RehydrateResult,
-    WorkflowPipelineScopeInfo,
-    WorkflowRunSnapshot,
-)
 
 
 def reset_rehydrate_seed_state() -> None:
