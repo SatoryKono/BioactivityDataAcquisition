@@ -75,10 +75,17 @@ Record forensics remain CLI (`bioetl quarantine inspect`) — no Loki/Tempo UI.
 - Pushgateway publication остаётся best-effort on run completion; CLI runs do
   not fail solely because publication fails, but publication helpers propagate
   failed push results for diagnostics and emit bounded publication status
-  metrics;
+  metrics. A failed gateway push emits structured `push_failed` with
+  `workflow_name`, `pipeline_names`, `run_type`, `gateway_class` and
+  `error_type`; gateway credentials and raw exception messages are omitted.
+  Workflow reports and the CLI exit status retain the execution result;
 - Pushgateway snapshots are grouped only by bounded `pipeline` and `run_type`,
   so short-lived ChEMBL runs remain queryable after process exit without
   introducing occurrence-scoped labels such as `run_id`;
+- Multi-pipeline workflows have no single pipeline/run-type Pushgateway
+  grouping key. Workflow names are diagnostic log fields only. Pushgateway is
+  a backup publication channel; Grafana selectors use the health server at
+  `bioetl:8000`, which rehydrates durable workflow reports (#10144).
 - Forbidden Prometheus label names (including aliases such as
   `filesystem_path` and `raw_exception_message`) are denied by registry policy
   in `prometheus_metric_label_policy_sets.FORBIDDEN_PROMETHEUS_LABEL_NAMES`.

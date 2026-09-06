@@ -2,7 +2,7 @@
 
 Refresh note (2026-09-06): SHA-bound reconciliation for the CodeQL and Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=413215409b14d9aa7e34270c8eeffe1f5f2901235358bc96e3bb6c5a223d12dd`
+`source_tree_sha256=88fc588d06d14c0aae801eff3261b6a26213cb89895f673e80af7730778f87d1`
 
 `source_module_count=2468`
 
@@ -107,6 +107,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `413215409b14d9aa7e34270c8eeffe1f5f2901235358bc96e3bb6c5a223d12dd`
+- source_tree_sha256: `88fc588d06d14c0aae801eff3261b6a26213cb89895f673e80af7730778f87d1`
 
 `source_module_count=2468`

@@ -139,6 +139,8 @@ def push_metrics_to_gateway(
     run_type: str | None = None,
     grouping_key_extra: Mapping[str, str] | None = None,
     metric_names: tuple[str, ...] | None = None,
+    workflow_name: str | None = None,
+    pipeline_names: tuple[str, ...] = (),
     logger: LoggerPort | None = None,
 ) -> bool:
     """Push metrics through the canonical composition-owned observability seam."""
@@ -152,10 +154,29 @@ def push_metrics_to_gateway(
         grouping_key["run_type"] = run_type
     if grouping_key_extra:
         grouping_key.update(grouping_key_extra)
-    metrics_service = get_metrics_service()
-    if logger is not None:
-        metrics_service.logger = logger
-    result = metrics_service.push_to_gateway(
+    if workflow_name is not None:
+        from bioetl.composition.bootstrap.cli.metrics import bootstrap_metrics_service
+        from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
+            bootstrap_logger,
+        )
+
+        publication_logger = logger or bootstrap_logger(
+            pipeline=pipeline_name or "unknown"
+        )
+        publication_logger = publication_logger.bind(
+            workflow_name=workflow_name,
+            pipeline_names=pipeline_names,
+            run_type=run_type,
+        )
+        push_metrics = bootstrap_metrics_service(
+            logger=publication_logger
+        ).push_to_gateway
+    else:
+        metrics_service = get_metrics_service()
+        if logger is not None:
+            metrics_service.logger = logger
+        push_metrics = metrics_service.push_to_gateway
+    result = push_metrics(
         gateway=gateway,
         run_label=run_label,
         grouping_key=grouping_key,
