@@ -142,6 +142,7 @@ repo-wide reorganization wave.
 - **Make**: For running automation commands.
 - **uv**: Recommended package manager ([install](https://docs.astral.sh/uv/getting-started/installation/)).
 - **Docker**: Optional, only for `docker-compose` extras such as Neo4j and monitoring; not required for the Local-Only runtime. See [Docker Quick Start](docs/DOCKER_QUICKSTART.md) and [Docker Setup](docs/DOCKER_SETUP.md) for adjunct helper usage.
+- **WSL2 (Windows)**: Enable **WSL Integration** for the working distro — Docker Desktop → Settings → Resources → WSL Integration → enable → `wsl --shutdown` → verify `docker info` succeeds. Required for `docker` to be found inside WSL and for `bioetl-monitoring` networking. See [Docker Quick Start — Network preconditions](docs/DOCKER_QUICKSTART.md#network-preconditions-medium) and `scripts/ops/runtime/docker/ensure-stable.ps1`.
 - **Node.js**: Optional, for Mermaid diagram rendering and related docs tooling.
 
 The supported dependency/bootstrap path is uv-first. `pip` remains a manual
