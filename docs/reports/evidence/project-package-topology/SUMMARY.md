@@ -1,10 +1,10 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-04): SHA-bound reconciliation for the CodeQL and Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-06): SHA-bound reconciliation for the CodeQL and Actions repair; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
 
-`source_tree_sha256=c208bd4e501584742a7ba64491e2858f4c31dd8d30f05c7f674a6d6334d625ef`
+`source_tree_sha256=645b4cf54933deaa26e2ab0401a418d7d0fc30e0ecb42662dd6bd11bdf644317`
 
-`source_module_count=2467`
+`source_module_count=2468`
 
 Дата: 2026-08-17
 Статус: refreshed
@@ -85,10 +85,10 @@ Collected: `6`
   for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct
   first-order package groups.
-- Current Python file count under `src/bioetl` is `2463`, including two
+- Current Python file count under `src/bioetl` is `2468`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=609`, `application=750`,
-  `infrastructure=626`, `composition=283`, `interfaces=157`.
+- Current layer file counts are: `domain=608`, `application=772`,
+  `infrastructure=632`, `composition=295`, `interfaces=159`.
 - Current first-order package counts are: `domain=22`, `application=6`,
   `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` remain the broadest package surfaces by
@@ -107,6 +107,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `c208bd4e501584742a7ba64491e2858f4c31dd8d30f05c7f674a6d6334d625ef`
+- source_tree_sha256: `645b4cf54933deaa26e2ab0401a418d7d0fc30e0ecb42662dd6bd11bdf644317`
 
-`source_module_count=2467`
+`source_module_count=2468`
