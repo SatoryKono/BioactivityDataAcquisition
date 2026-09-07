@@ -31,6 +31,7 @@ CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
 TIME_TOKEN = "${__url_time_range}"
 RUN_ID_TEMPLATE = "$run_id"
 HTML_AMPERSAND = "&amp;"
+_CUSTOM_INSPECT = "custom.inspect"
 # Grafana query-variable regex: capture trimmed non-empty token.
 RUN_ID_GRAFANA_REGEX = r"/^\s*(\S(?:.*\S)?)\s*$/"
 _RUN_ID_TEMPLATE_VALUES = frozenset(
@@ -372,11 +373,11 @@ def _fix_ranked_links(panel: dict) -> None:
         overrides.append(action)
     properties = action["properties"]
     properties[:] = [
-        p for p in properties if p["id"] not in {"links", "custom.inspect"}
+        p for p in properties if p["id"] not in {"links", _CUSTOM_INSPECT}
     ]
     properties.extend(
         [
-            {"id": "custom.inspect", "value": False},
+            {"id": _CUSTOM_INSPECT, "value": False},
             {
                 "id": "links",
                 "value": [
@@ -413,7 +414,7 @@ def _separate_action_inspector(panel: dict) -> None:
     indexes = organize["indexByName"]
     if "action_detail" not in indexes:
         position = indexes["action"] + 1
-        for name, index in list(indexes.items()):
+        for name, index in indexes.items():
             if index >= position:
                 indexes[name] = index + 1
         indexes["action_detail"] = position
@@ -424,7 +425,7 @@ def _separate_action_inspector(panel: dict) -> None:
             "matcher": {"id": "byName", "options": "Details"},
             "properties": [
                 {"id": "custom.cellOptions", "value": {"type": "auto"}},
-                {"id": "custom.inspect", "value": True},
+                {"id": _CUSTOM_INSPECT, "value": True},
                 {"id": "custom.hidden", "value": False},
                 {"id": "links", "value": []},
                 {
