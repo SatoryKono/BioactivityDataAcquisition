@@ -6,7 +6,7 @@
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 330,
     "violations": 0,
-    "source_fingerprint": "5a1bd4a9a3eb7462840c82d8c252cf64deaf34fdb01ba5c6de6f9ab59ded239c"
+    "source_fingerprint": "1f3999fcd5a8f3e6dd6e5f604b8fdc79530fe867d4504d2b091505bbe0b332f1"
   },
   "layer_edges": [
     {
@@ -36,13 +36,13 @@
     {
       "source": "composition",
       "target": "domain",
-      "imports": 284,
+      "imports": 283,
       "allowed": true
     },
     {
       "source": "composition",
       "target": "infrastructure",
-      "imports": 241,
+      "imports": 242,
       "allowed": true
     },
     {
