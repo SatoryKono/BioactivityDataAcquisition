@@ -962,7 +962,14 @@
     }
   },
   "assertless_total_candidates": 88,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 3,
+      "budget": "markerless_test_functions_max",
+      "expected_max": 0,
+      "metric": "markerless_test_functions"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1136,8 +1143,12 @@
     ]
   },
   "intentional_no_exception_contract": 86,
-  "markerless_examples": [],
-  "markerless_test_functions": 0,
+  "markerless_examples": [
+    "tests/unit/application/services/test_pipeline_runner_service.py:67",
+    "tests/unit/application/services/test_pipeline_runner_service.py:81",
+    "tests/unit/composition/bootstrap/runtime/test_runner_assembly_bootstrap.py:440"
+  ],
+  "markerless_test_functions": 3,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2007,8 +2018,12 @@
         ".yml"
       ]
     },
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/services/test_pipeline_runner_service.py:67",
+      "tests/unit/application/services/test_pipeline_runner_service.py:81",
+      "tests/unit/composition/bootstrap/runtime/test_runner_assembly_bootstrap.py:440"
+    ],
+    "markerless_test_functions": 3,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2069,12 +2084,12 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2415,
-    "total_test_functions": 25410,
+    "total_test_functions": 25414,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ae8847af6b0fb9375b2d534db78c32ad7c5525bc9763813620bb328b87d45cf0",
+  "source_tree_sha256": "14ff74129fe65312bf507b961f14e8a1d31c3f304a2293b29c2e0e810ef31775",
   "summary": {
     "assertion_branch_reachability_percent": 100.0,
     "assertless_total_candidates": 88,
@@ -2083,8 +2098,12 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 86,
-    "markerless_examples": [],
-    "markerless_test_functions": 0,
+    "markerless_examples": [
+      "tests/unit/application/services/test_pipeline_runner_service.py:67",
+      "tests/unit/application/services/test_pipeline_runner_service.py:81",
+      "tests/unit/composition/bootstrap/runtime/test_runner_assembly_bootstrap.py:440"
+    ],
+    "markerless_test_functions": 3,
     "refined_assertless_tests": 0,
     "unreviewed_assertion_bypass_count": 0,
     "uuid4_call_sites": 0
@@ -2137,7 +2156,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2415,
-  "total_test_functions": 25410,
+  "total_test_functions": 25414,
   "unreviewed_assertion_bypass_count": 0,
   "uuid4_call_sites": 0
 }

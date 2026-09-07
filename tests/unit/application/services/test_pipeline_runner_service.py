@@ -64,6 +64,29 @@ from bioetl.application.services.execution.pipeline_runner_service import (
 )
 
 
+def test_composed_run_id_factory_accepts_string_uuid() -> None:
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        _resolve_effective_run_id,
+    )
+
+    expected = UUID("12345678-1234-5678-1234-567812345678")
+    assert (
+        _resolve_effective_run_id(
+            run_id=None, options=RunOptions(), run_id_factory=lambda: str(expected)
+        )
+        == expected
+    )
+
+
+def test_missing_run_id_factory_fails_with_composition_diagnostic() -> None:
+    from bioetl.application.services.execution.pipeline_runner_service import (
+        _missing_run_id_factory,
+    )
+
+    with pytest.raises(RuntimeError, match="must be supplied by composition root"):
+        _missing_run_id_factory()
+
+
 @pytest.fixture
 def mock_logger():
     """Create a mock logger."""

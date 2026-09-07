@@ -435,3 +435,15 @@ class TestBootstrapCompositeRunner:
         assert infra_context.logger is logger
         assert infra_context.storage is storage
         assert infra_context.run_id == "effective-rid"
+
+
+def test_pipeline_run_id_factory_uses_pipeline_occurrence_kind(monkeypatch) -> None:
+    from uuid import UUID
+    from unittest.mock import Mock
+    from bioetl.composition.bootstrap.runtime import runner
+
+    expected = UUID("12345678-1234-5678-1234-567812345678")
+    occurrence_factory = Mock(return_value=expected)
+    monkeypatch.setattr(runner, "create_runtime_occurrence_run_id", occurrence_factory)
+    assert runner._pipeline_run_id_factory() == str(expected)
+    occurrence_factory.assert_called_once_with("pipeline_run")
