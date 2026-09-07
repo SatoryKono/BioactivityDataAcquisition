@@ -301,6 +301,20 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
             if not match:
                 continue
             target_uid = match.group(1)
+            if target_uid == "${__data.fields.action_dashboard_uid}":
+                assert dashboard["uid"] == "bioetl-incident-v1"
+                panel = next(p for p in dashboard["panels"] if p.get("id") == 2010)
+                expr = panel["targets"][0]["expr"]
+                resolved = set(
+                    re.findall(r'"action_dashboard_uid", "([a-z0-9-]+)"', expr)
+                )
+                assert resolved == {
+                    "bioetl-runtime",
+                    "bioetl-provider-health-v2",
+                    "bioetl-dq-v2",
+                }
+                assert resolved <= shipped
+                continue
             assert target_uid in shipped, (
                 f"{dashboard_path.name} link {link.get('title')!r} points to "
                 f"unknown dashboard uid {target_uid!r} (dangling handoff)"

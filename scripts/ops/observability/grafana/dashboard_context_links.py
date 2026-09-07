@@ -12,6 +12,7 @@ Production twin of the navigation-links contract. Builds `/d/` handoffs that:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import re
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 SEVEN_UIDS: tuple[str, ...] = (
@@ -159,7 +160,38 @@ def _assemble_url(
         parts.append(f"var-{name}={value}")
     parts.append(TIME_TOKEN)
     query = "&".join(parts)
-    return f"/d/{target_uid}/{PATH_BY_UID[target_uid]}?{query}"
+    return serialize_selection_parameters(
+        f"/d/{target_uid}/{PATH_BY_UID[target_uid]}?{query}"
+    )
+
+
+def serialize_selection_parameters(url: str) -> str:
+    """Use Grafana's URL formatter, preserving All and repeated selections.
+
+    A datasource formatter turns All into a regex and arrays into globs.
+    queryparam instead serializes the selector's original URL values.
+    Concrete row fields and explicit scope resets remain authored values.
+    """
+
+    def replace(match: re.Match[str]) -> str:
+        target = match.group(1)
+        source = match.group(2) or match.group(3)
+        if source.startswith("__"):
+            return match.group(0)
+        if source == target:
+            return "${" + source + ":queryparam}"
+        return "var-" + target + "=${" + source + ":percentencode}"
+
+    url = re.sub(
+        r"\$\{([a-z_]+):customqueryparam:var-([a-z_]+)\}",
+        lambda m: "var-" + m[2] + "=${" + m[1] + ":percentencode}",
+        url,
+    )
+    return re.sub(
+        r"var-([a-z_]+)=\$(?:\{([a-z_]+)\}|([a-z_]+))(?=&|$)",
+        replace,
+        url,
+    )
 
 
 @dataclass(slots=True)
@@ -269,3 +301,130 @@ __all__ = [
     "rewrite_dashboard_handoff_url",
     "urls_for_context",
 ]
+
+
+def _hide_field(panel: dict, name: str) -> None:
+    for transform in panel.get("transformations", []):
+        if transform.get("id") == "organize":
+            transform["options"].get("excludeByName", {}).pop(name, None)
+    overrides = panel.setdefault("fieldConfig", {}).setdefault("overrides", [])
+    if not any(o.get("matcher", {}).get("options") == name for o in overrides):
+        overrides.append(
+            {
+                "matcher": {"id": "byName", "options": name},
+                "properties": [{"id": "custom.hidden", "value": True}],
+            }
+        )
+
+
+def _rewrite_links(value: object) -> None:
+    if isinstance(value, list):
+        for item in value:
+            _rewrite_links(item)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(item, str) and key == "url" and item.startswith("/d/"):
+                value[key] = serialize_selection_parameters(item)
+            elif isinstance(item, str) and key == "content":
+                value[key] = re.sub(
+                    r'href="(/d/[^\"]+)"',
+                    lambda m: (
+                        'href="'
+                        + serialize_selection_parameters(
+                            m[1].replace("&amp;", "&")
+                        ).replace("&", "&amp;")
+                        + '"'
+                    ),
+                    item,
+                )
+            else:
+                _rewrite_links(item)
+
+
+def _fix_panel(panel: dict, uid: str) -> None:
+    for target in panel.get("targets", []):
+        if target.get("root_selector") == "summary":
+            for name in ("from_ms", "to_ms"):
+                _hide_field(panel, name)
+    if uid == "bioetl-run-explorer-v1" and panel.get("id") == 3013:
+        for override in panel["fieldConfig"]["overrides"]:
+            if override["matcher"]["options"] in {"kind", "Artifact", "ref"}:
+                if override["matcher"]["options"] == "kind":
+                    override["matcher"]["options"] = "Artifact"
+                for prop in override["properties"]:
+                    if prop["id"] == "links":
+                        prop["value"] = [
+                            {
+                                "title": "Open report artifact",
+                                "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/pipeline-run-report-artifact?pipeline=${pipeline:percentencode}&run_id=${run_id:percentencode}&format=${__data.fields.Artifact}",
+                                "targetBlank": True,
+                            }
+                        ]
+    if uid == "bioetl-incident-v1" and panel.get("id") == 2010:
+        parts = []
+        for domain, target_uid in (
+            ("runtime", "bioetl-runtime"),
+            ("provider", "bioetl-provider-health-v2"),
+            ("dq", "bioetl-dq-v2"),
+        ):
+            part = f"bioetl_incident_ranked_{domain}"
+            part = f'label_replace({part}, "action_dashboard_uid", "{target_uid}", "domain", "{domain}")'
+            part = f'label_replace({part}, "pipeline", "unknown", "pipeline", "^$")'
+            if domain == "provider":
+                part = f'label_replace({part}, "provider", "unknown", "provider", "^$")'
+                part = f'label_replace({part}, "action_scope", "var-provider=$1&var-pipeline_context=unknown", "provider", "(.+)")'
+            else:
+                part = f'label_replace({part}, "action_scope", "var-stage=$$__all", "domain", "{domain}")'
+            parts.append(part)
+        panel["targets"][0]["expr"] = " or ".join(parts)
+        _hide_field(panel, "action_dashboard_uid")
+        _hide_field(panel, "action_scope")
+        overrides = panel["fieldConfig"]["overrides"]
+        overrides[:] = [
+            o for o in overrides if o.get("matcher", {}).get("options") != "Action"
+        ]
+        overrides.append(
+            {
+                "matcher": {"id": "byName", "options": "Action"},
+                "properties": [
+                    {"id": "custom.width", "value": 150},
+                    {"id": "custom.cellOptions", "value": {"type": "data-links"}},
+                    {
+                        "id": "links",
+                        "value": [
+                            {
+                                "title": "Open domain diagnostics",
+                                "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                                "targetBlank": False,
+                                "includeVars": False,
+                            }
+                        ],
+                    },
+                ],
+            }
+        )
+    if (uid, panel.get("id")) in {
+        ("bioetl-provider-health-v2", 9107),
+        ("bioetl-runtime", 9102),
+    }:
+        title = (
+            "Open provider incident runbook"
+            if panel["id"] == 9107
+            else "Open observability runbook"
+        )
+        panel["links"] = [
+            {
+                "title": title,
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+                "targetBlank": True,
+            }
+        ]
+    for child in panel.get("panels", []):
+        _fix_panel(child, uid)
+
+
+def normalize_dashboard_actions(payload: dict) -> None:
+    """Keep helper fields in the data frame and bind visible actions explicitly."""
+    for panel in payload.get("panels", []):
+        _fix_panel(panel, payload.get("uid", ""))
+    _rewrite_links(payload)
