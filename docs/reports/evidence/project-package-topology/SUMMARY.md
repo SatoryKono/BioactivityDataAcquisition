@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): Grafana identity projection structural recount and successful coverage producer in CI run 34103657627; `source_tree_sha256` and `source_module_count` match `reports/quality/module-coverage-inventory.json`.
+Refresh note (2026-09-07): Grafana navigation and report-artifact fixes; source fingerprint refreshed from the canonical module-coverage inventory. The tracked Python file count and layer counts were remeasured and remain unchanged; existing coverage measurements are retained.
 
-`source_tree_sha256=c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c`
+`source_tree_sha256=85cb95d45b92c34f8d04cb55a9adf6f794cd2a96c91ea8dcf62cdabc013d7502`
 
 `source_module_count=2468`
 
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c`
+- source_tree_sha256: `85cb95d45b92c34f8d04cb55a9adf6f794cd2a96c91ea8dcf62cdabc013d7502`
 
 `source_module_count=2468`

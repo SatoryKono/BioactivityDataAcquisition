@@ -59,8 +59,8 @@ def test_template_handoff_uses_pipeline_context_from_provider_board() -> None:
         source_uid="bioetl-provider-health-v2",
         template=True,
     )
-    assert "var-pipeline=$pipeline_context" in url
-    assert "var-run_id=$run_id" in url
+    assert "var-pipeline=${pipeline_context:percentencode}" in url
+    assert "${run_id:queryparam}" in url
 
 
 def test_urls_for_context_do_not_keep_a_foreign_uuid() -> None:

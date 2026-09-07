@@ -28,6 +28,7 @@ from bioetl.interfaces.http.processed_records_table import (
 from bioetl.interfaces.http.run_report_ops import (
     list_pipeline_run_report_payloads,
     list_workflow_run_report_payloads,
+    load_pipeline_run_report_artifact,
     load_pipeline_run_report_payload,
     load_workflow_run_report_payload,
 )
@@ -45,6 +46,15 @@ _NOT_FOUND_MESSAGE = "Not Found"
 
 
 class _HealthResponseSupport(Protocol):
+    async def _send_text_response(
+        self,
+        writer: asyncio.StreamWriter,
+        status_code: int,
+        body: str,
+        *,
+        content_type: str = "text/plain; charset=utf-8",
+    ) -> None: ...
+
     async def _send_response(
         self,
         writer: asyncio.StreamWriter,
@@ -95,6 +105,9 @@ async def dispatch_observability_request(
         if path == "/ops/observability/pipeline-run-report":
             await handle_pipeline_run_report(host, writer, query)
             return
+        if path == "/ops/observability/pipeline-run-report-artifact":
+            await handle_pipeline_run_report_artifact(host, writer, query)
+            return
         if path == "/ops/observability/workflow-run-report":
             await handle_workflow_run_report(host, writer, query)
             return
@@ -109,6 +122,45 @@ async def dispatch_observability_request(
         await host._send_response(writer, 400, str(exc))
     except RuntimeError as exc:
         await host._send_response(writer, 502, str(exc))
+
+
+async def handle_pipeline_run_report_artifact(
+    host: _HealthObservabilityRoutingHost,
+    writer: asyncio.StreamWriter,
+    query: dict[str, str],
+) -> None:
+    """Open an exact persisted artifact with explicit missing/error responses."""
+    pipeline = host._read_required_param(query, "pipeline")
+    run_id = host._read_required_param(query, "run_id")
+    artifact_format = host._read_required_param(query, "format")
+    try:
+        body = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(
+                load_pipeline_run_report_artifact,
+                pipeline=pipeline,
+                run_id=run_id,
+                artifact_format=artifact_format,
+            ),
+        )
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="pipeline-run-report-artifact", reason=exc.reason
+            ),
+        )
+        return
+    if body is None:
+        await host._send_response(writer, 404, "Selected run report artifact not found")
+        return
+    content_type = (
+        "application/json; charset=utf-8"
+        if artifact_format == "pipeline_run_report_json"
+        else "text/plain; charset=utf-8"
+    )
+    await host._send_text_response(writer, 200, body, content_type=content_type)
 
 
 async def handle_pipeline_run_report(
