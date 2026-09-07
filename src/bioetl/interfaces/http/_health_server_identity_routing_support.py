@@ -260,7 +260,9 @@ def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
     report = load_pipeline_run_report_payload(
         run_id=scope.selected_run_id, pipeline_name=pipeline
     )
-    identity = report.get("identity") if isinstance(report, dict) else None
+    if not isinstance(report, dict):
+        return {}
+    identity = report.get("identity")
     if (
         not isinstance(identity, dict)
         or str(identity.get("run_id")) != scope.selected_run_id
@@ -272,11 +274,18 @@ def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
         "completed_at",
         "duration_seconds",
         "tracking_coverage",
+        "workflow_id",
+        "workflow_run_id",
+        "workflow_step_id",
+    )
+    values = dict(identity)
+    values["tracking_coverage"] = identity.get("tracking_coverage") or report.get(
+        "tracking_coverage"
     )
     return {
-        "run_status" if key == "status" else key: identity[key]
+        "run_status" if key == "status" else key: values[key]
         for key in keys
-        if identity.get(key) not in (None, "")
+        if values.get(key) not in (None, "")
     }
 
 

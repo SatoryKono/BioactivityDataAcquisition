@@ -101,7 +101,11 @@ async def test_identity_summary_uses_only_the_selected_report(
                 "status": "success",
                 "started_at": "2026-09-06T12:20:49+00:00",
                 "completed_at": "2026-09-06T12:21:15+00:00",
-            }
+                "workflow_id": "chembl_baseline",
+                "workflow_run_id": "workflow-run",
+                "workflow_step_id": "run_chembl_assay",
+            },
+            "tracking_coverage": "full",
         },
     )
     scope = _IdentityScope(
@@ -119,5 +123,20 @@ async def test_identity_summary_uses_only_the_selected_report(
         assert summary["run_status"] == "success"
         assert summary["started_at"] == "2026-09-06T12:20:49+00:00"
         assert summary["completed_at"] == "2026-09-06T12:21:15+00:00"
+        assert summary["tracking_coverage"] == "full"
+        rows = routing.build_control_plane_identity_payload(
+            requested_pipeline="chembl_assay",
+            resolved_manifest=None,
+            selected_pipelines=("chembl_assay",),
+            selected_run_id="selected",
+            selected_run_types=(),
+            resolved_via="selected_run_id_not_found",
+            identity_evidence_summary=summary,
+        )["rows"]
+        values = {row["parameter"]: row["value"] for row in rows}
+        assert values["Tracking coverage"] == "full"
+        assert values["Workflow ID"] == "chembl_baseline"
+        assert values["Workflow Run ID"] == "workflow-run"
+        assert values["Workflow Step ID"] == "run_chembl_assay"
     else:
         assert summary == {}

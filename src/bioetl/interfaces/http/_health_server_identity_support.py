@@ -278,6 +278,15 @@ def _report_identity_rows(
         _identity_row("Completed at", completed_at, unavailable=unavailable),
         _identity_row("Duration seconds", duration, unavailable=unavailable),
         _identity_row("Tracking coverage", coverage, unavailable=unavailable),
+        *[
+            _identity_row(label, summary[key], unavailable=unavailable)
+            for key, label in (
+                ("workflow_id", "Workflow ID"),
+                ("workflow_run_id", "Workflow Run ID"),
+                ("workflow_step_id", "Workflow Step ID"),
+            )
+            if summary.get(key) not in (None, "")
+        ],
     ]
 
 
