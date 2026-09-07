@@ -276,11 +276,10 @@ def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
     if not isinstance(report, dict):
         return {}
     identity = report.get("identity")
-    if (
-        not isinstance(identity, dict)
-        or str(identity.get("run_id")) != scope.selected_run_id
-        or identity.get("pipeline_name") != pipeline
-    ):
+    if not isinstance(identity, dict) or (
+        str(identity.get("run_id")),
+        identity.get("pipeline_name"),
+    ) != (scope.selected_run_id, pipeline):
         return {}
     keys = (
         "status",
