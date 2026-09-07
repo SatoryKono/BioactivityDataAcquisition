@@ -384,7 +384,11 @@ def _summary_rows_pipeline_run_report(
         grafana_to_ms=_parse_grafana_ms(grafana_to),
         status=status,
     )
-    set_range = "Set range to run (started_at-5m .. completed_at+5m)"
+    set_range = (
+        "Set range to run (started_at-5m .. completed_at+5m)"
+        if started_ms is not None and completed_ms is not None
+        else None
+    )
     coverage_chip = _coverage_chip(covers)
     summary_row = {
         "run_id": run_id,
@@ -398,8 +402,13 @@ def _summary_rows_pipeline_run_report(
         "coverage_offset": offset,
         "from_ms": str(from_ms),
         "to_ms": str(to_ms),
-        "set_range_to_run": set_range,
     }
+    # Grafana applies data links even to null cells. Omit the action field
+    # entirely when bounds are unavailable so no invalid URL can be clicked.
+    if set_range is not None:
+        summary_row["set_range_to_run"] = set_range
+    else:
+        summary_row["range_action_status"] = "Run timestamps unavailable"
     rows = [{"parameter": key, "value": value} for key, value in summary_row.items()]
     return {
         "schema_version": "pipeline_run_report_v1",

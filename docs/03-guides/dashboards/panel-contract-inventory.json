@@ -4419,7 +4419,9 @@
         "bioetl_provider_current_status_info"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+      ],
       "thresholds": [
         {
           "color": "gray",
@@ -5922,7 +5924,9 @@
         "bioetl_runtime_trust_gap_status_10m"
       ],
       "ref_id": "A",
-      "runbook_urls": [],
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+      ],
       "thresholds": [
         {
           "color": "green",

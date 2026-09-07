@@ -75,7 +75,7 @@ def evidence_payload(
             "processing_status": processing_status,
             "scope_kind": scope_kind,
             "evidence_freshness": evidence_freshness,
-            "reasons": reasons,
+            "reasons": reasons[:12],
             "reasons_count": len(reasons),
             "reasons_text": reasons_text,
             "reasons_truncated": reasons_truncated,
@@ -136,7 +136,7 @@ def _trust_reasons(
         wanted = {"WARNING"}
     else:
         wanted = {"UNKNOWN"}
-    return [check.reason for check in checks if check.status in wanted][:12]
+    return [check.reason for check in checks if check.status in wanted]
 
 
 def _trust_reasons_display(reasons: list[str]) -> tuple[str, bool]:
