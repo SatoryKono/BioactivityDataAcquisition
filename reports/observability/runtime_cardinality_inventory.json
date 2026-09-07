@@ -1453,7 +1453,6 @@
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
-      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json",
@@ -1668,14 +1667,17 @@
     ],
     "bioetl_incident_ranked_dq": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_incident_ranked_provider": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_incident_ranked_runtime": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "grafana/dashboards/bioetl-incident-v1.json"
     ],
     "bioetl_infrastructure_validated": [
@@ -1698,11 +1700,12 @@
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l0_next_action_no_route": [
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l0_next_action_route": [
-      "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
@@ -1975,7 +1978,6 @@
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-incident-v1.json",
@@ -2202,7 +2204,6 @@
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
-      "docs/03-guides/dashboards/panels/bioetl-incident-v1-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/dashboards/bioetl-incident-v1.json"

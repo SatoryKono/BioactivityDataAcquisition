@@ -33,6 +33,30 @@ or query semantics. See [Optional Scenes dual path](scenes-dual-path.md).
 > `bioetl quarantine inspect`. Details:
 > [monitoring-surface-reduction](../../05-operations/runbooks/monitoring-surface-reduction-2026-07-23.md).
 
+Operator triage updates (2026-09-07):
+
+- Overview priorities express routing urgency (URGENT / HIGH / REVIEW / WATCH),
+  with pipeline visible and identical actions merged across selected run types.
+  They are not alert severity. Provider
+  degradation is GLOBAL context. Domain comparisons use full-width tables;
+  timelines show named states and preserve gaps.
+- Pipeline Diagnostics places current blockers immediately below the scope and
+  health verdict. Endpoint SCRAPING, baseline rule/series presence, and rule
+  evaluation age are separate neutral evidence indicators. Baseline PRESENT
+  does not prove complete telemetry for the selected pipeline. Empty blockers
+  means none observed; confirm telemetry before a health conclusion.
+- Incident Workspace ranks GLOBAL, CURRENT signals at query evaluation time
+  (the selected range end). Pipeline and Run ID do not filter the ranking or
+  domain suspect details. Only positive signals are active suspects; a missing
+  domain universe retains telemetry_gap / UNKNOWN. Rank reflects severity,
+  with equal urgency for ties. Confidence remains UNVERIFIED until independent
+  domain evidence corroborates the cause; sample time is not event freshness.
+- Alert history merges adjacent equal samples. FIRING / PENDING appear in the
+  semantic legend; hover an interval for the full alert identity and bounds.
+- The shared navigation occupies three grid rows with the same 19px heading
+  and 16px links. The current destination retains its underline and accessible
+  current-page state. Detailed instructions remain available below the fold.
+
 Shipped inventory (**7 dashboards**): Control Plane, Overview, Runtime, Provider
 Provider Health, Data Quality, Incident Workspace, Run Explorer. Primary `0..6` refresh is `60s`.
 Generic primary handoffs preserve HTTP `$run_id` for identity panels only
@@ -666,26 +690,17 @@ Variable handoff policy for dashboard links remains strict and bounded:
 ## Важные пороги (из JSON)
 
 - `overview.id=214 (Status)`: `CRIT` при runtime blocker `>0`, DQ hard fail `>0`, blocking data-validation lifecycle или control-plane blocker `>0`; `WARN` при non-fatal warning-only сигналах; `UNKNOWN` при no recent samples. Panel links route directly to Runtime / Control Plane / Data Quality / Provider Health / Workflow with the current time range.
-- `overview.id=215 (Review First Action)`: table shows up to **four** routes via
-  `topk(4, bioetl_l0_next_action_route{…} or NO_ROUTE fallback)`. Column order is
-  **Action → Priority → Why → Pipeline** (Action-first hierarchy). Short Action
-  labels (`Runtime`, `Control Plane`, `DQ`, …) reduce truncation; panel
-  `dataLinks` keep full `Open *` titles as secondary domain shortcuts. Priority
-  order `Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow >
-  Monitor`. Priority uses **short badges** (`RUNTIME`/`CP`/`GOLD`/`DQ`/`PROV`/
-  `WF`/`MON`/`NR`) with **color-background** (column-only, never row-wide paint).
-  Action is the sole **color-text** CTA emphasis. Primary CTA is the Action cell
-  link using `action_dashboard_uid` + row `pipeline`. Missing/empty scope falls
-  back to `NO_ROUTE` / `selected_scope_not_present` instead of a blank panel.
-  Runtime / Control Plane / DQ handoffs preserve
-  `workflow/pipeline/run_type/run_id`; Provider Health fail-closes to
-  `provider=unknown` while preserving `pipeline_context`. When Priority is
-  `MON`/`NR` and Fleet Health is OK, continue monitoring rather than escalating.
-  First-screen layout pairs RFA with Domain Status at `w=12` each; `cellHeight`
-  is `sm`. The shipped dashboard JSON and its contracts are the durable record
-  for the RFA-00 migration; the retired one-off mutator was historical only and
-  should not be reintroduced under `scripts/ops/observability/grafana/` — edit
-  shipped `grafana/dashboards/*.json` through reviewable PR changes.
+- `overview.id=215 (Review First Action)`: shows at most **two** positive
+  routes after `max without(run_type)` merges identical action/object/reason
+  rows. Column order is **Priority → Pipeline → Why → Action**. Priority is
+  routing urgency, not alert severity: `0=UNKNOWN`, `5=WATCH`, `10=REVIEW`,
+  `20/30=HIGH`, `35/40/50=URGENT`. Different pipelines remain distinct.
+  An absence-only `bioetl_l0_next_action_no_route` fallback preserves UNKNOWN.
+  Action links use the row's `action_dashboard_uid` and pipeline, preserving
+  workflow, run type, run ID and time range. Provider Health clears an unknown
+  provider to `provider=unknown` while retaining `pipeline_context`.
+  First Action occupies `w=16`, paired with Domain Status at `w=8`.
+  Inspect retains routing metadata; no healthy zero is manufactured.
 - `overview` first-screen selected-scope cards normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading `bioetl_l0_*` / `bioetl_l1_*` summary recording rules. For example, `workflow_chembl_assay` resolves to the same current-state summary rows as `chembl_assay`.
 - `dq.id=2 (DQ Score Snapshot)`: no-data остается `UNKNOWN`, не `0`; hard-fail signals блокируют promotion, warning-only означает drift. Next action: hard-fail -> reject/quarantine diagnostics; warning-only -> trend + top reasons.
 - `overview.id=9002 (Review Domain Status)`: использует `topk(4, max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"}))`. First-screen таблица показывает четыре worst/UNKNOWN domain status; полный six-domain matrix остаётся в `overview.id=9031` под `Domain Status Tracks`.
@@ -694,7 +709,13 @@ Variable handoff policy for dashboard links remains strict and bounded:
   quarantine pressure, spike = incident. Next action: `Top Silver Reject
   Reasons` + `bioetl quarantine inspect` (CLI).
 - `runtime.id=16 (Monitor Active Blocker Count)`: CURRENT 15m count chip supporting `9101`; non-zero = active blocker count; `UNKNOWN` means missing current runtime status/blocker telemetry and must not be treated as OK. Next action: runtime blockers table + culprit stage panels, затем file logs under `reports/logs/` при необходимости (no Grafana Loki/Tempo UI).
-- `runtime.id=9102 (Metrics Evidence)`: `0=SCRAPING/RULES OK`, `1=RULE/SERIES GAP`, `>=2=RULE+SERIES GAP`, `null=UNKNOWN`; checks scrape health plus runtime dashboard recording-rule evaluation failures, rule-group presence, and rule-group freshness. Any non-zero value forces headline `Status` and `Runtime Status` to `INCOMPLETE` (`3`).
+- `runtime.id=9102 (Monitor Metrics Coverage)`: three neutral evidence fields
+  separate Endpoint (`SCRAPING` / `UNAVAILABLE`), Baseline (`PRESENT` /
+  `RULE/SERIES GAP` / `RULE+SERIES GAP`) and Rule age in seconds. Missing
+  evidence is UNKNOWN. Baseline PRESENT checks only the existing ten-minute
+  rule/series guard, not all required telemetry; the first-screen scope text
+  therefore keeps full telemetry UNVERIFIED. The existing non-zero trust-gap
+  rule still makes Pipeline Status INCOMPLETE, independently of presentation.
 - `runtime.id=205/id=236 (Failed Runs / Monitor No-Records Runs)`: `0` is valid only when `bioetl_runtime_pipeline_run_type_universe` confirms the selected scope; missing selected scope remains `UNKNOWN`.
 - `runtime.id=220 (Runtime Error Rate)`: elevated ratio with meaningful 30m Bronze denominator (`>=20`) = degradation risk; WARN starts at 5%, dashboard CRIT escalation at 20%, and lower/missing denominator stays `UNKNOWN`. Next action: `Inspect Errors by Stage / Error Code / Range` + failed runs/backlog/lag panels.
 - `runtime` current-triage panels normalize a manually selected `workflow_<pipeline>` value back to the entity pipeline before reading current runtime recording rules and error-rate/lag evidence. For example, `workflow_chembl_assay` resolves to the same current status and blocker scope as `chembl_assay`; `UNKNOWN` on error-rate still remains valid when the 30m Bronze denominator is absent or `<20`.
@@ -804,4 +825,4 @@ Variable handoff policy for dashboard links remains strict and bounded:
 - **Localize**: локализация culprit stage/phase и проверка latency/backlog breakdown.
 - **Escalate**: shutdown/terminal-state диагностика и handoff в tracing/log drilldown для подтверждения причины.
 
-На first screen оставлена ровно одна рекомендация drilldown — panel `id=9991` (`First Action`). Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.
+На first screen рекомендация первого действия включена в scope panel `id=9400`; подробный rail `id=9991` доступен в Localize Runtime Cause. Оператор сначала читает current status, top blockers и telemetry gap; `Inspect Active Runtime Blocker Detail` открывается из CTA только когда нужен полный rule-level breakdown внутри `Detect`.
