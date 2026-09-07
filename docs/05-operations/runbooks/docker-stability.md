@@ -49,6 +49,20 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 ```
 
 Use `runtime_manager.py recover --stack <stack>` only after preflight passes.
+On native Windows with Docker Desktop Linux containers, capacity preflight
+uses `wsl.exe -d docker-desktop` and read-only `nsenter`/`df -Pk` in the
+`dockerd` mount namespace. It checks the storage `engine-id` against the ID
+returned by `docker info` before using total/available bytes. Native Linux
+continues to measure `DockerRootDir` locally. No Windows drive or WSL root
+filesystem is used as a substitute for Docker storage.
+
+`CAPACITY_DISK` means measured free space is below the existing maximum of
+50 GiB and 20 percent of total capacity. `CAPACITY_DOCKER_ROOT` means capacity
+could not be verified (including missing WSL tools, an inaccessible daemon
+namespace, an engine identity mismatch, or invalid measurement output).
+Both block startup; inspect the finding's evidence before recovery. Daemon
+unavailability is reported separately as `DOCKER_DAEMON`.
+
 Recovery is bounded to three attempts and preserves named volumes. Never use
 `docker system prune`, `docker compose down -v`, or delete Docker data as an
 incident response shortcut.
