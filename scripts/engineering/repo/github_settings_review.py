@@ -125,7 +125,8 @@ class ReadOnlyGitHubClient:
             candidates.append(None)
         for candidate in candidates:
             completed = subprocess.run(
-                ["gh", "api", "user", "--silent"],
+                # The workflow token is an installation token, without a /user.
+                ["gh", "api", "rate_limit", "--silent"],
                 cwd=self.repo_root,
                 env=self._environment(candidate),
                 **_CAPTURED_TEXT,
