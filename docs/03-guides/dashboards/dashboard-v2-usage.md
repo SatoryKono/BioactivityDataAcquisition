@@ -779,6 +779,22 @@ Variable handoff policy for dashboard links remains strict and bounded:
 
 ## Частые проблемы
 
+В Selected-Run Trust столбцы Processing, Trust и Reasons показывают результат
+обработки, вердикт доверия и общее число причин. Ссылка в Reasons открывает
+полный список проверок. Identity evidence без Run ID показывает SELECT RUN;
+если выбранный манифест недоступен, отображается TELEMETRY MISSING.
+
+Run Explorer выводит Pipeline и Workflow из каждой записи отчёта. Отсутствующая
+связь с workflow обозначается явно; фильтр Workflow не заменяет эту связь.
+Status и даты в сводке берутся из отчёта того же Run ID. Таблицы деталей
+занимают полную ширину; полные значения доступны через Inspect. Stage Funnel,
+Top Run Reasons и Run Artifacts различают отсутствие выбора (SELECT RUN),
+недоступный отчёт (TELEMETRY MISSING), успешно загруженный пустой раздел
+(VALID EMPTY) и ошибку запроса (QUERY ERROR).
+
+Легенда Global Read Latency обозначает p50, p95 и p99 для всех хранилищ и
+операций вместе. Эти глобальные квантили не являются задержкой одного store.
+
 1. `No data`:
    проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
 1. `No data` на p95 latency panels:

@@ -1839,7 +1839,7 @@ class TestHealthServerControlPlaneSelector:
         assert status_code == 200
         data = json.loads(body)
         assert data["resolved_via"] == "aggregate_scope_requires_exact_run_id"
-        assert data["summary"]["overall_status"] == "UNKNOWN"
+        assert data["summary"]["overall_status"] == "SELECT RUN"
         rows = {item["name"]: item for item in data["rows"]}
         assert rows["run_id"]["value_full"] == "not available for current scope"
         assert rows["manifest_id"]["value_full"] == "not available for current scope"

@@ -21,6 +21,7 @@ from bioetl.interfaces.http._health_server_identity_support import (
     IDENTITY_UNAVAILABLE_VALUES,
     build_control_plane_identity_payload,
 )
+from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 if TYPE_CHECKING:
     from bioetl.interfaces.http._health_server_routing_support import _HealthRoutingHost
@@ -233,11 +234,30 @@ async def _build_identity_evidence_summary(
             checkpoint_metadata=checkpoint_metadata,
             view="overview",
         ).get("summary")
-        return (
-            identity_evidence_summary
-            if isinstance(identity_evidence_summary, dict)
-            else None
-        )
+        if not isinstance(identity_evidence_summary, dict):
+            return None
+        if scope.selected_run_id is not None:
+            report = load_pipeline_run_report_payload(
+                run_id=scope.selected_run_id,
+                pipeline_name=scope.requested_pipeline,
+            )
+            identity = report.get("identity") if isinstance(report, dict) else None
+            if (
+                isinstance(identity, dict)
+                and str(identity.get("run_id")) == scope.selected_run_id
+            ):
+                for key in (
+                    "status",
+                    "started_at",
+                    "completed_at",
+                    "duration_seconds",
+                    "tracking_coverage",
+                ):
+                    if identity.get(key) not in (None, ""):
+                        identity_evidence_summary[
+                            "run_status" if key == "status" else key
+                        ] = identity[key]
+        return identity_evidence_summary
 
     try:
         return await asyncio.wait_for(

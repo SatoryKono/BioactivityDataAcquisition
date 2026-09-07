@@ -76,6 +76,7 @@ def evidence_payload(
             "scope_kind": scope_kind,
             "evidence_freshness": evidence_freshness,
             "reasons": reasons,
+            "reasons_count": len(reasons),
             "reasons_text": reasons_text,
             "reasons_truncated": reasons_truncated,
             "evidence_observed_at": (
