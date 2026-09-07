@@ -53,6 +53,7 @@
       "lineage_closure_not_verified",
       "retention_plan_not_observed"
     ],
+    "reasons_count": 4,
     "reasons_text": "contract_evidence_not_finalized\ncheckpoint_artifact_not_observed\nlineage_closure_not_verified",
     "reasons_truncated": true,
     "scope_kind": "exact_run",

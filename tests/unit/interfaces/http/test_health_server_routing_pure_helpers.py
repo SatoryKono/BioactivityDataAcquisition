@@ -1101,6 +1101,9 @@ async def test_pipeline_run_report_route_returns_versioned_payload(
             "stage_timings": [],
             "identity_rows": [],
             "funnel": [],
+            "funnel_display": [{"stage_id": "VALID EMPTY"}],
+            "reasons_top_n_display": [{"reason_code": "VALID EMPTY"}],
+            "artifacts_display": [{"state": "VALID EMPTY"}],
             "timings_and_failure": [],
         },
     )

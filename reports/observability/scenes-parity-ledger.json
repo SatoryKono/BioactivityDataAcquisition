@@ -20,12 +20,12 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "0bacc70615d88003f5c118a9598bf4a3674f8e01f8eb2dae3c27db79521cfa45",
+    "bioetl-control-plane-v1": "2353f6f910c5435bb344356bdb91a432fa7d1f4567bc5fa991e0fb632dc77c99",
     "bioetl-dq-v2": "91316bc49d46e45ea0bbab6107492ab6aadc9a0451881737ad00e4ed21ef6288",
     "bioetl-incident-v1": "6b7494711ad550147bcc3e9b9ea7dbebc3952b9c9919fd087a8613cb9952b66c",
     "bioetl-overview-v2": "b9b8219561eefc254d3cec0a4ccadeb8332b35103c65bd4eeb2d2dc5a5077b35",
     "bioetl-provider-health-v2": "0c62a72cd4c4345f54e9a6dd0198efbf28a14eaa2befd658264f42bb5fa4f2b7",
-    "bioetl-run-explorer-v1": "373ea0f209343634a88401a6df4e383bcca6d311796c7e26ce085956da66df6b",
+    "bioetl-run-explorer-v1": "8c8bb3b4362b9e3c7d4468cc2c9abca33c15e1dbe2d5ce9783ea9b2f8bfeae67",
     "bioetl-runtime": "3069483ddb5441045649a77fa2810142ab56ee4798eaf027374dbe003a4865d8"
   },
   "panels": [
@@ -742,9 +742,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
         ],
         "target_count": 3
       }
@@ -3070,10 +3070,9 @@
         "datasource_type": null,
         "datasource_uid": null,
         "expressions": [
-          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
-          "/ops/observability/pipeline-run-report?pipeline=${pipeline}&run_id=${run_id}"
+          "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}"
         ],
-        "target_count": 2
+        "target_count": 1
       }
     },
     {
