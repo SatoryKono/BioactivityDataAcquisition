@@ -39,9 +39,16 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
 - **Data sources:** `bioetl_runtime_current_blocker_reason`, `bioetl_provider_current_cause`, `bioetl_dq_current_reason` (merged instant tables)
 - **Ranking:** shipped `severity` labels (`failing`/`crit`=2, `degraded`/`warn`=1).
   Priority 0 is `telemetry_gap` / UNKNOWN. Boolean `> 0` activation is not the rank.
-- **Visible columns:** Domain, Signal, Priority, Action, Pipeline, Provider.
+- **Visible columns:** Domain, Signal, Priority, Action, Details, Pipeline, Provider.
   Merge bookkeeping fields (`Time`, `reason`, `cause`) stay hidden; `Value` remains
   as Priority so global top-5 can sort before `limit`.
+- **Action:** Opens the indicated domain workspace for the row's Pipeline,
+  preserving the time range and applicable filters. It clears the selected Run ID
+  because the suspect represents current domain evidence.
+- **Details:** Offers a separate **Inspect value** control for the original action
+  value. Inspecting this value leaves the Incident Workspace open; clicking Action
+  performs the diagnostic handoff. Details uses available table width without a
+  fixed-width reservation.
 - **Empty:** `VALID_EMPTY — no active suspects across domains`
 
 ### 5b. Domain Suspect Details (collapsed row)
