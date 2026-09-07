@@ -269,6 +269,15 @@
       ],
       "transformations": [
         {
+          "id": "extractFields",
+          "options": {
+            "source": "action",
+            "format": "regexp",
+            "regExp": "(?<action_detail>.*)",
+            "replace": false
+          }
+        },
+        {
           "id": "sortBy",
           "options": {
             "fields": {},
@@ -306,7 +315,8 @@
               "Value": 2,
               "action": 3,
               "pipeline": 4,
-              "provider": 5
+              "provider": 5,
+              "action_detail": 6
             },
             "renameByName": {
               "domain": "Domain",
@@ -314,7 +324,8 @@
               "Value": "Priority",
               "action": "Action",
               "pipeline": "Pipeline",
-              "provider": "Provider"
+              "provider": "Provider",
+              "action_detail": "Details"
             }
           }
         }
@@ -568,7 +579,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Action"
+              "options": "Details"
             },
             "properties": [
               {
@@ -584,6 +595,46 @@
               {
                 "id": "custom.inspect",
                 "value": true
+              },
+              {
+                "id": "links",
+                "value": []
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": ".*",
+                      "result": {
+                        "text": "Inspect value"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Action"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto"
+                }
+              },
+              {
+                "id": "custom.inspect",
+                "value": false
               },
               {
                 "id": "links",

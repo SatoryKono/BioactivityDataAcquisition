@@ -364,6 +364,7 @@ def _fix_ranked_links(panel: dict) -> None:
     )
     _hide_field(panel, "action_dashboard_uid")
     _hide_field(panel, "action_scope")
+    _separate_action_inspector(panel)
     overrides = panel["fieldConfig"]["overrides"]
     overrides[:] = [
         o
@@ -376,7 +377,7 @@ def _fix_ranked_links(panel: dict) -> None:
             "properties": [
                 {"id": "custom.width", "value": 120},
                 {"id": "custom.cellOptions", "value": {"type": "auto"}},
-                {"id": "custom.inspect", "value": True},
+                {"id": "custom.inspect", "value": False},
                 {
                     "id": "links",
                     "value": [
@@ -385,6 +386,52 @@ def _fix_ranked_links(panel: dict) -> None:
                             "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
                             "targetBlank": False,
                             "includeVars": False,
+                        }
+                    ],
+                },
+            ],
+        }
+    )
+
+
+def _separate_action_inspector(panel: dict) -> None:
+    """Keep Grafana's cell inspector from intercepting the navigation click."""
+    transforms = panel["transformations"]
+    transforms[:] = [t for t in transforms if t.get("id") != "extractFields"]
+    transforms.insert(
+        0,
+        {
+            "id": "extractFields",
+            "options": {
+                "source": "action",
+                "format": "regexp",
+                "regExp": "(?<action_detail>.*)",
+                "replace": False,
+            },
+        },
+    )
+    organize = next(t["options"] for t in transforms if t["id"] == "organize")
+    organize["renameByName"]["action_detail"] = "Details"
+    organize["indexByName"]["action_detail"] = 6
+    overrides = panel["fieldConfig"]["overrides"]
+    overrides[:] = [o for o in overrides if o["matcher"]["options"] != "Details"]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "Details"},
+            "properties": [
+                {"id": "custom.width", "value": 120},
+                {"id": "custom.cellOptions", "value": {"type": "auto"}},
+                {"id": "custom.inspect", "value": True},
+                {"id": "links", "value": []},
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "regex",
+                            "options": {
+                                "pattern": ".*",
+                                "result": {"text": "Inspect value"},
+                            },
                         }
                     ],
                 },
