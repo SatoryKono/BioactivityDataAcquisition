@@ -2090,8 +2090,6 @@ tests:
         values: '30+0x2'
       - series: 'bioetl_l0_next_action_route{pipeline="sample",run_type="backfill",action_target="runtime"}'
         values: '0+0x2'
-      - series: 'bioetl_l0_next_action_no_route{action_target="no_route"}'
-        values: '0+0x2'
     promql_expr_test:
       - expr: 'topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline="sample"}>0)) or on() bioetl_l0_next_action_no_route'
         eval_time: 2m
@@ -2101,5 +2099,5 @@ tests:
       - expr: 'topk(2,max without(run_type)(bioetl_l0_next_action_route{pipeline="missing"}>0)) or on() bioetl_l0_next_action_no_route'
         eval_time: 2m
         exp_samples:
-          - labels: 'bioetl_l0_next_action_no_route{action_target="no_route"}'
+          - labels: 'bioetl_l0_next_action_no_route{action_dashboard_uid="bioetl-overview-v2",action_reason="selected_scope_not_present",action_target="no_route"}'
             value: 0

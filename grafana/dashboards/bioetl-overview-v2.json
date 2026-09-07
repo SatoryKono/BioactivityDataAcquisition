@@ -1072,7 +1072,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 70
+                "value": 100
               },
               {
                 "id": "custom.cellOptions",
@@ -1110,18 +1110,6 @@
                 "value": {
                   "mode": "thresholds"
                 }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Count"
               }
             ]
           }
