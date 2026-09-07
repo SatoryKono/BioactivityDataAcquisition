@@ -3139,7 +3139,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Estimates failed-run counter increase over the selected window for Pipeline and Run Type, evaluated once at the window end. Counter resets are handled before summing. Zero requires observed failed-counter samples with no increase; missing or insufficient samples remain UNKNOWN. Scope-universe presence alone does not prove counter coverage. Use the failure runbook or Run Explorer.",
+          "description": "TIME RANGE · Estimates failed-run counter increase over the selected window, once at its end. Resets are handled before summing. Every selected scope recorded by the window scope universe requires at least two failed-counter samples. Missing universe or insufficient samples in any scope remain UNKNOWN; empty is a coverage gap. Zero requires qualifying samples with no increase in every scope. The universe never manufactures zero. Use the failure runbook or Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3208,7 +3208,7 @@
           },
           "targets": [
             {
-              "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]))",
+              "expr": "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))",
               "instant": true,
               "range": false,
               "refId": "A"
