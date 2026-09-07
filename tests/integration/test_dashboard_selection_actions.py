@@ -96,5 +96,5 @@ def test_ranked_action_overrides_inspect_value_with_domain_link() -> None:
     assert {"id": "links", "value": []} in details["properties"]
     extractor = next(t for t in panel["transformations"] if t["id"] == "extractFields")
     assert extractor["options"]["source"] == "action"
-    assert extractor["options"]["regExp"] == "(?<action_detail>.*)"
+    assert extractor["options"]["regExp"] == "/(?<action_detail>.*)/"
     assert extractor["options"]["replace"] is False

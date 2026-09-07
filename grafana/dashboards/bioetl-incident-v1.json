@@ -273,7 +273,7 @@
           "options": {
             "source": "action",
             "format": "regexp",
-            "regExp": "(?<action_detail>.*)",
+            "regExp": "/(?<action_detail>.*)/",
             "replace": false
           }
         },

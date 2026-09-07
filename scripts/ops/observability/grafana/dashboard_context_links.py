@@ -405,7 +405,7 @@ def _separate_action_inspector(panel: dict) -> None:
             "options": {
                 "source": "action",
                 "format": "regexp",
-                "regExp": "(?<action_detail>.*)",
+                "regExp": "/(?<action_detail>.*)/",
                 "replace": False,
             },
         },
