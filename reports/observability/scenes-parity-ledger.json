@@ -20,13 +20,13 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "7d9fdc21041537245ac0e7a85726e5a17566080773ce3242d3fe53d90f304647",
-    "bioetl-dq-v2": "68d0ed592b4f8371f2549ca2296960b3e8a5c81d95c4bf9379df13a7493b2603",
-    "bioetl-incident-v1": "fff21c49c2d62c74fe91440e1d4d863dd3bde07cf9ca8fff9106f68b99c71fbe",
-    "bioetl-overview-v2": "af2acc517d435ebe7409d5590da5b828ae3c90cbf30a3d1f5c96d2b2c33a29e1",
-    "bioetl-provider-health-v2": "6e87880c616bf3b083b04676239fb8e1f58daba1bd16f9525972936976cd3058",
-    "bioetl-run-explorer-v1": "f2e7f6286d9c7a8d1ac6d5a62fd8432e73123b5c3b33124b95b7d3e914409657",
-    "bioetl-runtime": "726a7a2cec6896b61ffa77ffcb8a5e40952a2b2e28e82038ad3608715b13dbbc"
+    "bioetl-control-plane-v1": "0cd7a1fb77dca8ac5046ed29e71eda069d12540de7f79dd392f4c6875bd9d039",
+    "bioetl-dq-v2": "96007ac9585a7500264edd817e438b0936d4c5824037a3b02aab59f4068980d6",
+    "bioetl-incident-v1": "2aa298bcc2b1ddab972d56d314a48dc8d7361c13a9930d22209d1233f09db637",
+    "bioetl-overview-v2": "19d553d35b87a11d252afcf2989fc0cf144fea22b264e7e08d5036298c25edd0",
+    "bioetl-provider-health-v2": "87776d0395657be854adf73b37cdda18a5303d0d3435817ee10f3bf0cf9183df",
+    "bioetl-run-explorer-v1": "55ede3da8920ffb6326cdf15d465db0ee151223d261b07a95a46c71fab994ad5",
+    "bioetl-runtime": "f1d0177380131b30cea936283e6e82239f7702193daa28fcf3c6b70d5d860161"
   },
   "panels": [
     {
@@ -1230,9 +1230,11 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0)"
+          "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
+          "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
+          "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")"
         ],
-        "target_count": 1
+        "target_count": 3
       }
     },
     {

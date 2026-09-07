@@ -322,7 +322,8 @@
             "cellOptions": {
               "type": "auto"
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           },
           "mappings": [
             {
@@ -422,7 +423,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 80
+                "value": 100
               },
               {
                 "id": "custom.cellOptions",
@@ -567,7 +568,8 @@
             "cellOptions": {
               "type": "auto"
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           },
           "mappings": [
             {
@@ -707,8 +709,17 @@
                 }
               },
               {
-                "id": "custom.width",
-                "value": 260
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "missing_health_status": {
+                        "text": "Health status missing"
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -747,6 +758,80 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": {
+                        "text": "OK",
+                        "color": "green"
+                      },
+                      "1": {
+                        "text": "WARN",
+                        "color": "orange"
+                      },
+                      "2": {
+                        "text": "CRIT",
+                        "color": "red"
+                      },
+                      "3": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "UNKNOWN",
+                        "color": "gray"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Source state"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 105
               }
             ]
           }
@@ -1475,7 +1560,7 @@
             "sortBy": [
               {
                 "desc": true,
-                "displayName": "Severity"
+                "displayName": "Status"
               }
             ]
           },
@@ -1494,7 +1579,8 @@
             "defaults": {
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               }
             },
             "overrides": [
@@ -1521,6 +1607,76 @@
                     "value": 70
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          },
+                          "3": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Provider"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1531,6 +1687,10 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "Value": "Status"
                 }
               }
             }
@@ -1555,7 +1715,7 @@
             "sortBy": [
               {
                 "desc": true,
-                "displayName": "Severity"
+                "displayName": "Status"
               }
             ]
           },
@@ -1574,7 +1734,8 @@
             "defaults": {
               "noValue": "TELEMETRY MISSING — series not emitted for this selector (not a zero)",
               "custom": {
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               }
             },
             "overrides": [
@@ -1601,6 +1762,76 @@
                     "value": 50
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "OK",
+                            "color": "green"
+                          },
+                          "1": {
+                            "text": "WARN",
+                            "color": "orange"
+                          },
+                          "2": {
+                            "text": "CRIT",
+                            "color": "red"
+                          },
+                          "3": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 100
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Provider"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1611,6 +1842,10 @@
                 "excludeByName": {
                   "Time": true,
                   "__name__": true
+                },
+                "renameByName": {
+                  "provider": "Provider",
+                  "Value": "Status"
                 }
               }
             }
@@ -2170,7 +2405,7 @@
                 ]
               },
               "unit": "s",
-              "noValue": "No optional health-check latency samples in range; not a provider verdict.",
+              "noValue": "UNKNOWN",
               "mappings": [
                 {
                   "type": "special",
@@ -2194,6 +2429,10 @@
           },
           "id": 102,
           "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value",
+            "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -2201,9 +2440,7 @@
               ],
               "fields": "",
               "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            }
           },
           "targets": [
             {
@@ -2213,8 +2450,8 @@
             }
           ],
           "title": "Inspect Health-Check Latency p95",
-          "type": "gauge",
-          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot gauge of health-check p95; the interval trend is Track Health-Check Latency p95 (1)."
+          "type": "stat",
+          "description": "TIME RANGE · Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict TELEMETRY MISSING is not a zero and not VALID EMPTY. Role: range snapshot stat of health-check p95; the interval trend is Track Health-Check Latency p95 (1)."
         },
         {
           "datasource": {
@@ -3530,7 +3767,7 @@
             "y": 90
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero",
+          "description": "SELECTED RUN · TIME RANGE · Do not put full UUIDs into Prometheus labels. Current stage/outcome accounting evidence for the shared pipeline/run_type context. Provider remains the primary health selector; this table is bounded pipeline/run_type accounting evidence and does not prove current provider health by itself. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status, Monitor Provider Telemetry Freshness, and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the BioETL Ops HTTP/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty. Fail-closed: timeout, empty, or unresolved identity/accounting must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -3554,7 +3791,11 @@
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -3649,6 +3890,13 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -3674,6 +3922,13 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
                     }
                   }
                 ]
@@ -3790,6 +4045,13 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               }

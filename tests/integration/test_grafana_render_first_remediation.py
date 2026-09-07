@@ -234,7 +234,7 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     }
 
     severity_properties = {
-        prop["id"]: prop["value"] for prop in by_name["severity"]["properties"]
+        prop["id"]: prop["value"] for prop in by_name["Severity"]["properties"]
     }
     mappings = severity_properties["mappings"]
     assert [mapping["options"]["result"]["text"] for mapping in mappings] == [
@@ -737,7 +737,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
     cases = (
         ("bioetl-runtime.json", 9101, frozenset({"reason"})),
-        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason"})),
+        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason", "Source state"})),
     )
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -747,11 +747,13 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
         assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
-        assert all((_override_width(panel, name) or 0) >= 260 for name in wrapped), (
-            dashboard_name,
-            panel_id,
-            wrapped,
-        )
+        if panel_id == 9107:
+            # Keep the reason flexible so status and source survive at 900px.
+            assert _override_width(panel, "reason") is None
+            assert _override_width(panel, "Source state") == 105
+            assert _override_width(panel, "Status") == 100
+        else:
+            assert all((_override_width(panel, name) or 0) >= 260 for name in wrapped)
 
 
 def test_cycle4_named_text_columns_wrap_below_fold() -> None:
@@ -1377,7 +1379,7 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     layout_width = 1366 // 2
     chrome_px = 40
     cases = (
-        ("bioetl-provider-health-v2.json", 9107, 12, "reason", 260, "Value"),
+        ("bioetl-provider-health-v2.json", 9107, 12, "Source state", 105, "reason"),
         ("bioetl-runtime.json", 9101, 16, "reason", 260, "action_target"),
         (
             "bioetl-control-plane-v1.json",

@@ -251,7 +251,7 @@
         "y": 8
       },
       "options": {
-        "content": "<div style=\"font-size:16px;line-height:1;padding:0;margin:0;white-space:normal;overflow-wrap:anywhere\">First action: act on Current DQ Status.</div>",
+        "content": "<div style=\"font-size:16px;line-height:1.15\">OK: review run accounting. WARN/CRIT: inspect reasons. UNKNOWN: verify <a href=\"https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md\">DQ metrics, freshness and source</a>.</div>",
         "mode": "html",
         "bioetlDisplayTitle": "Start DQ Triage"
       },
@@ -378,7 +378,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "CURRENT · Current: Bounded reason and action rows for WARN/CRIT. If a non-OK current status has no active reason series, a fail-safe reason_evidence_unavailable row directs the operator to verify recording rules. Current verdict, selected-run accounting, and selected-range evidence are not peer severity badges. TELEMETRY MISSING is not a zero and not VALID EMPTY. An OK status adds No active reasons (OK). UNKNOWN or absent status adds Evidence unavailable (UNKNOWN). Query errors remain Grafana errors.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -414,7 +414,7 @@
             ]
           },
           "unit": "short",
-          "noValue": "No active reason rows. Valid only when Current DQ Status is OK; otherwise reason evidence is unavailable.",
+          "noValue": "UNKNOWN — reason evidence unavailable; verify DQ metrics and recording rules.",
           "links": [
             {
               "title": "Open Data Quality evidence",
@@ -529,6 +529,10 @@
                   "type": "auto",
                   "wrapText": false
                 }
+              },
+              {
+                "id": "noValue",
+                "value": "—"
               }
             ]
           },
@@ -613,6 +617,10 @@
               {
                 "id": "custom.width",
                 "value": 90
+              },
+              {
+                "id": "noValue",
+                "value": "—"
               }
             ]
           }
@@ -640,16 +648,32 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0)",
+          "expr": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{provider}} {{reason}} {{cause}}",
           "refId": "A"
+        },
+        {
+          "expr": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
         }
       ],
       "title": "Inspect Current DQ Reasons",
       "type": "table",
       "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
         {
           "id": "limit",
           "options": {
@@ -664,7 +688,10 @@
               "__name__": true,
               "Value": true,
               "pipeline": true,
-              "run_type": true
+              "run_type": true,
+              "Value #A": true,
+              "Value #B": true,
+              "Value #C": true
             },
             "indexByName": {
               "reason": 0,
@@ -849,7 +876,7 @@
             "h": 6
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero.",
+          "description": "SELECTED RUN · TIME RANGE · Selected run: Bronze/Silver/Gold stage/outcome accounting evidence for the shared pipeline/run_type context. Uses bounded stage/outcome accounting recording rules; missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors mean the BioETL Ops HTTP backend may be unavailable; verify /health/live before interpreting as expected empty. Fail-closed: timeout, empty, or unresolved identity must render UNKNOWN/INCOMPLETE/NO DATA — never a synthetic healthy zero. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -873,7 +900,11 @@
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -968,6 +999,13 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -993,6 +1031,13 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
                     }
                   }
                 ]
@@ -1109,6 +1154,13 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               }
@@ -1184,7 +1236,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
+          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1192,7 +1244,8 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
@@ -1288,6 +1341,177 @@
                     "value": 110
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Started"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 152
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 152
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Coverage"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "IN RANGE": {
+                            "text": "IN RANGE",
+                            "color": "green"
+                          },
+                          "OUT OF RANGE": {
+                            "text": "OUT OF RANGE",
+                            "color": "orange"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Gold"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 76
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Excluded"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 76
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1330,30 +1554,53 @@
           ],
           "transformations": [
             {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "started_at",
+                    "destinationType": "time"
+                  },
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
+            {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "covers_selected_run": true,
+                  "coverage_offset": true,
+                  "set_range_to_run": true,
+                  "from_ms": true,
+                  "to_ms": true
                 },
                 "indexByName": {
-                  "run_id": 0,
-                  "status": 1,
+                  "status": 0,
+                  "coverage_chip": 1,
                   "started_at": 2,
                   "completed_at": 3,
                   "gold_records_out": 4,
                   "excluded_by_contract": 5,
-                  "covers_selected_run": 7,
-                  "coverage_offset": 8,
-                  "set_range_to_run": 9,
-                  "from_ms": 10,
-                  "to_ms": 11,
-                  "coverage_chip": 6
+                  "run_id": 6,
+                  "from_ms": 7,
+                  "to_ms": 8
                 },
                 "renameByName": {
-                  "coverage_chip": "coverage",
-                  "covers_selected_run": "covers_selected_run"
+                  "coverage_chip": "Coverage",
+                  "covers_selected_run": "covers_selected_run",
+                  "status": "Status",
+                  "started_at": "Started",
+                  "completed_at": "Completed",
+                  "gold_records_out": "Gold",
+                  "excluded_by_contract": "Excluded",
+                  "run_id": "Run"
                 }
               }
             }
@@ -1430,10 +1677,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 8,
             "x": 0,
-            "y": 20
+            "y": 20,
+            "w": 12,
+            "h": 3
           },
           "id": 2,
           "options": {
@@ -1448,7 +1695,10 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value",
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -1509,10 +1759,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 8,
             "x": 12,
-            "y": 20
+            "y": 20,
+            "w": 12,
+            "h": 3
           },
           "id": 5,
           "options": {
@@ -1534,7 +1784,10 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value",
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -1594,13 +1847,24 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 8,
             "x": 0,
-            "y": 24
+            "y": 23,
+            "w": 12,
+            "h": 3
           },
           "id": 8,
           "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "textMode": "value",
+            "justifyMode": "center",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
             "dataLinks": [
               {
                 "targetBlank": true,
@@ -1609,15 +1873,9 @@
               }
             ],
             "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -1627,7 +1885,7 @@
             }
           ],
           "title": "Monitor Worst Freshness Age",
-          "type": "gauge"
+          "type": "stat"
         },
         {
           "datasource": {
@@ -1677,16 +1935,16 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 4,
-            "w": 8,
-            "x": 8,
-            "y": 24
+            "x": 12,
+            "y": 23,
+            "w": 12,
+            "h": 3
           },
           "id": 154,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
@@ -1697,8 +1955,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
+            "textMode": "value",
+            "wideLayout": true,
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -1764,10 +2025,10 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 0,
-            "y": 29
+            "y": 26,
+            "w": 12,
+            "h": 3
           },
           "id": 6,
           "options": {
@@ -1780,7 +2041,7 @@
               }
             ],
             "graphMode": "none",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -1789,7 +2050,10 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value",
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -1849,16 +2113,16 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
-            "w": 12,
             "x": 12,
-            "y": 29
+            "y": 26,
+            "w": 12,
+            "h": 3
           },
           "id": 117,
           "options": {
             "colorMode": "value",
             "graphMode": "none",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -1867,7 +2131,10 @@
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "textMode": "value",
+            "text": {
+              "value": 32
+            }
           },
           "targets": [
             {
@@ -2484,7 +2751,8 @@
                 "thresholdsStyle": {
                   "mode": "off"
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "mappings": [
                 {
@@ -2571,6 +2839,54 @@
                     }
                   }
                 ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Quarantined records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Excluded records"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
               }
             ]
           },
@@ -2633,8 +2949,8 @@
                 "renameByName": {
                   "pipeline": "Pipeline",
                   "Value": "Gold Rejects",
-                  "Value #A": "Gold Quarantined",
-                  "Value #B": "Gold Excluded by Contract"
+                  "Value #A": "Quarantined records",
+                  "Value #B": "Excluded records"
                 }
               }
             }

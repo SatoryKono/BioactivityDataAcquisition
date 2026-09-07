@@ -338,17 +338,18 @@ def format_percentage(
     denominator: _Denominator,
     percent_format: _PercentFormat,
 ) -> str:
-    """Format a row percentage, or UNKNOWN for missing or invalid inputs."""
+    """Use one decimal minimum and up to three for every accounting share.
+
+    ``percent_format`` remains a compatibility input; row type no longer changes
+    precision. Missing values and undefined denominators remain UNKNOWN.
+    """
     finite_value = _as_float(value)
     finite_bronze_value = _as_float(bronze_value)
     if denominator == "constant_100":
-        return "100%" if finite_value is not None else "UNKNOWN"
+        return "100.0%" if finite_value is not None else "UNKNOWN"
     if finite_value is None or finite_bronze_value is None or finite_bronze_value == 0:
         return "UNKNOWN"
 
     percentage = finite_value / finite_bronze_value * 100
-    if percent_format == "fixed_1":
-        return f"{percentage:.1f}%"
-    if percent_format == "trimmed_3":
-        return f"{percentage:.3f}".rstrip("0").rstrip(".") + "%"
-    return "100%"
+    text = f"{percentage:.3f}".rstrip("0").rstrip(".")
+    return (text if "." in text else f"{text}.0") + "%"

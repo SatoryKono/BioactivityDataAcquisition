@@ -167,10 +167,6 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 160
               }
             ]
           },
@@ -183,10 +179,6 @@
               {
                 "id": "unit",
                 "value": "time:YYYY-MM-DD HH:mm"
-              },
-              {
-                "id": "custom.width",
-                "value": 160
               }
             ]
           },
@@ -201,10 +193,6 @@
                 "value": {
                   "type": "color-text"
                 }
-              },
-              {
-                "id": "custom.width",
-                "value": 88
               },
               {
                 "id": "mappings",
@@ -266,6 +254,13 @@
                     "includeVars": false
                   }
                 ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
               },
               {
                 "id": "custom.inspect",
@@ -402,6 +397,107 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Started"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              },
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Completed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              },
+              {
+                "id": "unit",
+                "value": "time:YYYY-MM-DD HH:mm"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "TREE_MISSING": {
+                        "text": "TREE_MISSING",
+                        "color": "red"
+                      },
+                      "LAYOUT_UNHEALTHY": {
+                        "text": "LAYOUT_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "IDENTITY_UNHEALTHY": {
+                        "text": "IDENTITY_UNHEALTHY",
+                        "color": "orange"
+                      },
+                      "success": {
+                        "text": "success",
+                        "color": "green"
+                      },
+                      "failed": {
+                        "text": "failed",
+                        "color": "red"
+                      },
+                      "partial": {
+                        "text": "partial",
+                        "color": "orange"
+                      },
+                      "shutdown": {
+                        "text": "shutdown",
+                        "color": "orange"
+                      },
+                      "dry_run": {
+                        "text": "dry_run",
+                        "color": "blue"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
               }
             ]
           }
@@ -633,7 +729,7 @@
           "id": 3023,
           "type": "table",
           "title": "Inspect Processed Records",
-          "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK.",
+          "description": "SELECTED RUN · Complete Bronze/Silver/Gold accounting. Zero-valued outcomes remain evidence. SELECT RUN / VALID EMPTY is not OK. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "gridPos": {
             "h": 14,
             "w": 10,
@@ -665,7 +761,11 @@
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -760,6 +860,13 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -790,6 +897,13 @@
                   {
                     "id": "displayName",
                     "value": "percent"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -905,6 +1019,13 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               }
@@ -1561,7 +1682,15 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 120
+                    "value": 160
+                  },
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
                   }
                 ]
               },
@@ -1572,8 +1701,25 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 220
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Open workflow run report",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/workflow-run-report?workflow=${__data.fields.Workflow}&run_id=${__value.raw}",
+                        "targetBlank": true
+                      }
+                    ]
                   }
                 ]
               },
@@ -1585,7 +1731,7 @@
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 160
+                    "value": 150
                   }
                 ]
               },
@@ -1596,8 +1742,155 @@
                 },
                 "properties": [
                   {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "TREE_MISSING": {
+                            "text": "TREE_MISSING",
+                            "color": "red"
+                          },
+                          "LAYOUT_UNHEALTHY": {
+                            "text": "LAYOUT_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "IDENTITY_UNHEALTHY": {
+                            "text": "IDENTITY_UNHEALTHY",
+                            "color": "orange"
+                          },
+                          "success": {
+                            "text": "success",
+                            "color": "green"
+                          },
+                          "failed": {
+                            "text": "failed",
+                            "color": "red"
+                          },
+                          "partial": {
+                            "text": "partial",
+                            "color": "orange"
+                          },
+                          "shutdown": {
+                            "text": "shutdown",
+                            "color": "orange"
+                          },
+                          "dry_run": {
+                            "text": "dry_run",
+                            "color": "blue"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": ".+",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "null",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      },
+                      {
+                        "type": "special",
+                        "options": {
+                          "match": "nan",
+                          "result": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 100
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Started"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  },
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "selected"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": " "
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 36
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "0": {
+                            "text": "",
+                            "color": "transparent"
+                          },
+                          "1": {
+                            "text": "●",
+                            "color": "blue"
+                          },
+                          "true": {
+                            "text": "●",
+                            "color": "blue"
+                          },
+                          "false": {
+                            "text": "",
+                            "color": "transparent"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
@@ -1658,6 +1951,14 @@
                   "workflow": "Workflow",
                   "status": "Status",
                   "message": "Message"
+                },
+                "indexByName": {
+                  "selected": 0,
+                  "completed_at": 1,
+                  "status": 2,
+                  "workflow": 3,
+                  "run_id": 4,
+                  "workflow_run_id": 5
                 }
               }
             }
