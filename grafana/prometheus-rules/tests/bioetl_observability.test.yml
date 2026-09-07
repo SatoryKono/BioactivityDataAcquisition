@@ -2054,3 +2054,39 @@ tests:
       exp_samples:
       - labels: '{}'
         value: 0
+
+  - name: ranked-suspect-actions-preserve-unknown-with-valid-domain-targets
+    interval: 1m
+    input_series: []
+    promql_expr_test:
+      - expr: bioetl_incident_ranked_runtime
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_incident_ranked_runtime",action="UNKNOWN",action_dashboard_uid="bioetl-runtime",action_scope="var-stage=$__all",domain="runtime",pipeline="unknown",signal="telemetry_gap"}'
+            value: 0
+      - expr: bioetl_incident_ranked_provider
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_incident_ranked_provider",action="UNKNOWN",action_dashboard_uid="bioetl-provider-health-v2",action_scope="var-provider=unknown&var-pipeline_context=unknown",domain="provider",pipeline="unknown",provider="unknown",signal="telemetry_gap"}'
+            value: 0
+      - expr: bioetl_incident_ranked_dq
+        eval_time: 1m
+        exp_samples:
+          - labels: '{__name__="bioetl_incident_ranked_dq",action="UNKNOWN",action_dashboard_uid="bioetl-dq-v2",action_scope="var-stage=$__all",domain="dq",pipeline="unknown",signal="telemetry_gap"}'
+            value: 0
+
+  - name: ranked-runtime-dq-action-preserves-row-pipeline-and-priority
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_stage_expected{pipeline="chembl_assay",stage="gold"}'
+        values: "1+0x3"
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: "0+0x3"
+      - series: 'bioetl_stage_backlog_records{pipeline="chembl_assay",run_type="backfill",stage="output"}'
+        values: "5+0x3"
+    promql_expr_test:
+      - expr: bioetl_incident_ranked_runtime{reason="gold_write_missing"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_incident_ranked_runtime",action="data_quality",action_dashboard_uid="bioetl-dq-v2",action_scope="var-stage=$__all",action_target="data_quality",domain="runtime",pipeline="chembl_assay",reason="gold_write_missing",run_type="backfill",severity="failing",signal="gold_write_missing"}'
+            value: 2
