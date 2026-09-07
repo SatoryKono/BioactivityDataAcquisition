@@ -222,6 +222,8 @@ def _panel_contract(
     )
     if kind == "http":
         empty_state = empty_state or "valid_empty"
+    if "empty is a coverage gap" in documentation_lower:
+        empty_state = "coverage_gap"
     return {
         "dashboard_uid": dashboard_uid,
         "panel_id": panel_id,

@@ -247,7 +247,7 @@
       "id": 2010,
       "type": "table",
       "title": "Inspect Ranked Suspects",
-      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking uses shipped severity labels (failing/crit=2, degraded/warn=1), not boolean activation. Priority 0 is telemetry_gap/UNKNOWN for a domain with no recording-rule or universe series. Global sort by Priority then cap five rows. Domain, signal, priority, and action identify source and next handoff; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+      "description": "TIME RANGE · Selected pipeline may differ from row pipeline (blast radius). Cross-domain first-screen ranking uses shipped severity labels (failing/crit=2, degraded/warn=1), not boolean activation. Priority 0 is telemetry_gap/UNKNOWN for a domain with no recording-rule or universe series. Global sort by Priority then cap five rows. Domain, signal, priority, and action identify source and next handoff; row links preserve scope. VALID_EMPTY when no active suspects — empty domains are not a healthy-fleet verdict. Complete per-domain evidence stays in Domain Suspect Details. TELEMETRY MISSING is not a zero and not VALID EMPTY. One Prometheus union preserves a single Value column before descending priority sort and the five-row limit; domain labels keep sources distinct.",
       "gridPos": {
         "h": 7,
         "w": 24,
@@ -261,31 +261,13 @@
       "targets": [
         {
           "refId": "A",
-          "legendFormat": "runtime",
           "instant": true,
+          "range": false,
           "format": "table",
-          "expr": "bioetl_incident_ranked_runtime"
-        },
-        {
-          "refId": "B",
-          "legendFormat": "provider",
-          "instant": true,
-          "format": "table",
-          "expr": "bioetl_incident_ranked_provider"
-        },
-        {
-          "refId": "C",
-          "legendFormat": "dq",
-          "instant": true,
-          "format": "table",
-          "expr": "bioetl_incident_ranked_dq"
+          "expr": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
         }
       ],
       "transformations": [
-        {
-          "id": "merge",
-          "options": {}
-        },
         {
           "id": "sortBy",
           "options": {
@@ -315,7 +297,8 @@
               "cause": true,
               "run_type": true,
               "severity": true,
-              "action_target": true
+              "action_target": true,
+              "__name__": true
             },
             "indexByName": {
               "domain": 0,

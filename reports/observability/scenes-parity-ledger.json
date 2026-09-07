@@ -22,11 +22,11 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "7d9fdc21041537245ac0e7a85726e5a17566080773ce3242d3fe53d90f304647",
     "bioetl-dq-v2": "68d0ed592b4f8371f2549ca2296960b3e8a5c81d95c4bf9379df13a7493b2603",
-    "bioetl-incident-v1": "41d66480f09a39a71164922ebf982c3d4d193eefea9b457af7ffc15384ddd010",
+    "bioetl-incident-v1": "fff21c49c2d62c74fe91440e1d4d863dd3bde07cf9ca8fff9106f68b99c71fbe",
     "bioetl-overview-v2": "af2acc517d435ebe7409d5590da5b828ae3c90cbf30a3d1f5c96d2b2c33a29e1",
     "bioetl-provider-health-v2": "6e87880c616bf3b083b04676239fb8e1f58daba1bd16f9525972936976cd3058",
     "bioetl-run-explorer-v1": "f2e7f6286d9c7a8d1ac6d5a62fd8432e73123b5c3b33124b95b7d3e914409657",
-    "bioetl-runtime": "56f04c6c5cd8dee6d4b6633c92cc4fc071e5d227190f447fb0d87c086b3a0fe7"
+    "bioetl-runtime": "726a7a2cec6896b61ffa77ffcb8a5e40952a2b2e28e82038ad3608715b13dbbc"
   },
   "panels": [
     {
@@ -1830,11 +1830,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "bioetl_incident_ranked_runtime",
-          "bioetl_incident_ranked_provider",
-          "bioetl_incident_ranked_dq"
+          "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
         ],
-        "target_count": 3
+        "target_count": 1
       }
     },
     {
@@ -3795,7 +3793,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)"
+          "(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range])) and (count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range])) > 0)) unless count(max_over_time(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}[$__range]) unless on (pipeline, run_type) (count_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]) >= 2))"
         ],
         "target_count": 1
       }

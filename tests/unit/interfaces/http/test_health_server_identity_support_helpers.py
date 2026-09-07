@@ -133,6 +133,29 @@ def test_identity_support_rows_cover_empty_and_composite_manifest_edges(
     )
 
 
+@pytest.mark.parametrize("enabled, expected", [(True, "Yes"), (False, "No")])
+def test_execution_flags_read_nested_cached_bronze_launch_evidence(
+    enabled: bool, expected: str
+) -> None:
+    manifest = _manifest(
+        launch_context={"cached_bronze": {"enabled": enabled}},
+        resolved_config={"use_cached_bronze": not enabled},
+    )
+    assert support._execution_flags(manifest) == f"No | No | {expected}"
+
+
+def test_execution_flags_preserve_explicit_false_precedence() -> None:
+    manifest = _manifest(
+        runtime_config={"resume": False, "dry_run": False, "use_cached_bronze": False},
+        launch_context={
+            "resume": True,
+            "dry_run": True,
+            "cached_bronze": {"enabled": True},
+        },
+    )
+    assert support._execution_flags(manifest) == "No | No | No"
+
+
 def test_identity_support_display_helpers_cover_numeric_gap_and_fallback_edges() -> (
     None
 ):
