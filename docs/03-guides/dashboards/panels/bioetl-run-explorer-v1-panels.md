@@ -24,8 +24,8 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
   dashboard time picker does not filter this table. The Run column data link
   writes `var-run_id`, `var-pipeline`, and `var-run_type` from that row and
   stays on this dashboard so the operator can expand Selected Run Details
-  (panel header link). Pipeline and `run_type` are hidden (already selectors)
-  so the UUID stays readable. The
+  (panel header link). Pipeline and Workflow remain visible for each report; `run_type` and
+  Workflow Run ID remain available in Inspect. The
   matching `$run_id` row is marked via Ops HTTP `selected`. Started is
   `identity.started_at`. Workflow is `identity.workflow_id` from that
   pipeline report (not the workflow-run catalog). Workflow run is
@@ -33,7 +33,7 @@ control-plane Run ID catalog. `run_id` is never a Prometheus label.
   timestamps, and workflow identifiers inside the first-window fold. Older
   runs: pick Run ID from the catalog.
 - **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-reports`
-- **Layout:** First-window table at `y=6,h=12` with `limitField=10` and
+- **Layout:** First-window table at `y=7,h=11` with `limitField=10` and
   `cellHeight=sm` so ten rows fit the fold without internal scroll. Identity
   (`3022`) and processed records (`3023`) stay collapsed under Selected Run
   Details.
@@ -73,22 +73,26 @@ Nested titles (must match JSON):
 ### 7. Inspect Stage Funnel
 - **Type:** Table
 - **Purpose:** Stage funnel (records_in/out, balance) for exact run.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel`
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `funnel_display`
 - **Presentation:** Stage first; `removals` JSON is hidden in favor of
   `removals_summary`. Empty stage removals render as `—`, not table-level
-  VALID EMPTY. Shares a row with Top Run Reasons.
+  VALID EMPTY. A full-width panel shows all four stages, including Gold,
+  with wrapped full removal reasons and Inspect access.
 
 ### 8. Inspect Top Run Reasons
 - **Type:** Table
 - **Purpose:** Top removal/reason codes for exact run.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n`
-- **Presentation:** Shares a row with Stage Funnel.
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `reasons_top_n_display`
+- **Presentation:** Full-width panel below Stage Funnel; complete reason codes
+  wrap and remain available through Inspect. Before selection, report sections
+  show `SELECT RUN`; missing reports show `TELEMETRY MISSING`; successfully
+  loaded empty sections show `VALID EMPTY`.
 
 ### 11. Inspect Run Artifacts
 - **Type:** Table
 - **Purpose:** Artifact refs (report paths, exports) for exact run. The `ref`
   cell wraps so rows stay distinguishable; Copy still yields the full `ref`.
-- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts`
+- **Data sources:** BioETL Ops HTTP `/ops/observability/pipeline-run-report` → `artifacts_display`
 
 ### 12. Inspect Timings & Failure
 - **Type:** Table (`id=3014`)
@@ -106,8 +110,12 @@ Nested titles (must match JSON):
   Before a concrete selection the returned rows request an exact Run ID; after
   selection an empty section is `VALID EMPTY`, while datasource/backend failure
   renders as `QUERY ERROR`. This is the only identity table on Run Explorer.
-- **Data sources:** BioETL Ops HTTP `/ops/control-plane/identity-table` plus
-  `/ops/observability/pipeline-run-report` → `identity_rows` (not Prometheus).
+- **Data sources:** One BioETL Ops HTTP `/ops/control-plane/identity-table`
+  target, enriched from the report matching both Run ID and Pipeline.
+- **Presentation:** Parameter is 280 px; Value fills the remaining width and
+  wraps full IDs. Status, Started, Completed, duration, tracking coverage, and
+  available Workflow fields come from that report. Slow report I/O cannot
+  discard completed control-plane evidence.
 ### 18. Inspect Processed Records
 - **Type:** Table (`id=3023`)
 - **Purpose:** Bronze/Silver/Gold count and denominator-explicit percentage

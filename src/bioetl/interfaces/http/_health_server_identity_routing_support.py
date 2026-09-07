@@ -5,6 +5,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
+from threading import BoundedSemaphore
 from typing import TYPE_CHECKING
 
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
@@ -21,6 +25,7 @@ from bioetl.interfaces.http._health_server_identity_support import (
     IDENTITY_UNAVAILABLE_VALUES,
     build_control_plane_identity_payload,
 )
+from bioetl.interfaces.http.run_report_ops import load_pipeline_run_report_payload
 
 if TYPE_CHECKING:
     from bioetl.interfaces.http._health_server_routing_support import _HealthRoutingHost
@@ -33,6 +38,10 @@ if TYPE_CHECKING:
 _IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS = 1.5
 _IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 12.0
 _IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS = 1.5
+_IDENTITY_SUMMARY_EXECUTOR = ThreadPoolExecutor(
+    max_workers=4, thread_name_prefix="bioetl-identity"
+)
+_IDENTITY_SUMMARY_SLOTS = BoundedSemaphore(4)
 _IDENTITY_UNAVAILABLE_VALUES = IDENTITY_UNAVAILABLE_VALUES
 
 
@@ -233,19 +242,86 @@ async def _build_identity_evidence_summary(
             checkpoint_metadata=checkpoint_metadata,
             view="overview",
         ).get("summary")
-        return (
-            identity_evidence_summary
-            if isinstance(identity_evidence_summary, dict)
-            else None
-        )
+        if not isinstance(identity_evidence_summary, dict):
+            return None
+        return identity_evidence_summary
 
+    summary, report_summary = await asyncio.gather(
+        _bounded_identity_summary(_build),
+        _bounded_identity_summary(lambda: _selected_report_summary(scope)),
+    )
+    if report_summary:
+        return {**(summary or {}), **report_summary}
+    return summary
+
+
+async def _bounded_identity_summary(
+    build: Callable[[], dict[str, object] | None],
+) -> dict[str, object] | None:
+    """Bound each source independently so report I/O cannot erase evidence."""
     try:
         return await asyncio.wait_for(
-            asyncio.to_thread(_build),
+            _identity_summary_worker(build),
             timeout=_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS,
         )
     except TimeoutError:
         return None
+
+
+async def _identity_summary_worker(
+    build: Callable[[], dict[str, object] | None],
+) -> dict[str, object] | None:
+    """Keep capacity occupied until synchronous I/O actually finishes."""
+    slots = _IDENTITY_SUMMARY_SLOTS
+    while not slots.acquire(blocking=False):
+        await asyncio.sleep(0.01)
+    try:
+        pending = _IDENTITY_SUMMARY_EXECUTOR.submit(copy_context().run, build)
+    except RuntimeError:
+        slots.release()
+        raise
+    pending.add_done_callback(lambda _: slots.release())
+    return await asyncio.wrap_future(pending)
+
+
+def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
+    """Read summary fields only from the report for the exact selected run."""
+    if scope.selected_run_id is None:
+        return {}
+    pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest
+        else scope.requested_pipeline
+    )
+    report = load_pipeline_run_report_payload(
+        run_id=scope.selected_run_id, pipeline_name=pipeline
+    )
+    if not isinstance(report, dict):
+        return {}
+    identity = report.get("identity")
+    if not isinstance(identity, dict) or (
+        str(identity.get("run_id")),
+        identity.get("pipeline_name"),
+    ) != (scope.selected_run_id, pipeline):
+        return {}
+    keys = (
+        "status",
+        "started_at",
+        "completed_at",
+        "duration_seconds",
+        "tracking_coverage",
+        "workflow_id",
+        "workflow_run_id",
+        "workflow_step_id",
+    )
+    values = dict(identity)
+    if values.get("tracking_coverage") in (None, ""):
+        values["tracking_coverage"] = report.get("tracking_coverage")
+    return {
+        "run_status" if key == "status" else key: values[key]
+        for key in keys
+        if values.get(key) not in (None, "")
+    }
 
 
 def _identity_row_needs_timeout_value(
