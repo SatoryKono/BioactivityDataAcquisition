@@ -24,7 +24,7 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for PipelineRunnerService.
 
 Tests the universal pipeline runner service.

@@ -98,7 +98,7 @@ are in-process components of the package (see Layer Diagram below).
 | Element | Implementation anchor |
 | --- | --- |
 | ETL CLI process | `pyproject.toml` entrypoint `bioetl.interfaces.cli:main`; `src/bioetl/composition/bootstrap/runtime/` |
-| Optional health/ops process | `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py` launches `python -m bioetl health server`; `docker-compose.yml` packages the same command |
+| Optional health/ops process | `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py` orchestrates startup; `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py` launches `python -m bioetl health server`; `docker-compose.yml` packages the same command |
 | Local data and control-plane stores | `src/bioetl/infrastructure/storage/`, `checkpoint/`, `control_plane/`, `quarantine/`; data and reports mounts in `docker-compose.yml` |
 | Optional monitoring | `docker-compose.monitoring.yml`; ADR-010 and ADR-053 preserve the local-only default |
 
