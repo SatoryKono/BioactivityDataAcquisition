@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/close-architecture-10158-10162
-refreshed_at_utc: '2026-09-07T07:19:37.420103+00:00'
+refreshed_at_utc: '2026-09-07T07:29:09.364106+00:00'
 refresh_status: captured
 source_commit: 8a7d4b3357ccf447b82833b1b8e08e1e2e25dc34
 source_run_id: '34094034058'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/ci-telemetry-34094034058/coverage-report/coverage/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/ci-telemetry-34094034058/test-duration-telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
