@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/grafana-window-10163",
-  "source_commit": "36e26ee121a990707e565c63ba0a1970f5b274ca",
-  "source_run_id": "34103657627",
+  "source_branch": "fix/windows-capacity-10184",
+  "source_commit": "124a1ee76662e16aac55d021a902e66e64002665",
+  "source_run_id": "34108089660",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34103657627",
-  "source_tree_sha256": "146e200108e995f562ec72146b53769a93a684cdc0cd4879a89f935777795fc6",
-  "refreshed_at_utc": "2026-09-07T09:10:15.789693+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34108089660",
+  "source_tree_sha256": "0904c5afa65898964503ec9024b502d6350b70bf209b75c213b901d1c168ed8c",
+  "refreshed_at_utc": "2026-09-07T09:57:18.492349+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
