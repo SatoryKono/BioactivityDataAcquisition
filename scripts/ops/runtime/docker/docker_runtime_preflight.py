@@ -44,6 +44,30 @@ from bioetl.application.services.run_reports.source_identity import (
 DEFAULT_CONTRACT = Path("configs/quality/docker_runtime_contracts.yaml")
 _WSL_EXE = "wsl.exe"
 _DOCKER_FORMAT_JSON = "{{json .}}"
+# Enter the daemon's mount namespace: Desktop's WSL shell has a different root.
+# Paths are positional arguments, never interpolated into shell source.
+_DESKTOP_CAPACITY_SCRIPT = """\
+for comm in /proc/[0-9]*/comm; do
+    [ "$(cat "$comm" 2>/dev/null)" = dockerd ] || continue
+    pid=${comm#/proc/}
+    pid=${pid%/comm}
+    nsenter -t "$pid" -m -- cat "${1%/}/engine-id" || exit 1
+    printf '\\n'
+    exec nsenter -t "$pid" -m -- df -Pk "$1"
+done
+echo 'dockerd mount namespace unavailable' >&2
+exit 1
+"""
+_DESKTOP_CAPACITY_COMMAND = (
+    _WSL_EXE,
+    "-d",
+    "docker-desktop",
+    "--exec",
+    "sh",
+    "-c",
+    _DESKTOP_CAPACITY_SCRIPT,
+    "docker-capacity",
+)
 READ_ONLY_COMMANDS = {
     ("docker", "--version"),
     ("docker", "compose", "version"),
@@ -54,6 +78,7 @@ READ_ONLY_COMMANDS = {
     ("docker", "ps"),
     (_WSL_EXE, "--status"),
     (_WSL_EXE, "--version"),
+    _DESKTOP_CAPACITY_COMMAND,
 }
 ENV_NAME_PATTERN = re.compile(r"\$\{([A-Za-z_]\w*)")
 WINDOWS_DRIVE_PATTERN = re.compile(r"^([A-Za-z]):[/\\](.*)$")
@@ -1235,6 +1260,58 @@ def _static_observations(
     return findings, compose_observations
 
 
+@dataclass(frozen=True)
+class _DockerDiskUsage:
+    total: int
+    used: int
+    free: int
+    measurement_method: str = "docker_desktop_daemon_mount_namespace"
+
+
+def _parse_desktop_capacity(stdout: str, *, daemon_id: str) -> _DockerDiskUsage:
+    """Accept one POSIX df row only after proving the selected engine identity."""
+    lines = [line.strip() for line in stdout.splitlines() if line.strip()]
+    if not lines or lines[0] != daemon_id:
+        raise ValueError("Docker Desktop storage engine-id differs from docker info ID")
+    if len(lines) != 3 or not lines[1].startswith("Filesystem"):
+        raise ValueError("Docker Desktop capacity output is incomplete or ambiguous")
+    fields = lines[2].split()
+    if len(fields) != 6 or not fields[4].endswith("%"):
+        raise ValueError("Docker Desktop capacity output is not POSIX df -Pk")
+    total, used, free = (int(value) * 1024 for value in fields[1:4])
+    percent = int(fields[4][:-1])
+    if (
+        total <= 0
+        or min(used, free) < 0
+        or used + free > total
+        or not 0 <= percent <= 100
+    ):
+        raise ValueError("Docker Desktop capacity contains invalid byte counts")
+    return _DockerDiskUsage(total=total, used=used, free=free)
+
+
+def _measure_docker_disk(root: Path, docker_root: str, info: Mapping[str, Any]) -> Any:
+    """Measure Docker storage in its own filesystem, never a host-drive proxy."""
+    if platform.system() != "Windows":
+        return shutil.disk_usage(docker_root)
+    if (
+        info.get("OSType") != "linux"
+        or info.get("OperatingSystem") != "Docker Desktop"
+        or not info.get("ID")
+        or not docker_root.startswith("/")
+    ):
+        raise ValueError(
+            "Docker storage is not a verifiable local Docker Desktop Linux engine"
+        )
+    result = _run_read_only([*_DESKTOP_CAPACITY_COMMAND, docker_root], cwd=root)
+    if result.returncode != 0:
+        raise OSError(
+            "Docker Desktop daemon-namespace capacity probe failed: "
+            + (result.stderr or "WSL/nsenter/df unavailable")
+        )
+    return _parse_desktop_capacity(result.stdout, daemon_id=str(info["ID"]))
+
+
 def _docker_root_and_disk(
     root: Path,
 ) -> tuple[str | None, Any | None, list[Finding]]:
@@ -1242,6 +1319,7 @@ def _docker_root_and_disk(
         ["docker", "info", "--format", _DOCKER_FORMAT_JSON], cwd=root
     )
     docker_root: str | None = None
+    info_payload: dict[str, Any] = {}
     findings: list[Finding] = []
     if docker_info.returncode == 0:
         try:
@@ -1262,8 +1340,12 @@ def _docker_root_and_disk(
         )
         return None, None, findings
     try:
-        return docker_root, shutil.disk_usage(docker_root), findings
-    except OSError as exc:
+        return (
+            docker_root,
+            _measure_docker_disk(root, docker_root, info_payload),
+            findings,
+        )
+    except (OSError, ValueError) as exc:
         findings.append(
             Finding(
                 "CAPACITY_DOCKER_ROOT",
@@ -1341,6 +1423,11 @@ def _capacity_observation(
         "docker_root_dir": docker_root,
         "docker_total_bytes": docker_disk.total if docker_disk else None,
         "docker_free_bytes": docker_disk.free if docker_disk else None,
+        "docker_capacity_method": (
+            getattr(docker_disk, "measurement_method", "host_disk_usage")
+            if docker_disk
+            else None
+        ),
         "available_memory_bytes": memory_bytes,
         "thresholds": capacity_contract,
     }
