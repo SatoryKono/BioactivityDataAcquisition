@@ -73,6 +73,14 @@ def test_passport_nightly_and_release_gates_are_blocking() -> None:
     assert "tests/unit/scripts/docs/passports" in nightly
     assert "scripts.docs passports check" in release
     assert "--require-clean-source" in release
+    build = yaml.safe_load(release)["jobs"]["build"]
+    checkout = next(
+        step
+        for step in build["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout@")
+    )
+    assert checkout["with"]["fetch-depth"] == 0
+    assert checkout["with"]["persist-credentials"] is False
 
 
 def test_reconciliation_ownership_is_explicitly_decided() -> None:
