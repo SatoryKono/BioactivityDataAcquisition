@@ -358,38 +358,36 @@ def _fix_artifact_links(panel: dict) -> None:
 
 
 def _fix_ranked_links(panel: dict) -> None:
-    panel["targets"][0]["expr"] = (
-        "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider "
-        "or bioetl_incident_ranked_dq"
-    )
+    """Bind domain actions without replacing ranking or presentation semantics."""
     _hide_field(panel, "action_dashboard_uid")
     _hide_field(panel, "action_scope")
     overrides = panel["fieldConfig"]["overrides"]
-    overrides[:] = [
-        o
-        for o in overrides
-        if o.get("matcher", {}).get("options") not in {"Action", "action"}
+    action = next(
+        (o for o in overrides if o.get("matcher", {}).get("options") == "Action"),
+        None,
+    )
+    if action is None:
+        action = {"matcher": {"id": "byName", "options": "Action"}, "properties": []}
+        overrides.append(action)
+    properties = action["properties"]
+    properties[:] = [
+        p for p in properties if p["id"] not in {"links", "custom.inspect"}
     ]
-    overrides.append(
-        {
-            "matcher": {"id": "byName", "options": "Action"},
-            "properties": [
-                {"id": "custom.width", "value": 120},
-                {"id": "custom.cellOptions", "value": {"type": "auto"}},
-                {"id": "custom.inspect", "value": True},
-                {
-                    "id": "links",
-                    "value": [
-                        {
-                            "title": "Open domain diagnostics",
-                            "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
-                            "targetBlank": False,
-                            "includeVars": False,
-                        }
-                    ],
-                },
-            ],
-        }
+    properties.extend(
+        [
+            {"id": "custom.inspect", "value": True},
+            {
+                "id": "links",
+                "value": [
+                    {
+                        "title": "Open domain diagnostics",
+                        "url": "/d/${__data.fields.action_dashboard_uid}/${__data.fields.action_dashboard_uid}?${workflow:queryparam}&var-pipeline=${__data.fields.Pipeline}&${run_type:queryparam}&var-run_id=-&${__data.fields.action_scope}&${__url_time_range}",
+                        "targetBlank": False,
+                        "includeVars": False,
+                    }
+                ],
+            },
+        ]
     )
 
 
