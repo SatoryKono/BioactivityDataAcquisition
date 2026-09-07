@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/dashboard-navigation-five-issues
-refreshed_at_utc: '2026-09-07T12:26:22.434303+00:00'
+refreshed_at_utc: '2026-09-07T12:37:40.752336+00:00'
 refresh_status: captured
 source_commit: 298c4822c9171941b284a7cc3bdf08ffee79c800
 source_run_id: '34120921713'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/ci/dashboard-five-issues/telemetry/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/ci/dashboard-five-issues/telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
