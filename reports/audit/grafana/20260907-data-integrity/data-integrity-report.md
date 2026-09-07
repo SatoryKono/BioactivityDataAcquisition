@@ -151,3 +151,15 @@ and engine tests prove the proposed corrections and are retained separately;
 they do not replace live acceptance. `live_panel` is copied from the immutable
 dashboard API capture. `candidate_panel` is bound to source commit
 `36e26ee121a990707e565c63ba0a1970f5b274ca`. No deployment was performed.
+
+## Historical helper source packaging
+
+`capture_live.py.txt`, `check_rank_replay.py.txt`, and `reconcile.py.txt` are
+inert source snapshots from the capture session, not maintained executable
+repository tools. Their original bytes and SHA-256 digests are unchanged;
+the manifest records each original filename. To inspect or replay a historical
+helper, copy the snapshot into a separate working directory using its original
+filename, review its machine-specific paths, and install the documented
+dependencies first. The live snapshots and numerical verdicts are unchanged.
+The initially published package remains available at commit
+`191d4bf5e309ad21f460d0cb87f940441753a55e`; this publication corrects packaging.

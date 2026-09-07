@@ -13,9 +13,11 @@
       "sha256": "ffbb884f62eb447c0ec682f5573eb7df0a8d1028a46705f114a7b06099284022"
     },
     {
-      "path": "capture_live.py",
+      "path": "capture_live.py.txt",
       "bytes": 13113,
-      "sha256": "9cfbb2f56ca4b4331b403e197169e27ea14de5740fd4b01f0b04453e72e815aa"
+      "sha256": "9cfbb2f56ca4b4331b403e197169e27ea14de5740fd4b01f0b04453e72e815aa",
+      "original_filename": "capture_live.py",
+      "artifact_role": "historical_python_source_snapshot"
     },
     {
       "path": "captures.json.gz",
@@ -23,9 +25,11 @@
       "sha256": "bf0080b5079e13d122af2533f240a2b99cf6932a2f4f2610f41eb8702f9e977e"
     },
     {
-      "path": "check_rank_replay.py",
+      "path": "check_rank_replay.py.txt",
       "bytes": 1508,
-      "sha256": "a20940cc55fcaed021d694702b232bd36283062af29e081ea12cca39f736e5dd"
+      "sha256": "a20940cc55fcaed021d694702b232bd36283062af29e081ea12cca39f736e5dd",
+      "original_filename": "check_rank_replay.py",
+      "artifact_role": "historical_python_source_snapshot"
     },
     {
       "path": "coverage-guard-captures.json.gz",
@@ -54,8 +58,8 @@
     },
     {
       "path": "data-integrity-report.md",
-      "bytes": 9136,
-      "sha256": "e4a7531325267560c3cbb96559c000e16e5074fa125f38fa41e62813c7873f88"
+      "bytes": 9851,
+      "sha256": "56f13d5d731ea523c06a76a7f1ae814772f01995ab6ee5aa2f40fc70a34508d4"
     },
     {
       "path": "extended-reference-availability.json.gz",
@@ -113,9 +117,11 @@
       "sha256": "056fa9a4a795fcfe048b8b0973d64f070f90fa376da469523a697700447e0325"
     },
     {
-      "path": "reconcile.py",
+      "path": "reconcile.py.txt",
       "bytes": 12495,
-      "sha256": "6d345b623af9f8ac356c90f0ec9d1a6ffdffe30e9bc26c1709a9a3cf5cc57e33"
+      "sha256": "6d345b623af9f8ac356c90f0ec9d1a6ffdffe30e9bc26c1709a9a3cf5cc57e33",
+      "original_filename": "reconcile.py",
+      "artifact_role": "historical_python_source_snapshot"
     },
     {
       "path": "reconciliation.csv",
