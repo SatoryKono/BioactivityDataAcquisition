@@ -5,14 +5,15 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 from bioetl.application.services.run_reports.query import (
     ReportIndexEntry,
     list_pipeline_reports,
     list_workflow_reports,
 )
-from bioetl.composition.entrypoints import create_run_report_store
+from bioetl.composition.entrypoints import resolve
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     configured_report_root,
@@ -187,7 +188,7 @@ def _run_index_item(
 def _index_optional_label(value: str | None) -> str:
     """Compact identity label for the pipeline index; empty is emdash, not VALID EMPTY."""
     token = (value or "").strip()
-    return token if token else "—"
+    return token if token else "â€”"
 
 
 def _diagnostic_index_item(
@@ -213,8 +214,8 @@ def _diagnostic_index_item(
         return row
     row["pipeline"] = owner_value
     row["run_id"] = "-"
-    row["workflow_id"] = "—"
-    row["workflow_run_id"] = "—"
+    row["workflow_id"] = "â€”"
+    row["workflow_run_id"] = "â€”"
     row["started_at"] = None
     row["run_type"] = None
     return row
@@ -300,7 +301,10 @@ def list_pipeline_run_report_payloads(
     base = _effective_root(root)
     owner = _normalize_list_owner(pipeline_name)
     entries = list_pipeline_reports(
-        pipeline_name=owner, limit=limit, root=base, store=create_run_report_store()
+        pipeline_name=owner,
+        limit=limit,
+        root=base,
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     return _list_report_payload(
         kind="pipeline",
@@ -321,7 +325,10 @@ def list_workflow_run_report_payloads(
     base = _effective_root(root)
     owner = _normalize_list_owner(workflow_name)
     entries = list_workflow_reports(
-        workflow_name=owner, limit=limit, root=base, store=create_run_report_store()
+        workflow_name=owner,
+        limit=limit,
+        root=base,
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     return _list_report_payload(
         kind="workflow",

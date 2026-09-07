@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import click
 
@@ -17,7 +17,8 @@ from bioetl.application.services.run_reports.query import (
     load_workflow_report,
     prune_reports,
 )
-from bioetl.composition.entrypoints import create_run_report_store
+from bioetl.composition.entrypoints import resolve
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.interfaces.cli.commands.domains.shared.click_options import (
     typed_click_group,
     typed_click_option,
@@ -63,7 +64,7 @@ def show_command(
             run_id=run_id,
             latest=latest or run_id is None,
             root=report_root,
-            store=create_run_report_store(),
+            store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
         )
         if payload is None:
             raise click.ClickException(
@@ -77,7 +78,7 @@ def show_command(
             workflow_run_id=workflow_run_id,
             latest=latest or workflow_run_id is None,
             root=report_root,
-            store=create_run_report_store(),
+            store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
         )
         if payload is None:
             raise click.ClickException(
@@ -112,7 +113,7 @@ def list_command(
             workflow_name=workflow,
             limit=limit,
             root=report_root,
-            store=create_run_report_store(),
+            store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
         )
         for item in entries:
             click.echo(
@@ -123,7 +124,7 @@ def list_command(
         pipeline_name=pipeline,
         limit=limit,
         root=report_root,
-        store=create_run_report_store(),
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     for item in entries:
         click.echo(
@@ -153,13 +154,13 @@ def diff_command(
         pipeline_name=pipeline,
         run_id=run_id_a,
         root=report_root,
-        store=create_run_report_store(),
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     right = load_pipeline_report(
         pipeline_name=pipeline,
         run_id=run_id_b,
         root=report_root,
-        store=create_run_report_store(),
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     if left is None or right is None:
         raise click.ClickException("one or both run reports were not found")
@@ -199,7 +200,7 @@ def prune_command(
         now=current_utc_time(),
         root=configured_report_root(root=root),
         dry_run=not apply,
-        store=create_run_report_store(),
+        store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
     )
     mode = "deleted" if apply else "would delete"
     for path in removed:

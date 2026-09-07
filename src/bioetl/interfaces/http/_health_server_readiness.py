@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.application.observability.current_metrics_reconciliation import (
     current_metrics_reconciliation_check,
 )
-from bioetl.composition.entrypoints import create_run_report_store
+from bioetl.composition.entrypoints import resolve
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     enforce_report_root_marker,
@@ -39,7 +40,7 @@ async def build_readiness_response(host: _ReadinessHost) -> HealthResponse:
         "report_root": report_root_check,
         "current_metrics": current_metrics_reconciliation_check(
             exposition=host._metrics_exposition.build_exposition(),
-            store=create_run_report_store(),
+            store=resolve(cast("type[RunReportStorePort]", RunReportStorePort)),
         ),
     }
     status = "healthy"
