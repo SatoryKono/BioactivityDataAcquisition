@@ -3,7 +3,7 @@
 Provides a high-level, interface-agnostic API for running pipelines.
 Can be used from CLI, REST API, Airflow operators, or any other orchestrator.
 
-Implements RULES.md §1.1 - Application Layer depends only on Domain.
+Implements RULES.md Â§1.1 - Application Layer depends only on Domain.
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ from uuid import UUID
 
 from bioetl.application.runtime_timestamps import capture_runtime_timing_anchor
 from bioetl.application.services.execution._pipeline_runner_support import (
+    _require_execution_runner,
     build_dry_run_result,
     build_pipeline_run_result,
     complete_pipeline_dry_run,
@@ -405,12 +406,3 @@ class PipelineRunnerService:
             options=options,
             store=self.report_store,
         )
-
-
-def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
-    """Validate producer output before pipeline side effects begin."""
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
-
-    if not isinstance(runner, ExecutionMetricsRunnerPort):
-        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
-    return runner

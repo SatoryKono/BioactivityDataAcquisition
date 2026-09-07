@@ -298,3 +298,12 @@ async def create_execution_runner_audited(
     except Exception as exc:
         await record_failure(exc)
         raise
+
+
+def _require_execution_runner(runner: object) -> ExecutionMetricsRunnerPort:
+    """Validate producer output before pipeline side effects begin."""
+    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+
+    if not isinstance(runner, ExecutionMetricsRunnerPort):
+        raise TypeError("Runner does not implement ExecutionMetricsRunnerPort")
+    return runner
