@@ -2578,7 +2578,7 @@ dashboards:
         - not_applicable
         render_profiles: *id001
       '2099':
-        title: Domain Suspect Details
+        title: Domain Suspect Details · GLOBAL / CURRENT
         role: row_group
         tier: 4
         scope: global

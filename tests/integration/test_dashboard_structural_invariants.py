@@ -307,7 +307,10 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
             if target_uid == "${__data.fields.action_dashboard_uid}":
                 assert dashboard["uid"] == "bioetl-incident-v1"
                 panel = next(p for p in dashboard["panels"] if p.get("id") == 2010)
-                sources = panel["targets"][0]["expr"].split(" or ")
+                sources = re.findall(
+                    r"\bbioetl_incident_ranked_[a-z_]+\b",
+                    panel["targets"][0]["expr"],
+                )
                 rules = yaml.safe_load(
                     Path("grafana/prometheus-rules/bioetl_observability.yml").read_text(
                         encoding="utf-8"

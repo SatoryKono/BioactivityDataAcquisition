@@ -1111,7 +1111,12 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     assert panel is not None, "Panel 'Monitor Metrics Coverage' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert expressions == ["max(bioetl_runtime_trust_gap_status_10m)"]
+    assert "max(bioetl_runtime_trust_gap_status_10m)" in expressions
+    assert 'max(up{job="bioetl"})' in expressions
+    assert any(
+        "time()-max(prometheus_rule_group_last_evaluation" in expr
+        for expr in expressions
+    )
 
     rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
     rule_expr = next(
