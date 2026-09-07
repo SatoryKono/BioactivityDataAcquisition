@@ -57,7 +57,6 @@ def build_processed_records_table_payload(
             value=raw_value,
             bronze_value=bronze_value,
             denominator=spec.denominator,
-            percent_format=spec.percent_format,
         )
         rows.append(
             {

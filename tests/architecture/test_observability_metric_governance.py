@@ -224,7 +224,7 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
         str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
     )
     assert report["typed_target_counts"] == {
-        "promql": 171,  # Runtime/9102 separates endpoint, baseline, and rule age.
+        "promql": 173,  # Runtime evidence and DQ OK/UNKNOWN add two targets each.
         "http": 35,
         "loki": 0,
         "tempo": 0,

@@ -16,7 +16,7 @@
   "target_counts": {
     "http": 35,
     "loki": 0,
-    "promql": 171,
+    "promql": 173,
     "tempo": 0,
     "unknown": 0
   },
@@ -2600,15 +2600,70 @@
       "documents_backend_down": false,
       "documents_valid_empty": true,
       "empty_state": "coverage_gap",
-      "formula": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0)",
+      "formula": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
       "kind": "promql",
       "panel_id": 9102,
       "panel_title": "Inspect Current DQ Reasons",
-      "query": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0)",
+      "query": "topk(5, bioetl_dq_first_window_reason{pipeline=~\"$pipeline\"} > 0) and on(pipeline) (bioetl_dq_current_status{pipeline=~\"$pipeline\"} < 3)",
       "query_tokens": [
+        "bioetl_dq_current_status",
         "bioetl_dq_first_window_reason"
       ],
       "ref_id": "A",
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+      ],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
+      "kind": "promql",
+      "panel_id": 9102,
+      "panel_title": "Inspect Current DQ Reasons",
+      "query": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 0), \"reason\", \"No active reasons (OK)\", \"\", \"\")",
+      "query_tokens": [
+        "bioetl_dq_current_status"
+      ],
+      "ref_id": "B",
+      "runbook_urls": [
+        "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
+      ],
+      "thresholds": [
+        {
+          "color": "gray",
+          "value": null
+        }
+      ],
+      "unit": "short"
+    },
+    {
+      "coverage_class": "required_current",
+      "dashboard_uid": "bioetl-dq-v2",
+      "datasource_type": "prometheus",
+      "documents_backend_down": false,
+      "documents_valid_empty": true,
+      "empty_state": "coverage_gap",
+      "formula": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")",
+      "kind": "promql",
+      "panel_id": 9102,
+      "panel_title": "Inspect Current DQ Reasons",
+      "query": "label_replace((bioetl_dq_current_status{pipeline=~\"$pipeline\"} == 3) or absent(bioetl_dq_current_status{pipeline=~\"$pipeline\"}), \"reason\", \"Evidence unavailable (UNKNOWN)\", \"\", \"\")",
+      "query_tokens": [
+        "bioetl_dq_current_status"
+      ],
+      "ref_id": "C",
       "runbook_urls": [
         "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md"
       ],

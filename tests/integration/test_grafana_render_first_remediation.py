@@ -16,6 +16,7 @@ from html import unescape
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import yaml
@@ -234,7 +235,7 @@ def test_iteration_2_active_alert_severity_is_not_overridden_by_count() -> None:
     }
 
     severity_properties = {
-        prop["id"]: prop["value"] for prop in by_name["severity"]["properties"]
+        prop["id"]: prop["value"] for prop in by_name["Severity"]["properties"]
     }
     mappings = severity_properties["mappings"]
     assert [mapping["options"]["result"]["text"] for mapping in mappings] == [
@@ -737,7 +738,7 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
     """#8977: wrap only the named first-window text column; do not grow h."""
     cases = (
         ("bioetl-runtime.json", 9101, frozenset({"reason"})),
-        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason"})),
+        ("bioetl-provider-health-v2.json", 9107, frozenset({"reason", "Source state"})),
     )
     for dashboard_name, panel_id, allowed in cases:
         panel = _panel(_load(dashboard_name), panel_id)
@@ -747,11 +748,13 @@ def test_first_window_named_text_columns_wrap_without_table_default() -> None:
         assert custom.get("cellOptions", {}).get("wrapText") is not True
         wrapped = _wrapped_field_names(panel)
         assert wrapped == allowed, (dashboard_name, panel_id, wrapped)
-        assert all((_override_width(panel, name) or 0) >= 260 for name in wrapped), (
-            dashboard_name,
-            panel_id,
-            wrapped,
-        )
+        if panel_id == 9107:
+            # Keep the reason flexible so status and source survive at 900px.
+            assert _override_width(panel, "reason") is None
+            assert _override_width(panel, "Source state") == 105
+            assert _override_width(panel, "Status") == 100
+        else:
+            assert all((_override_width(panel, name) or 0) >= 260 for name in wrapped)
 
 
 def test_cycle4_named_text_columns_wrap_below_fold() -> None:
@@ -1205,6 +1208,26 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     ) == 10
 
 
+def test_workflow_run_report_link_uses_workflow_identifier_contract() -> None:
+    """Workflow reports require workflow_run_id, not the pipeline run_id key."""
+    panel = _panel(_load("bioetl-run-explorer-v1.json"), 3020)
+    run_override = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") == "Run"
+    )
+    links = next(
+        prop["value"] for prop in run_override["properties"] if prop["id"] == "links"
+    )
+    report_url = next(
+        link["url"] for link in links if "/workflow-run-report?" in link["url"]
+    )
+    assert parse_qs(urlsplit(report_url).query) == {
+        "workflow": ["${__data.fields.Workflow}"],
+        "workflow_run_id": ["${__value.raw}"],
+    }
+
+
 def test_run_explorer_funnel_removals_empty_is_emdash_not_valid_empty() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     row = next(panel for panel in explorer.get("panels", []) if panel.get("id") == 3099)
@@ -1362,7 +1385,7 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     layout_width = 1366 // 2
     chrome_px = 40
     cases = (
-        ("bioetl-provider-health-v2.json", 9107, 12, "reason", 260, "Value"),
+        ("bioetl-provider-health-v2.json", 9107, 12, "Source state", 105, "reason"),
         ("bioetl-runtime.json", 9101, 16, "reason", 260, "action_target"),
         (
             "bioetl-control-plane-v1.json",

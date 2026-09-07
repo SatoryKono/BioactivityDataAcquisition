@@ -343,7 +343,8 @@
               "type": "auto",
               "wrapText": false
             },
-            "inspect": true
+            "inspect": true,
+            "minWidth": 50
           },
           "unit": "none",
           "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
@@ -1288,10 +1289,6 @@
                 "value": "Status"
               },
               {
-                "id": "custom.width",
-                "value": 100
-              },
-              {
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text",
@@ -1327,6 +1324,33 @@
                 "value": {
                   "mode": "thresholds"
                 }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^(Value|Status|bioetl_l0_input_status_selected)$"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           }
@@ -1548,7 +1572,7 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "severity"
+                  "options": "Severity"
                 },
                 "properties": [
                   {
@@ -1579,12 +1603,13 @@
                   {
                     "id": "custom.cellOptions",
                     "value": {
-                      "type": "color-text"
+                      "type": "color-text",
+                      "wrapText": false
                     }
                   },
                   {
                     "id": "custom.width",
-                    "value": 80
+                    "value": 110
                   }
                 ]
               }
@@ -3936,7 +3961,7 @@
             "w": 12,
             "h": 6
           },
-          "description": "SELECTED RUN · TIME RANGE · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting.",
+          "description": "SELECTED RUN · TIME RANGE · Shows HTTP-backed Bronze, Silver, and Gold record counts and outcomes. Zero is a recorded count. No matching rows are a valid empty result for the selected scope; backend unavailable means the query could not be evaluated. Verify /health/live. Open Run Explorer for complete accounting. Counts and percentages are neutral accounting quantities, not quality verdicts. Exclusions alone have no severity threshold here; assess the DQ verdict and contract evidence. Percentages use the same precision (at least one decimal, up to three for small shares).",
           "datasource": "BioETL Ops HTTP",
           "fieldConfig": {
             "defaults": {
@@ -3961,7 +3986,11 @@
                   "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
                   "targetBlank": true
                 }
-              ]
+              ],
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "text"
+              }
             },
             "overrides": [
               {
@@ -4056,6 +4085,13 @@
                     "value": {
                       "type": "color-text"
                     }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               },
@@ -4081,6 +4117,13 @@
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
                     }
                   }
                 ]
@@ -4197,6 +4240,13 @@
                         }
                       }
                     ]
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "text"
+                    }
                   }
                 ]
               }

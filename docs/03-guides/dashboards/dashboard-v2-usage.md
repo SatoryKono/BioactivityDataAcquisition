@@ -222,10 +222,10 @@ exact-run RunLedger evidence when `$run_id` is selected, otherwise over
 status, accounted subtotal, and delta rows; missing aggregate accounting series
 are diagnostic no-data/instrumentation gaps, not green zero. Every panel titled
 `Inspect Processed Records` or `Review Processed Records` displays `parameter`,
-`value`, and canonical formatted `percentage`: Bronze is always `100%`;
-`silver [valid]` and `gold [valid]`
-render one decimal (`91.0%`, `90.1%`); secondary Silver and Gold outcomes render
-up to three decimals with trailing zeroes trimmed (`8.51%`, `0.47%`).
+`value`, and canonical formatted `percentage`: all rows use one to three
+decimal places, trimming trailing zeroes while retaining at least one decimal
+(`100.0%`, `91.02%`, `90.09%`, `8.51%`, `0.0%`, `0.001%`).
+Bronze is `100.0%` when its total is known; unavailable evidence is `UNKNOWN`.
 Zero-valued outcome rows remain visible in the compact table. Silver and Gold
 outcome percentages use Bronze total as denominator. The table formats `value`
 with a space as the thousands separator, left-pads shorter values to the
