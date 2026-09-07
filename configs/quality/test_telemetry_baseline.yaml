@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/grafana-acceptance-five
-refreshed_at_utc: '2026-09-07T20:35:43.530327+00:00'
+refreshed_at_utc: '2026-09-07T20:41:47.343016+00:00'
 refresh_status: captured
 source_commit: 7fc045ddca269d1c517f05b3db93543f098eac5a
 source_run_id: '34159206367'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/audit/grafana/20260907-acceptance-five/ci-telemetry-34159206367/coverage-report/coverage/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/audit/grafana/20260907-acceptance-five/ci-telemetry-34159206367/test-duration-telemetry/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
