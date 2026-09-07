@@ -808,7 +808,7 @@ def test_trust_9416_detail_is_not_wrapped_at_four_rows() -> None:
     assert "refresh" in docs.lower()
 
 
-def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
+def test_incident_ranked_suspects_uses_one_comparable_value_column() -> None:
     incident = _load("bioetl-incident-v1.json")
     suspects = _panel(incident, 2010)
     transforms = suspects.get("transformations", [])
@@ -822,12 +822,16 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
     exprs = [
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
-    assert exprs == [
+    assert len(exprs) == 1
+    assert exprs[0].split(" or ") == [
         "bioetl_incident_ranked_runtime",
         "bioetl_incident_ranked_provider",
         "bioetl_incident_ranked_dq",
     ]
-    assert "merge" in transform_ids
+    assert "merge" not in transform_ids
+    assert suspects["targets"][0]["format"] == "table"
+    assert suspects["targets"][0]["instant"] is True
+    assert exclude.get("__name__") is True
     assert "sortBy" in transform_ids
     assert "limit" in transform_ids
     assert transform_ids.index("sortBy") < transform_ids.index("limit")
@@ -852,12 +856,13 @@ def test_incident_ranked_suspects_hides_merged_activation_fields() -> None:
 
 
 def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
-    """#9960: merged top-5 must sort by shipped severity rank, not merge order."""
+    """#10164: one query yields Value, so top-5 sorts by rank across all domains."""
     incident = _load("bioetl-incident-v1.json")
     suspects = _panel(incident, 2010)
     transforms = suspects.get("transformations", [])
     ids = [transform.get("id") for transform in transforms]
-    assert ids.index("merge") < ids.index("sortBy") < ids.index("limit")
+    assert "merge" not in ids
+    assert ids.index("sortBy") < ids.index("limit")
     organize = next(
         transform for transform in transforms if transform.get("id") == "organize"
     )
@@ -866,7 +871,9 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
     exprs = [
         str(target.get("expr") or "").strip() for target in suspects.get("targets", [])
     ]
-    assert exprs == [
+    assert len(exprs) == 1
+    sources = exprs[0].split(" or ")
+    assert sources == [
         "bioetl_incident_ranked_runtime",
         "bioetl_incident_ranked_provider",
         "bioetl_incident_ranked_dq",
@@ -876,9 +883,9 @@ def test_incident_ranked_suspects_limit_requires_comparable_rank() -> None:
         str(rule.get("record")): str(rule.get("expr") or "")
         for group in rules.get("groups", [])
         for rule in group.get("rules", [])
-        if rule.get("record") in set(exprs)
+        if rule.get("record") in set(sources)
     }
-    assert set(recorded) == set(exprs)
+    assert set(recorded) == set(sources)
     assert any("* 2" in expr for expr in recorded.values())
     assert all(
         'severity="failing"' in expr or 'severity="crit"' in expr

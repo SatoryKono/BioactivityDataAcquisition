@@ -3139,7 +3139,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Counts failed runs over the selected window for Pipeline and Run Type. Zero means no matching failures only when telemetry and scope exist; No data or UNKNOWN is inconclusive. Use the failure runbook or Run Explorer",
+          "description": "TIME RANGE · Estimates failed-run counter increase over the selected window for Pipeline and Run Type, evaluated once at the window end. Counter resets are handled before summing. Zero requires observed failed-counter samples with no increase; missing or insufficient samples remain UNKNOWN. Scope-universe presence alone does not prove counter coverage. Use the failure runbook or Run Explorer.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3208,7 +3208,9 @@
           },
           "targets": [
             {
-              "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
+              "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[$__range]))",
+              "instant": true,
+              "range": false,
               "refId": "A"
             }
           ],
