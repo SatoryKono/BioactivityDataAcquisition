@@ -16,7 +16,7 @@
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `flaky_test_review_input_preflight` | `pass` | `required_json_input` | `available_valid_object` | `available_valid_object` | `reports/quality/flaky-test-burndown-review.json` |
-| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
+| `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c` | `c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2468, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c'}` | `{'source_module_count': 2468, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'c0cda22ac93d6b0395d548235151dd7eb41bab098643aff23058155eff890f4c'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
