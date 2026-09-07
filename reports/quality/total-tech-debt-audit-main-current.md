@@ -10,7 +10,7 @@ Audited branch: main
 
 Audited commit SHA: `09ab9ac286bacb7eee3324e950603539a5c62ee6`
 
-Evidence surface SHA-256: `eaf23ddfecb56c01b95f2f2fa87cdfc33071963f08d23af6d046faba06e3f09f`
+Evidence surface SHA-256: `743b3cdff062ebdd4f419a38ccfde8fb9380c7319e2a00da79c14f2ba20d1cb4`
 
 
 Registry: configs/quality/technical_debt_audit_registry.yaml
@@ -19,7 +19,7 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
 {
   "audit_id": "total-tech-debt-main-2026-08-20-r1",
   "audited_commit_sha": "09ab9ac286bacb7eee3324e950603539a5c62ee6",
-  "evidence_surface_sha256": "eaf23ddfecb56c01b95f2f2fa87cdfc33071963f08d23af6d046faba06e3f09f",
+  "evidence_surface_sha256": "743b3cdff062ebdd4f419a38ccfde8fb9380c7319e2a00da79c14f2ba20d1cb4",
   "metrics": {
     "architecture_integral_score": 9.14,
     "architecture_interpretation": "good_targeted_improvements",
@@ -30,10 +30,10 @@ Registry: configs/quality/technical_debt_audit_registry.yaml
     "debt_gate_pass_count": 45,
     "debt_gate_warn_count": 0,
     "expired_compat_count": 0,
-    "fully_covered_module_count": 1606,
+    "fully_covered_module_count": 1609,
     "layer_violation_count": 0,
     "no_executable_lines_module_count": 4,
-    "partially_covered_module_count": 858,
+    "partially_covered_module_count": 855,
     "source_module_count": 2468,
     "sunset_compat_count": 0,
     "transition_compat_count": 0,
@@ -54,8 +54,8 @@ Refresh reason: Reconcile the current evidence surface and semantic summary with
 1. Architecture quality integral score: **9.14** (`good_targeted_improvements`). Integral score `9.14`.
 1. Module inventory (from module-coverage-inventory.json only):
    - source_module_count: **2468**
-   - fully_covered: **1606**
-   - partially_covered: **858**
+   - fully_covered: **1609**
+   - partially_covered: **855**
    - no_executable_lines: **4**
    - uncovered: **0**
    - unmeasured: **0**
