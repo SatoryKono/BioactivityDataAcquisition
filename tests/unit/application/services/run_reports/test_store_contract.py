@@ -65,3 +65,14 @@ def test_memory_store_rejects_root_removal() -> None:
     with pytest.raises(ValueError):
         store.remove_tree("reports", root="reports")
     assert store.is_dir("reports")
+
+
+def test_writer_rejects_invalid_enrichment_before_persisting(monkeypatch) -> None:
+    from bioetl.application.services.run_reports import writer
+
+    store = MemoryReportStore()
+    report = build_pipeline_run_report(identity={"run_id": "invalid"}, metrics={})
+    monkeypatch.setattr(writer, "replace", lambda *args, **kwargs: object())
+    with pytest.raises(TypeError, match="did not preserve PipelineRunReport"):
+        write_pipeline_run_report(report, root=Path("reports"), store=store)
+    assert not store.files

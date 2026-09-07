@@ -24,7 +24,7 @@ def test_adapter_satisfies_port_and_round_trips_text(tmp_path: Path) -> None:
     assert adapter.read_text(str(target)) == payload
 
 
-@pytest.mark.parametrize("suffix", [".", "..", "nested/../.."])
+@pytest.mark.parametrize("suffix", [".", "..", "nested/..", "nested/../.."])
 def test_remove_tree_rejects_root_and_parent_traversal(
     tmp_path: Path, suffix: str
 ) -> None:
