@@ -1386,6 +1386,20 @@ def test_cycle4_below_fold_declared_widths_fit_200pct_css_budget() -> None:
         )
 
 
+def test_selected_trust_reasons_link_preserves_multiple_run_types() -> None:
+    panel = _panel(_load("bioetl-control-plane-v1.json"), 9418)
+    reasons = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"]["options"] == "reasons_count"
+    )
+    links = next(
+        item["value"] for item in reasons["properties"] if item["id"] == "links"
+    )
+    assert "${run_type:queryparam}" in links[0]["url"]
+    assert "var-run_type=${run_type:csv}" not in links[0]["url"]
+
+
 def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
     """#9563 #9564 #9565 #9566: wrap columns keep a declared width; one column stays flex."""
     layout_width = 1366 // 2

@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
+import asyncio
+from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import ContextVar
+from threading import BoundedSemaphore, Event
 from types import SimpleNamespace
+
+import pytest
 
 from bioetl.interfaces.http import _health_server_identity_routing_support as routing
 from bioetl.interfaces.http import _health_server_identity_support as identity_support
@@ -19,6 +25,17 @@ from bioetl.interfaces.http.control_plane_identity.payload import (
 )
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture
+def isolated_identity_executor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Iterator[ThreadPoolExecutor]:
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        monkeypatch.setattr(routing, "_IDENTITY_SUMMARY_EXECUTOR", executor)
+        monkeypatch.setattr(routing, "_IDENTITY_SUMMARY_SLOTS", BoundedSemaphore(2))
+        monkeypatch.setattr(routing, "_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS", 0.05)
+        yield executor
 
 
 def test_partial_identity_keeps_contract_reference_and_unknown_gap_count() -> None:
@@ -194,14 +211,15 @@ async def test_identity_summary_uses_only_the_selected_report(
 @pytest.mark.asyncio
 async def test_slow_report_enrichment_preserves_completed_identity_evidence(
     monkeypatch: pytest.MonkeyPatch,
+    isolated_identity_executor: ThreadPoolExecutor,
 ) -> None:
-    async def source_read(build):
-        if build.__name__ == "<lambda>":
-            await routing.asyncio.Event().wait()
-        return build()
+    release = Event()
 
-    monkeypatch.setattr(routing.asyncio, "to_thread", source_read)
-    monkeypatch.setattr(routing, "_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS", 0.01)
+    def slow_report(scope: _IdentityScope) -> dict[str, object]:
+        release.wait(2)
+        return {}
+
+    monkeypatch.setattr(routing, "_selected_report_summary", slow_report)
     monkeypatch.setattr(
         routing,
         "build_control_plane_identity_evidence_payload",
@@ -215,9 +233,73 @@ async def test_slow_report_enrichment_preserves_completed_identity_evidence(
         resolved_manifest=None,
         resolved_via="selected_run_id_not_found",
     )
-    summary = await routing._build_identity_evidence_summary(
-        SimpleNamespace(_run_ledger_port=None),
-        scope=scope,
-        checkpoint_metadata=None,
-    )
-    assert summary == {"identity_graph_complete": True, "gap_count": 0}
+    try:
+        summary = await routing._build_identity_evidence_summary(
+            SimpleNamespace(_run_ledger_port=None),
+            scope=scope,
+            checkpoint_metadata=None,
+        )
+        assert summary == {"identity_graph_complete": True, "gap_count": 0}
+    finally:
+        release.set()
+
+
+@pytest.mark.asyncio
+async def test_timed_out_reads_keep_capacity_and_leave_default_executor_available(
+    isolated_identity_executor: ThreadPoolExecutor,
+) -> None:
+    release = Event()
+    started: list[int] = []
+    asyncio.get_running_loop().set_default_executor(ThreadPoolExecutor(max_workers=1))
+
+    def slow_read() -> dict[str, object]:
+        started.append(1)
+        release.wait(3)
+        return {}
+
+    try:
+        for _ in range(3):
+            results = await asyncio.gather(
+                *(routing._bounded_identity_summary(slow_read) for _ in range(6))
+            )
+            assert results == [None] * 6
+        assert len(started) == 2
+        assert (
+            await asyncio.wait_for(asyncio.to_thread(lambda: "healthy"), 0.5)
+            == "healthy"
+        )
+        release.set()
+        assert await routing._bounded_identity_summary(lambda: {"recovered": True}) == {
+            "recovered": True
+        }
+    finally:
+        release.set()
+
+
+@pytest.mark.asyncio
+async def test_identity_executor_preserves_request_context(
+    isolated_identity_executor: ThreadPoolExecutor,
+) -> None:
+    request_id = ContextVar("identity_request_id", default="missing")
+    token = request_id.set("selected-request")
+    try:
+        assert await routing._bounded_identity_summary(
+            lambda: {"request_id": request_id.get()}
+        ) == {"request_id": "selected-request"}
+    finally:
+        request_id.reset(token)
+
+
+@pytest.mark.asyncio
+async def test_identity_executor_submission_failure_releases_capacity(
+    isolated_identity_executor: ThreadPoolExecutor,
+) -> None:
+    isolated_identity_executor.shutdown()
+    with pytest.raises(RuntimeError):
+        await routing._bounded_identity_summary(lambda: {})
+    slots = routing._IDENTITY_SUMMARY_SLOTS
+    assert slots.acquire(blocking=False)
+    assert slots.acquire(blocking=False)
+    assert not slots.acquire(blocking=False)
+    slots.release()
+    slots.release()

@@ -6,6 +6,9 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
+from threading import BoundedSemaphore
 from typing import TYPE_CHECKING
 
 from bioetl.interfaces.http._health_server_checkpoint_lookup import (
@@ -35,6 +38,10 @@ if TYPE_CHECKING:
 _IDENTITY_CHECKPOINT_LOAD_TIMEOUT_SECONDS = 1.5
 _IDENTITY_SCOPE_RESOLVE_TIMEOUT_SECONDS = 12.0
 _IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS = 1.5
+_IDENTITY_SUMMARY_EXECUTOR = ThreadPoolExecutor(
+    max_workers=4, thread_name_prefix="bioetl-identity"
+)
+_IDENTITY_SUMMARY_SLOTS = BoundedSemaphore(4)
 _IDENTITY_UNAVAILABLE_VALUES = IDENTITY_UNAVAILABLE_VALUES
 
 
@@ -254,11 +261,27 @@ async def _bounded_identity_summary(
     """Bound each source independently so report I/O cannot erase evidence."""
     try:
         return await asyncio.wait_for(
-            asyncio.to_thread(build),
+            _identity_summary_worker(build),
             timeout=_IDENTITY_EVIDENCE_BUILD_TIMEOUT_SECONDS,
         )
     except TimeoutError:
         return None
+
+
+async def _identity_summary_worker(
+    build: Callable[[], dict[str, object] | None],
+) -> dict[str, object] | None:
+    """Keep capacity occupied until synchronous I/O actually finishes."""
+    slots = _IDENTITY_SUMMARY_SLOTS
+    while not slots.acquire(blocking=False):
+        await asyncio.sleep(0.01)
+    try:
+        pending = _IDENTITY_SUMMARY_EXECUTOR.submit(copy_context().run, build)
+    except RuntimeError:
+        slots.release()
+        raise
+    pending.add_done_callback(lambda _: slots.release())
+    return await asyncio.wrap_future(pending)
 
 
 def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:

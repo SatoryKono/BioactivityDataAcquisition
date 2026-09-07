@@ -1,8 +1,8 @@
 # Сводка evidence: project-package-topology
 
-Refresh note (2026-09-07): Run Explorer adds the report-section ordering module. Counts below were remeasured from the source tree; the source fingerprint and coverage evidence come from the successful coverage-verify candidate for commit 876230b15a (CI run 34143907977). Historical notes remain historical.
+Refresh note (2026-09-07): Run Explorer adds the report-section ordering module and isolates summary I/O from the health server executor. Counts and the source fingerprint below come from the canonical source inventory. Coverage measurements will be refreshed from CI for the executor change before closeout. Historical notes remain historical.
 
-`source_tree_sha256=6599a6c473a427383ab81eb52cd0cf66309469b25710120668f6d98edb283e16`
+`source_tree_sha256=3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
 
 `source_module_count=2469`
 
@@ -108,6 +108,6 @@ Collected: `6`
 
 ## Source tree stamp
 
-- source_tree_sha256: `6599a6c473a427383ab81eb52cd0cf66309469b25710120668f6d98edb283e16`
+- source_tree_sha256: `3bd6e0b20e190e5be94697e7432cfa83865f053700b5c121f0a084730be1af4c`
 
 `source_module_count=2469`
