@@ -9,6 +9,7 @@ from bioetl.application.observability.current_metrics_rehydrate import (
     collect_latest_terminal_anchors,
     collect_latest_terminal_workflow_anchors,
 )
+from bioetl.domain.ports import RunReportStorePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,10 +31,11 @@ def reconcile_current_metrics_with_run_reports(
     *,
     root: Path | None = None,
     exposition: str | None = None,
+    store: RunReportStorePort,
 ) -> CurrentMetricsReconciliationOutcome:
     """Return an explicit gap reason when durable success lacks scrape samples."""
-    anchors = collect_latest_terminal_anchors(root=root)
-    workflow_anchors = collect_latest_terminal_workflow_anchors(root=root)
+    anchors = collect_latest_terminal_anchors(root=root, store=store)
+    workflow_anchors = collect_latest_terminal_workflow_anchors(root=root, store=store)
     successes = tuple(anchor for anchor in anchors if anchor.status == "success")
     workflow_successes = tuple(
         anchor for anchor in workflow_anchors if anchor.status == "success"
@@ -80,11 +82,11 @@ def current_metrics_reconciliation_check(
     *,
     root: Path | None = None,
     exposition: str | None = None,
+    store: RunReportStorePort,
 ) -> dict[str, object]:
     """JSON payload for ``/health/ready`` (diagnostic; does not fail ready)."""
     result = reconcile_current_metrics_with_run_reports(
-        root=root,
-        exposition=exposition,
+        root=root, exposition=exposition, store=store
     )
     return {
         "status": result.status,

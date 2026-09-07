@@ -40,6 +40,7 @@ from bioetl.application.services.workflow.workflow_transition_policy import (
     WorkflowStepDefinition,
     resolve_step_transition_policy,
 )
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowStepConfig,
@@ -77,6 +78,7 @@ class WorkflowRunnerService:
     pipeline_runner: PipelineRunnerService
     transform_service: WorkflowTransformService
     metrics: MetricsPort
+    report_store: RunReportStorePort
     monotonic: Callable[[], float] = perf_counter
     workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
         None
@@ -150,6 +152,7 @@ class WorkflowRunnerService:
             config=config,
             result=identified_result,
             logger=getattr(self.pipeline_runner, "logger", None),
+            store=self.report_store,
         )
 
     def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:

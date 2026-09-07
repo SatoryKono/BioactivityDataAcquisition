@@ -12,6 +12,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 import asyncio
 from collections.abc import Awaitable
 from dataclasses import dataclass, field
@@ -151,6 +155,7 @@ async def test_workflow_runner_roundtrips_pipeline_transform_and_metrics() -> No
             monotonic=iter([2.0, 2.5]).__next__,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
 
     result = await service.run_workflow(_build_config())
@@ -200,6 +205,7 @@ async def test_workflow_runner_skips_completed_transform_by_fingerprint() -> Non
         pipeline_runner=_PipelineRunner(),  # type: ignore[arg-type]
         transform_service=WorkflowTransformService(registry=registry, metrics=metrics),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
 
     result = await service.run_workflow(
@@ -227,6 +233,7 @@ async def test_workflow_runner_preserves_topological_order_for_dependency_graph(
             monotonic=iter([2.0, 2.2]).__next__,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",

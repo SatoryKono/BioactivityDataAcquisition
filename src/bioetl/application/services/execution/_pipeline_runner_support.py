@@ -24,6 +24,7 @@ from bioetl.application.services.run_reports.enrichment import (
     build_stage_timings,
 )
 from bioetl.application.services.run_reports.writer import write_pipeline_run_report
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.run_reports.accounting import StageAccountingAccumulator
 from bioetl.domain.run_reports.context import (
     get_stage_accounting,
@@ -141,6 +142,7 @@ def finalize_pipeline_run_report(
     report_root: Path | None = None,
     stage_timings: dict[str, float | int | None] | None = None,
     http_summary: dict[str, Any] | None = None,  # Any: dynamic HTTP report payload
+    store: RunReportStorePort,
 ) -> RunResult:
     """Build and persist pipeline run report; attach paths onto result."""
     accounting = get_stage_accounting()
@@ -189,7 +191,7 @@ def finalize_pipeline_run_report(
                 http_summary=build_http_summary(http_summary),
             ),
         )
-        written = write_pipeline_run_report(report, root=report_root)
+        written = write_pipeline_run_report(report, root=report_root, store=store)
     except Exception as exc:
         return _require_run_result(
             replace(
@@ -227,6 +229,7 @@ def build_pipeline_run_result(
     started_at: datetime,
     options: RunOptions | None = None,
     write_report: bool = True,
+    store: RunReportStorePort,
 ) -> RunResult:
     """Convert execution outcome to the public RunResult contract."""
     status = PipelineRunResult(outcome.status)
@@ -255,7 +258,7 @@ def build_pipeline_run_result(
         debug_export_hash=getattr(runner, "debug_export_hash", None),
     )
     if write_report:
-        return finalize_pipeline_run_report(result=result, options=options)
+        return finalize_pipeline_run_report(result=result, options=options, store=store)
     return result
 
 
@@ -267,6 +270,7 @@ async def complete_pipeline_dry_run(
     options: RunOptions,
     dry_run_result: RunResult,
     record_event: Callable[..., Awaitable[None]],
+    store: RunReportStorePort,
 ) -> RunResult:
     """Record dry-run completion and finalize the pipeline run report."""
     await record_event(
@@ -279,8 +283,7 @@ async def complete_pipeline_dry_run(
         timestamp=dry_run_result.completed_at,
     )
     return finalize_pipeline_run_report(
-        result=dry_run_result,
-        options=options,
+        result=dry_run_result, options=options, store=store
     )
 
 

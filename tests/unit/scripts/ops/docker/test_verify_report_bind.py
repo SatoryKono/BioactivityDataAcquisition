@@ -1,5 +1,5 @@
 # pyright: reportArgumentType=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict.
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict.
 """Unit tests for verify_report_bind operator script."""
 
 from __future__ import annotations
@@ -478,3 +478,16 @@ def test_verify_fails_foreign_source_even_when_report_counts_do_not_reveal_it(
 
     assert expected_source_id != foreign_source_id
     assert rc == 1
+
+
+def test_host_pipeline_summary_reads_composed_store(tmp_path: Path) -> None:
+    report = (
+        tmp_path / "pipeline" / "chembl_activity" / "run-a" / "pipeline-run-report.json"
+    )
+    report.parent.mkdir(parents=True)
+    report.write_text('{"identity": {"status": "success"}}', encoding="utf-8")
+    state = mod._VerificationState()
+    assert mod._host_pipeline_summary(
+        state, pipeline="chembl_activity", host_root=tmp_path
+    ) == (1, "run-a")
+    assert state.ok

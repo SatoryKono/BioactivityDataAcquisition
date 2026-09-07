@@ -161,7 +161,7 @@ the narrow domain storage ports for one pipeline service bundle.
 | Composite pattern | `src/bioetl/application/composite/**` | ADR-026 seed/enrich/merge orchestration and merge support. | Composite config and injected pipeline/runtime services. | Application |
 | Control-plane services | `src/bioetl/application/services/control_plane/**` | RunManifest, RunLedger, effective config, replay, workflow state, diagnostics. | Domain control-plane artifacts and ports. | Application |
 | DQ services | `src/bioetl/application/services/dq/**`, `data_quality_service.py`, `dq_report_service.py` | Bronze/Silver/Gold analyzers, DQ report generation, thresholds, anomalies. | Domain DQ VOs and quality ports. | Application |
-| Operator services | `src/bioetl/application/services/{checkpoint_service.py,quarantine_service.py,metrics_service.py,health_service.py}` | CLI/admin inspection and runtime-adjacent orchestration. | Domain ports; concrete stores through DI. | Application |
+| Operator services | `src/bioetl/application/services/checkpoint/checkpoint_service.py`, `src/bioetl/application/services/quality/quarantine_service.py`, `src/bioetl/application/services/ops/metrics_service.py`, `src/bioetl/application/services/ops/health_service.py` | CLI/admin inspection and runtime-adjacent orchestration. | Domain ports; concrete stores through DI. | Application |
 
 ## Infrastructure Layer
 

@@ -18,6 +18,7 @@ from bioetl.application.services.run_reports.query import (
     list_workflow_reports,
     load_pipeline_report,
 )
+from bioetl.domain.ports import RunReportStorePort
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
@@ -67,9 +68,11 @@ def _provider_from_pipeline_name(pipeline_name: str) -> str:
     return pipeline_name or "unknown"
 
 
-def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunSnapshot | None:
+def _anchor_from_report_entry(
+    entry: ReportIndexEntry, *, store: RunReportStorePort
+) -> PipelineRunSnapshot | None:
     """Build one terminal anchor from a report index entry, or None."""
-    payload = _load_report_payload(entry.json_path)
+    payload = _load_report_payload(entry.json_path, store=store)
     if payload is None:
         return None
     identity = payload.get("identity")
@@ -95,15 +98,15 @@ def _anchor_from_report_entry(entry: ReportIndexEntry) -> PipelineRunSnapshot | 
 
 
 def collect_latest_terminal_anchors(
-    *,
-    root: Path | None = None,
-    limit: int = 200,
+    *, root: Path | None = None, limit: int = 200, store: RunReportStorePort
 ) -> tuple[PipelineRunSnapshot, ...]:
     """Return one latest terminal anchor per pipeline × run_type × status."""
-    entries = list_pipeline_reports(pipeline_name=None, limit=limit, root=root)
+    entries = list_pipeline_reports(
+        pipeline_name=None, limit=limit, root=root, store=store
+    )
     selected: dict[tuple[str, str, str], PipelineRunSnapshot] = {}
     for entry in entries:
-        anchor = _anchor_from_report_entry(entry)
+        anchor = _anchor_from_report_entry(entry, store=store)
         if anchor is None:
             continue
         key = (anchor.pipeline, anchor.run_type, anchor.status)
@@ -114,15 +117,15 @@ def collect_latest_terminal_anchors(
 
 
 def collect_latest_terminal_workflow_anchors(
-    *,
-    root: Path | None = None,
-    limit: int = 200,
+    *, root: Path | None = None, limit: int = 200, store: RunReportStorePort
 ) -> tuple[WorkflowRunSnapshot, ...]:
     """Return one latest terminal anchor per workflow_name."""
-    entries = list_workflow_reports(workflow_name=None, limit=limit, root=root)
+    entries = list_workflow_reports(
+        workflow_name=None, limit=limit, root=root, store=store
+    )
     selected: dict[str, WorkflowRunSnapshot] = {}
     for entry in entries:
-        anchor = _anchor_from_workflow_entry(entry, root=root)
+        anchor = _anchor_from_workflow_entry(entry, root=root, store=store)
         if anchor is None:
             continue
         if anchor.workflow in selected:
@@ -132,14 +135,14 @@ def collect_latest_terminal_workflow_anchors(
 
 
 def rehydrate_current_pipeline_run_metrics(
-    metrics: MetricsPort,
-    *,
-    root: Path | None = None,
+    metrics: MetricsPort, *, root: Path | None = None, store: RunReportStorePort
 ) -> RehydrateResult:
     """Ensure scraped contract samples exist for latest terminal runs."""
     try:
-        anchors = collect_latest_terminal_anchors(root=root)
-        workflow_anchors = collect_latest_terminal_workflow_anchors(root=root)
+        anchors = collect_latest_terminal_anchors(root=root, store=store)
+        workflow_anchors = collect_latest_terminal_workflow_anchors(
+            root=root, store=store
+        )
         runs_seeded = 0
         providers_seeded = 0
         stages_seeded = 0
@@ -268,12 +271,10 @@ def _seed_workflow_pipeline_expected(
 
 
 def _anchor_from_workflow_entry(
-    entry: ReportIndexEntry,
-    *,
-    root: Path | None,
+    entry: ReportIndexEntry, *, root: Path | None, store: RunReportStorePort
 ) -> WorkflowRunSnapshot | None:
     """Build one terminal workflow anchor, or None."""
-    payload = _load_report_payload(entry.json_path)
+    payload = _load_report_payload(entry.json_path, store=store)
     if payload is None:
         return None
     identity = payload.get("identity")
@@ -292,7 +293,7 @@ def _anchor_from_workflow_entry(
     )
     if not workflow or status not in _WORKFLOW_TERMINAL_STATUSES:
         return None
-    pipelines = _pipeline_scopes_from_payload(payload, root=root)
+    pipelines = _pipeline_scopes_from_payload(payload, root=root, store=store)
     provider = _workflow_provider(payload, pipelines)
     return WorkflowRunSnapshot(
         workflow=workflow,
@@ -336,9 +337,7 @@ def _pipeline_names_from_payload(payload: dict[str, object]) -> tuple[str, ...]:
 
 
 def _pipeline_scopes_from_payload(
-    payload: dict[str, object],
-    *,
-    root: Path | None,
+    payload: dict[str, object], *, root: Path | None, store: RunReportStorePort
 ) -> tuple[WorkflowPipelineScopeInfo, ...]:
     selected: dict[tuple[str, str, str], WorkflowPipelineScopeInfo] = {}
     execution = payload.get("execution")
@@ -350,7 +349,9 @@ def _pipeline_scopes_from_payload(
         pipeline = _first_text(row.get("pipeline_name"))
         if not pipeline:
             continue
-        run_type = _run_type_from_execution_row(row, pipeline=pipeline, root=root)
+        run_type = _run_type_from_execution_row(
+            row, pipeline=pipeline, root=root, store=store
+        )
         if not run_type:
             continue
         provider = _provider_from_pipeline_name(pipeline)
@@ -370,6 +371,7 @@ def _run_type_from_execution_row(
     *,
     pipeline: str,
     root: Path | None,
+    store: RunReportStorePort,
 ) -> str:
     explicit = _first_text(row.get("run_type"))
     if explicit:
@@ -378,9 +380,7 @@ def _run_type_from_execution_row(
     if not pipeline_run_id:
         return ""
     child = load_pipeline_report(
-        pipeline_name=pipeline,
-        run_id=pipeline_run_id,
-        root=root,
+        pipeline_name=pipeline, run_id=pipeline_run_id, root=root, store=store
     )
     if not isinstance(child, dict):
         return ""
@@ -390,9 +390,11 @@ def _run_type_from_execution_row(
     return _first_text(identity.get("run_type"))
 
 
-def _load_report_payload(path: Path) -> dict[str, object] | None:
+def _load_report_payload(
+    path: Path, *, store: RunReportStorePort
+) -> dict[str, object] | None:
     try:
-        text = path.read_text(encoding="utf-8")
+        text = store.read_text(str(path))
     except OSError:
         return None
     try:

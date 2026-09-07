@@ -7,6 +7,11 @@ remain thin adapters. Full DI framework is intentionally not introduced
 
 from __future__ import annotations
 
+from bioetl.domain.ports import RunReportStorePort
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 from bioetl.composition._pipeline_execution import (
     create_pipeline_runner as create_pipeline_runner,
     ensure_metrics_server_started as ensure_metrics_server_started,
@@ -37,6 +42,7 @@ from bioetl.composition.resources_runtime import (
 from bioetl.composition.resources_runtime import preview_cleanup as preview_cleanup
 
 __all__ = [
+    "create_run_report_store",
     "MedallionLifecycleServiceProtocol",
     "ensure_metrics_server_started",
     "get_contract_migration_service",
@@ -48,3 +54,8 @@ __all__ = [
     "registered_ports",
     "resolve",
 ]
+
+
+def create_run_report_store() -> RunReportStorePort:
+    """Compose a fresh run-report store for an explicit caller lifetime."""
+    return FileRunReportStoreAdapter()

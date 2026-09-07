@@ -12,6 +12,7 @@ from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
     list_workflow_reports,
 )
+from bioetl.composition.entrypoints import create_run_report_store
 from bioetl.domain.types import JsonDict
 from bioetl.interfaces.http.report_root_config import (
     configured_report_root,
@@ -299,9 +300,7 @@ def list_pipeline_run_report_payloads(
     base = _effective_root(root)
     owner = _normalize_list_owner(pipeline_name)
     entries = list_pipeline_reports(
-        pipeline_name=owner,
-        limit=limit,
-        root=base,
+        pipeline_name=owner, limit=limit, root=base, store=create_run_report_store()
     )
     return _list_report_payload(
         kind="pipeline",
@@ -322,9 +321,7 @@ def list_workflow_run_report_payloads(
     base = _effective_root(root)
     owner = _normalize_list_owner(workflow_name)
     entries = list_workflow_reports(
-        workflow_name=owner,
-        limit=limit,
-        root=base,
+        workflow_name=owner, limit=limit, root=base, store=create_run_report_store()
     )
     return _list_report_payload(
         kind="workflow",

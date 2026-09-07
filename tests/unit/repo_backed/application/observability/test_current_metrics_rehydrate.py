@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 import json
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -64,7 +68,9 @@ def test_collects_latest_terminal_anchor_per_pipeline_run_type_status(
         run_type="backfill",
         status="success",
     )
-    anchors = collect_latest_terminal_anchors(root=tmp_path, limit=20)
+    anchors = collect_latest_terminal_anchors(
+        root=tmp_path, limit=20, store=FileRunReportStoreAdapter()
+    )
     assert len(anchors) == 1
     assert anchors[0].pipeline == "chembl_assay"
     assert anchors[0].run_type == "backfill"
@@ -82,8 +88,12 @@ def test_rehydrate_increments_pipeline_runs_total_once(tmp_path: Path) -> None:
         status="success",
     )
     metrics = MagicMock()
-    first = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
-    second = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+    first = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
+    second = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
 
     assert first.pipeline_runs_seeded == 1
     assert second.pipeline_runs_seeded == 0
@@ -118,7 +128,9 @@ def test_rehydrate_seeds_provider_universe_and_stage_series(tmp_path: Path) -> N
         provider="chembl",
     )
     metrics = MagicMock()
-    result = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+    result = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
     assert result.provider_universe_seeded == 1
     assert result.stage_series_seeded == 0
     metrics.set_gauge.assert_any_call(
@@ -155,6 +167,7 @@ def test_reconciliation_reports_gap_when_success_lacks_scrape_sample(
     result = reconcile_current_metrics_with_run_reports(
         root=tmp_path,
         exposition="# HELP bioetl_pipeline_runs_total x\n# TYPE bioetl_pipeline_runs_total counter\n",
+        store=FileRunReportStoreAdapter(),
     )
     assert result.status == "unhealthy"
     assert result.state == "durable_success_without_scrape_samples"
@@ -188,7 +201,9 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
         ]
 
     before_health = _health_check_samples(generate_latest(REGISTRY).decode("utf-8"))
-    result = rehydrate_current_pipeline_run_metrics(PrometheusMetrics(), root=tmp_path)
+    result = rehydrate_current_pipeline_run_metrics(
+        PrometheusMetrics(), root=tmp_path, store=FileRunReportStoreAdapter()
+    )
     assert result.error is None
     assert result.pipeline_runs_seeded == 1
     body = build_health_server_metrics_exposition()
@@ -205,8 +220,7 @@ def test_rehydrate_writes_scrape_sample_to_prometheus_registry(
     assert 'status="success"' in sample_lines[0]
     assert sample_lines[0].rsplit("}", 1)[-1].strip() in {"0", "0.0"}
     aligned = reconcile_current_metrics_with_run_reports(
-        root=tmp_path,
-        exposition=body,
+        root=tmp_path, exposition=body, store=FileRunReportStoreAdapter()
     )
     assert aligned.status == "healthy"
     assert aligned.state == "aligned"
@@ -226,8 +240,7 @@ def test_reconciliation_aligned_when_labeled_sample_present(tmp_path: Path) -> N
         'run_type="backfill",status="success"} 1.0\n'
     )
     result = reconcile_current_metrics_with_run_reports(
-        root=tmp_path,
-        exposition=exposition,
+        root=tmp_path, exposition=exposition, store=FileRunReportStoreAdapter()
     )
     assert result.status == "healthy"
     assert result.state == "aligned"
@@ -314,7 +327,9 @@ def test_collects_latest_terminal_workflow_anchor_per_workflow(
         status="success",
         pipelines=(("chembl_assay", "assay-new"),),
     )
-    anchors = collect_latest_terminal_workflow_anchors(root=tmp_path, limit=20)
+    anchors = collect_latest_terminal_workflow_anchors(
+        root=tmp_path, limit=20, store=FileRunReportStoreAdapter()
+    )
     chembl = [anchor for anchor in anchors if anchor.workflow == "chembl_baseline"]
     assert len(chembl) == 1
     assert chembl[0].status == "success"
@@ -331,8 +346,12 @@ def test_rehydrate_seeds_workflow_expected_once(tmp_path: Path) -> None:
         pipelines=(("chembl_assay", "assay-1"),),
     )
     metrics = MagicMock()
-    first = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
-    second = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+    first = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
+    second = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
 
     assert first.workflow_expected_seeded == 1
     assert first.workflow_pipeline_expected_seeded == 1
@@ -374,6 +393,7 @@ def test_reconciliation_reports_workflow_gap_when_success_lacks_scrape_sample(
         exposition=(
             "# HELP bioetl_workflow_expected x\n# TYPE bioetl_workflow_expected gauge\n"
         ),
+        store=FileRunReportStoreAdapter(),
     )
     assert result.status == "unhealthy"
     assert result.state == "durable_workflow_success_without_scrape_samples"
@@ -397,7 +417,9 @@ def test_rehydrate_writes_workflow_expected_scrape_sample(
     )
     from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
-    result = rehydrate_current_pipeline_run_metrics(PrometheusMetrics(), root=tmp_path)
+    result = rehydrate_current_pipeline_run_metrics(
+        PrometheusMetrics(), root=tmp_path, store=FileRunReportStoreAdapter()
+    )
     assert result.error is None
     assert result.workflow_expected_seeded == 1
     body = build_health_server_metrics_exposition()
@@ -418,8 +440,7 @@ def test_rehydrate_writes_workflow_expected_scrape_sample(
     ]
     assert runs_total == []
     aligned = reconcile_current_metrics_with_run_reports(
-        root=tmp_path,
-        exposition=body,
+        root=tmp_path, exposition=body, store=FileRunReportStoreAdapter()
     )
     assert aligned.status == "healthy"
     assert aligned.state == "aligned"
@@ -439,6 +460,7 @@ def test_reconciliation_aligns_workflow_without_child_pipeline_report(
     result = reconcile_current_metrics_with_run_reports(
         root=tmp_path,
         exposition='bioetl_workflow_expected{workflow="workflow_only"} 1.0\n',
+        store=FileRunReportStoreAdapter(),
     )
     assert result.status == "healthy"
     assert result.state == "aligned"
@@ -471,7 +493,9 @@ def test_rehydrate_uses_completion_time_or_artifact_mtime(
     path.write_text(json.dumps(payload), encoding="utf-8")
     os.utime(path, (1700000000.0, 1700000000.0))
 
-    anchors = collect_latest_terminal_anchors(root=tmp_path)
+    anchors = collect_latest_terminal_anchors(
+        root=tmp_path, store=FileRunReportStoreAdapter()
+    )
 
     assert len(anchors) == 1
     assert anchors[0].observed_unix == expected_unix
@@ -489,14 +513,18 @@ def test_rehydrate_reports_metrics_failure_and_allows_retry(tmp_path: Path) -> N
     metrics = MagicMock()
     metrics.set_gauge.side_effect = RuntimeError("metrics unavailable")
 
-    failed = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+    failed = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
 
     assert failed.error == "metrics unavailable"
     assert failed.pipeline_runs_seeded == 0
     metrics.increment_counter.assert_not_called()
 
     metrics.set_gauge.side_effect = None
-    recovered = rehydrate_current_pipeline_run_metrics(metrics, root=tmp_path)
+    recovered = rehydrate_current_pipeline_run_metrics(
+        metrics, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
 
     assert recovered.error is None
     assert recovered.pipeline_runs_seeded == 1

@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 import asyncio
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -267,6 +271,7 @@ def test_workflow_runner_records_expected_pipeline_universe_for_baseline() -> No
         pipeline_runner=_PipelineRunner(),  # type: ignore[arg-type]
         transform_service=_RecordingTransformService(),  # type: ignore[arg-type]
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
 
     service.record_expected_pipeline_metrics(_build_chembl_baseline_metrics_config())
@@ -328,6 +333,7 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
         transform_service=transform_service,
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -412,6 +418,7 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
         pipeline_runner=_FailingPipelineRunner(),  # type: ignore[arg-type]
         transform_service=transform_service,
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -463,6 +470,7 @@ async def test_workflow_runner_terminalizes_attribute_error_step_failure() -> No
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -502,6 +510,7 @@ async def test_pipeline_exception_preserves_reciprocal_child_anchors() -> None:
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -533,6 +542,7 @@ async def test_workflow_runner_marks_downstream_steps_skipped_after_failure() ->
         ),
         metrics=metrics,
         monotonic=iter([5.0, 5.3]).__next__,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -579,6 +589,7 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
         pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
         transform_service=transform_service,  # type: ignore[arg-type]
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = _build_chembl_baseline_config()
     events: list[tuple[str, str, str | None, str | None]] = []
@@ -677,6 +688,7 @@ async def test_workflow_runner_skips_chembl_baseline_reconciliation_after_failur
         pipeline_runner=pipeline_runner,  # type: ignore[arg-type]
         transform_service=transform_service,  # type: ignore[arg-type]
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = _build_chembl_baseline_config()
 
@@ -707,6 +719,7 @@ async def test_workflow_runner_forwards_workflow_level_dry_run_to_transforms() -
         pipeline_runner=_PipelineRunner(),  # type: ignore[arg-type]
         transform_service=transform_service,  # type: ignore[arg-type]
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="repair_workflow",
@@ -741,6 +754,7 @@ async def test_workflow_runner_skips_completed_steps_on_resume() -> None:
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -783,6 +797,7 @@ async def test_workflow_runner_callbacks_follow_start_then_complete_order() -> N
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -835,6 +850,7 @@ async def test_workflow_runner_callbacks_record_failed_then_skipped_transition()
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",
@@ -885,6 +901,7 @@ async def test_workflow_runner_transform_fingerprint_skip_still_emits_callbacks(
             metrics=metrics,
         ),
         metrics=metrics,
+        report_store=FileRunReportStoreAdapter(),
     )
     config = WorkflowConfig(
         name="activity_workflow",

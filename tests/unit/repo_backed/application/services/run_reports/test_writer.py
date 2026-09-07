@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -88,7 +92,9 @@ def test_write_pipeline_run_report(tmp_path: Path) -> None:
             },
         ),
     )
-    written = write_pipeline_run_report(report, root=tmp_path)
+    written = write_pipeline_run_report(
+        report, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
     assert written.json_path.is_file()
     assert written.markdown_path.is_file()
     assert written.latest_path is not None and written.latest_path.is_file()
@@ -132,7 +138,9 @@ def test_write_workflow_run_report(tmp_path: Path) -> None:
             }
         ],
     )
-    written = write_workflow_run_report(report, root=tmp_path)
+    written = write_workflow_run_report(
+        report, root=tmp_path, store=FileRunReportStoreAdapter()
+    )
     payload = json.loads(written.json_path.read_text(encoding="utf-8"))
     assert payload["totals"]["records_extracted_sum"] == 42
     assert payload["identity"]["completed_at"] == "2026-08-24T13:49:06+00:00"
@@ -157,6 +165,7 @@ def test_latest_pointer_uses_sanitized_identity_owner_with_custom_directory(
         report,
         root=tmp_path,
         directory=custom_directory,
+        store=FileRunReportStoreAdapter(),
     )
 
     assert written.json_path.parent == custom_directory
@@ -177,7 +186,11 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
 
     monkeypatch.setattr(Path, "replace", _fail_replace)
     try:
-        write_json(target, {"schema_version": "pipeline_run_report_v1"})
+        write_json(
+            target,
+            {"schema_version": "pipeline_run_report_v1"},
+            store=FileRunReportStoreAdapter(),
+        )
     except (OSError, Exception) as exc:
         assert "replace failed" in str(exc)
     else:
@@ -187,13 +200,12 @@ def test_write_json_cleans_temporary_file_when_replace_fails(
     assert list(tmp_path.glob(".*.tmp")) == []
 
 
-def test_require_store_raises_without_injection(monkeypatch) -> None:
-    monkeypatch.setattr(run_report_writer, "_injected_store", None)
+def test_require_store_raises_without_injection() -> None:
     target = Path("unused.json")
     try:
         run_report_writer.write_json(target, {"ok": True})
     except TypeError as exc:
-        assert "RunReportStorePort" in str(exc)
+        assert "store" in str(exc)
     else:
         raise AssertionError("write_json must require an injected store")
 

@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 from collections.abc import Callable
 from datetime import datetime
 from importlib import import_module
@@ -140,6 +144,7 @@ def get_workflow_runner_service(
     return cast(
         "WorkflowRunnerService",
         workflow_runner_service.WorkflowRunnerService(
+            report_store=FileRunReportStoreAdapter(),
             pipeline_runner=pipeline_runner_factory(registry),
             transform_service=workflow_transform_service.WorkflowTransformService(
                 registry=transform_registry,

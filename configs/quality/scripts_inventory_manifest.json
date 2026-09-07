@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-06T21:25:56.497726+00:00",
+  "generated_at": "2026-09-07T06:09:32.009139+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -18092,7 +18092,7 @@
         },
         {
           "path": "docs/02-architecture/04-interfaces-layer.md",
-          "line": 97,
+          "line": 111,
           "source_group": "docs",
           "text": "публичные command-модули `interfaces/cli/commands/run.py`,"
         },
@@ -21114,7 +21114,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/verify_report_bind.py",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "from scripts.ops.runtime.docker import docker_runtime_preflight as runtime_preflight"
         },

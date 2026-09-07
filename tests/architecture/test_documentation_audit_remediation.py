@@ -35,6 +35,32 @@ MKDOCS_FILE = PROJECT_ROOT / "mkdocs.yml"
 SOURCE_MAP_DOC = PROJECT_ROOT / "src/bioetl/README.md"
 
 
+def test_current_architecture_views_bind_runtime_and_service_owners() -> None:
+    """Keep deployable boundaries, HTTP families and literal owner paths current."""
+    import re
+
+    docs = PROJECT_ROOT / "docs/02-architecture"
+    diagrams = (docs / "current-state-diagrams.md").read_text(encoding="utf-8")
+    container = diagrams.split("## C4 Container", 1)[1].split("## Layer Diagram", 1)[0]
+    assert "python -m bioetl health server" in container
+    for layer in ("composition", "application", "domain", "infra"):
+        assert f"Container({layer}," not in container
+    http = (docs / "04-interfaces-layer.md").read_text(encoding="utf-8")
+    router = (
+        PROJECT_ROOT / "src/bioetl/interfaces/http/health_server_routing_mixin.py"
+    ).read_text(encoding="utf-8")
+    families = set(re.findall(r'"(/ops/[^/]+/)"', router)) | {"/metrics"}
+    assert all(family in http for family in families)
+    inventory = (docs / "current-state-inventory.md").read_text(encoding="utf-8")
+    row = next(
+        line
+        for line in inventory.splitlines()
+        if line.startswith("| Operator services |")
+    )
+    paths = re.findall(r"`(src/[^`]+\.py)`", row)
+    assert paths and all((PROJECT_ROOT / path).is_file() for path in paths)
+
+
 def test_operator_docs_use_current_readiness_endpoint() -> None:
     """Published operator docs must use `/health/ready`, not the stale `/ready`."""
     rules_text = RULES_DOC.read_text(encoding="utf-8")

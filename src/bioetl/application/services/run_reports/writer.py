@@ -30,7 +30,6 @@ __all__ = (
     "REPORT_ROOT_MARKER_NAME",
     "REPORT_ROOT_MARKER_VALUE",
     "RunReportWriteResult",
-    "configure_run_report_store",
     "inspect_report_root_marker",
     "report_root_marker_is_healthy",
     "report_root_marker_path",
@@ -41,8 +40,6 @@ __all__ = (
     "write_pipeline_run_report",
     "write_workflow_run_report",
 )
-
-_injected_store: RunReportStorePort | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,22 +56,6 @@ def _require_pipeline_run_report(value: object) -> PipelineRunReport:
     if not isinstance(value, PipelineRunReport):
         raise TypeError("dataclass replacement did not preserve PipelineRunReport")
     return value
-
-
-def configure_run_report_store(store: RunReportStorePort | None) -> None:
-    """Bind the composition-owned run-report store for default write paths."""
-    global _injected_store
-    _injected_store = store
-
-
-def _require_store(store: RunReportStorePort | None) -> RunReportStorePort:
-    resolved = store if store is not None else _injected_store
-    if resolved is None:
-        raise TypeError(
-            "Run-report writes require an injected RunReportStorePort. "
-            "Compose FileRunReportStoreAdapter at the composition root."
-        )
-    return resolved
 
 
 def _safe_segment(value: str) -> str:
@@ -107,11 +88,9 @@ def resolve_workflow_report_dir(
     )
 
 
-def _atomic_write_text(
-    path: Path, content: str, *, store: RunReportStorePort | None = None
-) -> None:
+def _atomic_write_text(path: Path, content: str, *, store: RunReportStorePort) -> None:
     """Atomically replace one UTF-8 text artifact through the store port."""
-    writer = _require_store(store)
+    writer = store
     writer.mkdir(str(path.parent))
     writer.write_text(str(path), content)
 
@@ -120,7 +99,7 @@ def write_json(
     path: Path,
     payload: Mapping[str, object],
     *,
-    store: RunReportStorePort | None = None,
+    store: RunReportStorePort,
 ) -> None:
     """Write deterministic JSON through an atomic same-directory replacement."""
     _atomic_write_text(
@@ -174,7 +153,7 @@ def write_pipeline_run_report(
     *,
     root: Path | None = None,
     directory: Path | None = None,
-    store: RunReportStorePort | None = None,
+    store: RunReportStorePort,
 ) -> RunReportWriteResult:
     """Write JSON + markdown pipeline run report artifacts and `_latest` pointer."""
     identity = report.identity
@@ -184,7 +163,7 @@ def write_pipeline_run_report(
         root=root,
     )
     out_dir = directory or resolved_dir
-    writer = _require_store(store)
+    writer = store
     writer.mkdir(str(out_dir))
     json_path = out_dir / "pipeline-run-report.json"
     md_path = out_dir / "pipeline-run-report.md"
@@ -229,7 +208,7 @@ def write_workflow_run_report(
     *,
     root: Path | None = None,
     directory: Path | None = None,
-    store: RunReportStorePort | None = None,
+    store: RunReportStorePort,
 ) -> RunReportWriteResult:
     """Write JSON + markdown workflow run report artifacts and `_latest` pointer."""
     identity = report.identity
@@ -239,7 +218,7 @@ def write_workflow_run_report(
         root=root,
     )
     out_dir = directory or resolved_dir
-    writer = _require_store(store)
+    writer = store
     writer.mkdir(str(out_dir))
     json_path = out_dir / "workflow-run-report.json"
     md_path = out_dir / "workflow-run-report.md"
