@@ -1,6 +1,6 @@
 """Check Gitleaks exception boundaries with the real pinned scanner.
 
-Run: python scripts/engineering/ci/check_gitleaks_false_positives.py --binary /path/to/gitleaks
+Run: python -m scripts.engineering.ci gitleaks-boundaries --binary /path/to/gitleaks
 No network requests are made; every input is synthetic or a documented dummy.
 """
 

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T11:34:05.719486+00:00",
+  "generated_at": "2026-09-07T15:41:40.722543+00:00",
   "summary": {
-    "total_scripts": 613,
+    "total_scripts": 614,
     "status_counts": {
-      "active": 338,
+      "active": 339,
       "supporting": 275
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 83,
       "docs": 252,
       "other": 75,
-      "scripts": 512,
+      "scripts": 513,
       "skills": 12,
       "tests": 425
     }
@@ -9590,7 +9590,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": ".github/workflows/import-linter.yml",
@@ -9817,7 +9817,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 44,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"apply-ci-fixes\": \"apply_ci_fixes.py\","
         },
@@ -9856,7 +9856,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "\"e2e-skip-rate\": \"check_e2e_matrix_skip_rate.py\","
         },
@@ -9895,7 +9895,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "\"e2e-rerun\": \"check_e2e_rerun_stability.py\","
         },
@@ -9920,7 +9920,7 @@
       ]
     },
     {
-      "path": "scripts/engineering/ci/check_neo4j_memory_live_audit.py",
+      "path": "scripts/engineering/ci/check_gitleaks_false_positives.py",
       "type": "py",
       "status": "active",
       "agent_usage": [],
@@ -9929,6 +9929,21 @@
         {
           "path": "scripts/engineering/ci/__main__.py",
           "line": 40,
+          "source_group": "scripts",
+          "text": "\"gitleaks-boundaries\": \"check_gitleaks_false_positives.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/ci/check_neo4j_memory_live_audit.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/ci/__main__.py",
+          "line": 42,
           "source_group": "scripts",
           "text": "\"neo4j-memory-live\": \"check_neo4j_memory_live_audit.py\","
         }
@@ -9943,7 +9958,7 @@
       "references": [
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "\"neo4j-memory\": \"check_neo4j_memory_ontology.py\","
         }
@@ -9964,7 +9979,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "\"pr-gate\": \"pr_gate.py\","
         },
@@ -9995,13 +10010,13 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 34,
+          "line": 35,
           "source_group": "scripts",
           "text": "\"quality-gate\": \"quality_integral_gate.py\","
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 35,
+          "line": 36,
           "source_group": "scripts",
           "text": "\"architecture-junit-skips\": \"quality_integral_gate.py\","
         },
@@ -10052,7 +10067,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 41,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"docker-timing\": \"report_docker_actions_timing.py\","
         },
@@ -10095,7 +10110,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 42,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"pr-gate-timing\": \"report_pr_gate_timing.py\","
         },
@@ -10132,7 +10147,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 43,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"debt-report\": \"report_quality_debt_weekly.py\","
         },
@@ -10177,7 +10192,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 33,
+          "line": 34,
           "source_group": "scripts",
           "text": "\"run-tests\": \"run_pytest_resilient.py\","
         },
@@ -10444,7 +10459,7 @@
         },
         {
           "path": "scripts/engineering/ci/__main__.py",
-          "line": 27,
+          "line": 28,
           "source_group": "scripts",
           "text": "from scripts.engineering.common.cli_dispatch import ("
         },

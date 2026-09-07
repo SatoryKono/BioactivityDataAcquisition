@@ -12,6 +12,7 @@ Commands:
     pr-gate         Classify and aggregate required PR checks
     e2e-skip-rate   Check E2E matrix skip rate against threshold
     e2e-rerun       Check E2E rerun stability
+    gitleaks-boundaries  Verify Gitleaks false-positive exception boundaries
     neo4j-memory    Check deterministic Neo4j memory ontology invariants
     neo4j-memory-live  Apply deterministic sync and validate live Neo4j drift
     docker-timing   Report Docker workflow timing and capacity evidence
@@ -36,6 +37,7 @@ COMMANDS = {
     "pr-gate": "pr_gate.py",
     "e2e-skip-rate": "check_e2e_matrix_skip_rate.py",
     "e2e-rerun": "check_e2e_rerun_stability.py",
+    "gitleaks-boundaries": "check_gitleaks_false_positives.py",
     "neo4j-memory": "check_neo4j_memory_ontology.py",
     "neo4j-memory-live": "check_neo4j_memory_live_audit.py",
     "docker-timing": "report_docker_actions_timing.py",
