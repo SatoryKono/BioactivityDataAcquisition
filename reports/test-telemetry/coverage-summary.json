@@ -1,11 +1,11 @@
 {
-  "source_branch": "fix/grafana-window-10163",
-  "source_commit": "36e26ee121a990707e565c63ba0a1970f5b274ca",
-  "source_run_id": "34103657627",
+  "source_branch": "fix/release-provenance-10136",
+  "source_commit": "1733977ef93c12b1d44acb30c0d670dbbf66a004",
+  "source_run_id": "34108317681",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34103657627",
-  "source_tree_sha256": "146e200108e995f562ec72146b53769a93a684cdc0cd4879a89f935777795fc6",
-  "refreshed_at_utc": "2026-09-07T09:10:15.789693+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34108317681",
+  "source_tree_sha256": "b0cfa74a5ee520595320dbd68409b7017180c0fc1d3589f020fe296c4cdafdd2",
+  "refreshed_at_utc": "2026-09-07T10:02:59.778588+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
