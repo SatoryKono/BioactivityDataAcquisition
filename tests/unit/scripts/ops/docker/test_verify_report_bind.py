@@ -1,5 +1,5 @@
 # pyright: reportArgumentType=false
-# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict.
+# PD5 test mock/fixture surface — product NewTypes/Ports stay strict.
 """Unit tests for verify_report_bind operator script."""
 
 from __future__ import annotations

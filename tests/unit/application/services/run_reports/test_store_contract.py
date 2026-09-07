@@ -57,3 +57,11 @@ def test_injected_stores_isolate_write_read_list_and_prune() -> None:
     assert [r.run_id for r in list_pipeline_reports(root=root, store=second)] == [
         "other"
     ]
+
+
+def test_memory_store_rejects_root_removal() -> None:
+    store = MemoryReportStore()
+    store.mkdir("reports")
+    with pytest.raises(ValueError):
+        store.remove_tree("reports", root="reports")
+    assert store.is_dir("reports")

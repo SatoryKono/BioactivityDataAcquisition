@@ -23,10 +23,10 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
     ObservabilityWorkflowServiceProtocol,
     RunManifestInspectionServiceProtocol,
 )
-from bioetl.composition import _services
+from bioetl.composition import _service_registry, _services
 from bioetl.composition.runtime_builders import config_access as _config_access
 from bioetl.domain.exceptions import MetricsServerError
-from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports import LoggerPort, RunReportStorePort
 
 _PUSHGATEWAY_FALLBACK = "localhost:9091"
 
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 __all__ = [
     "MetricsOperatorProfile",
     "ObservabilityDiagnosticsBundle",
+    "create_run_report_store",
     "delete_metrics_from_gateway",
     "get_audit_service",
     "get_checkpoint_service",
@@ -335,4 +336,11 @@ def get_observability_diagnostics_bundle() -> ObservabilityDiagnosticsBundle:
         run_manifest_service=get_run_manifest_service(),
         lineage_service=get_lineage_service(),
         workflow_service=get_observability_workflow_service(),
+    )
+
+
+def create_run_report_store() -> RunReportStorePort:
+    """Resolve a fresh report store for one explicit caller lifetime."""
+    return _service_registry.resolve(
+        _service_registry.typed_port[RunReportStorePort](RunReportStorePort)
     )

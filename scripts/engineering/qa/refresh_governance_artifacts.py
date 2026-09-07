@@ -388,12 +388,55 @@ def _run_refresh() -> None:
     )
 
 
+def _refresh_targeted_coverage_closeout() -> None:
+    """Revalidate targeted tests before rebinding their source-bound closeout."""
+    from defusedxml import ElementTree as ET
+
+    path = ROOT / "reports/quality/low-coverage-targeted-tests-6045.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    inventory = json.loads(
+        (ROOT / "reports/quality/module-coverage-inventory.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    digest = inventory["source_tree_sha256"]
+    if payload["module_coverage_inventory_source_tree_sha256"] == digest:
+        return
+    tests = sorted(
+        {p for row in payload["targeted_modules"] for p in row["targeted_tests"]}
+    )
+    junit = ROOT / "reports/quality/low-coverage-6045-revalidation.xml"
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        *tests,
+        "-q",
+        "--no-cov",
+        f"--junitxml={junit}",
+    ]
+    _run(command)
+    suites = ET.parse(junit).getroot().findall("testsuite")
+    if not suites or any(int(s.get("skipped", "0")) for s in suites):
+        raise SystemExit(
+            "Targeted coverage closeout requires executed, non-skipped tests"
+        )
+    payload["module_coverage_inventory_source_tree_sha256"] = digest
+    payload["validation"][0] = {
+        "command": "python -m pytest " + " ".join(tests) + " -q --no-cov",
+        "status": "pass",
+        "tests": sum(int(s.get("tests", "0")) for s in suites),
+    }
+    _write_text_atomically(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+
 def refresh(*, check_only: bool) -> None:
     """Refresh or verify governance artifacts in deterministic order."""
     if check_only:
         _run_check_only()
         return
     _run_refresh()
+    _refresh_targeted_coverage_closeout()
 
 
 def main(argv: list[str] | None = None) -> None:
