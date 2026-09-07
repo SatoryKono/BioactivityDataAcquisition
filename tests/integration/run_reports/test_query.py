@@ -38,7 +38,7 @@ import os
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 from datetime import UTC, datetime
 from pathlib import Path

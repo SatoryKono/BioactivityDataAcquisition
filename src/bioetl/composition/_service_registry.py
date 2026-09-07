@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from importlib import import_module
 from typing import cast
 
+from bioetl.domain.ports import RunReportStorePort
+
 from bioetl.composition.bootstrap.runtime_public_exports import (
     AdrServicePort,
     AuditInspectionServiceProtocol,
@@ -267,4 +269,11 @@ _register_lazy_contextual_factory(
     ),
     "bioetl.composition.bootstrap.cli.health",
     "bootstrap_health_server_dependencies",
+)
+
+
+_register_lazy_service(
+    typed_port[RunReportStorePort](RunReportStorePort),
+    "bioetl.infrastructure.storage.run_report_store_adapter",
+    "FileRunReportStoreAdapter",
 )
