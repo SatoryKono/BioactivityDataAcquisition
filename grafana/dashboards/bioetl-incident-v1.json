@@ -1536,7 +1536,7 @@
             "h": 5
           },
           "datasource": "BioETL Ops HTTP",
-          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning.",
+          "description": "SELECTED RUN · Compact pipeline_run_report_v1 projection (identity, times, gold out, contract exclusions, coverage). Missing run is VALID EMPTY / SELECT RUN, not OK. Set range to run opens 6. Run Explorer at started_at-5m .. <code style='font-size:16px'>completed_at</code>+5m. Do not treat CURRENT Prometheus as this UUID. Backend unavailable means the query could not be evaluated. Verify /health/live. Coverage chip is IN RANGE / OUT OF RANGE / UNKNOWN from covers_selected_run. Set range to run opens Run Explorer 3022 at from_ms..to_ms. A covered run does not show an outside-range warning. Status, coverage and local timestamps precede the UUID. Inspect the Run cell to copy its complete value; range-bound fields remain available to the Set range to run action and panel data inspection.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -1544,7 +1544,8 @@
                 "cellOptions": {
                   "type": "auto"
                 },
-                "inspect": true
+                "inspect": true,
+                "minWidth": 50
               },
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no report.",
@@ -1661,6 +1662,177 @@
               {
                 "matcher": {
                   "id": "byName",
+                  "options": "Started"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 152
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Completed"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:YYYY-MM-DD HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 152
+                  },
+                  {
+                    "id": "noValue",
+                    "value": "—"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 90
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": false
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Coverage"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 125
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text",
+                      "wrapText": false
+                    }
+                  },
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "value",
+                        "options": {
+                          "IN RANGE": {
+                            "text": "IN RANGE",
+                            "color": "green"
+                          },
+                          "OUT OF RANGE": {
+                            "text": "OUT OF RANGE",
+                            "color": "orange"
+                          },
+                          "UNKNOWN": {
+                            "text": "UNKNOWN",
+                            "color": "gray"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Gold"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 76
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Excluded"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 76
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "locale"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Run"
+                },
+                "properties": [
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  },
+                  {
+                    "id": "links",
+                    "value": []
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
                   "options": "from_ms"
                 },
                 "properties": [
@@ -1723,38 +1895,59 @@
           ],
           "transformations": [
             {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  {
+                    "targetField": "started_at",
+                    "destinationType": "time"
+                  },
+                  {
+                    "targetField": "completed_at",
+                    "destinationType": "time"
+                  }
+                ]
+              }
+            },
+            {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true,
                   "__name__": true,
-                  "Value": true
+                  "Value": true,
+                  "covers_selected_run": true,
+                  "coverage_offset": true,
+                  "set_range_to_run": true
                 },
                 "indexByName": {
-                  "run_id": 0,
-                  "status": 1,
+                  "status": 0,
+                  "coverage_chip": 1,
                   "started_at": 2,
                   "completed_at": 3,
                   "gold_records_out": 4,
                   "excluded_by_contract": 5,
-                  "covers_selected_run": 7,
-                  "coverage_offset": 8,
-                  "set_range_to_run": 9,
-                  "from_ms": 10,
-                  "to_ms": 11,
-                  "coverage_chip": 6
+                  "run_id": 6,
+                  "from_ms": 7,
+                  "to_ms": 8
                 },
                 "renameByName": {
-                  "coverage_chip": "coverage",
-                  "covers_selected_run": "covers_selected_run"
+                  "coverage_chip": "Coverage",
+                  "covers_selected_run": "covers_selected_run",
+                  "status": "Status",
+                  "started_at": "Started",
+                  "completed_at": "Completed",
+                  "gold_records_out": "Gold",
+                  "excluded_by_contract": "Excluded",
+                  "run_id": "Run"
                 }
               }
             }
           ],
           "links": [
             {
-              "title": "Set range to run",
-              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&viewPanel=3022&from=${__data.fields.from_ms}&to=${__data.fields.to_ms}",
+              "title": "Open Run Explorer",
+              "url": "/d/bioetl-run-explorer-v1/bioetl-run-explorer-v1?${workflow:queryparam}&${pipeline:queryparam}&${run_type:queryparam}&${run_id:queryparam}&${__url_time_range}",
               "targetBlank": false,
               "includeVars": false
             }

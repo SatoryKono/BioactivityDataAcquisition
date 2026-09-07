@@ -1056,7 +1056,9 @@ def test_dq_current_status_and_reasons_share_one_instant_snapshot() -> None:
     assert len(expression) <= 200
     assert "label_replace" not in expression
     no_value = str(reasons["fieldConfig"]["defaults"]["noValue"]).lower()
-    assert "valid only when current dq status is ok" in no_value
+    assert "reason evidence unavailable" in no_value
+    assert "No active reasons (OK)" in reasons["targets"][1]["expr"]
+    assert "Evidence unavailable (UNKNOWN)" in reasons["targets"][2]["expr"]
 
 
 def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:

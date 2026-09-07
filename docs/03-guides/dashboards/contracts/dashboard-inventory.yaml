@@ -161,7 +161,7 @@ dashboards:
         description: Current DQ violation reasons breakdown (NOW lane)
       - id: 8
         title: Monitor Worst Freshness Age
-        type: gauge
+        type: stat
         description: TIME RANGE freshness age in hours with WARN 24h and CRIT 72h
     selector_variables:
       - workflow
