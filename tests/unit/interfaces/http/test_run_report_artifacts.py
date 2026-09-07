@@ -60,6 +60,8 @@ def test_artifact_returns_original_format(
         ("../secret", "run-1", "pipeline_run_report_json"),
         ("chembl_assay", "../secret", "pipeline_run_report_json"),
         ("chembl_assay", "run-1", "../../.env"),
+        ("chembl assay", "run-1", "pipeline_run_report_json"),
+        ("chembl_assay", "run/1", "pipeline_run_report_md"),
     ],
 )
 def test_artifact_rejects_path_inputs(
@@ -84,6 +86,48 @@ def test_artifact_missing_is_explicit(report_root: Path) -> None:
         )
         is None
     )
+
+
+def _symlink_or_skip(link: Path, target: Path) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target.is_dir())
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 1314:
+            pytest.skip("Windows account cannot create symbolic links")
+        raise
+
+
+def test_artifact_rejects_run_directory_symlink_escape(report_root: Path) -> None:
+    confined = report_root / "confined"
+    link = confined / "pipeline" / "chembl_assay" / "run-1"
+    link.parent.mkdir(parents=True)
+    _symlink_or_skip(link, report_root / "pipeline" / "chembl_assay" / "run-1")
+    with pytest.raises(ValueError, match="outside the configured report root"):
+        load_pipeline_run_report_artifact(
+            pipeline="chembl_assay",
+            run_id="run-1",
+            artifact_format="pipeline_run_report_json",
+            root=confined,
+        )
+
+
+@pytest.mark.parametrize("extension", ["json", "md"])
+def test_artifact_rejects_file_symlink_escape(
+    report_root: Path, extension: str
+) -> None:
+    path = (
+        report_root / "pipeline/chembl_assay/run-1" / f"pipeline-run-report.{extension}"
+    )
+    outside = report_root / f"other-run-report.{extension}"
+    path.rename(outside)
+    _symlink_or_skip(path, outside)
+    with pytest.raises(ValueError, match="outside the selected run"):
+        load_pipeline_run_report_artifact(
+            pipeline="chembl_assay",
+            run_id="run-1",
+            artifact_format="pipeline_run_report_md",
+            root=report_root,
+        )
 
 
 def test_artifact_rejects_foreign_identity(report_root: Path) -> None:
