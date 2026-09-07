@@ -236,27 +236,7 @@ async def _build_identity_evidence_summary(
         ).get("summary")
         if not isinstance(identity_evidence_summary, dict):
             return None
-        if scope.selected_run_id is not None:
-            report = load_pipeline_run_report_payload(
-                run_id=scope.selected_run_id,
-                pipeline_name=scope.requested_pipeline,
-            )
-            identity = report.get("identity") if isinstance(report, dict) else None
-            if (
-                isinstance(identity, dict)
-                and str(identity.get("run_id")) == scope.selected_run_id
-            ):
-                for key in (
-                    "status",
-                    "started_at",
-                    "completed_at",
-                    "duration_seconds",
-                    "tracking_coverage",
-                ):
-                    if identity.get(key) not in (None, ""):
-                        identity_evidence_summary[
-                            "run_status" if key == "status" else key
-                        ] = identity[key]
+        identity_evidence_summary.update(_selected_report_summary(scope))
         return identity_evidence_summary
 
     try:
@@ -266,6 +246,38 @@ async def _build_identity_evidence_summary(
         )
     except TimeoutError:
         return None
+
+
+def _selected_report_summary(scope: _IdentityScope) -> dict[str, object]:
+    """Read summary fields only from the report for the exact selected run."""
+    if scope.selected_run_id is None:
+        return {}
+    pipeline = (
+        scope.resolved_manifest.pipeline_name
+        if scope.resolved_manifest
+        else scope.requested_pipeline
+    )
+    report = load_pipeline_run_report_payload(
+        run_id=scope.selected_run_id, pipeline_name=pipeline
+    )
+    identity = report.get("identity") if isinstance(report, dict) else None
+    if (
+        not isinstance(identity, dict)
+        or str(identity.get("run_id")) != scope.selected_run_id
+    ):
+        return {}
+    keys = (
+        "status",
+        "started_at",
+        "completed_at",
+        "duration_seconds",
+        "tracking_coverage",
+    )
+    return {
+        "run_status" if key == "status" else key: identity[key]
+        for key in keys
+        if identity.get(key) not in (None, "")
+    }
 
 
 def _identity_row_needs_timeout_value(

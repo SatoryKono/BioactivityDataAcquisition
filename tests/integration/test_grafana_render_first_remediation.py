@@ -433,6 +433,11 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
     control = _load("bioetl-control-plane-v1.json")
+    latency = _panel(control, 111)
+    assert latency["options"]["legend"]["showLegend"] is True
+    for target, quantile in zip(latency["targets"], ("p50", "p95", "p99"), strict=True):
+        assert "sum by (le, store, operation)" in target["expr"]
+        assert target["legendFormat"] == "{{store}} / {{operation}} · " + quantile
     # Expanded detail groups place identity panels under their section headers.
     assert _panel(control, 9404)["gridPos"]["y"] >= 0
     copy_panel = _panel(control, 9407)

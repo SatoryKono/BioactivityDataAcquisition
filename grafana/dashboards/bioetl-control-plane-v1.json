@@ -251,7 +251,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status.",
+      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status. Backend unavailable means QUERY ERROR, never VALID EMPTY.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3345,7 +3345,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "TIME RANGE · Shows p50, p95, and p99 read latency across all control-plane stores during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
+          "description": "TIME RANGE · Shows p50, p95, and p99 read latency for each control-plane store and operation during the selected range. Filters do not apply. No data means no latency samples were recorded in the selected range. TELEMETRY MISSING is not a zero and not VALID EMPTY.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3385,7 +3385,7 @@
             "x": 0,
             "y": 131,
             "w": 24,
-            "h": 7
+            "h": 11
           },
           "id": 111,
           "options": {
@@ -3402,18 +3402,18 @@
           },
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "All stores / all operations · p50",
+              "expr": "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "All stores / all operations · p95",
+              "expr": "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p95",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "All stores / all operations · p99",
+              "expr": "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+              "legendFormat": "{{store}} / {{operation}} · p99",
               "refId": "C"
             }
           ],

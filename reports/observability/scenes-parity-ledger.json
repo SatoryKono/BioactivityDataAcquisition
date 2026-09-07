@@ -20,7 +20,7 @@
     "round_trip_test": "src/kernel/contracts.test.ts"
   },
   "dashboard_sha256": {
-    "bioetl-control-plane-v1": "0d6c2617b71d51893f35a93ebce03e5a6935fa1129e48350506f6b32b23af278",
+    "bioetl-control-plane-v1": "88ed280969ec3a43c0f4d71ef53cb36d283afcb70f5eaf70b17b51ee94d80011",
     "bioetl-dq-v2": "68d0ed592b4f8371f2549ca2296960b3e8a5c81d95c4bf9379df13a7493b2603",
     "bioetl-incident-v1": "fff21c49c2d62c74fe91440e1d4d863dd3bde07cf9ca8fff9106f68b99c71fbe",
     "bioetl-overview-v2": "af2acc517d435ebe7409d5590da5b828ae3c90cbf30a3d1f5c96d2b2c33a29e1",
@@ -742,9 +742,9 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-          "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
+          "histogram_quantile(0.50, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.95, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
+          "histogram_quantile(0.99, sum by (le, store, operation) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))"
         ],
         "target_count": 3
       }

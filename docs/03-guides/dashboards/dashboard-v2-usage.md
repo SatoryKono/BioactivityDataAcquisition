@@ -792,8 +792,9 @@ Top Run Reasons и Run Artifacts различают отсутствие выб�
 недоступный отчёт (TELEMETRY MISSING), успешно загруженный пустой раздел
 (VALID EMPTY) и ошибку запроса (QUERY ERROR).
 
-Легенда Global Read Latency обозначает p50, p95 и p99 для всех хранилищ и
-операций вместе. Эти глобальные квантили не являются задержкой одного store.
+Легенда Global Read Latency обозначает store / operation и квантиль p50, p95
+или p99. Каждая линия относится к указанной паре хранилища и операции;
+панель охватывает все pipelines и не зависит от выбранного Run ID.
 
 1. `No data`:
    проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
