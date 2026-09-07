@@ -880,6 +880,16 @@ def _dashboard_source_error(
         return f"render manifest dashboard {uid} source SHA is invalid"
     if not isinstance(version, int):
         return f"render manifest dashboard {uid} version is missing"
+    expected_path = (_REPO_ROOT / _DASHBOARD_DIR / f"{uid}.json").resolve()
+    actual_path = (_REPO_ROOT / source_path).resolve()
+    if actual_path != expected_path:
+        return f"render manifest dashboard {uid} source path drift"
+    try:
+        actual_sha = _sha256(expected_path)
+    except OSError:
+        return f"render manifest dashboard {uid} source file is unreadable"
+    if actual_sha != source_sha:
+        return f"render manifest dashboard {uid} source SHA does not match checkout"
     return None
 
 
