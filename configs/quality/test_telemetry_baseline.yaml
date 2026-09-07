@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/dashboard-action-inspector
-refreshed_at_utc: '2026-09-07T16:36:51.081917+00:00'
+refreshed_at_utc: '2026-09-07T16:51:27.891713+00:00'
 refresh_status: captured
 source_commit: d4b469add22e1f8cb2753e72bea90d6c86da56cc
 source_run_id: '34143337205'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/ci/dashboard-five-issues/telemetry-d4b469/coverage/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/ci/dashboard-five-issues/telemetry-d4b469/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
