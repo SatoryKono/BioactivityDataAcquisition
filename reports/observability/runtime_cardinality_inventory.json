@@ -1700,11 +1700,12 @@
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l0_next_action_no_route": [
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l0_next_action_route": [
-      "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/metrics-readiness-matrix.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
