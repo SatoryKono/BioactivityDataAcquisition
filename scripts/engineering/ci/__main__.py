@@ -176,84 +176,79 @@ def _gitleaks_boundaries(argv: list[str]) -> int:
         )
     )
 
-    def main() -> int:
-        parser = argparse.ArgumentParser(
-            description="Check Gitleaks exception boundaries with the pinned scanner"
-        )
-        parser.add_argument("--binary", default=shutil.which("gitleaks"))
-        parser.add_argument("--config", type=Path, default=repo_root / ".gitleaks.toml")
-        parser.add_argument("--report", type=Path)
-        args = parser.parse_args(argv)
-        if not args.binary:
-            parser.error("gitleaks 8.24.3 is required; provide --binary")
-        binary = str(Path(args.binary).resolve())
-        config = args.config.resolve()
-        version = subprocess.run(
-            [binary, "version"], check=True, capture_output=True, text=True
-        ).stdout.strip()
-        if version != "8.24.3":
-            parser.error(f"expected Gitleaks 8.24.3, received {version}")
-        results = []
-        with tempfile.TemporaryDirectory(prefix="bioetl-gitleaks-probes-") as temporary:
-            base = Path(temporary).resolve()
-            for i, (name, path, content, expected) in enumerate(CASES):
-                root = base / str(i)
-                target = root / path
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(content, encoding="utf-8")
-                report = base / f"{i}.json"
-                run = subprocess.run(
-                    [
-                        binary,
-                        "dir",
-                        ".",
-                        "--config",
-                        str(config),
-                        "--redact",
-                        "--no-banner",
-                        "--report-format",
-                        "json",
-                        "--report-path",
-                        str(report),
-                    ],
-                    capture_output=True,
-                    cwd=root,
-                    check=False,
-                )
-                findings = (
-                    json.loads(report.read_text(encoding="utf-8"))
-                    if report.exists()
-                    else []
-                )
-                detected = bool(findings)
-                passed = detected == expected and run.returncode == int(expected)
-                results.append(
-                    {
-                        "name": name,
-                        "expected_detection": expected,
-                        "detected": detected,
-                        "exit_code": run.returncode,
-                        "passed": passed,
-                        "rules": sorted({f["RuleID"] for f in findings}),
-                    }
-                )
-                print(f"{name}: {'PASS' if passed else 'FAIL'}", flush=True)
-        result = {
-            "version": version,
-            "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
-            "passed": sum(r["passed"] for r in results),
-            "total": len(results),
-            "cases": results,
-        }
-        if args.report:
-            args.report.parent.mkdir(parents=True, exist_ok=True)
-            args.report.write_text(
-                json.dumps(result, indent=2) + "\n", encoding="utf-8"
+    parser = argparse.ArgumentParser(
+        description="Check Gitleaks exception boundaries with the pinned scanner"
+    )
+    parser.add_argument("--binary", default=shutil.which("gitleaks"))
+    parser.add_argument("--config", type=Path, default=repo_root / ".gitleaks.toml")
+    parser.add_argument("--report", type=Path)
+    args = parser.parse_args(argv)
+    if not args.binary:
+        parser.error("gitleaks 8.24.3 is required; provide --binary")
+    binary = str(Path(args.binary).resolve())
+    config = args.config.resolve()
+    version = subprocess.run(
+        [binary, "version"], check=True, capture_output=True, text=True
+    ).stdout.strip()
+    if version != "8.24.3":
+        parser.error(f"expected Gitleaks 8.24.3, received {version}")
+    results = []
+    with tempfile.TemporaryDirectory(prefix="bioetl-gitleaks-probes-") as temporary:
+        base = Path(temporary).resolve()
+        for i, (name, path, content, expected) in enumerate(CASES):
+            root = base / str(i)
+            target = root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+            report = base / f"{i}.json"
+            run = subprocess.run(
+                [
+                    binary,
+                    "dir",
+                    ".",
+                    "--config",
+                    str(config),
+                    "--redact",
+                    "--no-banner",
+                    "--report-format",
+                    "json",
+                    "--report-path",
+                    str(report),
+                ],
+                capture_output=True,
+                cwd=root,
+                check=False,
             )
-        print(f"Passed {result['passed']}/{result['total']}")
-        return int(not all(r["passed"] for r in results))
-
-    return main()
+            findings = (
+                json.loads(report.read_text(encoding="utf-8"))
+                if report.exists()
+                else []
+            )
+            detected = bool(findings)
+            passed = detected == expected and run.returncode == int(expected)
+            results.append(
+                {
+                    "name": name,
+                    "expected_detection": expected,
+                    "detected": detected,
+                    "exit_code": run.returncode,
+                    "passed": passed,
+                    "rules": sorted({f["RuleID"] for f in findings}),
+                }
+            )
+            print(f"{name}: {'PASS' if passed else 'FAIL'}", flush=True)
+    result = {
+        "version": version,
+        "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+        "passed": sum(r["passed"] for r in results),
+        "total": len(results),
+        "cases": results,
+    }
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(f"Passed {result['passed']}/{result['total']}")
+    return int(not all(r["passed"] for r in results))
 
 
 def main(argv: list[str] | None = None) -> int:
