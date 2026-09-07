@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: fix/windows-capacity-10184
-refreshed_at_utc: '2026-09-07T09:57:18.492349+00:00'
+refreshed_at_utc: '2026-09-07T10:12:08.649764+00:00'
 refresh_status: captured
 source_commit: 124a1ee76662e16aac55d021a902e66e64002665
 source_run_id: '34108089660'
@@ -13,10 +13,10 @@ freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
-  coverage_xml: reports/quality/issue-10184-inputs/coverage/coverage/coverage.xml
+  coverage_xml: reports/coverage/coverage.xml
   coverage_log: null
   coverage_percent_fallback: null
-  slowest_tests_json: reports/quality/issue-10184-inputs/duration/slowest-tests.json
+  slowest_tests_json: reports/test-telemetry/slowest-tests.json
   junit_inputs: []
 coverage:
   threshold_percent: 85.0
