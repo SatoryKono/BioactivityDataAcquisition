@@ -114,7 +114,6 @@ class TestProcessedRecordsTable:
                     value=non_finite,
                     bronze_value=100.0,
                     denominator="constant_100",
-                    percent_format="constant_100",
                 )
                 == "UNKNOWN"
             )
@@ -123,7 +122,6 @@ class TestProcessedRecordsTable:
                     value=non_finite,
                     bronze_value=100.0,
                     denominator="bronze",
-                    percent_format="fixed_1",
                 )
                 == "UNKNOWN"
             )
@@ -132,7 +130,6 @@ class TestProcessedRecordsTable:
                     value=1.0,
                     bronze_value=non_finite,
                     denominator="bronze",
-                    percent_format="trimmed_3",
                 )
                 == "UNKNOWN"
             )

@@ -61,7 +61,6 @@ __all__ = (
 )
 
 _Denominator = Literal["constant_100", "bronze"]
-_PercentFormat = Literal["constant_100", "fixed_1", "trimmed_3"]
 
 
 @dataclass(frozen=True)
@@ -71,7 +70,6 @@ class ProcessedRecordRowSpec:
     parameter: str
     metric: str
     denominator: _Denominator
-    percent_format: _PercentFormat
 
 
 PROCESSED_RECORDS_ROW_SPECS: tuple[ProcessedRecordRowSpec, ...] = (
@@ -79,67 +77,56 @@ PROCESSED_RECORDS_ROW_SPECS: tuple[ProcessedRecordRowSpec, ...] = (
         parameter="01 bronze_records",
         metric="bioetl_processed_records_bronze_current",
         denominator="constant_100",
-        percent_format="constant_100",
     ),
     ProcessedRecordRowSpec(
         parameter="02 silver_valid_records",
         metric="bioetl_processed_records_silver_valid_current",
         denominator="bronze",
-        percent_format="fixed_1",
     ),
     ProcessedRecordRowSpec(
         parameter="03 silver_filtered_out_records",
         metric="bioetl_processed_records_silver_filtered_out_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="04 silver_quarantined_records",
         metric="bioetl_processed_records_silver_quarantined_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="05 silver_skipped_records",
         metric="bioetl_processed_records_silver_skipped_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="06 silver_deduplicated_records",
         metric="bioetl_processed_records_silver_deduplicated_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="07 gold_written_records",
         metric="bioetl_processed_records_gold_written_current",
         denominator="bronze",
-        percent_format="fixed_1",
     ),
     ProcessedRecordRowSpec(
         parameter="08 gold_excluded_by_contract_records",
         metric="bioetl_processed_records_gold_excluded_by_contract_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="09 gold_quarantined_records",
         metric="bioetl_processed_records_gold_quarantined_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="10 gold_skipped_records",
         metric="bioetl_processed_records_gold_skipped_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
     ProcessedRecordRowSpec(
         parameter="11 gold_deduplicated_records",
         metric="bioetl_processed_records_gold_deduplicated_current",
         denominator="bronze",
-        percent_format="trimmed_3",
     ),
 )
 
@@ -336,12 +323,10 @@ def format_percentage(
     value: float | None,
     bronze_value: float | None,
     denominator: _Denominator,
-    percent_format: _PercentFormat,
 ) -> str:
     """Use one decimal minimum and up to three for every accounting share.
 
-    ``percent_format`` remains a compatibility input; row type no longer changes
-    precision. Missing values and undefined denominators remain UNKNOWN.
+    Missing values and undefined denominators remain UNKNOWN.
     """
     finite_value = _as_float(value)
     finite_bronze_value = _as_float(bronze_value)
