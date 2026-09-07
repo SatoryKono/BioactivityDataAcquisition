@@ -91,6 +91,13 @@ def build_control_plane_identity_evidence_payload(
         anchors=anchors,
         checkpoint_rows=checkpoint_compare["rows"],
     )
+    if resolved_manifest is None:
+        state = "SELECT RUN" if selected_run_id is None else "TELEMETRY MISSING"
+        for anchor in anchors:
+            anchor.update(ui_status=state, status=state, source_quality="unavailable")
+        summary["overall_status"] = state
+        if not rows:
+            rows = [{"label": "Run identity", "value_full": state, "ui_status": state}]
     return {
         "contract": IDENTITY_EVIDENCE_CONTRACT,
         "pipeline": requested_pipeline,
@@ -278,7 +285,7 @@ def build_anchor_row(
         checkpoint_status=checkpoint_status,
         applicable=applicable,
     )
-    rendered_ui_status = ui_status(domain_status)
+    rendered_ui_status = "N/A" if domain_status == "N/A" else ui_status(domain_status)
     value_short, value_full, copy_enabled, copy_mode, copy_value = _anchor_value_fields(
         value=value,
         present=present,
@@ -294,7 +301,9 @@ def build_anchor_row(
         "label": spec.label,
         "source": spec.source,
         "source_type": source_model.source_type,
-        "source_quality": source_model.source_quality,
+        "source_quality": source_model.source_quality
+        if present and applicable
+        else "unavailable",
         "format": spec.value_format,
         "why": spec.why,
         "rendering": spec.rendering,

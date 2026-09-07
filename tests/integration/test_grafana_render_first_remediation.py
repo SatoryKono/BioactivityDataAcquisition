@@ -768,7 +768,7 @@ def test_cycle4_named_text_columns_wrap_below_fold() -> None:
         ("bioetl-control-plane-v1.json", 9417, "reason"),
         ("bioetl-run-explorer-v1.json", 3014, "value"),
         ("bioetl-dq-v2.json", 118, "Pipeline"),
-        ("bioetl-control-plane-v1.json", 9404, "value_short"),
+        ("bioetl-control-plane-v1.json", 9404, "value_full"),
         ("bioetl-dq-v2.json", 156, "Pipeline"),
     )
     for dashboard_name, panel_id, field in cases:
@@ -1094,7 +1094,7 @@ def test_run_explorer_recent_runs_bind_run_id_via_data_link() -> None:
             if isinstance(prop, dict)
         )
     }
-    assert "Pipeline" in hidden
+    assert "Pipeline" not in hidden
     assert "run_type" in hidden
     target_url = str((first_screen.get("targets") or [{}])[0].get("url") or "")
     assert "run_id=${run_id}" in target_url
@@ -1138,10 +1138,11 @@ def test_run_explorer_selected_run_details_row_nests_forensics() -> None:
     assert int(identity_grid.get("h") or 0) >= 14
     assert int(records_grid.get("h") or 0) >= 14
     assert int(records_grid.get("w") or 0) == int(reasons_grid.get("w") or 0)
-    assert int(identity_grid.get("w") or 0) + int(records_grid.get("w") or 0) == 24
-    assert int(funnel_grid.get("w") or 0) + int(reasons_grid.get("w") or 0) == 24
-    assert funnel_grid.get("y") == reasons_grid.get("y")
-    assert int(timings_grid.get("h") or 0) <= 4
+    assert identity_grid["w"] == records_grid["w"] == 24
+    assert records_grid["y"] >= identity_grid["y"] + identity_grid["h"]
+    assert funnel_grid["w"] == reasons_grid["w"] == 24
+    assert reasons_grid["y"] >= funnel_grid["y"] + funnel_grid["h"]
+    assert timings_grid["w"] == 24
 
     # Forensics must not remain as root siblings.
     root_ids = {panel.get("id") for panel in explorer.get("panels") or []}
@@ -1197,7 +1198,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     explorer = _load("bioetl-run-explorer-v1.json")
     recent = _panel(explorer, 3010)
     assert _override_width(recent, "selected") == 36
-    assert (_override_width(recent, "Workflow") or 0) == 72
+    assert (_override_width(recent, "^(workflow_id|Workflow)$") or 0) == 118
     assert (_override_width(recent, "Run") or 0) <= 340
     hidden = {
         str((item.get("matcher") or {}).get("options"))
@@ -1209,7 +1210,7 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
             if isinstance(prop, dict)
         )
     }
-    assert "Pipeline" in hidden
+    assert "Pipeline" not in hidden
     assert "run_type" in hidden
     assert "message" in hidden
     grid = recent.get("gridPos") or {}
@@ -1232,7 +1233,7 @@ def test_run_explorer_funnel_removals_empty_is_emdash_not_valid_empty() -> None:
     defaults = str(
         (funnel.get("fieldConfig") or {}).get("defaults", {}).get("noValue") or ""
     )
-    assert defaults.startswith("VALID EMPTY")
+    assert "SELECT RUN" in defaults and "VALID EMPTY" in defaults
     assert _override_novalue(funnel, "Removals") == "—"
     assert (_override_width(funnel, "Removals") or 0) >= 280
 
@@ -1383,8 +1384,8 @@ def test_cycle5_wrap_text_columns_restore_declared_widths() -> None:
             "bioetl-control-plane-v1.json",
             9418,
             12,
-            "reasons_text",
-            150,
+            "reasons_count",
+            80,
             "trust_status",
         ),
         ("bioetl-control-plane-v1.json", 9416, 12, "reason", 150, "status"),

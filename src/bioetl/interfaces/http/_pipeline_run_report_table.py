@@ -96,7 +96,7 @@ def _empty_pipeline_run_report_shell(
     message: str,
 ) -> dict[str, object]:
     """Empty report shell for Grafana table root_selectors (no QUERY_ERROR)."""
-    return {
+    payload: dict[str, object] = {
         "status": status,
         "message": message,
         "run_id": run_id,
@@ -113,6 +113,14 @@ def _empty_pipeline_run_report_shell(
         "timings_and_failure": [],
         "schema_version": "pipeline_run_report_v1",
     }
+    state = "SELECT RUN" if status == "unresolved_scope" else "TELEMETRY MISSING"
+    for key, label in (
+        ("funnel", "stage_id"),
+        ("reasons_top_n", "reason_code"),
+        ("artifacts", "kind"),
+    ):
+        payload[f"{key}_display"] = [{label: state, "message": message}]
+    return payload
 
 
 def _unresolved_pipeline_run_report_shell(
@@ -291,6 +299,12 @@ def _table_shape_pipeline_run_report(
     _shape_object_or_list_block(payload, shaped, "stage_timings")
     shaped["identity_rows"] = _shape_identity_rows(payload)
     shaped["funnel"] = _shape_funnel_rows(payload)
+    for key, label in (
+        ("funnel", "stage_id"),
+        ("reasons_top_n", "reason_code"),
+        ("artifacts", "kind"),
+    ):
+        shaped.setdefault(f"{key}_display", shaped.get(key) or [{label: "VALID EMPTY"}])
     shaped["timings_and_failure"] = [
         *_section_param_value_rows("failure", shaped.get("failure")),
         *_section_param_value_rows("stage_timings", shaped.get("stage_timings")),

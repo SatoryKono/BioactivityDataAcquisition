@@ -251,7 +251,7 @@
         "y": 7
       },
       "datasource": "BioETL Ops HTTP",
-      "description": "SELECTED RUN HTTP trust summary on the first screen. processing_status is the data-processing outcome; trust_status is fail-closed exact-run evidence (INCOMPLETE/ERROR/UNKNOWN are not OK). First screen shows evidence freshness plus top-3 trust.reasons_text (newline-joined); the full reason list stays in rows / panel 9414. Scope is exact_run when run_id resolves. Valid empty means no selected exact-run payload; backend unavailable is not a health verdict. SELECT RUN / VALID EMPTY is not OK.",
+      "description": "SELECTED RUN · Processing outcome, fail-closed Trust verdict and total Reasons remain visible together. Select Reasons to inspect the full evidence in panel 9414; full reasons also remain in table inspection. INCOMPLETE / UNKNOWN is not OK. SELECT RUN / VALID EMPTY is not OK. Processing is processing_status; Trust is trust_status.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -266,40 +266,6 @@
           "links": []
         },
         "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "processing_status"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 72
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "trust_status"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": false
-                }
-              }
-            ]
-          },
           {
             "matcher": {
               "id": "byName",
@@ -327,33 +293,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "reasons_text"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "reasons"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              },
-              {
-                "id": "custom.inspect",
-                "value": true
-              },
-              {
-                "id": "custom.width",
-                "value": 150
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "evidence_observed_at"
             },
             "properties": [
@@ -364,6 +303,91 @@
               {
                 "id": "custom.hidden",
                 "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "processing_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Processing"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trust_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Trust"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_text"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "reasons_count"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reasons"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Inspect all trust reasons",
+                    "url": "/d/bioetl-control-plane-v1/0-trust?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=${run_type:csv}&var-run_id=$run_id&viewPanel=9414&${__url_time_range}",
+                    "targetBlank": false,
+                    "includeVars": false
+                  }
+                ]
               }
             ]
           }
@@ -423,8 +447,9 @@
             "indexByName": {
               "processing_status": 0,
               "trust_status": 1,
-              "reasons_text": 2,
-              "evidence_observed_at": 3
+              "reasons_count": 2,
+              "reasons_text": 3,
+              "evidence_observed_at": 4
             },
             "renameByName": {}
           }
@@ -3368,7 +3393,7 @@
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": false
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
@@ -3378,17 +3403,17 @@
           "targets": [
             {
               "expr": "histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p50",
+              "legendFormat": "All stores / all operations · p50",
               "refId": "A"
             },
             {
               "expr": "histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p95",
+              "legendFormat": "All stores / all operations · p95",
               "refId": "B"
             },
             {
               "expr": "histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!=\"failed\"}[$__range])))",
-              "legendFormat": "p99",
+              "legendFormat": "All stores / all operations · p99",
               "refId": "C"
             }
           ],
@@ -4110,12 +4135,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4126,23 +4235,156 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto",
-                      "wrapText": true
-                    }
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "copy"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
                 },
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
                   }
                 ]
               },
@@ -4153,11 +4395,35 @@
                 },
                 "properties": [
                   {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
                     "id": "custom.cellOptions",
                     "value": {
                       "type": "auto",
                       "wrapText": true
                     }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4167,7 +4433,7 @@
             "x": 0,
             "y": 207,
             "w": 24,
-            "h": 4
+            "h": 18
           },
           "id": 9404,
           "options": {
@@ -4199,42 +4465,14 @@
               "id": "organize",
               "options": {
                 "excludeByName": {
-                  "Time": true,
-                  "__name__": true,
-                  "Value": true,
-                  "copy_value": true,
-                  "format": true,
-                  "rendering": true,
-                  "why": true
+                  "Time": true
                 },
                 "indexByName": {
                   "label": 0,
-                  "value_short": 1,
-                  "value_full": 2,
-                  "ui_status": 3,
-                  "missing_severity": 4,
-                  "source_type": 5,
-                  "source_quality": 6,
-                  "drilldown_type": 7,
-                  "drilldown_target": 8,
-                  "drilldown": 9
+                  "value_full": 1,
+                  "ui_status": 2
                 },
-                "renameByName": {
-                  "drilldown": "drilldown",
-                  "drilldown_target": "drilldown target",
-                  "drilldown_type": "drilldown type",
-                  "label": "anchor",
-                  "missing_severity": "severity",
-                  "source_quality": "source quality",
-                  "source_type": "source type",
-                  "ui_status": "status",
-                  "value_full": "full value",
-                  "value_short": "short value",
-                  "Value": "Count",
-                  "Value #A": "Series A",
-                  "Value #B": "Series B",
-                  "Value #C": "Series C"
-                }
+                "renameByName": {}
               }
             }
           ],
@@ -4252,14 +4490,6 @@
                 },
                 "inspect": true
               },
-              "links": [
-                {
-                  "includeVars": false,
-                  "targetBlank": true,
-                  "title": "Open full value as plain text",
-                  "url": "data:text/plain,${__data.fields.copy_value}"
-                }
-              ],
               "unit": "none",
               "noValue": "SELECT RUN — no exact Run ID selected. Choose a run first. VALID EMPTY if the selected run has no identity."
             },
@@ -4267,12 +4497,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4283,41 +4597,32 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Count"
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "value"
+                  "options": "copy"
                 },
                 "properties": [
                   {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4328,15 +4633,159 @@
                 },
                 "properties": [
                   {
-                    "id": "links",
-                    "value": [
-                      {
-                        "title": "Copy/Open full value (plain text)",
-                        "url": "data:text/plain,${__value.raw}",
-                        "targetBlank": true,
-                        "includeVars": false
-                      }
-                    ]
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4344,9 +4793,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 211,
+            "y": 225,
             "w": 24,
-            "h": 4
+            "h": 30
           },
           "id": 9407,
           "options": {
@@ -4380,7 +4829,13 @@
               "options": {
                 "excludeByName": {
                   "Time": true
-                }
+                },
+                "indexByName": {
+                  "label": 0,
+                  "value_full": 1,
+                  "ui_status": 2
+                },
+                "renameByName": {}
               }
             }
           ]
@@ -4399,7 +4854,7 @@
           "description": "Shown when no identity rows are returned. This can mean no matching run, unresolved scope, or an unavailable backend; it is not a critical verdict by itself.",
           "gridPos": {
             "x": 0,
-            "y": 215,
+            "y": 255,
             "w": 12,
             "h": 4
           },
@@ -4428,7 +4883,7 @@
           "description": "Shown when no processed-record rows are returned. This can mean no activity, a run that has not started, unresolved scope, or an unavailable backend.",
           "gridPos": {
             "x": 12,
-            "y": 215,
+            "y": 255,
             "w": 12,
             "h": 4
           },
@@ -4464,12 +4919,96 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "status"
+                  "options": "priority"
                 },
                 "properties": [
                   {
-                    "id": "custom.width",
-                    "value": 110
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "source_quality"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "format"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "why"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "rendering"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
@@ -4480,22 +5019,195 @@
                 },
                 "properties": [
                   {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "auto"
-                    }
+                    "id": "custom.hidden",
+                    "value": true
                   }
                 ]
               },
               {
                 "matcher": {
-                  "id": "byRegexp",
-                  "options": "^(Value|#Value|Value \\(.*\\)|value|Value #.*)$"
+                  "id": "byName",
+                  "options": "copy"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_mode"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "copy_value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_type"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_target"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "drilldown_label"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "missing_severity"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "identity_gap"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "present"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "status"
+                },
+                "properties": [
+                  {
+                    "id": "custom.hidden",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "label"
                 },
                 "properties": [
                   {
                     "id": "displayName",
-                    "value": "Count"
+                    "value": "Anchor"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value_full"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Value"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "auto",
+                      "wrapText": true
+                    }
+                  },
+                  {
+                    "id": "custom.inspect",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "ui_status"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "State"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 160
                   }
                 ]
               }
@@ -4503,9 +5215,9 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 219,
-            "w": 12,
-            "h": 4
+            "y": 259,
+            "w": 24,
+            "h": 18
           },
           "id": 9405,
           "options": {
@@ -4539,7 +5251,13 @@
               "options": {
                 "excludeByName": {
                   "Time": true
-                }
+                },
+                "indexByName": {
+                  "label": 0,
+                  "value_full": 1,
+                  "ui_status": 2
+                },
+                "renameByName": {}
               }
             }
           ]
@@ -4602,7 +5320,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 219,
+            "y": 273,
             "w": 12,
             "h": 4
           },
@@ -4701,7 +5419,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 223,
+            "y": 277,
             "w": 12,
             "h": 4
           },
@@ -4800,7 +5518,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 223,
+            "y": 277,
             "w": 12,
             "h": 4
           },
@@ -4844,7 +5562,7 @@
         {
           "gridPos": {
             "x": 0,
-            "y": 227,
+            "y": 281,
             "w": 24,
             "h": 4
           },
@@ -4879,7 +5597,7 @@
           "title": "Review Run Summary",
           "gridPos": {
             "x": 0,
-            "y": 232,
+            "y": 286,
             "w": 18,
             "h": 6
           },
@@ -5030,7 +5748,7 @@
           "title": "Review Processed Records",
           "gridPos": {
             "x": 18,
-            "y": 232,
+            "y": 286,
             "w": 6,
             "h": 6
           },
@@ -5430,7 +6148,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 238,
+            "y": 292,
             "w": 24,
             "h": 6
           },
