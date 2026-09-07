@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-07T17:19:24.266555+00:00",
+  "generated_at": "2026-09-07T19:21:13.040567+00:00",
   "summary": {
     "total_scripts": 613,
     "status_counts": {
@@ -20007,7 +20007,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/01-requirements/DASHBOARD_REQUIREMENTS.md",
@@ -20046,16 +20046,16 @@
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
-          "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 25,
+          "path": "tests/unit/scripts/ops/observability/test_grafana_acceptance_provenance.py",
+          "line": 10,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 134,
+          "line": 26,
           "source_group": "tests",
-          "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
+          "text": "from scripts.ops.observability.grafana import ("
         }
       ]
     },
@@ -20123,7 +20123,7 @@
       "references": [
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 685,
+          "line": 697,
           "source_group": "scripts",
           "text": "from scripts.ops.observability.grafana.dashboard_state_fixture_v2 import ("
         },
@@ -20417,7 +20417,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": "docs/03-guides/dashboards/archive/audit-protocols/dux5-screenshot-regression-protocol.md",
@@ -20496,13 +20496,13 @@
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 31,
+          "line": 32,
           "source_group": "tests",
           "text": "from scripts.ops.observability.grafana import ("
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 924,
+          "line": 929,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -20641,13 +20641,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1510,
+          "line": 1565,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 1597,
+          "line": 1652,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -22351,7 +22351,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 445,
+          "line": 447,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/load_repo_env.sh or pass --username/--password \""
         },
