@@ -650,10 +650,10 @@ def _assert_identity_evidence_panel(panels: dict, title: str, view: str) -> None
 
 def _assert_scoped_control_plane_nav_link(title: str, link: dict) -> None:
     url = str(link.get("url", ""))
-    assert "var-workflow=$workflow" in url
-    assert "var-pipeline=$pipeline" in url
-    assert "var-run_type=$run_type" in url
-    assert "var-run_id=$run_id" in url
+    assert "${workflow:queryparam}" in url
+    assert "${pipeline:queryparam}" in url
+    assert "${run_type:queryparam}" in url
+    assert "${run_id:queryparam}" in url
     assert "${__url_time_range}" in url
 
 

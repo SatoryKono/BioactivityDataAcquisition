@@ -425,7 +425,7 @@ def test_provider_and_workflow_scope_are_explicit() -> None:
         "var-provider=unknown" in str(link.get("url", "")) for link in provider_links
     )
     assert any(
-        "var-pipeline_context=$pipeline" in str(link.get("url", ""))
+        "var-pipeline_context=${pipeline:percentencode}" in str(link.get("url", ""))
         for link in provider_links
     )
 
