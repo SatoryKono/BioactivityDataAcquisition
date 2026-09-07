@@ -51,7 +51,7 @@ from bioetl.domain.workflow import (
 )
 
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.integration
 
 
 def test_plan_steps_from_config_reads_typed_step_fields() -> None:
