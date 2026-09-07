@@ -28,7 +28,7 @@ def assert_processed_records_field_overrides(
     assert value_properties["noValue"] == "UNKNOWN"
     assert value_properties["custom.cellOptions"] == {"type": "color-text"}
     assert value_properties.get("mappings", []) == []
-    assert "color" not in value_properties
+    assert value_properties["color"] == {"mode": "fixed", "fixedColor": "text"}
     assert "thresholds" not in value_properties
     assert "decimals" not in value_properties
 
@@ -46,7 +46,7 @@ def assert_processed_records_field_overrides(
     assert percentage_properties["noValue"] == "UNKNOWN"
     assert percentage_properties["custom.cellOptions"] == {"type": "color-text"}
     assert percentage_properties.get("mappings", []) == []
-    assert "color" not in percentage_properties
+    assert percentage_properties["color"] == {"mode": "fixed", "fixedColor": "text"}
     assert "thresholds" not in percentage_properties
 
     row_status_overrides = [

@@ -114,7 +114,6 @@ class TestProcessedRecordsTable:
                     value=non_finite,
                     bronze_value=100.0,
                     denominator="constant_100",
-                    percent_format="constant_100",
                 )
                 == "UNKNOWN"
             )
@@ -123,7 +122,6 @@ class TestProcessedRecordsTable:
                     value=non_finite,
                     bronze_value=100.0,
                     denominator="bronze",
-                    percent_format="fixed_1",
                 )
                 == "UNKNOWN"
             )
@@ -132,13 +130,12 @@ class TestProcessedRecordsTable:
                     value=1.0,
                     bronze_value=non_finite,
                     denominator="bronze",
-                    percent_format="trimmed_3",
                 )
                 == "UNKNOWN"
             )
 
-    def test_payload_formats_row_specific_percentage_precision(self) -> None:
-        """Primary rows keep one decimal while zero-valued outcomes stay visible."""
+    def test_payload_formats_consistent_percentage_precision(self) -> None:
+        """All rows use the same precision while zero-valued outcomes stay visible."""
         payload = build_processed_records_table_payload(
             metric_values=self._SAMPLE_VALUES,
             pipeline="chembl_activity",
@@ -171,17 +168,17 @@ class TestProcessedRecordsTable:
         assert rows["09 gold_quarantined_records"]["row_status"] == "gold_deficit"
         assert rows["10 gold_skipped_records"]["row_status"] == "gold_deficit"
         assert rows["11 gold_deduplicated_records"]["row_status"] == ("gold_deficit")
-        assert rows["01 bronze_records"]["percentage"] == "100%"
-        assert rows["02 silver_valid_records"]["percentage"] == ("91.0%")
+        assert rows["01 bronze_records"]["percentage"] == "100.0%"
+        assert rows["02 silver_valid_records"]["percentage"] == ("91.02%")
         assert rows["03 silver_filtered_out_records"]["percentage"] == ("8.51%")
         assert rows["04 silver_quarantined_records"]["percentage"] == ("0.47%")
-        assert rows["07 gold_written_records"]["percentage"] == "90.1%"
-        assert rows["05 silver_skipped_records"]["percentage"] == ("0%")
-        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0%")
-        assert rows["08 gold_excluded_by_contract_records"]["percentage"] == ("0%")
-        assert rows["09 gold_quarantined_records"]["percentage"] == ("0%")
-        assert rows["10 gold_skipped_records"]["percentage"] == ("0%")
-        assert rows["11 gold_deduplicated_records"]["percentage"] == ("0%")
+        assert rows["07 gold_written_records"]["percentage"] == "90.09%"
+        assert rows["05 silver_skipped_records"]["percentage"] == ("0.0%")
+        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0.0%")
+        assert rows["08 gold_excluded_by_contract_records"]["percentage"] == ("0.0%")
+        assert rows["09 gold_quarantined_records"]["percentage"] == ("0.0%")
+        assert rows["10 gold_skipped_records"]["percentage"] == ("0.0%")
+        assert rows["11 gold_deduplicated_records"]["percentage"] == ("0.0%")
         assert all("percintage" not in row for row in payload["rows"])
         assert len(payload["rows"]) == 11
         assert all("__zero" not in str(row["parameter"]) for row in payload["rows"])
@@ -385,7 +382,7 @@ class TestProcessedRecordsTable:
         rows = {row["parameter"]: row for row in payload["rows"]}
         assert rows["02 silver_valid_records"]["value"] == " 5"
         assert rows["06 silver_deduplicated_records"]["value"] == (" 0")
-        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0%")
+        assert rows["06 silver_deduplicated_records"]["percentage"] == ("0.0%")
 
     def test_exact_run_payload_uses_run_ledger_artifacts_as_source_of_truth(
         self,
@@ -500,8 +497,8 @@ class TestProcessedRecordsTable:
         assert rows["03 silver_filtered_out_records"]["value"] == ("   851")
         assert rows["02 silver_valid_records"]["row_status"] == ""
         assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
-        assert rows["02 silver_valid_records"]["percentage"] == "91.0%"
-        assert rows["07 gold_written_records"]["percentage"] == "90.1%"
+        assert rows["02 silver_valid_records"]["percentage"] == "91.02%"
+        assert rows["07 gold_written_records"]["percentage"] == "90.09%"
         assert rows["05 silver_skipped_records"]["value"] == ("     0")
         assert rows["11 gold_deduplicated_records"]["value"] == ("     0")
 
