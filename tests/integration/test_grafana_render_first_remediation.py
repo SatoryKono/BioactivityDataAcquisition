@@ -1558,5 +1558,6 @@ def test_incident_main_columns_hide_future_service_labels_but_keep_inspect() -> 
         "Object",
         "Signal",
         "Action",
+        "Details",
         "Domain",
     }
