@@ -64,6 +64,7 @@ from bioetl.application.services.execution.pipeline_runner_service import (
 )
 
 
+@pytest.mark.unit
 def test_composed_run_id_factory_accepts_string_uuid() -> None:
     from bioetl.application.services.execution.pipeline_runner_service import (
         _resolve_effective_run_id,
@@ -78,6 +79,7 @@ def test_composed_run_id_factory_accepts_string_uuid() -> None:
     )
 
 
+@pytest.mark.unit
 def test_missing_run_id_factory_fails_with_composition_diagnostic() -> None:
     from bioetl.application.services.execution.pipeline_runner_service import (
         _missing_run_id_factory,

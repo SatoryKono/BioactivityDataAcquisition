@@ -437,6 +437,7 @@ class TestBootstrapCompositeRunner:
         assert infra_context.run_id == "effective-rid"
 
 
+@pytest.mark.unit
 def test_pipeline_run_id_factory_uses_pipeline_occurrence_kind(monkeypatch) -> None:
     from uuid import UUID
     from unittest.mock import Mock
