@@ -781,6 +781,7 @@ def test_capacity_uses_maximum_of_50_gib_and_20_percent(
     expect_disk_error: bool,
 ) -> None:
     preflight = _load_preflight()
+    monkeypatch.setattr(preflight.platform, "system", lambda: "Linux")
     usage = namedtuple("usage", "total used free")
     contract = {
         "capacity": {
@@ -924,6 +925,7 @@ def test_preflight_command_surface_is_read_only_and_secret_safe() -> None:
         ("docker", "ps"),
         ("wsl.exe", "--status"),
         ("wsl.exe", "--version"),
+        preflight._DESKTOP_CAPACITY_COMMAND,
     }
     assert preflight.READ_ONLY_COMMANDS == allowed_verbs
     assert "docker compose up" not in PREFLIGHT_PATH.read_text(encoding="utf-8")
