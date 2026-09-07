@@ -16,6 +16,7 @@ from html import unescape
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import yaml
@@ -1220,6 +1221,26 @@ def test_run_explorer_recent_runs_selected_column_fits_first_window() -> None:
     assert (recent.get("transformations") or [{}])[0].get("options", {}).get(
         "limitField"
     ) == 10
+
+
+def test_workflow_run_report_link_uses_workflow_identifier_contract() -> None:
+    """Workflow reports require workflow_run_id, not the pipeline run_id key."""
+    panel = _panel(_load("bioetl-run-explorer-v1.json"), 3020)
+    run_override = next(
+        item
+        for item in panel["fieldConfig"]["overrides"]
+        if item["matcher"].get("options") == "Run"
+    )
+    links = next(
+        prop["value"] for prop in run_override["properties"] if prop["id"] == "links"
+    )
+    report_url = next(
+        link["url"] for link in links if "/workflow-run-report?" in link["url"]
+    )
+    assert parse_qs(urlsplit(report_url).query) == {
+        "workflow": ["${__data.fields.Workflow}"],
+        "workflow_run_id": ["${__value.raw}"],
+    }
 
 
 def test_run_explorer_funnel_removals_empty_is_emdash_not_valid_empty() -> None:

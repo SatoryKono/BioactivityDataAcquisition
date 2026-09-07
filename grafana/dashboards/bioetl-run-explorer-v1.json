@@ -1716,7 +1716,7 @@
                     "value": [
                       {
                         "title": "Open workflow run report",
-                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/workflow-run-report?workflow=${__data.fields.Workflow}&run_id=${__value.raw}",
+                        "url": "/api/datasources/proxy/uid/bioetl-ops-http/ops/observability/workflow-run-report?workflow=${__data.fields.Workflow}&workflow_run_id=${__value.raw}",
                         "targetBlank": true
                       }
                     ]
