@@ -104,6 +104,11 @@ jobs:
         python-version: ["3.13"]
 
     steps:
+      - name: Checkout dependency lock
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5
         with:
@@ -119,6 +124,13 @@ jobs:
         with:
           name: dist
           path: dist/
+
+      - name: Install locked runtime dependencies
+        run: |
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt \
+            --output-file "${RUNNER_TEMP}/runtime-requirements.txt"
+          python -c "import subprocess,sys; subprocess.check_call(['uv','pip','install','--system','--require-hashes','--only-binary=:all:','-r',sys.argv[1]])" \
+            "${RUNNER_TEMP}/runtime-requirements.txt"
 
       - name: Install from wheel
         run: |
@@ -151,7 +163,7 @@ jobs:
         run: |
           # Check that bioetl CLI is properly installed
           which bioetl
-          bioetl --version || echo "Version command not implemented"
+          bioetl --version
 
   security-gate:
     name: Same-SHA security scans

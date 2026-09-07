@@ -1,11 +1,11 @@
 {
   "source_branch": "fix/dashboard-navigation-five-issues",
-  "source_commit": "d4733848be9b69f07278d2f2be0fa1c346c2c8ec",
-  "source_run_id": "34124972115",
+  "source_commit": "52804b52774d36d8aabffab59ad2951da1a7a65e",
+  "source_run_id": "34125906418",
   "source_event": "pull_request",
-  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34124972115",
-  "source_tree_sha256": "837d6d914ef89694bdb2d2fab8b90dbcd0cb9c3e748fa4df0ecf29f9610823f9",
-  "refreshed_at_utc": "2026-09-07T13:09:23.344463+00:00",
+  "source_run_url": "https://github.com/SatoryKono/BioactivityDataAcquisition/actions/runs/34125906418",
+  "source_tree_sha256": "0fc385c40239f27256b7260735467e87307e8f2eead55a3e1f4eaf6058477f7c",
+  "refreshed_at_utc": "2026-09-07T13:55:21.171974+00:00",
   "refresh_status": "captured",
   "coverage_percent": 96.71,
   "coverage": {
