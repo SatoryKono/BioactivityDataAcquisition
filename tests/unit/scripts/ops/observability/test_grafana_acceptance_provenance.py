@@ -15,6 +15,45 @@ from scripts.ops.observability.grafana import rerender_grafana_screenshots as re
 pytestmark = pytest.mark.unit
 
 
+def test_partial_render_preserves_success_and_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    config = rerender._parse_args(
+        ["--output-dir", str(tmp_path), "--occurrence-id", "partial-test"]
+    )
+    records = [
+        rerender.DashboardRecord(uid=uid, title=uid, url="/d/" + uid)
+        for uid in ("bioetl-runtime", "bioetl-dq-v2", "bioetl-overview-v2")
+    ]
+    monkeypatch.setattr(rerender, "_load_dashboards", lambda _: records)
+    visited = []
+
+    def capture(cfg):
+        uid = cfg.selected_uids[0]
+        visited.append(uid)
+        failed = uid == "bioetl-dq-v2"
+        return int(failed), {
+            "dashboards": [
+                {
+                    "uid": uid,
+                    "file": uid + ".png",
+                    "renderStatus": "error" if failed else "rendered",
+                }
+            ],
+            "terminal_state_validation": {"status": "error" if failed else "ok"},
+        }
+
+    monkeypatch.setattr(rerender, "_run_playwright_with_retry", capture)
+    assert rerender._run_playwright_fallback(config) == 1
+    manifest = json.loads((tmp_path / "render-manifest.json").read_text())
+    assert len(visited) == 3
+    assert len(manifest["dashboards"]) == 3
+    assert manifest["terminal_state_validation"]["status"] == "error"
+    assert {d["uid"]: d["renderStatus"] for d in manifest["dashboards"]}[
+        "bioetl-dq-v2"
+    ] == "error"
+
+
 def test_explicit_occurrence_cannot_overwrite_evidence(tmp_path: Path) -> None:
     image = tmp_path / "bioetl-runtime.png"
     image.write_bytes(b"original evidence")
