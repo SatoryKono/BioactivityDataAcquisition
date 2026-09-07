@@ -42,11 +42,16 @@ rules only. Not a persistent working record. Not Grafana Drilldown Investigation
   `bioetl_incident_ranked_provider` and `bioetl_incident_ranked_dq`.
 - **Ranking:** shipped `severity` labels (`failing`/`crit`=2, `degraded`/`warn`=1).
   Priority 0 is `telemetry_gap` / UNKNOWN. Boolean `> 0` activation is not the rank.
-- **Visible columns:** Rank, Severity, Confidence, Object, Signal, Action, Domain.
+- **Visible columns:** Rank, Severity, Confidence, Object, Signal, Action, Details, Domain.
   Value sorts descending before the global top-five limit and is displayed as
   Severity. Rank is a one-based row index; equal severity has equal urgency.
   Object combines pipeline/provider; raw labels remain accessible in Inspect.
   Confidence is UNVERIFIED and does not claim a measured causal probability.
+- **Action:** Opens the indicated domain workspace for the row's Pipeline,
+  preserving the time range and applicable filters while clearing the selected Run ID.
+- **Details:** Offers a separate **Inspect value** control for the original action
+  value. Inspecting it leaves the Incident Workspace open; Action performs the
+  diagnostic handoff. Details uses available width without a fixed reservation.
 - **Empty:** `VALID_EMPTY — no active suspects across domains`
 
 ### 5b. Domain Suspect Details · GLOBAL / CURRENT (collapsed row)

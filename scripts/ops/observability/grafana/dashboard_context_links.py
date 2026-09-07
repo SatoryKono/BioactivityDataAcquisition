@@ -31,6 +31,7 @@ CORE_VAR_ORDER: tuple[str, ...] = ("workflow", "pipeline", "run_type", "run_id")
 TIME_TOKEN = "${__url_time_range}"
 RUN_ID_TEMPLATE = "$run_id"
 HTML_AMPERSAND = "&amp;"
+_CUSTOM_INSPECT = "custom.inspect"
 # Grafana query-variable regex: capture trimmed non-empty token.
 RUN_ID_GRAFANA_REGEX = r"/^\s*(\S(?:.*\S)?)\s*$/"
 _RUN_ID_TEMPLATE_VALUES = frozenset(
@@ -361,6 +362,7 @@ def _fix_ranked_links(panel: dict) -> None:
     """Bind domain actions without replacing ranking or presentation semantics."""
     _hide_field(panel, "action_dashboard_uid")
     _hide_field(panel, "action_scope")
+    _separate_action_inspector(panel)
     overrides = panel["fieldConfig"]["overrides"]
     action = next(
         (o for o in overrides if o.get("matcher", {}).get("options") == "Action"),
@@ -370,12 +372,10 @@ def _fix_ranked_links(panel: dict) -> None:
         action = {"matcher": {"id": "byName", "options": "Action"}, "properties": []}
         overrides.append(action)
     properties = action["properties"]
-    properties[:] = [
-        p for p in properties if p["id"] not in {"links", "custom.inspect"}
-    ]
+    properties[:] = [p for p in properties if p["id"] not in {"links", _CUSTOM_INSPECT}]
     properties.extend(
         [
-            {"id": "custom.inspect", "value": True},
+            {"id": _CUSTOM_INSPECT, "value": False},
             {
                 "id": "links",
                 "value": [
@@ -388,6 +388,58 @@ def _fix_ranked_links(panel: dict) -> None:
                 ],
             },
         ]
+    )
+
+
+def _separate_action_inspector(panel: dict) -> None:
+    """Keep Grafana's cell inspector from intercepting the navigation click."""
+    transforms = panel["transformations"]
+    transforms[:] = [t for t in transforms if t.get("id") != "extractFields"]
+    transforms.insert(
+        next(i for i, t in enumerate(transforms) if t["id"] == "organize"),
+        {
+            "id": "extractFields",
+            "options": {
+                "source": "action",
+                "format": "regexp",
+                "regExp": "/(?<action_detail>.*)/",
+                "replace": False,
+            },
+        },
+    )
+    organize = next(t["options"] for t in transforms if t["id"] == "organize")
+    organize["renameByName"]["action_detail"] = "Details"
+    indexes = organize["indexByName"]
+    if "action_detail" not in indexes:
+        position = indexes["action"] + 1
+        for name, index in indexes.items():
+            if index >= position:
+                indexes[name] = index + 1
+        indexes["action_detail"] = position
+    overrides = panel["fieldConfig"]["overrides"]
+    overrides[:] = [o for o in overrides if o["matcher"]["options"] != "Details"]
+    overrides.append(
+        {
+            "matcher": {"id": "byName", "options": "Details"},
+            "properties": [
+                {"id": "custom.cellOptions", "value": {"type": "auto"}},
+                {"id": _CUSTOM_INSPECT, "value": True},
+                {"id": "custom.hidden", "value": False},
+                {"id": "links", "value": []},
+                {
+                    "id": "mappings",
+                    "value": [
+                        {
+                            "type": "regex",
+                            "options": {
+                                "pattern": ".*",
+                                "result": {"text": "Inspect value"},
+                            },
+                        }
+                    ],
+                },
+            ],
+        }
     )
 
 
