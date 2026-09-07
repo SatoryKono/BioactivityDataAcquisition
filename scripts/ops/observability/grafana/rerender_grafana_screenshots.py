@@ -1484,7 +1484,23 @@ def _run_playwright_with_retry(
     for attempt in range(2):
         result = _run_playwright_process(config)
         if result != 0:
-            return result, None
+            try:
+                failed = _read_playwright_manifest(
+                    config.output_dir / _RENDER_MANIFEST_JSON
+                )
+            except RuntimeError:
+                return result, None
+            actual_uids = {
+                item.get("uid")
+                for item in failed.get("dashboards", [])
+                if isinstance(item, dict)
+            }
+            if actual_uids != set(config.selected_uids):
+                return result, None
+            failed["terminal_state_validation"] = {"status": "error"}
+            for item in failed["dashboards"]:
+                item["renderStatus"] = "error"
+            return result, failed
         try:
             manifest = _read_playwright_manifest(
                 config.output_dir / _RENDER_MANIFEST_JSON
@@ -1508,11 +1524,14 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
     if len(dashboards) <= 1:
         result, manifest = _run_playwright_with_retry(config)
         if result != 0 or manifest is None:
+            if manifest is not None:
+                _write_merged_playwright_manifest(config, [manifest])
             return result or 1
         _write_merged_playwright_manifest(config, [manifest])
         return 0
 
     manifests: list[dict[str, Any]] = []
+    failed = False
     for dashboard in dashboards:
         single_config = cast(
             RenderConfig,
@@ -1520,11 +1539,23 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         )
         result, manifest = _run_playwright_with_retry(single_config)
         if result != 0 or manifest is None:
-            return result or 1
+            failed = True
+            if manifest is None:
+                manifest = {
+                    "terminal_state_validation": {"status": "error"},
+                    "dashboards": [
+                        {
+                            "uid": dashboard.uid,
+                            "file": f"{dashboard.uid}.png",
+                            "renderStatus": "error",
+                            "error": "capture failed without matching manifest",
+                        }
+                    ],
+                }
         manifests.append(manifest)
 
     _write_merged_playwright_manifest(config, manifests)
-    return 0
+    return 1 if failed else 0
 
 
 def _playwright_runtime_failure_detail(raw_detail: str) -> str:
