@@ -88,7 +88,21 @@ python -m bioetl health --provider chembl
 Содержит HTTP health server с entrypoint `health_server.py` и mixin-based decomposition:
 `health_server_http_mixin.py`, `health_server_routing_mixin.py`,
 `health_server_state_mixin.py`, `types.py`.
-Endpoints: `/health`, `/health/live`, `/health/ready`.
+HTTP endpoint families и владельцы данных:
+
+| Family | Назначение и владелец |
+| --- | --- |
+| `/health`, `/health/live`, `/health/ready` | Состояние процесса, готовность collaborators и локальных artifact roots |
+| `/metrics` | Prometheus exposition через observability collaborators |
+| `/ops/quarantine/` | Read-only inspection quarantine через injected quarantine port |
+| `/ops/control-plane/` | Manifest, ledger, checkpoint и replay diagnostics через control-plane ports |
+| `/ops/observability/` | Processed records и pipeline/workflow run reports; local report storage и observability collaborators |
+
+Route dispatch задаёт `health_server_routing_mixin.py`; observability routes
+детализирует `_health_server_observability_routing.py`. Это локальный GET API,
+работающий с правами OS user; GET-only не является multi-tenant авторизацией.
+В основном compose published port привязан к localhost. Удалённый Quarantine
+Explorer UI не следует путать с сохранённым `/ops/quarantine/` API.
 
 ### 2.3. Оркестрация CLI без placeholder-пакета
 

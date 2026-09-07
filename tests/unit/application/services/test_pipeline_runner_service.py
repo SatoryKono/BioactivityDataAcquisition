@@ -24,13 +24,15 @@
 # pyright: reportFunctionMemberAccess=false
 # pyright: reportConstantRedefinition=false
 # pyright: reportInvalidTypeForm=false
-# PD5 test mock/fixture surface — product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
+# PD5 test mock/fixture surface â€” product NewTypes/Ports stay strict (#6997+#6998+#6999+#7000).
 """Unit tests for PipelineRunnerService.
 
 Tests the universal pipeline runner service.
 """
 
 from __future__ import annotations
+
+from tests.helpers.run_report_store import MemoryReportStore
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -161,6 +163,7 @@ def service(
         _context_service=PipelineRunContextService(),
         _execution_service=PipelineRunExecutionService(clock=clock),
         run_id_factory=lambda: UUID("00000000-0000-0000-0000-000000000101"),
+        report_store=MemoryReportStore(),
     )
 
 

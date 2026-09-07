@@ -8,6 +8,8 @@ Implements RULES.md §1.1 - Application Layer depends only on Domain.
 
 from __future__ import annotations
 
+from bioetl.domain.ports import RunReportStorePort
+
 __all__ = [
     "PipelineNotFoundError",
     "PipelineRunResult",
@@ -121,6 +123,7 @@ class PipelineRunnerService:
     clock: ClockPort
     _context_service: PipelineRunContextService
     _execution_service: PipelineRunExecutionService
+    report_store: RunReportStorePort
     run_id_factory: Callable[[], RunID | UUID | str] = _missing_run_id_factory
 
     async def run(
@@ -192,6 +195,7 @@ class PipelineRunnerService:
                 options=effective_options,
                 dry_run_result=dry_run_result,
                 record_event=_record_pipeline_audit_event,
+                store=self.report_store,
             )
 
         async def _record_constructor_failure(exc: Exception) -> None:
@@ -399,6 +403,7 @@ class PipelineRunnerService:
             run_type=run_type,
             started_at=started_at,
             options=options,
+            store=self.report_store,
         )
 
 

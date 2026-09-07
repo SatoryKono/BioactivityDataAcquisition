@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,6 +13,7 @@ from bioetl.application.services.run_reports.paths import (
     resolve_report_root,
 )
 from bioetl.application.services.run_reports.writer import _safe_segment
+from bioetl.domain.ports import RunReportStorePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,16 +39,13 @@ def _root(root: Path | None) -> Path:
 
 
 def load_latest_pointer(
-    *,
-    kind: str,
-    owner: str,
-    root: Path | None = None,
+    *, kind: str, owner: str, root: Path | None = None, store: RunReportStorePort
 ) -> dict[str, Any] | None:  # Any: latest pointer
     base = _root(root) / kind / _safe_segment(owner) / "_latest.json"
-    if not base.is_file():
+    if not store.is_file(str(base)):
         return None
     try:
-        payload = json.loads(base.read_text(encoding="utf-8"))
+        payload = json.loads(store.read_text(str(base)))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return None
     return payload if isinstance(payload, dict) else None
@@ -60,10 +57,13 @@ def load_pipeline_report(
     run_id: str | None = None,
     latest: bool = False,
     root: Path | None = None,
+    store: RunReportStorePort,
 ) -> dict[str, Any] | None:  # Any: report payload
     base = _root(root)
     if latest or run_id is None:
-        return _load_latest_report(kind="pipeline", owner=pipeline_name, root=base)
+        return _load_latest_report(
+            kind="pipeline", owner=pipeline_name, root=base, store=store
+        )
     path = (
         base
         / "pipeline"
@@ -71,7 +71,7 @@ def load_pipeline_report(
         / _safe_segment(run_id)
         / "pipeline-run-report.json"
     )
-    return _load_json_dict(path)
+    return _load_json_dict(path, store=store)
 
 
 def load_workflow_report(
@@ -80,10 +80,13 @@ def load_workflow_report(
     workflow_run_id: str | None = None,
     latest: bool = False,
     root: Path | None = None,
+    store: RunReportStorePort,
 ) -> dict[str, Any] | None:  # Any: report payload
     base = _root(root)
     if latest or workflow_run_id is None:
-        return _load_latest_report(kind="workflow", owner=workflow_name, root=base)
+        return _load_latest_report(
+            kind="workflow", owner=workflow_name, root=base, store=store
+        )
     path = (
         base
         / "workflow"
@@ -91,26 +94,25 @@ def load_workflow_report(
         / _safe_segment(workflow_run_id)
         / "workflow-run-report.json"
     )
-    return _load_json_dict(path)
+    return _load_json_dict(path, store=store)
 
 
 def _load_latest_report(
-    *,
-    kind: str,
-    owner: str,
-    root: Path,
+    *, kind: str, owner: str, root: Path, store: RunReportStorePort
 ) -> dict[str, Any] | None:  # Any: decoded report payload
-    pointer = load_latest_pointer(kind=kind, owner=owner, root=root)
+    pointer = load_latest_pointer(kind=kind, owner=owner, root=root, store=store)
     if pointer is None:
         return None
-    return _load_json_dict(Path(str(pointer.get("json_path") or "")))
+    return _load_json_dict(Path(str(pointer.get("json_path") or "")), store=store)
 
 
-def _load_json_dict(path: Path) -> dict[str, Any] | None:  # Any: decoded JSON object
-    if not path.is_file():
+def _load_json_dict(
+    path: Path, *, store: RunReportStorePort
+) -> dict[str, Any] | None:  # Any: decoded JSON object
+    if not store.is_file(str(path)):
         return None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(store.read_text(str(path)))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return None
     return payload if isinstance(payload, dict) else None
@@ -121,8 +123,11 @@ def list_pipeline_reports(
     pipeline_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
+    store: RunReportStorePort,
 ) -> list[ReportIndexEntry]:
-    return _list_reports(kind="pipeline", owner=pipeline_name, limit=limit, root=root)
+    return _list_reports(
+        kind="pipeline", owner=pipeline_name, limit=limit, root=root, store=store
+    )
 
 
 def list_workflow_reports(
@@ -130,8 +135,11 @@ def list_workflow_reports(
     workflow_name: str | None = None,
     limit: int = 20,
     root: Path | None = None,
+    store: RunReportStorePort,
 ) -> list[ReportIndexEntry]:
-    return _list_reports(kind="workflow", owner=workflow_name, limit=limit, root=root)
+    return _list_reports(
+        kind="workflow", owner=workflow_name, limit=limit, root=root, store=store
+    )
 
 
 def _list_reports(
@@ -140,12 +148,15 @@ def _list_reports(
     owner: str | None,
     limit: int | None,
     root: Path | None,
+    store: RunReportStorePort,
 ) -> list[ReportIndexEntry]:
     """List newest reports by mtime first; hydrate meta only for top ``limit``."""
     base = _root(root) / kind
-    if not base.is_dir():
+    if not store.is_dir(str(base)):
         return []
-    candidates = _collect_report_candidates(base=base, kind=kind, owner=owner)
+    candidates = _collect_report_candidates(
+        base=base, kind=kind, owner=owner, store=store
+    )
     candidates.sort(key=lambda item: item[0], reverse=True)
     return [
         _build_report_index_entry(
@@ -154,6 +165,7 @@ def _list_reports(
             owner_name=owner_name,
             run_dir=run_dir,
             json_path=json_path,
+            store=store,
         )
         for mtime, owner_name, run_dir, json_path in _limit_report_candidates(
             candidates,
@@ -173,25 +185,22 @@ def _limit_report_candidates(
 
 
 def _collect_report_candidates(
-    *,
-    base: Path,
-    kind: str,
-    owner: str | None,
+    *, base: Path, kind: str, owner: str | None, store: RunReportStorePort
 ) -> list[tuple[float, str, Path, Path]]:
     """Collect sortable report paths without hydrating report payloads."""
     report_name = f"{kind}-run-report.json"
     candidates: list[tuple[float, str, Path, Path]] = []
-    for owner_dir in _owner_directories(base, owner):
-        if not owner_dir.is_dir():
+    for owner_dir in _owner_directories(base, owner, store=store):
+        if not store.is_dir(str(owner_dir)):
             continue
-        for run_dir in owner_dir.iterdir():
-            if not run_dir.is_dir() or run_dir.name.startswith("."):
+        for run_dir in (Path(location) for location in store.iterdir(str(owner_dir))):
+            if not store.is_dir(str(run_dir)) or run_dir.name.startswith("."):
                 continue
             json_path = run_dir / report_name
-            if not json_path.is_file():
+            if not store.is_file(str(json_path)):
                 continue
             try:
-                mtime = json_path.stat().st_mtime
+                mtime = store.mtime(str(json_path))
             except OSError:
                 continue
             candidates.append((mtime, owner_dir.name, run_dir, json_path))
@@ -205,16 +214,17 @@ def _build_report_index_entry(
     owner_name: str,
     run_dir: Path,
     json_path: Path,
+    store: RunReportStorePort,
 ) -> ReportIndexEntry:
     """Hydrate one ranked report candidate."""
-    meta = read_identity_preview(json_path)
+    meta = read_identity_preview(json_path, store=store)
     md_path = run_dir / f"{kind}-run-report.md"
     return ReportIndexEntry(
         kind=kind,
         owner=owner_name,
         run_id=run_dir.name,
         json_path=json_path,
-        markdown_path=md_path if md_path.is_file() else None,
+        markdown_path=md_path if store.is_file(str(md_path)) else None,
         status=meta.status,
         started_at=meta.started_at,
         completed_at=meta.completed_at,
@@ -225,10 +235,16 @@ def _build_report_index_entry(
     )
 
 
-def _owner_directories(base: Path, owner: str | None) -> list[Path]:
+def _owner_directories(
+    base: Path, owner: str | None, *, store: RunReportStorePort
+) -> list[Path]:
     if owner:
         return [base / _safe_segment(owner)]
-    return [path for path in base.iterdir() if path.is_dir()]
+    return [
+        path
+        for path in (Path(location) for location in store.iterdir(str(base)))
+        if store.is_dir(str(path))
+    ]
 
 
 def diff_pipeline_reports(left: MappingLike, right: MappingLike) -> ReportPayload:
@@ -313,12 +329,13 @@ def prune_reports(
     now: datetime | None = None,
     root: Path | None = None,
     dry_run: bool = True,
+    store: RunReportStorePort,
 ) -> list[str]:
     """Delete old report directories. Returns removed paths (or candidates if dry_run)."""
     _validate_prune_options(kind, max_count, max_age_days, now)
-    entries = _reports_for_prune(kind, owner, root)
+    entries = _reports_for_prune(kind, owner, root, store=store)
     victims = _prune_candidates(entries, max_count, max_age_days, now)
-    return _remove_report_directories(victims, dry_run=dry_run)
+    return _remove_report_directories(victims, dry_run=dry_run, store=store)
 
 
 def _validate_prune_options(
@@ -336,11 +353,9 @@ def _validate_prune_options(
 
 
 def _reports_for_prune(
-    kind: str,
-    owner: str | None,
-    root: Path | None,
+    kind: str, owner: str | None, root: Path | None, *, store: RunReportStorePort
 ) -> list[ReportIndexEntry]:
-    return _list_reports(kind=kind, owner=owner, limit=None, root=root)
+    return _list_reports(kind=kind, owner=owner, limit=None, root=root, store=store)
 
 
 def _prune_candidates(
@@ -360,9 +375,7 @@ def _prune_candidates(
 
 
 def _remove_report_directories(
-    victims: list[ReportIndexEntry],
-    *,
-    dry_run: bool,
+    victims: list[ReportIndexEntry], *, dry_run: bool, store: RunReportStorePort
 ) -> list[str]:
     seen: set[Path] = set()
     removed: list[str] = []
@@ -373,7 +386,7 @@ def _remove_report_directories(
         seen.add(directory)
         removed.append(str(directory.as_posix()))
         if not dry_run:
-            _rm_tree(directory)
+            store.remove_tree(str(directory), root=str(directory.parent.parent.parent))
     return removed
 
 
@@ -396,10 +409,3 @@ def _as_mapping(value: MappingLike) -> ReportPayload:
     if isinstance(value, dict):
         return value
     raise TypeError("report payload must be a mapping")
-
-
-def _rm_tree(path: Path) -> None:
-    if path.is_symlink() or path.is_file():
-        path.unlink(missing_ok=True)
-        return
-    shutil.rmtree(path)

@@ -29,6 +29,10 @@
 
 from __future__ import annotations
 
+from bioetl.infrastructure.storage.run_report_store_adapter import (
+    FileRunReportStoreAdapter,
+)
+
 from unittest.mock import MagicMock
 
 import pytest
@@ -105,7 +109,9 @@ def test_attach_workflow_run_report_logs_warning_on_failure(
         lambda **_kwargs: (_ for _ in ()).throw(RuntimeError("report boom")),
     )
 
-    degraded = attach_workflow_run_report(config=config, result=result, logger=logger)
+    degraded = attach_workflow_run_report(
+        config=config, result=result, logger=logger, store=FileRunReportStoreAdapter()
+    )
 
     assert degraded.run_report_error == "RuntimeError: report boom"
     logger.warning.assert_called_once()
@@ -140,7 +146,9 @@ def test_attach_workflow_run_report_records_completed_at(
         _capture_build,
     )
 
-    attach_workflow_run_report(config=config, result=result, logger=logger)
+    attach_workflow_run_report(
+        config=config, result=result, logger=logger, store=FileRunReportStoreAdapter()
+    )
 
     identity = captured["identity"]
     assert isinstance(identity, dict)

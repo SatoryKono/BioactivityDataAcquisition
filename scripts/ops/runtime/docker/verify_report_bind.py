@@ -47,6 +47,7 @@ from bioetl.application.services.run_reports.paths import (
     inspect_report_root_marker,
     inspect_report_root_source_identity,
 )
+from bioetl.composition.entrypoints import create_run_report_store
 from bioetl.application.services.run_reports.query import (
     list_pipeline_reports,
 )
@@ -311,7 +312,12 @@ def _host_pipeline_summary(
 ) -> tuple[int | None, str | None]:
     if not pipeline:
         return None, None
-    entries = list_pipeline_reports(pipeline_name=pipeline, limit=100, root=host_root)
+    entries = list_pipeline_reports(
+        pipeline_name=pipeline,
+        limit=100,
+        root=host_root,
+        store=create_run_report_store(),
+    )
     count = len(entries)
     latest_run_id = entries[0].run_id if entries else None
     print(f"host_pipeline_count pipeline={pipeline!r} count={count}")

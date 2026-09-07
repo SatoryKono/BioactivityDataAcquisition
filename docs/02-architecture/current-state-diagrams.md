@@ -76,26 +76,34 @@ C4Container
     title BioETL C4 Container View
     Person(operator, "Operator")
     System_Boundary(bioetl, "BioETL") {
-        Container(cli, "CLI", "Click", "Driving adapter in src/bioetl/interfaces/cli")
-        Container(composition, "Composition Root", "Python", "Runtime, control-plane, observability, and factory wiring")
-        Container(application, "Application Services", "Python", "Pipeline execution, workflows, DQ, control-plane use cases")
-        Container(domain, "Domain Model", "Python", "Aggregates, value objects, domain events, ports, contracts")
-        Container(infra, "Infrastructure Adapters", "Python", "Provider APIs, local storage, config loaders, observability adapters")
+        Container(cli, "ETL CLI process", "Python / Click", "Pipeline and workflow execution; five architecture layers inside one process")
+        Container(health, "Health and ops backend (optional)", "Python / HTTP", "python -m bioetl health server; separate local process")
         ContainerDb(localdata, "Local Data Root", "Filesystem/Delta/JSONL", "Bronze/Silver/Gold, checkpoints, manifests, ledgers")
     }
     System_Ext(providers, "External Provider APIs")
     System_Ext(obs, "Prometheus/Grafana (optional)")
 
     Rel(operator, cli, "Runs bioetl commands")
-    Rel(cli, composition, "Requests configured runtime objects")
-    Rel(composition, application, "Constructs use-case services")
-    Rel(composition, infra, "Constructs concrete adapters")
-    Rel(application, domain, "Uses aggregates, value objects, ports")
-    Rel(infra, domain, "Implements domain ports")
-    Rel(infra, providers, "HTTP/API calls")
-    Rel(infra, localdata, "Reads/writes local artifacts")
-    Rel(obs, infra, "Optionally scrapes metrics when monitoring is enabled")
+    Rel(operator, health, "Local health and ops GET requests")
+    Rel(cli, providers, "HTTP/API calls through injected adapters")
+    Rel(cli, localdata, "Reads/writes data, state and run reports")
+    Rel(health, localdata, "Reads configured local artifact roots")
+    Rel(obs, health, "Optionally scrapes exposed metrics")
 ```
+
+Here C4 containers describe execution and data-store boundaries, not Docker
+containers or Python layers. Composition, Application, Domain and Infrastructure
+are in-process components of the package (see Layer Diagram below).
+
+| Element | Implementation anchor |
+| --- | --- |
+| ETL CLI process | `pyproject.toml` entrypoint `bioetl.interfaces.cli:main`; `src/bioetl/composition/bootstrap/runtime/` |
+| Optional health/ops process | `src/bioetl/interfaces/cli/commands/domains/health/observability_backend_process.py` launches `python -m bioetl health server`; `docker-compose.yml` packages the same command |
+| Local data and control-plane stores | `src/bioetl/infrastructure/storage/`, `checkpoint/`, `control_plane/`, `quarantine/`; data and reports mounts in `docker-compose.yml` |
+| Optional monitoring | `docker-compose.monitoring.yml`; ADR-010 and ADR-053 preserve the local-only default |
+
+The backend has its own lifecycle and shares configured artifact roots with ETL.
+Docker and monitoring remain optional packaging/observability choices.
 
 ## Layer Diagram
 

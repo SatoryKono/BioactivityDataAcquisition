@@ -22,6 +22,7 @@ from bioetl.application.services.run_reports.source_identity import (
     compare_runtime_source_identity,
     normalize_source_id,
 )
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 
 # Relative default under the process CWD. In the main Docker service this is
@@ -316,11 +317,13 @@ def _optional_identity_text(value: object) -> str | None:
     return text or None
 
 
-def read_identity_preview(path: Path) -> IdentityIndexPreview:
+def read_identity_preview(
+    path: Path, *, store: RunReportStorePort
+) -> IdentityIndexPreview:
     """Read identity fields from a run-report JSON file."""
     empty = IdentityIndexPreview(None, None, None, None, None, None)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(store.read_text(str(path)))
     except (OSError, json.JSONDecodeError):
         return empty
     identity = payload.get("identity") if isinstance(payload, dict) else None

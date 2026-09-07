@@ -22,6 +22,7 @@ See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
 from __future__ import annotations
 
 from pathlib import Path
+import ast
 
 import pytest
 
@@ -29,6 +30,47 @@ pytestmark = pytest.mark.architecture
 
 # Path relative to project root
 APPLICATION_DIR = Path("src/bioetl/application")
+
+
+def test_run_report_io_requires_explicit_store() -> None:
+    """Report queries cannot regain ambient DI or concrete filesystem access."""
+    for name in ("writer", "query"):
+        tree = ast.parse(
+            (APPLICATION_DIR / f"services/run_reports/{name}.py").read_text(
+                encoding="utf-8"
+            )
+        )
+        assert not any(isinstance(n, ast.Global) for n in ast.walk(tree))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                if node.func.attr in {
+                    "read_text",
+                    "write_text",
+                    "is_file",
+                    "is_dir",
+                    "iterdir",
+                    "mkdir",
+                    "mtime",
+                    "remove_tree",
+                }:
+                    assert isinstance(node.func.value, ast.Name)
+                    assert node.func.value.id in {"store", "writer"}
+                assert node.func.attr not in {"unlink", "rmtree", "stat", "open"}
+            if (
+                isinstance(node, ast.FunctionDef)
+                and not node.name.startswith("_")
+                and node.name != "diff_pipeline_reports"
+            ):
+                if node.name.startswith(("write_", "load_", "list_", "prune_")):
+                    args = dict(
+                        zip(
+                            (a.arg for a in node.args.kwonlyargs),
+                            node.args.kw_defaults,
+                            strict=True,
+                        )
+                    )
+                    assert "store" in args and args["store"] is None
+
 
 # Forbidden patterns: service creation in application layer.
 # These services MUST be injected, not created directly.

@@ -13,6 +13,7 @@ from bioetl.application.services.workflow.workflow_runner_models import (
     WorkflowRunExecutionResult,
     WorkflowStepExecutionResult,
 )
+from bioetl.domain.ports import RunReportStorePort
 from bioetl.domain.types import JsonDict
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
 
@@ -72,15 +73,15 @@ def _pipeline_name_for_step(
     return None
 
 
-def _load_child_top_reasons(report_ref: object) -> object:
+def _load_child_top_reasons(report_ref: object, *, store: RunReportStorePort) -> object:
     """Best-effort load of reason rows at the application filesystem boundary."""
     if not isinstance(report_ref, str) or not report_ref:
         return ()
     try:
         path = Path(report_ref)
-        if not path.is_file():
+        if not store.is_file(str(path)):
             return ()
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(store.read_text(str(path)))
     except (OSError, json.JSONDecodeError, TypeError, ValueError):
         return ()
     if not isinstance(payload, Mapping):
@@ -92,6 +93,7 @@ def _execution_rows_from_result(
     result: WorkflowRunExecutionResult,
     *,
     plan_steps: list[JsonDict],
+    store: RunReportStorePort,
 ) -> list[JsonDict]:
     execution_rows: list[JsonDict] = []
     for step in result.steps:
@@ -113,7 +115,7 @@ def _execution_rows_from_result(
                 "child_run_id": step.child_run_id,
                 "child_manifest_id": step.child_manifest_id,
                 "pipeline_report_ref": report_ref,
-                "top_reasons": _load_child_top_reasons(report_ref),
+                "top_reasons": _load_child_top_reasons(report_ref, store=store),
                 "error_type": step.error_type,
                 "error_message": step.error_message,
             }
@@ -126,6 +128,7 @@ def attach_workflow_run_report(
     config: WorkflowConfig,
     result: WorkflowRunExecutionResult,
     logger: LoggerPort | None = None,
+    store: RunReportStorePort,
 ) -> WorkflowRunExecutionResult:
     """Build and persist workflow_run_report_v1 (best-effort)."""
     try:
@@ -137,7 +140,9 @@ def attach_workflow_run_report(
         )
 
         plan_steps = _plan_steps_from_config(config)
-        execution_rows = _execution_rows_from_result(result, plan_steps=plan_steps)
+        execution_rows = _execution_rows_from_result(
+            result, plan_steps=plan_steps, store=store
+        )
         report = build_workflow_run_report(
             identity={
                 "workflow_name": result.workflow_name,
@@ -154,7 +159,7 @@ def attach_workflow_run_report(
             plan_steps=plan_steps,
             execution_steps=execution_rows,
         )
-        written = write_workflow_run_report(report)
+        written = write_workflow_run_report(report, store=store)
         return _require_workflow_result(
             replace(
                 result,
