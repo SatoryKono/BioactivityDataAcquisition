@@ -412,7 +412,7 @@ def _separate_action_inspector(panel: dict) -> None:
     )
     organize = next(t["options"] for t in transforms if t["id"] == "organize")
     organize["renameByName"]["action_detail"] = "Details"
-    organize["indexByName"]["action_detail"] = 6
+    organize["indexByName"].update(action_detail=4, pipeline=5, provider=6)
     overrides = panel["fieldConfig"]["overrides"]
     overrides[:] = [o for o in overrides if o["matcher"]["options"] != "Details"]
     overrides.append(

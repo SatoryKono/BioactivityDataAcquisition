@@ -314,9 +314,9 @@
               "signal": 1,
               "Value": 2,
               "action": 3,
-              "pipeline": 4,
-              "provider": 5,
-              "action_detail": 6
+              "pipeline": 5,
+              "provider": 6,
+              "action_detail": 4
             },
             "renameByName": {
               "domain": "Domain",
