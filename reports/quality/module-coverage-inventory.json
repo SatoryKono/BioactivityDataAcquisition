@@ -1,7 +1,7 @@
 {
   "canonical_coverage_lane": "coverage-verify",
   "coverage_xml_path": "reports/coverage/coverage.xml",
-  "coverage_xml_sha256": "9649894bd64524246c2f78dfb565fc3f5ef6ad4f3cd6b5cbe061940cedc32b26",
+  "coverage_xml_sha256": "89ff3593c5f0108dbc4f806ec5b5536bf74895245e0d60e16b4e4223d8bd16e7",
   "generated_by": "scripts/engineering/qa/report_module_coverage_inventory.py",
   "measurement_mode": "coverage_xml",
   "modules": [
@@ -24308,8 +24308,8 @@
     {
       "coverage_percent": 98.9,
       "coverage_status": "partially_covered",
-      "covered_lines": 179,
-      "executable_lines": 181,
+      "covered_lines": 180,
+      "executable_lines": 182,
       "missing_lines": 2,
       "module": "bioetl.interfaces.http._health_server_identity_support",
       "path": "src/bioetl/interfaces/http/_health_server_identity_support.py",
@@ -24478,12 +24478,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
+      "covered_lines": 54,
+      "executable_lines": 54,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.control_plane_identity.manifest_extractors",
       "path": "src/bioetl/interfaces/http/control_plane_identity/manifest_extractors.py",
-      "source_lines": 140
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,
@@ -48990,8 +48990,8 @@
     {
       "coverage_percent": 98.9,
       "coverage_status": "partially_covered",
-      "covered_lines": 179,
-      "executable_lines": 181,
+      "covered_lines": 180,
+      "executable_lines": 182,
       "missing_lines": 2,
       "module": "bioetl.interfaces.http._health_server_identity_support",
       "path": "src/bioetl/interfaces/http/_health_server_identity_support.py",
@@ -49160,12 +49160,12 @@
     {
       "coverage_percent": 100.0,
       "coverage_status": "fully_covered",
-      "covered_lines": 45,
-      "executable_lines": 45,
+      "covered_lines": 54,
+      "executable_lines": 54,
       "missing_lines": 0,
       "module": "bioetl.interfaces.http.control_plane_identity.manifest_extractors",
       "path": "src/bioetl/interfaces/http/control_plane_identity/manifest_extractors.py",
-      "source_lines": 140
+      "source_lines": 161
     },
     {
       "coverage_percent": 100.0,

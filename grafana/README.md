@@ -69,8 +69,9 @@ increase over the dashboard-selected window, using an instant query at its end.
 `increase` handles resets per series before the result is summed across the selected
 Pipeline and Run Type; extrapolation can produce fractional values. This is counter
 telemetry, not exact-run accounting. A measured zero requires at least two matching
-failed-counter samples with no increase. Absent or insufficient failed-counter samples
-remain `UNKNOWN`, even when the runtime scope universe or success counters exist.
+failed-counter samples with no increase in every selected scope recorded by the
+window's scope universe. Absent or insufficient samples in any such scope, or an
+absent universe, remain `UNKNOWN`; universe presence never manufactures a zero.
 A wider range can retain historical evidence after the latest samples have gone stale;
 use the separate Metrics Coverage card for current scrape confidence.
 
