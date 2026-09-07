@@ -45,6 +45,22 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [(1000, "100.0%"), (983, "98.3%"), (17, "1.7%"), (0, "0.0%"), (0.01, "0.001%")],
+)
+def test_percentage_precision_retains_small_shares(value: float, expected: str) -> None:
+    """Equal shares use equal precision, retaining small nonzero exclusions."""
+    assert (
+        support.format_percentage(
+            value=value,
+            bronze_value=1000,
+            denominator="bronze",
+        )
+        == expected
+    )
+
+
 def test_fetch_processed_record_values_queries_all_visible_rows_once(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -128,7 +144,6 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             value=None,
             bronze_value=10,
             denominator="constant_100",
-            percent_format="constant_100",
         )
         == "UNKNOWN"
     )
@@ -137,7 +152,6 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             value=5,
             bronze_value=0,
             denominator="bronze",
-            percent_format="fixed_1",
         )
         == "UNKNOWN"
     )
@@ -146,16 +160,14 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             value=1,
             bronze_value=3,
             denominator="bronze",
-            percent_format="fixed_1",
         )
-        == "33.3%"
+        == "33.333%"
     )
     assert (
         support.format_percentage(
             value=1,
             bronze_value=8,
             denominator="bronze",
-            percent_format="trimmed_3",
         )
         == "12.5%"
     )
@@ -164,9 +176,8 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             value=5,
             bronze_value=10,
             denominator="bronze",
-            percent_format="constant_100",
         )
-        == "100%"
+        == "50.0%"
     )
 
 
