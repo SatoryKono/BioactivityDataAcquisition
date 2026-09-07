@@ -31,6 +31,8 @@ selection_serialization:
   selected_run_range: retained_hidden_from_ms_to_ms
   unavailable_run_range: no_active_action
   ranked_suspect_action:
+  action_target_override:
+    data_quality: bioetl-dq-v2
     source_uid: bioetl-incident-v1
     panel_id: 2010
     pipeline: row

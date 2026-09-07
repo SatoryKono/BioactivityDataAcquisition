@@ -26,6 +26,9 @@ aspirational rewrites).
 from __future__ import annotations
 
 import re
+from pathlib import Path
+
+import yaml
 from typing import Any
 
 import pytest
@@ -304,10 +307,25 @@ def test_internal_dashboard_links_resolve_to_shipped_uids() -> None:
             if target_uid == "${__data.fields.action_dashboard_uid}":
                 assert dashboard["uid"] == "bioetl-incident-v1"
                 panel = next(p for p in dashboard["panels"] if p.get("id") == 2010)
-                expr = panel["targets"][0]["expr"]
-                resolved = set(
-                    re.findall(r'"action_dashboard_uid", "([a-z0-9-]+)"', expr)
+                sources = panel["targets"][0]["expr"].split(" or ")
+                rules = yaml.safe_load(
+                    Path("grafana/prometheus-rules/bioetl_observability.yml").read_text(
+                        encoding="utf-8"
+                    )
                 )
+                resolved = {
+                    target
+                    for group in rules["groups"]
+                    for rule in group["rules"]
+                    if rule.get("record") in sources
+                    for target in (
+                        [rule["labels"]["action_dashboard_uid"]]
+                        if "action_dashboard_uid" in rule.get("labels", {})
+                        else re.findall(
+                            r'"action_dashboard_uid", "([a-z0-9-]+)"', rule["expr"]
+                        )
+                    )
+                }
                 assert resolved == {
                     "bioetl-runtime",
                     "bioetl-provider-health-v2",

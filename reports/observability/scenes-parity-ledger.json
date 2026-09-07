@@ -22,7 +22,7 @@
   "dashboard_sha256": {
     "bioetl-control-plane-v1": "9e74059229b464d796403645cc242bb058c63cbe36dc93d61df967848d33bba2",
     "bioetl-dq-v2": "1ad28cf26d05252550e66f4a24f30722648d0a5b3ba263557f5ad0ad8b4329ca",
-    "bioetl-incident-v1": "6b464200b1297bd50dee236a82bf57649b3246e8bc228bdf4643fbcafed7f27e",
+    "bioetl-incident-v1": "e0ce2178d00d1c63bc1bcf1bc79657af06a9eb1cf3afcb2ca7d52860005c9557",
     "bioetl-overview-v2": "2c556c560afd62142bc3de556a6d53ec2c77f72fcb21b3c062fcc16ecb1a2558",
     "bioetl-provider-health-v2": "795e069fa6b4aca30914a112f6fecbe1a791cc2098de1bdc6c360594c0656c05",
     "bioetl-run-explorer-v1": "858a9a1815955b861e98fae33a696d3c69e339f414cde8bf46745130d4f8f4b1",
@@ -1830,7 +1830,7 @@
         "datasource_type": "prometheus",
         "datasource_uid": "prometheus",
         "expressions": [
-          "label_replace(label_replace(label_replace(bioetl_incident_ranked_runtime, \"action_dashboard_uid\", \"bioetl-runtime\", \"domain\", \"runtime\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"action_scope\", \"var-stage=$$__all\", \"domain\", \"runtime\") or label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_provider, \"action_dashboard_uid\", \"bioetl-provider-health-v2\", \"domain\", \"provider\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"provider\", \"unknown\", \"provider\", \"^$\"), \"action_scope\", \"var-provider=$1&var-pipeline_context=unknown\", \"provider\", \"(.+)\") or label_replace(label_replace(label_replace(bioetl_incident_ranked_dq, \"action_dashboard_uid\", \"bioetl-dq-v2\", \"domain\", \"dq\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"action_scope\", \"var-stage=$$__all\", \"domain\", \"dq\")"
+          "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
         ],
         "target_count": 1
       }

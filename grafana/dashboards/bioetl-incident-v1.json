@@ -264,7 +264,7 @@
           "instant": true,
           "range": false,
           "format": "table",
-          "expr": "label_replace(label_replace(label_replace(bioetl_incident_ranked_runtime, \"action_dashboard_uid\", \"bioetl-runtime\", \"domain\", \"runtime\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"action_scope\", \"var-stage=$$__all\", \"domain\", \"runtime\") or label_replace(label_replace(label_replace(label_replace(bioetl_incident_ranked_provider, \"action_dashboard_uid\", \"bioetl-provider-health-v2\", \"domain\", \"provider\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"provider\", \"unknown\", \"provider\", \"^$\"), \"action_scope\", \"var-provider=$1&var-pipeline_context=unknown\", \"provider\", \"(.+)\") or label_replace(label_replace(label_replace(bioetl_incident_ranked_dq, \"action_dashboard_uid\", \"bioetl-dq-v2\", \"domain\", \"dq\"), \"pipeline\", \"unknown\", \"pipeline\", \"^$\"), \"action_scope\", \"var-stage=$$__all\", \"domain\", \"dq\")"
+          "expr": "bioetl_incident_ranked_runtime or bioetl_incident_ranked_provider or bioetl_incident_ranked_dq"
         }
       ],
       "transformations": [
@@ -510,25 +510,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "action"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 120
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "auto",
-                  "wrapText": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "pipeline"
             },
             "properties": [
@@ -592,13 +573,17 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 120
               },
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "data-links"
+                  "type": "auto"
                 }
+              },
+              {
+                "id": "custom.inspect",
+                "value": true
               },
               {
                 "id": "links",

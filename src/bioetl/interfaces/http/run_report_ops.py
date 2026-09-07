@@ -97,6 +97,24 @@ def load_pipeline_run_report_artifact(
     *, pipeline: str, run_id: str, artifact_format: str, root: Path | None = None
 ) -> str | None:
     """Read only the named run's JSON/Markdown report, never a caller path."""
+    json_path, path = _validated_artifact_paths(pipeline, run_id, artifact_format, root)
+    payload = _load_versioned_payload(
+        json_path, expected_schema="pipeline_run_report_v1"
+    )
+    if payload is None or not path.is_file():
+        return None
+    identity = payload.get("identity")
+    if not isinstance(identity, dict) or (
+        identity.get("run_id") != run_id or identity.get("pipeline_name") != pipeline
+    ):
+        raise ValueError("report identity does not match the selected run")
+    return path.read_text(encoding="utf-8")
+
+
+def _validated_artifact_paths(
+    pipeline: str, run_id: str, artifact_format: str, root: Path | None
+) -> tuple[Path, Path]:
+    """Resolve the supported artifact pair inside the exact selected run."""
     extensions = {"pipeline_run_report_json": "json", "pipeline_run_report_md": "md"}
     if artifact_format not in extensions:
         raise ValueError("unsupported report artifact format")
@@ -110,17 +128,7 @@ def load_pipeline_run_report_artifact(
     path = (run_root / f"pipeline-run-report.{extensions[artifact_format]}").resolve()
     if not path.is_relative_to(run_root) or not json_path.is_relative_to(run_root):
         raise ValueError("report artifact is outside the selected run")
-    payload = _load_versioned_payload(
-        json_path, expected_schema="pipeline_run_report_v1"
-    )
-    if payload is None or not path.is_file():
-        return None
-    identity = payload.get("identity")
-    if not isinstance(identity, dict) or (
-        identity.get("run_id") != run_id or identity.get("pipeline_name") != pipeline
-    ):
-        raise ValueError("report identity does not match the selected run")
-    return path.read_text(encoding="utf-8")
+    return json_path, path
 
 
 def _normalize_list_owner(name: str | None) -> str | None:
