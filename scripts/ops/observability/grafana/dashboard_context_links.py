@@ -372,9 +372,7 @@ def _fix_ranked_links(panel: dict) -> None:
         action = {"matcher": {"id": "byName", "options": "Action"}, "properties": []}
         overrides.append(action)
     properties = action["properties"]
-    properties[:] = [
-        p for p in properties if p["id"] not in {"links", _CUSTOM_INSPECT}
-    ]
+    properties[:] = [p for p in properties if p["id"] not in {"links", _CUSTOM_INSPECT}]
     properties.extend(
         [
             {"id": _CUSTOM_INSPECT, "value": False},
